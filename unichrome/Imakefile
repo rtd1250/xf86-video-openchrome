@@ -1,0 +1,214 @@
+#define IHaveModules
+#include <Server.tmpl>
+
+XCOMM Check the version to see if we need anything special.
+#ifdef XF86_VERSION_CURRENT
+XCOMM We are using Xfree86
+
+XCOMM This needs a seperate check though, debian dfsg-6 needs this
+XCOMM but it's version is still 4.3.0.1 - see via_xvmc.c
+#if XF86_VERSION_CURRENT >= XF86_VERSION_NUMERIC(4,3,99,3,0)
+DEFXVPRIV = -DX_NEED_XVPRIV_H
+#endif
+
+#if XF86_VERSION_CURRENT >= XF86_VERSION_NUMERIC(4,3,99,14,0)
+DEFLINFB = -DX_USE_LINEARFB
+#endif
+
+#if XF86_VERSION_CURRENT >= XF86_VERSION_NUMERIC(4,3,99,16,0)
+DEFREGIONNULL = -DX_USE_REGION_NULL
+#endif
+
+#if BuildXF86DRI
+#if XF86_VERSION_CURRENT >= XF86_VERSION_NUMERIC(4,3,99,901,0)
+X_DRM_H_LOCATION = -I$(XF86OSSRC)/shared/drm/kernel
+#else
+X_DRM_H_LOCATION = -I$(XF86OSSRC)/linux/drm/kernel
+#endif
+#endif 
+
+#if XF86_VERSION_CURRENT >= XF86_VERSION_NUMERIC(4,4,99,2,0)
+XCOMM for Imakefile only
+#define X_NEED_NEWMODULETARGET 1
+#endif
+
+#if XF86_VERSION_CURRENT <= XF86_VERSION_NUMERIC(4,4,99,7,0)
+XCOMM drm_hw_lock_t is hidden behind __KERNEL__ here
+XCOMM use drmLock instead
+DEFXNEEDDRMLOCK = -DX_NEED_DRMLOCK
+#else
+#undef DEFXNEEDDRMLOCK
+#endif
+
+#else
+XCOMM We are using X.org
+XCOMM The XF86_VERSION stuff just had to be renamed it seems. Why
+XCOMM they kept XORG_VERSION at all I don't know, since they are 
+XCOMM apparently not bothering with altering it. Both the x.org 
+XCOMM release and a cvs checkout (3m after release) here are 
+XCOMM 6.7.0.0.0. Luckily, apart from the drm.h location, this is 
+XCOMM not a problem... yet. -- luc
+
+DEFXVPRIV = -DX_NEED_XVPRIV_H
+DEFLINFB = -DX_USE_LINEARFB
+DEFREGIONNULL = -DX_USE_REGION_NULL
+
+#if BuildXF86DRI
+XCOMM Since we are unable to properly version, just include the lot.
+X_DRM_H_LOCATION = -I$(DRMSRCDIR)/shared -I$(XF86OSSRC)/shared/drm/kernel
+#endif 
+
+XCOMM Include the Xorg changes concerning dlloader (by Adam Jackson). 
+XCOMM The current changes are not necessary yet, but I've backported
+XCOMM them anyway.
+#if MakeDllModules
+DEFXAAGETROP = -DX_HAVE_XAAGETROP
+#endif
+
+XCOMM We don't need X_NEED_NEWMODULETARGET with X.org
+#undef X_NEED_NEWMODULETARGET
+
+XCOMM I2CBusses require the Start function attached from 6.8 and on
+#if XORG_VERSION_MINOR > 7
+DEFI2CSTART = -DX_NEED_I2CSTART
+#else
+#undef DEFI2CSTART
+#endif
+
+#if XORG_VERSION_MINOR < 7
+XCOMM drm_hw_lock_t is hidden behind __KERNEL__ here
+XCOMM use drmLock instead
+DEFXNEEDDRMLOCK = -DX_NEED_DRMLOCK
+#else
+#undef DEFXNEEDDRMLOCK
+#endif
+
+#endif
+
+#if BuildXF86DRI
+DRISRCS = via_dri.c via_xvmc.c
+DRIOBJS = via_dri.o via_xvmc.o
+DRIINCLUDES = -I$(SERVERSRC)/GL/dri -I$(LIBSRC)/GL/dri \
+       $(X_DRM_H_LOCATION) -I$(TOP)/include
+DRIDEFINES = $(GLX_DEFINES)
+#endif
+
+SRCS = via_driver.c \
+    via_accel.c \
+    via_bandwidth.c \
+    via_mode.c \
+    via_cursor.c \
+    via_shadow.c \
+    via_dga.c \
+    via_video.c \
+    via_i2c.c \
+    via_id.c \
+    via_swov.c \
+    via_memory.c \
+    via_memcpy.c \
+    via_vbe.c \
+    via_vgahw.c \
+    via_vt162x.c \
+    $(DRISRCS)
+
+OBJS = via_driver.o \
+    via_accel.o \
+    via_bandwidth.o \
+    via_mode.o \
+    via_cursor.o \
+    via_shadow.o \
+    via_dga.o \
+    via_video.o \
+    via_i2c.o \
+    via_id.o \
+    via_swov.o \
+    via_memory.o \
+    via_memcpy.o \
+    via_vbe.o \
+    via_vgahw.o \
+    via_vt162x.o \
+    $(DRIOBJS)
+
+#if defined(XF86DriverSDK)
+INCLUDES = -I. -I../../include
+#else
+INCLUDES = -I. -I$(XF86COMSRC) -I$(XF86OSSRC) \
+           -I$(SERVERSRC)/mfb -I$(SERVERSRC)/mi \
+           -I$(SERVERSRC)/cfb -I$(XF86SRC)/xaa \
+           -I$(XF86SRC)/xf1bpp -I$(XF86SRC)/xf4bpp \
+           -I$(XF86SRC)/xf24_32bpp -I$(SERVERSRC)/Xext \
+           -I$(XF86SRC)/vgahw -I$(XF86SRC)/ramdac \
+           -I$(XF86SRC)/ddc -I$(XF86SRC)/i2c \
+           -I$(XF86SRC)/rac -I$(XF86SRC)/int10 -I$(SERVERSRC)/render \
+           -I$(SERVERSRC)/include -I$(XINCLUDESRC) -I$(FONTINCSRC) \
+           -I$(EXTINCSRC) -I$(XF86SRC)/vbe -I$(XF86SRC)/shadowfb \
+           -I$(SERVERSRC)/fb $(DRIINCLUDES)
+#endif
+
+DEFINES = $(DRIDEFINES) $(DEFXVPRIV) $(DEFLINFB) $(DEFREGIONNULL) \
+	$(DEFXAAGETROP) $(DEFI2CSTART) $(DEFXNEEDDRMLOCK)
+
+#if MakeHasPosixVariableSubstitutions
+SubdirLibraryRule($(OBJS))
+#endif
+
+NormalAsmObjectRule()
+
+ModuleObjectRule()
+#ifdef X_NEED_NEWMODULETARGET
+ObjectModuleTarget(via, $(OBJS),drivers)
+#else
+ObjectModuleTarget(via, $(OBJS))
+#endif
+
+#ifdef InstallVideoObjectModule
+InstallVideoObjectModule(via,$(MODULEDIR))
+#else
+InstallObjectModule(via,$(MODULEDIR),drivers)
+#endif
+
+#if !defined(XF86DriverSDK)
+CppManTarget(via,)
+InstallModuleManPage(via)
+#endif
+
+DependTarget()
+
+InstallDriverSDKNonExecFile(Imakefile,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via.h,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_accel.c,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_bandwidth.c,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_bios.h,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_cursor.c,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_dga.c,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_dri.c,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_dri.h,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_driver.c,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_driver.h,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_drm.h,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_drmclient.h,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_i2c.c,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_id.h,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_id.c,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_memcpy.c,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_memcpy.h,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_memory.c,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_mode.c,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_mode.h,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_priv.h,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_regs.h,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_shadow.c,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_swov.c,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_swov.h,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_vbe.c,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_vgahw.c,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_vgahw.h,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_video.c,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_video.h,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_vt162x.c,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_vt162x.h,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_xvmc.c,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_xvmc.h,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_xvpriv.h,$(DRIVERSDKDIR)/drivers/via)
+
+InstallDriverSDKObjectModule(via,$(DRIVERSDKMODULEDIR),drivers)
