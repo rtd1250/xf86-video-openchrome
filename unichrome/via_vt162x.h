@@ -178,6 +178,7 @@ static DisplayModeRec VT1622Modes[] = {
     { MODEPREFIX("848x480Over"),    33000,  848,  872, 1032, 1200, 0,  480,  490,  493,  550, 0, V_PHSYNC | V_PVSYNC, MODESUFFIXPAL  },
     { MODEPREFIX("720x480Over"),    21000,  720,  728,  760,  800, 0,  480,  480,  483,  525, 0, V_NHSYNC | V_PVSYNC, MODESUFFIXNTSC },
     { MODEPREFIX("720x576Over"),    30000,  720,  728,  864, 1000, 0,  576,  576,  579,  600, 0, V_NHSYNC | V_PVSYNC, MODESUFFIXPAL  },
+    { MODEPREFIX("720x480Noscale"), 27972,  720,  736,  768,  888, 0,  480,  480,  483,  525, 0, V_NHSYNC | V_PVSYNC, MODESUFFIXNTSC },
     { MODEPREFIX("720x576Noscale"), 28000,  720,  728,  864,  896, 0,  576,  576,  579,  625, 0, V_NHSYNC | V_NVSYNC, MODESUFFIXPAL  },
     { MODEPREFIX(NULL), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, MODESUFFIXNTSC },
 };
@@ -398,6 +399,16 @@ VT1622Table[] = {
       { 0xBA, 0xB8, 0xB8, 0x90, 0x99, 0 },
       { 0x58, 0x48, 0x49 },
       0x2D66772D, 0,
+    },
+    { "720x480Noscale", 720, 480, TVTYPE_NTSC, 0, 0,
+      { 0x04,    0,    0,    0, 0x03,    0, 0x10, 0x98,  0x98, 0x08, 0x5A, 0x17, 0x49, 0x41,    0, 0x89, 
+           0,    0, 0xA9, 0x19, 0xDC, 0x24,    0,    0,     0,    0, 0xEE, 0x03, 0x02, 0x80,    0, 0x04, 
+        0x11, 0x08, 0x04, 0x75,    0, 0x5A, 0x31, 0x95,  0x51,    0,    0, 0xAA, 0x2B, 0x7A, 0xDB,    0 }, 
+      { 0xE4, 0x69, 0x04,    0,    0, 0x40, 0x77, 0xD0,  0x23, 0x0C, 0x02, 0x77, 0xD0, 0x80, 0x23, 0x88, 
+        0xC9, 0x30, 0xD0, 0x16,    0,    0,    0,    0,     0, 0x77, 0x03 }, 
+      { 0xBA, 0xB8, 0xB8, 0x90, 0x99, 0 }, /* added later - untested */
+      { 0x58, 0x48, 0x49 }, /* added later - untested */
+      0x20BA2E8B, 0,
     },
     { "720x576Noscale", 720, 576, TVTYPE_PAL, 0, 0,
       { 0x04,    0,    0, 0xA4,    0,    0, 0x10, 0x75,  0xA5, 0x3A, 0x5A,    0, 0x49, 0x46,    0, 0x89, 

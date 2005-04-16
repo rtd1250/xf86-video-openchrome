@@ -128,18 +128,17 @@ Untested as no combination with Unichrome is known or available.
 Supports the following normal modes: \*q640x480\*q and \*q800x600\*q. Use
 \*q640x480Over\*q and \*q800x600Over\*q for vertical overscan. These modes
 are made available by the driver and modelines provided in __xconfigfile__
-will not work.
+will be ignored.
 .TP
 .BI "VIA Technologies VT1622, VT1622A, VT1623"
 Supports the following modes: \*q640x480\*q, \*q800x600\*q, \*q1024x768\*q,
 \*q848x480\*q, \*q720x480\*q (NTSC only) and \*q720x576\*q (PAL only). Use
 \*q640x480Over\*q, \*q800x600Over\*q, \*q1024x768Over\*q, \*q848x480Over\*q,
 \*q720x480Over\*q (NTSC) and \*q720x576Over\*q (PAL) for vertical overscan.
-The mode \*q720x576Noscale\*q (PAL) is provided for quality TV video output.
-This mode turns off the scaling within the TV chip and sets the dot clock and
-other registers for minimal overscan on a PAL TV.
+The modes \*q720x480Noscale\*q (NTSC) and \*q720x576Noscale\*q (PAL)
+(VT1622 only) provide cleaner TV output (unscaled with only minimal overscan).
 These modes are made available by the driver and modelines provided in
-__xconfigfile__ will not work.
+__xconfigfile__ will be ignored.
 
 .SH "BUGS"
 Switching virtual terminals when an OpenGL DRI client is running may cause
