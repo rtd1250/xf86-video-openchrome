@@ -38,7 +38,7 @@
  * performance in the drm dma command verifier. 
  */
 
-#define LL_AGP_CMDBUF_SIZE (4096*3)
+#define LL_AGP_CMDBUF_SIZE (4096*2)
 #define LL_PCI_CMDBUF_SIZE (4096)
 
 #define LL_MODE_DECODER_SLICE 0x01

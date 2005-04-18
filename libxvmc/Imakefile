@@ -2,13 +2,16 @@
 #define DoSharedLib SharedLibXvMC
 #define DoDebugLib DebugLibXvMC
 #define DoProfileLib ProfileLibXvMC
-#define LibName viaXvMC
+/*#define LibName viaXvMC*/
 #define SoRev SOXVMCREV
 #define LibHeaders NO
 
-#define OUTOFTREE
-
 #include <Threads.tmpl>
+
+/* Anyone know how to determine this properly?
+ * Comment out the following to build in the x tree
+ */
+#define OUTOFTREE
 
 #ifdef OUTOFTREE
 VIADRIVERSRC=../unichrome
@@ -28,14 +31,17 @@ ALLOC_DEFINES = -DMALLOC_0_RETURNS_NULL
      INCLUDES = -I$(XINCLUDESRC) -I$(INCLUDESRC) -I$(XLIBSRC) -I$(EXTINCSRC) \
 		-I$(XF86COMSRC) -I$(XF86OSSRC) -I$(DRMSRCDIR)/shared \
 		-I$(XF86OSSRC)/linux/drm/kernel -I$(VIADRIVERSRC)
-         SRCS = viaXvMC.c viaLowLevel.c xf86dri.c driDrawable.c
+         SRCS = viaXvMC.c viaLowLevel.c viaLowLevelPro.c xf86dri.c driDrawable.c
          OBJS = viaXvMC.o viaLowLevel.o xf86drm.o xf86drmHash.o \
+	        xf86drmRandom.o xf86drmSL.o xf86dri.o driDrawable.o
+         OBJSPRO = viaXvMC.o viaLowLevelPro.o xf86drm.o xf86drmHash.o \
 	        xf86drmRandom.o xf86drmSL.o xf86dri.o driDrawable.o
      LINTLIBS = $(LINTXLIB)
 
-
 #include <Library.tmpl>
 
+SharedLibraryTarget(viaXvMC,$(SoRev),$(OBJS) $(EXTRASHAREDOBJS),.,.)
+SharedLibraryTarget(viaXvMCPro,$(SoRev),$(OBJSPRO) $(EXTRASHAREDOBJS),.,.)
 
 #if defined(LinuxArchitecture)
 OS_SUBDIR = linux
