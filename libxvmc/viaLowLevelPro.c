@@ -32,6 +32,13 @@
  * Authors: Andreas Robinson 2003. Thomas Hellström 2004. Ivor Hewitt 2005.
  */
 
+/* IH
+ * I've left the proReg or-ing in case we need/want to implement the V1/V3
+ * register toggle too, which also moves the register locations.
+ * The CN400 has dual mpeg decoders, not sure at the moment whether these
+ * are also operated through independent registers also.
+ */
+
 #define VIDEO_DMA
 #undef HQV_USE_IRQ
 
@@ -670,38 +677,16 @@ viaVideoSetSWFLipLocked(XvMCLowLevel *xl,
 
 #ifdef VIDEO_DMA
     BEGIN_HEADER6_DATA(xl, 3);
-    if (xl->chipId == PCI_CHIP_VT3259)
-    {
-        OUT_RING_QW_AGP(xl, (proReg|HQV_SRC_OFFSET) + 0x200 , 0);
-    }
-
+    OUT_RING_QW_AGP(xl, (proReg|HQV_SRC_OFFSET) + 0x200 , 0);
     OUT_RING_QW_AGP(xl, (proReg|HQV_SRC_STARTADDR_Y) + 0x200, yOffs);
-    
-    if (xl->chipId == PCI_CHIP_VT3259)
-    {
-        OUT_RING_QW_AGP(xl, (proReg|HQV_SRC_STARTADDR_U) + 0x200, vOffs);
-    }
-    else
-    {
-        OUT_RING_QW_AGP(xl, HQV_SRC_STARTADDR_U + 0x200, uOffs);
-        OUT_RING_QW_AGP(xl, HQV_SRC_STARTADDR_V + 0x200 , vOffs);
-    }
+    OUT_RING_QW_AGP(xl, (proReg|HQV_SRC_STARTADDR_U) + 0x200, vOffs);
     WAITFLAGS(xl, LL_MODE_VIDEO); 
 #else
     pciCommand(xl, VIA_AGP_HEADER6, 3, LL_MODE_VIDEO);
     pciCommand(xl, 0x00F60000, 0, 0);
-    if (xl->chipId == PCI_CHIP_VT3259)
-        pciCommand(xl, proReg|HQV_SRC_OFFSET + 0x200 , 0, 0);
+    pciCommand(xl, proReg|HQV_SRC_OFFSET + 0x200 , 0, 0);
     pciCommand(xl, proReg|HQV_SRC_STARTADDR_Y + 0x200, yOffs, 0);
-    if (xl->chipId == PCI_CHIP_VT3259)
-    {
-        pciCommand(xl, proReg|HQV_SRC_STARTADDR_U + 0x200, vOffs, 0);
-    }
-    else
-    {
-        pciCommand(xl, HQV_SRC_STARTADDR_U + 0x200, uOffs, 0);
-        pciCommand(xl, HQV_SRC_STARTADDR_V + 0x200 , vOffs, 0);
-    }
+    pciCommand(xl, proReg|HQV_SRC_STARTADDR_U + 0x200, vOffs, 0);
 #endif
 }
     
@@ -773,21 +758,10 @@ viaMpegSetFB(XvMCLowLevel *xl,unsigned i,
 	     unsigned uOffs,
 	     unsigned vOffs) {
 
-    if (xl->chipId == PCI_CHIP_VT3259)
-    {
-        i *= (4*2);
-        BEGIN_HEADER6_DATA(xl, 2);
-        OUT_RING_QW_AGP(xl, 0xc28 + i, yOffs >> 3);
-        OUT_RING_QW_AGP(xl, 0xc2c + i, vOffs >> 3);
-    }
-    else
-    {
-        i *= (4*3);
-        BEGIN_HEADER6_DATA(xl, 3);
-        OUT_RING_QW_AGP(xl, 0xc20 + i, yOffs >> 3);
-        OUT_RING_QW_AGP(xl, 0xc24 + i, uOffs >> 3);
-        OUT_RING_QW_AGP(xl, 0xc28 + i, vOffs >> 3);
-    }
+    i *= (4*2);
+    BEGIN_HEADER6_DATA(xl, 2);
+    OUT_RING_QW_AGP(xl, 0xc28 + i, yOffs >> 3);
+    OUT_RING_QW_AGP(xl, 0xc2c + i, vOffs >> 3);
 
     WAITFLAGS(xl, LL_MODE_DECODER_IDLE);
 }

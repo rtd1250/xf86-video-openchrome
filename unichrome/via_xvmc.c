@@ -398,8 +398,13 @@ ViaInitXVMC(ScreenPtr pScreen)
 #if (XvMCVersion > 1) || (XvMCRevision > 0)
   {
       DRIInfoPtr pDRIInfo = pVia->pDRIInfo;
-      xf86XvMCRegisterDRInfo(pScreen, "viaXvMC",pDRIInfo->busIdString,
+      if (pVia->Chipset !=  PCI_CHIP_VT3259)
+          xf86XvMCRegisterDRInfo(pScreen, "viaXvMC",pDRIInfo->busIdString,
 			     VIAXVMC_MAJOR, VIAXVMC_MINOR, VIAXVMC_PL);
+      else
+          xf86XvMCRegisterDRInfo(pScreen, "viaXvMCPro",pDRIInfo->busIdString,
+			     VIAXVMC_MAJOR, VIAXVMC_MINOR, VIAXVMC_PL);
+
   }
 #endif
  
