@@ -33,7 +33,7 @@
  */
 
 #define VIDEO_DMA
-#define HQV_USE_IRQ 
+#undef HQV_USE_IRQ
 
 #include "viaXvMCPriv.h"
 #include "viaLowLevel.h"
@@ -417,9 +417,9 @@ syncVideo(XvMCLowLevel *xl, unsigned int doSleep)
 	drm_via_irqwait_t irqw;
 	irqw.request.irq = 1;
 	irqw.request.type = VIA_IRQ_ABSOLUTE;
-	if (drmCommandWriteRead(xl->fd, DRM_VIA_WAIT_IRQ, &irqw, sizeof(irqw)) < 0)
-		xl->errors |= LL_VIDEO_TIMEDOUT;
-    }
+	if (drmCommandWriteRead(xl->fd, DRM_VIA_WAIT_IRQ, &irqw, sizeof(irqw)) < 0) 
+	    xl->errors |= LL_VIDEO_TIMEDOUT;
+  }
 }
 #else
 static void 
@@ -697,11 +697,11 @@ viaVideoSetSWFLipLocked(XvMCLowLevel *xl,
     {
         pciCommand(xl, proReg|HQV_SRC_STARTADDR_U + 0x200, vOffs, 0);
     }
+    else
     {
         pciCommand(xl, HQV_SRC_STARTADDR_U + 0x200, uOffs, 0);
         pciCommand(xl, HQV_SRC_STARTADDR_V + 0x200 , vOffs, 0);
     }
-    else
 #endif
 }
     

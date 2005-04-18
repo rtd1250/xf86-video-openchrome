@@ -198,6 +198,20 @@ static XF86MCSurfaceInfoRec Via_YV12_mpg2_surface =
     FOURCC_YV12,  
     XVMC_CHROMA_FORMAT_420,
     0,
+    1024,
+    1024,
+    1024,
+    1024,
+    XVMC_MPEG_2 | XVMC_VLD,
+    XVMC_OVERLAID_SURFACE | XVMC_BACKEND_SUBPICTURE,
+    &yv12_subpicture_list
+};
+
+static XF86MCSurfaceInfoRec Via_pga_mpg2_surface =
+{
+    FOURCC_YV12,  
+    XVMC_CHROMA_FORMAT_420,
+    0,
     2048,
     2048,
     2048,
@@ -207,35 +221,21 @@ static XF86MCSurfaceInfoRec Via_YV12_mpg2_surface =
     &yv12_subpicture_list
 };
 
-static XF86MCSurfaceInfoRec Via_YV12_mocomp_mpg12_surface =
-{
-    FOURCC_YV12,  
-    XVMC_CHROMA_FORMAT_420,
-    0,
-    1024,
-    1024,
-    1024,
-    1024,
-    XVMC_MPEG_1 | XVMC_MPEG_2 | XVMC_MOCOMP,
-    XVMC_OVERLAID_SURFACE | XVMC_BACKEND_SUBPICTURE,
-    &yv12_subpicture_list
-};
-
-static XF86MCSurfaceInfoRec Via_YV12_idct_mpg12_surface =
-{
-    FOURCC_YV12,  
-    XVMC_CHROMA_FORMAT_420,
-    0,
-    1024,
-    1024,
-    1024,
-    1024,
-    XVMC_MPEG_1 | XVMC_MPEG_2 | XVMC_IDCT,
-    XVMC_OVERLAID_SURFACE | XVMC_BACKEND_SUBPICTURE,
-    &yv12_subpicture_list
-};
-
 static XF86MCSurfaceInfoRec Via_YV12_mpg1_surface =
+{
+    FOURCC_YV12,  
+    XVMC_CHROMA_FORMAT_420,
+    0,
+    1024,
+    1024,
+    1024,
+    1024,
+    XVMC_MPEG_1 | XVMC_VLD,
+    XVMC_OVERLAID_SURFACE | XVMC_BACKEND_SUBPICTURE,
+    &yv12_subpicture_list
+};
+
+static XF86MCSurfaceInfoRec Via_pga_mpg1_surface =
 {
     FOURCC_YV12,  
     XVMC_CHROMA_FORMAT_420,
@@ -255,10 +255,11 @@ static XF86MCSurfaceInfoPtr ppSI[2] =
     (XF86MCSurfaceInfoPtr)&Via_YV12_mpg1_surface
 };
 
-static XF86MCSurfaceInfoPtr ppSI_mocomp[2] = 
+
+static XF86MCSurfaceInfoPtr ppSI_pga[2] = 
 {
-  (XF86MCSurfaceInfoPtr)&Via_YV12_mocomp_mpg12_surface,
-  (XF86MCSurfaceInfoPtr)&Via_YV12_idct_mpg12_surface
+    (XF86MCSurfaceInfoPtr)&Via_pga_mpg2_surface,
+    (XF86MCSurfaceInfoPtr)&Via_pga_mpg1_surface
 };
 
 
@@ -296,11 +297,11 @@ static XF86MCAdaptorRec pAdapt =
     (xf86XvMCDestroySubpictureProcPtr)ViaXvMCDestroySubpicture
 };
 
-static XF86MCAdaptorRec pAdapt_mocomp = 
+static XF86MCAdaptorRec pAdapt_pga = 
 {
     "XV_SWOV",		/* name */
     2,				/* num_surfaces */
-    ppSI_mocomp,		/* surfaces */
+    ppSI_pga,		/* surfaces */
     2,				/* num_subpictures */
     Via_subpicture_list,		/* subpictures */
     (xf86XvMCCreateContextProcPtr)ViaXvMCCreateContext,
@@ -312,7 +313,7 @@ static XF86MCAdaptorRec pAdapt_mocomp =
 };
 
 static XF86MCAdaptorPtr ppAdapt[1] = {(XF86MCAdaptorPtr)&pAdapt};
-static XF86MCAdaptorPtr ppAdapt_mocomp[1] = {(XF86MCAdaptorPtr)&pAdapt_mocomp};
+static XF86MCAdaptorPtr ppAdapt_pga[1] = {(XF86MCAdaptorPtr)&pAdapt_pga};
 
 static void mpegDisable(VIAPtr pVia,CARD32 val) 
 
@@ -386,8 +387,8 @@ ViaInitXVMC(ScreenPtr pScreen)
   initViaXvMC(vXvMC);
 
   if (! xf86XvMCScreenInit(pScreen, 1, 
-			   (pVia->Chipset == VIA_KM400) ? 
-			   ppAdapt_mocomp : ppAdapt)) {
+			   (pVia->Chipset == VIA_PM800) ? 
+			   ppAdapt_pga : ppAdapt)) {
       xf86DrvMsg(pScrn->scrnIndex, X_ERROR, 
 		 "[XvMC] XvMCScreenInit failed. Disabling XvMC.\n");
       drmRmMap(pVia->drmFD,vXvMC->fbBase);

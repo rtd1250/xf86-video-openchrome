@@ -783,6 +783,8 @@ Status XvMCPutSurface(Display *display,XvMCSurface *surface,Drawable draw,
 	pthread_mutex_unlock( &pViaXvMC->ctxMutex );
 	return BadAccess;
     }
+
+    setLowLevelLocking(&pViaXvMC->xl,0);
 	
 
     /*
@@ -800,13 +802,15 @@ Status XvMCPutSurface(Display *display,XvMCSurface *surface,Drawable draw,
 			    vOffs(pViaSurface));
 
     while (lastSurface != dispSurface) {
+
+	flushPCIXvMCLowLevel(&pViaXvMC->xl);
+	setLowLevelLocking(&pViaXvMC->xl,1);
 	hwlUnlock(&pViaXvMC->xl,1);
 
 	/*
 	 * We weren't the last to display. Update the overlay before flipping.
 	 */
 
-	flushPCIXvMCLowLevel(&pViaXvMC->xl);
 	ret = updateXVOverlay(display,pViaXvMC,pViaSurface,draw,srcx,srcy,srcw, 
 			      srch,destx,desty,destw,desth);
 	if (ret) {
@@ -825,12 +829,12 @@ Status XvMCPutSurface(Display *display,XvMCSurface *surface,Drawable draw,
 	    return BadAccess;
 	}
 	
+	setLowLevelLocking(&pViaXvMC->xl,0);
 	lastSurface = pViaSurface->srfNo | VIA_XVMC_VALID;
 	dispSurface = sAPriv->XvMCDisplaying[pViaXvMC->xvMCPort];
 	overlayUpdated = 1;
     } 
 
-    setLowLevelLocking(&pViaXvMC->xl,0);
 
     /*
      * Subpictures
