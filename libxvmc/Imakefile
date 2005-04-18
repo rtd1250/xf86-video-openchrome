@@ -42,6 +42,8 @@ ALLOC_DEFINES = -DMALLOC_0_RETURNS_NULL
 
 SharedLibraryTarget(viaXvMC,$(SoRev),$(OBJS) $(EXTRASHAREDOBJS),.,.)
 SharedLibraryTarget(viaXvMCPro,$(SoRev),$(OBJSPRO) $(EXTRASHAREDOBJS),.,.)
+InstallSharedLibrary(viaXvMC,$(SoRev),$(SHLIBDIR))
+InstallSharedLibrary(viaXvMCPro,$(SoRev),$(SHLIBDIR))
 
 #if defined(LinuxArchitecture)
 OS_SUBDIR = linux
