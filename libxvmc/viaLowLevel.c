@@ -41,10 +41,6 @@
 #include <sys/time.h>
 #include <stdio.h>
 
-#define PCI_CHIP_VT3204         0x3108 /* K8M800 */
-#define PCI_CHIP_VT3259         0x3118 /* PM800/PM880/CN400 */
-#define PCI_CHIP_CLE3122        0x3122 /* CLE266 */
-#define PCI_CHIP_VT3205         0x7205 /* KM400 */
 
 /*
  * For Other architectures than i386 these might have to be modified for

@@ -122,10 +122,16 @@ extern void hwlLock(XvMCLowLevel *xl, int videoLock);
 
 #define LL_HW_LOCK(xl)							\
     do {								\
-	DRM_LOCK((xl)->fd,(xl)->hwLock,*(xl)->drmcontext,0); } while(0);
+	DRM_LOCK((xl)->fd,(xl)->hwLock,*(xl)->drmcontext,0);		\
+    } while(0);
 #define LL_HW_UNLOCK(xl)					\
-    do {DRM_UNLOCK((xl)->fd,(xl)->hwLock,*(xl)->drmcontext);	\
+    do {							\
+	DRM_UNLOCK((xl)->fd,(xl)->hwLock,*(xl)->drmcontext);	\
     } while(0);
 
+#define PCI_CHIP_VT3204         0x3108 /* K8M800 */
+#define PCI_CHIP_VT3259         0x3118 /* PM800/PM880/CN400 */
+#define PCI_CHIP_CLE3122        0x3122 /* CLE266 */
+#define PCI_CHIP_VT3205         0x7205 /* KM400 */
 
 #endif

@@ -29,6 +29,7 @@
 #include <XvMC.h>
 #include <XvMClib.h>
 #include <stdlib.h>
+#include <Xutil.h>
 #include "vldXvMC.h"
 #include "via_xvmc.h"
 #include "viaLowLevel.h"
@@ -56,13 +57,16 @@ extern Status _xvmc_destroy_subpicture(Display *dpy,
 				     query*/
 
 typedef enum{
+  context_drawHash,
   context_lowLevel,
   context_mutex,
   context_sAreaMap,
   context_fbMap,
   context_mmioMap,
-  context_context,
+  context_drmContext,
   context_fd,
+  context_driConnection,
+  context_context,
   context_none
 } ContextRes;
 
@@ -119,7 +123,13 @@ typedef struct{
     int lastSrfDisplaying;
     ContextRes resources;
     CARD32 timeStamp;
-    unsigned chipId;
+    XID id;
+    unsigned screen;
+    unsigned depth;
+    unsigned stride;
+    XVisualInfo visualInfo;
+    void *drawHash;
+    CARD32 chipId;
 }ViaXvMCContext;
 
 typedef struct{
@@ -201,5 +211,6 @@ extern void viaVideoSubPictureOffLocked(XvMCLowLevel *xl);
 #define VIABLIT_TRANSCOPY 0
 #define VIABLIT_COPY 1
 #define VIABLIT_FILL 2
+
 
 #endif

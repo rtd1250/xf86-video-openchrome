@@ -43,7 +43,8 @@
 #include <xf86drm.h>
 #include <pthread.h>
 #include "vldXvMC.h"
-
+#include "xf86dri.h"
+#include "driDrawable.h"
     
 #define SAREAPTR(ctx) ((ViaXvMCSAreaPriv *)			\
 		       (((CARD8 *)(ctx)->sAreaAddress) +	\
@@ -53,6 +54,11 @@
 
 static int error_base;
 static int event_base;
+static unsigned numContexts = 0;
+static int globalFD;
+static drmAddress sAreaAddress;
+static drmAddress fbAddress;
+static drmAddress mmioAddress;
 
 
 #define FOURCC_XVMC (('C' << 24) + ('M' << 16) + ('V' << 8) + 'X')
@@ -175,24 +181,38 @@ static Status releaseContextResources(Display *display, XvMCContext *context,
     ViaXvMCContext *pViaXvMC = (ViaXvMCContext *) context->privData;
 
     switch(pViaXvMC->resources) {
+    case context_drawHash:
+        driDestroyHashContents( pViaXvMC->drawHash );
+	drmHashDestroy( pViaXvMC->drawHash );
     case context_lowLevel:
 	closeXvMCLowLevel(&pViaXvMC->xl);
     case context_mutex:
 	pthread_mutex_destroy(&pViaXvMC->ctxMutex);
+    case context_drmContext:
+	XF86DRIDestroyContext(display, pViaXvMC->screen, pViaXvMC->id);
     case context_sAreaMap:
-	drmUnmap(pViaXvMC->sAreaAddress,pViaXvMC->sAreaSize);
+	numContexts--;
+	if (numContexts == 0)
+	    drmUnmap(pViaXvMC->sAreaAddress,pViaXvMC->sAreaSize);
     case context_fbMap:
-	drmUnmap(pViaXvMC->fbAddress,pViaXvMC->fbSize);
+	if (numContexts == 0)
+	    drmUnmap(pViaXvMC->fbAddress,pViaXvMC->fbSize);
     case context_mmioMap:
-	drmUnmap(pViaXvMC->mmioAddress,pViaXvMC->mmioSize);
+	if (numContexts == 0)
+	    drmUnmap(pViaXvMC->mmioAddress,pViaXvMC->mmioSize);
+    case context_fd:
+	if (numContexts == 0) {
+	    if (pViaXvMC->fd >= 0)
+		drmClose(pViaXvMC->fd);
+	}
+	pViaXvMC->fd = -1;
+    case context_driConnection:
+	if (numContexts == 0)
+	    XF86DRICloseConnection(display, pViaXvMC->screen);
     case context_context:
 	XLockDisplay(display);
 	_xvmc_destroy_context(display, context);
 	XUnlockDisplay(display);
-    case context_fd:
-	if (pViaXvMC->fd >= 0)
-	    drmClose(pViaXvMC->fd);
-	pViaXvMC->fd = -1;
 	if (!freePrivate) break;
     default:
 	free(pViaXvMC);
@@ -214,7 +234,8 @@ Status XvMCCreateContext(Display *display, XvPortID port,
     int major, minor;
     ViaXvMCCreateContextRec *tmpComm;
     drmVersionPtr drmVer;
-    char curBusID[20];
+    char *curBusID;
+    int isCapable;
 
     /* 
      * Verify Obvious things first 
@@ -269,171 +290,198 @@ Status XvMCCreateContext(Display *display, XvPortID port,
     ret = XvMCQueryVersion(display, &major, &minor);
     if(ret) {
 	fprintf(stderr,"XvMCQuery Version Failed, unable to determine "
-		"protocol version\n");
+		"protocol version!\n");
     }
     XUnlockDisplay(display);
 
     /* FIXME: Check Major and Minor here */
 
-    /* Check for drm */
+    XLockDisplay(display);
+    if((ret = _xvmc_create_context(display, context, &priv_count, 
+				       &priv_data))) {
+      XUnlockDisplay(display);
+      fprintf(stderr,"Unable to create XvMC Context.\n");
+      return releaseContextResources(display, context, 1, BadAlloc);
+    }
+    XUnlockDisplay(display);
 
-    if(! drmAvailable()) {
-	fprintf(stderr,"Direct Rendering is not avilable on this system!\n");
+    /*
+     * Check size and version of returned data.
+     */
+
+    tmpComm = (  ViaXvMCCreateContextRec *) priv_data;
+    if(priv_count != (sizeof(ViaXvMCCreateContextRec) >> 2)) {
+	fprintf(stderr,"_xvmc_create_context() returned incorrect "
+		"data size!\n");
+	fprintf(stderr,"\tExpected %d, got %d\n",
+		(sizeof(ViaXvMCCreateContextRec) >> 2),
+		priv_count);
+	XFree(priv_data);
+	return releaseContextResources(display, context, 1, BadAlloc);
+    }
+    pViaXvMC->resources = context_context;
+
+    if ((tmpComm->major != VIAXVMC_MAJOR) ||
+	(tmpComm->minor != VIAXVMC_MINOR)) {
+	fprintf(stderr,"Version mismatch between the X via driver\n"
+		"and the XvMC library. Cannot continue!\n");
+	XFree(priv_data);
 	return releaseContextResources(display, context, 1, BadAlloc);
     }
 
-    /*
-     * We don't know the BUSID. Have the X server tell it to us by faking
-     * a working drm connection.
-     */ 
-
-    strncpy(curBusID,"NOBUSID",20);
-    pViaXvMC->fd = -1;
-
-    do {
-	if (strcmp(curBusID,"NOBUSID")) {
-	    if((pViaXvMC->fd = drmOpen("via",curBusID)) < 0) {
-		fprintf(stderr,"DRM Device for via could not be opened.\n");
-		return releaseContextResources(display, context, 1, BadAlloc);
-	    }
-	    pViaXvMC->resources = context_fd;
-
-	    if (NULL == (drmVer = drmGetVersion(pViaXvMC->fd))) {
-		fprintf(stderr, 
-			"viaXvMC: Could not get drm version.");
-		return releaseContextResources(display, context, 1, BadAlloc);
-	    }
-	    if (((drmVer->version_major != 2 ) || (drmVer->version_minor < 0))) {
-		fprintf(stderr, 
-			"viaXvMC: Kernel drm is not compatible with XvMC.\n"); 
-		fprintf(stderr, 
-			"viaXvMC: Kernel drm version: %d.%d.%d "
-			"and I need at least version 2.0.0.\n"
-			"Please update.\n",
-			drmVer->version_major,drmVer->version_minor,
-			drmVer->version_patchlevel); 
-		drmFreeVersion(drmVer);
-		return releaseContextResources(display, context, 1, BadAlloc);
-	    } 
-	    drmFreeVersion(drmVer);
-	    drmGetMagic(pViaXvMC->fd,&magic);
-	} else {
-	    magic = 0;
-	}
-	context->flags = (unsigned long)magic;
-
-	/*
-	 * Pass control to the X server to create a drmContext for us, and
-	 * validate the width / height and flags.
-	 */
-
-	XLockDisplay(display);
-	if((ret = _xvmc_create_context(display, context, &priv_count, 
-				       &priv_data))) {
-	    XUnlockDisplay(display);
-	    fprintf(stderr,"Unable to create XvMC Context.\n");
-	    return releaseContextResources(display, context, 1, BadAlloc);
-	}
-	XUnlockDisplay(display);
-
-	if(priv_count != (sizeof(ViaXvMCCreateContextRec) >> 2)) {
-	    fprintf(stderr,"_xvmc_create_context() returned incorrect "
-		    "data size!\n");
-	    fprintf(stderr,"\tExpected %d, got %d\n",
-		    (sizeof(ViaXvMCCreateContextRec) >> 2),
-		    priv_count);
-	    return releaseContextResources(display, context, 1, BadAlloc);
-	}
-	pViaXvMC->resources = context_context;
-
-	tmpComm = (  ViaXvMCCreateContextRec *) priv_data;
-
-	if ((tmpComm->major != VIAXVMC_MAJOR) ||
-	    (tmpComm->minor != VIAXVMC_MINOR)) {
-	    fprintf(stderr,"Version mismatch between the XFree86 via driver\n"
-		    "and the XvMC library. Cannot continue!\n");
-	    return releaseContextResources(display, context, 1, BadAlloc);
-	}
-      
-	if (strncmp(curBusID, tmpComm->busIdString, 20)) {
-	    releaseContextResources(display, context, 0, Success);
-	    pViaXvMC->resources = context_none;
-	    strncpy(curBusID, tmpComm->busIdString, 20);
-	    XFree(priv_data);
-	    continue;
-	}
-      
-	if (!tmpComm->authenticated) {
-	    XFree(priv_data);
-	    return releaseContextResources(display, context, 1, BadAlloc);
-	}
-	    
-    } while (pViaXvMC->fd < 0);
-
     pViaXvMC->ctxNo = tmpComm->ctxNo;
-    pViaXvMC->drmcontext = tmpComm->drmcontext;
     pViaXvMC->fbOffset = tmpComm->fbOffset;
     pViaXvMC->fbSize = tmpComm->fbSize;
     pViaXvMC->mmioOffset = tmpComm->mmioOffset;
     pViaXvMC->mmioSize = tmpComm->mmioSize;
-    pViaXvMC->sAreaOffset = tmpComm->sAreaOffset;
     pViaXvMC->sAreaSize = tmpComm->sAreaSize;
     pViaXvMC->sAreaPrivOffset = tmpComm->sAreaPrivOffset;
     pViaXvMC->decoderOn = 0;
     pViaXvMC->xvMCPort = tmpComm->xvmc_port;
     pViaXvMC->useAGP = tmpComm->useAGP;
-    pViaXvMC->chipId = tmpComm->chipId;
-    for (i=0; i<VIA_MAX_RENDSURF; ++i) {
-	pViaXvMC->rendSurf[i] = 0;
-    }
-    strncpy(pViaXvMC->busIdString,tmpComm->busIdString,20);
-    pViaXvMC->busIdString[20] = '\0';    
     pViaXvMC->attrib = tmpComm->initAttrs;
-    pViaXvMC->lastSrfDisplaying = ~0;
-    setupAttribDesc(display, port, &pViaXvMC->attrib, pViaXvMC->attribDesc);
-
-fprintf("XvMCCreateContext: Chipid %08x, %08x\n", pViaXvMC->chipId, tmpComm->chipId);
+    pViaXvMC->screen = tmpComm->screen;
+    pViaXvMC->depth = tmpComm->depth;
+    pViaXvMC->stride = tmpComm->stride;
+    pViaXvMC->chipId = tmpComm->chipId;
 
     /* 
      * Must free the private data we were passed from X 
      */
 
     XFree(priv_data);
-    
-    /* 
-     * Map the register memory 
-     */
-
-    if(drmMap(pViaXvMC->fd,pViaXvMC->mmioOffset,
-	      pViaXvMC->mmioSize,&(pViaXvMC->mmioAddress)) < 0) {
-	fprintf(stderr,"Unable to map the display chip mmio registers.\n");
-	return releaseContextResources(display, context, 1, BadAlloc);
-    }   
-    pViaXvMC->resources = context_mmioMap;
-
-    /* 
-     * Map Framebuffer memory 
-     */
-
-    if(drmMap(pViaXvMC->fd,pViaXvMC->fbOffset,
-	      pViaXvMC->fbSize,&(pViaXvMC->fbAddress)) < 0) {
-	fprintf(stderr,"Unable to map XvMC Framebuffer.\n");
-	return releaseContextResources(display, context, 1, BadAlloc);
-    } 
-    pViaXvMC->resources = context_fbMap;
-
 
     /*
-     * Map XvMC Sarea and get the address of the HW lock.
+     * Check for direct rendering capable, establish DRI and DRM connections,
+     * map framebuffer, DRI shared area and read-only register areas. 
+     * Initial checking for drm has already been done by the server. 
+     * Only do this for the first context we create.
+     */ 
+
+    if (numContexts == 0) {
+	ret = XF86DRIQueryDirectRenderingCapable(display, pViaXvMC->screen, &isCapable);
+	if (!ret || !isCapable) {
+	    fprintf(stderr,"Direct Rendering is not available on this system!\n");
+	    return releaseContextResources(display, context, 1, BadAlloc);
+	}
+
+	if (!XF86DRIOpenConnection(display, pViaXvMC->screen, &pViaXvMC->sAreaOffset,
+				   &curBusID)) {
+	    fprintf(stderr,"Could not open DRI connection to X server!\n");
+	    return releaseContextResources(display, context, 1, BadAlloc);
+	}	
+	strncpy(pViaXvMC->busIdString,curBusID,20);
+	pViaXvMC->busIdString[20] = '\0';    
+	XFree(curBusID);
+
+	pViaXvMC->resources = context_driConnection;    
+
+	if((pViaXvMC->fd = drmOpen("via",curBusID)) < 0) {
+	    fprintf(stderr,"DRM Device for via could not be opened.\n");
+	    return releaseContextResources(display, context, 1, BadAlloc);
+	}
+	globalFD = pViaXvMC->fd;
+	pViaXvMC->resources = context_fd;
+
+	if (NULL == (drmVer = drmGetVersion(pViaXvMC->fd))) {
+	    fprintf(stderr, 
+		    "viaXvMC: Could not get drm version.");
+	    return releaseContextResources(display, context, 1, BadAlloc);
+	}
+	if (((drmVer->version_major != 2 ) || (drmVer->version_minor < 0))) {
+	    fprintf(stderr, 
+		    "viaXvMC: Kernel drm is not compatible with XvMC.\n"); 
+	    fprintf(stderr, 
+		    "viaXvMC: Kernel drm version: %d.%d.%d "
+		    "and I need at least version 2.0.0.\n"
+		    "Please update.\n",
+		    drmVer->version_major,drmVer->version_minor,
+		    drmVer->version_patchlevel); 
+	    drmFreeVersion(drmVer);
+	    return releaseContextResources(display, context, 1, BadAlloc);
+	} 
+	drmFreeVersion(drmVer);
+	drmGetMagic(pViaXvMC->fd,&magic);
+	
+	if (!XF86DRIAuthConnection(display, pViaXvMC->screen, magic)) {
+	    fprintf(stderr, "viaXvMC: X server did not allow DRI. Check permissions.\n");
+	    XFree(priv_data);
+	    return releaseContextResources(display, context, 1, BadAlloc);
+	}
+
+	/* 
+	 * Map the register memory 
+	 */
+
+	if(drmMap(pViaXvMC->fd,pViaXvMC->mmioOffset,
+		  pViaXvMC->mmioSize,&mmioAddress) < 0) {
+	    fprintf(stderr,"Unable to map the display chip mmio registers.\n");
+	    return releaseContextResources(display, context, 1, BadAlloc);
+	}   
+	pViaXvMC->mmioAddress = mmioAddress;
+	pViaXvMC->resources = context_mmioMap;
+
+	/* 
+	 * Map Framebuffer memory 
+	 */
+
+	if(drmMap(pViaXvMC->fd,pViaXvMC->fbOffset,
+		  pViaXvMC->fbSize,&fbAddress) < 0) {
+	    fprintf(stderr,"Unable to map XvMC Framebuffer.\n");
+	    return releaseContextResources(display, context, 1, BadAlloc);
+	} 
+	pViaXvMC->fbAddress = fbAddress;
+	pViaXvMC->resources = context_fbMap;
+
+
+	/*
+	 * Map DRI Sarea.
+	 */
+
+	if(drmMap(pViaXvMC->fd,pViaXvMC->sAreaOffset,
+		  pViaXvMC->sAreaSize,&sAreaAddress) < 0) {
+	    fprintf(stderr,"Unable to map DRI SAREA.\n");
+	    return releaseContextResources(display, context, 1, BadAlloc);
+	} 
+    } else {
+	pViaXvMC->fd = globalFD;
+	pViaXvMC->mmioAddress = mmioAddress;
+	pViaXvMC->fbAddress = fbAddress;
+    }
+
+    pViaXvMC->sAreaAddress = sAreaAddress;
+    pViaXvMC->resources = context_sAreaMap;
+    numContexts++;
+
+    /*
+     * Find a matching visual. Important only for direct drawing to the visible
+     * frame-buffer.
      */
 
-    if(drmMap(pViaXvMC->fd,pViaXvMC->sAreaOffset,
-	      pViaXvMC->sAreaSize,&(pViaXvMC->sAreaAddress)) < 0) {
-	fprintf(stderr,"Unable to map DRI SAREA.\n");
+    XLockDisplay(display);
+    ret = XMatchVisualInfo(display, pViaXvMC->screen, 
+			   (pViaXvMC->depth == 32) ? 24 : pViaXvMC->depth, TrueColor, 
+			   &pViaXvMC->visualInfo);
+    XUnlockDisplay(display);
+    if (!ret) {
+	fprintf(stderr, "viaXvMC: Could not find a matching TrueColor visual.\n");
 	return releaseContextResources(display, context, 1, BadAlloc);
-    } 
-    pViaXvMC->resources = context_sAreaMap;
+    }	
 
+    if (!XF86DRICreateContext(display, pViaXvMC->screen, pViaXvMC->visualInfo.visual, 
+			      &pViaXvMC->id, &pViaXvMC->drmcontext)) {
+	
+	fprintf(stderr, "viaXvMC: Could not create DRI context.\n");
+	return releaseContextResources(display, context, 1, BadAlloc);
+    }
+
+    pViaXvMC->resources = context_drmContext;
+
+    for (i=0; i<VIA_MAX_RENDSURF; ++i) {
+	pViaXvMC->rendSurf[i] = 0;
+    }
+    pViaXvMC->lastSrfDisplaying = ~0;
+    setupAttribDesc(display, port, &pViaXvMC->attrib, pViaXvMC->attribDesc);
 
     pViaXvMC->hwLock = (drmLockPtr) pViaXvMC->sAreaAddress;
     defaultQMatrices(pViaXvMC);
@@ -450,18 +498,29 @@ fprintf("XvMCCreateContext: Chipid %08x, %08x\n", pViaXvMC->chipId, tmpComm->chi
 
     if (initXvMCLowLevel(&pViaXvMC->xl, pViaXvMC->fd, &pViaXvMC->drmcontext,
 			 pViaXvMC->hwLock, pViaXvMC->mmioAddress, 
-			 pViaXvMC->fbAddress, pViaXvMC->useAGP, pViaXvMC->chipId )) {
-	fprintf(stderr,"ViaXvMC: Could not allocate timestamp blit area\n");
+			 pViaXvMC->fbAddress, pViaXvMC->useAGP, pViaXvMC->chipId)) {
+	fprintf(stderr,"ViaXvMC: Could not allocate timestamp blit area.\n");
 	return releaseContextResources(display, context, 1, BadAlloc);
     }       
     pViaXvMC->resources = context_lowLevel;
     setAGPSyncLowLevel(&pViaXvMC->xl, 1, 0);
-    hwlLock(&pViaXvMC->xl,1); 
-    setLowLevelLocking(&pViaXvMC->xl,0);
-    viaVideoSubPictureOffLocked(&pViaXvMC->xl); 
-    flushXvMCLowLevel(&pViaXvMC->xl);  /* Ignore errors here. */
-    setLowLevelLocking(&pViaXvMC->xl,1);
-    hwlUnlock(&pViaXvMC->xl,1); 
+    
+    if (NULL == (pViaXvMC->drawHash = drmHashCreate())) {
+	fprintf(stderr,"ViaXvMC: Could not allocate drawable hash table.\n");
+	return releaseContextResources(display, context, 1, BadAlloc);
+    }   
+    pViaXvMC->resources = context_drawHash;
+
+
+    if (numContexts == 1) {
+	hwlLock(&pViaXvMC->xl,1); 
+	setLowLevelLocking(&pViaXvMC->xl,0);
+	viaVideoSubPictureOffLocked(&pViaXvMC->xl);
+	flushXvMCLowLevel(&pViaXvMC->xl);  
+	setLowLevelLocking(&pViaXvMC->xl,1);
+	hwlUnlock(&pViaXvMC->xl,1);
+    }
+
     return Success;
 }
 
@@ -477,7 +536,6 @@ Status XvMCDestroyContext(Display *display, XvMCContext *context)
     if(NULL == (pViaXvMC = context->privData)) {
 	return (error_base + XvMCBadContext);
     }
-
 
     /*
      * Release decoder if we have it. In case of crash or termination
@@ -673,6 +731,7 @@ static Status updateXVOverlay(Display *display,ViaXvMCContext *pViaXvMC,
     return Success;
 }
 
+
 Status XvMCPutSurface(Display *display,XvMCSurface *surface,Drawable draw,
 		      short srcx, short srcy, unsigned short srcw, 
 		      unsigned short srch,short destx,short desty,
@@ -697,6 +756,7 @@ Status XvMCPutSurface(Display *display,XvMCSurface *surface,Drawable draw,
     Status ret;
     unsigned dispSurface, lastSurface;
     int overlayUpdated;
+    drawableInfo *drawInfo;
 
     if((display == NULL) || (surface == NULL)) {
 	return BadValue;
@@ -711,8 +771,20 @@ Status XvMCPutSurface(Display *display,XvMCSurface *surface,Drawable draw,
     pthread_mutex_lock( &pViaXvMC->ctxMutex );
     pViaSubPic = pViaSurface->privSubPic;
     sAPriv = SAREAPTR( pViaXvMC );
-    hwlLock(&pViaXvMC->xl,1); 
+
+    hwlLock(&pViaXvMC->xl,1);
+
     
+    if (getDRIDrawableInfoLocked(pViaXvMC->drawHash, display, pViaXvMC->screen, draw, 0,
+				 pViaXvMC->fd, pViaXvMC->drmcontext, pViaXvMC->sAreaAddress, 
+				 FALSE, &drawInfo, sizeof(*drawInfo))) {
+
+	hwlUnlock(&pViaXvMC->xl,1);
+	pthread_mutex_unlock( &pViaXvMC->ctxMutex );
+	return BadAccess;
+    }
+	
+
     /*
      * Put a surface ID in the SAREA to "authenticate" to the 
      * X server.
@@ -727,7 +799,7 @@ Status XvMCPutSurface(Display *display,XvMCSurface *surface,Drawable draw,
     viaVideoSetSWFLipLocked(&pViaXvMC->xl, yOffs(pViaSurface), uOffs(pViaSurface), 
 			    vOffs(pViaSurface));
 
-    if (lastSurface != dispSurface) {
+    while (lastSurface != dispSurface) {
 	hwlUnlock(&pViaXvMC->xl,1);
 
 	/*
@@ -743,18 +815,21 @@ Status XvMCPutSurface(Display *display,XvMCSurface *surface,Drawable draw,
 	}
 
 	hwlLock(&pViaXvMC->xl,1);
-	overlayUpdated = 1;
-	if (pViaXvMC->lastSrfDisplaying != sAPriv->XvMCDisplaying[pViaXvMC->xvMCPort]) {
 
-	    /*
-	     * Race. Somebody beat us to the port.
-	     */
-	  
+	if (getDRIDrawableInfoLocked(pViaXvMC->drawHash, display, pViaXvMC->screen, draw, 0,
+				     pViaXvMC->fd, pViaXvMC->drmcontext, pViaXvMC->sAreaAddress, 
+				     FALSE, &drawInfo, sizeof(*drawInfo))) {
+	    
 	    hwlUnlock(&pViaXvMC->xl,1);
 	    pthread_mutex_unlock( &pViaXvMC->ctxMutex );
 	    return BadAccess;
 	}
+	
+	lastSurface = pViaSurface->srfNo | VIA_XVMC_VALID;
+	dispSurface = sAPriv->XvMCDisplaying[pViaXvMC->xvMCPort];
+	overlayUpdated = 1;
     } 
+
     setLowLevelLocking(&pViaXvMC->xl,0);
 
     /*
@@ -780,11 +855,12 @@ Status XvMCPutSurface(Display *display,XvMCSurface *surface,Drawable draw,
      */
 
     viaVideoSWFlipLocked(&pViaXvMC->xl, flags, pViaSurface->progressiveSequence);
-    flushPCIXvMCLowLevel(&pViaXvMC->xl);
+    flushXvMCLowLevel(&pViaXvMC->xl);  
+
     setLowLevelLocking(&pViaXvMC->xl,1);
     hwlUnlock(&pViaXvMC->xl,1);
 
-    if (overlayUpdated) {
+    if (overlayUpdated || !drawInfo->touched ) {
         pthread_mutex_unlock( &pViaXvMC->ctxMutex );
 	return Success;
     }
@@ -1444,13 +1520,29 @@ XvMCBlendSubpicture2 (
 	    yOffs(pViaSurface), pViaSurface->yStride,
 	    width, height, 1, 1, VIABLIT_COPY, 0);
     flushPCIXvMCLowLevel(&pViaXvMC->xl);
-    viaBlit(&pViaXvMC->xl, 8, uOffs(pViaSSurface), pViaSSurface->yStride >> 1,
-	    uOffs(pViaSurface), pViaSurface->yStride >> 1,
-	    width >> 1, height >> 1, 1, 1, VIABLIT_COPY, 0);
-    flushPCIXvMCLowLevel(&pViaXvMC->xl);
-    viaBlit(&pViaXvMC->xl, 8, vOffs(pViaSSurface), pViaSSurface->yStride >> 1,
-	    vOffs(pViaSurface), pViaSurface->yStride >> 1,
-	    width >> 1, height >> 1, 1, 1, VIABLIT_COPY, 0);
+    if (pViaXvMC->chipId != PCI_CHIP_VT3259) {
+
+	/*
+	 * YV12 Chroma blit.
+	 */
+	
+	viaBlit(&pViaXvMC->xl, 8, uOffs(pViaSSurface), pViaSSurface->yStride >> 1,
+		uOffs(pViaSurface), pViaSurface->yStride >> 1,
+		width >> 1, height >> 1, 1, 1, VIABLIT_COPY, 0);
+	flushPCIXvMCLowLevel(&pViaXvMC->xl);
+	viaBlit(&pViaXvMC->xl, 8, vOffs(pViaSSurface), pViaSSurface->yStride >> 1,
+		vOffs(pViaSurface), pViaSurface->yStride >> 1,
+		width >> 1, height >> 1, 1, 1, VIABLIT_COPY, 0);
+    } else {
+	
+	/*
+	 * NV12 Chroma blit.
+	 */
+
+	viaBlit(&pViaXvMC->xl, 8, vOffs(pViaSSurface), pViaSSurface->yStride,
+		vOffs(pViaSurface), pViaSurface->yStride,
+		width, height >> 1, 1, 1, VIABLIT_COPY, 0);
+    }
     pViaSurface->needsSync = 1;
     pViaSurface->syncMode = LL_MODE_2D;
     pViaSurface->timeStamp = viaDMATimeStampLowLevel(&pViaXvMC->xl);

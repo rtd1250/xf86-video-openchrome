@@ -36,7 +36,7 @@
 
 
 #define VIAXVMC_MAJOR 0
-#define VIAXVMC_MINOR 9
+#define VIAXVMC_MINOR 10
 #define VIAXVMC_PL    0
 #define VIA_NUM_XVMC_ATTRIBUTES 6
 #define VIA_XVMC_VALID 0x80000000
@@ -80,23 +80,22 @@ typedef struct{
  */
 
 typedef struct {
+    unsigned int ctxNo;
     unsigned int major,minor,pl;
-    unsigned ctxNo;
     unsigned xvmc_port;
-    drm_context_t drmcontext;
     unsigned int fbOffset;
     unsigned int fbSize;
     unsigned int mmioOffset;
     unsigned int mmioSize;
-    unsigned int sAreaOffset;
     unsigned int sAreaSize;
     unsigned int sAreaPrivOffset;
-    char busIdString[20];
     ViaXvMCAttrHolder initAttrs;
     int useAGP;
-    int authenticated;
-    unsigned chipId;
-    unsigned pad;    
+    unsigned int chipId;
+    unsigned int screen;
+    unsigned int depth;
+    unsigned int stride;
+    unsigned int pad;        
 } ViaXvMCCreateContextRec;
 
 #endif

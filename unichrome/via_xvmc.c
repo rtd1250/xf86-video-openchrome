@@ -328,7 +328,6 @@ ViaInitXVMC(ScreenPtr pScreen)
   VIAPtr pVia = VIAPTR(pScrn);
   ViaXvMCPtr vXvMC = &(pVia->xvmc);
   volatile ViaXvMCSAreaPriv *saPriv;
-  char *bID;
   drmVersionPtr drmVer;
 
   pVia->XvMCEnabled = 0;
@@ -372,13 +371,6 @@ ViaInitXVMC(ScreenPtr pScreen)
 		 "[XvMC] Continuing, but strange things may happen.\n");
   } 
   drmFreeVersion(drmVer);
-
-  if (!DRIOpenConnection(pScreen,&vXvMC->sAreaBase,&bID)) {
-      xf86DrvMsg(pScrn->scrnIndex, X_WARNING, 
-		 "[XvMC] DRIOpenConnection failed. Disabling XvMC.\n");
-      return;
-  } 
-  DRICloseConnection(pScreen);
 
   vXvMC->mmioBase = pVia->registerHandle;
 
@@ -430,7 +422,6 @@ void ViaCleanupXVMC(ScrnInfoPtr pScrn, XF86VideoAdaptorPtr *XvAdaptors,
     if (pVia->XvMCEnabled) {
 	mpegDisable(pVia,0);
 	drmRmMap(pVia->drmFD,vXvMC->mmioBase); 
-	drmRmMap(pVia->drmFD,vXvMC->fbBase); 
 	cleanupViaXvMC(vXvMC, XvAdaptors, XvAdaptorCount);
     }
     for (i=0; i<XvAdaptorCount; ++i) {
@@ -458,7 +449,6 @@ ViaXvMCCreateContext (ScrnInfoPtr pScrn, XvMCContextPtr pContext,
   viaPortPrivPtr pPriv = (viaPortPrivPtr) portPriv->DevPriv.ptr;
   ViaXvMCXVPriv *vx = (ViaXvMCXVPriv *) pPriv->xvmc_priv;
   volatile ViaXvMCSAreaPriv *sAPriv;
-  int authenticated;
 
   sAPriv = (ViaXvMCSAreaPriv*) DRIGetSAREAPrivate(pScrn->pScreen);
 
@@ -498,19 +488,6 @@ ViaXvMCCreateContext (ScrnInfoPtr pScrn, XvMCContextPtr pContext,
     return BadAlloc;
   }
 
-  if(drmCreateContext(pVia->drmFD, &(contextRec->drmcontext) ) < 0) {
-      xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-		 "[XvMC] ViaXvMCCreateContext: Unable to create DRMContext!\n");
-    xfree(*priv);
-    xfree(cPriv);
-    return BadAlloc;
-  }
-  drmSetContextFlags(pVia->drmFD, contextRec->drmcontext, 
-		     DRM_CONTEXT_2DONLY);
-  cPriv->drmCtx = contextRec->drmcontext;
-
-  authenticated = (drmAuthMagic(pVia->drmFD, pContext->flags) == 0);
-
   /*
    * Export framebuffer and mmio to non-root clients.
    */
@@ -521,26 +498,24 @@ ViaXvMCCreateContext (ScrnInfoPtr pScrn, XvMCContextPtr pContext,
   contextRec->fbSize = pVia->videoRambytes;
   contextRec->mmioOffset = vXvMC->mmioBase;
   contextRec->mmioSize = VIA_MMIO_REGSIZE;
-  contextRec->sAreaOffset = vXvMC->sAreaBase;
   contextRec->sAreaSize = pDRIInfo->SAREASize;
   contextRec->sAreaPrivOffset = sizeof(XF86DRISAREARec);
   contextRec->major = VIAXVMC_MAJOR;
   contextRec->minor = VIAXVMC_MINOR;
   contextRec->pl = VIAXVMC_PL;
-  strncpy (contextRec->busIdString,pDRIInfo->busIdString, 20);
   contextRec->initAttrs = vx->xvAttr; 
   contextRec->useAGP = pViaDRI->ringBufActive && 
 	((pVia->Chipset == VIA_CLE266) || 
 	 (pVia->Chipset == VIA_KM400) || 
 	 (pVia->Chipset == VIA_PM800));	
-  contextRec->authenticated = authenticated;
   contextRec->chipId = pVia->ChipId;
+  contextRec->screen = pScrn->pScreen->myNum;
+  contextRec->depth = pScrn->bitsPerPixel;
+  contextRec->stride = pVia->Bpp * pScrn->virtualX;
+
   vXvMC->nContexts++;
   vXvMC->contexts[ctxNo] = pContext->context_id;
   vXvMC->cPrivs[ctxNo] = cPriv;
-
-  xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-            "[XvMC] Chipid: %08x.", contextRec->chipId);
 
   return Success;
 }
@@ -714,7 +689,6 @@ static void ViaXvMCDestroyContext (ScrnInfoPtr pScrn, XvMCContextPtr pContext)
   ViaXvMCPtr vXvMC = &(pVia->xvmc);
   int i;
   volatile ViaXvMCSAreaPriv *sAPriv;
-  drm_context_t context;
   viaPortPrivPtr pPriv;
   XvPortRecPrivatePtr portPriv;
   ViaXvMCXVPriv *vx;
@@ -722,7 +696,6 @@ static void ViaXvMCDestroyContext (ScrnInfoPtr pScrn, XvMCContextPtr pContext)
   for(i=0; i < VIA_XVMC_MAX_CONTEXTS; i++) {
     if(vXvMC->contexts[i] == pContext->context_id) {
 
-	context = vXvMC->cPrivs[i]->drmCtx;
 	sAPriv=(ViaXvMCSAreaPriv *) DRIGetSAREAPrivate(pScrn->pScreen);
 	portPriv = (XvPortRecPrivatePtr) pContext->port_priv;
 	pPriv = (viaPortPrivPtr) portPriv->DevPriv.ptr;
@@ -733,7 +706,6 @@ static void ViaXvMCDestroyContext (ScrnInfoPtr pScrn, XvMCContextPtr pContext)
 	    vx->ctxDisplaying = 0;
 	}
 
-	drmDestroyContext(pVia->drmFD,vXvMC->cPrivs[i]->drmCtx);
 	xfree(vXvMC->cPrivs[i]);
 	vXvMC->cPrivs[i] = 0;
 	vXvMC->nContexts--;
