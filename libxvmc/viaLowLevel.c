@@ -33,7 +33,7 @@
  */
 
 #define VIDEO_DMA
-/*#define HQV_USE_IRQ */
+#define HQV_USE_IRQ 
 
 #include "viaXvMCPriv.h"
 #include "viaLowLevel.h"
@@ -893,7 +893,7 @@ viaMpegReset(XvMCLowLevel *xl)
 {
     int i,j;
 
-    BEGIN_HEADER6_DATA(xl, 50);
+    BEGIN_HEADER6_DATA(xl, 99);
     WAITFLAGS(xl, LL_MODE_DECODER_IDLE);
 
     OUT_RING_QW_AGP(xl, 0xcf0 ,0);
