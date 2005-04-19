@@ -1136,6 +1136,8 @@ initXvMCLowLevel(XvMCLowLevel *xl, int fd, drm_context_t *ctx,
 		 drmLockPtr hwLock, drmAddress mmioAddress, 
 		 drmAddress fbAddress, int useAgp, unsigned chipId ) 
 {
+    printf("Initialised Pro LowLevel\n");
+
     xl->agp_pos = 0;
     xl->pci_pos = 0;
     xl->use_agp = useAgp;
