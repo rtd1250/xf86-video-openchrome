@@ -220,6 +220,23 @@ static Status releaseContextResources(Display *display, XvMCContext *context,
     return errType;
 }
 
+static void
+setRegion(unsigned x,unsigned y, unsigned w, unsigned h, XvMCRegion *region)
+{
+    region->x = x;
+    region->y = y;
+    region->w = w;
+    region->h = h;
+}
+
+static int
+regionEqual(const XvMCRegion *r1, const XvMCRegion *r2)
+{
+    return (r1->x == r2->x &&
+	    r1->y == r2->y &&
+	    r1->w == r2->w &&
+	    r1->h == r2->h);
+}
 
 Status XvMCCreateContext(Display *display, XvPortID port,
 			 int surface_type_id, int width, int height, int flags,
@@ -495,6 +512,8 @@ Status XvMCCreateContext(Display *display, XvPortID port,
     pthread_mutex_init(&pViaXvMC->ctxMutex,NULL);
     pViaXvMC->resources = context_mutex;
     pViaXvMC->timeStamp = 0;
+    setRegion(0,0,-1,-1,&pViaXvMC->sRegion);
+    setRegion(0,0,-1,-1,&pViaXvMC->dRegion);
 
     if (initXvMCLowLevel(&pViaXvMC->xl, pViaXvMC->fd, &pViaXvMC->drmcontext,
 			 pViaXvMC->hwLock, pViaXvMC->mmioAddress, 
@@ -757,6 +776,8 @@ Status XvMCPutSurface(Display *display,XvMCSurface *surface,Drawable draw,
     unsigned dispSurface, lastSurface;
     int overlayUpdated;
     drawableInfo *drawInfo;
+    XvMCRegion sReg, dReg;
+    Bool forceUpdate = FALSE;
 
     if((display == NULL) || (surface == NULL)) {
 	return BadValue;
@@ -772,8 +793,23 @@ Status XvMCPutSurface(Display *display,XvMCSurface *surface,Drawable draw,
     pViaSubPic = pViaSurface->privSubPic;
     sAPriv = SAREAPTR( pViaXvMC );
 
-    hwlLock(&pViaXvMC->xl,1);
+    setRegion(srcx, srcy, srcw, srch, &sReg);
+    setRegion(destx, desty, destw, desth, &dReg);
+    
+    if ((!regionEqual(&sReg, &pViaXvMC->sRegion)) ||
+	(!regionEqual(&dReg, &pViaXvMC->dRegion))) {
+    
+	/*
+	 * Force update of the video overlay to match the new format.
+	 */
 
+	pViaXvMC->sRegion = sReg;
+	pViaXvMC->dRegion = dReg;
+	forceUpdate = TRUE;
+    }
+    
+
+    hwlLock(&pViaXvMC->xl,1);
     
     if (getDRIDrawableInfoLocked(pViaXvMC->drawHash, display, pViaXvMC->screen, draw, 0,
 				 pViaXvMC->fd, pViaXvMC->drmcontext, pViaXvMC->sAreaAddress, 
@@ -801,8 +837,9 @@ Status XvMCPutSurface(Display *display,XvMCSurface *surface,Drawable draw,
     viaVideoSetSWFLipLocked(&pViaXvMC->xl, yOffs(pViaSurface), uOffs(pViaSurface), 
 			    vOffs(pViaSurface));
 
-    while (lastSurface != dispSurface) {
+    while ((lastSurface != dispSurface) || forceUpdate) {
 
+	forceUpdate = FALSE;
 	flushPCIXvMCLowLevel(&pViaXvMC->xl);
 	setLowLevelLocking(&pViaXvMC->xl,1);
 	hwlUnlock(&pViaXvMC->xl,1);

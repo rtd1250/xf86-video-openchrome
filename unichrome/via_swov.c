@@ -104,7 +104,12 @@ viaWaitHQVFlip(VIAPtr pVia)
         proReg = REG_HQV1_INDEX;
 
     pdwState = (CARD32 volatile *) (pVia->VidMapBase+(HQV_CONTROL|proReg));
-    while (!(*pdwState & HQV_FLIP_STATUS) );
+
+    if (pVia->ChipId == PCI_CHIP_VT3259) {
+	while (*pdwState & (HQV_SUBPIC_FLIP | HQV_SW_FLIP)) ;
+    } else {
+	while (!(*pdwState & HQV_FLIP_STATUS) );
+    }
 /*
     while (!((*pdwState & 0xc0)== 0xc0) );
     while (!((*pdwState & 0xc0)!= 0xc0) );
@@ -1858,7 +1863,9 @@ DBG_DD(ErrorF("** 6 of %ld **", pVia->VidRegCursor));
                     usleep(1);
                 }
 #endif
-                
+		if (pVia->ChipId == PCI_CHIP_VT3259)
+		    hqvCtl |= HQV_GEN_IRQ;
+
                 VIDOutD(proReg|HQV_CONTROL, hqvCtl | HQV_FLIP_STATUS);
                 VIDOutD(proReg|HQV_CONTROL, hqvCtl | HQV_SW_FLIP);
                 

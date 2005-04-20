@@ -71,6 +71,14 @@ typedef enum{
 } ContextRes;
 
 typedef struct{
+    int x;
+    int y;
+    int w;
+    int h;
+} XvMCRegion;
+
+
+typedef struct{
     unsigned ctxNo;                 /* XvMC private context reference number */
     pthread_mutex_t ctxMutex;       /* Mutex for multi-threading. Not used */
     drm_context_t drmcontext;       /* The drm context */
@@ -130,6 +138,8 @@ typedef struct{
     XVisualInfo visualInfo;
     void *drawHash;
     CARD32 chipId;
+    XvMCRegion sRegion;
+    XvMCRegion dRegion;
 }ViaXvMCContext;
 
 typedef struct{

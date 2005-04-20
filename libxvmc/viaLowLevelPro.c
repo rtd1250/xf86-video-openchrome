@@ -40,7 +40,7 @@
  */
 
 #define VIDEO_DMA
-#undef HQV_USE_IRQ
+#define HQV_USE_IRQ
 
 #include "viaXvMCPriv.h"
 #include "viaLowLevel.h"
