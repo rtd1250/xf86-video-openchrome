@@ -1,3 +1,10 @@
+2005-05-11  Thomas Hellström  <unicrhome-at-shipmail-dot-org>
+
+	* prepare-ChangeLogSVN.pl:
+
+	- Added the above file for generation of ChangeLog Entries.
+
+	
 2005-05-11  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 	
 	* libxvmc/driDrawable.c:
@@ -55,4 +62,3 @@
 	  output. These are not activated yet. (Unichrome Pro.)
 	- Added HW deinterlacing functions. Deactivated, since I cannot see any visible
 	  difference. (Unichrome Pro.)
-	
