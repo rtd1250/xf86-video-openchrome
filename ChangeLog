@@ -1,0 +1,58 @@
+2005-05-11  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+	
+	* libxvmc/driDrawable.c:
+	* libxvmc/viaLowLevel.c: (hwlLock), (hwlUnlock),
+	(setAGPSyncLowLevel), (viaDMATimeStampLowLevel),
+	(flushXvMCLowLevel), (flushPCIXvMCLowLevel),
+	(viaMpegSetSurfaceStride), (viaVideoSetSWFLipLocked),
+	(viaVideoSWFlipLocked), (viaMpegSetFB), (viaMpegBeginPicture),
+	(viaMpegReset), (viaMpegWriteSlice), (viaVideoSubPictureOffLocked),
+	(viaVideoSubPictureLocked), (viaBlit), (syncXvMCLowLevel),
+	(initXvMCLowLevel), (setLowLevelLocking), (closeXvMCLowLevel):
+	* libxvmc/viaLowLevel.h:
+	* libxvmc/viaLowLevelPro.c: (initHQVShadow),
+	(setHQVHWDeinterlacing), (setHQVDeblocking), (setHQVStartAddress),
+	(setHQVColorSpaceConversion), (setHQVFetchLine), (setHQVScale),
+	(setHQVSingleDestination), (setHQVDeinterlacing),
+	(setHQVTripleBuffer), (hwlLock), (hwlUnlock), (setAGPSyncLowLevel),
+	(viaDMATimeStampLowLevel), (viaDMAInitTimeStamp),
+	(uploadHQVDeinterlace), (uploadHQVShadow), (flushXvMCLowLevel),
+	(flushPCIXvMCLowLevel), (viaMpegSetSurfaceStride),
+	(viaVideoSetSWFLipLocked), (viaVideoSWFlipLocked), (viaMpegSetFB),
+	(viaMpegBeginPicture), (viaMpegReset), (viaMpegWriteSlice),
+	(viaVideoSubPictureOffLocked), (viaVideoSubPictureLocked),
+	(viaBlit), (syncXvMCLowLevel), (updateLowLevelBuf),
+	(cleanupLowLevelBuf), (initXvMCLowLevel), (setLowLevelLocking),
+	(closeXvMCLowLevel), (computeDownScaling),
+	(computeHQVScaleAndFilter), (setupBackBuffer):
+	* libxvmc/viaXvMC.c: (grabDecoder), (releaseContextResources),
+	(XvMCCreateContext), (XvMCCreateSurface), (XvMCPutSlice2),
+	(XvMCPutSlice), (XvMCPutSurface), (XvMCBeginSurface),
+	(XvMCSyncSurface), (XvMCLoadQMatrix), (XvMCCreateSubpicture),
+	(XvMCSetSubpicturePalette), (XvMCClearSubpicture),
+	(XvMCCompositeSubpicture), (XvMCBlendSubpicture2),
+	(XvMCSyncSubpicture), (XvMCDestroySubpicture), (XvMCFlushSurface),
+	(XvMCGetSurfaceStatus), (XvMCQueryAttributes), (XvMCSetAttribute),
+	(XvMCGetAttribute), (XvMCHideSurface):
+	* libxvmc/viaXvMCPriv.h:
+	* unichrome/via_swov.c: (ViaSwovSurfaceCreate):
+	* unichrome/via_video.c: (viaSetupAdaptors):
+	* unichrome/via_xvpriv.h:
+
+	- Added ChangeLog to the repository.
+	- Made the DDX update the overlay if a change in surface format occured
+	  while it's dimensions are still the same.
+	- Made the XvMCLowLevel struct opaque (void *) and not defined in the 
+	  header file. This allows for different definitions for different hardware
+	- Added a HQV shadow which holds the HQV context for the Unichrome Pro. 
+	  The purpose is twofold:
+	  1. If someone else touched the HQV since we last used it, we can upload the
+	     whole context.
+	  2. We do not need to read from the HQV, which is bad because we have to 
+	     halt the DMA engine to do that.
+	- Added and activated mpeg deblocking for Unichrome Pro.
+	- Added a number of HQV utility functions for the upcoming video engine free
+	  output. These are not activated yet. (Unichrome Pro.)
+	- Added HW deinterlacing functions. Deactivated, since I cannot see any visible
+	  difference. (Unichrome Pro.)
+	

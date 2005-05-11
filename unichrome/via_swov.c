@@ -1049,8 +1049,11 @@ ViaSwovSurfaceCreate(ScrnInfoPtr pScrn, viaPortPrivPtr pPriv, CARD32 FourCC,
 
     DBG_DD(ErrorF("ViaSwovSurfaceCreate: FourCC =0x%08lx\n", FourCC));
 
-    if (pVia->VideoStatus & VIDEO_SWOV_SURFACE_CREATED)
+    if ((pVia->VideoStatus & VIDEO_SWOV_SURFACE_CREATED) &&
+	(FourCC == pPriv->lastId))
         return Success;
+
+    pPriv->lastId = FourCC;
 
     switch (FourCC) {
     case FOURCC_YUY2:

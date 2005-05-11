@@ -32,8 +32,13 @@
 #include <Xutil.h>
 #include "vldXvMC.h"
 #include "via_xvmc.h"
-#include "viaLowLevel.h"
 
+typedef struct{
+    int x;
+    int y;
+    int w;
+    int h;
+} XvMCRegion;
 
 
 extern Status _xvmc_create_context(Display *dpy, XvMCContext *context,
@@ -69,13 +74,6 @@ typedef enum{
   context_context,
   context_none
 } ContextRes;
-
-typedef struct{
-    int x;
-    int y;
-    int w;
-    int h;
-} XvMCRegion;
 
 
 typedef struct{
@@ -120,7 +118,7 @@ typedef struct{
 					    values */
     XvAttribute attribDesc[VIA_NUM_XVMC_ATTRIBUTES]; /* Attribute decriptions */
     int useAGP;                          /* Use the AGP ringbuffer to upload data to the chip */
-    XvMCLowLevel xl;                     /* Lowlevel context. Opaque to us. */
+    void *xl;                            /* Lowlevel context. Opaque to us. */
     int haveXv;                         /* Have I initialized the Xv 
 					   connection for this surface? */
     XvImage *xvImage;                   /* Fake Xv Image used for command 
@@ -131,6 +129,7 @@ typedef struct{
     int lastSrfDisplaying;
     ContextRes resources;
     CARD32 timeStamp;
+    CARD32 videoTimeStamp;
     XID id;
     unsigned screen;
     unsigned depth;
@@ -175,6 +174,7 @@ typedef struct{
     int needsSync;
     int syncMode;
     CARD32 timeStamp;
+    int topFieldFirst;
 }ViaXvMCSurface;
 
 /*
@@ -189,34 +189,6 @@ typedef struct{
 /*
  * Low-level Mpeg functions in viaLowLevel.c
  */ 
-
-extern void viaMpegReset(XvMCLowLevel *xl);
-extern void viaMpegWriteSlice(XvMCLowLevel *xl, CARD8* slice, 
-				    int nBytes, CARD32 sCode);
-extern void viaMpegSetSurfaceStride(XvMCLowLevel *xl, ViaXvMCContext *ctx);
-extern void viaMpegSetFB(XvMCLowLevel *xl,unsigned i, unsigned yOffs,
-			       unsigned uOffs, unsigned vOffs);
-extern void viaMpegBeginPicture(XvMCLowLevel *xl, ViaXvMCContext *ctx,unsigned width,
-				unsigned height,const XvMCMpegControl *control);
-
-/*
- * Low-level Video functions in viaLowLevel.c
- */ 
-
-
-extern void viaBlit(XvMCLowLevel *xl,unsigned bpp,unsigned srcBase,
-		    unsigned srcPitch,unsigned dstBase,unsigned dstPitch,
-		    unsigned w,unsigned h,int xdir,int ydir, 
-		    unsigned blitMode, unsigned color); 
-
-extern void viaVideoSWFlipLocked(XvMCLowLevel *xl, unsigned flags,
-				 int progressiveSequence);
-extern void viaVideoSetSWFLipLocked(XvMCLowLevel *xl,unsigned yOffs,unsigned uOffs,
-				    unsigned vOffs); 
-
-extern void viaVideoSubPictureLocked(XvMCLowLevel *xl,ViaXvMCSubPicture *pViaSubPic);
-extern void viaVideoSubPictureOffLocked(XvMCLowLevel *xl);
-
 
 #define VIABLIT_TRANSCOPY 0
 #define VIABLIT_COPY 1

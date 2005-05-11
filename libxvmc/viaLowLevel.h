@@ -67,67 +67,78 @@
 #define VIA_IDLEVAL              0x00000204   
 
 #include "via_drm.h"
+#include "viaXvMCPriv.h"
 
-typedef struct{
-    CARD32 agp_buffer[LL_AGP_CMDBUF_SIZE];
-    CARD32 pci_buffer[LL_PCI_CMDBUF_SIZE];
-    unsigned agp_pos;
-    unsigned pci_pos;
-    unsigned flip_pos;
-    int use_agp;   
-    int agp_mode;
-    int agp_header_start;
-    int agp_index;
-    int fd;
-    drm_context_t *drmcontext;
-    drmLockPtr hwLock;
-    drmAddress mmioAddress;
-    drmAddress fbAddress;
-    unsigned curWaitFlags;
-    int performLocking;
-    unsigned errors;
-    drm_via_mem_t tsMem;
-    CARD32 tsOffset;
-    volatile CARD32 *tsP;
-    CARD32 curTimeStamp;
-    CARD32 lastReadTimeStamp;
-    int agpSync;
-    CARD32 agpSyncTimeStamp;
-    unsigned chipId;
-}XvMCLowLevel;
+#define setRegion(xx,yy,ww,hh,region) \
+    do {			  \
+	(region).x = (xx);	  \
+	(region).y = (yy);	  \
+	(region).w = (ww);	  \
+	(region).h = (hh);	  \
+    } while(0)
+
+#define regionEqual(r1, r2)				\
+    ((r1).x == (r2).x &&				\
+     (r1).y == (r2).y &&				\
+     (r1).w == (r2).w &&				\
+     (r1).h == (r2).h)
 
 
-extern int initXvMCLowLevel(XvMCLowLevel *xl, int fd, drm_context_t *ctx,
-			     drmLockPtr hwLock, drmAddress mmioAddress,
-			     drmAddress fbAddress,int useAgp, unsigned chipId );
 
-extern void setLowLevelLocking(XvMCLowLevel *xl, int perFormLocking);
-extern void closeXvMCLowLevel(XvMCLowLevel *xl);
-extern void flushPCIXvMCLowLevel(XvMCLowLevel *xl);
-extern CARD32 viaDMATimeStampLowLevel(XvMCLowLevel *xl);
-extern void setAGPSyncLowLevel(XvMCLowLevel *xl, int val, CARD32 timeStamp);
+extern void
+*initXvMCLowLevel(int fd, drm_context_t *ctx,
+		 drmLockPtr hwLock, drmAddress mmioAddress, 
+		 drmAddress fbAddress, unsigned fbStride, unsigned fbDepth,
+		 unsigned width, unsigned height, int useAgp, unsigned chipId );
+
+extern void setLowLevelLocking(void *xlp, int perFormLocking);
+extern void closeXvMCLowLevel(void *xlp);
+extern void flushPCIXvMCLowLevel(void *xlp);
+extern CARD32 viaDMATimeStampLowLevel(void *xlp);
+extern void setAGPSyncLowLevel(void *xlp, int val, CARD32 timeStamp);
 
 
 /*
  * These two functions also return and clear the current error status.
  */
 
-extern unsigned flushXvMCLowLevel(XvMCLowLevel *xl);
-extern unsigned syncXvMCLowLevel(XvMCLowLevel *xl, unsigned int mode,
+extern unsigned flushXvMCLowLevel(void *xlp);
+extern unsigned syncXvMCLowLevel(void *xlp, unsigned int mode,
 				 unsigned int doSleep, CARD32 timeStamp);
 
-extern void hwlUnlock(XvMCLowLevel *xl, int videoLock); 
-extern void hwlLock(XvMCLowLevel *xl, int videoLock); 
+extern void hwlUnlock(void *xlp, int videoLock); 
+extern void hwlLock(void *xlp, int videoLock); 
+
+extern void viaVideoSetSWFLipLocked(void *xlp, unsigned yOffs, unsigned uOffs,
+				    unsigned vOffs, unsigned yStride, unsigned uvStride);
+
+extern void viaMpegReset(void *xlp);
+extern void viaMpegWriteSlice(void *xlp, CARD8* slice, 
+				    int nBytes, CARD32 sCode);
+extern void viaMpegSetSurfaceStride(void *xlp, ViaXvMCContext *ctx);
+extern void viaMpegSetFB(void *xlp,unsigned i, unsigned yOffs,
+			       unsigned uOffs, unsigned vOffs);
+extern void viaMpegBeginPicture(void *xlp, ViaXvMCContext *ctx,unsigned width,
+				unsigned height,const XvMCMpegControl *control);
+
+/*
+ * Low-level Video functions in viaLowLevel.c
+ */ 
 
 
-#define LL_HW_LOCK(xl)							\
-    do {								\
-	DRM_LOCK((xl)->fd,(xl)->hwLock,*(xl)->drmcontext,0);		\
-    } while(0);
-#define LL_HW_UNLOCK(xl)					\
-    do {							\
-	DRM_UNLOCK((xl)->fd,(xl)->hwLock,*(xl)->drmcontext);	\
-    } while(0);
+extern void viaBlit(void *xlp,unsigned bpp,unsigned srcBase,
+		    unsigned srcPitch,unsigned dstBase,unsigned dstPitch,
+		    unsigned w,unsigned h,int xdir,int ydir, 
+		    unsigned blitMode, unsigned color); 
+
+extern void viaVideoSWFlipLocked(void *xlp, unsigned flags,
+				 int progressiveSequence);
+
+extern void viaVideoSubPictureLocked(void *xlp,ViaXvMCSubPicture *pViaSubPic);
+extern void viaVideoSubPictureOffLocked(void *xlp);
+
+
+
 
 #define PCI_CHIP_VT3204         0x3108 /* K8M800 */
 #define PCI_CHIP_VT3259         0x3118 /* PM800/PM880/CN400 */

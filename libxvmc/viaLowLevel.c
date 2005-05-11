@@ -40,6 +40,42 @@
 #include <sys/time.h>
 #include <stdio.h>
 
+typedef struct{
+    CARD32 agp_buffer[LL_AGP_CMDBUF_SIZE];
+    CARD32 pci_buffer[LL_PCI_CMDBUF_SIZE];
+    unsigned agp_pos;
+    unsigned pci_pos;
+    unsigned flip_pos;
+    int use_agp;   
+    int agp_mode;
+    int agp_header_start;
+    int agp_index;
+    int fd;
+    drm_context_t *drmcontext;
+    drmLockPtr hwLock;
+    drmAddress mmioAddress;
+    drmAddress fbAddress;
+    unsigned fbStride;
+    unsigned fbDepth;
+    unsigned width;
+    unsigned height;
+    unsigned curWaitFlags;
+    int performLocking;
+    unsigned errors;
+    drm_via_mem_t tsMem;
+    CARD32 tsOffset;
+    volatile CARD32 *tsP;
+    CARD32 curTimeStamp;
+    CARD32 lastReadTimeStamp;
+    int agpSync;
+    CARD32 agpSyncTimeStamp;
+    unsigned chipId;
+}XvMCLowLevel;
+
+
+
+
+
 /*
  * For Other architectures than i386 these might have to be modified for
  * bigendian etc.
@@ -150,6 +186,15 @@
     } while (0)
   
 
+#define LL_HW_LOCK(xl)							\
+    do {								\
+	DRM_LOCK((xl)->fd,(xl)->hwLock,*(xl)->drmcontext,0);		\
+    } while(0);
+#define LL_HW_UNLOCK(xl)					\
+    do {							\
+	DRM_UNLOCK((xl)->fd,(xl)->hwLock,*(xl)->drmcontext);	\
+    } while(0);
+
 
 /*
  * We want to have two concurrent types of thread taking the hardware
@@ -161,14 +206,18 @@
 
 
 void 
-hwlLock(XvMCLowLevel *xl, int videoLock) 
+hwlLock(void *xlp, int videoLock) 
 {
+    XvMCLowLevel *xl = (XvMCLowLevel *) xlp;
+
     LL_HW_LOCK(xl);
 }
 
 void 
-hwlUnlock(XvMCLowLevel *xl, int videoLock) 
+hwlUnlock(void *xlp, int videoLock) 
 {
+    XvMCLowLevel *xl = (XvMCLowLevel *) xlp;
+
     LL_HW_UNLOCK(xl);
 }
     
@@ -180,15 +229,19 @@ timeDiff(struct timeval *now,struct timeval *then) {
 }
 
 void 
-setAGPSyncLowLevel(XvMCLowLevel *xl, int val, CARD32 timeStamp)
+setAGPSyncLowLevel(void *xlp, int val, CARD32 timeStamp)
 {
+    XvMCLowLevel *xl = (XvMCLowLevel *) xlp;
+
     xl->agpSync = val;
     xl->agpSyncTimeStamp = timeStamp;
 }
 
 CARD32 
-viaDMATimeStampLowLevel(XvMCLowLevel *xl)
+viaDMATimeStampLowLevel(void *xlp)
 {
+    XvMCLowLevel *xl = (XvMCLowLevel *) xlp;
+
     if (xl->use_agp) {
 	viaBlit(xl, 32, xl->tsOffset, 1, xl->tsOffset, 1, 1, 1, 0, 0, 
 		VIABLIT_FILL, xl->curTimeStamp);
@@ -499,11 +552,12 @@ agpFlush(XvMCLowLevel *xl)
 }
 
 unsigned 
-flushXvMCLowLevel(XvMCLowLevel *xl) 
+flushXvMCLowLevel(void *xlp) 
 {
     unsigned 
 	errors;
-
+    XvMCLowLevel *xl = (XvMCLowLevel *) xlp;
+    
     if(xl->pci_pos) pciFlush(xl);
     if(xl->agp_pos) agpFlush(xl);
     errors = xl->errors;
@@ -512,8 +566,10 @@ flushXvMCLowLevel(XvMCLowLevel *xl)
 }
 
 void 
-flushPCIXvMCLowLevel(XvMCLowLevel *xl) 
+flushPCIXvMCLowLevel(void  *xlp) 
 {
+    XvMCLowLevel *xl = (XvMCLowLevel *) xlp;
+
     if(xl->pci_pos) pciFlush(xl); 
     if (!xl->use_agp && xl->agp_pos) agpFlush(xl);
 }
@@ -528,10 +584,12 @@ __inline static void pciCommand(XvMCLowLevel *xl, unsigned offset, unsigned valu
 }
 
 void 
-viaMpegSetSurfaceStride(XvMCLowLevel * xl, ViaXvMCContext *ctx)
+viaMpegSetSurfaceStride(void *xlp, ViaXvMCContext *ctx)
 {
     CARD32 y_stride = ctx->yStride;
     CARD32 uv_stride = y_stride >> 1;
+    XvMCLowLevel *xl = (XvMCLowLevel *) xlp;
+
     
     BEGIN_RING_AGP(xl, 2);
     OUT_RING_QW_AGP(xl, H1_ADDR(0xc50), (y_stride >> 3) | ((uv_stride >> 3) << 16)); 
@@ -540,21 +598,23 @@ viaMpegSetSurfaceStride(XvMCLowLevel * xl, ViaXvMCContext *ctx)
 
 
 void 
-viaVideoSetSWFLipLocked(XvMCLowLevel *xl,
-			     unsigned yOffs,
-			     unsigned uOffs,
-			     unsigned vOffs) 
+viaVideoSetSWFLipLocked(void *xlp, unsigned yOffs, unsigned uOffs,
+			unsigned vOffs, unsigned yStride, unsigned uvStride)
 {
+    XvMCLowLevel *xl = (XvMCLowLevel *) xlp;
+
     pciCommand(xl,HQV_SRC_STARTADDR_Y | 0x200,yOffs,LL_MODE_VIDEO);
     pciCommand(xl,HQV_SRC_STARTADDR_U | 0x200,uOffs,0);
     pciCommand(xl,HQV_SRC_STARTADDR_V | 0x200,vOffs,0);
 }
     
 void 
-viaVideoSWFlipLocked(XvMCLowLevel *xl, unsigned flags,
+viaVideoSWFlipLocked(void *xlp, unsigned flags,
 		     int progressiveSequence)
 {
     CARD32 andWd,orWd;
+    XvMCLowLevel *xl = (XvMCLowLevel *) xlp;
+
     andWd = 0;
     orWd = 0;
 
@@ -595,10 +655,13 @@ viaVideoSWFlipLocked(XvMCLowLevel *xl, unsigned flags,
 }
 	
 void 
-viaMpegSetFB(XvMCLowLevel *xl,unsigned i,
+viaMpegSetFB(void *xlp,unsigned i,
 	     unsigned yOffs,
 	     unsigned uOffs,
-	     unsigned vOffs) {
+	     unsigned vOffs) 
+{
+    XvMCLowLevel *xl = (XvMCLowLevel *) xlp;
+
     i *= 12;
     BEGIN_RING_AGP(xl, 6);
     OUT_RING_QW_AGP(xl, H1_ADDR(0xc20 + i), yOffs >> 3);
@@ -608,12 +671,14 @@ viaMpegSetFB(XvMCLowLevel *xl,unsigned i,
 }
 
 void 
-viaMpegBeginPicture(XvMCLowLevel *xl,ViaXvMCContext *ctx,
+viaMpegBeginPicture(void *xlp,ViaXvMCContext *ctx,
 		    unsigned width,
 		    unsigned height,
 		    const XvMCMpegControl *control) {
 				  
     unsigned j, mb_width, mb_height;
+    XvMCLowLevel *xl = (XvMCLowLevel *) xlp;
+
     mb_width = (width + 15) >> 4;
 
     mb_height =
@@ -704,9 +769,10 @@ viaMpegBeginPicture(XvMCLowLevel *xl,ViaXvMCContext *ctx,
 
 
 void 
-viaMpegReset(XvMCLowLevel *xl)
+viaMpegReset(void *xlp)
 {
     int i,j;
+    XvMCLowLevel *xl = (XvMCLowLevel *) xlp;
 
     BEGIN_RING_AGP(xl, 100);
     WAITFLAGS(xl, LL_MODE_DECODER_IDLE);
@@ -730,11 +796,13 @@ viaMpegReset(XvMCLowLevel *xl)
 }
 
 void 
-viaMpegWriteSlice(XvMCLowLevel *xl, CARD8* slice, int nBytes, CARD32 sCode)
+viaMpegWriteSlice(void *xlp, CARD8* slice, int nBytes, CARD32 sCode)
 {
     int i, n, r;
     CARD32* buf;
     int count;
+    XvMCLowLevel *xl = (XvMCLowLevel *) xlp;
+
 
     if (xl->errors & (LL_DECODER_TIMEDOUT |
 		      LL_IDCT_FIFO_ERROR  |
@@ -781,9 +849,11 @@ viaMpegWriteSlice(XvMCLowLevel *xl, CARD8* slice, int nBytes, CARD32 sCode)
 }
 
 void 
-viaVideoSubPictureOffLocked(XvMCLowLevel *xl) {
+viaVideoSubPictureOffLocked(void *xlp) {
 
     CARD32 stride;
+    XvMCLowLevel *xl = (XvMCLowLevel *) xlp;
+
 
     stride = VIDIN(xl,SUBP_CONTROL_STRIDE);
 
@@ -791,10 +861,11 @@ viaVideoSubPictureOffLocked(XvMCLowLevel *xl) {
 }
 
 void 
-viaVideoSubPictureLocked(XvMCLowLevel *xl,ViaXvMCSubPicture *pViaSubPic) {
+viaVideoSubPictureLocked(void *xlp,ViaXvMCSubPicture *pViaSubPic) {
 
     unsigned i;
     CARD32 cWord;
+    XvMCLowLevel *xl = (XvMCLowLevel *) xlp;
 
 
     for (i=0; i<VIA_SUBPIC_PALETTE_SIZE; ++i) {
@@ -808,7 +879,7 @@ viaVideoSubPictureLocked(XvMCLowLevel *xl,ViaXvMCSubPicture *pViaSubPic) {
 }
 
 void 
-viaBlit(XvMCLowLevel *xl,unsigned bpp,unsigned srcBase,
+viaBlit(void *xlp,unsigned bpp,unsigned srcBase,
 	unsigned srcPitch,unsigned dstBase,unsigned dstPitch,
 	unsigned w,unsigned h,int xdir,int ydir, unsigned blitMode, 
 	unsigned color) 
@@ -816,6 +887,7 @@ viaBlit(XvMCLowLevel *xl,unsigned bpp,unsigned srcBase,
 
     CARD32 dwGEMode = 0, srcY=0, srcX, dstY=0, dstX;
     CARD32 cmd;
+    XvMCLowLevel *xl = (XvMCLowLevel *) xlp;
 
 
     if (!w || !h)
@@ -895,11 +967,12 @@ viaBlit(XvMCLowLevel *xl,unsigned bpp,unsigned srcBase,
 }
 
 unsigned 
-syncXvMCLowLevel(XvMCLowLevel *xl, unsigned int mode, unsigned int doSleep,
+syncXvMCLowLevel(void *xlp, unsigned int mode, unsigned int doSleep,
 		 CARD32 timeStamp)
 {
     unsigned
 	errors;
+    XvMCLowLevel *xl = (XvMCLowLevel *) xlp;
 
     if (mode == 0) {
 	errors = xl->errors;
@@ -927,15 +1000,23 @@ syncXvMCLowLevel(XvMCLowLevel *xl, unsigned int mode, unsigned int doSleep,
 
     errors = xl->errors;
     xl->errors = 0;
-
+    
     return errors;
 }
 
-int 
-initXvMCLowLevel(XvMCLowLevel *xl, int fd, drm_context_t *ctx,
+
+extern void
+*initXvMCLowLevel(int fd, drm_context_t *ctx,
 		 drmLockPtr hwLock, drmAddress mmioAddress, 
-		 drmAddress fbAddress, int useAgp, unsigned cardId) 
+		 drmAddress fbAddress, unsigned fbStride, unsigned fbDepth,
+		 unsigned width, unsigned height, int useAgp, unsigned chipId )
+
 {
+    int ret;
+  
+    XvMCLowLevel *xl = (XvMCLowLevel *)malloc(sizeof(XvMCLowLevel));
+    if (!xl) return NULL;
+
     xl->agp_pos = 0;
     xl->pci_pos = 0;
     xl->use_agp = useAgp;
@@ -948,19 +1029,28 @@ initXvMCLowLevel(XvMCLowLevel *xl, int fd, drm_context_t *ctx,
     xl->performLocking = 1;
     xl->errors = 0;
     xl->agpSync = 0;
-    return viaDMAInitTimeStamp(xl); 
-
+    ret = viaDMAInitTimeStamp(xl); 
+    if (ret) {
+	free(xl);
+	return NULL;
+    }
+    return xl;
 }
 
 void 
-setLowLevelLocking(XvMCLowLevel *xl, int performLocking)
+setLowLevelLocking(void *xlp, int performLocking)
 {
+    XvMCLowLevel *xl = (XvMCLowLevel *) xlp;
+
     xl->performLocking = performLocking;
 }
 
 void 
-closeXvMCLowLevel(XvMCLowLevel *xl) 
+closeXvMCLowLevel(void *xlp) 
 {
+    XvMCLowLevel *xl = (XvMCLowLevel *) xlp;
+
     viaDMACleanupTimeStamp(xl); 
+    free(xl);
 }
 
