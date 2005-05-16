@@ -1,4 +1,10 @@
-2005-05-11  Thomas Hellström  <unicrhome-at-shipmail-dot-org>
+2005-05-16  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
+	* unichrome/via_dri.c: (VIASetAgpMode), (VIADRIAgpInit):
+
+	- Added better AGP mode control to the DDX.
+
+2005-05-11  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
 	* prepare-ChangeLogSVN.pl:
 

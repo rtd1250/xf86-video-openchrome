@@ -52,6 +52,14 @@ extern void GlxSetVisualConfigs(
 #define AGP_SIZE (AGP_PAGE_SIZE * AGP_PAGES)
 #define AGP_CMDBUF_PAGES 512
 #define AGP_CMDBUF_SIZE (AGP_PAGE_SIZE * AGP_CMDBUF_PAGES)
+#define VIA_AGP_MODE_MASK 0x17
+#define VIA_AGPv3_MODE    0x08
+#define VIA_AGPv3_8X_MODE 0x02
+#define VIA_AGPv3_4X_MODE 0x01
+#define VIA_AGP_4X_MODE 0x04
+#define VIA_AGP_2X_MODE 0x02
+#define VIA_AGP_1X_MODE 0x01
+#define VIA_AGP_FW_MODE 0x10
 
 static char VIAKernelDriverName[] = "via";
 static char VIAClientDriverName[] = "unichrome";
@@ -189,6 +197,42 @@ VIADRIRingBufferInit(ScrnInfoPtr pScrn)
     return TRUE;
 }	    
 
+static Bool VIASetAgpMode(ScrnInfoPtr pScrn)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+    CARD32       mode   = drmAgpGetMode(pVia->drmFD);
+    unsigned int vendor = drmAgpVendorId(pVia->drmFD);
+    unsigned int device = drmAgpDeviceId(pVia->drmFD);
+
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] Detected AGP vendor 0x%x, device 0x%x\n",
+	       vendor, device);
+
+    mode &= ~VIA_AGP_MODE_MASK;
+    if ((mode & VIA_AGPv3_MODE)) {
+	mode |= 
+	    VIA_AGPv3_8X_MODE | 
+	    VIA_AGPv3_4X_MODE;
+	xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] Found AGP v3 compatible device. "
+		   "Trying AGP 8X mode.\n");
+    } else {
+	mode |= 
+	    VIA_AGP_4X_MODE | 
+	    VIA_AGP_2X_MODE |
+	    VIA_AGP_1X_MODE;
+	xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] Didn't find any AGP v3 compatible device. "
+		   "Trying AGP 4X mode.\n");
+    }
+	
+    mode |= VIA_AGP_FW_MODE;
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] Trying to enable AGP fast writes.\n");
+
+    if (drmAgpEnable(pVia->drmFD, mode) < 0) {
+        return FALSE;
+    }
+    return TRUE;
+}
+    
+    
 	
 static Bool VIADRIAgpInit(ScreenPtr pScreen, VIAPtr pVia)
 {
@@ -205,8 +249,9 @@ static Bool VIADRIAgpInit(ScreenPtr pScreen, VIAPtr pVia)
         return FALSE;
     }
 
-    if (drmAgpEnable(pVia->drmFD, drmAgpGetMode(pVia->drmFD)&~0x0) < 0) {
-         xf86DrvMsg(pScreen->myNum, X_ERROR, "[drm] drmAgpEnable failed\n");
+    if (!VIASetAgpMode(xf86Screens[pScreen->myNum])) {
+	xf86DrvMsg(pScreen->myNum, X_ERROR, "[drm] VIASetAgpMode failed\n");
+	drmAgpRelease(pVia->drmFD);
         return FALSE;
     }
     
