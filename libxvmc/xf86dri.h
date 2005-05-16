@@ -68,50 +68,50 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 _XFUNCPROTOBEGIN
 
-Bool XF86DRIQueryExtension( Display *dpy, int *event_base, int *error_base );
+Bool uniDRIQueryExtension( Display *dpy, int *event_base, int *error_base );
 
-Bool XF86DRIQueryVersion( Display *dpy, int *majorVersion, int *minorVersion,
-    int *patchVersion );
+Bool uniDRIQueryVersion( Display *dpy, int *majorVersion, int *minorVersion,
+			 int *patchVersion );
 
-Bool XF86DRIQueryDirectRenderingCapable( Display *dpy, int screen,
-    Bool *isCapable );
+Bool uniDRIQueryDirectRenderingCapable( Display *dpy, int screen,
+					Bool *isCapable );
 
-Bool XF86DRIOpenConnection( Display *dpy, int screen, drm_handle_t *hSAREA,
-    char **busIDString );
+Bool uniDRIOpenConnection( Display *dpy, int screen, drm_handle_t *hSAREA,
+			   char **busIDString );
 
-Bool XF86DRIAuthConnection( Display *dpy, int screen, drm_magic_t magic );
+Bool uniDRIAuthConnection( Display *dpy, int screen, drm_magic_t magic );
 
-Bool XF86DRICloseConnection( Display *dpy, int screen );
+Bool uniDRICloseConnection( Display *dpy, int screen );
 
-Bool XF86DRIGetClientDriverName( Display *dpy, int screen,
-    int *ddxDriverMajorVersion, int *ddxDriverMinorVersion,
-    int *ddxDriverPatchVersion, char **clientDriverName );
+Bool uniDRIGetClientDriverName( Display *dpy, int screen,
+				int *ddxDriverMajorVersion, int *ddxDriverMinorVersion,
+				int *ddxDriverPatchVersion, char **clientDriverName );
 
-Bool XF86DRICreateContext( Display *dpy, int screen, Visual *visual,
-    XID *ptr_to_returned_context_id, drm_context_t *hHWContext );
+Bool uniDRICreateContext( Display *dpy, int screen, Visual *visual,
+			  XID *ptr_to_returned_context_id, drm_context_t *hHWContext );
 
-Bool XF86DRICreateContextWithConfig( Display *dpy, int screen, int configID,
-    XID *ptr_to_returned_context_id, drm_context_t *hHWContext );
+Bool uniDRICreateContextWithConfig( Display *dpy, int screen, int configID,
+				    XID *ptr_to_returned_context_id, drm_context_t *hHWContext );
 
-extern Bool XF86DRIDestroyContext( Display *dpy, int screen,
-    XID context_id );
+extern Bool uniDRIDestroyContext( Display *dpy, int screen,
+				  XID context_id );
 
-extern Bool XF86DRICreateDrawable( Display *dpy, int screen,
-    Drawable drawable, drm_drawable_t *hHWDrawable );
+extern Bool uniDRICreateDrawable( Display *dpy, int screen,
+				  Drawable drawable, drm_drawable_t *hHWDrawable );
 
-extern Bool XF86DRIDestroyDrawable( Display *dpy, int screen, 
-    Drawable drawable);
+extern Bool uniDRIDestroyDrawable( Display *dpy, int screen, 
+				   Drawable drawable);
 
-Bool XF86DRIGetDrawableInfo( Display *dpy, int screen, Drawable drawable,
-    unsigned int *index, unsigned int *stamp, 
-    int *X, int *Y, int *W, int *H,
-    int *numClipRects, drm_clip_rect_t ** pClipRects,
-    int *backX, int *backY,
-    int *numBackClipRects, drm_clip_rect_t **pBackClipRects );
+Bool uniDRIGetDrawableInfo( Display *dpy, int screen, Drawable drawable,
+			    unsigned int *index, unsigned int *stamp, 
+			    int *X, int *Y, int *W, int *H,
+			    int *numClipRects, drm_clip_rect_t ** pClipRects,
+			    int *backX, int *backY,
+			    int *numBackClipRects, drm_clip_rect_t **pBackClipRects );
 
-Bool XF86DRIGetDeviceInfo( Display *dpy, int screen,
-    drm_handle_t *hFrameBuffer, int *fbOrigin, int *fbSize,
-    int *fbStride, int *devPrivateSize, void **pDevPrivate );
+Bool uniDRIGetDeviceInfo( Display *dpy, int screen,
+			  drm_handle_t *hFrameBuffer, int *fbOrigin, int *fbSize,
+			  int *fbStride, int *devPrivateSize, void **pDevPrivate );
 
 _XFUNCPROTOEND
 

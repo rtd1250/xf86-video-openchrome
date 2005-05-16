@@ -1,5 +1,18 @@
 2005-05-16  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
+	* libxvmc/driDrawable.c: (getDRIDrawableInfoLocked):
+	* libxvmc/viaXvMC.c: (releaseContextResources),
+	(XvMCCreateContext):
+	* libxvmc/xf86dri.c: (uniDRIDestroyContext),
+	(uniDRICreateDrawable), (uniDRIDestroyDrawable),
+	(uniDRIGetDrawableInfo):
+	* libxvmc/xf86dri.h:
+
+	- Changed DRI client function names since they clash with
+	  via_dri.so, causing strange problems in, for example, xine.
+	
+2005-05-16  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
 	* unichrome/via_dri.c: (VIASetAgpMode), (VIADRIAgpInit):
 
 	- Added better AGP mode control to the DDX.

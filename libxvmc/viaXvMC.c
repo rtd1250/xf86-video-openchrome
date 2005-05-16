@@ -200,7 +200,9 @@ static Status releaseContextResources(Display *display, XvMCContext *context,
     case context_mutex:
 	pthread_mutex_destroy(&pViaXvMC->ctxMutex);
     case context_drmContext:
-	XF86DRIDestroyContext(display, pViaXvMC->screen, pViaXvMC->id);
+	XLockDisplay(display);
+	uniDRIDestroyContext(display, pViaXvMC->screen, pViaXvMC->id);
+	XUnlockDisplay(display);
     case context_sAreaMap:
 	numContexts--;
 	if (numContexts == 0)
@@ -218,8 +220,11 @@ static Status releaseContextResources(Display *display, XvMCContext *context,
 	}
 	pViaXvMC->fd = -1;
     case context_driConnection:
-	if (numContexts == 0)
-	    XF86DRICloseConnection(display, pViaXvMC->screen);
+	if (numContexts == 0) {
+	    XLockDisplay(display);
+	    uniDRICloseConnection(display, pViaXvMC->screen);
+	    XUnlockDisplay(display);
+	}
     case context_context:
 	XLockDisplay(display);
 	_xvmc_destroy_context(display, context);
@@ -370,14 +375,14 @@ Status XvMCCreateContext(Display *display, XvPortID port,
 
     if (numContexts == 0) {
 	XLockDisplay(display);
-	ret = XF86DRIQueryDirectRenderingCapable(display, pViaXvMC->screen, &isCapable);
+	ret = uniDRIQueryDirectRenderingCapable(display, pViaXvMC->screen, &isCapable);
 	if (!ret || !isCapable) {
 	    XUnlockDisplay(display);
 	    fprintf(stderr,"Direct Rendering is not available on this system!\n");
 	    return releaseContextResources(display, context, 1, BadAlloc);
 	}
 
-	if (!XF86DRIOpenConnection(display, pViaXvMC->screen, &pViaXvMC->sAreaOffset,
+	if (!uniDRIOpenConnection(display, pViaXvMC->screen, &pViaXvMC->sAreaOffset,
 				   &curBusID)) {
 	    XUnlockDisplay(display);
 	    fprintf(stderr,"Could not open DRI connection to X server!\n");
@@ -419,7 +424,7 @@ Status XvMCCreateContext(Display *display, XvPortID port,
 	drmGetMagic(pViaXvMC->fd,&magic);
 	
 	XLockDisplay(display);
-	if (!XF86DRIAuthConnection(display, pViaXvMC->screen, magic)) {
+	if (!uniDRIAuthConnection(display, pViaXvMC->screen, magic)) {
 	    XUnlockDisplay(display);
 	    fprintf(stderr, "viaXvMC: X server did not allow DRI. Check permissions.\n");
 	    XFree(priv_data);
@@ -486,7 +491,7 @@ Status XvMCCreateContext(Display *display, XvPortID port,
 	return releaseContextResources(display, context, 1, BadAlloc);
     }	
 
-    if (!XF86DRICreateContext(display, pViaXvMC->screen, pViaXvMC->visualInfo.visual, 
+    if (!uniDRICreateContext(display, pViaXvMC->screen, pViaXvMC->visualInfo.visual, 
 			      &pViaXvMC->id, &pViaXvMC->drmcontext)) {
 	
 	fprintf(stderr, "viaXvMC: Could not create DRI context.\n");

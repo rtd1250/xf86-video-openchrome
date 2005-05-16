@@ -60,8 +60,8 @@ getDRIDrawableInfoLocked(void *drawHash, Display *display, int screen, Drawable 
        */
 
       DRM_UNLOCK(drmFD, &pSarea->lock, drmContext); 
-      if (!XF86DRICreateDrawable(display, screen, draw,
-				 &drmDraw)) {
+      if (!uniDRICreateDrawable(display, screen, draw,
+				&drmDraw)) {
 	DRM_LOCK(drmFD, &pSarea->lock, drmContext, lockFlags); 
 	  return 1;
       }
@@ -96,12 +96,12 @@ getDRIDrawableInfoLocked(void *drawHash, Display *display, int screen, Drawable 
       if (updateInfo || !drawInfo->clipFront) {
 	  DRM_UNLOCK(drmFD, &pSarea->lock, drmContext); 
 
-	  ret = XF86DRIGetDrawableInfo(display, screen, draw,
-				       &drawInfo->index, &drawInfo->stamp, &drawInfo->x, 
-				       &drawInfo->y, &drawInfo->w, &drawInfo->h,
-				       &drawInfo->numClipFront, &clipFront, 
-				       &drawInfo->backX, &drawInfo->backY,
-				       &drawInfo->numClipBack, &clipBack);
+	  ret = uniDRIGetDrawableInfo(display, screen, draw,
+				      &drawInfo->index, &drawInfo->stamp, &drawInfo->x, 
+				      &drawInfo->y, &drawInfo->w, &drawInfo->h,
+				      &drawInfo->numClipFront, &clipFront, 
+				      &drawInfo->backX, &drawInfo->backY,
+				      &drawInfo->numClipBack, &clipBack);
 	  
 	  DRM_LIGHT_LOCK(drmFD, &pSarea->lock, drmContext); 
 
@@ -115,7 +115,7 @@ getDRIDrawableInfoLocked(void *drawHash, Display *display, int screen, Drawable 
 	      drmHashDelete(drawHash, (unsigned long) draw);
 	      
 	      DRM_UNLOCK(drmFD, &pSarea->lock, drmContext);
-	      XF86DRIDestroyDrawable( display, screen, draw);
+	      uniDRIDestroyDrawable( display, screen, draw);
 	      DRM_LOCK(drmFD, &pSarea->lock, drmContext, lockFlags);
 
 	      return 1;
