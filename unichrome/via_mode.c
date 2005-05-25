@@ -1590,9 +1590,11 @@ ViaModePrimary(ScrnInfoPtr pScrn, DisplayModePtr mode)
 	   is removed -- copy from clock handling code below */
 	if ((pVia->Chipset == VIA_CLE266) && CLE266_REV_IS_AX(pVia->ChipRev))
 	    ViaSetPrimaryDotclock(pScrn, 0x471C); /* CLE266Ax use 2x XCLK */
+	else if ((pVia->Chipset == VIA_K8M800) || pVia->Chipset == VIA_PM800)
+	    ViaSetPrimaryDotclock(pScrn, 0x529001);
 	else
 	    ViaSetPrimaryDotclock(pScrn, 0x871C);
-	ViaSetUseExternalClock(hwp);
+	ViaSetUseExternalClock(hwp); 
 
 	ViaTVSetMode(pScrn, mode);
     } else
@@ -1603,6 +1605,8 @@ ViaModePrimary(ScrnInfoPtr pScrn, DisplayModePtr mode)
     if (pBIOSInfo->ClockExternal) {
 	if ((pVia->Chipset == VIA_CLE266) && CLE266_REV_IS_AX(pVia->ChipRev))
 	    ViaSetPrimaryDotclock(pScrn, 0x471C); /* CLE266Ax use 2x XCLK */
+	else if ((pVia->Chipset == VIA_K8M800) || pVia->Chipset == VIA_PM800)
+	    ViaSetPrimaryDotclock(pScrn, 0x529001);
 	else
 	    ViaSetPrimaryDotclock(pScrn, 0x871C);
 	ViaCrtcMask(hwp, 0x6B, 0x01, 0x01);

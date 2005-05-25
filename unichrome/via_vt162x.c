@@ -90,6 +90,7 @@ ViaVT162xDetect(ScrnInfoPtr pScrn, I2CBusPtr pBus, CARD8 Address)
 	pBIOSInfo->TVEncoder = VIA_VT1622;
 	pDev->DevName = "VT1622";
 	break;
+    case 0x0F:
     case 0x10:
 	xf86DrvMsg(pScrn->scrnIndex, X_PROBED, 
 		   "Detected VIA Technologies VT1622A/VT1623 TV Encoder\n");

@@ -482,12 +482,12 @@ setHQVDeinterlacing(HQVRegister *shadow, CARD32 frameType)
     CARD32 tmp = GETHQVSHADOW(shadow, 0x3D0);
  
 
-    if ((frameType & XVMC_FRAME_PICTURE) == XVMC_BOTTOM_FIELD) {
+    if ((frameType & XVMC_FRAME_PICTURE) == XVMC_TOP_FIELD) {
 	tmp |= HQV_FIELD_UV   |
 	    HQV_DEINTERLACE   |
 	    HQV_FIELD_2_FRAME |
 	    HQV_FRAME_2_FIELD;
-    } else if ((frameType & XVMC_FRAME_PICTURE) == XVMC_TOP_FIELD) {
+    } else if ((frameType & XVMC_FRAME_PICTURE) == XVMC_BOTTOM_FIELD) {
 	tmp |= HQV_FIELD_UV   |
 	    HQV_DEINTERLACE   |
 	    HQV_FIELD_2_FRAME |

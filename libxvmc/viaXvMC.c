@@ -31,8 +31,6 @@
 
 #undef WAITPAUSE
 
-#define UNICHROME_PRO
-
 #include "viaXvMCPriv.h"
 #include "viaLowLevel.h"
 #include <stdio.h>

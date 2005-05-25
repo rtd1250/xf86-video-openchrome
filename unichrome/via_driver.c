@@ -222,6 +222,8 @@ static const char *vbeSymbols[] = {
     "VBESetVBEMode",
     "VBEValidateModes",
     "xf86ExecX86int10",
+    "xf86Int10AllocPages",
+    "xf86Int10FreePages",
     NULL
 };
 
