@@ -1609,7 +1609,8 @@ ViaModePrimary(ScrnInfoPtr pScrn, DisplayModePtr mode)
 	    ViaSetPrimaryDotclock(pScrn, 0x529001);
 	else
 	    ViaSetPrimaryDotclock(pScrn, 0x871C);
-	ViaCrtcMask(hwp, 0x6B, 0x01, 0x01);
+	if ((pVia->Chipset != VIA_K8M800) && pVia->Chipset != VIA_PM800)
+	  ViaCrtcMask(hwp, 0x6B, 0x01, 0x01);
     } else {
 	ViaSetPrimaryDotclock(pScrn, pBIOSInfo->Clock);
 	ViaSetUseExternalClock(hwp);
