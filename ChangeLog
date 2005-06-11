@@ -1,3 +1,9 @@
+2005-06-11  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
+	* unichrome/via_dri.c: (VIADRIScreenInit):
+
+	- Update via_dri.c to compile with new libdri.
+	
 2005-06-01  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
 	* unichrome/via_mode.c: (ViaModePrimary):

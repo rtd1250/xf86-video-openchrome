@@ -39,11 +39,12 @@
 #include "via_id.h"
 #include "xf86drm.h"
 
-extern void GlxSetVisualConfigs(
-    int nconfigs,
-    __GLXvisualConfig *configs,
-    void **configprivs
-);
+#ifndef DRIINFO_MAJOR_VERSION
+#define DRIINFO_MAJOR_VERSION 4
+#endif
+#ifndef DRIINFO_MINOR_VERSION
+#define DRIINFO_MINOR_VERSION 0
+#endif
 
 #define VIDEO	0 
 #define AGP		1
@@ -60,6 +61,12 @@ extern void GlxSetVisualConfigs(
 #define VIA_AGP_2X_MODE 0x02
 #define VIA_AGP_1X_MODE 0x01
 #define VIA_AGP_FW_MODE 0x10
+
+extern void GlxSetVisualConfigs(
+    int nconfigs,
+    __GLXvisualConfig *configs,
+    void **configprivs
+);
 
 static char VIAKernelDriverName[] = "via";
 static char VIAClientDriverName[] = "unichrome";
@@ -605,15 +612,17 @@ Bool VIADRIScreenInit(ScreenPtr pScreen)
     }
     
     /* Check the DRI version */
+
     {
         int major, minor, patch;
         DRIQueryVersion(&major, &minor, &patch);
-        if (major != 4 || minor < 0) {
+        if (major != DRIINFO_MAJOR_VERSION || minor < DRIINFO_MINOR_VERSION) {
             xf86DrvMsg(pScreen->myNum, X_ERROR,
                     "[dri] VIADRIScreenInit failed because of a version mismatch.\n"
-                    "[dri] libDRI version is %d.%d.%d but version 4.0.x is needed.\n"
+                    "[dri] libdri version is %d.%d.%d but version %d.%d.x is needed.\n"
                     "[dri] Disabling DRI.\n",
-                    major, minor, patch);
+                    major, minor, patch,
+                    DRIINFO_MAJOR_VERSION, DRIINFO_MINOR_VERSION);
             return FALSE;
         }
     }
@@ -633,7 +642,11 @@ Bool VIADRIScreenInit(ScreenPtr pScreen)
     pDRIInfo->ddxDriverMajorVersion = VIA_DRI_VERSION_MAJOR;
     pDRIInfo->ddxDriverMinorVersion = VIA_DRI_VERSION_MINOR;
     pDRIInfo->ddxDriverPatchVersion = PATCHLEVEL;
+#if (DRIINFO_MAJOR_VERSION == 5)
+    pDRIInfo->frameBufferPhysicalAddress = (pointer) pVia->FrameBufferBase;
+#else
     pDRIInfo->frameBufferPhysicalAddress = pVia->FrameBufferBase;
+#endif
     pDRIInfo->frameBufferSize = pVia->videoRambytes;  
   
     pDRIInfo->frameBufferStride = (pScrn->displayWidth *
