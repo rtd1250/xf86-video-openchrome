@@ -152,7 +152,6 @@ void
 ViaTVRestore(ScrnInfoPtr pScrn)
 {
     VIABIOSInfoPtr pBIOSInfo = VIAPTR(pScrn)->pBIOSInfo;
-
     if (pBIOSInfo->TVRestore)
 	pBIOSInfo->TVRestore(pScrn);
 }

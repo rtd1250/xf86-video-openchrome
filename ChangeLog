@@ -1,3 +1,14 @@
+2005-06-12  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
+	* unichrome/via_bios.h:
+	* unichrome/via_i2c.c:
+	* unichrome/via_mode.c: (ViaTVRestore):
+	* unichrome/via_vt162x.c: (VT162xPrintRegs), (ViaVT162xDetect),
+	(VT162xSave), (VT162xRestore), (ViaVT162xInit):
+
+	- Fix up the vt1623 encoder: Correct device ID, number of registers
+	  and most of all reading from the i2cbus it is sitting on.
+
 2005-06-11  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
 	* unichrome/via_dri.c: (VIADRIScreenInit):

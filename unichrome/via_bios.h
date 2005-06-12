@@ -112,6 +112,7 @@ typedef struct _VIABIOSINFO {
     Bool        TVDotCrawl;
     int         TVDeflicker;
     CARD8       TVRegs[0xFF];
+    int         TVNumRegs;
 
     /* TV Callbacks */
     void (*TVSave) (ScrnInfoPtr pScrn);

@@ -294,10 +294,11 @@ ViaI2C3GetBit(I2CBusPtr b, int timeout)
     vgaHWPtr hwp = VGAHWPTR(xf86Screens[b->scrnIndex]);
     Bool ret;
 
-    ViaSeqMask(hwp, 0x2C, 0x00, 0x40);
+    ViaSeqMask(hwp, 0x2c, 0x80, 0xC0);
     b->I2CUDelay(b, b->RiseFallTime/5);
-
-    ViaSeqMask(hwp, 0x2C, 0xA0, 0xA0);
+    ViaSeqMask(hwp, 0x2c, 0xA0, 0xA0);    
+    b->I2CUDelay(b, 3*b->HoldTime);
+    b->I2CUDelay(b, timeout);
 
     if (hwp->readSeq(hwp, 0x2C) & 0x04)
         ret = TRUE;
@@ -305,6 +306,7 @@ ViaI2C3GetBit(I2CBusPtr b, int timeout)
         ret = FALSE;
 
     ViaSeqMask(hwp, 0x2C, 0x80, 0xA0);
+    b->I2CUDelay(b, b->HoldTime);
     b->I2CUDelay(b, b->RiseFallTime/5);
 
     return ret;
@@ -361,6 +363,11 @@ ViaI2CBus3Init(int scrnIndex)
     pI2CBus->I2CStop = ViaI2C3Stop;
     pI2CBus->I2CPutByte = ViaI2C3PutByte;
     pI2CBus->I2CGetByte = ViaI2C3GetByte;
+
+    pI2CBus->HoldTime = 10;
+    pI2CBus->BitTimeout = 10;
+    pI2CBus->ByteTimeout = 10;
+    pI2CBus->StartTimeout = 10;
     
     if (!xf86I2CBusInit(pI2CBus)) {
 	xf86DestroyI2CBusRec(pI2CBus, TRUE, FALSE);
