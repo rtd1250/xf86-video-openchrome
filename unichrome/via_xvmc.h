@@ -53,7 +53,7 @@
 typedef drm_via_sarea_t ViaXvMCSAreaPriv;
 
 typedef struct{
-    Atom attribute;
+    INT32 attribute;
     INT32 value;
 }ViaAttrPair;
 

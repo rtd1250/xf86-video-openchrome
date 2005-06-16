@@ -1,3 +1,11 @@
+2005-06-16  Thomas Hellström  <set EMAIL_ADDRESS environment variable>
+
+	* unichrome/via_xvmc.c: (ViaXvMCCreateContext),
+	(ViaXvMCCreateSurface), (ViaXvMCCreateSubpicture):
+	* unichrome/via_xvmc.h:
+
+	- XvMC 64 bit fixes. XvMC now runs on K8M800 64-bit Linux.
+	
 2005-06-12  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
 	* unichrome/via_bios.h:
