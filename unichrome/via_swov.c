@@ -2019,6 +2019,7 @@ VIAVidUpdateOverlay(ScrnInfoPtr pScrn, LPDDUPDATEOVERLAY pUpdate)
     if (flags & DDOVER_BOB)
 	deinterlaceMode |= DDOVER_BOB;
     
+    /* check this is correct place to enable 3259 fifo */
     if ((pVia->ChipId == PCI_CHIP_CLE3122 || pVia->ChipId == PCI_CHIP_VT3259) && (pScrn->currentMode->HDisplay > 1024)) {
 	DBG_DD(ErrorF("UseExtendedFIFO\n"));
 	pVia->swov.gdwUseExtendedFIFO = 1;
