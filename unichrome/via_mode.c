@@ -1001,7 +1001,8 @@ ViaSetPrimaryDotclock(ScrnInfoPtr pScrn, CARD32 clock)
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
 
-    DEBUG(xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO, "ViaSetPrimaryDotclock to 0x%lX\n", clock));
+    DEBUG(xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO, "ViaSetPrimaryDotclock to 0x%06x\n", 
+		     (unsigned) clock));
 
     if ((pVia->Chipset == VIA_CLE266) || (pVia->Chipset == VIA_KM400)) {
 	hwp->writeSeq(hwp, 0x46, clock >> 8);
@@ -1025,7 +1026,8 @@ ViaSetSecondaryDotclock(ScrnInfoPtr pScrn, CARD32 clock)
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
 
-    DEBUG(xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO, "ViaSetSecondaryDotclock to 0x%lX\n", clock));
+    DEBUG(xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO, "ViaSetSecondaryDotclock to 0x%06x\n", 
+		     (unsigned) clock));
 
     if ((pVia->Chipset == VIA_CLE266) || (pVia->Chipset == VIA_KM400)) {
 	hwp->writeSeq(hwp, 0x44, clock >> 8);
@@ -1524,6 +1526,56 @@ ViaModePrimaryVGA(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x33, 0, 0xC8);
 }
 
+static CARD32 
+ViaComputeProDotClock(unsigned clock)
+{
+    double fvco, fout, fref, err, minErr;
+    CARD32 dr = 0, dn, dm, maxdm, maxdn; 
+    CARD32 factual, bestClock;
+
+    fref = 14.318e6;
+    fout = (double) clock * 1.e3;
+    factual = ~0;
+    maxdm = factual / 14318000U - 2;
+    minErr = 1.e10;
+    bestClock = 0U;
+
+    do {
+	fvco = fout * (1 << dr);
+    } while( fvco < 300.e6 && dr++ < 8);
+
+    if (dr == 8) {
+	return 0;
+    }
+
+    if (clock < 30000) 
+	maxdn = 6;
+    else if (clock < 45000)
+	maxdn = 5;
+    else if (clock < 170000)
+	maxdn = 4;
+    else
+	maxdn = 3;
+
+
+    for (dn = 0; dn < maxdn; ++dn) {
+	for (dm = 0; dm < maxdm; ++dm) {
+	    factual = 14318000U * (dm + 2);
+	    factual /= (dn + 2) << dr;
+	    if ((err = fabs((double) factual / fout - 1.)) < 0.005) {
+		if (err < minErr) {
+		    minErr = err;
+		    bestClock = ((dm & 0xff) << 16) | 
+		      ( ((1 << 7) | (dr << 2) | ((dm & 0x300) >> 8)) << 8) |
+		      ( dn & 0x7f);
+		}
+	    }
+	}
+    }
+    
+    return bestClock;
+}
+	
 /*
  *
  */
@@ -1532,15 +1584,18 @@ ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     int i;
+    CARD32 ret;
 
     for (i = 0; ViaDotClocks[i].DotClock; i++)
 	if (ViaDotClocks[i].DotClock == mode->Clock) {
 	    if ((pVia->Chipset == VIA_CLE266) || (pVia->Chipset == VIA_KM400))
 		return ViaDotClocks[i].UniChrome;
-	    else
-		return ViaDotClocks[i].UniChromePro;	
+	    else {
+		ret = ViaDotClocks[i].UniChromePro;  
+		if (ret) return ret;
+	    }
 	}
-    return 0x0000;
+    return ViaComputeProDotClock(mode->Clock);
 }
 
 /*
