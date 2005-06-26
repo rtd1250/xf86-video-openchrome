@@ -1,3 +1,19 @@
+2005-06-26  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
+	* libxvmc/viaLowLevelPro.c: (finish_header_agp), (syncDMA),
+	(syncVideo), (pciFlush), (agpFlush), (uploadHQVDeinterlace),
+	(uploadHQVShadow), (flushXvMCLowLevel), (flushPCIXvMCLowLevel),
+	(viaMpegSetSurfaceStride), (viaVideoSetSWFLipLocked),
+	(viaVideoSWFlipLocked), (viaMpegSetFB), (viaMpegBeginPicture),
+	(viaMpegReset), (viaMpegWriteSlice), (viaVideoSubPictureOffLocked),
+	(viaVideoSubPictureLocked), (viaBlit), (syncXvMCLowLevel),
+	(releaseXvMCLowLevel), (initXvMCLowLevel), (closeXvMCLowLevel):
+
+	-Clean up the VIDEO_DMA ifdef mess before xorg inclusion. 
+	-Make VIDEO_DMA wait for DMA quiescent before flipping, pending proper
+	 HQV locking.
+	-Disable VIDEO_DMA to improve latency pending proper HQV locking.
+
 2005-06-17  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
 	* unichrome/via_mode.c: (ViaSetPrimaryDotclock),
