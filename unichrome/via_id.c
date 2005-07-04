@@ -113,6 +113,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"ASRock Inc. K7VM2/3/4",                 VIA_KM400,   0x1849, 0x7205, VIA_DEVICE_CRT},
     {"Soyo K7VME",                            VIA_KM400,   0xA723, 0x10FD, VIA_DEVICE_CRT},
     /* K8M800 */
+    {"ECS K8M800-M2",                         VIA_K8M800,  0x1019, 0x1828, VIA_DEVICE_CRT},
     {"Acer Aspire 136x",                      VIA_K8M800,  0x1025, 0x006E, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
     {"Asus K8V-MX",                           VIA_K8M800,  0x1043, 0x8129, VIA_DEVICE_CRT},
     {"Mitac 8399",                            VIA_K8M800,  0x1071, 0x8399, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV}, /* aka "pogolinux konabook 3100" */

@@ -1176,6 +1176,7 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
     }
     hwp = VGAHWPTR(pScrn);
 
+
 #ifdef HAVE_DEBUG
     if (xf86ReturnOptValBool(VIAOptions, OPTION_PRINTVGAREGS, FALSE)) {
         pVia->PrintVGARegs = TRUE;
@@ -1974,9 +1975,9 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 
     pVia->FirstInit = TRUE;
     if (pVia->pVbe) {
-        ViaVbeDoDPMS(pScrn, DPMSModeStandby);
+        vgaHWBlankScreen(pScrn, FALSE);
 	if (!ViaVbeSetMode(pScrn, pScrn->currentMode)) {
-	    ViaVbeDoDPMS(pScrn, DPMSModeOn);
+	    vgaHWBlankScreen(pScrn, TRUE);
 	    return FALSE;
 	}
     } else {
@@ -2103,10 +2104,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Palette loaded\n"));
 
-    if (pVia->pVbe)
-	ViaVbeDoDPMS(pScrn, DPMSModeOn);
-    else
-	vgaHWBlankScreen(pScrn, TRUE);
+    vgaHWBlankScreen(pScrn, TRUE);
 
     pVia->CloseScreen = pScreen->CloseScreen;
     pScreen->SaveScreen = VIASaveScreen;

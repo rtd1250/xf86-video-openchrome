@@ -1,3 +1,17 @@
+2005-07-04  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
+	* unichrome/via_driver.c: (VIAPreInit), (VIAScreenInit):
+	* unichrome/via_id.c:
+
+	-Avoid calling DPMS to blank screen during init with VBEModes
+	-Add another card ID.
+	
+2005-06-29  Ivor Hewitt  <ivor-at-ivor-dot-org>
+
+	* unichrome/via_id.c:
+
+	-Additional card-ids. Patch from Xavier Bachelot
+	
 2005-06-26  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
 	* libxvmc/viaLowLevelPro.c: (finish_header_agp), (syncDMA),
