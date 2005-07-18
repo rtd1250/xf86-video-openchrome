@@ -63,6 +63,8 @@
  * ECS k8m800-m2
  * Epox EP-8KMM5I (km400a)
  * MSI K8M Neo-V
+ * MSI K8MM-V
+ * MSI K8MM-ILSR
  * PcChips M861G
  * Soltek SL-B9C-FGR (Qbic EQ3802-300P)
  * Soltek SL-K8M800I-R
@@ -122,6 +124,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Sharp Actius AL27",                     VIA_K8M800,  0x13BD, 0x1044, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Giga-byte GA-K8VM800M",                 VIA_K8M800,  0x1458, 0xD000, VIA_DEVICE_CRT},
     {"MSI K8M Neo-V",                         VIA_K8M800,  0x1462, 0x0320, VIA_DEVICE_CRT},
+    {"MSI K8MM-V",                            VIA_K8M800,  0x1462, 0x7142, VIA_DEVICE_CRT},
     {"MSI K8MM-ILSR",                         VIA_K8M800,  0x1462, 0x7410, VIA_DEVICE_CRT},
     {"Abit KV-80",                            VIA_K8M800,  0x147B, 0x1419, VIA_DEVICE_CRT},
     {"Averatec 327x",                         VIA_K8M800,  0x14FF, 0x0315, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
