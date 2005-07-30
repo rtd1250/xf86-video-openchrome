@@ -50,7 +50,7 @@
  *   - merge with CLEXF40040
  */
 
-#define   XV_DEBUG      1     /* write log msg to /var/log/XFree86.0.log */
+#define   XV_DEBUG      0     /* write log msg to /var/log/XFree86.0.log */
 
 #ifdef XV_DEBUG
 # define DBG_DD(x) (x)

@@ -1,3 +1,12 @@
+2005-07-30  Ivor Hewitt  <ivor-at-ivor-dot-org>
+
+	* libxvmc/Imakefile:
+	* unichrome/via_mode.c: (ViaGetMemoryBandwidth),
+	(ViaModePrimaryVGA), (ViaModePrimary):
+	* unichrome/via_swov.c:
+
+	-Merge fixes from xorg for typos in mode setting and sync set
+
 2005-07-18  Ivor Hewitt  <ivor-at-ivor-dot-org>
 
 	* unichrome/via_id.c:
