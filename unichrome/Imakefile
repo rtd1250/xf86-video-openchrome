@@ -96,6 +96,7 @@ DRIDEFINES = $(GLX_DEFINES)
 SRCS = via_driver.c \
     via_accel.c \
     via_bandwidth.c \
+    via_ch7xxx.c \
     via_mode.c \
     via_cursor.c \
     via_shadow.c \
@@ -114,6 +115,7 @@ SRCS = via_driver.c \
 OBJS = via_driver.o \
     via_accel.o \
     via_bandwidth.o \
+    via_ch7xxx.o \
     via_mode.o \
     via_cursor.o \
     via_shadow.o \
@@ -179,6 +181,8 @@ InstallDriverSDKNonExecFile(via.h,$(DRIVERSDKDIR)/drivers/via)
 InstallDriverSDKNonExecFile(via_accel.c,$(DRIVERSDKDIR)/drivers/via)
 InstallDriverSDKNonExecFile(via_bandwidth.c,$(DRIVERSDKDIR)/drivers/via)
 InstallDriverSDKNonExecFile(via_bios.h,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_ch7xxx.c,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_ch7xxx.h,$(DRIVERSDKDIR)/drivers/via)
 InstallDriverSDKNonExecFile(via_cursor.c,$(DRIVERSDKDIR)/drivers/via)
 InstallDriverSDKNonExecFile(via_dga.c,$(DRIVERSDKDIR)/drivers/via)
 InstallDriverSDKNonExecFile(via_dri.c,$(DRIVERSDKDIR)/drivers/via)

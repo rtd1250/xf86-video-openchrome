@@ -92,6 +92,7 @@
 static struct ViaCardIdStruct ViaCardId[] = {
     /* CLE266 */
     {"ECS G320",                              VIA_CLE266,  0x1019, 0xB320, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
+    {"Asus C3V (Terminator)",                 VIA_CLE266,  0x1043, 0x8155, VIA_DEVICE_CRT},
     {"VIA EPIA M/MII/...",                    VIA_CLE266,  0x1106, 0x3122, VIA_DEVICE_CRT | VIA_DEVICE_TV},
     /* KM400 */
     {"Acer Aspire 135x",                      VIA_KM400,   0x1025, 0x0033, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
@@ -131,6 +132,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Averatec 54xx",                         VIA_K8M800,  0x1509, 0x3930, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Biostar K8VGA-M",                       VIA_K8M800,  0x1565, 0x1203, VIA_DEVICE_CRT},
     {"Packard Bell B3 800",                   VIA_K8M800,  0x1631, 0xC009, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
+    {"ASRock K8Upgrade-VM800",                VIA_K8M800,  0x1849, 0x3108, VIA_DEVICE_CRT},
     /* PM800 */
     {"ECS PM800-M2",                          VIA_PM800,   0x1106, 0x3118, VIA_DEVICE_CRT}, /* VIA/PM800 */
     {"Biostar P4VMA-M",                       VIA_PM800,   0x1565, 0x1202, VIA_DEVICE_CRT},

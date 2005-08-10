@@ -69,11 +69,23 @@ ViaTVDetect(ScrnInfoPtr pScrn)
     pBIOSInfo->TVPower = NULL;
     pBIOSInfo->TVModes = NULL;
     pBIOSInfo->TVPrintRegs = NULL;
+    pBIOSInfo->LCDPower = NULL;
+    pBIOSInfo->TVNumRegs = 0;
 
-    if (pVia->pI2CBus2 && xf86I2CProbeAddress(pVia->pI2CBus2, 0x40))
-	pBIOSInfo->TVI2CDev = ViaVT162xDetect(pScrn, pVia->pI2CBus2, 0x40);
+    /*
+     * On an SK43G (KM400/Ch7011), false positive detections at a VT162x
+     * chip were observed, so try to detect the Ch7011 first.
+     */
+    if (pVia->pI2CBus2 && xf86I2CProbeAddress(pVia->pI2CBus2, 0xEC))
+        pBIOSInfo->TVI2CDev = ViaCH7xxxDetect(pScrn, pVia->pI2CBus2, 0xEC);
+    else if (pVia->pI2CBus2 && xf86I2CProbeAddress(pVia->pI2CBus2, 0x40))
+        pBIOSInfo->TVI2CDev = ViaVT162xDetect(pScrn, pVia->pI2CBus2, 0x40);
     else if (pVia->pI2CBus3 && xf86I2CProbeAddress(pVia->pI2CBus3, 0x40))
-	pBIOSInfo->TVI2CDev = ViaVT162xDetect(pScrn, pVia->pI2CBus3, 0x40);
+        pBIOSInfo->TVI2CDev = ViaVT162xDetect(pScrn, pVia->pI2CBus3, 0x40);
+    else if (pVia->pI2CBus2 && xf86I2CProbeAddress(pVia->pI2CBus2, 0xEA))
+        pBIOSInfo->TVI2CDev = ViaCH7xxxDetect(pScrn, pVia->pI2CBus2, 0xEA);
+    else if (pVia->pI2CBus3 && xf86I2CProbeAddress(pVia->pI2CBus3, 0xEA))
+        pBIOSInfo->TVI2CDev = ViaCH7xxxDetect(pScrn, pVia->pI2CBus3, 0xEA);
 
     if (pBIOSInfo->TVI2CDev)
 	return TRUE;
@@ -91,14 +103,20 @@ ViaTVInit(ScrnInfoPtr pScrn)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaTVInit\n"));
 
     switch (pBIOSInfo->TVEncoder){
-    case VIA_VT1621:
-    case VIA_VT1622:
-    case VIA_VT1623:
-	ViaVT162xInit(pScrn);
-	break;
-    default:
-	return FALSE;
-	break;
+        case VIA_VT1621:
+        case VIA_VT1622:
+        case VIA_VT1623:
+        case VIA_VT1625:
+            ViaVT162xInit(pScrn);
+            break;
+        case VIA_CH7011:
+        case VIA_CH7019A:
+        case VIA_CH7019B:
+            ViaCH7xxxInit(pScrn);
+            break;
+        default:
+            return FALSE;
+            break;
     }
 
     if (!pBIOSInfo->TVSave || !pBIOSInfo->TVRestore ||
@@ -124,6 +142,7 @@ ViaTVInit(ScrnInfoPtr pScrn)
 	pBIOSInfo->TVPower = NULL;
 	pBIOSInfo->TVModes = NULL;
 	pBIOSInfo->TVPrintRegs = NULL;
+    pBIOSInfo->TVNumRegs = 0;
 
 	return FALSE;
     }

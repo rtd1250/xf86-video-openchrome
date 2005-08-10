@@ -28,22 +28,27 @@ struct VT162xModePrivate {
     CARD8  Standard;
 };
 
-static struct VT162xModePrivate VT162xModePrivateNTSC = {
-    { 'V', 'T', '1', '6', '2', 'x', 0, 0, 0, 0, 0, 0 },
-    TVTYPE_NTSC,
-};
-
-static struct VT162xModePrivate VT162xModePrivatePAL = {
-    { 'V', 'T', '1', '6', '2', 'x', 0, 0, 0, 0, 0, 0 },
-    TVTYPE_PAL,
-};
-    
+/* Hmm this seemed like a reasonable approach initially. perhaps not. */
+static struct VT162xModePrivate VT162xModePrivateNTSC = { { 'V', 'T', '1', '6', '2', 'x', 0, 0, 0, 0, 0, 0 }, TVTYPE_NTSC,};
+static struct VT162xModePrivate VT162xModePrivatePAL = {  { 'V', 'T', '1', '6', '2', 'x', 0, 0, 0, 0, 0, 0 }, TVTYPE_PAL,};
+static struct VT162xModePrivate VT162xModePrivate480P = { { 'V', 'T', '1', '6', '2', 'x', 0, 0, 0, 0, 0, 0 }, TVTYPE_480P,};
+static struct VT162xModePrivate VT162xModePrivate576P = { { 'V', 'T', '1', '6', '2', 'x', 0, 0, 0, 0, 0, 0 }, TVTYPE_576P,};
+static struct VT162xModePrivate VT162xModePrivate720P = { { 'V', 'T', '1', '6', '2', 'x', 0, 0, 0, 0, 0, 0 }, TVTYPE_720P,};
+static struct VT162xModePrivate VT162xModePrivate1080I = {{ 'V', 'T', '1', '6', '2', 'x', 0, 0, 0, 0, 0, 0 }, TVTYPE_1080I,};
 
 #define MODEPREFIX(name) NULL, NULL, name, 0,M_T_DEFAULT
 #define MODESUFFIXNTSC       0,0, 0,0,0,0,0,0,0, 0,0,0,0,0,0,FALSE,FALSE,\
 	sizeof(struct VT162xModePrivate),(void *)&VT162xModePrivateNTSC,0,0.0,0.0
 #define MODESUFFIXPAL        0,0, 0,0,0,0,0,0,0, 0,0,0,0,0,0,FALSE,FALSE,\
 	sizeof(struct VT162xModePrivate),(void *)&VT162xModePrivatePAL,0,0.0,0.0
+#define MODESUFFIX480P       0,0, 0,0,0,0,0,0,0, 0,0,0,0,0,0,FALSE,FALSE,\
+	sizeof(struct VT162xModePrivate),(void *)&VT162xModePrivate480P,0,0.0,0.0
+#define MODESUFFIX576P       0,0, 0,0,0,0,0,0,0, 0,0,0,0,0,0,FALSE,FALSE,\
+	sizeof(struct VT162xModePrivate),(void *)&VT162xModePrivate576P,0,0.0,0.0
+#define MODESUFFIX720P       0,0, 0,0,0,0,0,0,0, 0,0,0,0,0,0,FALSE,FALSE,\
+	sizeof(struct VT162xModePrivate),(void *)&VT162xModePrivate720P,0,0.0,0.0
+#define MODESUFFIX1080I      0,0, 0,0,0,0,0,0,0, 0,0,0,0,0,0,FALSE,FALSE,\
+	sizeof(struct VT162xModePrivate),(void *)&VT162xModePrivate1080I,0,0.0,0.0
 
 /*
  *
@@ -459,6 +464,8 @@ static DisplayModeRec VT1623Modes[] = {
     { MODEPREFIX("720x480Over"),  21000,  720,  728,  760,  800, 0,  480,  480,  483,  525, 0, V_NHSYNC | V_PVSYNC, MODESUFFIXNTSC },
     { MODEPREFIX("720x576Over"),  27000,  720,  768,  800,  864, 0,  576,  577,  579,  625, 0, V_NHSYNC | V_PVSYNC, MODESUFFIXPAL  },
     { MODEPREFIX("720x576Noscale"), 28000,  720,  728,  864,  896, 0,  576,  576,  579,  625, 0, V_NHSYNC | V_NVSYNC, MODESUFFIXPAL  },
+    { MODEPREFIX("720x480Noscale"), 27972,  720,  736,  768,  888, 0,  480,  480,  483,  525, 0, V_NHSYNC | V_NVSYNC, MODESUFFIXNTSC },
+    { MODEPREFIX("720x480pal"), 27972,  720,  736,  768,  888, 0,  480,  480,  483,  525, 0, V_NHSYNC | V_NVSYNC, MODESUFFIXPAL },
     { MODEPREFIX(NULL), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, MODESUFFIXNTSC },
 };
 
@@ -674,6 +681,217 @@ VT1623Table[] = {
       { 0x58, 0x48, 0x49 },
       0x288933E3, 0,
     },
+    { "720x480Noscale", 720, 480, TVTYPE_NTSC, 0, 0,
+      { 0x04, 0x00, 0x00, 0x00, 0x03, 0x00, 0x20, 0x74,  0x8c, 0x06, 0x50, 0x00, 0x4e, 0x2f, 0x00, 0x07,
+        0x00, 0x00, 0xa9, 0x19, 0x6e, 0x24, 0xe3, 0x33,  0x89, 0x28, 0xee, 0x10, 0x02, 0x80, 0x00, 0x11,
+        0x11, 0x08, 0x04, 0x76, 0x08, 0x5a, 0x31, 0x95,  0x51, 0x00, 0x00, 0xaa, 0x2b, 0x7a, 0xdb, 0x00,
+        },
+      { 0x00, 0x00, 0x04, 0x00, 0x00, 0x40, 0x77, 0xd0,  0x23, 0x0c, 0x02, 0x77, 0xd0, 0xb0, 0x23, 0x88,
+        0xc9, 0x30, 0xd0, 0x16, 0x00, 0x00, 0x00, 0x00,  0x00, 0x77, 0x03 },
+      { 0xBA, 0xB8, 0xB8, 0x90, 0x99, 0 },
+      { 0x58, 0x48, 0x49 },
+      0x20BA2E8B, 0,
+    },
+    { "720x480pal", 720, 480, TVTYPE_PAL, 0, 0,
+      { 0x04, 0x00, 0x00, 0x00, 0x02, 0x00, 0x20, 0x74,  0x8c, 0x06, 0x50, 0x00, 0x4e, 0x2f, 0x00, 0x07,
+        0x00, 0x00, 0xa9, 0x19, 0x6e, 0x24, 0xe3, 0x33,  0x89, 0x28, 0xee, 0x10, 0x02, 0x80, 0x00, 0x11,
+        0x11, 0x08, 0x04, 0x76, 0x08, 0x5a, 0x31, 0x95,  0x51, 0x00, 0x00, 0xaa, 0x2b, 0x7a, 0xdb, 0x00,
+        },
+      { 0x00, 0x00, 0x04, 0x00, 0x00, 0x40, 0x77, 0xd0,  0x23, 0x0c, 0x02, 0x77, 0xd0, 0xb0, 0x23, 0x88,
+        0xc9, 0x30, 0xd0, 0x16, 0x00, 0x00, 0x00, 0x00,  0x00, 0x77, 0x03 },
+      { 0xBA, 0xB8, 0xB8, 0x90, 0x99, 0 },
+      { 0x58, 0x48, 0x49 },
+      0x288933e3, 0,
+    },
+    { NULL, 0, 0, 0, 0, 0,
+      { 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0 },
+      { 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0 },
+      { 0, 0, 0, 0, 0, 0 },
+      { 0, 0, 0 },
+      0, 0,
+    }
+};
+
+/*
+ *
+ * VT1625 modetables
+ *
+ */
+
+static DisplayModeRec VT1625Modes[] = {
+/* all available modes are: */
+/*  { MODEPREFIX("640x480"), ... ,   MODESUFFIXNTSC },
+    { MODEPREFIX("800x600"), ... ,   MODESUFFIXNTSC },
+    { MODEPREFIX("1024x768"), ... ,   MODESUFFIXNTSC },
+
+    { MODEPREFIX("720x480"), ... ,   MODESUFFIX480P },
+
+    { MODEPREFIX("640x480"), ... ,   MODESUFFIX720P },
+    { MODEPREFIX("800x600"), ... ,   MODESUFFIX720P },
+    { MODEPREFIX("1024x768"), ... ,   MODESUFFIX720P },
+    { MODEPREFIX("720x480"), ... ,   MODESUFFIX720P },
+    { MODEPREFIX("720x576"), ... ,   MODESUFFIX720P },
+
+    { MODEPREFIX("640x480"), ... ,   MODESUFFIX1080I },
+    { MODEPREFIX("800x600"), ... ,   MODESUFFIX1080I },
+    { MODEPREFIX("1024x768"), ... ,   MODESUFFIX1080I },
+    { MODEPREFIX("720x480"), ... ,   MODESUFFIX1080I },
+    { MODEPREFIX("720x576"), ... ,   MODESUFFIX1080I }, 
+
+    { MODEPREFIX("640x480Over"), ... ,   MODESUFFIXNTSC },
+    { MODEPREFIX("800x600Over"), ... ,   MODESUFFIXNTSC },
+    { MODEPREFIX("1024x768Over"), ... ,   MODESUFFIXNTSC },
+    { MODEPREFIX("720x480Over"), ... ,   MODESUFFIXNTSC },
+
+    { MODEPREFIX("640x480Over"), ... ,   MODESUFFIXPAL },
+    { MODEPREFIX("800x600Over"), ... ,   MODESUFFIXPAL },
+    { MODEPREFIX("1024x768Over"), ... ,   MODESUFFIXPAL },
+    { MODEPREFIX("720x576Over"), ... ,   MODESUFFIXPAL },*/
+
+    { MODEPREFIX("640x480"),  30000,  640,  680,  808, 1000, 0,  480,  520,  523,  600, 0, V_NHSYNC | V_NVSYNC, MODESUFFIXPAL  },
+    { MODEPREFIX("800x600"),  34500,  800,  816,  880,  920, 0,  600,  604,  620,  750, 0, V_PHSYNC | V_PVSYNC, MODESUFFIXPAL  },
+    { MODEPREFIX("1024x768"), 57000, 1024, 1040, 1112, 1200, 0,  768,  829,  840,  950, 0, V_NHSYNC | V_NVSYNC, MODESUFFIXPAL  },
+
+    { MODEPREFIX("720x576"),  28500,  720,  728,  744,  760, 0,  576,  635,  643,  750, 0, V_NHSYNC | V_PVSYNC, MODESUFFIXPAL  },
+
+    { MODEPREFIX("1280x720"), 74250, 1280, 1320, 1376, 1650, 0, 720, 722, 728, 750, 0, V_NHSYNC | V_NVSYNC,   MODESUFFIX720P },
+    { MODEPREFIX("1920x1080"), 74250, 1920, 1960, 2016, 2200, 0, 1080, 1082, 1088, 1125, 0, V_NHSYNC | V_NVSYNC,  MODESUFFIX1080I },
+
+
+    { MODEPREFIX("640x480"),    24696,  640,  656,  744,  784, 0,  480,  482,  483,  525, 0, V_NHSYNC | V_NVSYNC, MODESUFFIXNTSC },
+    { MODEPREFIX("720x480Under"),    28225,  720,  728,  744,  784, 0,  480,  490,  496,  600, 0, V_NHSYNC | V_NVSYNC, MODESUFFIXNTSC },
+    { MODEPREFIX("720x480Fit"),    28980,  720,  728,  744,  784, 0,  480,  490,  496,  600, 0, V_NHSYNC | V_NVSYNC, MODESUFFIXNTSC },
+    { MODEPREFIX("720x480Over"),    27025,  720,  728,  744,  784, 0,  480,  490,  496,  600, 0, V_NHSYNC | V_NVSYNC, MODESUFFIXNTSC },
+    { MODEPREFIX(NULL), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, MODESUFFIXNTSC },
+};
+
+static struct VT162XTableRec
+VT1625Table[] = {
+    { "640x480", 640, 480, TVTYPE_NTSC, 0, 0,
+      /*  00                                                                                         0F */
+      { 0x03,    0, 0x10, 0x40, 0x10,    0,    0, 0x28,  0x47, 0x15, 0x7B,    0, 0x50, 0x57,    0, 0x9E,
+	   0, 0x80, 0xFA, 0x21, 0xE0, 0x68, 0xD6, 0x7B,  0xF0, 0x21, 0x02, 0x50, 0x41, 0x80,    0, 0x10,
+	0x1C, 0x2A, 0xCB, 0x77,    0,    0,    0,    0,     0,    0,    0,    0,    0,    0,    0,    0 },
+      /*  4A                            4F    50                                                     59 */
+      { 0xC5,    0,    0, 0x01, 0x10, 0x4A, 0x0F, 0x83,  0x23, 0x57, 0x22, 0x59, 0x83, 0x7F, 0x23, 0x91,
+      /*  5A                            5F    60                       64 */
+	0xD2, 0x13, 0x7C, 0x16, 0x49,    0, 0x92, 0x20,     0, 0x7F, 0x03 },
+      /* RBG 65,66,67,27,2b,2c */
+      { 0x55, 0x37, 0x5C,    0,    0,    0 },
+      /* Y-Cb-Cr 65,66,67 */
+      { 0x55, 0x56, 0x55 },
+      /* Subcarrier 19,18,17,16, DotCrawl Subcarrier (set bit 3 of reg 11 then subcarrier) */
+      0x21F07BD6, 0x21F087BE,
+    },
+    { "720x480Under", 720, 480, TVTYPE_NTSC, 0, 0,
+      /*  00                                                                                         0F */
+      { 0x03,    0, 0x10, 0x40, 0x10,    0,    0, 0x2A,  0x41, 0x14, 0x7B,    0, 0x50, 0x57,    0, 0xB7,
+	   0, 0x80, 0xAB, 0x27, 0x70, 0x2C, 0xD6, 0x7B,  0xF0, 0x21, 0x02, 0x50, 0x41, 0x80,    0, 0x01,
+	0x2F, 0x08, 0xCB, 0x7E,    0,    0,    0,    0,     0,    0,    0,    0,    0,    0,    0,    0 },
+      /*  4A                            4F    50                                                     59 */
+      { 0xC5, 0x0F,    0, 0x01,   0, 0x4A, 0x0F, 0xCF,  0x23, 0x57, 0x22, 0x59, 0x83, 0x7F, 0x23, 0x91,
+      /*  5A                            5F    60                       64 */
+	0xD2, 0x13, 0x7A, 0x16, 0x49, 0xF1, 0x92, 0xA8,     0, 0x7F, 0x03 },
+      /* RBG 65,66,67,27,2b,2c */
+      { 0x55, 0x37, 0x5C,    0,    0,    0 },
+      /* Y-Cb-Cr 65,66,67 */
+      { 0x55, 0x54, 0x56 },
+      /* Subcarrier 19,18,17,16, DotCrawl Subcarrier (set bit 3 of reg 11 then subcarrier) */
+      0x21F07BD6, 0x21F087BE,
+    },
+    { "720x480Fit", 720, 480, TVTYPE_NTSC, 0, 0,
+      /*  00                                                                                         0F */
+      { 0x03,    0, 0x10, 0x40, 0x10,    0,    0, 0x41,  0x43, 0x07, 0x7B,    0, 0x50, 0x57,    0, 0xB7,
+           0, 0x80, 0xCD, 0x21, 0x73, 0x34, 0xD6, 0x7B,  0xF0, 0x21, 0x02, 0x50, 0x43, 0x80,    0, 0x01,
+        0x2F, 0x08, 0xCA, 0x7E, 0x02,    0,    0,    0,     0,    0,    0,    0,    0,    0,    0,    0 },
+      /*  4A                            4F    50                                                     59 */
+      { 0xC5, 0x0F,    0, 0x01,    0, 0x4A, 0x47, 0xCF,  0x23, 0x3E, 0x22, 0x59, 0x8B, 0x7F, 0x23, 0x91,
+      /*  5A                            5F    60                       64 */
+        0xD2, 0x13, 0x7A, 0x16, 0x30, 0xD4, 0x8C, 0x28,     0, 0x97, 0x03 },
+      /* RBG 65,66,67,27,2b,2c */
+      { 0x55, 0x37, 0x5C,    0,    0,    0 },
+      /* Y-Cb-Cr 65,66,67 */
+      { 0x55, 0x54, 0x56 },
+      /* Subcarrier 19,18,17,16, DotCrawl Subcarrier (set bit 3 of reg 11 then subcarrier) */
+      0x21F07BD6, 0x21F087BE,
+    },
+    { "720x480Over", 720, 480, TVTYPE_NTSC, 0, 0,
+      /*  00                                                                                         0F */
+      { 0x03,    0, 0x10, 0x40, 0x10,    0,    0, 0x33,  0x20,    0, 0x7B,    0, 0x50, 0x57,    0, 0x9E,
+           0, 0x80, 0x04, 0x08, 0x08, 0x10, 0xD6, 0x7B,  0xF0, 0x21, 0x02, 0x50, 0x43, 0x80,    0, 0x01,
+        0x2F, 0x08, 0xDC, 0x7E, 0x02,    0,    0,    0,     0,    0,    0,    0,    0,    0,    0,    0 },
+      /*  4A                            4F    50                                                     59 */
+      { 0xC5, 0x0F,    0, 0x01,    0, 0x4A, 0x59, 0xCF,  0x23, 0x0C, 0x22, 0x59, 0xCF, 0x7F, 0x23, 0x91,
+      /*  5A                            5F    60                       64 */
+        0xD2, 0xE1, 0x7D, 0x06,    0,    0, 0x80, 0x28,     0, 0x59, 0x03 },
+      /* RBG 65,66,67,27,2b,2c */
+      { 0x55, 0x37, 0x5C,    0,    0,    0 },
+      /* Y-Cb-Cr 65,66,67 */
+      { 0x55, 0x54, 0x56 },
+      /* Subcarrier 19,18,17,16, DotCrawl Subcarrier (set bit 3 of reg 11 then subcarrier) */
+      0x21F07BD6, 0x21F087BE,
+    },
+
+    { "1280x720", 1270, 720, TVTYPE_720P, 0, 0,
+      /*  00                                                                                         0F */
+      { 0x83,    0, 0x10, 0x40, 0x94, 0x00,    0, 0xFF,  0x53, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x9E,
+        0x00, 0x80, 0x89, 0x10, 0x63, 0x24, 0x00, 0x00,  0x00, 0x00,    0, 0x50, 0x40, 0x80, 0x00, 0x03,
+        0x25, 0x00, 0x00, 0x7E, 0x00,    0,    0,    0,     0,    0,    0,    0,    0,    0,    0,    0 },
+/* hdtv - 4A 0x85, 4B 0x0A */
+      /*  4A                            4F    50                                                     59 */
+      { 0xC5, 0x0F,    0, 0x01,    0, 0x00, 0x71, 0xFF,  0x46, 0xED, 0x12, 0x71, 0xFF, 0x50, 0x46, 0x30,
+      /*  5A                            5F    60                       64 */
+        0x30, 0x1C, 0x47, 0x96, 0x00, 0x00, 0x80, 0x28,  0x00, 0x71, 0x36 },
+      /* RBG 65,66,67,27,2b,2c */
+      { 0x55, 0x39, 0x66,    0,    0,    0 },
+      /* Y-Cb-Cr 65,66,67 */
+      { 0x55, 0x56, 0x55 },
+      /* Subcarrier 19,18,17,16, DotCrawl Subcarrier (set bit 3 of reg 11 then subcarrier) */
+      0x0, 0x0,
+    },
+
+    { "1920x1080", 1920, 540, TVTYPE_1080I, 0, 0,
+      /*  00                                                                                         0F */
+      { 0x83,    0, 0x10, 0x4A, 0x86, 0x39,    0, 0x8B,  0x3D, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00, 0x9E,
+        0x00, 0x80, 0x4A, 0x08, 0x37, 0x14, 0x00, 0x00,  0x00, 0x00, 0x00, 0x50, 0x44, 0x80, 0x00, 0x03,
+        0x25, 0x00, 0x00, 0x7E, 0x00,    0,    0,    0,     0,    0,    0,    0,    0,    0,    0,    0 },
+      /*  4A                            4F    50                                                     59 */
+      { 0xC5, 0x0F,    0, 0x01,    0, 0x00, 0x97, 0x7F,  0x78, 0x64, 0x14, 0x97, 0x7f, 0x59, 0x78, 0xb0,
+      /*  5A                            5F    60                       64 */
+        0x1a, 0xec, 0xfa, 0x08, 0x00, 0x00, 0x80, 0x20,  0xFF, 0x97, 0x28 },
+      /* RBG 65,66,67,27,2b,2c */
+      { 0x55, 0x39, 0x66,    0,    0,    0 },
+      /* Y-Cb-Cr 65,66,67 */
+      { 0x55, 0x56, 0x55 },
+      /* Subcarrier 19,18,17,16, DotCrawl Subcarrier (set bit 3 of reg 11 then subcarrier) */
+      0x0, 0x0,
+    },
+
+/*
+    { "1920x1080", 1920, 540, TVTYPE_NTSC, 0, 0,
+      { 0x83,    0, 0x10, 0x4A, 0x86, 0x39,    0, 0x8B,  0x3D, 0x32,    0,    0,    0,    0,    0, 0x9E,
+	   0, 0x80, 0x4A, 0x08, 0x37, 0x14,    0,    0,     0,    0,    0, 0x50, 0x44, 0x80,    0, 0x03,
+	0x25,    0,    0, 0x7E,    0,    0,    0,    0,     0,    0,    0,    0,    0,    0,    0,    0 },
+      { 0xC5, 0x0F,    0, 0x01,    0,    0, 0x97, 0x7F,  0x78, 0x64, 0x14, 0x97, 0x7F, 0x59, 0x78, 0xB0,
+	0x1A, 0xEC, 0xFA, 0x08,    0,    0, 0x80, 0x20,  0xFF, 0x97, 0x28 },
+      { 0x55, 0x56, 0x55, 0x91, 0x9C, 0 },
+      { 0x42, 0x49, 0x48 },
+      0x1E555518, 0x1E554CC3,
+    },
+    { "960x540", 960, 540, TVTYPE_NTSC, 0, 0,
+      { 0x83,    0, 0x10, 0x4A, 0x86, 0x39,    0, 0x8B,  0x3D, 0x32,    0,    0,    0,    0,    0, 0x9E,
+	   0, 0x80, 0x4A, 0x08, 0x37, 0x14,    0,    0,     0,    0,    0, 0x50, 0x44, 0x80,    0, 0x03,
+	0x25,    0,    0, 0x7E,    0,    0,    0,    0,     0,    0,    0,    0,    0,    0,    0,    0 },
+      { 0xC5, 0x0F,    0, 0x01,    0,    0, 0x97, 0x7F,  0x78, 0x64, 0x14, 0x97, 0x7F, 0x59, 0x78, 0xB0,
+	0x1A, 0xEC, 0xFA, 0x08,    0,    0, 0x80, 0x20,  0xFF, 0x97, 0x28 },
+      { 0x55, 0x56, 0x55, 0x91, 0x9C, 0 },
+      { 0x42, 0x49, 0x48 },
+      0x1E555518, 0x1E554CC3,
+    },
+*/
     { NULL, 0, 0, 0, 0, 0,
       { 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0,

@@ -132,6 +132,7 @@ typedef enum {
     OPTION_PANELSIZE,
     OPTION_FORCEPANEL,
     OPTION_TVDOTCRAWL,
+    OPTION_TVPROGRESSIVE,
     OPTION_TVTYPE,
     OPTION_TVOUTPUT,
     OPTION_DISABLEVQ,
@@ -166,6 +167,7 @@ static OptionInfoRec VIAOptions[] =
     {OPTION_FORCEPANEL, "ForcePanel",   OPTV_BOOLEAN, {0}, FALSE}, /* last resort - don't doc */
     {OPTION_TVDOTCRAWL, "TVDotCrawl",   OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_TVDEFLICKER,"TVDeflicker",  OPTV_INTEGER, {0}, FALSE},
+    {OPTION_TVPROGRESSIVE, "TVProgressive", OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_TVTYPE,     "TVType",       OPTV_ANYSTR,  {0}, FALSE},
     {OPTION_TVOUTPUT,   "TVOutput",     OPTV_ANYSTR,  {0}, FALSE},
     {OPTION_DISABLEVQ,  "DisableVQ",    OPTV_BOOLEAN, {0}, FALSE},
@@ -1062,6 +1064,41 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
             pBIOSInfo->TVType = TVTYPE_PAL;
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Type is PAL\n");
         }
+        else if(!xf86NameCmp(s, "480P")) {
+            pBIOSInfo->TVType = TVTYPE_480P;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Type is SDTV 480P\n");
+        }
+        else if(!xf86NameCmp(s, "576P")) {
+            pBIOSInfo->TVType = TVTYPE_576P;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Type is SDTV 576P\n");
+        }
+        else if(!xf86NameCmp(s, "720P")) {
+            pBIOSInfo->TVType = TVTYPE_720P;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Type is HDTV 720P\n");
+        }
+        else if(!xf86NameCmp(s, "1080I")) {
+            pBIOSInfo->TVType = TVTYPE_1080I;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Type is HDTV 1080i\n");
+        }
+    }
+
+    if (xf86ReturnOptValBool(VIAOptions, OPTION_TVPROGRESSIVE, FALSE))
+    {
+        pBIOSInfo->TVProgressive=TRUE;
+
+        if (pBIOSInfo->TVType == TVTYPE_NTSC)
+        {
+            pBIOSInfo->TVType = TVTYPE_480P;
+        }
+        else if (pBIOSInfo->TVType == TVTYPE_PAL)
+        {
+            pBIOSInfo->TVType = TVTYPE_576P;
+        }
+        xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Progressive Mode is Enable\n");    
+    }
+    else
+    {
+        pBIOSInfo->TVProgressive=FALSE;
     }
 
     /* TV out put signal Option */

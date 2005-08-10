@@ -38,6 +38,10 @@
 #define     TVTYPE_NONE                     0x00
 #define     TVTYPE_NTSC                     0x01
 #define     TVTYPE_PAL                      0x02
+#define     TVTYPE_480P                     0X03
+#define     TVTYPE_576P                     0X04
+#define     TVTYPE_720P                     0X05
+#define     TVTYPE_1080I                    0X06
 
 #define     TVOUTPUT_NONE                   0x00
 #define     TVOUTPUT_COMPOSITE              0x01
@@ -51,6 +55,13 @@
 #define  VIA_VT1622   2 /* TV3 */
 #define  VIA_VT1623   3 /* also VT1622A */
 #define  VIA_VT1625   4 
+#define  VIA_CH7011   5
+#define  VIA_CH7019A  6
+#define  VIA_CH7019B  7
+#define  VIA_CH7017   8
+#define  VIA_CH7304   9
+#define  VIA_CH7305   10
+
 
 #define     VIA_TVNORMAL                    0
 #define     VIA_TVOVER                      1
@@ -109,6 +120,7 @@ typedef struct _VIABIOSINFO {
     Bool        TVActive;
     I2CDevPtr   TVI2CDev;
     int         TVType;
+    Bool        TVProgressive;
     Bool        TVDotCrawl;
     int         TVDeflicker;
     CARD8       TVRegs[0xFF];
@@ -122,6 +134,7 @@ typedef struct _VIABIOSINFO {
     void (*TVModeI2C) (ScrnInfoPtr pScrn, DisplayModePtr mode);
     void (*TVModeCrtc) (ScrnInfoPtr pScrn, DisplayModePtr mode);
     void (*TVPower) (ScrnInfoPtr pScrn, Bool On);
+    void (*LCDPower) (ScrnInfoPtr pScrn, Bool On);
     DisplayModePtr TVModes;
     void (*TVPrintRegs) (ScrnInfoPtr pScrn);
 
@@ -160,5 +173,9 @@ void ViaDisablePrimaryFIFO(ScrnInfoPtr pScrn);
 /* via_vt162x.c */
 I2CDevPtr ViaVT162xDetect(ScrnInfoPtr pScrn, I2CBusPtr pBus, CARD8 Address);
 void ViaVT162xInit(ScrnInfoPtr pScrn);
+
+/* via_ch7xxx.c */
+I2CDevPtr ViaCH7xxxDetect(ScrnInfoPtr pScrn, I2CBusPtr pBus, CARD8 Address);
+void ViaCH7xxxInit(ScrnInfoPtr pScrn);
 
 #endif /* _VIA_BIOS_H_ */

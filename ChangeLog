@@ -1,3 +1,25 @@
+2005-08-10  Ivor Hewitt  <ivor-at-ivor-dot-org>
+
+	* unichrome/Imakefile:
+	* unichrome/via_bios.h:
+	* unichrome/via_ch7xxx.c: (CH7xxxPrintRegs), (ViaCH7xxxDetect),
+	(CH7xxxSave), (CH7xxxRestore), (CH7xxxDACSenseI2C),
+	(CH7xxxDACSense), (CH7011ModeIndex), (CH7019ModeIndex),
+	(CH7xxxModeValid), (CH7xxxModeI2C), (CH7xxxModeCrtc),
+	(CH7xxxTVPower), (CH7019LCDPower), (ViaCH7xxxInit):
+	* unichrome/via_ch7xxx.h:
+	* unichrome/via_driver.c: (VIAPreInit):
+	* unichrome/via_id.c:
+	* unichrome/via_mode.c: (ViaTVDetect), (ViaTVInit):
+	* unichrome/via_vt162x.c: (ViaVT162xDetect), (VT1625DACSenseI2C),
+	(VT1625DACSense), (VT1621ModeIndex), (VT1622ModeIndex),
+	(VT1625ModeValid), (VT1622ModeI2C), (VT1622ModeCrtc),
+	(VT1625Power), (ViaVT162xInit):
+	* unichrome/via_vt162x.h:
+
+        -Initial steps to incorporating CH7xxx and VT1625 support
+        merging patches from David George, Philip Prindeville, Terry Lewis
+
 2005-07-30  Ivor Hewitt  <ivor-at-ivor-dot-org>
 
 	* libxvmc/Imakefile:
