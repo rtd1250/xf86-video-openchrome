@@ -1968,10 +1968,8 @@ VIAVidUpdateOverlay(ScrnInfoPtr pScrn, LPDDUPDATEOVERLAY pUpdate)
 
     unsigned long proReg=0;
 
-    panDX = pVia->swov.panning_x - pVia->swov.panning_old_x;
-    panDY = pVia->swov.panning_y - pVia->swov.panning_old_y;
-
-    /* Adjust to fix panning mode bug */
+    panDX = pVia->swov.panning_x; 
+    panDY = pVia->swov.panning_y; 
 
     pUpdate->DstLeft   -= panDX;
     pUpdate->DstTop    -= panDY;
@@ -2092,9 +2090,6 @@ VIAVidUpdateOverlay(ScrnInfoPtr pScrn, LPDDUPDATEOVERLAY pUpdate)
 
     pVia->swov.SWVideo_ON = FALSE;
     
-    pVia->swov.panning_old_x = pVia->swov.panning_x;
-    pVia->swov.panning_old_y = pVia->swov.panning_y;
-
     return TRUE;
 
 } /*VIAVidUpdateOverlay*/

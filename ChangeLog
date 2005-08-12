@@ -1,5 +1,14 @@
 2005-08-12  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
+	* unichrome/via_priv.h:
+	* unichrome/via_swov.c: (VIAVidUpdateOverlay):
+	* unichrome/via_video.c: (RegionsEqual), (viaReputImage),
+	(viaSetupAdaptors), (VIAVidAdjustFrame):
+
+	-Fix Xv panning.
+
+2005-08-12  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
 	* unichrome/via_video.c: (viaExitVideo):
 
 	-Fix stopvideo for all ports and adaptors.

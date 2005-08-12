@@ -478,6 +478,84 @@ void viaInitVideo(ScreenPtr pScreen)
     }
 }
 
+static Bool
+RegionsEqual(RegionPtr A, RegionPtr B)
+{
+    int *dataA, *dataB;
+    int num;
+
+    num = REGION_NUM_RECTS(A);
+    if(num != REGION_NUM_RECTS(B))
+        return FALSE;
+
+    if((A->extents.x1 != B->extents.x1) ||
+       (A->extents.x2 != B->extents.x2) ||
+       (A->extents.y1 != B->extents.y1) ||
+       (A->extents.y2 != B->extents.y2))
+        return FALSE;
+
+    dataA = (int*)REGION_RECTS(A);
+    dataB = (int*)REGION_RECTS(B);
+
+    while(num--) {
+        if((dataA[0] != dataB[0]) || (dataA[1] != dataB[1]))
+           return FALSE;
+        dataA += 2; 
+        dataB += 2;
+    }
+ 
+    return TRUE;
+}
+
+
+/*
+ * This one gets called, for example, on panning.
+ */
+
+static int
+viaReputImage(ScrnInfoPtr pScrn,
+	      short drw_x,
+	      short drw_y,
+	      RegionPtr clipBoxes,
+	      pointer data)
+{
+
+    DDUPDATEOVERLAY      UpdateOverlay_Video;
+    LPDDUPDATEOVERLAY    lpUpdateOverlay = &UpdateOverlay_Video;
+    viaPortPrivPtr pPriv = (viaPortPrivPtr)data;
+
+    lpUpdateOverlay->SrcLeft = pPriv->old_src_x;
+    lpUpdateOverlay->SrcTop = pPriv->old_src_y;
+    lpUpdateOverlay->SrcRight = pPriv->old_src_x + pPriv->old_src_w;
+    lpUpdateOverlay->SrcBottom = pPriv->old_src_y + pPriv->old_src_h;
+
+    lpUpdateOverlay->DstLeft = drw_x;
+    lpUpdateOverlay->DstTop = drw_y;
+    lpUpdateOverlay->DstRight = drw_x + pPriv->old_drw_w;
+    lpUpdateOverlay->DstBottom = drw_y + pPriv->old_drw_h;
+    pPriv->old_drw_x = drw_x;
+    pPriv->old_drw_y = drw_y;
+
+    lpUpdateOverlay->dwFlags = DDOVER_KEYDEST;
+
+    if (pScrn->bitsPerPixel == 8)
+	lpUpdateOverlay->dwColorSpaceLowValue = pPriv->colorKey & 0xff;
+    else
+	lpUpdateOverlay->dwColorSpaceLowValue = pPriv->colorKey;
+    
+    if(!RegionsEqual(&pPriv->clip, clipBoxes)) {
+	REGION_COPY(pScrn->pScreen, &pPriv->clip, clipBoxes);    
+	if (pPriv->autoPaint) 
+	    xf86XVFillKeyHelper(pScrn->pScreen, pPriv->colorKey, clipBoxes); 
+    } 
+
+    VIAVidUpdateOverlay(pScrn, lpUpdateOverlay);
+
+    return Success;
+}
+
+
+
 
 static unsigned
 viaSetupAdaptors(ScreenPtr pScreen, XF86VideoAdaptorPtr **adaptors)
@@ -540,6 +618,7 @@ viaSetupAdaptors(ScreenPtr pScreen, XF86VideoAdaptorPtr **adaptors)
         viaAdaptPtr[i]->GetPortAttribute = viaGetPortAttribute;
         viaAdaptPtr[i]->SetPortAttribute = viaSetPortAttribute;
         viaAdaptPtr[i]->PutImage = viaPutImage;
+        viaAdaptPtr[i]->ReputImage = viaReputImage;
         viaAdaptPtr[i]->QueryImageAttributes = viaQueryImageAttributes;
 
 	for (j=0; j<numPorts; ++j) {
@@ -567,35 +646,6 @@ viaSetupAdaptors(ScreenPtr pScreen, XF86VideoAdaptorPtr **adaptors)
     return XV_ADAPT_NUM;
 }
 
-
-static Bool
-RegionsEqual(RegionPtr A, RegionPtr B)
-{
-    int *dataA, *dataB;
-    int num;
-
-    num = REGION_NUM_RECTS(A);
-    if(num != REGION_NUM_RECTS(B))
-        return FALSE;
-
-    if((A->extents.x1 != B->extents.x1) ||
-       (A->extents.x2 != B->extents.x2) ||
-       (A->extents.y1 != B->extents.y1) ||
-       (A->extents.y2 != B->extents.y2))
-        return FALSE;
-
-    dataA = (int*)REGION_RECTS(A);
-    dataB = (int*)REGION_RECTS(B);
-
-    while(num--) {
-        if((dataA[0] != dataB[0]) || (dataA[1] != dataB[1]))
-           return FALSE;
-        dataA += 2; 
-        dataB += 2;
-    }
- 
-    return TRUE;
-}
 
 static void 
 viaStopVideo(ScrnInfoPtr pScrn, pointer data, Bool exit)
@@ -1092,29 +1142,6 @@ VIAVidAdjustFrame(ScrnInfoPtr pScrn, int x, int y)
 
     pVia->swov.panning_x = x;
     pVia->swov.panning_y = y;
-
-    /* Check if HW mpeg engine active */
-    if (pVia->VideoStatus & VIDEO_SWOV_ON) { /* SW video case */
-	DDUPDATEOVERLAY UpdateOverlay;
-
-        xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                      "Call SW MPEG UpdateOverlay at panning mode.\n");
-
-        UpdateOverlay.dwFlags = DDOVER_KEYDEST;
-        UpdateOverlay.dwColorSpaceLowValue = VIAGETREG(0x220);
-        UpdateOverlay.SrcLeft = 0;
-        UpdateOverlay.SrcTop = 0;
-        UpdateOverlay.SrcRight = 720;
-        UpdateOverlay.SrcBottom = 480;
-
-        UpdateOverlay.DstLeft = (int) pVia->swov.SWDevice.gdwSWDstLeft;
-        UpdateOverlay.DstTop = (int) pVia->swov.SWDevice.gdwSWDstTop;
-        UpdateOverlay.DstRight = UpdateOverlay.DstLeft + pVia->swov.SWDevice.gdwSWDstWidth;
-        UpdateOverlay.DstBottom = UpdateOverlay.DstTop + pVia->swov.SWDevice.gdwSWDstHeight;
-
-        VIAVidUpdateOverlay(pScrn, &UpdateOverlay);
-    }
-
 }
 
 #endif  /* !XvExtension */

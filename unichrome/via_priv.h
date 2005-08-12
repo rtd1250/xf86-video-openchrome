@@ -152,8 +152,6 @@ typedef struct  {
     unsigned long   gdwUseExtendedFIFO;
 
 /* For panning mode use */
-    int panning_old_x;
-    int panning_old_y;
     int panning_x;
     int panning_y;
 } swovRec, *swovPtr;
