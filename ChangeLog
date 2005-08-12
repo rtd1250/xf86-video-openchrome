@@ -1,3 +1,9 @@
+2005-08-12  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
+	* unichrome/via_video.c: (viaExitVideo):
+
+	-Fix stopvideo for all ports and adaptors.
+	
 2005-08-10  Ivor Hewitt  <ivor-at-ivor-dot-org>
 
 	* unichrome/Imakefile:

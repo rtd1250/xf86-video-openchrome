@@ -390,7 +390,7 @@ void viaExitVideo(ScrnInfoPtr pScrn)
     vmmtr   viaVidEng = (vmmtr) pVia->VidMapBase;    
     CARD32  dwTemp;
     XF86VideoAdaptorPtr curAdapt;
-    int i;
+    int i, j, numPorts;
 
     DBG_DD(ErrorF(" via_video.c : viaExitVideo : \n"));
 
@@ -414,6 +414,10 @@ void viaExitVideo(ScrnInfoPtr pScrn)
 	if (curAdapt) {
 	    if (curAdapt->pPortPrivates) {
 		if (curAdapt->pPortPrivates->ptr) {
+		    numPorts = numAdaptPort[i];
+		    for (j=0; j<numPorts; ++j) {
+		      viaStopVideo(pScrn, (viaPortPrivPtr)curAdapt->pPortPrivates->ptr + j, TRUE);
+		    }
 		    xfree(curAdapt->pPortPrivates->ptr);
 		}
 		xfree(curAdapt->pPortPrivates);
