@@ -1,5 +1,11 @@
 2005-08-13  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
+	* unichrome/via_swov.c: (ViaSwovSurfaceDestroy):
+
+	-Destroy video surfaces on video exit / stop.
+
+2005-08-13  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
 	* unichrome/via_driver.c: (VIAAdjustFrame)
 
 	-Fix Xv panning also for VBEModes.
@@ -18,7 +24,7 @@
 	* unichrome/via_video.c: (RegionsEqual), (viaReputImage),
 	(viaSetupAdaptors), (VIAVidAdjustFrame):
 
-	-Fix Xv panning.
+	-Fix Xv panning. Speed up overlay updates on window moves.
 
 2005-08-12  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 

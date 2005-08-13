@@ -1104,13 +1104,13 @@ ViaSwovSurfaceDestroy(ScrnInfoPtr pScrn, viaPortPrivPtr pPriv)
 {
     VIAPtr  pVia = VIAPTR(pScrn);
     DBG_DD(ErrorF("ViaSwovSurfaceDestroy: FourCC =0x%08lx\n",
-		  pPriv->FourCC));
+		  pPriv->lastId));
 
     if (pVia->VideoStatus & VIDEO_SWOV_SURFACE_CREATED) {
         DBG_DD(ErrorF("ViaSwovSurfaceDestroy: VideoStatus =0x%08lx\n",
 		      pVia->VideoStatus));
 	
-	switch (pPriv->FourCC) {
+	switch (pPriv->lastId) {
 	case FOURCC_YUY2:
 	    pVia->swov.SrcFourCC = 0;
 	    
