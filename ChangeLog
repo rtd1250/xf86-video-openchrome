@@ -1,3 +1,9 @@
+2005-08-13  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
+	* unichrome/via_driver.c: (VIAAdjustFrame)
+
+	-Fix Xv panning also for VBEModes.
+	
 2005-08-12  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
 	* unichrome/via_driver.c: (VIAEnterVT):
