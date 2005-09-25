@@ -22,19 +22,27 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
- 
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "xf86.h"
 #include "xf86_OSproc.h"
 #include "xf86_ansic.h"
 #include "xf86fbman.h"
 
 #include "via.h"
+#ifdef XF86DRI
 #include "xf86drm.h"
+#endif
 
 #include "via_driver.h"
 #include "via_priv.h"
 #include "via_swov.h"
+#ifdef XF86DRI
 #include "via_drm.h"
+#endif
 #include "via_vgahw.h"
 #include "via_id.h"
 
@@ -50,14 +58,6 @@
  *   - merge with CLEXF40040
  */
 
-#define   XV_DEBUG      0     /* write log msg to /var/log/XFree86.0.log */
-
-#ifdef XV_DEBUG
-# define DBG_DD(x) (x)
-#else
-# define DBG_DD(x)
-#endif
-
 /*
  * Old via_regrec code.
  *
@@ -66,8 +66,8 @@
 #define VIDREG_BUFFER_SIZE  100  /* Number of entries in the VidRegBuffer. */
 #define IN_VIDEO_DISPLAY     (*((unsigned long volatile *)(pVia->VidMapBase+V_FLAGS))&VBI_STATUS)
 #if 0
-
 #define IN_HQV_FIRE     (*((unsigned long volatile *)(pVia->VidMapBase+HQV_CONTROL))&HQV_IDLE)
+
 #ifdef UNUSED
 
 #define IN_VIDEO_FIRE   (*((unsigned long volatile *)(pVia->VidMapBase+V_COMPOSE_MODE))&V1_COMMAND_FIRE)
@@ -81,7 +81,6 @@ viaWaitHQVIdle(VIAPtr pVia)
     while (!IN_HQV_FIRE);
 }
 #endif /* UNUSED */
-
 #endif
 
 static void 
@@ -98,28 +97,25 @@ viaWaitHQVFlip(VIAPtr pVia)
 {
     unsigned long proReg=0;
     CARD32 volatile *pdwState;
-
+    
     if ((pVia->ChipId == PCI_CHIP_VT3259) &&
         !(pVia->swov.gdwVideoFlagSW & VIDEO_1_INUSE))
-        proReg = REG_HQV1_INDEX;
-
-    pdwState = (CARD32 volatile *) (pVia->VidMapBase+(HQV_CONTROL|proReg));
-
+        proReg = PRO_HQV1_OFFSET; 
+   
+    pdwState = (CARD32 volatile *) (pVia->VidMapBase+(HQV_CONTROL + proReg));
+    
     if (pVia->ChipId == PCI_CHIP_VT3259) {
 	while (*pdwState & (HQV_SUBPIC_FLIP | HQV_SW_FLIP)) ;
     } else {
 	while (!(*pdwState & HQV_FLIP_STATUS) );
     }
-/*
-    while (!((*pdwState & 0xc0)== 0xc0) );
-    while (!((*pdwState & 0xc0)!= 0xc0) );
-*/    
 }
+
 
 static void
 viaWaitHQVFlipClear(VIAPtr pVia, unsigned long dwData)
 {
-    CARD32 volatile *pdwState = (CARD32 volatile *) (pVia->VidMapBase+(HQV_CONTROL));
+    CARD32 volatile *pdwState = (CARD32 volatile *) (pVia->VidMapBase+HQV_CONTROL);
     *pdwState =dwData;
 
     while ((*pdwState & HQV_FLIP_STATUS) )
@@ -141,13 +137,9 @@ viaWaitHQVDone(VIAPtr pVia)
     unsigned long proReg=0;
     if ((pVia->ChipId == PCI_CHIP_VT3259) &&
         !(pVia->swov.gdwVideoFlagSW & VIDEO_1_INUSE))
-        proReg = REG_HQV1_INDEX;
+        proReg = PRO_HQV1_OFFSET;
 
-
-    pdwState = (CARD32 volatile *) (pVia->VidMapBase+(HQV_CONTROL|proReg));
-    /*pdwState = (CARD32 volatile *) (GEAddr+HQV_CONTROL);*/
-
-    /*if (*pdwState & HQV_ENABLE)*/
+    pdwState = (CARD32 volatile *) (pVia->VidMapBase+(HQV_CONTROL + proReg));
     if (pVia->swov.MPEG_ON)
     {
         while ((*pdwState & HQV_SW_FLIP) );
@@ -335,6 +327,21 @@ viaOverlayGetV1V3Format(VIAPtr pVia, int vport, /* 1 or 3, as in V1 or V3 */
 	} else
 	    *pVidCtl |= V1_YUV422;
 	break;
+
+    case FOURCC_RV15:
+    case FOURCC_RV16:
+	if (videoFlag & VIDEO_HQV_INUSE) {
+	    *pVidCtl |= 
+	      ((pVia->swov.SrcFourCC == FOURCC_RV15) ? V1_RGB15 : V1_RGB16) | 
+	      V1_SWAP_HW_HQV;
+	    *pHQVCtl |= HQV_SRC_SW |
+	      ((pVia->swov.SrcFourCC == FOURCC_RV15) ? HQV_RGB15 : HQV_RGB16) | 
+	      HQV_ENABLE | HQV_SW_FLIP;
+	} else {
+	    ErrorF("viaOverlayGetV1V3Format: Can't display RGB video in this configuration.\n");
+	    is_ok = FALSE;
+	}
+	break;
 	
     default:
 	DBG_DD(ErrorF("viaOverlayGetV1V3Format: Invalid FOURCC format (0x%lx).\n",
@@ -365,6 +372,8 @@ viaOverlayGetSrcStartAddress(VIAPtr pVia, unsigned long videoFlag,
 	switch (pVia->swov.SrcFourCC) {
 	case FOURCC_YUY2:
 	case FOURCC_UYVY:
+	case FOURCC_RV15:
+	case FOURCC_RV16:
 	    
 	    if (videoFlag & VIDEO_HQV_INUSE) {
 		offset = (((pUpdate->SrcTop & ~3) * srcPitch) + ((pUpdate->SrcLeft << 1) & ~31));
@@ -428,26 +437,6 @@ viaOverlayGetYCbCrStartAddress(unsigned long videoFlag, unsigned long startAddr,
         YCbCr.dwCB = startAddr + srcPitch * srcHeight + UVoffset;
         YCbCr.dwCR = startAddr + srcPitch * srcHeight + UVoffset
             + srcPitch * (srcHeight >> 2);
-    }
-    return YCbCr;
-}
-
-static YCBCRREC
-viaOverlayGetYCbCrStartAddressProA(unsigned long videoFlag, unsigned long startAddr,
-			       unsigned long offset, unsigned long UVoffset,
-			       unsigned long srcPitch, unsigned long srcHeight)
-{
-    YCBCRREC YCbCr;
-    
-    if (videoFlag & VIDEO_HQV_INUSE) {
-        YCbCr.dwY  = startAddr;
-        YCbCr.dwCB = startAddr + srcPitch * srcHeight;
-	YCbCr.dwCR = startAddr + srcPitch * srcHeight;
-    }
-    else {
-        YCbCr.dwY  = startAddr + offset;
-        YCbCr.dwCB = startAddr + srcPitch * srcHeight + UVoffset;
-        YCbCr.dwCR = startAddr + srcPitch * srcHeight + UVoffset;
     }
     return YCbCr;
 }
@@ -620,6 +609,8 @@ viaOverlayGetFetch(VIAPtr pVia, unsigned long videoFlag,
 	break;
     case FOURCC_UYVY:
     case FOURCC_YUY2:
+    case FOURCC_RV15:
+    case FOURCC_RV16:
 	n = 1; /* 2^n = 2 bytes per pixel (packed YUV) */
 	break;
     default:
@@ -837,13 +828,13 @@ void viaSetColorSpace(VIAPtr pVia, int hue, int saturation, int brightness, int 
     switch ( pVia->ChipId ) {
     case PCI_CHIP_VT3205:
     case PCI_CHIP_VT3204:
+    case PCI_CHIP_VT3259:
         VIDOutD(V3_ColorSpaceReg_1, col1);
         VIDOutD(V3_ColorSpaceReg_2, col2);
         DBG_DD(ErrorF("000002C4 %08lx\n",col1));
         DBG_DD(ErrorF("000002C8 %08lx\n",col2));
         break;
     case PCI_CHIP_CLE3122:
-    case PCI_CHIP_VT3259:
         VIDOutD(V1_ColorSpaceReg_2, col2);
         VIDOutD(V1_ColorSpaceReg_1, col1);
         VIDOutD(V3_ColorSpaceReg_2, col2);
@@ -853,10 +844,7 @@ void viaSetColorSpace(VIAPtr pVia, int hue, int saturation, int brightness, int 
         DBG_DD(ErrorF("00000284 %08lx\n",col1));
         break;
     default:
-/*IVOR*/
-        DBG_DD(ErrorF("000002C4 %08lx\n",col1));
-        DBG_DD(ErrorF("000002C8 %08lx\n",col2));
-
+        DBG_DD(ErrorF("Unknown DeviceID\n"));
         break;
     }
 }
@@ -896,7 +884,8 @@ static unsigned long ViaSetVidCtl(VIAPtr pVia, unsigned int videoFlag)
         switch (pVia->ChipId)
         {
         case PCI_CHIP_VT3205:
-        case PCI_CHIP_VT3204:	
+        case PCI_CHIP_VT3204:
+	case PCI_CHIP_VT3259:
             return V3_ENABLE | V3_EXPIRE_NUM_3205;
 
         case PCI_CHIP_CLE3122:
@@ -905,10 +894,6 @@ static unsigned long ViaSetVidCtl(VIAPtr pVia, unsigned int videoFlag)
             else 
                 return V3_ENABLE | V3_EXPIRE_NUM;
             break;
-
-        case PCI_CHIP_VT3259:
-                return V3_ENABLE | V3_EXPIRE_NUM_3205;
-                break;
 
         default:
             DBG_DD(ErrorF("Unknown DeviceID\n"));
@@ -947,11 +932,11 @@ static long AddHQVSurface(ScrnInfoPtr pScrn, unsigned int numbuf, CARD32 fourcc)
 
     VIAPtr pVia = VIAPTR(pScrn);
     CARD32 AddrReg[3] = {HQV_DST_STARTADDR0, HQV_DST_STARTADDR1, HQV_DST_STARTADDR2};
-
     unsigned long proReg=0;
+
     if ((pVia->ChipId == PCI_CHIP_VT3259) &&
         !(pVia->swov.gdwVideoFlagSW & VIDEO_1_INUSE))
-        proReg = REG_HQV1_INDEX;
+        proReg = PRO_HQV1_OFFSET;
 
     isplanar = ((fourcc == FOURCC_YV12) || (fourcc == FOURCC_XVMC));
 
@@ -969,7 +954,7 @@ static long AddHQVSurface(ScrnInfoPtr pScrn, unsigned int numbuf, CARD32 fourcc)
 
     for (i = 0; i < numbuf; i++) {
         pVia->swov.overlayRecordV1.dwHQVAddr[i] = addr;
-        VIDOutD(AddrReg[i]|proReg, addr);
+        VIDOutD(AddrReg[i] + proReg, addr);
         addr += fbsize;
     }
 
@@ -1054,14 +1039,15 @@ ViaSwovSurfaceCreate(ScrnInfoPtr pScrn, viaPortPrivPtr pPriv, CARD32 FourCC,
         return Success;
 
     pPriv->lastId = FourCC;
-
     switch (FourCC) {
     case FOURCC_YUY2:
+    case FOURCC_RV15:
+    case FOURCC_RV16:
 	retCode = CreateSurface(pScrn, FourCC, Width, Height, TRUE);
         if (retCode != Success)
 	    break;
         if ((pVia->swov.gdwVideoFlagSW & SW_USE_HQV))
-	    retCode = AddHQVSurface(pScrn, numbuf, FOURCC_YUY2);
+	    retCode = AddHQVSurface(pScrn, numbuf, FourCC);
         break;
 
     case FOURCC_HQVSW:
@@ -1104,7 +1090,7 @@ ViaSwovSurfaceDestroy(ScrnInfoPtr pScrn, viaPortPrivPtr pPriv)
 {
     VIAPtr  pVia = VIAPTR(pScrn);
     DBG_DD(ErrorF("ViaSwovSurfaceDestroy: FourCC =0x%08lx\n",
-		  pPriv->lastId));
+		  pPriv->FourCC));
 
     if (pVia->VideoStatus & VIDEO_SWOV_SURFACE_CREATED) {
         DBG_DD(ErrorF("ViaSwovSurfaceDestroy: VideoStatus =0x%08lx\n",
@@ -1112,6 +1098,8 @@ ViaSwovSurfaceDestroy(ScrnInfoPtr pScrn, viaPortPrivPtr pPriv)
 	
 	switch (pPriv->lastId) {
 	case FOURCC_YUY2:
+	case FOURCC_RV16:
+	case FOURCC_RV15:
 	    pVia->swov.SrcFourCC = 0;
 	    
 	    VIAFreeLinear(&pVia->swov.SWfbMem);
@@ -1196,9 +1184,9 @@ static void SetFIFO_V3_64or32or32(VIAPtr pVia)
 {
     switch (pVia->ChipId)
     {
-    case PCI_CHIP_VT3259:
     case PCI_CHIP_VT3205:
     case PCI_CHIP_VT3204:
+    case PCI_CHIP_VT3259:
         SetFIFO_V3(pVia, 32, 29, 29);
         break;
 
@@ -1218,9 +1206,9 @@ static void SetFIFO_V3_64or32or16(VIAPtr pVia)
 {
     switch (pVia->ChipId)
     {
-    case PCI_CHIP_VT3259:
     case PCI_CHIP_VT3205:
     case PCI_CHIP_VT3204:
+    case PCI_CHIP_VT3259:
         SetFIFO_V3(pVia, 32, 29, 29);
         break;
 
@@ -1336,8 +1324,8 @@ static CARD32 SetColorKey(VIAPtr pVia, unsigned long videoFlag,
                           CARD32 keyLow, CARD32 keyHigh, CARD32 compose)
 {
     keyLow &= 0x00FFFFFF;
-
-    keyLow|=0x40000000;
+    if ((pVia->ChipId == PCI_CHIP_VT3259))
+	keyLow |= 0x40000000;
 
     /*SaveVideoRegister(pVia, V_COLOR_KEY, keyLow);*/
 
@@ -1345,7 +1333,7 @@ static CARD32 SetColorKey(VIAPtr pVia, unsigned long videoFlag,
         SaveVideoRegister(pVia, V_COLOR_KEY, keyLow);
     }
     else {
-    /* IVOR   if (pVia->HWDiff.dwSupportTwoColorKey )*/    /*CLE_C0*/
+        if (pVia->HWDiff.dwSupportTwoColorKey )    /*CLE_C0*/
             SaveVideoRegister(pVia, V3_COLOR_KEY, keyLow);
     }
 
@@ -1368,12 +1356,14 @@ static CARD32 SetChromaKey(VIAPtr pVia, unsigned long videoFlag,
     chromaLow  |= (VIDInD(V_CHROMAKEY_LOW) & ~CHROMA_KEY_LOW);
     chromaHigh |= (VIDInD(V_CHROMAKEY_HIGH)& ~CHROMA_KEY_HIGH);
 
-    chromaLow |= 0x40000000;
+    if ((pVia->ChipId == PCI_CHIP_VT3259))
+	chromaLow |= 0x40000000;
+
 
     SaveVideoRegister(pVia, V_CHROMAKEY_HIGH, chromaHigh);
     if (videoFlag & VIDEO_1_INUSE)
     {
-        SaveVideoRegister(pVia, V_CHROMAKEY_LOW, chromaLow&(~V_CHROMAKEY_V3));
+        SaveVideoRegister(pVia, V_CHROMAKEY_LOW, chromaLow & ~V_CHROMAKEY_V3);
         /*Temporarily solve the H/W Interpolation error when using Chroma Key*/
         SaveVideoRegister(pVia, V1_MINI_CONTROL, miniCtl & 0xFFFFFFF8);
     }
@@ -1406,15 +1396,16 @@ static void SetVideoStart(VIAPtr pVia, unsigned long videoFlag,
 
 static void SetHQVFetch(VIAPtr pVia, CARD32 srcFetch, unsigned long srcHeight)
 {
-unsigned long proReg=0;
+    unsigned long proReg=0;
     if ((pVia->ChipId == PCI_CHIP_VT3259) &&
         !(pVia->swov.gdwVideoFlagSW & VIDEO_1_INUSE))
-        proReg = REG_HQV1_INDEX;
+        proReg = PRO_HQV1_OFFSET;
 
     if (!pVia->HWDiff.dwHQVFetchByteUnit) {   /* CLE_C0 */
         srcFetch >>= 3; /* fetch unit is 8-byte */
     }
-    SaveVideoRegister(pVia, proReg|HQV_SRC_FETCH_LINE, ((srcFetch - 1) << 16) | (srcHeight - 1));
+    SaveVideoRegister(pVia, HQV_SRC_FETCH_LINE + proReg, 
+		      ((srcFetch - 1) << 16) | (srcHeight - 1));
 }
 
 static void SetFetch(VIAPtr pVia, unsigned long videoFlag, CARD32 fetch)
@@ -1534,7 +1525,7 @@ SetVideoWindow(ScrnInfoPtr pScrn, unsigned long videoFlag, LPDDUPDATEOVERLAY pUp
     }
 }
 
-/* IVOR - Guess what. this needs checking */
+
 
 /****************************************************************************
  *
@@ -1565,12 +1556,12 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
     unsigned long hqvSrcWidth = 0, hqvDstWidth = 0;
     unsigned long hqvSrcFetch = 0, hqvOffset = 0;
     unsigned long dwOffset = 0,fetch = 0,tmp = 0;
+    unsigned long proReg=0;
 
-unsigned long proReg=0;
     if ((pVia->ChipId == PCI_CHIP_VT3259) &&
         !(videoFlag & VIDEO_1_INUSE))
-        proReg = REG_HQV1_INDEX;
-
+	proReg = PRO_HQV1_OFFSET;
+    
     compose = (VIDInD(V_COMPOSE_MODE) & 
         ~(SELECT_VIDEO_IF_COLOR_KEY | V1_COMMAND_FIRE | V3_COMMAND_FIRE)) | V_COMMAND_LOAD_VBI;
 
@@ -1593,17 +1584,14 @@ unsigned long proReg=0;
     viaOverlayGetV1V3Format(pVia, (videoFlag & VIDEO_1_INUSE) ? 1 : 3,
 			    videoFlag, &vidCtl, &hqvCtl);
     
-#if 0
     if (hwDiff->dwThreeHQVBuffer) { /* CLE_C0: HQV supports triple-buffering */
 	hqvCtl &= ~HQV_SW_FLIP;
 	hqvCtl |= HQV_TRIPLE_BUFF | HQV_FLIP_STATUS; 
     }
-#endif 
     
     /* Starting address of source and Source offset*/
     dwOffset = viaOverlayGetSrcStartAddress(pVia, videoFlag, pUpdate, srcPitch, &hqvOffset);
     DBG_DD(ErrorF("===dwOffset= 0x%lx \n", dwOffset));
-    DBG_DD(ErrorF("===hqvOffset= 0x%lx \n", hqvOffset));
     
     pVia->swov.overlayRecordV1.dwOffset = dwOffset;
     
@@ -1617,33 +1605,20 @@ unsigned long proReg=0;
 			  pVia->swov.overlayRecordV1.dwHQVAddr[2]+dwOffset);
 	    
 	    if (pVia->swov.SrcFourCC != FOURCC_XVMC) {
-            if (pVia->ChipId == PCI_CHIP_VT3259)
-            {
-        DBG_DD(ErrorF("viaOverlayGetYCbCrStartAddressProA\n"));
-	    YCbCr = viaOverlayGetYCbCrStartAddressProA(videoFlag, startAddr,
-						   pVia->swov.overlayRecordV1.dwOffset,
-						   pVia->swov.overlayRecordV1.dwUVoffset,
-						   srcPitch,oriSrcHeight);
-            }
-            else
-            {
-        DBG_DD(ErrorF("viaOverlayGetYCbCrStartAddress\n"));
-	    YCbCr = viaOverlayGetYCbCrStartAddress(videoFlag, startAddr,
-						   pVia->swov.overlayRecordV1.dwOffset,
-						   pVia->swov.overlayRecordV1.dwUVoffset,
-						   srcPitch,oriSrcHeight);
-            }
-
-            if (pVia->ChipId == PCI_CHIP_VT3259)
-	        SaveVideoRegister(pVia, proReg|0x1cc, dwOffset);   
-	    SaveVideoRegister(pVia, proReg|HQV_SRC_STARTADDR_Y, YCbCr.dwY);
-	    SaveVideoRegister(pVia, proReg|HQV_SRC_STARTADDR_U, YCbCr.dwCR);
-
-            if (pVia->ChipId != PCI_CHIP_VT3259)
-        	    SaveVideoRegister(pVia, proReg|HQV_SRC_STARTADDR_V, YCbCr.dwCB);
-            }
+		YCbCr = viaOverlayGetYCbCrStartAddress(videoFlag, startAddr,
+						       pVia->swov.overlayRecordV1.dwOffset,
+						       pVia->swov.overlayRecordV1.dwUVoffset,
+						       srcPitch,oriSrcHeight);
+		if (pVia->ChipId == PCI_CHIP_VT3259) {
+		    SaveVideoRegister(pVia, HQV_SRC_STARTADDR_Y + proReg, YCbCr.dwY);
+		    SaveVideoRegister(pVia, HQV_SRC_STARTADDR_U + proReg, YCbCr.dwCB);
+		} else {
+		    SaveVideoRegister(pVia, HQV_SRC_STARTADDR_Y, YCbCr.dwY);
+		    SaveVideoRegister(pVia, HQV_SRC_STARTADDR_U, YCbCr.dwCR);
+		    SaveVideoRegister(pVia, HQV_SRC_STARTADDR_V, YCbCr.dwCB);
+		}
+	    }
 	} else {
-        DBG_DD(ErrorF("viaOverlayGetYCbCrStartAddress2\n"));
 	    YCbCr = viaOverlayGetYCbCrStartAddress(videoFlag, startAddr,
 						   pVia->swov.overlayRecordV1.dwOffset,
 						   pVia->swov.overlayRecordV1.dwUVoffset,
@@ -1669,10 +1644,9 @@ unsigned long proReg=0;
 			  pVia->swov.overlayRecordV1.dwHQVAddr[1] + hqvOffset,
 			  pVia->swov.overlayRecordV1.dwHQVAddr[2] + hqvOffset);
 	    
-            if (pVia->ChipId == PCI_CHIP_VT3259)
-                SaveVideoRegister(pVia, proReg|0x1cc, dwOffset); 
-
-	    SaveVideoRegister(pVia, proReg|HQV_SRC_STARTADDR_Y, startAddr);
+	    if (pVia->ChipId == PCI_CHIP_VT3259)
+		SaveVideoRegister(pVia, 0x1cc + proReg, dwOffset); 
+	    SaveVideoRegister(pVia, HQV_SRC_STARTADDR_Y + proReg, startAddr);
 	} else {
 	    startAddr += dwOffset;
 	    SetVideoStart(pVia, videoFlag, 1, startAddr, 0, 0);
@@ -1712,16 +1686,16 @@ unsigned long proReg=0;
 	    else
 		SaveVideoRegister(pVia, V3_STRIDE, srcPitch << 1);
 	    
-	    SaveVideoRegister(pVia, proReg|HQV_SRC_STRIDE, ((srcPitch >> 1) << 16) | srcPitch);
-	    SaveVideoRegister(pVia, proReg|HQV_DST_STRIDE, (srcPitch << 1));
+	    SaveVideoRegister(pVia, HQV_SRC_STRIDE + proReg, ((srcPitch >> 1) << 16) | srcPitch);
+	    SaveVideoRegister(pVia, HQV_DST_STRIDE + proReg, (srcPitch << 1));
 	} else {
 	    if (videoFlag & VIDEO_1_INUSE)
 		SaveVideoRegister(pVia, V1_STRIDE, srcPitch);
 	    else
 		SaveVideoRegister(pVia, V3_STRIDE, srcPitch);
 	    
-	    SaveVideoRegister(pVia, proReg|HQV_SRC_STRIDE, srcPitch);
-	    SaveVideoRegister(pVia, proReg|HQV_DST_STRIDE, srcPitch);
+	    SaveVideoRegister(pVia, HQV_SRC_STRIDE + proReg, srcPitch);
+	    SaveVideoRegister(pVia, HQV_DST_STRIDE + proReg, srcPitch);
 	}
 	
     } else {
@@ -1815,8 +1789,8 @@ unsigned long proReg=0;
 
 	    SetMiniAndZoom(pVia, videoFlag, 0, 0);
 	}
-	SaveVideoRegister(pVia, proReg|HQV_MINIFY_CONTROL, hqvMiniCtl);
-	SaveVideoRegister(pVia, proReg|HQV_FILTER_CONTROL, hqvFilterCtl);
+	SaveVideoRegister(pVia, HQV_MINIFY_CONTROL + proReg, hqvMiniCtl);
+	SaveVideoRegister(pVia, HQV_FILTER_CONTROL + proReg, hqvFilterCtl);
     } else
 	SetMiniAndZoom(pVia, videoFlag, miniCtl, zoomCtl);
     
@@ -1826,116 +1800,94 @@ unsigned long proReg=0;
     if (haveChromaKey)
 	compose = SetChromaKey(pVia, videoFlag, chromaKeyLow, chromaKeyHigh,
 			       miniCtl, compose);
-
-/*wait hqvdone.*/
-    viaWaitHQVDone(pVia);
-
-DBG_DD(ErrorF("** 6 of %ld **", pVia->VidRegCursor));
-
+        
     /* Setup video control*/
-    if (videoFlag & VIDEO_HQV_INUSE)
-    {
-        if (!pVia->swov.SWVideo_ON)
-        {
-            DBG_DD(ErrorF("    First HQV\n"));
+    if (videoFlag & VIDEO_HQV_INUSE) {
+	if (!pVia->swov.SWVideo_ON) {
+	    DBG_DD(ErrorF("    First HQV\n"));
 	    
-            FlushVidRegBuffer(pVia);
+	    FlushVidRegBuffer(pVia);
 	    
-            DBG_DD(ErrorF(" Wait flips"));
-            
-            if (hwDiff->dwHQVInitPatch)
-            {
-                DBG_DD(ErrorF(" Initializing HQV twice ..."));
-                for (i = 0; i < 2; i++) {
-                    viaWaitHQVFlipClear(pVia,
-                                        ((hqvCtl & ~HQV_SW_FLIP) | HQV_FLIP_STATUS) & ~HQV_ENABLE);
-                    VIDOutD(proReg|HQV_CONTROL, hqvCtl);
-                    viaWaitHQVFlip(pVia);
-                }
-                DBG_DD(ErrorF(" done.\n"));
-            }
-            else
-            { /* CLE_C0 */
-                CARD32 volatile *HQVCtrl =
-                    (CARD32 volatile *) (pVia->VidMapBase + (proReg|HQV_CONTROL));
+	    DBG_DD(ErrorF(" Wait flips"));
+	    
+	    if (hwDiff->dwHQVInitPatch) {
+		DBG_DD(ErrorF(" Initializing HQV twice ..."));
+		for (i = 0; i < 2; i++) {
+		    viaWaitHQVFlipClear(pVia, ((hqvCtl & ~HQV_SW_FLIP) | HQV_FLIP_STATUS) & ~HQV_ENABLE);
+		    VIDOutD(HQV_CONTROL + proReg, hqvCtl);
+		    viaWaitHQVFlip(pVia);
+		}
+		DBG_DD(ErrorF(" done.\n"));
+	    } else { /* CLE_C0 */
+		CARD32 volatile *HQVCtrl =
+		    (CARD32 volatile *) (pVia->VidMapBase + HQV_CONTROL + proReg);
 		
-#if 1                /* check HQV is idle */
-                DBG_DD(ErrorF("HQV control wf - %08lx\n", *HQVCtrl));
-                while (!(*HQVCtrl & HQV_IDLE)) {
-                    DBG_DD(ErrorF("HQV control busy - %08lx\n", *HQVCtrl));
-                    usleep(1);
-                }
-#endif
+		/* check HQV is idle */
+		DBG_DD(ErrorF("HQV control wf - %08lx\n", *HQVCtrl));
+		while (!(*HQVCtrl & HQV_IDLE)) {
+		    DBG_DD(ErrorF("HQV control busy - %08lx\n", *HQVCtrl));
+		    usleep(1);
+		}
+
 		if (pVia->ChipId == PCI_CHIP_VT3259)
 		    hqvCtl |= HQV_GEN_IRQ;
 
-                VIDOutD(proReg|HQV_CONTROL, hqvCtl | HQV_FLIP_STATUS);
-                VIDOutD(proReg|HQV_CONTROL, hqvCtl | HQV_SW_FLIP);
-                
-                DBG_DD(ErrorF("HQV control wf5 - %08lx\n", *HQVCtrl));
-                DBG_DD(ErrorF(" Wait flips5")); 
-                
-/*		for (i = 0; (i < 50) && !(*HQVCtrl & HQV_FLIP_STATUS); i++) {
-        DBG_DD(ErrorF(" HQV wait %d %08x\n",i, *HQVCtrl));
-        *HQVCtrl |= HQV_SW_FLIP | HQV_FLIP_STATUS;
-        usleep(1);
-		}*/
-               
-                viaWaitHQVFlip(pVia);
-                
-                DBG_DD(ErrorF(" Wait flips6"));
-            }
+		VIDOutD(HQV_CONTROL + proReg, hqvCtl & ~HQV_SW_FLIP);
+		VIDOutD(HQV_CONTROL + proReg, hqvCtl | HQV_SW_FLIP);
+		
+		DBG_DD(ErrorF("HQV control wf5 - %08lx\n", *HQVCtrl));
+		DBG_DD(ErrorF(" Wait flips5")); 
+		
+		if (pVia->ChipId != PCI_CHIP_VT3259) {
+		    for (i = 0; (i < 50) && !(*HQVCtrl & HQV_FLIP_STATUS); i++) {
+			DBG_DD(ErrorF(" HQV wait %d %08lx\n",i, *HQVCtrl));
+			*HQVCtrl |= HQV_SW_FLIP | HQV_FLIP_STATUS;
+			usleep(1);
+		    }
+		} else {
+		    viaWaitHQVFlip(pVia);
+		}
 
-
-
-            if (videoFlag & VIDEO_1_INUSE)
-            {
-                VIDOutD(V1_CONTROL, vidCtl);
-                VIDOutD(V_COMPOSE_MODE, compose | V1_COMMAND_FIRE);
-                if (pVia->swov.gdwUseExtendedFIFO)
-                {
-                    /*Set Display FIFO*/
-                    DBG_DD(ErrorF(" Wait flips7"));
-                    viaWaitVBI(pVia);
-                    DBG_DD(ErrorF(" Wait flips 8"));
-                    hwp->writeSeq(hwp, 0x17, 0x2F);
-                    ViaSeqMask(hwp, 0x16, 0x14, 0x1F);
-                    hwp->writeSeq(hwp, 0x18, 0x56);
-                    DBG_DD(ErrorF(" Wait flips 9"));
-                }
-            }
-            else
-            {
-                DBG_DD(ErrorF(" Wait flips 10 ctl: %08lx, comp %08lx\n", vidCtl,compose));
-                VIDOutD(V3_CONTROL, vidCtl);
-                VIDOutD(V_COMPOSE_MODE, compose | V3_COMMAND_FIRE);
-            }
-            
-            DBG_DD(ErrorF(" Done flips"));
-        }
-        else
-        {
-            DBG_DD(ErrorF("    Normal called\n"));
-            SaveVideoRegister(pVia, proReg|HQV_CONTROL, hqvCtl | HQV_FLIP_STATUS);
-
-            SetVideoControl(pVia, videoFlag, vidCtl);
-            FireVideoCommand(pVia, videoFlag, compose);
-            /*viaWaitHQVDone(pVia);*/
-
-            FlushVidRegBuffer(pVia);
-        }
-    }
-    else
-    {
-        SetVideoControl(pVia, videoFlag, vidCtl);
-        FireVideoCommand(pVia, videoFlag, compose);
-/*       viaWaitHQVDone(pVia);*/
-        FlushVidRegBuffer(pVia);
+		DBG_DD(ErrorF(" Wait flips6"));
+	    }
+	    
+	    if (videoFlag & VIDEO_1_INUSE) {
+		VIDOutD(V1_CONTROL, vidCtl);
+		VIDOutD(V_COMPOSE_MODE, compose | V1_COMMAND_FIRE);
+		if (pVia->swov.gdwUseExtendedFIFO) {
+		    /*Set Display FIFO*/
+		    DBG_DD(ErrorF(" Wait flips7"));
+		    viaWaitVBI(pVia);
+		    DBG_DD(ErrorF(" Wait flips 8"));
+		    hwp->writeSeq(hwp, 0x17, 0x2F);
+		    ViaSeqMask(hwp, 0x16, 0x14, 0x1F);
+		    hwp->writeSeq(hwp, 0x18, 0x56);
+		    DBG_DD(ErrorF(" Wait flips 9"));
+		}
+	    } else {
+		DBG_DD(ErrorF(" Wait flips 10"));
+		VIDOutD(V3_CONTROL, vidCtl);
+		VIDOutD(V_COMPOSE_MODE, compose | V3_COMMAND_FIRE);
+	    }
+	    DBG_DD(ErrorF(" Done flips"));
+	} else {
+	    DBG_DD(ErrorF("    Normal called\n"));
+	    SaveVideoRegister(pVia, HQV_CONTROL + proReg, hqvCtl | HQV_FLIP_STATUS);
+	    SetVideoControl(pVia, videoFlag, vidCtl);
+	    FireVideoCommand(pVia, videoFlag, compose);
+	    viaWaitHQVDone(pVia); 
+	    FlushVidRegBuffer(pVia);
+	}
+    } else {
+	SetVideoControl(pVia, videoFlag, vidCtl);
+	FireVideoCommand(pVia, videoFlag, compose);
+	viaWaitHQVDone(pVia); 
+	FlushVidRegBuffer(pVia);
     }
     pVia->swov.SWVideo_ON = TRUE;
-    
+
     DBG_DD(ErrorF(" Done Upd_Video"));
-    
+
     return TRUE;
 
 } /* Upd_Video */
@@ -1966,10 +1918,13 @@ VIAVidUpdateOverlay(ScrnInfoPtr pScrn, LPDDUPDATEOVERLAY pUpdate)
     int dstTop, dstBottom, dstLeft, dstRight;
     int panDX,panDY; /* Panning delta */
 
-    unsigned long proReg=0;
+    unsigned long proReg = 0;
+
 
     panDX = pVia->swov.panning_x; 
     panDY = pVia->swov.panning_y; 
+    pVia->swov.oldPanningX = pVia->swov.panning_x;
+    pVia->swov.oldPanningY = pVia->swov.panning_y;
 
     pUpdate->DstLeft   -= panDX;
     pUpdate->DstTop    -= panDY;
@@ -1984,6 +1939,8 @@ VIAVidUpdateOverlay(ScrnInfoPtr pScrn, LPDDUPDATEOVERLAY pUpdate)
         pUpdate->DstTop, pUpdate->DstBottom));
 
     if ((pVia->swov.SrcFourCC == FOURCC_YUY2) ||
+        (pVia->swov.SrcFourCC == FOURCC_RV15) ||
+        (pVia->swov.SrcFourCC == FOURCC_RV16) ||
         (pVia->swov.SrcFourCC == FOURCC_YV12) ||
         (pVia->swov.SrcFourCC == FOURCC_XVMC))
     {
@@ -1992,8 +1949,7 @@ VIAVidUpdateOverlay(ScrnInfoPtr pScrn, LPDDUPDATEOVERLAY pUpdate)
 
     if ((pVia->ChipId == PCI_CHIP_VT3259) &&
         !(videoFlag & VIDEO_1_INUSE))
-        proReg = REG_HQV1_INDEX;
-
+        proReg = PRO_HQV1_OFFSET;
 
     flags |= DDOVER_INTERLEAVED;
 
@@ -2004,7 +1960,7 @@ VIAVidUpdateOverlay(ScrnInfoPtr pScrn, LPDDUPDATEOVERLAY pUpdate)
     ResetVidRegBuffer(pVia);
 
     /*for SW decode HW overlay use*/
-    startAddr = VIDInD(proReg|HQV_SRC_STARTADDR_Y);
+    startAddr = VIDInD(HQV_SRC_STARTADDR_Y + proReg);
     
     if (flags & DDOVER_KEYDEST) {
 	haveColorKey = 1;
@@ -2017,8 +1973,7 @@ VIAVidUpdateOverlay(ScrnInfoPtr pScrn, LPDDUPDATEOVERLAY pUpdate)
     if (flags & DDOVER_BOB)
 	deinterlaceMode |= DDOVER_BOB;
     
-    /* check this is correct place to enable 3259 fifo */
-    if ((pVia->ChipId == PCI_CHIP_CLE3122 || pVia->ChipId == PCI_CHIP_VT3259) && (pScrn->currentMode->HDisplay > 1024)) {
+    if ((pVia->ChipId == PCI_CHIP_CLE3122) && (pScrn->currentMode->HDisplay > 1024)) {
 	DBG_DD(ErrorF("UseExtendedFIFO\n"));
 	pVia->swov.gdwUseExtendedFIFO = 1;
     } else
@@ -2054,6 +2009,8 @@ VIAVidUpdateOverlay(ScrnInfoPtr pScrn, LPDDUPDATEOVERLAY pUpdate)
     /* Save modified src & original dest rectangle param. */
     
     if ((pVia->swov.SrcFourCC == FOURCC_YUY2) ||
+        (pVia->swov.SrcFourCC == FOURCC_RV15) ||
+        (pVia->swov.SrcFourCC == FOURCC_RV16) ||
 	(pVia->swov.SrcFourCC == FOURCC_YV12) ||
 	(pVia->swov.SrcFourCC == FOURCC_XVMC)) {   
 	pVia->swov.SWDevice.gdwSWDstLeft   = pUpdate->DstLeft + panDX;
@@ -2106,19 +2063,20 @@ ViaOverlayHide(ScrnInfoPtr pScrn)
     unsigned long proReg = 0;
 
     if ((pVia->swov.SrcFourCC == FOURCC_YUY2) ||
+        (pVia->swov.SrcFourCC == FOURCC_RV15) ||
+        (pVia->swov.SrcFourCC == FOURCC_RV16) ||
         (pVia->swov.SrcFourCC == FOURCC_YV12) ||
         (pVia->swov.SrcFourCC == FOURCC_XVMC))
         videoFlag = pVia->swov.gdwVideoFlagSW;
 
     if ((pVia->ChipId == PCI_CHIP_VT3259) &&
         !(videoFlag & VIDEO_1_INUSE))
-        proReg = REG_HQV1_INDEX;
-
+        proReg = PRO_HQV1_OFFSET;
     
     ResetVidRegBuffer(pVia);
     
     if (pVia->HWDiff.dwHQVDisablePatch)
-        ViaSeqMask(hwp, 0x2E, 0x00, 0x10);
+	ViaSeqMask(hwp, 0x2E, 0x00, 0x10);
     
     SaveVideoRegister(pVia, V_FIFO_CONTROL, V1_FIFO_PRETHRESHOLD12 |
 		      V1_FIFO_THRESHOLD8 | V1_FIFO_DEPTH16);
@@ -2126,23 +2084,23 @@ ViaOverlayHide(ScrnInfoPtr pScrn)
 		      | ALPHA_FIFO_DEPTH8 | V3_FIFO_THRESHOLD24 | V3_FIFO_DEPTH32);
     
     if (videoFlag & VIDEO_HQV_INUSE)
-        SaveVideoRegister(pVia, proReg|HQV_CONTROL, VIDInD(proReg|HQV_CONTROL) & ~HQV_ENABLE);
+	SaveVideoRegister(pVia, HQV_CONTROL + proReg, VIDInD(HQV_CONTROL) & ~HQV_ENABLE);
     
     if (videoFlag & VIDEO_1_INUSE)
-        SaveVideoRegister(pVia, V1_CONTROL, VIDInD(V1_CONTROL) & ~V1_ENABLE);
+	SaveVideoRegister(pVia, V1_CONTROL, VIDInD(V1_CONTROL) & ~V1_ENABLE);
     else
-        SaveVideoRegister(pVia, V3_CONTROL, VIDInD(V3_CONTROL) & ~V3_ENABLE);
+	SaveVideoRegister(pVia, V3_CONTROL, VIDInD(V3_CONTROL) & ~V3_ENABLE);
     
     FireVideoCommand(pVia, videoFlag, VIDInD(V_COMPOSE_MODE));
     FlushVidRegBuffer(pVia);
     
     if (pVia->HWDiff.dwHQVDisablePatch)
-        ViaSeqMask(hwp, 0x2E, 0x10, 0x10);
+	ViaSeqMask(hwp, 0x2E, 0x10, 0x10);
     
     pVia->swov.SWVideo_ON = FALSE;
     
     if (pVia->swov.gdwUseExtendedFIFO)
-        ViaSetPrimaryFIFO(pScrn, pScrn->currentMode);
+	ViaSetPrimaryFIFO(pScrn, pScrn->currentMode);
 
     pVia->VideoStatus &= ~VIDEO_SWOV_ON;
 }

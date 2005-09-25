@@ -304,6 +304,7 @@ typedef struct _VIA {
     unsigned long	old_dwUseExtendedFIFO;
     
     ViaSharedPtr	sharedData;
+    Bool                useDmaBlit;
 
 #ifdef HAVE_DEBUG
     Bool                DumpVGAROM;

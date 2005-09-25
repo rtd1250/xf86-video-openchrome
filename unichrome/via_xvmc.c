@@ -329,7 +329,7 @@ ViaInitXVMC(ScreenPtr pScreen)
   VIAPtr pVia = VIAPTR(pScrn);
   ViaXvMCPtr vXvMC = &(pVia->xvmc);
   volatile ViaXvMCSAreaPriv *saPriv;
-  drmVersionPtr drmVer;
+  VIADRIPtr pVIADRI = pVia->pDRIInfo->devPrivate;
 
   pVia->XvMCEnabled = 0;
 
@@ -346,32 +346,26 @@ ViaInitXVMC(ScreenPtr pScreen)
       return;
   }
 
-  if (NULL == (drmVer = drmGetVersion(pVia->drmFD))) {
-      xf86DrvMsg(pScrn->scrnIndex, X_WARNING, 
-		 "[XvMC] Could not get drm version. Disabling XvMC\n");
-      return;
-  }
-  if (((drmVer->version_major <= 2) && (drmVer->version_minor < 4))) {
+  if (((pVIADRI->drmVerMajor <= 2) && (pVIADRI->drmVerMinor< 4))) {
       xf86DrvMsg(pScrn->scrnIndex, X_WARNING, 
 		 "[XvMC] Kernel drm is not compatible with XvMC.\n"); 
       xf86DrvMsg(pScrn->scrnIndex, X_WARNING, 
 		 "[XvMC] Kernel drm version: %d.%d.%d "
 		 "and need at least version 2.4.0.\n",
-		 drmVer->version_major,drmVer->version_minor,
-		 drmVer->version_patchlevel); 
+		 pVIADRI->drmVerMajor,
+		 pVIADRI->drmVerMinor,
+		 pVIADRI->drmVerPL); 
       xf86DrvMsg(pScrn->scrnIndex, X_WARNING, 
 		 "[XvMC] Please update. Disabling XvMC.\n");
-      drmFreeVersion(drmVer);
       return;
   } 
-  if ((drmVer->version_major >= 3)) {
+  if ((pVIADRI->drmVerMajor >= 3)) {
       xf86DrvMsg(pScrn->scrnIndex, X_WARNING, 
 		 "[XvMC] XvMC X driver may not be compatible "
 		 "with kernel drm.\n");
       xf86DrvMsg(pScrn->scrnIndex, X_WARNING, 
 		 "[XvMC] Continuing, but strange things may happen.\n");
   } 
-  drmFreeVersion(drmVer);
 
   vXvMC->mmioBase = pVia->registerHandle;
 

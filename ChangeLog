@@ -1,3 +1,33 @@
+2005-09-25  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
+	* unichrome/via.h:
+	* unichrome/via_dri.c: (VIADRIRingBufferInit),
+	(VIADRIFinishScreenInit):
+	* unichrome/via_dri.h:
+	* unichrome/via_driver.h:
+	* unichrome/via_drm.h:
+	* unichrome/via_priv.h:
+	* unichrome/via_swov.c: (viaWaitHQVFlip), (viaWaitHQVFlipClear),
+	(viaWaitHQVDone), (viaOverlayGetV1V3Format),
+	(viaOverlayGetSrcStartAddress), (viaOverlayGetFetch),
+	(viaSetColorSpace), (ViaSetVidCtl), (AddHQVSurface),
+	(ViaSwovSurfaceCreate), (ViaSwovSurfaceDestroy),
+	(SetFIFO_V3_64or32or32), (SetFIFO_V3_64or32or16), (SetColorKey),
+	(SetChromaKey), (SetHQVFetch), (Upd_Video), (VIAVidUpdateOverlay),
+	(ViaOverlayHide):
+	* unichrome/via_video.c: (DecideOverlaySupport), (viaResetVideo),
+	(viaSaveVideo), (viaExitVideo), (viaInitVideo), (viaReputImage),
+	(viaSetupAdaptors), (viaStopVideo), (Flip), (nv12cp),
+	(viaDmaBlitImage), (viaPutImage), (viaQueryImageAttributes):
+	* unichrome/via_xvmc.c: (ViaInitXVMC):
+	* unichrome/via_xvpriv.h:
+
+	Big Xv update.
+	-Bring Xv in sync with Xorg, which includes RV15 and RV16 support.
+	-Add support for PCI DMA Xv image transfer. This requires DRM >= 2.7.0,
+	 and does not yet work on Unichrome Pro group A, since YV12->NV12 hardware
+	 conversion is not yet implemented. 
+	
 2005-08-13  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
 	* unichrome/via_swov.c: (ViaSwovSurfaceDestroy):

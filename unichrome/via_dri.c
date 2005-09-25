@@ -162,13 +162,8 @@ VIADRIRingBufferInit(ScrnInfoPtr pScrn)
 
     if (pVia->agpEnable) {
 	drm_via_dma_init_t ringBufInit;
-	drmVersionPtr drmVer;
 
-	if (NULL == (drmVer = drmGetVersion(pVia->drmFD))) {
-	    return FALSE;
-	}
-
-	if (((drmVer->version_major <= 1) && (drmVer->version_minor <= 3))) {
+	if (((pVIADRI->drmVerMajor <= 1) && (pVIADRI->drmVerMinor <= 3))) {
 	    return FALSE;
 	} 
 
@@ -794,6 +789,7 @@ VIADRIFinishScreenInit(ScreenPtr pScreen)
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
     VIAPtr pVia = VIAPTR(pScrn);
     VIADRIPtr pVIADRI;
+    drmVersionPtr drmVer;
 
     pVia->pDRIInfo->driverSwapMethod = DRI_HIDE_X_CONTEXT;
     
@@ -841,6 +837,15 @@ VIADRIFinishScreenInit(ScreenPtr pScreen)
     /* TODO */
     pVIADRI->scrnX=pVIADRI->width;
     pVIADRI->scrnY=pVIADRI->height;
+    
+    if (NULL == (drmVer = drmGetVersion(pVia->drmFD))) {
+	VIADRICloseScreen(pScreen);
+	return FALSE;
+    }
+    pVIADRI->drmVerMajor = drmVer->version_major;
+    pVIADRI->drmVerMinor = drmVer->version_minor;
+    pVIADRI->drmVerPL = drmVer->version_patchlevel;
+    drmFreeVersion(drmVer);
 
     /* Initialize IRQ */
     if (pVia->DRIIrqEnable) 

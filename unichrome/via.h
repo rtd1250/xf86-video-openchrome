@@ -199,7 +199,7 @@
 #define HQV_DST_STRIDE          0x1F4
 #define HQV_SRC_STRIDE          0x1F8
 
-
+#define PRO_HQV1_OFFSET         0x1000
 /*
  *  Video command definition
  */

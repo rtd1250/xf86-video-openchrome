@@ -14,8 +14,9 @@
  * FOURCC definitions
  */
 
-#define FOURCC_NV12   0x3231564E
 #define FOURCC_XVMC     (('C' << 24) + ('M' << 16) + ('V' << 8) + 'X')
+#define FOURCC_RV15     (('5' << 24) + ('1' << 16) + ('V' << 8) + 'R')
+#define FOURCC_RV16     (('6' << 24) + ('1' << 16) + ('V' << 8) + 'R')
 
 /*
  * Structures for create surface
@@ -154,6 +155,9 @@ typedef struct  {
 /* For panning mode use */
     int panning_x;
     int panning_y;
+    int oldPanningX;
+    int oldPanningY;
+
 } swovRec, *swovPtr;
 
 #endif /* _VIA_PRIV_H_ */

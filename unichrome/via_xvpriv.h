@@ -60,6 +60,21 @@ typedef struct {
 
     void *xvmc_priv;
     CARD32 lastId;
+    
+    /*
+     * For PCI DMA image transfer to frame-buffer memory.
+     */
+
+    unsigned char *dmaBounceBuffer;
+    unsigned dmaBounceStride;
+    unsigned dmaBounceLines;
+
+    /*
+     * For hardware YV12 to NV12 conversion.
+     */
+
+    VIAMem nv12Mem;
+    char *nv12Buffer;
 
 } viaPortPrivRec, *viaPortPrivPtr;
 

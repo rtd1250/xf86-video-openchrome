@@ -63,6 +63,9 @@ typedef struct {
     int sarea_priv_offset;
     int ringBufActive;
     unsigned int reg_pause_addr;
+    int drmVerMajor;
+    int drmVerMinor;
+    int drmVerPL;
 } VIADRIRec, *VIADRIPtr;
 
 typedef struct {
