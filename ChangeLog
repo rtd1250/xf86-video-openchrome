@@ -1,3 +1,12 @@
+2005-10-18  Ivor Hewitt
+
+	* unichrome/via_driver.c: (VIAPreInit):
+	* unichrome/via_id.c:
+	* unichrome/via_id.h:
+	* unichrome/via_mode.h:
+
+	-Device id additions. AsRock P4VM800 reported by Mariano Benedettini
+
 2005-09-25  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
 	* unichrome/via.h:

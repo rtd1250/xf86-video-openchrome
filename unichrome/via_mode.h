@@ -87,6 +87,7 @@ static struct ViaDotClock {
     {  64995, 0x0D3B, 0x6b8c01 }, 
     {  65000, 0x0D3B, 0x6b8c01 }, /* Slightly unstable on PM800 */ 
     {  65028, 0x866D, 0x6b8c01 }, 
+    {  74480, 0x156E, 0x288800 }, 
     {  75000, 0x156E, 0x288800 }, 
     {  78800, 0x442C, 0x2a8800 }, 
     {  81135, 0x0622, 0x428801 }, 
