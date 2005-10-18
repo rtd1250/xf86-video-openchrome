@@ -241,7 +241,6 @@ VIAVidHWDiffInit(ScrnInfoPtr pScrn)
         HWDiff->dwHQVInitPatch = VID_HWDIFF_FALSE;
         HWDiff->dwHQVDisablePatch = VID_HWDIFF_TRUE;
         break;
-#ifdef HAVE_K8M800
     case VIA_K8M800:
         HWDiff->dwThreeHQVBuffer = VID_HWDIFF_TRUE;
         HWDiff->dwHQVFetchByteUnit = VID_HWDIFF_TRUE;
@@ -249,8 +248,7 @@ VIAVidHWDiffInit(ScrnInfoPtr pScrn)
         HWDiff->dwHQVInitPatch = VID_HWDIFF_FALSE;
         HWDiff->dwHQVDisablePatch = VID_HWDIFF_TRUE;
         break;
-#endif /* HAVE_K8M800 */
-#ifdef HAVE_PM800
+    case VIA_VM800:
     case VIA_PM800:
         HWDiff->dwThreeHQVBuffer = VID_HWDIFF_TRUE;
         HWDiff->dwHQVFetchByteUnit = VID_HWDIFF_TRUE;
@@ -258,7 +256,6 @@ VIAVidHWDiffInit(ScrnInfoPtr pScrn)
         HWDiff->dwHQVInitPatch = VID_HWDIFF_FALSE;
         HWDiff->dwHQVDisablePatch = VID_HWDIFF_FALSE;
         break;
-#endif /* HAVE_PM800 */
     default:
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "VIAVidHWDiffInit: Unhandled ChipSet.\n");
     }

@@ -1185,7 +1185,6 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
 
     xf86DrvMsg(pScrn->scrnIndex, from, "Chipset: \"%s\"\n", pScrn->chipset);
 
-#ifndef HAVE_K8M800
     if (pVia->Chipset == VIA_K8M800) {
 	xf86DrvMsg(pScrn->scrnIndex, X_WARNING, 
 		   "This device seems to be a VIA Unichrome Pro K8M800.\n");
@@ -1194,8 +1193,6 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
 	xf86DrvMsg(pScrn->scrnIndex, X_WARNING, 
 		   "Please contact unichrome.sourceforge.net ASAP to resolve this.\n");
     }
-#endif /* HAVE_K8M800 */
-#ifndef HAVE_PM800
     if (pVia->Chipset == VIA_PM800) {
 	xf86DrvMsg(pScrn->scrnIndex, X_WARNING, 
 		   "This device seems to be a VIA Unichrome Pro PM800, PM880 or CN400.\n");
@@ -1204,7 +1201,6 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
 	xf86DrvMsg(pScrn->scrnIndex, X_WARNING, 
 		   "Please contact unichrome.sourceforge.net ASAP to resolve this.\n");
     }
-#endif /* HAVE_PM800 */
 
     pVia->PciTag = pciTag(pVia->PciInfo->bus, pVia->PciInfo->device,
                           pVia->PciInfo->func);

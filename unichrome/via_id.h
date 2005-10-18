@@ -24,15 +24,6 @@
 #ifndef _VIA_ID_H_
 #define _VIA_ID_H_ 1
 
-/*
- * K8M800 and PM800/PM880/CN400 are currently untested
- * and support is disabled.
- */
-
-#define HAVE_K8M800
-#define HAVE_PM800
-
-
 /* Chip tags.  These are used to group the adapters into
  * related families.
  */

@@ -44,7 +44,6 @@
  * + loads of semi-embedded devices.
  *
  * km400:
- * Abit VA-20: ? km400 vs km400a ?
  * ECS KM400-M
  * ECS KM400-M2
  * ECS KM400A-M2
@@ -60,7 +59,6 @@
  * Biostar Ideq 210V (km400a)
  * Biostar M7VIZ
  * Chaintech MK8M800
- * ECS k8m800-m2
  * Epox EP-8KMM5I (km400a)
  * MSI K8M Neo-V
  * MSI K8MM-V
@@ -70,12 +68,9 @@
  * Soltek SL-K8M800I-R
  *
  * pm800:
- * Asrock P4VM8
  * Biostar Ideq 210M
  * Biostar P4VMA-M
  * Biostar P4M80-M7 (is this even a unichrome?)
- * Chaintech MPM800
- * Gigabyte 8VM800M
  * PcChips M955G
  * PcChips M957G
  * Soltek SL-PM800I
@@ -98,6 +93,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Acer Aspire 135x",                      VIA_KM400,   0x1025, 0x0033, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
     {"Asustek A7V8X-MX",                      VIA_KM400,   0x1043, 0x80ED, VIA_DEVICE_CRT},
     {"Asustek A7V8X-MX SE/A7V400-MX",         VIA_KM400,   0x1043, 0x8118, VIA_DEVICE_CRT},
+    {"Asustek A7VT (Terminator)",             VIA_KM400,   0x1043, 0x813E, VIA_DEVICE_CRT | VIA_DEVICE_TV},
     {"Mitac 8375X",                           VIA_KM400,   0x1071, 0x8375, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV}, /* aka UMAX 585T */
     {"Soltek SL-75MIV2",                      VIA_KM400,   0x1106, 0x0000, VIA_DEVICE_CRT}, /* VIA/0x0000 */
     {"Soltek QBic",                           VIA_KM400,   0x1106, 0x3205, VIA_DEVICE_CRT | VIA_DEVICE_TV},
@@ -121,6 +117,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Acer Aspire 136x",                      VIA_K8M800,  0x1025, 0x006E, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
     {"Asus K8V-MX",                           VIA_K8M800,  0x1043, 0x8129, VIA_DEVICE_CRT},
     {"Mitac 8399",                            VIA_K8M800,  0x1071, 0x8399, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV}, /* aka "pogolinux konabook 3100" */
+    {"Mitac 8899",                            VIA_K8M800,  0x1071, 0x8899, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
     {"DFI K8M800-MLVF",                       VIA_K8M800,  0x1106, 0x3108, VIA_DEVICE_CRT}, /* VIA/K8M800 -- ??? PciInfo Alignment issue ??? */
     {"Shuttle FX83",                          VIA_K8M800,  0x1297, 0xF683, VIA_DEVICE_CRT | VIA_DEVICE_TV},
     {"Sharp Actius AL27",                     VIA_K8M800,  0x13BD, 0x1044, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
@@ -131,6 +128,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Abit KV-80",                            VIA_K8M800,  0x147B, 0x1419, VIA_DEVICE_CRT},
     {"Averatec 327x",                         VIA_K8M800,  0x14FF, 0x0315, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Averatec 54xx",                         VIA_K8M800,  0x1509, 0x3930, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
+    {"FIC K8M-800M",                          VIA_K8M800,  0x1509, 0x6001, VIA_DEVICE_CRT},
     {"Biostar K8VGA-M",                       VIA_K8M800,  0x1565, 0x1203, VIA_DEVICE_CRT},
     {"Packard Bell B3 800",                   VIA_K8M800,  0x1631, 0xC009, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"ASRock K8Upgrade-VM800",                VIA_K8M800,  0x1849, 0x3108, VIA_DEVICE_CRT},
@@ -139,6 +137,8 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Biostar P4VMA-M",                       VIA_PM800,   0x1565, 0x1202, VIA_DEVICE_CRT},
     {"Fujitsu/Siemens Amilo Pro V2010",       VIA_PM800,   0x1734, 0x1078, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
     {"ASRock P4VM8",                          VIA_PM800,   0x1849, 0x3118, VIA_DEVICE_CRT},
+    {"Chaintech MPM800-3",                    VIA_PM800,   0x270F, 0x7671, VIA_DEVICE_CRT},
+
     /* VM800 */
     {"ASRock P4VM800",                        VIA_VM800,   0x1849, 0x3344, VIA_DEVICE_CRT},
     /* keep this */
