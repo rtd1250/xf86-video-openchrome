@@ -1,5 +1,12 @@
 2005-10-27  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
+	* unichrome/via_video.c: (viaPutImage):
+
+	-Make via_video.c compile without -DXF86DRI. Broken with the
+	-dmablit commit. (Reported by Luc Verhaegen)
+	
+2005-10-27  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
 	* unichrome/via_accel.c: (VIAInitAccel):
 
 	-Fix HW cursor memory allocation.

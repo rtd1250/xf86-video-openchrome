@@ -972,6 +972,8 @@ nv12cp(unsigned char *dst,
     }
 }
 
+#ifdef XF86DRI
+
 static int
 viaDmaBlitImage(VIAPtr pVia,
 		viaPortPrivPtr pPort, 
@@ -1083,7 +1085,7 @@ viaDmaBlitImage(VIAPtr pVia,
     return Success;    
 }
     
-    
+#endif    
 
 static int
 viaPutImage( 
@@ -1139,10 +1141,12 @@ viaPutImage(
 		dstPitch = pVia->swov.SWDevice.dwPitch;
 
 		if (pVia->useDmaBlit) {
+#ifdef XF86DRI
 		    viaDmaBlitImage(pVia, pPriv, buf,  
 				    (unsigned char *)pVia->swov.SWDevice.lpSWOverlaySurface[pVia->dwFrameNum&1] -
 				    (unsigned char *)pVia->FBBase,
 				    width, height, dstPitch, id);
+#endif
 		} else {
 		    switch(id) {
 		    case FOURCC_YV12:
