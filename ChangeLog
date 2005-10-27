@@ -1,3 +1,9 @@
+2005-10-27  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
+	* unichrome/via_accel.c: (VIAInitAccel):
+
+	-Fix HW cursor memory allocation.
+
 2005-10-18  Ivor Hewitt <ivor-at-ivor-dot-org>
 
 	* unichrome/via_bandwidth.c: (ViaSetPrimaryFIFO),
