@@ -1,4 +1,11 @@
-2005-10-27  Thomas Hellström  <set EMAIL_ADDRESS environment variable>
+2005-10-27  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
+	* unichrome/via_video.c: (viaExitVideo), (viaSaveVideo),
+	(viaRestoreVideo), (VIAVidAdjustFrame):
+
+	-Fix server crash when compiled without -DXvExtension.
+	
+2005-10-27  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
 	* unichrome/via_mode.c: (ViaModeDotClockTranslate):
 

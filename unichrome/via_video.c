@@ -76,6 +76,10 @@
 
 #ifndef XvExtension
 void viaInitVideo(ScreenPtr pScreen) {}
+void viaExitVideo(ScrnInfoPtr pScrn) {}
+void viaSaveVideo(ScrnInfoPtr pScrn) {}
+void viaRestoreVideo(ScrnInfoPtr pScrn) {}
+void VIAVidAdjustFrame(ScrnInfoPtr pScrn, int x, int y) {}
 #else
 
 static vidCopyFunc viaFastVidCpy = NULL;
