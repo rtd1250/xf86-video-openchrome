@@ -60,8 +60,8 @@ void VIAFreeLinear(VIAMemPtr mem)
 	    return;
 	case 2:
 #ifdef XF86DRI
-	    if(drmCommandWrite(mem->drm_fd, DRM_VIA_FREEMEM,
-			       &mem->drm, sizeof(drm_via_mem_t)) < 0)
+	    if(drmCommandWriteRead(mem->drm_fd, DRM_VIA_FREEMEM,
+				   &mem->drm, sizeof(drm_via_mem_t)) < 0)
 		ErrorF("DRM module failed free.\n");
 #endif
 	    mem->pool = 0;
@@ -109,9 +109,9 @@ unsigned long VIAAllocLinear(VIAMemPtr mem, ScrnInfoPtr pScrn, unsigned long siz
 	mem->drm_fd = pVia->drmFD;
 	mem->drm.context = 1;
 	mem->drm.size = size;
-	mem->drm.type = VIDEO;
-	ret = drmCommandWrite(mem->drm_fd, DRM_VIA_ALLOCMEM, &mem->drm, 
-			      sizeof(drm_via_mem_t));
+	mem->drm.type = VIA_MEM_VIDEO;
+	ret = drmCommandWriteRead(mem->drm_fd, DRM_VIA_ALLOCMEM, &mem->drm, 
+				  sizeof(drm_via_mem_t));
 	if (ret || (size != mem->drm.size)) {
 #ifdef X_USE_LINEARFB
 	    /*

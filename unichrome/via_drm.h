@@ -16,7 +16,7 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL
- * VIA, S3 GRAPHICS, AND/OR ITS SUPPLIERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * THE AUTHOR(S) OR COPYRIGHT HOLDER(S) BE LIABLE FOR ANY CLAIM, DAMAGES OR
  * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
@@ -31,7 +31,7 @@
 #ifndef _VIA_DEFINES_
 #define _VIA_DEFINES_
 
-#ifndef __KERNEL__
+#if !defined(__KERNEL__) && !defined(_KERNEL)
 #include "via_drmclient.h"
 #endif
 
@@ -107,8 +107,13 @@
 #define VIA_BACK    0x2
 #define VIA_DEPTH   0x4
 #define VIA_STENCIL 0x8
-#define VIDEO 0
-#define AGP 1
+
+#define VIA_MEM_VIDEO   0	/* matches drm constant */
+#define VIA_MEM_AGP     1	/* matches drm constant */
+#define VIA_MEM_SYSTEM  2		
+#define VIA_MEM_MIXED   3
+#define VIA_MEM_UNKNOWN 4
+
 typedef struct {
 	uint32_t offset;
 	uint32_t size;
@@ -162,7 +167,7 @@ typedef struct _drm_via_dma_init {
 } drm_via_dma_init_t;
 
 typedef struct _drm_via_cmdbuffer {
-	char *buf;
+	char __user *buf;
 	unsigned long size;
 } drm_via_cmdbuffer_t;
 
@@ -194,8 +199,12 @@ typedef struct _drm_via_sarea {
 
 	unsigned int XvMCDisplaying[VIA_NR_XVMC_PORTS];
 	unsigned int XvMCSubPicOn[VIA_NR_XVMC_PORTS];
-	unsigned int XvMCCtxNoGrabbed;	/* Last context to hold decoder */
+	unsigned int XvMCCtxNoGrabbed;	/* Last context to hold decoder */	
 
+	/* Used by the 3d driver only at this point, for pageflipping:
+	 */
+
+        unsigned int pfCurrentOffset;
 } drm_via_sarea_t;
 
 typedef struct _drm_via_cmdbuf_size {
@@ -258,21 +267,4 @@ typedef struct drm_via_dmablit {
 } drm_via_dmablit_t;
 
 
-#ifdef __KERNEL__
-
-int via_fb_init(DRM_IOCTL_ARGS);
-int via_mem_alloc(DRM_IOCTL_ARGS);
-int via_mem_free(DRM_IOCTL_ARGS);
-int via_agp_init(DRM_IOCTL_ARGS);
-int via_map_init(DRM_IOCTL_ARGS);
-int via_decoder_futex(DRM_IOCTL_ARGS);
-int via_dma_init(DRM_IOCTL_ARGS);
-int via_cmdbuffer(DRM_IOCTL_ARGS);
-int via_flush_ioctl(DRM_IOCTL_ARGS);
-int via_pci_cmdbuffer(DRM_IOCTL_ARGS);
-int via_cmdbuf_size(DRM_IOCTL_ARGS);
-int via_wait_irq(DRM_IOCTL_ARGS);
-int via_dma_blit(DRM_IOCTL_ARGS);
-int via_dma_blit_sync(DRM_IOCTL_ARGS);
-#endif
 #endif				/* _VIA_DRM_H_ */

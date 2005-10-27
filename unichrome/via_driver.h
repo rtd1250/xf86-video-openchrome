@@ -270,8 +270,8 @@ typedef struct _VIA {
     int 		numVisualConfigs;
     __GLXvisualConfig* 	pVisualConfigs;
     VIAConfigPrivPtr 	pVisualConfigsPriv;
-    unsigned long 	agpHandle;
-    unsigned long 	registerHandle;
+    drm_handle_t 	agpHandle;
+    drm_handle_t 	registerHandle;
     unsigned long 	agpAddr;
     drmAddress          agpMappedAddr;
     unsigned char 	*agpBase;
@@ -279,6 +279,9 @@ typedef struct _VIA {
     Bool 		IsPCI;
     Bool 		drixinerama;
     ViaXvMC             xvmc;
+    int                 drmVerMajor;
+    int                 drmVerMinor;
+    int                 drmVerPL;
 #endif
     Bool		DRIIrqEnable;
     Bool                agpEnable;
@@ -386,5 +389,13 @@ unsigned long viaXvMCPutImageSize(ScrnInfoPtr pScrn);
 
 /* via_i2c.c */
 void ViaI2CInit(ScrnInfoPtr pScrn);
+
+#ifdef XF86DRI
+Bool VIADRIScreenInit(ScreenPtr pScreen);
+void VIADRICloseScreen(ScreenPtr pScreen);
+Bool VIADRIFinishScreenInit(ScreenPtr pScreen);
+void VIADRIRingBufferCleanup(ScrnInfoPtr pScrn);
+Bool VIADRIRingBufferInit(ScrnInfoPtr pScrn);
+#endif /* XF86DRI */
 
 #endif /* _VIA_DRIVER_H_ */

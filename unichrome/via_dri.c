@@ -163,7 +163,7 @@ VIADRIRingBufferInit(ScrnInfoPtr pScrn)
     if (pVia->agpEnable) {
 	drm_via_dma_init_t ringBufInit;
 
-	if (((pVIADRI->drmVerMajor <= 1) && (pVIADRI->drmVerMinor <= 3))) {
+	if (((pVia->drmVerMajor <= 1) && (pVia->drmVerMinor <= 3))) {
 	    return FALSE;
 	} 
 
@@ -598,7 +598,6 @@ Bool VIADRIScreenInit(ScreenPtr pScreen)
     /* Check that the GLX, DRI, and DRM modules have been loaded by testing
     * for canonical symbols in each module. */
     if (!xf86LoaderCheckSymbol("GlxSetVisualConfigs")) return FALSE;
-    if (!xf86LoaderCheckSymbol("DRIScreenInit"))       return FALSE;
     if (!xf86LoaderCheckSymbol("drmAvailable"))        return FALSE;
     if (!xf86LoaderCheckSymbol("DRIQueryVersion")) {
 	xf86DrvMsg(pScreen->myNum, X_ERROR,
@@ -607,7 +606,6 @@ Bool VIADRIScreenInit(ScreenPtr pScreen)
     }
     
     /* Check the DRI version */
-
     {
         int major, minor, patch;
         DRIQueryVersion(&major, &minor, &patch);
@@ -634,9 +632,9 @@ Bool VIADRIScreenInit(ScreenPtr pScreen)
         ((pciConfigPtr)pVia->PciInfo->thisCard)->busnum,
         ((pciConfigPtr)pVia->PciInfo->thisCard)->devnum,
         ((pciConfigPtr)pVia->PciInfo->thisCard)->funcnum);
-    pDRIInfo->ddxDriverMajorVersion = VIA_DRI_VERSION_MAJOR;
-    pDRIInfo->ddxDriverMinorVersion = VIA_DRI_VERSION_MINOR;
-    pDRIInfo->ddxDriverPatchVersion = PATCHLEVEL;
+    pDRIInfo->ddxDriverMajorVersion = VIA_DRIDDX_VERSION_MAJOR;
+    pDRIInfo->ddxDriverMinorVersion = VIA_DRIDDX_VERSION_MINOR;
+    pDRIInfo->ddxDriverPatchVersion = VIA_DRIDDX_VERSION_PATCH;
 #if (DRIINFO_MAJOR_VERSION == 5)
     pDRIInfo->frameBufferPhysicalAddress = (pointer) pVia->FrameBufferBase;
 #else
@@ -664,7 +662,7 @@ Bool VIADRIScreenInit(ScreenPtr pScreen)
     /* For now the mapping works by using a fixed size defined
     * in the SAREA header
     */
-    if (sizeof(XF86DRISAREARec)+sizeof(VIASAREAPriv) > SAREA_MAX) {
+    if (sizeof(XF86DRISAREARec)+sizeof(drm_via_sarea_t) > SAREA_MAX) {
 	xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Data does not fit in SAREA\n");
 	DRIDestroyInfoRec(pVia->pDRIInfo);
 	pVia->pDRIInfo = NULL;
@@ -713,10 +711,9 @@ Bool VIADRIScreenInit(ScreenPtr pScreen)
 	return FALSE;
     }
     pVIADRI->regs.size = VIA_MMIO_REGSIZE;
-    pVIADRI->regs.map = 0;
     pVIADRI->regs.handle = pVia->registerHandle;
     xf86DrvMsg(pScreen->myNum, X_INFO, "[drm] mmio Registers = 0x%08lx\n",
-	pVIADRI->regs.handle);
+               (unsigned long) pVIADRI->regs.handle);
     
     pVIADRI->drixinerama = pVia->drixinerama;
 
@@ -820,9 +817,9 @@ VIADRIFinishScreenInit(ScreenPtr pScreen)
 
     /* set SAREA value */
     {
-	VIASAREAPriv *saPriv;
+	drm_via_sarea_t *saPriv;
 
-	saPriv=(VIASAREAPriv*)DRIGetSAREAPrivate(pScreen);
+	saPriv=(drm_via_sarea_t *)DRIGetSAREAPrivate(pScreen);
 	assert(saPriv);
 	memset(saPriv, 0, sizeof(*saPriv));
 	saPriv->ctxOwner = -1;
@@ -842,9 +839,9 @@ VIADRIFinishScreenInit(ScreenPtr pScreen)
 	VIADRICloseScreen(pScreen);
 	return FALSE;
     }
-    pVIADRI->drmVerMajor = drmVer->version_major;
-    pVIADRI->drmVerMinor = drmVer->version_minor;
-    pVIADRI->drmVerPL = drmVer->version_patchlevel;
+    pVia->drmVerMajor = drmVer->version_major;
+    pVia->drmVerMinor = drmVer->version_minor;
+    pVia->drmVerPL = drmVer->version_patchlevel;
     drmFreeVersion(drmVer);
 
     /* Initialize IRQ */
@@ -919,8 +916,8 @@ static Bool VIADRIMapInit(ScreenPtr pScreen, VIAPtr pVia)
 	return FALSE;
     }
     
-    xf86DrvMsg(pScreen->myNum, X_INFO,
-	"[drm] register handle = 0x%08lx\n", pVia->registerHandle);
+    xf86DrvMsg(pScreen->myNum, X_INFO, "[drm] register handle = 0x%08lx\n",
+               (unsigned long) pVia->registerHandle);
 
     return TRUE;
 }

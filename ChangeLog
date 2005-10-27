@@ -1,5 +1,19 @@
 2005-10-27  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
+	* unichrome/via_dri.c: (VIADRIRingBufferInit), (VIADRIScreenInit),
+	(VIADRIFinishScreenInit), (VIADRIMapInit):
+	* unichrome/via_dri.h:
+	* unichrome/via_driver.h:
+	* unichrome/via_drm.h:
+	* unichrome/via_memory.c: (VIAFreeLinear), (VIAAllocLinear):
+	* unichrome/via_video.c: (viaInitVideo):
+	* unichrome/via_xvmc.c: (ViaInitXVMC):
+
+	-Sync dri handling with Xorg. This should hopefully make it run
+	-with Mesa 6.4 again. (Luc Verhaegen, Eric Anholt, Me)
+
+2005-10-27  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
 	* unichrome/via_video.c: (viaPutImage):
 
 	-Make via_video.c compile without -DXF86DRI. Broken with the

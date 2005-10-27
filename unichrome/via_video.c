@@ -472,18 +472,14 @@ void viaInitVideo(ScreenPtr pScreen)
     
     pVia->useDmaBlit = FALSE;
 #ifdef XF86DRI
-    {
-	VIADRIPtr pVIADRI = pVia->pDRIInfo->devPrivate;
-
-	pVia->useDmaBlit = pVia->directRenderingEnabled &&
-	    ((pVia->Chipset == VIA_CLE266) || 
-	     (pVia->Chipset == VIA_KM400) ||
-	     (pVia->Chipset == VIA_K8M800));
-	if ((pVIADRI->drmVerMajor < 2) || 
-	    ((pVIADRI->drmVerMajor == 2) && 
-	     (pVIADRI->drmVerMinor < 7)))
-	    pVia->useDmaBlit = FALSE;
-    }
+    pVia->useDmaBlit = pVia->directRenderingEnabled &&
+	((pVia->Chipset == VIA_CLE266) || 
+	 (pVia->Chipset == VIA_KM400) ||
+	 (pVia->Chipset == VIA_K8M800));
+    if ((pVia->drmVerMajor < 2) || 
+	((pVia->drmVerMajor == 2) && 
+	 (pVia->drmVerMinor < 7)))
+	pVia->useDmaBlit = FALSE;
 #endif
 
     if (pVia->useDmaBlit)

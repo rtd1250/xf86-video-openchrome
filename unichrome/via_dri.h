@@ -21,25 +21,27 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-
+/*
+ * Keep this file in perfect sync between the ddx and dri drivers.
+ * At least bump the VIA_DRIDDX_VERSION defines appropriately.
+ *
+ */
 #ifndef _VIA_DRI_H_
 #define _VIA_DRI_H_ 1
 
-#include "drm.h"
-#include "xf86drm.h"
-#include "via_drm.h"
-
 #define VIA_MAX_DRAWABLES 256
 
-#define VIA_DRI_VERSION_MAJOR		4
-#define VIA_DRI_VERSION_MINOR		1
+#define VIA_DRIDDX_VERSION_MAJOR  5
+#define VIA_DRIDDX_VERSION_MINOR  0
+#define VIA_DRIDDX_VERSION_PATCH  0
 
-typedef drm_via_sarea_t VIASAREAPriv;
+#ifndef XFree86Server
+typedef int Bool;
+#endif
 
 typedef struct {
     drm_handle_t handle;
     drmSize size;
-    drmAddress map;
 } viaRegion, *viaRegionPtr;
 
 typedef struct {
@@ -63,9 +65,6 @@ typedef struct {
     int sarea_priv_offset;
     int ringBufActive;
     unsigned int reg_pause_addr;
-    int drmVerMajor;
-    int drmVerMinor;
-    int drmVerPL;
 } VIADRIRec, *VIADRIPtr;
 
 typedef struct {
@@ -76,17 +75,4 @@ typedef struct {
     int dummy;
 } VIADRIContextRec, *VIADRIContextPtr;
 
-#ifdef XFree86Server
-
-#include "screenint.h"
-
-Bool VIADRIScreenInit(ScreenPtr pScreen);
-void VIADRICloseScreen(ScreenPtr pScreen);
-Bool VIADRIFinishScreenInit(ScreenPtr pScreen);
-void VIADRIRingBufferCleanup(ScrnInfoPtr pScrn);
-Bool VIADRIRingBufferInit(ScrnInfoPtr pScrn);
-
-
-
-#endif /* XFree86Server */
 #endif /* _VIA_DRI_H_ */

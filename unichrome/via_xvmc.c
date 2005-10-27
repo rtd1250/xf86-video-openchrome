@@ -36,6 +36,7 @@
 #ifdef XF86DRI
 
 #include "via.h"
+#include "via_drm.h"
 #include "via_dri.h"
 #include "via_driver.h"
 #include "via_id.h"
@@ -329,7 +330,6 @@ ViaInitXVMC(ScreenPtr pScreen)
   VIAPtr pVia = VIAPTR(pScrn);
   ViaXvMCPtr vXvMC = &(pVia->xvmc);
   volatile ViaXvMCSAreaPriv *saPriv;
-  VIADRIPtr pVIADRI = pVia->pDRIInfo->devPrivate;
 
   pVia->XvMCEnabled = 0;
 
@@ -346,20 +346,20 @@ ViaInitXVMC(ScreenPtr pScreen)
       return;
   }
 
-  if (((pVIADRI->drmVerMajor <= 2) && (pVIADRI->drmVerMinor< 4))) {
+  if (((pVia->drmVerMajor <= 2) && (pVia->drmVerMinor< 4))) {
       xf86DrvMsg(pScrn->scrnIndex, X_WARNING, 
 		 "[XvMC] Kernel drm is not compatible with XvMC.\n"); 
       xf86DrvMsg(pScrn->scrnIndex, X_WARNING, 
 		 "[XvMC] Kernel drm version: %d.%d.%d "
 		 "and need at least version 2.4.0.\n",
-		 pVIADRI->drmVerMajor,
-		 pVIADRI->drmVerMinor,
-		 pVIADRI->drmVerPL); 
+		 pVia->drmVerMajor,
+		 pVia->drmVerMinor,
+		 pVia->drmVerPL); 
       xf86DrvMsg(pScrn->scrnIndex, X_WARNING, 
 		 "[XvMC] Please update. Disabling XvMC.\n");
       return;
   } 
-  if ((pVIADRI->drmVerMajor >= 3)) {
+  if ((pVia->drmVerMajor >= 3)) {
       xf86DrvMsg(pScrn->scrnIndex, X_WARNING, 
 		 "[XvMC] XvMC X driver may not be compatible "
 		 "with kernel drm.\n");
