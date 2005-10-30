@@ -1,5 +1,12 @@
 2005-10-30  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
+	* unichrome/via_accel.c: (VIAInitAccel):
+
+	-Revert the hardware cursor fix since it for some strange reason
+	 makes hw cursors white. Need to figure out why.
+	
+2005-10-30  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
 	* unichrome/via_video.c: (viaInitVideo), (viaSetupAdaptors),
 	(nv12cp), (viaDmaBlitImage), (viaPutImage), (nv12Blit):
 	* unichrome/via_xvpriv.h:

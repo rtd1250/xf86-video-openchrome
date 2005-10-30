@@ -405,7 +405,6 @@ VIAInitAccel(ScreenPtr pScreen)
     }
     if (pVia->hwcursor) {
 	pVia->FBFreeEnd -= VIA_CURSOR_SIZE;
-	pVia->CursorStart = pVia->FBFreeEnd;
     }
 
     VIAInitialize2DEngine(pScrn);
