@@ -26,7 +26,7 @@
 #define _VIA_XVPRIV_H_ 1
 
 #include "xf86xv.h"
-
+#include "via_dmabuffer.h"
 
 enum{ XV_ADAPT_SWOV=0, 
       XV_ADAPT_NUM};
@@ -68,13 +68,6 @@ typedef struct {
     unsigned char *dmaBounceBuffer;
     unsigned dmaBounceStride;
     unsigned dmaBounceLines;
-
-    /*
-     * For hardware YV12 to NV12 conversion.
-     */
-
-    VIAMem nv12Mem;
-    char *nv12Buffer;
 
 } viaPortPrivRec, *viaPortPrivPtr;
 

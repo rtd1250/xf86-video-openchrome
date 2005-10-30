@@ -1,3 +1,19 @@
+2005-10-30  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
+	* unichrome/via_video.c: (viaInitVideo), (viaSetupAdaptors),
+	(nv12cp), (viaDmaBlitImage), (viaPutImage), (nv12Blit):
+	* unichrome/via_xvpriv.h:
+
+	-Enable DMA Xv image transfers also for PM8X0 / CN400. 
+	 YV12 to NV12 conversion is still software but now takes place 
+	 in system memory instead of during transfer to framebuffer memory.
+	 CPU usage is much improved on PM8X0. Less so on CN400. 
+	 Hardware YV12 to NV12 conversion using the blitter was implemented
+	 and tested but was very slow, probably due to the fact that blitting
+	 only took place one column at a time. Since sync on the 2D engine 
+	 currently requires a busy-wait, the approach was not only slow, but
+	 also CPU-consuming.
+	
 2005-10-27  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
 	* unichrome/via_video.c: (viaExitVideo), (viaSaveVideo),

@@ -99,6 +99,11 @@ static int viaSetPortAttribute(ScrnInfoPtr, Atom, INT32, pointer);
 static int viaPutImage(ScrnInfoPtr, short, short, short, short, short, short, 
 		       short, short,int, unsigned char*, short, short, Bool, 
 		       RegionPtr, pointer);
+static void nv12Blit(unsigned char *nv12Chroma,
+		     const unsigned char *uBuffer,
+		     const unsigned char *vBuffer,
+		     unsigned width, unsigned srcPitch, 
+		     unsigned dstPitch, unsigned lines);
 
 static Atom xvBrightness, xvContrast, xvColorKey, xvHue, xvSaturation, xvAutoPaint;
 
@@ -479,7 +484,8 @@ void viaInitVideo(ScreenPtr pScreen)
     pVia->useDmaBlit = pVia->directRenderingEnabled &&
 	((pVia->Chipset == VIA_CLE266) || 
 	 (pVia->Chipset == VIA_KM400) ||
-	 (pVia->Chipset == VIA_K8M800));
+	 (pVia->Chipset == VIA_K8M800) ||
+	 (pVia->Chipset == VIA_PM800));
     if ((pVia->drmVerMajor < 2) || 
 	((pVia->drmVerMajor == 2) && 
 	 (pVia->drmVerMinor < 7)))
@@ -690,6 +696,7 @@ viaSetupAdaptors(ScreenPtr pScreen, XF86VideoAdaptorPtr **adaptors)
  	    viaPortPriv[j].hue = 0;
 	    viaPortPriv[j].lastId = 0;
  	    viaPortPriv[j].xv_portnum = j + usedPorts;
+	      
 #ifdef X_USE_REGION_NULL
 	    REGION_NULL(pScreen, &viaPortPriv[j].clip);
 #else
@@ -924,53 +931,16 @@ nv12cp(unsigned char *dst,
        int w,
        int h, int yuv422)
 {
-    int count;
-    int x, dstAdd;
-    const unsigned char* src2;
-
-    /* Blit luma component as a fake YUY2 assembler blit. */
+    /* 
+     * Blit luma component as a fake YUY2 assembler blit. 
+     */ 
+     
 
     (*viaFastVidCpy)(dst, src, dstPitch, w >> 1, h, TRUE);
-
-    src += w*h;
-    dst += dstPitch*h;
-    dstAdd = dstPitch - w;
-
-    /* UV component is 1/2 of Y */
-    w >>= 1;
-
-   /* copy V(Cr),U(Cb) components to video memory */
-    count = h/2;
-
-    src2 = src + w*count;
-    while(count--) {
-	x=w;
-	while(x > 3) {
-	    register CARD32 
-		dst32,
-		src32 = *((CARD32 *) src),
-		src32_2 = *((CARD32 *) src2);
-	    dst32 = 
-		(src32_2 & 0xff) | ((src32 & 0xff) << 8) |
-		((src32_2 & 0x0000ff00) << 8) | ((src32 & 0x0000ff00) << 16);
-	    *((CARD32 *) dst) = dst32;
-	    dst +=4;
-	    dst32 = 
-		((src32_2 & 0x00ff0000) >> 16) | ((src32 & 0x00ff0000) >> 8) |
-		((src32_2 & 0xff000000) >> 8) | (src32 & 0xff000000);
-	    *((CARD32 *) dst) = dst32;
-	    dst +=4;
-	    x -= 4;
-	    src += 4;
-	    src2 += 4;
-	}
-        while(x--) {
-	    *dst++ = *src2++;
-	    *dst++ = *src++;
-        }   
-	dst += dstAdd;
-    }
+    nv12Blit( dst + dstPitch*h, src + w*h + (w >> 1)*(h >> 1), src + w*h,
+	      w >> 1, w >> 1, dstPitch, h >> 1);
 }
+
 
 #ifdef XF86DRI
 
@@ -986,16 +956,19 @@ viaDmaBlitImage(VIAPtr pVia,
 {
     Bool bounceBuffer;
     drm_via_dmablit_t blit;
-    drm_via_blitsync_t *lumaSync = &blit.sync;
-    drm_via_blitsync_t chromaSync;
+    drm_via_blitsync_t *chromaSync = &blit.sync;
+    drm_via_blitsync_t lumaSync;
     unsigned char *base;
+    unsigned char *bounceBase;
     unsigned bounceStride;
     unsigned bounceLines;
     unsigned size;
     int err=0;
+    Bool nv12Conversion;
 
     bounceBuffer = ((unsigned long)src & 15);
-
+    nv12Conversion = ((pVia->ChipId == PCI_CHIP_VT3259) && (id == FOURCC_YV12));
+    
     switch(id) {
     case FOURCC_YUY2:
     case FOURCC_RV15:
@@ -1010,7 +983,7 @@ viaDmaBlitImage(VIAPtr pVia,
 	break;
     }
     
-    if (bounceBuffer) {      
+    if (bounceBuffer || nv12Conversion) {      
 	if (!pPort->dmaBounceBuffer || 
 	    pPort->dmaBounceStride != bounceStride ||
 	    pPort->dmaBounceLines != bounceLines) {
@@ -1025,33 +998,10 @@ viaDmaBlitImage(VIAPtr pVia,
 	    pPort->dmaBounceStride = bounceStride;
 	}
     }
-    base = (bounceBuffer) ? (unsigned char *)ALIGN_TO((unsigned long)(pPort->dmaBounceBuffer), 16)
-	: src;
-    if (id == FOURCC_YV12) {
-        unsigned tmp = ALIGN_TO(bounceStride >> 1, 16);
-	if(bounceBuffer) {
-	    (*viaFastVidCpy)(base + bounceStride*height,src + bounceStride*height,
-			     tmp, tmp >> 1,height, 1); 
-	}
 
-	blit.num_lines = height;
-	blit.line_length = width >> 1;
-	blit.fb_addr = dst + lumaStride*height;
-	blit.fb_stride = lumaStride >> 1;
-	blit.mem_addr = base + bounceStride*height;
-	blit.mem_stride = tmp;
-	blit.bounce_buffer = 0;
-	blit.to_fb = 1;
-	while(-EAGAIN == (err = drmCommandWriteRead(pVia->drmFD, DRM_VIA_DMA_BLIT, 
-						    &blit, sizeof(blit))));
-	if (err < 0) {
-	    ErrorF("Chroma blit failed!\n");
-	    return -1;
-	}
-
-	chromaSync = blit.sync;
-    }	
-
+    bounceBase = (unsigned char *)ALIGN_TO((unsigned long)(pPort->dmaBounceBuffer), 16);
+    base = (bounceBuffer) ? bounceBase : src;
+    
     if(bounceBuffer) {
 	(*viaFastVidCpy)(base, src, bounceStride, bounceStride >> 1, height, 1);
     }
@@ -1076,9 +1026,53 @@ viaDmaBlitImage(VIAPtr pVia,
 	ErrorF("Luma blit failed!\n");
 	return -1;
     }
+
+    lumaSync = blit.sync;
+
+    if (id == FOURCC_YV12) {
+        unsigned tmp = ALIGN_TO(bounceStride >> 1, 16);
+
+	if (nv12Conversion) {
+	    nv12Blit(bounceBase + bounceStride*height, 
+		     src + bounceStride*height + tmp*(height >> 1),
+		     src + bounceStride*height, width >> 1, tmp, 
+		     bounceStride, height >> 1);
+	} else if (bounceBuffer) {
+	    (*viaFastVidCpy)(base + bounceStride*height,src + bounceStride*height,
+			     tmp, tmp >> 1,height, 1); 
+	}
+
+	if (nv12Conversion) {
+	    blit.num_lines = height >> 1;
+	    blit.line_length = width;
+	    blit.mem_addr = bounceBase + bounceStride*height;
+	    blit.fb_stride = lumaStride;
+	    blit.mem_stride = bounceStride;
+	} else {
+	    blit.num_lines = height;
+	    blit.line_length = width >> 1;
+	    blit.mem_addr = base + bounceStride*height;
+	    blit.fb_stride = lumaStride >> 1;
+	    blit.mem_stride = tmp;
+	}
+
+	blit.fb_addr = dst + lumaStride*height;
+	blit.bounce_buffer = 0;
+	blit.to_fb = 1;
+
+	while(-EAGAIN == (err = drmCommandWriteRead(pVia->drmFD, DRM_VIA_DMA_BLIT, 
+						    &blit, sizeof(blit))));
+	if (err < 0) {
+	    ErrorF("Chroma blit failed!\n");
+	    return -1;
+	}
+
+    }	
+
     while(-EAGAIN == (err = drmCommandWrite(pVia->drmFD, DRM_VIA_BLIT_SYNC, 
-					    lumaSync, sizeof(*lumaSync))));
+					    chromaSync, sizeof(*chromaSync))));
     if (err < 0) {
+	ErrorF("Chroma sync failed!\n");
 	return -1;
     }
 
@@ -1124,9 +1118,10 @@ viaPutImage(
 	    /*  Allocate video memory(CreateSurface),
 	     *  add codes to judge if need to re-create surface
 	     */
-	    if ( (pPriv->old_src_w != src_w) || (pPriv->old_src_h != src_h) )
+	    if ( (pPriv->old_src_w != src_w) || (pPriv->old_src_h != src_h) ) {
 		ViaSwovSurfaceDestroy(pScrn, pPriv);
-
+	    }
+		
 	    if (Success != ( retCode = ViaSwovSurfaceCreate(pScrn, pPriv, id, width, height) ))
                 {
 		    DBG_DD(ErrorF("             : Fail to Create SW Video Surface\n"));
@@ -1358,6 +1353,55 @@ VIAVidAdjustFrame(ScrnInfoPtr pScrn, int x, int y)
 
     pVia->swov.panning_x = x;
     pVia->swov.panning_y = y;
+}
+
+/*
+ * Blit the chroma field from one buffer to another while at the same time converting from
+ * YV12 to NV12.
+ */
+
+static void nv12Blit(unsigned char *nv12Chroma,
+		     const unsigned char *uBuffer,
+		     const unsigned char *vBuffer,
+		     unsigned width, unsigned srcPitch, 
+		     unsigned dstPitch, unsigned lines)
+{
+    int x;
+    int dstAdd;
+    int srcAdd;
+
+    dstAdd = dstPitch - (width << 1);
+    srcAdd = srcPitch - width;
+
+    while(lines--) {
+	x=width;
+	while(x > 3) {
+	    register CARD32 
+		dst32,
+		src32 = *((CARD32 *) vBuffer),
+		src32_2 = *((CARD32 *) uBuffer);
+	    dst32 = 
+		(src32_2 & 0xff) | ((src32 & 0xff) << 8) |
+		((src32_2 & 0x0000ff00) << 8) | ((src32 & 0x0000ff00) << 16);
+	    *((CARD32 *) nv12Chroma) = dst32;
+	    nv12Chroma +=4;
+	    dst32 = 
+		((src32_2 & 0x00ff0000) >> 16) | ((src32 & 0x00ff0000) >> 8) |
+		((src32_2 & 0xff000000) >> 8) | (src32 & 0xff000000);
+	    *((CARD32 *) nv12Chroma) = dst32;
+	    nv12Chroma +=4;
+	    x -= 4;
+	    vBuffer += 4;
+	    uBuffer += 4;
+	}
+        while(x--) {
+	    *nv12Chroma++ = *uBuffer++;
+	    *nv12Chroma++ = *vBuffer++;
+        }   
+	nv12Chroma += dstAdd;
+	vBuffer += srcAdd;
+	uBuffer += srcAdd;
+    }
 }
 
 #endif  /* !XvExtension */
