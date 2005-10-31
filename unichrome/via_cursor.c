@@ -71,10 +71,10 @@ VIAHWCursorInit(ScreenPtr pScreen)
     if (!pVia->CursorStart) {
         pVia->CursorStart = pVia->FBFreeEnd - VIA_CURSOR_SIZE;
         pVia->FBFreeEnd -= VIA_CURSOR_SIZE;
-
-        /* Set cursor location in frame buffer.  */
-        VIASETREG(VIA_REG_CURSOR_MODE, pVia->CursorStart);
     }
+    
+    /* Set cursor location in frame buffer. */    
+    VIASETREG(VIA_REG_CURSOR_MODE, pVia->CursorStart);
 
     return xf86InitCursor(pScreen, infoPtr);
 }
