@@ -4,6 +4,12 @@
 
 	-Fix stray include left over by previous commit.
 	
+2005-10-31 Ivor Hewitt <ivor-at-ivor-dot-org>
+
+    * unichrome/via_id.c:
+
+    -Mitac 8889 device id (Daniel Schindler)
+
 2005-10-30  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
 	* unichrome/via_accel.c: (VIAInitAccel):
