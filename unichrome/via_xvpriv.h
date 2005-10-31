@@ -26,7 +26,6 @@
 #define _VIA_XVPRIV_H_ 1
 
 #include "xf86xv.h"
-#include "via_dmabuffer.h"
 
 enum{ XV_ADAPT_SWOV=0, 
       XV_ADAPT_NUM};
