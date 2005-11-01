@@ -94,5 +94,6 @@ typedef CARD32 uint32_t;
 #define UNICHROME_LOCK_DECODER1 0
 #define UNICHROME_LOCK_DECODER2 1
 #define UNICHROME_LOCK_HQV      4
+#define __user
       
 #endif

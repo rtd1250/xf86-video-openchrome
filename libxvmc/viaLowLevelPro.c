@@ -626,7 +626,7 @@ viaDMAInitTimeStamp(XvMCLowLevel *xl)
     if (xl->use_agp) {
 	xl->tsMem.context = *(xl->drmcontext);
 	xl->tsMem.size = 64;
-	xl->tsMem.type = VIDEO;
+	xl->tsMem.type = VIA_MEM_VIDEO;
 	if ((ret = drmCommandWriteRead(xl->fd, DRM_VIA_ALLOCMEM, 
 				       &xl->tsMem, sizeof(xl->tsMem))) < 0) 
 	    return ret;
@@ -1462,7 +1462,7 @@ updateLowLevelBuf(XvMCLowLevel *xl, LowLevelBuffer *buf,
 	    drmCommandWrite(xl->fd, DRM_VIA_FREEMEM, mem, sizeof(mem)); 
 	mem->context = *(xl->drmcontext);
 	mem->size = size;
-	mem->type = VIDEO;
+	mem->type = VIA_MEM_VIDEO;
 	
 	if (((ret = drmCommandWriteRead(xl->fd, DRM_VIA_ALLOCMEM, mem, sizeof(mem))) < 0)  ||
 	    mem->size != size) {

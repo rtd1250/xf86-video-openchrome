@@ -1,3 +1,13 @@
+2005-11-01  Thomas Hellström <unichrome-at-shipmail-dot-org> 
+
+	* libxvmc/viaLowLevel.c: (viaDMAInitTimeStamp):
+	* libxvmc/viaLowLevelPro.c: (viaDMAInitTimeStamp),
+	(updateLowLevelBuf):
+	* unichrome/via_drmclient.h:
+	
+	-Fix compilation errors caused by the drm / dri update.
+	 (reported by Tarun Kripalani)
+	
 2005-10-31  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
 	* unichrome/via_accel.c: (VIAInitAccel):

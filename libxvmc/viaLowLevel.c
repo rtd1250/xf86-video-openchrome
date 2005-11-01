@@ -285,7 +285,7 @@ viaDMAInitTimeStamp(XvMCLowLevel *xl)
     if (xl->use_agp) {
 	xl->tsMem.context = *(xl->drmcontext);
 	xl->tsMem.size = 64;
-	xl->tsMem.type = VIDEO;
+	xl->tsMem.type = VIA_MEM_VIDEO;
 	if (drmCommandWriteRead(xl->fd, DRM_VIA_ALLOCMEM, &xl->tsMem, sizeof(xl->tsMem)) < 0) 
 	    return ret;
 	if (xl->tsMem.size != 64)
