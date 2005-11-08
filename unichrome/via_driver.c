@@ -2434,8 +2434,8 @@ VIASwitchMode(int scrnIndex, DisplayModePtr mode, int flags)
 	ret = VIAWriteMode(pScrn, mode);
 
 #ifdef XF86DRI
-    kickVblank(pScrn);
     if (pVia->directRenderingEnabled) {
+    	kickVblank(pScrn);
 	VIADRIRingBufferInit(pScrn);
 	DRIUnlock(screenInfo.screens[scrnIndex]);
     }
