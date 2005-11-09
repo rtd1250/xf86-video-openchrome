@@ -1185,23 +1185,6 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
 
     xf86DrvMsg(pScrn->scrnIndex, from, "Chipset: \"%s\"\n", pScrn->chipset);
 
-    if (pVia->Chipset == VIA_K8M800) {
-	xf86DrvMsg(pScrn->scrnIndex, X_WARNING, 
-		   "This device seems to be a VIA Unichrome Pro K8M800.\n");
-	xf86DrvMsg(pScrn->scrnIndex, X_WARNING, 
-		   "There is no specific support for this device yet in this driver.\n");
-	xf86DrvMsg(pScrn->scrnIndex, X_WARNING, 
-		   "Please contact unichrome.sourceforge.net ASAP to resolve this.\n");
-    }
-    if (pVia->Chipset == VIA_PM800) {
-	xf86DrvMsg(pScrn->scrnIndex, X_WARNING, 
-		   "This device seems to be a VIA Unichrome Pro PM800, PM880 or CN400.\n");
-	xf86DrvMsg(pScrn->scrnIndex, X_WARNING, 
-		   "There is no specific support for this device yet in this driver.\n");
-	xf86DrvMsg(pScrn->scrnIndex, X_WARNING, 
-		   "Please contact unichrome.sourceforge.net ASAP to resolve this.\n");
-    }
-
     pVia->PciTag = pciTag(pVia->PciInfo->bus, pVia->PciInfo->device,
                           pVia->PciInfo->func);
 

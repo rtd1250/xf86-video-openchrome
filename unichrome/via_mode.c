@@ -1607,18 +1607,17 @@ ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode)
     VIAPtr pVia = VIAPTR(pScrn);
     int i;
 
-    for (i = 0; ViaDotClocks[i].DotClock; i++)
-	if (ViaDotClocks[i].DotClock == mode->Clock) {
-	    if ((pVia->Chipset == VIA_CLE266) || (pVia->Chipset == VIA_KM400))
-		return ViaDotClocks[i].UniChrome;
-	    else {
-                CARD32 ret;
-                ret = ViaDotClocks[i].UniChromePro;  
-                if (!ret)
-                    ret = ViaComputeProDotClock(mode->Clock);
-                return ret;
-            }
-        }
+    if ((pVia->Chipset == VIA_CLE266) || (pVia->Chipset == VIA_KM400)) {
+        for (i = 0; ViaDotClocks[i].DotClock; i++)
+            if (ViaDotClocks[i].DotClock == mode->Clock)
+                return ViaDotClocks[i].UniChrome;
+    } else {
+        for (i = 0; ViaDotClocks[i].DotClock; i++)
+            if (ViaDotClocks[i].DotClock == mode->Clock)
+                return ViaDotClocks[i].UniChromePro;
+        return ViaComputeProDotClock(mode->Clock);
+    }
+
     return 0;
 }
 

@@ -1,3 +1,10 @@
+2005-11-09  Ivor Hewitt <ivor-at-ivor-dot-org>
+
+	* unichrome/via_driver.c: (VIAPreInit):
+	* unichrome/via_mode.c: (ViaModeDotClockTranslate):
+
+	- Fix pro-mode and remove pro warning. (Paul Bender)
+
 2005-11-08  Ivor Hewitt <ivor-at-ivor-dot-org>
 
 	* unichrome/via_driver.c: (VIASwitchMode):
