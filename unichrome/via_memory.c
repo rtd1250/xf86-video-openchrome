@@ -35,51 +35,68 @@
 
 
 /*
- *	Isolate the wonders of X memory allocation, DRI memory allocation
+ *	Isolate the wonders of X memory allocation and DRI memory allocation
  *	and 4.3 or 4.4 differences in once abstraction
  *
  *	The pool code indicates who provided the memory
  *	0	-	nobody
- *	1	-	xf86 linear (Used in 4.4 only)
+ *	1	-	xf86 linear 
  *	2	-	DRM
- *	3	-	Preallocated buffer (Used in 4.3 only)
  */
  
 void VIAFreeLinear(VIAMemPtr mem)
 {
-    VIAPtr pVia;
     DEBUG(ErrorF("Freed %lu (pool %d)\n", mem->base, mem->pool));
-    switch(mem->pool)
-	{
-	case 0:
-	    return;
-	case 1:
-	    xf86FreeOffscreenLinear(mem->linear);
+    switch(mem->pool) {
+    case 0:
+	return;
+    case 1:
+#ifdef VIA_HAVE_EXA
+    {
+	VIAPtr pVia = VIAPTR(mem->pScrn);
+	if (pVia->useEXA && !pVia->NoAccel) {
+	    exaOffscreenFree(mem->pScrn->pScreen, mem->exa);
 	    mem->linear = NULL;
 	    mem->pool = 0;
 	    return;
-	case 2:
-#ifdef XF86DRI
-	    if(drmCommandWriteRead(mem->drm_fd, DRM_VIA_FREEMEM,
-				   &mem->drm, sizeof(drm_via_mem_t)) < 0)
-		ErrorF("DRM module failed free.\n");
+	} 
+    }
 #endif
-	    mem->pool = 0;
-	    return;
-	case 3:
-	    mem->pool = 0;
-	    pVia = mem->pVia;
-	    pVia->SWOVUsed[mem->slot] = 0;
-	    return;
-	}
+    xf86FreeOffscreenLinear(mem->linear);
+    mem->linear = NULL;
+    mem->pool = 0;
+    return;
+    case 2:
+#ifdef XF86DRI
+	if(drmCommandWriteRead(mem->drm_fd, DRM_VIA_FREEMEM,
+			       &mem->drm, sizeof(drm_via_mem_t)) < 0)
+	    ErrorF("DRM module failed free.\n");
+#endif
+	mem->pool = 0;
+	return;
+    }
 }
 
-#ifdef X_USE_LINEARFB
 static unsigned long offScreenLinear(VIAMemPtr mem, ScrnInfoPtr pScrn,
 				     unsigned long size) {
 
-    int depth = (pScrn->bitsPerPixel + 7) >> 3;
-    /* Make sure we don't truncate requested size */
+    int depth = pScrn->bitsPerPixel >> 3;
+
+#ifdef VIA_HAVE_EXA
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    if (pVia->useEXA && !pVia->NoAccel) {
+
+	mem->exa = exaOffscreenAlloc(pScrn->pScreen, size, 
+				     32, TRUE, NULL,NULL);
+	if (mem->exa == NULL)
+	    return BadAlloc;
+	mem->base = mem->exa->offset;
+	mem->pool = 1;
+	return Success;
+    }
+#endif
+
     mem->linear = xf86AllocateOffscreenLinear(pScrn->pScreen, 
 					      ( size + depth - 1 ) / depth,
 					      32, NULL, NULL, NULL);
@@ -90,22 +107,21 @@ static unsigned long offScreenLinear(VIAMemPtr mem, ScrnInfoPtr pScrn,
     return Success;
 
 }
-#endif /* X_USE_LINEARFB */
 
 unsigned long VIAAllocLinear(VIAMemPtr mem, ScrnInfoPtr pScrn, unsigned long size)
 {
-#if defined(XF86DRI) || !defined(X_USE_LINEARFB)
+#if defined(XF86DRI) 
     VIAPtr  pVia = VIAPTR(pScrn);
 #endif
 	
 #ifdef XF86DRI
     int ret;
 
-
     if(mem->pool)
 	ErrorF("VIA Double Alloc.\n");
 		
     if(pVia->directRenderingEnabled) {
+	mem->pScrn = pScrn;
 	mem->drm_fd = pVia->drmFD;
 	mem->drm.context = 1;
 	mem->drm.size = size;
@@ -113,14 +129,13 @@ unsigned long VIAAllocLinear(VIAMemPtr mem, ScrnInfoPtr pScrn, unsigned long siz
 	ret = drmCommandWriteRead(mem->drm_fd, DRM_VIA_ALLOCMEM, &mem->drm, 
 				  sizeof(drm_via_mem_t));
 	if (ret || (size != mem->drm.size)) {
-#ifdef X_USE_LINEARFB
+
 	    /*
-	     * Try XY Fallback before failing.
+	     * Try X Offsceen fallback before failing.
 	     */ 
 		    
 	    if (Success == offScreenLinear(mem, pScrn, size))
 		return Success;
-#endif /* X_USE_LINEARFB */
 	    ErrorF("DRM memory allocation failed\n");
 	    return BadAlloc;
 	}
@@ -128,76 +143,33 @@ unsigned long VIAAllocLinear(VIAMemPtr mem, ScrnInfoPtr pScrn, unsigned long siz
 	mem->base = mem->drm.offset;
 	mem->pool = 2;
 	DEBUG(ErrorF("Fulfilled via DRI at %lu\n", mem->base));
-	return 0;
+	return Success;
     }
-#endif /* XF86DRI */
-
-#ifdef X_USE_LINEARFB
+#endif 
     {
+	mem->pScrn = pScrn;
 	if (Success == offScreenLinear(mem, pScrn, size))
 	    return Success;
 	ErrorF("Linear memory allocation failed\n");
 	return BadAlloc;
     }
-#else /* X_USE_LINEARFB */
-    {
-	int i;
-	if(size > pVia->SWOVSize)
-	    return BadAccess;
-	for(i = 0; i < MEM_BLOCKS; i++) {
-	    if(!pVia->SWOVUsed[i]) {
-		pVia->SWOVUsed[i] = 1;
-		mem->pool = 3;
-		mem->base = pVia->SWOVPool + pVia->SWOVSize * i;
-		mem->pVia = pVia;
-		mem->slot = i;
-		DEBUG(ErrorF("Fulfilled via pool at %lu\n", mem->base));
-		return 0;
-	    }
-	}
-    }
-    ErrorF("Out of pools.\n");
-    return BadAlloc;
-#endif /* X_USE_LINEARFB */
+    return Success;
 }
-
-#ifndef X_USE_LINEARFB
-static void
-VIAInitPool(VIAPtr pVia, unsigned long offset, unsigned long size)
-{
-    DEBUG(ErrorF("VIAInitPool %lu bytes at %lu\n", size, offset));
-	
-    size /= 4;
-
-    DEBUG(ErrorF("VIAInitPool %d pools of %lu bytes\n", MEM_BLOCKS, size));
-    pVia->SWOVPool = offset;
-    pVia->SWOVSize = size;
-}
-
-#endif /* !X_USE_LINEARFB */
 
 void VIAInitLinear(ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
     VIAPtr pVia = VIAPTR(pScrn);
-#ifdef X_USE_LINEARFB	
-    /*
-     * In the 44 path we must take care not to truncate offset and size so
-     * that we get overlaps. If there is available memory below line 2048
-     * we use it.
-     */ 
-    unsigned long offset = (pVia->FBFreeStart + pVia->Bpp - 1 ) / pVia->Bpp; 
-    unsigned long size = pVia->FBFreeEnd / pVia->Bpp - offset;
-    if (size > 0) xf86InitFBManagerLinear(pScreen, offset, size);
-#else 
-    /*
-     * In the 43 path we don't have to care about truncation. just use
-     * all available memory, also below line 2048. The drm module uses 
-     * pVia->FBFreeStart as offscreen available start. We do it to. 
-     */
-    unsigned long offset = pVia->FBFreeStart; 
-    unsigned long size = pVia->FBFreeEnd - offset;
-    if (size > 0 ) VIAInitPool(pVia, offset, size);
-#endif /* X_USE_LINEARFB */	
+
+#ifdef VIA_HAVE_EXA
+    if (pVia->useEXA && !pVia->NoAccel) {
+        return;
+    } else 
+#endif
+    {
+        unsigned long offset = (pVia->FBFreeStart + pVia->Bpp - 1 ) / pVia->Bpp; 
+        long size = pVia->FBFreeEnd / pVia->Bpp - offset;
+        if (size > 0) xf86InitFBManagerLinear(pScreen, offset, size);
+    }
 }
     

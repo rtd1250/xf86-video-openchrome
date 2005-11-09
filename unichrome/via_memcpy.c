@@ -542,7 +542,6 @@ vidCopyFunc viaVidCopyInit( char *copyType,
     double cpuFreq;
     VIAPtr pVia = VIAPTR(pScrn);
 
-    pScrn->pScreen = pScreen;
     if (NULL == (cpuInfoFile = fopen("/proc/cpuinfo","r"))) {
 	return libc_YUV42X;
     }

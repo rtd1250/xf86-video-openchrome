@@ -11,10 +11,6 @@ XCOMM but it's version is still 4.3.0.1 - see via_xvmc.c
 DEFXVPRIV = -DX_NEED_XVPRIV_H
 #endif
 
-#if XF86_VERSION_CURRENT >= XF86_VERSION_NUMERIC(4,3,99,14,0)
-DEFLINFB = -DX_USE_LINEARFB
-#endif
-
 #if XF86_VERSION_CURRENT >= XF86_VERSION_NUMERIC(4,3,99,16,0)
 DEFREGIONNULL = -DX_USE_REGION_NULL
 #endif
@@ -50,7 +46,6 @@ XCOMM 6.7.0.0.0. Luckily, apart from the drm.h location, this is
 XCOMM not a problem... yet. -- luc
 
 DEFXVPRIV = -DX_NEED_XVPRIV_H
-DEFLINFB = -DX_USE_LINEARFB
 DEFREGIONNULL = -DX_USE_REGION_NULL
 
 #if BuildXF86DRI
@@ -91,6 +86,11 @@ DRIOBJS = via_dri.o via_xvmc.o
 DRIINCLUDES = -I$(SERVERSRC)/GL/dri -I$(LIBSRC)/GL/dri \
        $(X_DRM_H_LOCATION) -I$(TOP)/include
 DRIDEFINES = $(GLX_DEFINES)
+#endif
+
+#if XF86EXA
+EXAINCLUDES = -I$(XF86SRC)/exa
+EXADEFINES = -DVIA_HAVE_EXA
 #endif
 
 SRCS = via_driver.c \
@@ -144,11 +144,11 @@ INCLUDES = -I. -I$(XF86COMSRC) -I$(XF86OSSRC) \
            -I$(XF86SRC)/rac -I$(XF86SRC)/int10 -I$(SERVERSRC)/render \
            -I$(SERVERSRC)/include -I$(XINCLUDESRC) -I$(FONTINCSRC) \
            -I$(EXTINCSRC) -I$(XF86SRC)/vbe -I$(XF86SRC)/shadowfb \
-           -I$(SERVERSRC)/fb $(DRIINCLUDES)
+           -I$(SERVERSRC)/fb $(DRIINCLUDES) $(EXAINCLUDES)
 #endif
 
-DEFINES = $(DRIDEFINES) $(DEFXVPRIV) $(DEFLINFB) $(DEFREGIONNULL) \
-	$(DEFXAAGETROP) $(DEFI2CSTART) $(DEFXNEEDDRMLOCK)
+DEFINES = $(DRIDEFINES) $(DEFXVPRIV) $(DEFREGIONNULL) \
+	$(DEFXAAGETROP) $(DEFI2CSTART) $(DEFXNEEDDRMLOCK) $(EXADEFINES)
 
 #if MakeHasPosixVariableSubstitutions
 SubdirLibraryRule($(OBJS))
@@ -185,6 +185,7 @@ InstallDriverSDKNonExecFile(via_ch7xxx.c,$(DRIVERSDKDIR)/drivers/via)
 InstallDriverSDKNonExecFile(via_ch7xxx.h,$(DRIVERSDKDIR)/drivers/via)
 InstallDriverSDKNonExecFile(via_cursor.c,$(DRIVERSDKDIR)/drivers/via)
 InstallDriverSDKNonExecFile(via_dga.c,$(DRIVERSDKDIR)/drivers/via)
+InstallDriverSDKNonExecFile(via_dmabuffer.h,$(DRIVERSDKDIR)/drivers/via)
 InstallDriverSDKNonExecFile(via_dri.c,$(DRIVERSDKDIR)/drivers/via)
 InstallDriverSDKNonExecFile(via_dri.h,$(DRIVERSDKDIR)/drivers/via)
 InstallDriverSDKNonExecFile(via_driver.c,$(DRIVERSDKDIR)/drivers/via)

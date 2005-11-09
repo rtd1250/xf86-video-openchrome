@@ -1,3 +1,45 @@
+2005-11-09  Thomas Hellström <unichrome-at-shipmail-dot-org> 
+
+	* unichrome/Imakefile:
+	* unichrome/via_accel.c: (viaFlushPCI), (viaFlushDRIEnabled),
+	(viaSetupCBuffer), (viaTearDownCBuffer), (viaInitAgp),
+	(viaEnableVQ), (viaDisableVQ), (viaAccelSetMode),
+	(viaInitialize2DEngine), (viaAccelSync), (viaSetClippingRectangle),
+	(viaDisableClipping), (viaAccelClippingHelper),
+	(viaAccelSolidHelper), (viaAccelTransparentHelper),
+	(viaAccelCopyHelper), (viaSetupForScreenToScreenCopy),
+	(viaSubsequentScreenToScreenCopy), (viaSetupForSolidFill),
+	(viaSubsequentSolidFillRect), (viaSetupForMono8x8PatternFill),
+	(viaSubsequentMono8x8PatternFillRect),
+	(viaSetupForColor8x8PatternFill),
+	(viaSubsequentColor8x8PatternFillRect),
+	(viaSetupForCPUToScreenColorExpandFill),
+	(viaSubsequentScanlineCPUToScreenColorExpandFill),
+	(viaSetupForImageWrite), (viaSubsequentImageWriteRect),
+	(viaSetupForSolidLine), (viaSubsequentSolidTwoPointLine),
+	(viaSubsequentSolidHorVertLine), (viaSetupForDashedLine),
+	(viaSubsequentDashedTwoPointLine), (viaInitXAA),
+	(viaAccelMarkSync), (viaAccelWaitMarker), (viaExaPrepareSolid),
+	(viaExaSolid), (viaExaDoneSolidCopy), (viaExaPrepareCopy),
+	(viaExaCopy), (viaExaDownloadFromScreen), (viaExaUploadToScreen),
+	(viaInitExa), (viaInitAccel), (viaExitAccel), (viaDGABlitRect),
+	(viaDGAFillRect), (viaDGAWaitMarker):
+	* unichrome/via_cursor.c: (VIALoadCursorImage):
+	* unichrome/via_dga.c:
+	* unichrome/via_dri.c: (VIADRIFBInit), (VIADRIScreenInit),
+	(VIADRICloseScreen), (VIADRIFinishScreenInit):
+	* unichrome/via_driver.c: (VIASetup), (VIAPreInit), (VIALeaveVT),
+	(VIAScreenInit), (VIAWriteMode), (VIACloseScreen), (VIASwitchMode):
+	* unichrome/via_driver.h:
+	* unichrome/via_memcpy.c: (viaVidCopyInit):
+	* unichrome/via_memory.c: (VIAFreeLinear), (offScreenLinear),
+	(VIAAllocLinear), (VIAInitLinear):
+	* unichrome/via_priv.h:
+	* unichrome/via_vbe.c: (ViaVbeSetMode):
+
+	- Merge exa_branch from revision 52 to 67. For a detailed Changelog,
+	  check that branch. 
+
 2005-11-09  Ivor Hewitt <ivor-at-ivor-dot-org>
 
 	* unichrome/via_driver.c: (VIAPreInit):

@@ -122,6 +122,9 @@ typedef enum {
     OPTION_PCI_BURST,
     OPTION_PCI_RETRY,
     OPTION_NOACCEL,
+#ifdef VIA_HAVE_EXA
+    OPTION_ACCELMETHOD,
+#endif
     OPTION_SWCURSOR,
     OPTION_HWCURSOR,
     OPTION_SHADOW_FB,
@@ -156,6 +159,9 @@ static OptionInfoRec VIAOptions[] =
     {OPTION_VBEMODES, "VBEModes", OPTV_BOOLEAN, {0}, FALSE},
 #endif /* HAVE_DEBUG */
     {OPTION_NOACCEL,    "NoAccel",      OPTV_BOOLEAN, {0}, FALSE},
+#ifdef VIA_HAVE_EXA
+    {OPTION_ACCELMETHOD, "AccelMethod", OPTV_STRING,  {0}, FALSE},
+#endif /* VIA_HAVE_EXA */
     {OPTION_HWCURSOR,   "HWCursor",     OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_SWCURSOR,   "SWCursor",     OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_SHADOW_FB,  "ShadowFB",     OPTV_BOOLEAN, {0}, FALSE},
@@ -269,6 +275,17 @@ static const char *xaaSymbols[] = {
     NULL
 };
 
+#ifdef VIA_HAVE_EXA
+static const char *exaSymbols[] = {
+  "exaGetVersion",
+  "exaDriverInit",
+  "exaDriverFini",
+  "exaOffscreenAlloc",
+  "exaOffscreenFree",
+  NULL
+};
+#endif
+
 static const char *shadowSymbols[] = {
     "ShadowFBInit",
     NULL
@@ -378,6 +395,9 @@ static pointer VIASetup(pointer module, pointer opts, int *errmaj, int *errmin)
 #endif
                           ramdacSymbols,
                           xaaSymbols,
+#ifdef VIA_HAVE_EXA
+			  exaSymbols,
+#endif
                           shadowSymbols,
                           vbeSymbols,
                           i2cSymbols,
@@ -871,6 +891,23 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
     else {
         pVia->NoAccel = FALSE;
     }
+#ifdef VIA_HAVE_EXA 
+    if(!pVia->NoAccel) {
+        from = X_DEFAULT;
+	if((s = (char *)xf86GetOptValString(VIAOptions, OPTION_ACCELMETHOD))) {
+	    if(!xf86NameCmp(s,"XAA")) {
+		from = X_CONFIG;
+		pVia->useEXA = FALSE;
+	    }
+	    else if(!xf86NameCmp(s,"EXA")) {
+		from = X_CONFIG;
+		pVia->useEXA = TRUE;
+	    }
+	}
+	xf86DrvMsg(pScrn->scrnIndex, from, "Using %s acceleration architecture\n",
+		   pVia->useEXA ? "EXA" : "XAA");
+    }
+#endif /* VIA_HAVE_EXA */
 
     if (pVia->shadowFB && !pVia->NoAccel) {
         xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
@@ -1398,7 +1435,7 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
 			      NULL,                     /* list of line pitches */
 			      256,                      /* mini line pitch */
 			      3344,                     /* max line pitch */
-			      16 * pScrn->bitsPerPixel, /* pitch inc (bits) */
+			      32*8,                      /* pitch inc (bits) */
 			      128,                      /* min height */
 			      2508,                     /* max height */
 			      pScrn->display->virtualX, /* virtual width */
@@ -1471,6 +1508,13 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
             return FALSE;
         }
         xf86LoaderReqSymLists(xaaSymbols, NULL);
+#ifdef VIA_HAVE_EXA
+        if(!xf86LoadSubModule(pScrn, "exa")) {
+            VIAFreeRec(pScrn);
+            return FALSE;
+        }
+        xf86LoaderReqSymLists(exaSymbols, NULL);
+#endif
     }
 
     if (pVia->hwcursor) {
@@ -1548,7 +1592,7 @@ static void VIALeaveVT(int scrnIndex, int flags)
 	DRILock(screenInfo.screens[scrnIndex], 0);
 #endif
 
-    VIAAccelSync(pScrn);
+    viaAccelSync(pScrn);
 
 
 #ifdef XF86DRI
@@ -1566,7 +1610,7 @@ static void VIALeaveVT(int scrnIndex, int flags)
 #endif
 
     if (pVia->VQEnable) 
-	ViaVQDisable(pScrn);
+        viaDisableVQ(pScrn);
 
     /* Save video status and turn off all video activities */
 
@@ -1976,7 +2020,8 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
-
+    
+    pScrn->pScreen = pScreen;
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAScreenInit\n"));
 
     if (!VIAMapFB(pScrn))
@@ -2064,32 +2109,8 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 #endif
 
     if (!pVia->NoAccel) {
-        VIAInitAccel(pScreen);
+        viaInitAccel(pScreen);
     } 
-#ifdef X_USE_LINEARFB
-    else {
-	/*
-	 * This is needed because xf86InitFBManagerLinear in VIAInitLinear
-	 * needs xf86InitFBManager to have been initialized, and 
-	 * xf86InitFBManager needs at least one line of free memory to
-	 * work. This is only for Xv in Noaccel part, and since Xv is in some
-	 * sense accelerated, it might be a better idea to disable it
-	 * altogether.
-	 */ 
-        BoxRec AvailFBArea;
-
-        AvailFBArea.x1 = 0;
-        AvailFBArea.y1 = 0;
-        AvailFBArea.x2 = pScrn->displayWidth;
-        AvailFBArea.y2 = pScrn->virtualY + 1;
-	/* 
-	 * Update FBFreeStart also for other memory managers, since 
-	 * we steal one line to make xf86InitFBManager work.
-	 */
-	pVia->FBFreeStart = (AvailFBArea.y2 + 1) * pVia->Bpl;
-	xf86InitFBManager(pScreen, &AvailFBArea);	
-    }
-#endif /* X_USE_LINEARFB */
 
     miInitializeBackingStore(pScreen);
     xf86SetBackingStore(pScreen);
@@ -2107,6 +2128,26 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                        "Hardware cursor initialization failed\n");
         }
+    }
+
+    if (pVia->NoAccel) {
+
+	/*
+	 * This is only for Xv in Noaccel path, and since Xv is in some
+	 * sense accelerated, it might be a better idea to disable it
+	 * altogether.
+	 */ 
+
+        BoxRec AvailFBArea;
+
+        AvailFBArea.x1 = 0;
+        AvailFBArea.y1 = 0;
+        AvailFBArea.x2 = pScrn->displayWidth;
+        AvailFBArea.y2 = pScrn->virtualY + 1;
+	pVia->FBFreeStart=(AvailFBArea.y2 + 1)*pVia->Bpl;
+	xf86InitFBManager(pScreen, &AvailFBArea);
+	VIAInitLinear(pScreen);
+	pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart - pVia->Bpl);
     }
 
     if (pVia->shadowFB)
@@ -2133,19 +2174,19 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- DPMS set up\n"));
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Color maps etc. set up\n"));
+    pVia->agpDMA = FALSE;
 
 #ifdef XF86DRI
     if (pVia->directRenderingEnabled)
 	pVia->directRenderingEnabled = VIADRIFinishScreenInit(pScreen);
 
-    if (pVia->directRenderingEnabled)
+    if (pVia->directRenderingEnabled) {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO, "direct rendering enabled\n");
-    else {
+	VIADRIPtr pVIADRI = pVia->pDRIInfo->devPrivate;
+	pVia->agpDMA = pVia->dma2d && pVIADRI->ringBufActive;
+    } else {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO, "direct rendering disabled\n");
-	VIAInitLinear(pScreen);
     }
-#else    
-    VIAInitLinear(pScreen);
 #endif
 
     viaInitVideo(pScreen);
@@ -2245,7 +2286,7 @@ VIAWriteMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
     /* Enable the graphics engine. */
     if (!pVia->NoAccel)
-	VIAInitialize2DEngine(pScrn);
+	viaInitialize2DEngine(pScrn);
     
 #ifdef XF86DRI
     VIAInitialize3DEngine(pScrn);
@@ -2273,7 +2314,7 @@ static Bool VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
 	  DRILock(screenInfo.screens[scrnIndex], 0);
 #endif
         /* Wait Hardware Engine idle to exit graphical mode */
-        VIAAccelSync(pScrn);
+        viaAccelSync(pScrn);
  
 
 #ifdef XF86DRI
@@ -2285,22 +2326,19 @@ static Bool VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
 
 	if (!pVia->IsSecondary) {
             /* Turn off all video activities */
-            viaExitVideo(pScrn);
+            viaExitVideo(pScrn); 
 
             VIAHideCursor(pScrn);
         }
 
         if (pVia->VQEnable)
-	    ViaVQDisable(pScrn);
+	    viaDisableVQ(pScrn);
     }
 #ifdef XF86DRI
     if (pVia->directRenderingEnabled)
 	VIADRICloseScreen(pScreen);
 #endif
-    if (pVia->AccelInfoRec) {
-        XAADestroyInfoRec(pVia->AccelInfoRec);
-        pVia->AccelInfoRec = NULL;
-    }
+    viaExitAccel(pScreen);
     if (pVia->CursorInfoRec) {
         xf86DestroyCursorInfoRec(pVia->CursorInfoRec);
         pVia->CursorInfoRec = NULL;
@@ -2401,7 +2439,7 @@ VIASwitchMode(int scrnIndex, DisplayModePtr mode, int flags)
 	DRILock(screenInfo.screens[scrnIndex], 0);
 #endif
     
-    VIAAccelSync(pScrn);
+    viaAccelSync(pScrn);
     
 #ifdef XF86DRI
     if (pVia->directRenderingEnabled)
@@ -2409,7 +2447,7 @@ VIASwitchMode(int scrnIndex, DisplayModePtr mode, int flags)
 #endif
     
     if (pVia->VQEnable)
-	ViaVQDisable(pScrn);
+	viaDisableVQ(pScrn);
     
     if (pVia->pVbe)
 	ret = ViaVbeSetMode(pScrn, mode);
