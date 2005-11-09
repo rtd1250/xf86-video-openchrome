@@ -102,6 +102,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Giga-byte 7VM400(A)M",                  VIA_KM400,   0x1458, 0xD000, VIA_DEVICE_CRT}, /* 7VM400M, GA-7VM400AM */
     {"MSI KM4(A)M-V",                         VIA_KM400,   0x1462, 0x7061, VIA_DEVICE_CRT}, /* aka "DFI KM400-MLV" */
     {"MSI KM4(A)M-L",                         VIA_KM400,   0x1462, 0x7348, VIA_DEVICE_CRT},
+    {"MSI PM8M2-V",                           VIA_KM400,   0x1462, 0x7071, VIA_DEVICE_CRT},
     {"Abit VA-10 (1)",                        VIA_KM400,   0x147B, 0x140B, VIA_DEVICE_CRT},
     {"Abit VA-10 (2)",                        VIA_KM400,   0x147B, 0x140C, VIA_DEVICE_CRT}, /* VA-10/VA-20 id difference is not confirmed */
     {"Abit VA-20",                            VIA_KM400,   0x147B, 0x1411, VIA_DEVICE_CRT},
@@ -119,7 +120,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Mitac 8399",                            VIA_K8M800,  0x1071, 0x8399, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV}, /* aka "pogolinux konabook 3100" */
     {"Mitac 8889",                            VIA_K8M800,  0x1071, 0x8889, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
     {"Mitac 8899",                            VIA_K8M800,  0x1071, 0x8899, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
-    {"DFI K8M800-MLVF",                       VIA_K8M800,  0x1106, 0x3108, VIA_DEVICE_CRT}, /* VIA/K8M800 -- ??? PciInfo Alignment issue ??? */
+    {"DFI K8M800-MLVF",                       VIA_K8M800,  0x15BD, 0x1002, VIA_DEVICE_CRT},
     {"Shuttle FX83",                          VIA_K8M800,  0x1297, 0xF683, VIA_DEVICE_CRT | VIA_DEVICE_TV},
     {"Sharp Actius AL27",                     VIA_K8M800,  0x13BD, 0x1044, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Giga-byte GA-K8VM800M",                 VIA_K8M800,  0x1458, 0xD000, VIA_DEVICE_CRT},
@@ -128,6 +129,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"MSI K8MM-ILSR",                         VIA_K8M800,  0x1462, 0x7410, VIA_DEVICE_CRT},
     {"Abit KV-80",                            VIA_K8M800,  0x147B, 0x1419, VIA_DEVICE_CRT},
     {"Averatec 327x",                         VIA_K8M800,  0x14FF, 0x0315, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
+    {"Twinhead N14RA",                        VIA_K8M800,  0x14FF, 0x0321, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Averatec 54xx",                         VIA_K8M800,  0x1509, 0x3930, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"FIC K8M-800M",                          VIA_K8M800,  0x1509, 0x6001, VIA_DEVICE_CRT},
     {"Biostar K8VGA-M",                       VIA_K8M800,  0x1565, 0x1203, VIA_DEVICE_CRT},
