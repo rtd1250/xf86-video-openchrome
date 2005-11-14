@@ -505,7 +505,7 @@ static Bool VIAProbe(DriverPtr drv, int flags)
         return FALSE;
 
     xf86Msg(X_NOTICE, "VIA Technologies does not support or endorse this driver in any way.\n");
-    xf86Msg(X_NOTICE, "For support, please refer to http://unichrome.sourceforge.net/ or\n");
+    xf86Msg(X_NOTICE, "For support, please refer to http://www.openchrome.org/ or\n");
     xf86Msg(X_NOTICE, "your X vendor.\n");
 
     if (flags & PROBE_DETECT) {
