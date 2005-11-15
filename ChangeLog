@@ -1,3 +1,14 @@
+2005-11-15  Thomas Hellström <unichrome-at-shipmail-dot-org>  
+
+	* unichrome/Imakefile:
+	* unichrome/via_accel.c: (viaTearDownCBuffer),
+	(viaAccelSolidHelper), (viaAccelCopyHelper),
+	(viaExaDownloadFromScreen), (viaExaUploadToScreen):
+	* unichrome/via_driver.c: (VIAScreenInit):
+
+	- Merged changes in exa_branch revisions 67 to 74. For a detailed
+	  ChangeLog, see that branch.
+	
 2005-11-09  Thomas Hellström <unichrome-at-shipmail-dot-org> 
 
 	* unichrome/Imakefile:
