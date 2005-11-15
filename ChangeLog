@@ -1,3 +1,13 @@
+2005-11-15  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
+	* unichrome/via_swov.c: (ViaSwovSurfaceCreate),
+	(ViaSwovSurfaceDestroy):
+	* unichrome/via_video.c: (viaSetupAdaptors):
+	* unichrome/via_xvpriv.h:
+
+	- Fix Xv surface destruction and re-allocation.
+	  (Reported by Cedric Berger).
+	
 2005-11-15  Thomas Hellström <unichrome-at-shipmail-dot-org>  
 
 	* unichrome/Imakefile:

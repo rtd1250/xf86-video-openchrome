@@ -58,7 +58,6 @@ typedef struct {
     short old_drw_h;
 
     void *xvmc_priv;
-    CARD32 lastId;
     
     /*
      * For PCI DMA image transfer to frame-buffer memory.
