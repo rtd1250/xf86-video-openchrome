@@ -49,6 +49,10 @@
 #define VIAACCELCOPYROP(vRop) (XAACopyROP[vRop] << 24)
 #endif
 
+/*
+ * Use PCI MMIO to flush the command buffer. When AGP DMA is not available.
+ */
+
 void viaFlushPCI(ViaCommandBuffer *buf)
 {
     unsigned size = buf->pos >> 1;
@@ -78,6 +82,10 @@ void viaFlushPCI(ViaCommandBuffer *buf)
     buf->pos = 0;
 }
 
+/*
+ * Use AGP DMA to flush the command buffer. If it fails it skips the current
+ * command buffer and reverts to PCI MMIO until the server is reset.
+ */
 
 #ifdef XF86DRI
 static void 
@@ -110,6 +118,11 @@ viaFlushDRIEnabled(ViaCommandBuffer *cb)
 }
 #endif
 
+/*
+ * Initialize a command buffer. Some fields are currently not used since they
+ * are intended for Unichrome Pro group A video commands.
+ */
+
 int 
 viaSetupCBuffer(ScrnInfoPtr pScrn, ViaCommandBuffer *buf, unsigned size)
 {
@@ -131,13 +144,20 @@ viaSetupCBuffer(ScrnInfoPtr pScrn, ViaCommandBuffer *buf, unsigned size)
     return Success;
 }
 
+/*
+ * Free resources associated with a command buffer.
+ */
+
 void
 viaTearDownCBuffer(ViaCommandBuffer *buf)
 {
-    xfree(buf->buf);
+    if (buf && buf->buf) xfree(buf->buf);
     buf->buf = NULL;
 }
 
+/*
+ * Leftover from VIAs code.
+ */
 
 static void
 viaInitAgp(VIAPtr pVia)
@@ -155,6 +175,13 @@ viaInitAgp(VIAPtr pVia)
     VIASETREG(VIA_REG_TRANSET, 0xfe020000);
     VIASETREG(VIA_REG_TRANSPACE, 0x00000000);
 }
+
+/*
+ * Initialize the virtual command queue. Header 2 commands can be put
+ * in this queue for buffering. AFAIK it doesn't handle Header 1 
+ * commands, which is really a pity, since it has to be idled before
+ * issuing a H1 command.
+ */
 
 static void
 viaEnableVQ(VIAPtr pVia)
@@ -191,6 +218,10 @@ viaEnableVQ(VIAPtr pVia)
     VIASETREG(VIA_REG_TRANSPACE, vqEndL);
     VIASETREG(VIA_REG_TRANSPACE, vqLen);
 }
+
+/*
+ * Disable the virtual command queue.
+ */
     
 void
 viaDisableVQ(ScrnInfoPtr pScrn)
@@ -204,6 +235,10 @@ viaDisableVQ(ScrnInfoPtr pScrn)
     VIASETREG(VIA_REG_TRANSPACE, 0x45080c04);
     VIASETREG(VIA_REG_TRANSPACE, 0x46800408);
 }    
+
+/*
+ * Update our 2D state (TwoDContext) with a new mode.
+ */
 
 static Bool
 viaAccelSetMode(int bpp, ViaTwodContext *tdc)
@@ -227,7 +262,10 @@ viaAccelSetMode(int bpp, ViaTwodContext *tdc)
     }
 }
 
-
+/*
+ * Initialize the 2D engine and set the 2D context mode to the
+ * current screen depth. Also enable the virtual queue. 
+ */
 
 void
 viaInitialize2DEngine(ScrnInfoPtr pScrn)
@@ -257,7 +295,7 @@ viaInitialize2DEngine(ScrnInfoPtr pScrn)
 
 
 /*
- * Generic functions.
+ * Wait for acceleration engines idle. An expensive way to sync.
  */
 
 void 
@@ -277,6 +315,10 @@ viaAccelSync(ScrnInfoPtr pScrn)
 	;
 }
 
+/*
+ * Set 2D state clipping on.
+ */
+
 static void
 viaSetClippingRectangle(
     ScrnInfoPtr pScrn,
@@ -295,6 +337,9 @@ viaSetClippingRectangle(
     tdc->clipY2 = y2;
 }
 
+/*
+ * Set 2D state clipping off.
+ */
 
 static void 
 viaDisableClipping(ScrnInfoPtr pScrn)
@@ -305,7 +350,10 @@ viaDisableClipping(ScrnInfoPtr pScrn)
     tdc->clipping = FALSE;
 }
 
-
+/*
+ * Emit clipping borders to the command buffer and update the 2D context
+ * current command with clipping info.
+ */
 
 static int
 viaAccelClippingHelper(ViaCommandBuffer *cb, int refY, ViaTwodContext *tdc)
@@ -323,6 +371,10 @@ viaAccelClippingHelper(ViaCommandBuffer *cb, int refY, ViaTwodContext *tdc)
 
 }
 
+/*
+ * Emit a solid blit operation to the command buffer. 
+ */
+
 static void 
 viaAccelSolidHelper(ViaCommandBuffer *cb, int x, int y, int w, int h,
 		    unsigned fbBase, CARD32 mode, unsigned pitch, CARD32 fg,
@@ -331,12 +383,17 @@ viaAccelSolidHelper(ViaCommandBuffer *cb, int x, int y, int w, int h,
     BEGIN_RING_AGP(cb, 14); 
     OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_GEMODE), mode);
     OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_DSTBASE), fbBase >> 3);
-    OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_PITCH), (pitch >> 3) << 16);
+    OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_PITCH), VIA_PITCH_ENABLE | 
+		    (pitch >> 3) << 16);
     OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_DSTPOS), (y << 16) | x);
     OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_DIMENSION), ((h - 1) << 16) | (w - 1));
     OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_FGCOLOR), fg);
     OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_GECMD), cmd);
 }
+
+/*
+ * Emit transparency state and color to the command buffer.
+ */
 
 static void
 viaAccelTransparentHelper(ViaCommandBuffer *cb, CARD32 keyControl, 
@@ -348,6 +405,10 @@ viaAccelTransparentHelper(ViaCommandBuffer *cb, CARD32 keyControl,
 	OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_SRCCOLORKEY), transColor);
     }
 }
+
+/*
+ * Emit a copy blit operation to the command buffer.
+ */
 
 static void 
 viaAccelCopyHelper(ViaCommandBuffer *cb, int xs, int ys, int xd, int yd,
@@ -368,7 +429,8 @@ viaAccelCopyHelper(ViaCommandBuffer *cb, int xs, int ys, int xd, int yd,
     OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_GEMODE), mode);
     OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_SRCBASE), srcFbBase >> 3);    
     OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_DSTBASE), dstFbBase >> 3);
-    OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_PITCH), ((dstPitch >> 3) << 16) | (srcPitch >> 3));
+    OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_PITCH), VIA_PITCH_ENABLE | 
+		    ((dstPitch >> 3) << 16) | (srcPitch >> 3));
     OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_SRCPOS), (ys << 16) | xs);
     OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_DSTPOS), (yd << 16) | xd);
     OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_DIMENSION), ((h - 1) << 16) | (w - 1));
@@ -592,7 +654,6 @@ viaSetupForCPUToScreenColorExpandFill(ScrnInfoPtr pScrn, int fg, int bg, int rop
     viaAccelTransparentHelper(cb, 0x0, 0x0);
 }
 
-
 static void
 viaSubsequentScanlineCPUToScreenColorExpandFill(ScrnInfoPtr pScrn, int x, int y,
 						int w, int h, int skipleft)
@@ -635,7 +696,6 @@ viaSetupForImageWrite(ScrnInfoPtr pScrn, int rop, unsigned planemask, int trans_
 			      trans_color);
 }
 
-
 static void
 viaSubsequentImageWriteRect(ScrnInfoPtr pScrn, int x, int y, int w, int h,
 			    int skipleft)
@@ -677,7 +737,6 @@ viaSetupForSolidLine(ScrnInfoPtr pScrn, int color, int rop, unsigned int planema
     OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_MONOPAT0), 0xFF);
     OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_FGCOLOR), tdc->fgColor);
 }
-
 
 static void
 viaSubsequentSolidTwoPointLine(ScrnInfoPtr pScrn, int x1, int y1, 
@@ -740,7 +799,6 @@ viaSubsequentSolidTwoPointLine(ScrnInfoPtr pScrn, int x1, int y1,
     cb->flushFunc(cb);
 
 }
-
 
 /* Subsequent XAA solid horizontal and vertical lines */
 static void
@@ -814,7 +872,6 @@ viaSubsequentDashedTwoPointLine(ScrnInfoPtr pScrn, int x1, int y1, int x2,
 {
     viaSubsequentSolidTwoPointLine(pScrn, x1, y1, x2, y2, flags);
 }
-
 
 static int
 viaInitXAA(ScreenPtr pScreen)
@@ -981,9 +1038,6 @@ viaAccelWaitMarker(ScreenPtr pScreen, int marker)
     }
 }
 
-
-
-
 #ifdef VIA_HAVE_EXA
 
 static Bool
@@ -1106,12 +1160,15 @@ viaExaDownloadFromScreen(PixmapPtr pSrc, int x, int y, int w, int h,
     VIAPtr pVia = VIAPTR(pScrn);
     drm_via_dmablit_t blit;
     unsigned srcPitch = exaGetPixmapPitch(pSrc);
-    unsigned srcOffset = exaGetPixmapOffset(pSrc);
     unsigned bytesPerPixel = pSrc->drawable.bitsPerPixel >> 3;
+    unsigned srcOffset = exaGetPixmapOffset(pSrc) + y*srcPitch + x*bytesPerPixel;
     int err;
     char *bounce = NULL;
     char *bounceAligned = NULL;
     unsigned bouncePitch = 0;
+
+    if (!pVia->directRenderingEnabled) 
+        return FALSE;
 
     if ((srcPitch & 3) || (srcOffset & 3)) {
 	ErrorF("VIA EXA download src_pitch misaligned\n");
@@ -1163,9 +1220,12 @@ viaExaUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src, int 
     VIAPtr pVia = VIAPTR(pScrn);
     drm_via_dmablit_t blit;
     unsigned dstPitch = exaGetPixmapPitch(pDst);
-    unsigned dstOffset = exaGetPixmapOffset(pDst);
     unsigned bytesPerPixel = pDst->drawable.bitsPerPixel >> 3;
+    unsigned dstOffset = exaGetPixmapOffset(pDst) + y*dstPitch + x*bytesPerPixel;
     int err;
+
+    if (!pVia->directRenderingEnabled) 
+        return FALSE;
 
     if (((unsigned long)src & 15) || (src_pitch & 15)) 
 	return FALSE;
@@ -1173,8 +1233,11 @@ viaExaUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src, int 
     if ((dstPitch & 3) || (dstOffset & 3))
 	return FALSE;
     
-    blit.num_lines = h;
     blit.line_length = w*bytesPerPixel;
+    if (blit.line_length < 65)
+        return FALSE;
+
+    blit.num_lines = h;
     blit.fb_addr = dstOffset;
     blit.fb_stride = dstPitch;
     blit.mem_addr = src;

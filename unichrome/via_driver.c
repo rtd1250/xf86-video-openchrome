@@ -2181,8 +2181,9 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 	pVia->directRenderingEnabled = VIADRIFinishScreenInit(pScreen);
 
     if (pVia->directRenderingEnabled) {
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "direct rendering enabled\n");
 	VIADRIPtr pVIADRI = pVia->pDRIInfo->devPrivate;
+
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "direct rendering enabled\n");
 	pVia->agpDMA = pVia->dma2d && pVIADRI->ringBufActive;
     } else {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO, "direct rendering disabled\n");
