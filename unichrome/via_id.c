@@ -136,6 +136,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Abit KV-80",                            VIA_K8M800,  0x147B, 0x1419, VIA_DEVICE_CRT},
     {"Averatec 327x",                         VIA_K8M800,  0x14FF, 0x0315, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Twinhead N14RA",                        VIA_K8M800,  0x14FF, 0x0321, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
+    {"Averatec 3715",                         VIA_K8M800,  0x14FF, 0x0322, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Averatec 54xx",                         VIA_K8M800,  0x1509, 0x3930, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"FIC K8M-800M",                          VIA_K8M800,  0x1509, 0x6001, VIA_DEVICE_CRT},
     {"Biostar K8VGA-M",                       VIA_K8M800,  0x1565, 0x1203, VIA_DEVICE_CRT},
