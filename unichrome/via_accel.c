@@ -99,7 +99,7 @@ viaFlushDRIEnabled(ViaCommandBuffer * cb)
     drm_via_cmdbuffer_t b;
 
     if (pVia->agpDMA) {
-	do {
+	while (tmpSize > 0) {
 	    b.size = (tmpSize > VIA_DMASIZE) ? VIA_DMASIZE : tmpSize;
 	    tmpSize -= b.size;
 	    b.buf = tmp;
@@ -111,7 +111,7 @@ viaFlushDRIEnabled(ViaCommandBuffer * cb)
 		cb->flushFunc = viaFlushPCI;
 		return;
 	    }
-	} while (tmpSize > 0);
+	}
 	cb->pos = 0;
     } else {
 	cb->flushFunc = viaFlushPCI;
@@ -130,7 +130,7 @@ viaSetupCBuffer(ScrnInfoPtr pScrn, ViaCommandBuffer * buf, unsigned size)
 {
     buf->pScrn = pScrn;
     buf->bufSize = ((size == 0) ? VIA_DMASIZE : size) >> 2;
-    buf->buf = (CARD32 *) xcalloc(buf->bufSize, 1);
+    buf->buf = (CARD32 *) xcalloc(buf->bufSize, sizeof(CARD32));
     if (!buf->buf)
 	return BadAlloc;
     buf->waitFlags = 0;

@@ -1,3 +1,9 @@
+2005-11-26  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
+	* unichrome/via_accel.c: (viaFlushDRIEnabled), (viaSetupCBuffer):
+
+	- Merged EXA branch changes between revisions 84 and 86.
+
 2005-11-23  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
 	* unichrome/via_accel.c: (viaFlushPCI), (viaFlushDRIEnabled),
