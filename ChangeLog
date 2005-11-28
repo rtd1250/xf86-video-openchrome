@@ -1,3 +1,9 @@
+2005-11-28  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
+	* unichrome/Imakefile:
+
+	- Include the correct drm.h file. This is important for 64 bit builds.
+	
 2005-11-26  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
 	* unichrome/via_accel.c: (viaFlushDRIEnabled), (viaSetupCBuffer):

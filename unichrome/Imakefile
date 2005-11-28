@@ -15,14 +15,6 @@ DEFXVPRIV = -DX_NEED_XVPRIV_H
 DEFREGIONNULL = -DX_USE_REGION_NULL
 #endif
 
-#if BuildXF86DRI
-#if XF86_VERSION_CURRENT >= XF86_VERSION_NUMERIC(4,3,99,901,0)
-X_DRM_H_LOCATION = -I$(XF86OSSRC)/shared/drm/kernel
-#else
-X_DRM_H_LOCATION = -I$(XF86OSSRC)/linux/drm/kernel
-#endif
-#endif 
-
 #if XF86_VERSION_CURRENT >= XF86_VERSION_NUMERIC(4,4,99,2,0)
 XCOMM for Imakefile only
 #define X_NEED_NEWMODULETARGET 1
@@ -50,7 +42,7 @@ DEFREGIONNULL = -DX_USE_REGION_NULL
 
 #if BuildXF86DRI
 XCOMM Since we are unable to properly version, just include the lot.
-X_DRM_H_LOCATION = -I$(DRMSRCDIR)/shared -I$(XF86OSSRC)/shared/drm/kernel
+X_DRM_H_LOCATION = -I$(DRMSRCDIR)/shared-core -I$(XF86OSSRC)/shared/drm/kernel
 #endif 
 
 XCOMM Include the Xorg changes concerning dlloader (by Adam Jackson). 
