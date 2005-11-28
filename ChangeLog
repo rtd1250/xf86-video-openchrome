@@ -1,3 +1,9 @@
+2005-11-28  Ivor Hewitt <ivor-at-ivor-dot-org>
+
+	* unichrome/via_id.c:
+        
+        - Just another id. (Tobias Blom)
+
 2005-11-28  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
 	* unichrome/Imakefile:
