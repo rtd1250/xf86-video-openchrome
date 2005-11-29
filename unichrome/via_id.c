@@ -125,7 +125,6 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Mitac 8399",                            VIA_K8M800,  0x1071, 0x8399, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV}, /* aka "pogolinux konabook 3100" */
     {"Mitac 8889",                            VIA_K8M800,  0x1071, 0x8889, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
     {"VIA VT3108 (K8M800)",                   VIA_K8M800,  0x1106, 0x3108, VIA_DEVICE_CRT}, /* VIA/K8M800 -- ??? PciInfo Alignment issue ??? */
-    {"DFI K8M800-MLVF",                       VIA_K8M800,  0x15BD, 0x1002, VIA_DEVICE_CRT},
     {"Shuttle FX83",                          VIA_K8M800,  0x1297, 0xF683, VIA_DEVICE_CRT | VIA_DEVICE_TV},
     {"Sharp Actius AL27",                     VIA_K8M800,  0x13BD, 0x1044, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Giga-byte GA-K8VM800M",                 VIA_K8M800,  0x1458, 0xD000, VIA_DEVICE_CRT},
@@ -141,6 +140,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Averatec 54xx",                         VIA_K8M800,  0x1509, 0x3930, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"FIC K8M-800M",                          VIA_K8M800,  0x1509, 0x6001, VIA_DEVICE_CRT},
     {"Biostar K8VGA-M",                       VIA_K8M800,  0x1565, 0x1203, VIA_DEVICE_CRT},
+    {"DFI K8M800-MLVF",                       VIA_K8M800,  0x15BD, 0x1002, VIA_DEVICE_CRT},
     {"Packard Bell Easynote E6116/E63xx",     VIA_K8M800,  0x1631, 0xC008, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
     {"Packard Bell Easynote B3 800/B3340",    VIA_K8M800,  0x1631, 0xC009, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"ASRock K8Upgrade-VM800",                VIA_K8M800,  0x1849, 0x3108, VIA_DEVICE_CRT},
