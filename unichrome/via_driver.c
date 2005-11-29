@@ -37,6 +37,7 @@
 #define DPMS_SERVER
 #include "extensions/dpms.h"
 
+#include "svnversion.h"
 
 #include "via_driver.h"
 #include "via_video.h"
@@ -329,6 +330,7 @@ static const char *drmSymbols[] = {
     "drmCtlUninstHandler",
     "drmCommandNone",
     "drmCommandWrite",
+    "drmCommandWriteRead",
     "drmFreeVersion",
     "drmGetInterruptFromBusID",
     "drmGetLibVersion",
@@ -507,6 +509,10 @@ static Bool VIAProbe(DriverPtr drv, int flags)
     xf86Msg(X_NOTICE, "VIA Technologies does not support or endorse this driver in any way.\n");
     xf86Msg(X_NOTICE, "For support, please refer to http://www.openchrome.org/ or\n");
     xf86Msg(X_NOTICE, "your X vendor.\n");
+
+#ifdef BUILDCOMMENT
+    xf86Msg(X_NOTICE, BUILDCOMMENT);
+#endif
 
     if (flags & PROBE_DETECT) {
         foundScreen = TRUE;

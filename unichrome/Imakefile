@@ -1,5 +1,21 @@
-#define IHaveModules
+ #define IHaveModules
 #include <Server.tmpl>
+
+XCOMM Add a comment into the source if we are building svn code.
+all:: svnversion.h
+
+svnversion.h:
+	@if [ -f svnrelease.h ]; then \
+	echo '#include "svnrelease.h"' > $@.tmp; \
+	elif [ -d .svn ]; then \
+	echo '#define BUILDCOMMENT "(development build, at svn revision '\
+	"`svnversion -nc . | sed -e s/^[^:]*://`"')\n"' > $@.tmp; \
+	else date +'#define BUILDCOMMENT "(development build, compiled on %c)\n"' > $@.tmp; fi
+
+	@(chmod 666 $@.tmp 2> /dev/null || /bin/true)
+	@cmp -s $@ $@.tmp || (mv $@.tmp $@ ; echo created $@)
+
+.PHONY: svnversion.h
 
 XCOMM Check the version to see if we need anything special.
 #ifdef XF86_VERSION_CURRENT
