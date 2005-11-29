@@ -1,3 +1,9 @@
+2005-11-29  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
+	* unichrome/Imakefile:
+
+	- Yet another drm.h include fixup. For 6.8 and earlier?
+	
 2005-11-28  Ivor Hewitt <ivor-at-ivor-dot-org>
 
 	* unichrome/via_id.c:
