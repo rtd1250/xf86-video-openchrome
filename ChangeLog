@@ -1,5 +1,12 @@
 2005-11-29  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
+	* unichrome/via_accel.c: (viaInitAccel):
+	* unichrome/via_memory.c: (VIAAllocLinear):
+
+	- Merge exa_branch revisions 86:91 
+	
+2005-11-29  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
 	* unichrome/Imakefile:
 
 	- Yet another drm.h include fixup. For 6.8 and earlier?

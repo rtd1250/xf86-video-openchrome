@@ -1407,10 +1407,13 @@ viaInitAccel(ScreenPtr pScreen)
      * XAA may get slow for some reason. 
      */
 
+#ifdef XF86DRI
     if (pVia->directRenderingEnabled) {
 	pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart) / 2;
 	maxY = pScrn->virtualY + (pVia->driSize / pVia->Bpl);
-    } else {
+    } else 
+#endif
+    {
 	maxY = pVia->FBFreeEnd / pVia->Bpl;
     }
     if (maxY > 4 * pScrn->virtualY)

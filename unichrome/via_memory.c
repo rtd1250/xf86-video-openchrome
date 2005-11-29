@@ -110,11 +110,9 @@ static unsigned long offScreenLinear(VIAMemPtr mem, ScrnInfoPtr pScrn,
 
 unsigned long VIAAllocLinear(VIAMemPtr mem, ScrnInfoPtr pScrn, unsigned long size)
 {
-#if defined(XF86DRI) 
-    VIAPtr  pVia = VIAPTR(pScrn);
-#endif
-	
+
 #ifdef XF86DRI
+    VIAPtr  pVia = VIAPTR(pScrn);
     int ret;
 
     if(mem->pool)
