@@ -329,7 +329,8 @@ static const char *drmSymbols[] = {
     "drmCtlInstHandler",
     "drmCtlUninstHandler",
     "drmCommandNone",
-    "drmCommandWrite",
+    "drmCommandWrite"
+    "drmCommandWriteRead",
     "drmCommandWriteRead",
     "drmFreeVersion",
     "drmGetInterruptFromBusID",

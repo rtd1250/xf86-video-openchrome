@@ -68,8 +68,8 @@ void VIAFreeLinear(VIAMemPtr mem)
     return;
     case 2:
 #ifdef XF86DRI
-	if(drmCommandWriteRead(mem->drm_fd, DRM_VIA_FREEMEM,
-			       &mem->drm, sizeof(drm_via_mem_t)) < 0)
+	if(drmCommandWrite(mem->drm_fd, DRM_VIA_FREEMEM,
+			   &mem->drm, sizeof(drm_via_mem_t)) < 0)
 	    ErrorF("DRM module failed free.\n");
 #endif
 	mem->pool = 0;

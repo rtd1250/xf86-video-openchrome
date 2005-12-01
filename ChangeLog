@@ -1,3 +1,11 @@
+2005-12-01  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
+	* unichrome/via_driver.c:
+	* unichrome/via_memory.c: (VIAFreeLinear):
+
+	- Add drmCommandWriteRead to drm loader symbols.
+	- Make the drm freemem call drmCommandWrite.
+	
 2005-11-29  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
 	* unichrome/via_accel.c: (viaInitAccel):
