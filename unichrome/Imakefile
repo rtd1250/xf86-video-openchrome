@@ -1,4 +1,4 @@
- #define IHaveModules
+#define IHaveModules
 #include <Server.tmpl>
 
 XCOMM Add a comment into the source if we are building svn code.

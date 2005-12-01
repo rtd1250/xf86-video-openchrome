@@ -1,5 +1,16 @@
 2005-12-01  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
+	* libxvmc/Imakefile:
+	* unichrome/Imakefile:
+	* unichrome/via_driver.c:
+
+	- Remove drmCommandWriteRead from drm loader symbols again.
+	  Ivor had already added it :)
+	- Fix a typo in unichrome/Imakefile that broke build on x86_64.
+	- Add $(PICFLAGS) to libxvmc Makefile to make it build on x86_64.
+
+2005-12-01  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
 	* unichrome/via_driver.c:
 	* unichrome/via_memory.c: (VIAFreeLinear):
 
