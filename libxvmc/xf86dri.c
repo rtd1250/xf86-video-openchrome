@@ -201,9 +201,10 @@ static XEXT_GENERATE_CLOSE_DISPLAY (close_display, xf86dri_info)
 
     *hSAREA = rep.hSAREALow;
 #ifdef LONG64
-    *hSAREA |= ((drm_handle_t)rep.hSAREAHigh) << 32;
+    if (sizeof(drm_handle_t) == 8) {
+        *hSAREA |= ((unsigned long)rep.hSAREAHigh) << 32;
+    }
 #endif
-
     if (rep.length) {
         if (!(*busIdString = (char *)Xcalloc(rep.busIdStringLength + 1, 1))) {
             _XEatData(dpy, ((rep.busIdStringLength+3) & ~3));
@@ -563,7 +564,9 @@ Bool uniDRIDestroyDrawable( Display * ndpy, int screen,
 
     *hFrameBuffer = rep.hFrameBufferLow;
 #ifdef LONG64
-    *hFrameBuffer |= ((drm_handle_t)rep.hFrameBufferHigh) << 32;
+    if (sizeof(drm_handle_t) == 8) {
+        *hFrameBuffer |= ((unsigned long)rep.hFrameBufferHigh) << 32;
+    }
 #endif
 
     *fbOrigin = rep.framebufferOrigin;

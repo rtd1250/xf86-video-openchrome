@@ -29,7 +29,8 @@ ALLOC_DEFINES = -DMALLOC_0_RETURNS_NULL
 
       DEFINES = $(ALLOC_DEFINES) $(PICFLAGS) -DTRUE=1 -DFALSE=0
      INCLUDES = -I$(XINCLUDESRC) -I$(INCLUDESRC) -I$(XLIBSRC) -I$(EXTINCSRC) \
-		-I$(XF86COMSRC) -I$(XF86OSSRC) -I$(DRMSRCDIR)/shared \
+		-I$(XF86COMSRC) -I$(XF86OSSRC) -I$(DRMSRCDIR)/shared-core \
+		-I$(DRMSRCDIR)/shared \
 		-I$(XF86OSSRC)/linux/drm/kernel -I$(VIADRIVERSRC)
          SRCS = viaXvMC.c viaLowLevel.c viaLowLevelPro.c xf86dri.c driDrawable.c
          OBJS = viaXvMC.o viaLowLevel.o xf86drm.o xf86drmHash.o \

@@ -1,5 +1,12 @@
 2005-12-02  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
+	* libxvmc/Imakefile:
+	* libxvmc/xf86dri.c:
+
+	- 64 bit fixes on libviaXvMC*
+	
+2005-12-02  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
 	reviewed by: <delete if not using a buddy>
 
 	* unichrome/via_accel.c: (viaAccelPlaneMaskHelper),
