@@ -390,15 +390,61 @@ viaAccelSolidHelper(ViaCommandBuffer * cb, int x, int y, int w, int h,
 }
 
 /*
+ * Check if we can use a planeMask and update the 2D context accordingly.
+ */
+
+static Bool
+viaAccelPlaneMaskHelper(ViaTwodContext * tdc, CARD32 planeMask)
+{
+    CARD32 modeMask = (1 << ((1 << tdc->bytesPPShift) << 3)) - 1;
+    CARD32 curMask = 0x00000000;
+    CARD32 curByteMask;
+    int i;
+
+    if ((planeMask & modeMask) != modeMask) {
+
+	/*
+	 * Masking doesn't work in 8bpp.
+	 */
+
+	if (modeMask == 0x0F) {
+	    tdc->keyControl &= 0x0FFFFFFF;
+	    return FALSE;
+	}
+
+	/*
+	 * Translate the bit planemask to a byte planemask.
+	 */
+
+	for (i = 0; i < (1 << tdc->bytesPPShift); ++i) {
+	    curByteMask = (0xFF << i);
+
+	    if ((planeMask & curByteMask) == 0) {
+		curMask |= (1 << i);
+	    } else if ((planeMask & curByteMask) != curByteMask) {
+		tdc->keyControl &= 0x0FFFFFFF;
+		return FALSE;
+	    }
+	}
+
+	tdc->keyControl = (tdc->keyControl & 0x0FFFFFFF) | (curMask << 28);
+    }
+
+    return TRUE;
+}
+
+/*
  * Emit transparency state and color to the command buffer.
  */
 
 static void
-viaAccelTransparentHelper(ViaCommandBuffer * cb, CARD32 keyControl,
-    CARD32 transColor)
+viaAccelTransparentHelper(ViaTwodContext * tdc, ViaCommandBuffer * cb,
+    CARD32 keyControl, CARD32 transColor, Bool usePlaneMask)
 {
+    tdc->keyControl &= ((usePlaneMask) ? 0xF0000000 : 0x00000000);
+    tdc->keyControl |= (keyControl & 0x0FFFFFFF);
     BEGIN_RING_AGP(cb, 4);
-    OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_KEYCONTROL), keyControl);
+    OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_KEYCONTROL), tdc->keyControl);
     if (keyControl) {
 	OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_SRCCOLORKEY), transColor);
     }
@@ -460,8 +506,8 @@ viaSetupForScreenToScreenCopy(ScrnInfoPtr pScrn, int xdir, int ydir, int rop,
 	cmd |= VIA_GEC_DECY;
 
     tdc->cmd = cmd;
-    viaAccelTransparentHelper(cb, (trans_color != -1) ? 0x4000 : 0x0000,
-	trans_color);
+    viaAccelTransparentHelper(tdc, cb, (trans_color != -1) ? 0x4000 : 0x0000,
+	trans_color, FALSE);
 }
 
 static void
@@ -492,10 +538,12 @@ viaSetupForSolidFill(ScrnInfoPtr pScrn, int color, int rop,
     unsigned planemask)
 {
     VIAPtr pVia = VIAPTR(pScrn);
+    ViaCommandBuffer *cb = &pVia->cb;
     ViaTwodContext *tdc = &pVia->td;
 
     tdc->cmd = VIA_GEC_BLT | VIA_GEC_FIXCOLOR_PAT | VIAACCELPATTERNROP(rop);
     tdc->fgColor = color;
+    viaAccelTransparentHelper(tdc, cb, 0x00, 0x00, FALSE);
 }
 
 static void
@@ -536,6 +584,7 @@ viaSetupForMono8x8PatternFill(ScrnInfoPtr pScrn, int pattern0, int pattern1,
     VIAPtr pVia = VIAPTR(pScrn);
     int cmd;
     ViaTwodContext *tdc = &pVia->td;
+    ViaCommandBuffer *cb = &pVia->cb;
 
     cmd = VIA_GEC_BLT | VIA_GEC_PAT_REG | VIA_GEC_PAT_MONO |
 	VIAACCELPATTERNROP(rop);
@@ -549,6 +598,8 @@ viaSetupForMono8x8PatternFill(ScrnInfoPtr pScrn, int pattern0, int pattern1,
     tdc->bgColor = bg;
     tdc->pattern0 = pattern0;
     tdc->pattern1 = pattern1;
+    viaAccelTransparentHelper(tdc, cb, 0x00, 0x00, FALSE);
+
 }
 
 static void
@@ -592,9 +643,12 @@ viaSetupForColor8x8PatternFill(ScrnInfoPtr pScrn, int patternx, int patterny,
 {
     VIAPtr pVia = VIAPTR(pScrn);
     ViaTwodContext *tdc = &pVia->td;
+    ViaCommandBuffer *cb = &pVia->cb;
 
     tdc->cmd = VIA_GEC_BLT | VIAACCELPATTERNROP(rop);
     tdc->patternAddr = (patternx * pVia->Bpp + patterny * pVia->Bpl);
+    viaAccelTransparentHelper(tdc, cb, (trans_color != -1) ? 0x4000 : 0x0000,
+	trans_color, FALSE);
 }
 
 static void
@@ -659,7 +713,7 @@ viaSetupForCPUToScreenColorExpandFill(ScrnInfoPtr pScrn, int fg, int bg,
 
     cb->flushFunc(cb);
 
-    viaAccelTransparentHelper(cb, 0x0, 0x0);
+    viaAccelTransparentHelper(tdc, cb, 0x0, 0x0, FALSE);
 }
 
 static void
@@ -698,8 +752,8 @@ viaSetupForImageWrite(ScrnInfoPtr pScrn, int rop, unsigned planemask,
 
     tdc->cmd = VIA_GEC_BLT | VIA_GEC_SRC_SYS | VIAACCELCOPYROP(rop);
     cb->flushFunc(cb);
-    viaAccelTransparentHelper(cb, (trans_color != -1) ? 0x4000 : 0x0000,
-	trans_color);
+    viaAccelTransparentHelper(tdc, cb, (trans_color != -1) ? 0x4000 : 0x0000,
+	trans_color, FALSE);
 }
 
 static void
@@ -733,6 +787,7 @@ viaSetupForSolidLine(ScrnInfoPtr pScrn, int color, int rop,
     ViaCommandBuffer *cb = &pVia->cb;
     ViaTwodContext *tdc = &pVia->td;
 
+    viaAccelTransparentHelper(tdc, cb, 0x00, 0x00, FALSE);
     tdc->cmd = VIA_GEC_FIXCOLOR_PAT | VIAACCELPATTERNROP(rop);
     tdc->fgColor = color;
 
@@ -801,7 +856,7 @@ viaSubsequentSolidTwoPointLine(ScrnInfoPtr pScrn, int x1, int y1,
     OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_LINE_XY), ((y1 << 16) | x1));
     OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_DIMENSION), dx);
     OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_LINE_ERROR),
-	(((dy << 1) - dx - error) & 0x3fff));
+	(((dy << 1) - dx - error) & 0x3fff) | 0xFF0000);
     OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_GECMD), cmd);
     cb->flushFunc(cb);
 
@@ -847,6 +902,7 @@ viaSetupForDashedLine(ScrnInfoPtr pScrn, int fg, int bg, int rop,
     ViaCommandBuffer *cb = &pVia->cb;
     ViaTwodContext *tdc = &pVia->td;
 
+    viaAccelTransparentHelper(tdc, cb, 0x00, 0x00, FALSE);
     cmd = VIA_GEC_LINE | VIA_GEC_FIXCOLOR_PAT | VIAACCELPATTERNROP(rop);
 
     if (bg == -1) {
@@ -1013,8 +1069,9 @@ viaAccelMarkSync(ScreenPtr pScreen)
     pVia->curMarker &= 0x7FFFFFFF;
 
     if (pVia->agpDMA) {
-
-	viaAccelSolidHelper(&pVia->cb, 0, 0, 1, 1, pVia->markerOffset,
+	BEGIN_RING_AGP(cb, 2);
+	OUT_RING_QW_AGP(cb, H1_ADDR(VIA_REG_KEYCONTROL), 0x00);
+	viaAccelSolidHelper(cb, 0, 0, 1, 1, pVia->markerOffset,
 	    VIA_GEM_32bpp, 4, pVia->curMarker,
 	    (0xF0 << 24) | VIA_GEC_BLT | VIA_GEC_FIXCOLOR_PAT);
 	cb->flushFunc(cb);
@@ -1048,7 +1105,7 @@ viaAccelWaitMarker(ScreenPtr pScreen, int marker)
  */
 
 static Bool
-viaExaPrepareSolid(PixmapPtr pPixmap, int alu, Pixel planemask, Pixel fg)
+viaExaPrepareSolid(PixmapPtr pPixmap, int alu, Pixel planeMask, Pixel fg)
 {
     ScrnInfoPtr pScrn = xf86Screens[pPixmap->drawable.pScreen->myNum];
     VIAPtr pVia = VIAPTR(pScrn);
@@ -1061,7 +1118,9 @@ viaExaPrepareSolid(PixmapPtr pPixmap, int alu, Pixel planemask, Pixel fg)
     if (!viaAccelSetMode(pPixmap->drawable.depth, tdc))
 	return FALSE;
 
-    viaAccelTransparentHelper(cb, 0x0, 0x0);
+    if (!viaAccelPlaneMaskHelper(tdc, planeMask))
+	return FALSE;
+    viaAccelTransparentHelper(tdc, cb, 0x0, 0x0, TRUE);
 
     tdc->cmd = VIA_GEC_BLT | VIA_GEC_FIXCOLOR_PAT | VIAACCELPATTERNROP(alu);
 
@@ -1103,11 +1162,6 @@ viaExaPrepareCopy(PixmapPtr pSrcPixmap, PixmapPtr pDstPixmap, int xdir,
     ViaCommandBuffer *cb = &pVia->cb;
     ViaTwodContext *tdc = &pVia->td;
 
-    if ((planeMask & ((1 << pSrcPixmap->drawable.depth) - 1)) !=
-	(1 << pSrcPixmap->drawable.depth) - 1) {
-	return FALSE;
-    }
-
     if (pSrcPixmap->drawable.bitsPerPixel !=
 	pDstPixmap->drawable.bitsPerPixel)
 	return FALSE;
@@ -1129,7 +1183,9 @@ viaExaPrepareCopy(PixmapPtr pSrcPixmap, PixmapPtr pDstPixmap, int xdir,
     if (!viaAccelSetMode(pDstPixmap->drawable.bitsPerPixel, tdc))
 	return FALSE;
 
-    viaAccelTransparentHelper(cb, 0x0, 0x0);
+    if (!viaAccelPlaneMaskHelper(tdc, planeMask))
+	return FALSE;
+    viaAccelTransparentHelper(tdc, cb, 0x0, 0x0, TRUE);
 
     return TRUE;
 }
@@ -1411,7 +1467,7 @@ viaInitAccel(ScreenPtr pScreen)
     if (pVia->directRenderingEnabled) {
 	pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart) / 2;
 	maxY = pScrn->virtualY + (pVia->driSize / pVia->Bpl);
-    } else 
+    } else
 #endif
     {
 	maxY = pVia->FBFreeEnd / pVia->Bpl;
@@ -1494,7 +1550,7 @@ viaDGABlitRect(ScrnInfoPtr pScrn, int srcx, int srcy, int w, int h,
 	    cmd |= VIA_GEC_DECY;
 
 	viaAccelSetMode(pScrn->bitsPerPixel, tdc);
-	viaAccelTransparentHelper(cb, 0x0, 0x0);
+	viaAccelTransparentHelper(tdc, cb, 0x0, 0x0, FALSE);
 	viaAccelCopyHelper(cb, srcx, 0, dstx, 0, w, h, srcOffset, dstOffset,
 	    tdc->mode, pVia->Bpl, pVia->Bpl, cmd);
 	pVia->dgaMarker = viaAccelMarkSync(pScrn->pScreen);
@@ -1518,7 +1574,7 @@ viaDGAFillRect(ScrnInfoPtr pScrn, int x, int y, int w, int h,
 
     if (!pVia->NoAccel) {
 	viaAccelSetMode(pScrn->bitsPerPixel, tdc);
-	viaAccelTransparentHelper(cb, 0x0, 0x0);
+	viaAccelTransparentHelper(tdc, cb, 0x0, 0x0, FALSE);
 	viaAccelSolidHelper(cb, x, 0, w, h, dstBase, tdc->mode,
 	    pVia->Bpl, color, cmd);
 	pVia->dgaMarker = viaAccelMarkSync(pScrn->pScreen);

@@ -283,6 +283,8 @@ static const char *exaSymbols[] = {
   "exaDriverFini",
   "exaOffscreenAlloc",
   "exaOffscreenFree",
+  "exaGetPixmapPitch",
+  "exaGetPixmapOffset",
   NULL
 };
 #endif

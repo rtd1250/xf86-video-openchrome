@@ -1,3 +1,24 @@
+2005-12-02  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
+	reviewed by: <delete if not using a buddy>
+
+	* unichrome/via_accel.c: (viaAccelPlaneMaskHelper),
+	(viaAccelTransparentHelper), (viaSetupForScreenToScreenCopy),
+	(viaSetupForSolidFill), (viaSetupForMono8x8PatternFill),
+	(viaSetupForColor8x8PatternFill),
+	(viaSetupForCPUToScreenColorExpandFill), (viaSetupForImageWrite),
+	(viaSetupForSolidLine), (viaSubsequentSolidTwoPointLine),
+	(viaSetupForDashedLine), (viaAccelMarkSync), (viaExaPrepareSolid),
+	(viaExaPrepareCopy), (viaInitAccel), (viaDGABlitRect),
+	(viaDGAFillRect):
+	* unichrome/via_driver.c:
+	* unichrome/via_driver.h:
+
+	- Merge exa_branch revisions 91:104:
+	  Add support for EXA planemasks.
+	  Tell loader about some missing EXA functions (Reported by Adam Jackson).
+	  Fix broken XAA dashed lines.
+	
 2005-12-01  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
 	* libxvmc/Imakefile:
