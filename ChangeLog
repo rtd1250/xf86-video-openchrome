@@ -1,3 +1,11 @@
+2005-12-04  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
+	* unichrome/via_vt162x.c: (VT1622ModeCrtc):
+
+	- Fix trac item #13. 
+	  This will probably also make TV-out work on some K8M/N800 laptops,
+	  and will probaly fix TV-out after a resume.
+
 2005-12-02  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
 	* libxvmc/Imakefile:
