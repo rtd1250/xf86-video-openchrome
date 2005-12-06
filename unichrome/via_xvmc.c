@@ -23,6 +23,10 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "xf86.h"
 #include "xf86_OSproc.h"
 #include "xf86Resources.h"
@@ -49,8 +53,8 @@
 #endif
 
 #include "xf86xvmc.h"
-#include "Xv.h"
-#include "XvMC.h"
+#include <X11/extensions/Xv.h>
+#include <X11/extensions/XvMC.h>
 #include "xaa.h"
 #include "xaalocal.h"
 #include "dixstruct.h"

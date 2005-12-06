@@ -25,6 +25,11 @@
 /*
  * Implements three i2c busses through registers SR26, SR2c and SR31
  */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "via_driver.h"
 #include "via_vgahw.h"
 

@@ -29,6 +29,10 @@
  *DRI protocol support by Thomas Hellström, 2005.
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #undef WAITPAUSE
 
 #include "viaXvMCPriv.h"
@@ -38,7 +42,7 @@
 #include <sys/time.h>
 #include <time.h>
 #include <fourcc.h>
-#include <Xv.h>
+#include <X11/extensions/Xv.h>
 #include <xf86drm.h>
 #include <pthread.h>
 #include "vldXvMC.h"

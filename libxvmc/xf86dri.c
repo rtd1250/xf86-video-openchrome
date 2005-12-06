@@ -37,11 +37,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /* THIS IS NOT AN X CONSORTIUM STANDARD */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #define NEED_REPLIES
 #include <X11/Xlibint.h>
 #include <X11/extensions/Xext.h>
-#include "extutil.h"
-/* #include "glheader.h" */
+#include <X11/extensions/extutil.h>
 #include "xf86dristr.h"
 
 static XExtensionInfo _xf86dri_info_data;

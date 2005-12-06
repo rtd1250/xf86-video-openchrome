@@ -26,10 +26,10 @@
 #define _VIAXVMCPRIV_H 1
 
 #include <X11/Xlibint.h>
-#include <XvMC.h>
-#include <XvMClib.h>
+#include <X11/extensions/XvMC.h>
+#include <X11/extensions/XvMClib.h>
 #include <stdlib.h>
-#include <Xutil.h>
+#include <X11/Xutil.h>
 #include "vldXvMC.h"
 #include "via_xvmc.h"
 

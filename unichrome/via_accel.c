@@ -31,7 +31,11 @@
  *
  ************************************************************************/
 
-#include "Xarch.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <X11/Xarch.h>
 #include "xaalocal.h"
 #include "xaarop.h"
 #include "miline.h"

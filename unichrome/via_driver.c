@@ -30,12 +30,16 @@
  *
  ************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "xf86RAC.h"
 #include "shadowfb.h"
 
 #include "globals.h"
 #define DPMS_SERVER
-#include "extensions/dpms.h"
+#include <X11/extensions/dpms.h>
 
 #include "svnversion.h"
 

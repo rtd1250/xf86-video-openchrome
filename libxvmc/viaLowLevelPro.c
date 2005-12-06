@@ -42,6 +42,10 @@
  * are also operated through independent registers also.
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #undef VIDEO_DMA
 #define HQV_USE_IRQ
 #define UNICHROME_PRO

@@ -27,6 +27,11 @@
  * It's a bit daft to provide this short stuff in a seperate file, 
  * but then again, we'd only complicate matters in already complicated files.
  */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "xf86_ansic.h"
 #include "compiler.h"
 #include "xf86.h"
