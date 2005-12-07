@@ -83,16 +83,6 @@
  * Soyo SY-P4VM800
  *
  */
-
-static struct ViaCardIdStruct GenericId[] = {
-    {"Generic CLE266",                        VIA_CLE266,  0x1106, 0x3122, VIA_DEVICE_CRT},
-    {"Generic KM400",                         VIA_KM400,   0x1106, 0x7205, VIA_DEVICE_CRT},
-    {"Generic K8M800",                        VIA_K8M800,  0x1106, 0x3108, VIA_DEVICE_CRT},
-    {"Generic PM800",                         VIA_PM800,   0x1106, 0x3118, VIA_DEVICE_CRT},
-    {"Generic VM800",                         VIA_VM800,   0x1106, 0x3344, VIA_DEVICE_CRT},
-    {NULL,                                    VIA_UNKNOWN, 0x0000, 0x0000, VIA_DEVICE_NONE}
-};
-
 /*
  * There's no reason for this to be known outside of via_id.o
  * Only a pointer to an single entry will ever be used outside.
@@ -223,27 +213,10 @@ ViaCheckCardId(ScrnInfoPtr pScrn)
 	    return;
 	}
     }
-
-    for (Id = GenericId; Id->String; Id++)
-    {
-        if (Id->Chip == pVia->Chipset)
-        {
-            xf86DrvMsg(pScrn->scrnIndex, X_WARNING, 
-                    "Unknown Card-Ids (%4X|%4X), report this to openchrome-users@openchrome.org ASAP\n",
-                    pVia->PciInfo->subsysVendor, pVia->PciInfo->subsysCard);
-
-            xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Using %s, features may be missing.\n", Id->String);
-            pVia->Id = Id;
-            return;
-        }
-    }
     
-    xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-            "Unknown Card-Ids (%4X|%4X), report this to openchrome-users@openchrome.org ASAP\n"
+    xf86DrvMsg(pScrn->scrnIndex, X_ERROR, 
+	       "Unknown Card-Ids (%4X|%4X), report this to openchrome-users@openchrome.org ASAP\n"
 	       , pVia->PciInfo->subsysVendor, pVia->PciInfo->subsysCard);
-    
     pVia->Id = NULL;
 }
-
-/* vim:et:ts=4:sw=4 */
 
