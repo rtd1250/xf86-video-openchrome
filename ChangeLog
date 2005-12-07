@@ -1,3 +1,11 @@
+2005-12-06  Jon Nettleton <jon-dot-nettleton-at-gmail-dot-com>
+
+	* Makefile.am:
+	* Makefile.in:
+
+        - Added Makefile.am and Makefile.in to allow running make
+	  in the root directory 
+
 2005-12-06  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
 	* acinclude.m4:
