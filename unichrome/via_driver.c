@@ -2124,14 +2124,6 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
         viaInitAccel(pScreen);
     }
  
-    if (pVia->NoAccel) {
-	memset(pVia->FBBase, 0x00, pVia->videoRambytes);
-    } else {
-	viaDGAFillRect(pScrn, pScrn->frameX0, pScrn->frameY0, 
-		       pScrn->displayWidth, pScrn->virtualY,
-		       0x00000000);
-    }
-    
     miInitializeBackingStore(pScreen);
     xf86SetBackingStore(pScreen);
     /*xf86SetSilkenMouse(pScreen);*/
@@ -2184,8 +2176,6 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Palette loaded\n"));
 
-    vgaHWBlankScreen(pScrn, TRUE);
-
     pVia->CloseScreen = pScreen->CloseScreen;
     pScreen->SaveScreen = VIASaveScreen;
     pScreen->CloseScreen = VIACloseScreen;
@@ -2209,6 +2199,16 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
         xf86DrvMsg(pScrn->scrnIndex, X_INFO, "direct rendering disabled\n");
     }
 #endif
+
+    if (pVia->NoAccel) {
+	memset(pVia->FBBase, 0x00, pVia->videoRambytes);
+    } else {
+	viaDGAFillRect(pScrn, pScrn->frameX0, pScrn->frameY0, 
+		       pScrn->displayWidth, pScrn->virtualY,
+		       0x00000000);
+	viaDGAWaitMarker(pScrn);
+    }
+    vgaHWBlankScreen(pScrn, TRUE);
 
     viaInitVideo(pScreen);
 

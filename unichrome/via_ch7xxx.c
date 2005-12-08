@@ -334,8 +334,6 @@ CH7xxxModeI2C(ScrnInfoPtr pScrn, DisplayModePtr mode)
     VIAPtr pVia = VIAPTR(pScrn);
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
-    CARD8   *TV;
-    CARD16  *Patch2;
     CARD8   i, j;
 
     VIABIOSTVMASKTableRec Mask;

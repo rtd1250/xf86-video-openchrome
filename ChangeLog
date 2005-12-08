@@ -1,5 +1,16 @@
 2005-12-08  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
+	* unichrome/via_ch7xxx.c: (CH7xxxModeI2C):
+	* unichrome/via_dri.c: (VIADRIAgpInit):
+	* unichrome/via_driver.c: (VIAScreenInit):
+	* unichrome/via_id.c:
+
+	- Moved the memset from previous commit to after dri is initialized, so
+	  that AGP command submission will work.
+	- Silenced some warnings.
+
+2005-12-08  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
 	* unichrome/via_driver.c: (VIAScreenInit):
 	* unichrome/via_mode.c: (ViaModePrimary):
 	* unichrome/via_vbe.c: (ViaVbeSetMode):

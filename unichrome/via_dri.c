@@ -291,7 +291,6 @@ static Bool VIADRIAgpInit(ScreenPtr pScreen, VIAPtr pVia)
                  "[drm] agpAddr = 0x%08lx\n",pVia->agpAddr);
 		 
     pVIADRI->agp.size = pVia->agpSize;
-    ErrorF("Sizes %d %d %d\n", sizeof(drm_handle_t), sizeof(drmSize), sizeof(VIADRIRec));
     if (drmAddMap(pVia->drmFD, (drm_handle_t)0,
                  pVIADRI->agp.size, DRM_AGP, 0, 
                  &pVIADRI->agp.handle) < 0) {
