@@ -1,5 +1,13 @@
 2005-12-08  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
+	* unichrome/via_driver.c: (VIAScreenInit):
+	* unichrome/via_memory.c: (VIAAllocLinear):
+
+	- Protect the accelerated initial sceen clearing with a DRI lock.
+	- Submit the correct context for drm memory allocation.
+	
+2005-12-08  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
 	* unichrome/via_ch7xxx.c: (CH7xxxModeI2C):
 	* unichrome/via_dri.c: (VIADRIAgpInit):
 	* unichrome/via_driver.c: (VIAScreenInit):

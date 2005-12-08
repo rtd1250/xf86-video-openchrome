@@ -126,7 +126,7 @@ unsigned long VIAAllocLinear(VIAMemPtr mem, ScrnInfoPtr pScrn, unsigned long siz
     if(pVia->directRenderingEnabled) {
 	mem->pScrn = pScrn;
 	mem->drm_fd = pVia->drmFD;
-	mem->drm.context = 1;
+	mem->drm.context = DRIGetContext(pScrn->pScreen);
 	mem->drm.size = size;
 	mem->drm.type = VIA_MEM_VIDEO;
 	ret = drmCommandWriteRead(mem->drm_fd, DRM_VIA_ALLOCMEM, &mem->drm, 

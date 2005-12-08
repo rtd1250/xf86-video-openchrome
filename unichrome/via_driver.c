@@ -2203,10 +2203,18 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     if (pVia->NoAccel) {
 	memset(pVia->FBBase, 0x00, pVia->videoRambytes);
     } else {
+#ifdef XF86DRI
+	if (pVia->directRenderingEnabled)
+	    DRILock(screenInfo.screens[scrnIndex], 0);
+#endif
 	viaDGAFillRect(pScrn, pScrn->frameX0, pScrn->frameY0, 
 		       pScrn->displayWidth, pScrn->virtualY,
 		       0x00000000);
 	viaDGAWaitMarker(pScrn);
+#ifdef XF86DRI
+	if (pVia->directRenderingEnabled)
+	    	DRIUnlock(screenInfo.screens[scrnIndex]);
+#endif
     }
     vgaHWBlankScreen(pScrn, TRUE);
 
