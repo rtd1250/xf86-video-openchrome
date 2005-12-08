@@ -2122,8 +2122,16 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 
     if (!pVia->NoAccel) {
         viaInitAccel(pScreen);
-    } 
-
+    }
+ 
+    if (pVia->NoAccel) {
+	memset(pVia->FBBase, 0x00, pVia->videoRambytes);
+    } else {
+	viaDGAFillRect(pScrn, pScrn->frameX0, pScrn->frameY0, 
+		       pScrn->displayWidth, pScrn->virtualY,
+		       0x00000000);
+    }
+    
     miInitializeBackingStore(pScreen);
     xf86SetBackingStore(pScreen);
     /*xf86SetSilkenMouse(pScreen);*/

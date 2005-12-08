@@ -1650,10 +1650,6 @@ ViaModePrimary(ScrnInfoPtr pScrn, DisplayModePtr mode)
     pBIOSInfo->Clock = ViaModeDotClockTranslate(pScrn, mode);
     pBIOSInfo->ClockExternal = FALSE;
 
-    /* Don't do this before the Sequencer is set: locks up KM400 and K8M800 */
-    if (pVia->FirstInit)
-	memset(pVia->FBBase, 0x00, pVia->videoRambytes);
-    
     /* Enable MMIO & PCI burst (1 wait state) */
     ViaSeqMask(hwp, 0x1A, 0x06, 0x06);
     

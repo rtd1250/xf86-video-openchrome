@@ -124,9 +124,6 @@ ViaVbeSetMode(ScrnInfoPtr pScrn, DisplayModePtr pMode)
 
     pVia->OverlaySupported = FALSE;
 
-    if (pVia->FirstInit)
-	memset(pVia->FBBase, 0x00, pVia->videoRambytes);
-
     data = (VbeModeInfoData*)pMode->Private;
 
     mode = data->mode | (1 << 15);

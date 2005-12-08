@@ -1,3 +1,13 @@
+2005-12-08  Thomas Hellström  <unichrome-at-shipmail-dot-org>
+
+	* unichrome/via_driver.c: (VIAScreenInit):
+	* unichrome/via_mode.c: (ViaModePrimary):
+	* unichrome/via_vbe.c: (ViaVbeSetMode):
+
+	- Moved memset to blank screen from ModeSetting to ScreenInit, in
+	  an attempt to avoid long standing hangs on K8M800. Also use
+	  the 2D engine for this if acceleration is enabled.
+
 2005-12-07  Thomas Hellström  <unichrome-at-shipmail-dot-org>
 
 	* Makefile.in:
