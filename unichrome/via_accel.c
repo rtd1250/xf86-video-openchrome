@@ -1434,6 +1434,9 @@ viaInitAccel(ScreenPtr pScreen)
     pVia->FBFreeEnd -= 32;
     pVia->markerOffset = (pVia->FBFreeEnd + 31) & ~31;
     pVia->markerBuf = (CARD32 *) ((char *)pVia->FBBase + pVia->markerOffset);
+    *pVia->markerBuf = 0;
+    pVia->curMarker = 0;
+    pVia->lastMarkerRead = 0;
 
 #ifdef VIA_HAVE_EXA
 
