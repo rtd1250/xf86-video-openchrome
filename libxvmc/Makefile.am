@@ -13,7 +13,7 @@ libviaXvMC_la_SOURCES = \
 	xf86dristr.h \
 	vldXvMC.h
 libviaXvMCPro_la_SOURCES = \
-	viaLowLevel.c \
+	viaLowLevelPro.c \
 	driDrawable.c \
 	viaXvMC.c \
 	xf86dri.c \

@@ -1,3 +1,11 @@
+2005-12-26  Thomas Hellström  <unichrome-at-shipmail-dot-org> 
+
+	* libxvmc/Makefile.am:
+
+	- Modular build two identical XvMC libs. The pro lib was not a pro lib. 
+	  Fix this.
+	  (Tim Dodge)
+
 2005-12-15  Thomas Hellström <unichrome-at-shipmail-dot-org> 
 
 	* unichrome/via_accel.c: (viaInitAccel):
