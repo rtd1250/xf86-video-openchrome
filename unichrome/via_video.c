@@ -973,7 +973,7 @@ viaDmaBlitImage(VIAPtr pVia,
     case FOURCC_YUY2:
     case FOURCC_RV15:
     case FOURCC_RV16:
-	bounceStride = 2*ALIGN_TO(width, 16);
+	bounceStride = ALIGN_TO(2*width, 16);
 	bounceLines = height;
 	break;
     case FOURCC_YV12:
@@ -1262,7 +1262,6 @@ viaPutImage(
     DBG_DD(ErrorF(" via_video.c : PutImage done OK\n"));
     return Success;
 }
-
 
 static int 
 viaQueryImageAttributes(
