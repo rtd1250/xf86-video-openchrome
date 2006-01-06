@@ -1007,12 +1007,11 @@ viaDmaBlitImage(VIAPtr pVia,
     }
 
     blit.num_lines = height;
-    blit.line_length = (id == FOURCC_YV12) ? width : 2*width;
+    blit.line_length = bounceStride;
     blit.fb_addr = dst;
     blit.fb_stride = lumaStride;
     blit.mem_addr = base;
     blit.mem_stride = bounceStride;
-    blit.bounce_buffer = 0;
     blit.to_fb = 1;
 #ifdef XV_DEBUG
     ErrorF("Addr: 0x%lx, Offset 0x%lx\n Fb_stride: %u, Mem_stride: %u\n width: %u num_lines: %u\n",
@@ -1044,20 +1043,19 @@ viaDmaBlitImage(VIAPtr pVia,
 
 	if (nv12Conversion) {
 	    blit.num_lines = height >> 1;
-	    blit.line_length = width;
+	    blit.line_length = lumaStride;
 	    blit.mem_addr = bounceBase + bounceStride*height;
 	    blit.fb_stride = lumaStride;
 	    blit.mem_stride = bounceStride;
 	} else {
 	    blit.num_lines = height;
-	    blit.line_length = width >> 1;
+	    blit.line_length = lumaStride >> 1;
 	    blit.mem_addr = base + bounceStride*height;
 	    blit.fb_stride = lumaStride >> 1;
 	    blit.mem_stride = tmp;
 	}
 
 	blit.fb_addr = dst + lumaStride*height;
-	blit.bounce_buffer = 0;
 	blit.to_fb = 1;
 
 	while(-EAGAIN == (err = drmCommandWriteRead(pVia->drmFD, DRM_VIA_DMA_BLIT, 

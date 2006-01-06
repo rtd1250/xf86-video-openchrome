@@ -1251,7 +1251,6 @@ viaExaDownloadFromScreen(PixmapPtr pSrc, int x, int y, int w, int h,
     blit.fb_stride = srcPitch;
     blit.mem_addr = dst;
     blit.mem_stride = dst_pitch;
-    blit.bounce_buffer = 0;
     blit.to_fb = 0;
 
     if (((unsigned long)dst & 15) || (dst_pitch & 15)) {
@@ -1323,7 +1322,6 @@ viaExaUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
     blit.fb_stride = dstPitch;
     blit.mem_addr = src;
     blit.mem_stride = src_pitch;
-    blit.bounce_buffer = 0;
     blit.to_fb = 1;
 
     while (-EAGAIN == (err =

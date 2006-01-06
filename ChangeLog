@@ -1,3 +1,14 @@
+2006-01-06  Thomas Hellström <unichrome-at-shipmail-dot-org> 
+
+	* unichrome/via_accel.c: (viaExaDownloadFromScreen),
+	(viaExaUploadToScreen):
+	* unichrome/via_video.c: (viaDmaBlitImage):
+
+	- Update Xv blit to new blit-combining feature of DRM.
+	  (Idea from Luc Verhaegen/Unichrome).
+	- Prepare for ugly via_drm.h dmablit IOCTL arg change and via_drm.h 
+	  versioning.
+	
 2005-12-29  Thomas Hellström  <unichrome-at-shipmail-dot-org> 
 	
 	* unichrome/via_video.c: (viaDmaBlitImage):
