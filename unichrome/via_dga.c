@@ -44,9 +44,9 @@ DGAFunctionRec VIADGAFuncs = {
     VIADGASetMode,
     VIADGASetViewport,
     VIADGAGetViewport,
-    viaDGAWaitMarker,
-    viaDGAFillRect,
-    viaDGABlitRect,
+    viaAccelSyncMarker,
+    viaAccelFillRect,
+    viaAccelBlitRect,
     NULL                    /* BlitTransRect */
 };
 

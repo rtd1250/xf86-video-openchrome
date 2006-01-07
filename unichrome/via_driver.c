@@ -1606,16 +1606,15 @@ static void VIALeaveVT(int scrnIndex, int flags)
 
     viaAccelSync(pScrn);
 
+    /*
+     * Next line apparently helps fix 3D hang on VT switch.
+     * No idea why. Taken from VIA's binary drivers.
+     */
+
+    hwp->writeSeq(hwp, 0x1A, pVia->SavedReg.SR1A | 0x40);
 
 #ifdef XF86DRI
     if (pVia->directRenderingEnabled) {
-
-	/*
-	 * Next line apparently helps fix 3D hang on VT switch.
-	 * No idea why. Taken from VIA's binary drivers.
-	 */
-
-        hwp->writeSeq(hwp, 0x1A, pVia->SavedReg.SR1A | 0x40);
 
 	VIADRIRingBufferCleanup(pScrn); 
     }
@@ -2142,26 +2141,6 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
         }
     }
 
-    if (pVia->NoAccel) {
-
-	/*
-	 * This is only for Xv in Noaccel path, and since Xv is in some
-	 * sense accelerated, it might be a better idea to disable it
-	 * altogether.
-	 */ 
-
-        BoxRec AvailFBArea;
-
-        AvailFBArea.x1 = 0;
-        AvailFBArea.y1 = 0;
-        AvailFBArea.x2 = pScrn->displayWidth;
-        AvailFBArea.y2 = pScrn->virtualY + 1;
-	pVia->FBFreeStart=(AvailFBArea.y2 + 1)*pVia->Bpl;
-	xf86InitFBManager(pScreen, &AvailFBArea);
-	VIAInitLinear(pScreen);
-	pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart - pVia->Bpl);
-    }
-
     if (pVia->shadowFB)
 	ViaShadowFBInit(pScrn, pScreen);
 
@@ -2199,6 +2178,8 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
         xf86DrvMsg(pScrn->scrnIndex, X_INFO, "direct rendering disabled\n");
     }
 #endif
+    if (!pVia->NoAccel)
+        viaFinishInitAccel(pScreen);
 
     if (pVia->NoAccel) {
 	memset(pVia->FBBase, 0x00, pVia->videoRambytes);
@@ -2207,16 +2188,36 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 	if (pVia->directRenderingEnabled)
 	    DRILock(screenInfo.screens[scrnIndex], 0);
 #endif
-	viaDGAFillRect(pScrn, pScrn->frameX0, pScrn->frameY0, 
+	viaAccelFillRect(pScrn, pScrn->frameX0, pScrn->frameY0, 
 		       pScrn->displayWidth, pScrn->virtualY,
 		       0x00000000);
-	viaDGAWaitMarker(pScrn);
+	viaAccelSyncMarker(pScrn);
 #ifdef XF86DRI
 	if (pVia->directRenderingEnabled)
 	    	DRIUnlock(screenInfo.screens[scrnIndex]);
 #endif
     }
     vgaHWBlankScreen(pScrn, TRUE);
+
+    if (pVia->NoAccel) {
+
+	/*
+	 * This is only for Xv in Noaccel path, and since Xv is in some
+	 * sense accelerated, it might be a better idea to disable it
+	 * altogether.
+	 */ 
+
+        BoxRec AvailFBArea;
+
+        AvailFBArea.x1 = 0;
+        AvailFBArea.y1 = 0;
+        AvailFBArea.x2 = pScrn->displayWidth;
+        AvailFBArea.y2 = pScrn->virtualY + 1;
+	pVia->FBFreeStart=(AvailFBArea.y2 + 1)*pVia->Bpl;
+	xf86InitFBManager(pScreen, &AvailFBArea);
+	VIAInitLinear(pScreen);
+	pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart - pVia->Bpl);
+    }
 
     viaInitVideo(pScreen);
 
@@ -2317,7 +2318,7 @@ VIAWriteMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
     if (!pVia->NoAccel)
 	viaInitialize2DEngine(pScrn);
     
-#ifdef XF86DRI
+#if defined(XF86DRI) || defined(VIA_HAVE_EXA)
     VIAInitialize3DEngine(pScrn);
 #endif 
 
@@ -2346,12 +2347,8 @@ static Bool VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
         viaAccelSync(pScrn);
  
 
-#ifdef XF86DRI
 	/* Fix 3D Hang after X restart */
-
-	if (pVia->directRenderingEnabled)
-	    hwp->writeSeq(hwp, 0x1A, pVia->SavedReg.SR1A | 0x40);
-#endif 
+	hwp->writeSeq(hwp, 0x1A, pVia->SavedReg.SR1A | 0x40);
 
 	if (!pVia->IsSecondary) {
             /* Turn off all video activities */
@@ -2544,7 +2541,7 @@ static void VIADPMS(ScrnInfoPtr pScrn, int mode, int flags)
     return;
 }
 
-#ifdef XF86DRI
+#if defined(XF86DRI) || defined(VIA_HAVE_EXA)
 void
 VIAInitialize3DEngine(ScrnInfoPtr pScrn)
 {

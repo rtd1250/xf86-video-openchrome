@@ -1,4 +1,42 @@
-2006-01-06  Thomas Hellström <unichrome-at-shipmail-dot-org> 
+2006-01-07  Thomas Hellström <unichrome-at-shipmail-dot-org>  
+
+	* unichrome/Imakefile:
+	* unichrome/via_accel.c: (viaDumpDMA), (viaFlushPCI),
+	(viaFlushDRIEnabled), (viaSetupCBuffer), (viaAccelClippingHelper),
+	(viaAccelSolidHelper), (viaAccelPlaneMaskHelper),
+	(viaAccelTransparentHelper), (viaAccelCopyHelper),
+	(viaSetupForScreenToScreenCopy), (viaSubsequentScreenToScreenCopy),
+	(viaSetupForSolidFill), (viaSubsequentSolidFillRect),
+	(viaSetupForMono8x8PatternFill),
+	(viaSubsequentMono8x8PatternFillRect),
+	(viaSetupForColor8x8PatternFill),
+	(viaSubsequentColor8x8PatternFillRect),
+	(viaSetupForCPUToScreenColorExpandFill),
+	(viaSubsequentScanlineCPUToScreenColorExpandFill),
+	(viaSetupForImageWrite), (viaSubsequentImageWriteRect),
+	(viaSetupForSolidLine), (viaSubsequentSolidTwoPointLine),
+	(viaSubsequentSolidHorVertLine), (viaSetupForDashedLine),
+	(viaAccelMarkSync), (viaExaPrepareSolid), (viaExaSolid),
+	(viaExaPrepareCopy), (viaExaCopy), (viaExaCompositePictDesc),
+	(viaExaPrintComposite), (viaBitExpandHelper), (viaPixelARGB8888),
+	(viaExpandablePixel), (viaCheckUpload), (viaOrder),
+	(viaExaDownloadFromScreen), (viaExaTexUploadToScreen),
+	(viaExaUploadToScreen), (viaExaUploadToScratch),
+	(viaExaCheckComposite), (viaIsAGP), (viaIsOffscreen),
+	(viaExaPrepareComposite), (viaExaComposite), (viaInitExa),
+	(viaInitAccel), (viaExitAccel), (viaFinishInitAccel),
+	(viaAccelBlitRect), (viaAccelFillRect), (viaAccelSyncMarker):
+	* unichrome/via_dga.c:
+	* unichrome/via_dmabuffer.h:
+	* unichrome/via_dri.c: (VIADRIFBInit):
+	* unichrome/via_driver.c: (VIALeaveVT), (VIAScreenInit),
+	(VIAWriteMode), (VIACloseScreen):
+	* unichrome/via_driver.h:
+
+	- Merge in exa_branch from revision 104 to 127. Exa Composite acceleration.
+	  See the branch Changelog for a detailed description of changes.
+	
+2006-01-06  Thomas Hellström 
 
 	* unichrome/via_accel.c: (viaExaDownloadFromScreen),
 	(viaExaUploadToScreen):

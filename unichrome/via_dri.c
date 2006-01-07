@@ -349,7 +349,7 @@ static Bool VIADRIFBInit(ScreenPtr pScreen, VIAPtr pVia)
 		   "[drm] memory area in BIOS. Disabling DRI.\n");
 	return FALSE;
     }
-    if (FBSize < (pScrn->virtualY * pVia->Bpl)) {
+    if (FBSize < 3*(pScrn->virtualY * pVia->Bpl)) {
 	xf86DrvMsg(pScreen->myNum, X_WARNING,
 		   "[drm] The DRM Heap and Pixmap cache memory could be too small\n");
 	xf86DrvMsg(pScreen->myNum, X_WARNING,

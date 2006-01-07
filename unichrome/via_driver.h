@@ -65,6 +65,7 @@
 #include "via_priv.h"
 #include "via_swov.h"
 #include "via_dmabuffer.h"
+#include "via_3d.h"
 
 #ifdef XF86DRI
 #define _XF86DRI_SERVER_
@@ -76,6 +77,10 @@
 
 #ifdef VIA_HAVE_EXA
 #include "exa.h"
+#define VIA_AGP_UPL_SIZE        (1024*128)
+#define VIA_DMA_DL_SIZE         (1024*128)
+#define VIA_SCRATCH_SIZE    (2048*1024)
+#define VIA_SCRATCH_SIZE     (2048*1024)
 #endif
 
 #define DRIVER_NAME     "via"
@@ -229,8 +234,10 @@ typedef struct _VIA {
     /* Support for XAA acceleration */
     XAAInfoRecPtr       AccelInfoRec;
     ViaTwodContext      td;
+    Via3DState          v3d;
+    Via3DState          *lastToUpload;
     ViaCommandBuffer    cb;
-    int                 dgaMarker;
+    int                 accelMarker;
     CARD32              markerOffset;
     CARD32             *markerBuf;
     CARD32              curMarker;
@@ -241,7 +248,20 @@ typedef struct _VIA {
     ExaOffscreenArea   *exa_scratch;
     unsigned int        exa_scratch_next;
     Bool                useEXA;
+    void               *maskP;
+    CARD32              maskFormat;
+    Bool                componentAlpha;
+    void               *srcP;
+    CARD32              srcFormat;
+    ExaOffscreenArea   *scratchFBBuffer;
+    unsigned            scratchOffset;
+    char *              scratchAddr;
 #ifdef XF86DRI
+    drm_via_mem_t       scratchAGPBuffer;
+    drm_via_mem_t       texAGPBuffer;
+    unsigned            texOffset;
+    char *              texAddr;
+    char *              dBounce;
 #endif
 #endif
 
@@ -344,7 +364,7 @@ typedef struct
 } VIAEntRec, *VIAEntPtr;
 
 /* Prototypes. */
-#ifdef XF86DRI
+#if defined(XF86DRI) || defined(VIA_HAVE_EXA)
 void VIAInitialize3DEngine(ScrnInfoPtr pScrn);
 #endif 
 
@@ -361,9 +381,14 @@ void viaInitialize2DEngine(ScrnInfoPtr);
 void viaAccelSync(ScrnInfoPtr);
 void viaDisableVQ(ScrnInfoPtr);
 void viaExitAccel(ScreenPtr);
-void viaDGABlitRect(ScrnInfoPtr, int, int, int, int, int, int);
-void viaDGAFillRect(ScrnInfoPtr, int, int, int, int, unsigned long);
-void viaDGAWaitMarker(ScrnInfoPtr);
+void viaAccelBlitRect(ScrnInfoPtr, int, int, int, int, int, int);
+void viaAccelFillRect(ScrnInfoPtr, int, int, int, int, unsigned long);
+void viaAccelSyncMarker(ScrnInfoPtr);
+void viaFinishInitAccel(ScreenPtr);
+void viaAccelWaitMarker(ScreenPtr, int);
+int viaAccelMarkSync(ScreenPtr);
+
+
 
 /* In via_shadow.c */
 void ViaShadowFBInit(ScrnInfoPtr pScrn, ScreenPtr pScreen);
