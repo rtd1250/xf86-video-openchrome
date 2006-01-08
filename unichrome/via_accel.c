@@ -1903,9 +1903,9 @@ viaIsAGP(VIAPtr pVia, PixmapPtr pPix, unsigned long *offset)
 
     if (pVia->directRenderingEnabled && !pVia->IsPCI) {
 	offs = (unsigned long)pPix->devPrivate.ptr -
-	    (unsigned long)pVia->agpMappedAddr + pVia->scratchOffset;
+	    (unsigned long)pVia->agpMappedAddr;
 
-	if (offs < VIA_SCRATCH_SIZE) {
+	if ((offs - pVia->scratchOffset) < VIA_SCRATCH_SIZE) {
 	    *offset = offs + pVia->agpAddr;
 	    return TRUE;
 	}
