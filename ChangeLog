@@ -1,3 +1,9 @@
+2006-01-08  Thomas Hellström  <unichrome-at-shipmail-dot-org>   
+
+	* unichrome/Makefile.am:
+	
+	-Modular build fix. (Boris Dusec)
+	
 2006-01-07  Thomas Hellström <unichrome-at-shipmail-dot-org>  
 
 	* unichrome/Imakefile:

@@ -31,6 +31,9 @@ via_drv_la_LDFLAGS = -module -avoid-version
 via_drv_ladir = @moduledir@/drivers
 
 via_drv_la_SOURCES = \
+	 via_3d_reg.h \
+	 via_3d.c \
+	 via_3d.h \
          via_accel.c \
          via_bandwidth.c \
          via_bios.h \
