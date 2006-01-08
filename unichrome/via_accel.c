@@ -1416,9 +1416,9 @@ viaPixelARGB8888(unsigned format, void *pixelP, CARD32 * argb8888)
 	    bits) << 16;
 	shift += bits;
 	bits = PICT_FORMAT_A(format);
-	*argb8888 |=
+	*argb8888 |= ((bits) ? 
 	    viaBitExpandHelper((pixel >> shift) & ((1 << bits) - 1),
-	    bits) << 24;
+			       bits) : 0xFF) << 24;
 	return;
     case PICT_TYPE_ABGR:
 	shift = 0;
@@ -1435,9 +1435,9 @@ viaPixelARGB8888(unsigned format, void *pixelP, CARD32 * argb8888)
 	    viaBitExpandHelper((pixel >> shift) & ((1 << bits) - 1), bits);
 	shift += bits;
 	bits = PICT_FORMAT_A(format);
-	*argb8888 |=
+	*argb8888 |= ((bits) ? 
 	    viaBitExpandHelper((pixel >> shift) & ((1 << bits) - 1),
-	    bits) << 24;
+			       bits) : 0xFF) << 24;
 	return;
     default:
 	break;
