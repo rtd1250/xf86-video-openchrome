@@ -1,5 +1,12 @@
 2006-01-08  Thomas Hellström  <unichrome-at-shipmail-dot-org>   
 
+	* unichrome/via_accel.c: (viaPixelARGB8888):
+
+	- Merge exa_branch 130:132. Rendering errors.
+	- Changelog typo.
+	
+2006-01-08  Thomas Hellström  <unichrome-at-shipmail-dot-org>   
+
 	* unichrome/via_3d.c: (viaSet3DFlags), (viaSet3DCompositeOperator):
 	* unichrome/via_accel.c: (viaIsAGP):
 
@@ -9,7 +16,7 @@
 
 	* unichrome/Makefile.am:
 	
-	- Modular build fix. (Boris Dusec)
+	- Modular build fix. (Boris Dusek)
 	
 2006-01-07  Thomas Hellström <unichrome-at-shipmail-dot-org>  
 
