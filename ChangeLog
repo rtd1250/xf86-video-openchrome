@@ -1,3 +1,12 @@
+2006-01-09  Thomas Hellström <unichrome-at-shipmail-dot-org>   
+
+	* libxvmc/viaXvMC.c: (releaseContextResources):
+	* unichrome/via_swov.c: (CreateSurface), (ViaSwovSurfaceDestroy):
+
+	- Mark already destroyed XvMC contexts as bad, in case clients 
+	  try to destroy them twice.
+	- Don't try to destroy YV12 buffers when exiting XvMC video.
+
 2006-01-08  Thomas Hellström  <unichrome-at-shipmail-dot-org>   
 
 	* unichrome/via_accel.c: (viaPixelARGB8888):

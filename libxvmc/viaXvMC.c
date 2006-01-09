@@ -234,6 +234,7 @@ static Status releaseContextResources(Display *display, XvMCContext *context,
 	if (!freePrivate) break;
     default:
 	free(pViaXvMC);
+	context->privData = NULL;
     }
     return errType;
 }

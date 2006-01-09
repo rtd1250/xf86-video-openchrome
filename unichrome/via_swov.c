@@ -979,9 +979,9 @@ CreateSurface(ScrnInfoPtr pScrn, CARD32 FourCC, CARD16 Width,
     pitch  = ALIGN_TO(Width, 32) * (isplanar ? 1 : 2);
     fbsize = pitch * Height * (isplanar ? 1.5 : 1.0);
 
-    VIAFreeLinear(&pVia->swov.SWfbMem);
 
     if (doalloc) {
+        VIAFreeLinear(&pVia->swov.SWfbMem);
         retCode = VIAAllocLinear(&pVia->swov.SWfbMem, pScrn, fbsize * 2);
         if(retCode != Success)
 	    return retCode;
@@ -1111,10 +1111,10 @@ ViaSwovSurfaceDestroy(ScrnInfoPtr pScrn, viaPortPrivPtr pPriv)
 	    break;
 	    
 	case FOURCC_YV12:
+	    VIAFreeLinear(&pVia->swov.SWfbMem);
 	case FOURCC_XVMC:
 	    pVia->swov.SrcFourCC = 0;
 	    
-	    VIAFreeLinear(&pVia->swov.SWfbMem);
 	    VIAFreeLinear(&pVia->swov.HQVMem);
 	    pVia->swov.gdwVideoFlagSW = 0;
 	    break;
