@@ -77,10 +77,19 @@
 
 #ifdef VIA_HAVE_EXA
 #include "exa.h"
-#define VIA_AGP_UPL_SIZE        (1024*128)
-#define VIA_DMA_DL_SIZE         (1024*128)
+#define VIA_AGP_UPL_SIZE    (1024*128)
+#define VIA_DMA_DL_SIZE     (1024*128)
 #define VIA_SCRATCH_SIZE    (2048*1024)
-#define VIA_SCRATCH_SIZE     (2048*1024)
+#define VIA_SCRATCH_SIZE    (2048*1024)
+
+/*
+ * Pixmap sizes below which we don't try to do hw accel.
+ */
+
+#define VIA_MIN_COMPOSITE   1 /*400*/  
+#define VIA_MIN_UPLOAD 4000
+#define VIA_MIN_TEX_UPLOAD 400
+#define VIA_MIN_DOWNLOAD 400
 #endif
 
 #define DRIVER_NAME     "via"

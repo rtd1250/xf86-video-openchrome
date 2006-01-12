@@ -56,6 +56,7 @@
 #define VIAACCELCOPYROP(vRop) (XAACopyROP[vRop] << 24)
 #endif
 
+
 /*
  * Use PCI MMIO to flush the command buffer. When AGP DMA is not available.
  */
@@ -1529,8 +1530,9 @@ viaExaDownloadFromScreen(PixmapPtr pSrc, int x, int y, int w, int h,
 
     totSize = wBytes * h;
 
-    if (totSize < 400) {
-	bounceAligned = pVia->FBBase + srcOffset;
+    exaWaitSync(pScrn->pScreen);
+    if (totSize < VIA_MIN_DOWNLOAD) {
+        bounceAligned = (char *)pVia->FBBase + srcOffset;
 	while (h--) {
 	    memcpy(dst, bounceAligned, wBytes);
 	    dst += dst_pitch;
@@ -1570,8 +1572,8 @@ viaExaDownloadFromScreen(PixmapPtr pSrc, int x, int y, int w, int h,
 	curBlit->line_length = wBytes;
 	curBlit->fb_addr = srcOffset;
 	curBlit->fb_stride = srcPitch;
-	curBlit->mem_addr =
-	    (useBounceBuffer) ? bounceAligned + VIA_DMA_DL_SIZE * buf : dst;
+	curBlit->mem_addr = (unsigned char *)
+	  ((useBounceBuffer) ? bounceAligned + VIA_DMA_DL_SIZE * buf : dst);
 	curBlit->mem_stride = (useBounceBuffer) ? bouncePitch : dst_pitch;
 	curBlit->to_fb = 0;
 
@@ -1634,7 +1636,7 @@ viaExaTexUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
     unsigned dstOffset;
     CARD32 texWidth, texHeight, texPitch;
     int format;
-    unsigned char *dst;
+    char *dst;
     int i, sync[2], yOffs, bufH, bufOffs, height;
     Bool buf;
     Via3DState *v3d = &pVia->v3d;
@@ -1642,13 +1644,16 @@ viaExaTexUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
     if (!w || !h)
 	return TRUE;
 
-    if (wBytes * h < 400) {
+
+    if (wBytes * h < VIA_MIN_TEX_UPLOAD) {
 	dstOffset = x * pDst->drawable.bitsPerPixel;
 	if (dstOffset & 3)
 	    return FALSE;
 	dst =
 	    (char *)pVia->FBBase + (exaGetPixmapOffset(pDst) + y * dstPitch +
 	    (dstOffset >> 3));
+	exaWaitSync(pScrn->pScreen);
+
 	while (h--) {
 	    memcpy(dst, src, wBytes);
 	    dst += dstPitch;
@@ -1755,8 +1760,10 @@ viaExaUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
 	return FALSE;
     dstOffset = exaGetPixmapOffset(pDst) + y * dstPitch + (dstOffset >> 3);
 
-    if (wBytes * h < 400 || wBytes < 65) {
+    if (wBytes * h < VIA_MIN_UPLOAD || wBytes < 65) {
 	dst = (char *)pVia->FBBase + dstOffset;
+
+	exaWaitSync(pScrn->pScreen);
 	while (h--) {
 	    memcpy(dst, src, wBytes);
 	    dst += dstPitch;
@@ -1778,10 +1785,11 @@ viaExaUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
     blit.num_lines = h;
     blit.fb_addr = dstOffset;
     blit.fb_stride = dstPitch;
-    blit.mem_addr = src;
+    blit.mem_addr = (unsigned char *) src;
     blit.mem_stride = src_pitch;
     blit.to_fb = 1;
 
+    exaWaitSync(pScrn->pScreen);
     while (-EAGAIN == (err =
 	    drmCommandWriteRead(pVia->drmFD, DRM_VIA_DMA_BLIT, &blit,
 		sizeof(blit)))) ;
@@ -1849,6 +1857,21 @@ viaExaCheckComposite(int op, PicturePtr pSrcPicture,
     ScrnInfoPtr pScrn = xf86Screens[pDstPicture->pDrawable->pScreen->myNum];
     VIAPtr pVia = VIAPTR(pScrn);
     Via3DState *v3d = &pVia->v3d;
+
+    /*
+     * Reject small composites early. They are done much faster in software.
+     */
+
+    if (!pSrcPicture->repeat && 
+	pSrcPicture->pDrawable->width *
+	pSrcPicture->pDrawable->height < VIA_MIN_COMPOSITE)
+      return FALSE;
+
+    if (pMaskPicture &&
+	!pMaskPicture->repeat && 
+	pMaskPicture->pDrawable->width *
+	pMaskPicture->pDrawable->height < VIA_MIN_COMPOSITE)
+      return FALSE;
 
     if (pMaskPicture && pMaskPicture->componentAlpha)
 	return FALSE;

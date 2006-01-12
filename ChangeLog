@@ -1,3 +1,12 @@
+2006-01-12  Thomas Hellström <unichrome-at-shipmail-dot-org> 
+
+	* unichrome/via_accel.c: (viaExaDownloadFromScreen),
+	(viaExaTexUploadToScreen), (viaExaUploadToScreen),
+	(viaExaCheckComposite):
+	* unichrome/via_driver.h:
+
+	- Exa branch revision 132:138 merge.
+	
 2006-01-12  Thomas Hellström <unichrome-at-shipmail-dot-org>   
 
 	* unichrome/via_swov.c: (CreateSurface):
