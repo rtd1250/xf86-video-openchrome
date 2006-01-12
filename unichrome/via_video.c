@@ -488,7 +488,7 @@ void viaInitVideo(ScreenPtr pScreen)
 	 (pVia->Chipset == VIA_PM800));
     if ((pVia->drmVerMajor < 2) || 
 	((pVia->drmVerMajor == 2) && 
-	 (pVia->drmVerMinor < 7)))
+	 (pVia->drmVerMinor < 9)))
 	pVia->useDmaBlit = FALSE;
 #endif
 
@@ -894,10 +894,11 @@ static void Flip(VIAPtr pVia, viaPortPrivPtr pPriv, int fourcc, unsigned long Di
         case FOURCC_YUY2:
         case FOURCC_RV15:
         case FOURCC_RV16:
-            while ((VIDInD(HQV_CONTROL) & HQV_SW_FLIP) );
+            while ((VIDInD(HQV_CONTROL + proReg) & HQV_SW_FLIP) );
             VIDOutD(HQV_SRC_STARTADDR_Y + proReg, 
 		    pVia->swov.SWDevice.dwSWPhysicalAddr[DisplayBufferIndex]);
-            VIDOutD(HQV_CONTROL,( VIDInD(HQV_CONTROL)&~HQV_FLIP_ODD) |HQV_SW_FLIP|HQV_FLIP_STATUS);
+            VIDOutD(HQV_CONTROL + proReg,( VIDInD(HQV_CONTROL + proReg)&~HQV_FLIP_ODD) |
+		    HQV_SW_FLIP|HQV_FLIP_STATUS);
             break;
 
         case FOURCC_YV12:
@@ -1029,7 +1030,7 @@ viaDmaBlitImage(VIAPtr pVia,
     lumaSync = blit.sync;
 
     if (id == FOURCC_YV12) {
-        unsigned tmp = ALIGN_TO(bounceStride >> 1, 16);
+        unsigned tmp = ALIGN_TO(width >> 1, 16);
 
 	if (nv12Conversion) {
 	    nv12Blit(bounceBase + bounceStride*height, 
@@ -1043,13 +1044,13 @@ viaDmaBlitImage(VIAPtr pVia,
 
 	if (nv12Conversion) {
 	    blit.num_lines = height >> 1;
-	    blit.line_length = lumaStride;
+	    blit.line_length = bounceStride;
 	    blit.mem_addr = bounceBase + bounceStride*height;
 	    blit.fb_stride = lumaStride;
 	    blit.mem_stride = bounceStride;
 	} else {
 	    blit.num_lines = height;
-	    blit.line_length = lumaStride >> 1;
+	    blit.line_length = tmp;
 	    blit.mem_addr = base + bounceStride*height;
 	    blit.fb_stride = lumaStride >> 1;
 	    blit.mem_stride = tmp;

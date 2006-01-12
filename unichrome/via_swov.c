@@ -976,7 +976,7 @@ CreateSurface(ScrnInfoPtr pScrn, CARD32 FourCC, CARD16 Width,
 
     isplanar = ((FourCC == FOURCC_YV12) || (FourCC == FOURCC_XVMC));
 
-    pitch  = ALIGN_TO(Width, 32) * (isplanar ? 1 : 2);
+    pitch  = ALIGN_TO((Width*(isplanar ? 1:2)), 32);
     fbsize = pitch * Height * (isplanar ? 1.5 : 1.0);
 
 

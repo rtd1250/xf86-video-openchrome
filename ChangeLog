@@ -1,3 +1,13 @@
+2006-01-12  Thomas Hellström <unichrome-at-shipmail-dot-org>   
+
+	* unichrome/via_swov.c: (CreateSurface):
+	* unichrome/via_video.c: (viaInitVideo), (Flip), (viaDmaBlitImage):
+
+	- Fix planar Xv Flipping and surface allocation size. 
+	  (Reported by Tim, MagicITX)
+	- Fix Xv dmablit strides and bump drm version for dmablit to 2.9.0, since
+	  there is a direction bug in earlier versions.
+	  
 2006-01-09  Thomas Hellström <unichrome-at-shipmail-dot-org>   
 
 	* libxvmc/viaXvMC.c: (releaseContextResources):
