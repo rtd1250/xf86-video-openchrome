@@ -1,3 +1,11 @@
+2006-01-26  Thomas Hellström <thomas-at-tungstengraphics-dot-com>   
+
+	* unichrome/via_dri.c: (VIADRIKernelInit), (VIADRIMapInit):
+	* unichrome/via_driver.h:
+
+	- Add a framebuffer map for DRI. Don't just assume that the
+	  framebuffer map handle is the physical address.
+	
 2006-01-12  Thomas Hellström <unichrome-at-shipmail-dot-org> 
 
 	* unichrome/via_accel.c: (viaExaDownloadFromScreen),

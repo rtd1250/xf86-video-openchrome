@@ -925,7 +925,7 @@ static Bool VIADRIKernelInit(ScreenPtr pScreen, VIAPtr pVia)
     memset(&drmInfo, 0, sizeof(drm_via_init_t));
     drmInfo.func = VIA_INIT_MAP;
     drmInfo.sarea_priv_offset   = sizeof(XF86DRISAREARec);
-    drmInfo.fb_offset           = pVia->FrameBufferBase;
+    drmInfo.fb_offset           = pVia->frameBufferHandle;
     drmInfo.mmio_offset         = pVia->registerHandle;
     if (pVia->IsPCI)
 	drmInfo.agpAddr = (CARD32)NULL;
@@ -948,9 +948,14 @@ static Bool VIADRIMapInit(ScreenPtr pScreen, VIAPtr pVia)
 		  DRM_REGISTERS, flags, &pVia->registerHandle) < 0) {
 	return FALSE;
     }
-    
     xf86DrvMsg(pScreen->myNum, X_INFO, "[drm] register handle = 0x%08lx\n",
                (unsigned long) pVia->registerHandle);
-
+    if (drmAddMap(pVia->drmFD, pVia->FrameBufferBase, pVia->videoRambytes,
+		  DRM_FRAME_BUFFER, 0, &pVia->frameBufferHandle) < 0) {
+	return FALSE;
+    }
+    xf86DrvMsg(pScreen->myNum, X_INFO, "[drm] framebuffer handle = 0x%08lx\n",
+               (unsigned long) pVia->frameBufferHandle);
+    
     return TRUE;
 }

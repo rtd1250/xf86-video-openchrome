@@ -309,6 +309,7 @@ typedef struct _VIA {
     VIAConfigPrivPtr 	pVisualConfigsPriv;
     drm_handle_t 	agpHandle;
     drm_handle_t 	registerHandle;
+    drm_handle_t        frameBufferHandle;
     unsigned long 	agpAddr;
     drmAddress          agpMappedAddr;
     unsigned char 	*agpBase;
