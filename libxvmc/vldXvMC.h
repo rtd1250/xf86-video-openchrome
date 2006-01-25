@@ -74,7 +74,7 @@
 /*
  * Which of two mappings between quantiser_scale_code
  * and quantiser_scale shall apply.
- */ 
+ */
 
 #define XVMC_Q_SCALE_TYPE         0x00000400
 
@@ -87,27 +87,26 @@
 
 /*
  * Also XVMC_SECOND_FIELD should be set in flags if active. 
- */ 
+ */
 
 #define XVMC_I_PICTURE 1
 #define XVMC_P_PICTURE 2
 #define XVMC_B_PICTURE 3
 
-typedef struct _XvMCMpegControl{
-    unsigned 
-        BVMV_range,        /* Backward vertical motion vector range */
-	BHMV_range,        /* Backward horizontal motion vector range */
-	FVMV_range,        /* Forward vertical motion vector range */
-	FHMV_range,        /* Forward horizontal motion vector range */
-	picture_structure, /* XVMC_TOP_FIELD, XVMC_BOTTOM_FIELD, 
-			    *  XVMC_FRAME_PICTURE
-			    */
-	intra_dc_precision, /* 0x00 - 0x03 corresponds to 8 to 11 bits prec. */
-	picture_coding_type,/* XVMC_X_PICTURE */
-	mpeg_coding,        /* XVMC_MPEG_2 */
-	flags;              /* See above */
-}XvMCMpegControl;
-
+typedef struct _XvMCMpegControl
+{
+    unsigned BVMV_range,	       /* Backward vertical motion vector range */
+        BHMV_range,		       /* Backward horizontal motion vector range */
+        FVMV_range,		       /* Forward vertical motion vector range */
+        FHMV_range,		       /* Forward horizontal motion vector range */
+        picture_structure,	       /* XVMC_TOP_FIELD, XVMC_BOTTOM_FIELD, 
+				        *  XVMC_FRAME_PICTURE
+				        */
+        intra_dc_precision,	       /* 0x00 - 0x03 corresponds to 8 to 11 bits prec. */
+        picture_coding_type,	       /* XVMC_X_PICTURE */
+        mpeg_coding,		       /* XVMC_MPEG_2 */
+        flags;			       /* See above */
+} XvMCMpegControl;
 
 /*
  * The following function is called BEFORE starting sending slices to the
@@ -116,13 +115,11 @@ typedef struct _XvMCMpegControl{
  * in addition to it's current functionality.
  */
 
-extern Status XvMCBeginSurface(Display *display,
-			       XvMCContext *context,
-			       XvMCSurface *target_surface,
-			       XvMCSurface *past_surface,
-			       XvMCSurface *future_surface,
-			       const XvMCMpegControl *control);
-
+extern Status XvMCBeginSurface(Display * display,
+    XvMCContext * context,
+    XvMCSurface * target_surface,
+    XvMCSurface * past_surface,
+    XvMCSurface * future_surface, const XvMCMpegControl * control);
 
 /*
  * The quantizer matrix structure. This should be filled in by the user and
@@ -133,8 +130,9 @@ extern Status XvMCBeginSurface(Display *display,
  * intra_quantiser_matrix and the non_intra_quantiser_matrix. RFC: Are
  * the other fields needed for future compatibility?
  */
-    
-typedef struct _XvMCQMatrix {
+
+typedef struct _XvMCQMatrix
+{
     int load_intra_quantiser_matrix;
     int load_non_intra_quantiser_matrix;
     int load_chroma_intra_quantiser_matrix;
@@ -150,17 +148,16 @@ typedef struct _XvMCQMatrix {
  * The hardware will start using it the next XvMCBeginSurface.
  */
 
-extern Status XvMCLoadQMatrix(Display *display, XvMCContext *context,
-			      const XvMCQMatrix *qmx);
-
+extern Status XvMCLoadQMatrix(Display * display, XvMCContext * context,
+    const XvMCQMatrix * qmx);
 
 /*
  * Put a slice to the decoder. The hardware will start processing it 
  * immediately.
  */
 
-extern Status XvMCPutSlice(Display *display,XvMCContext *context, 
-			   char *slice, int nBytes);
+extern Status XvMCPutSlice(Display * display, XvMCContext * context,
+    char *slice, int nBytes);
 /*
  * Put a slice without the slice start code to the decoder. 
  * The hardware will start processing it 
@@ -169,13 +166,13 @@ extern Status XvMCPutSlice(Display *display,XvMCContext *context,
  * XvMCPutSlice2(display,context,slice+4,nBytes-4,slice[3]);
  */
 
-extern Status XvMCPutSlice2(Display *display,XvMCContext *context, 
-			   char *slice, int nBytes, int sliceCode);
+extern Status XvMCPutSlice2(Display * display, XvMCContext * context,
+    char *slice, int nBytes, int sliceCode);
 
 /*
  * Debug the XvMCControl structure. For convenience only. 
  */
 
-extern void debugControl(const XvMCMpegControl *control);
+extern void debugControl(const XvMCMpegControl * control);
 
 #endif

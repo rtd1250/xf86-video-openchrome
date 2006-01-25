@@ -1,5 +1,50 @@
 2006-01-26  Thomas Hellström <thomas-at-tungstengraphics-dot-com>   
 
+	* libxvmc/driDrawable.c: (drawStamp), (getDRIDrawableInfoLocked),
+	(driDestroyHashContents):
+	* libxvmc/driDrawable.h:
+	* libxvmc/viaLowLevel.c: (hwlLock), (hwlUnlock), (timeDiff),
+	(viaDMATimeStampLowLevel), (viaDMAWaitTimeStamp),
+	(viaDMAInitTimeStamp), (viaDMACleanupTimeStamp),
+	(viaMpegGetStatus), (viaMpegIsBusy), (syncDMA), (syncVideo),
+	(syncAccel), (syncMpeg), (pciFlush), (agpFlush),
+	(flushXvMCLowLevel), (flushPCIXvMCLowLevel), (pciCommand),
+	(viaMpegSetSurfaceStride), (viaVideoSetSWFLipLocked),
+	(viaVideoSWFlipLocked), (viaMpegSetFB), (viaMpegBeginPicture),
+	(viaMpegReset), (viaMpegWriteSlice), (viaVideoSubPictureOffLocked),
+	(viaVideoSubPictureLocked), (viaBlit), (syncXvMCLowLevel),
+	(initXvMCLowLevel), (closeXvMCLowLevel):
+	* libxvmc/viaLowLevel.h:
+	* libxvmc/viaLowLevelPro.c: (initHQVShadow),
+	(setHQVHWDeinterlacing), (setHQVDeblocking), (setHQVStartAddress),
+	(setHQVColorSpaceConversion), (setHQVFetchLine), (setHQVScale),
+	(setHQVSingleDestination), (setHQVDeinterlacing),
+	(setHQVTripleBuffer), (finish_header_agp), (hwlLock), (hwlUnlock),
+	(timeDiff), (viaDMATimeStampLowLevel), (viaDMAWaitTimeStamp),
+	(viaDMAInitTimeStamp), (viaDMACleanupTimeStamp),
+	(viaMpegGetStatus), (viaMpegIsBusy), (syncDMA), (syncVideo),
+	(syncAccel), (syncMpeg), (pciFlush), (agpFlush),
+	(uploadHQVDeinterlace), (uploadHQVShadow), (flushXvMCLowLevel),
+	(flushPCIXvMCLowLevel), (viaMpegSetSurfaceStride),
+	(viaVideoSetSWFLipLocked), (viaVideoSWFlipLocked), (viaMpegSetFB),
+	(viaMpegBeginPicture), (viaMpegReset), (viaMpegWriteSlice),
+	(viaVideoSubPictureOffLocked), (viaVideoSubPictureLocked),
+	(viaBlit), (syncXvMCLowLevel), (updateLowLevelBuf),
+	(cleanupLowLevelBuf), (releaseXvMCLowLevel), (initXvMCLowLevel),
+	(setLowLevelLocking), (closeXvMCLowLevel), (computeDownScaling),
+	(computeHQVScaleAndFilter), (setupBackBuffer):
+	* libxvmc/viaXvMCPriv.h:
+	* libxvmc/vldXvMC.h:
+	* libxvmc/xf86dri.c: (uniDRIDestroyContext),
+	(uniDRICreateDrawable), (uniDRIDestroyDrawable),
+	(uniDRIGetDrawableInfo):
+	* libxvmc/xf86dri.h:
+	* libxvmc/xf86dristr.h:
+
+	- run indent on libXvMC. Sync XvMC with Xorg 7.0.
+
+2006-01-26  Thomas Hellström <thomas-at-tungstengraphics-dot-com>   
+
 	* unichrome/via_dri.c: (VIADRIKernelInit), (VIADRIMapInit):
 	* unichrome/via_driver.h:
 
