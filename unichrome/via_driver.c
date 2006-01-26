@@ -148,10 +148,10 @@ typedef enum {
     OPTION_DISABLEVQ,
     OPTION_DRIXINERAMA,
     OPTION_DISABLEIRQ,
-    OPTION_INSECUREDRI,
     OPTION_TVDEFLICKER,
     OPTION_AGP_DMA,
-    OPTION_2D_DMA
+    OPTION_2D_DMA,
+    OPTION_XV_DMA
 } VIAOpts;
 
 
@@ -188,6 +188,7 @@ static OptionInfoRec VIAOptions[] =
     {OPTION_DISABLEIRQ, "DisableIRQ", OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_AGP_DMA, "EnableAGPDMA", OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_2D_DMA, "NoAGPFor2D", OPTV_BOOLEAN, {0}, FALSE},
+    {OPTION_XV_DMA, "NoXVDMA", OPTV_BOOLEAN, {0}, FALSE},
     {-1,                NULL,           OPTV_NONE,    {0}, FALSE}
 };
 
@@ -992,6 +993,15 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
 	}
     } else {
         pVia->dma2d = TRUE;
+    }
+
+    if (xf86ReturnOptValBool(VIAOptions, OPTION_XV_DMA, FALSE)) {
+        pVia->dmaXV = FALSE;
+	xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+		   "Option: NoXVDMA - PCI DMA is not used for XV "
+		   "image transfer\n");
+    } else {
+        pVia->dmaXV = TRUE;
     }
 
 #ifdef HAVE_DEBUG

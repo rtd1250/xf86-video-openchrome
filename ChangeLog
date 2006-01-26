@@ -1,3 +1,14 @@
+2006-01-26  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+
+	* unichrome/via.man:
+	* unichrome/via_driver.c: (VIAPreInit):
+	* unichrome/via_driver.h:
+	* unichrome/via_video.c: (viaInitVideo):
+
+	- Added a "NoXVDMA" option to disable PCI DMA for Xv image transfers.
+	  May turn out useful to vlc users.
+	- Updated man page.
+	
 2006-01-26  Thomas Hellström <thomas-at-tungstengraphics-dot-com>   
 
 	* unichrome/via_driver.c:

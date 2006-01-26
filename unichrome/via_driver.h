@@ -325,6 +325,7 @@ typedef struct _VIA {
     Bool		DRIIrqEnable;
     Bool                agpEnable;
     Bool                dma2d;
+    Bool                dmaXV;
 
     CARD8               ActiveDevice;	/* Option */
     unsigned char       *CursorImage;

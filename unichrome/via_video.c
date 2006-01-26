@@ -491,6 +491,7 @@ void viaInitVideo(ScreenPtr pScreen)
 	 (pVia->drmVerMinor < 9)))
 	pVia->useDmaBlit = FALSE;
 #endif
+    pVia->useDmaBlit = pVia->useDmaBlit && pVia->dmaXV;
 
     if (pVia->useDmaBlit)
 	xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[Xv] Using PCI DMA for Xv image transfer.\n");
