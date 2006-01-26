@@ -1,5 +1,11 @@
 2006-01-26  Thomas Hellström <thomas-at-tungstengraphics-dot-com>   
 
+	* unichrome/via_swov.c: (ViaOverlayHide):
+
+	Fix HQV offset bug.
+	
+2006-01-26  Thomas Hellström <thomas-at-tungstengraphics-dot-com>   
+
 	* libxvmc/driDrawable.c: (drawStamp), (getDRIDrawableInfoLocked),
 	(driDestroyHashContents):
 	* libxvmc/driDrawable.h:

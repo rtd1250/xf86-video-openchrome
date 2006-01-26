@@ -65,23 +65,6 @@
  */
 #define VIDREG_BUFFER_SIZE  100  /* Number of entries in the VidRegBuffer. */
 #define IN_VIDEO_DISPLAY     (*((unsigned long volatile *)(pVia->VidMapBase+V_FLAGS))&VBI_STATUS)
-#if 0
-#define IN_HQV_FIRE     (*((unsigned long volatile *)(pVia->VidMapBase+HQV_CONTROL))&HQV_IDLE)
-
-#ifdef UNUSED
-
-#define IN_VIDEO_FIRE   (*((unsigned long volatile *)(pVia->VidMapBase+V_COMPOSE_MODE))&V1_COMMAND_FIRE)
-#define IN_HQV_FLIP     (*((unsigned long volatile *)(pVia->VidMapBase+HQV_CONTROL))&HQV_FLIP_STATUS)
-#define IN_DISPLAY      (VIDInD(V_FLAGS) & 0x200)
-#define IN_VBLANK       (!IN_DISPLAY)
-
-static void 
-viaWaitHQVIdle(VIAPtr pVia)
-{
-    while (!IN_HQV_FIRE);
-}
-#endif /* UNUSED */
-#endif
 
 static void 
 viaWaitVideoCommandFire(VIAPtr pVia)
@@ -2082,7 +2065,7 @@ ViaOverlayHide(ScrnInfoPtr pScrn)
 		      | ALPHA_FIFO_DEPTH8 | V3_FIFO_THRESHOLD24 | V3_FIFO_DEPTH32);
     
     if (videoFlag & VIDEO_HQV_INUSE)
-	SaveVideoRegister(pVia, HQV_CONTROL + proReg, VIDInD(HQV_CONTROL) & ~HQV_ENABLE);
+	SaveVideoRegister(pVia, HQV_CONTROL + proReg, VIDInD(HQV_CONTROL + proReg) & ~HQV_ENABLE);
     
     if (videoFlag & VIDEO_1_INUSE)
 	SaveVideoRegister(pVia, V1_CONTROL, VIDInD(V1_CONTROL) & ~V1_ENABLE);
