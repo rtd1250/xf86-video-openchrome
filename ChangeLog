@@ -1,8 +1,15 @@
 2006-01-26  Thomas Hellström <thomas-at-tungstengraphics-dot-com>   
 
+	* unichrome/via_driver.c:
+
+	- Added vgaHWGetIndex to vgaHW symbol list.
+	  Reported by Ole Sandum.
+	
+2006-01-26  Thomas Hellström <thomas-at-tungstengraphics-dot-com>   
+
 	* unichrome/via_swov.c: (ViaOverlayHide):
 
-	Fix HQV offset bug.
+	- Fix HQV offset bug.
 	
 2006-01-26  Thomas Hellström <thomas-at-tungstengraphics-dot-com>   
 

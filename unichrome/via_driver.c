@@ -207,6 +207,7 @@ static const char *vgaHWSymbols[] = {
     "vgaHWLock",
     "vgaHWUnlock",
     "vgaHWFreeHWRec",
+    "vgaHWGetIndex",  /* Through VGAHWPTR() */
     NULL
 };
 
