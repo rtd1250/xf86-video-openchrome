@@ -31,6 +31,8 @@
 #include "xf86_OSproc.h"
 #include "xf86_ansic.h"
 #include "xf86fbman.h"
+#include "time.h"
+#include "sys/time.h"
 
 #include "via.h"
 #ifdef XF86DRI
@@ -65,14 +67,36 @@
  */
 #define VIDREG_BUFFER_SIZE  100  /* Number of entries in the VidRegBuffer. */
 #define IN_VIDEO_DISPLAY     (*((unsigned long volatile *)(pVia->VidMapBase+V_FLAGS))&VBI_STATUS)
+#define VIA_FIRETIMEOUT 40000
+
+static unsigned
+viaTimeDiff(struct timeval *now, struct timeval *then)
+{
+    return (now->tv_usec >= then->tv_usec) ?
+	now->tv_usec - then->tv_usec :
+	1000000 - (then->tv_usec - now->tv_usec);
+}
+
 
 static void 
 viaWaitVideoCommandFire(VIAPtr pVia)
 {
-    /*while (IN_VIDEO_FIRE);*/
+    struct timeval now, then;
+    struct timezone here;
+
+    here.tz_minuteswest = 0;
+    here.tz_dsttime = 0;
+    gettimeofday(&then, &here);
+    
     CARD32 volatile *pdwState = (CARD32 volatile *) (pVia->VidMapBase+V_COMPOSE_MODE);
-    /*pdwState = (CARD32 volatile *) (pVia->VidMapBase+V_COMPOSE_MODE);*/
-    while ((*pdwState & V1_COMMAND_FIRE)||(*pdwState & V3_COMMAND_FIRE));
+
+    while ((*pdwState & V1_COMMAND_FIRE)||(*pdwState & V3_COMMAND_FIRE)) {
+	gettimeofday(&now, &here);
+	if (viaTimeDiff(&now, &then) > VIA_FIRETIMEOUT) {
+	    ErrorF("viaWaitVideoCommandFire: Timeout.\n");
+	    break;
+	}
+    }
 }
 
 static void 

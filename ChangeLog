@@ -1,3 +1,9 @@
+2006-01-26 Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+
+	* unichrome/via_swov.c: (viaTimeDiff), (viaWaitVideoCommandFire):
+
+	- Make the Xv viaWaitVideoCommandFire loop time out. Better than server hang?
+
 2006-01-26  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via.man:
