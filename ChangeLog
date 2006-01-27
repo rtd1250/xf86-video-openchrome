@@ -1,3 +1,10 @@
+2006-01-27  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+
+	* unichrome/via_mode.c: (ViaModePrimary):
+
+	- Import Luc's fix for sometimes-blanking CRTs on CLE266.
+	  (Luc Verhaegen)
+	
 2006-01-27 Thomas Hellström <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_swov.c: (viaWaitVideoCommandFire):

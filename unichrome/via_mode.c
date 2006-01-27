@@ -1655,6 +1655,8 @@ ViaModePrimary(ScrnInfoPtr pScrn, DisplayModePtr mode)
     
     if (!pBIOSInfo->CrtActive)
 	ViaCrtcMask(hwp, 0x36, 0x30, 0x30);
+    else
+        ViaSeqMask(hwp, 0x16, 0x00, 0x40);
 
     if (pBIOSInfo->PanelActive && ViaPanelGetIndex(pScrn, mode)) {
 	VIASetLCDMode(pScrn, mode);
