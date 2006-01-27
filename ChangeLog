@@ -1,3 +1,10 @@
+2006-01-27 Thomas Hellström <thomas-at-tungstengraphics-dot-com> 
+
+	* unichrome/via_swov.c: (viaWaitVideoCommandFire):
+
+	- The previous commit causes problems with older X versions.
+	  Avoid using gettimeofday(). Reported by Paul Bender.
+	
 2006-01-26 Thomas Hellström <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via_swov.c: (viaTimeDiff), (viaWaitVideoCommandFire):

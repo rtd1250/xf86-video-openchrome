@@ -69,33 +69,20 @@
 #define IN_VIDEO_DISPLAY     (*((unsigned long volatile *)(pVia->VidMapBase+V_FLAGS))&VBI_STATUS)
 #define VIA_FIRETIMEOUT 40000
 
-static unsigned
-viaTimeDiff(struct timeval *now, struct timeval *then)
-{
-    return (now->tv_usec >= then->tv_usec) ?
-	now->tv_usec - then->tv_usec :
-	1000000 - (then->tv_usec - now->tv_usec);
-}
-
-
 static void 
 viaWaitVideoCommandFire(VIAPtr pVia)
 {
-    struct timeval now, then;
-    struct timezone here;
+/*
+ * Assume uncached PCI reading throughputs about 9MB/s. 8Bytes / loop means
+ * Appox 1Mloops / second. We want to time out after 25 ms which means 25000 loops.
+ */
 
-    here.tz_minuteswest = 0;
-    here.tz_dsttime = 0;
-    gettimeofday(&then, &here);
-    
+    unsigned count = 25000;
     CARD32 volatile *pdwState = (CARD32 volatile *) (pVia->VidMapBase+V_COMPOSE_MODE);
 
-    while ((*pdwState & V1_COMMAND_FIRE)||(*pdwState & V3_COMMAND_FIRE)) {
-	gettimeofday(&now, &here);
-	if (viaTimeDiff(&now, &then) > VIA_FIRETIMEOUT) {
-	    ErrorF("viaWaitVideoCommandFire: Timeout.\n");
-	    break;
-	}
+    while (--count && ((*pdwState & V1_COMMAND_FIRE)||(*pdwState & V3_COMMAND_FIRE)));
+    if (!count) {
+	ErrorF("viaWaitVideoCommandFire: Timeout.\n");
     }
 }
 
