@@ -265,6 +265,7 @@ typedef struct _VIA {
     ExaOffscreenArea   *scratchFBBuffer;
     unsigned            scratchOffset;
     char *              scratchAddr;
+    Bool                noComposite;
 #ifdef XF86DRI
     drm_via_mem_t       scratchAGPBuffer;
     drm_via_mem_t       texAGPBuffer;

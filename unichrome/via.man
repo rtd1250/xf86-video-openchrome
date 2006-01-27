@@ -133,6 +133,16 @@ will display rendering artifacts when PCI DMA is used. If you
 experience this, or don't want your PCI bus to be stressed 
 with Xv images, set this option to "true". This option has no effect
 if DRI is not enabled.
+.TP
+.BI "Option \*qAccelMethod\*q \*q" string \*q
+The driver supports \*qXAA\*q and \*qEXA\*q acceleration methods. The default method is 
+XAA, since EXA is still experimental. Contrary to XAA. EXA implements acceleration for
+screen uploads and downlads (if DRI is enabled) and the Render / Composite extension.
+.TP
+.BI "Option \*qEXANoComposite\*q \*q" boolean \*q
+If Exa is enabled using the above option, Don't accelerate composite. Since EXA, and in
+particular, it's composite acceleration is still experimental, This is a way to disable
+exa composite acceleration.
 
 .SH "Supported TV Encoders"
 Unichromes tend to be paired with several different TV Encoders.

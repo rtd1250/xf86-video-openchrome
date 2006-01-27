@@ -50,7 +50,7 @@ static Via3DFormat via3DFormats[256];
 #define VIA_NUM_3D_FORMATS 15
 #define VIA_FMT_HASH(arg) (((((arg) >> 1) + (arg)) >> 8) & 0xFF)
 
-static CARD32 viaOpCodes[VIA_NUM_3D_OPCODES][5] = {
+static const CARD32 viaOpCodes[VIA_NUM_3D_OPCODES][5] = {
     {PictOpClear, 0x05, 0x45, 0x40, 0x80},
     {PictOpSrc, 0x15, 0x45, 0x50, 0x80},
     {PictOpDst, 0x05, 0x55, 0x40, 0x90},
@@ -72,7 +72,7 @@ static CARD32 viaOpCodes[VIA_NUM_3D_OPCODES][5] = {
     {PictOpConjointDst, 0x05, 0x55, 0x40, 0x90}
 };
 
-static CARD32 viaFormats[VIA_NUM_3D_FORMATS][5] = {
+static const CARD32 viaFormats[VIA_NUM_3D_FORMATS][5] = {
     {PICT_x1r5g5b5, HC_HDBFM_RGB555, HC_HTXnFM_RGB555, 1, 1},
     {PICT_r5g6b5, HC_HDBFM_RGB565, HC_HTXnFM_RGB565, 1, 1},
     {PICT_a4r4g4b4, HC_HDBFM_ARGB4444, HC_HTXnFM_ARGB4444, 1, 1},

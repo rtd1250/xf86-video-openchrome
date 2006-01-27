@@ -1,4 +1,15 @@
 2006-01-27  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+	
+	* unichrome/via.man:
+	* unichrome/via_3d.c:
+	* unichrome/via_accel.c: (viaAccelPlaneMaskHelper), (viaInitExa),
+	(viaInitAccel), (viaExitAccel), (viaFinishInitAccel):
+	* unichrome/via_driver.c: (VIAPreInit):
+	* unichrome/via_driver.h:
+
+	- Merge EXA branch revisions 138:152
+
+2006-01-27  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via_mode.c: (ViaModePrimary):
 
