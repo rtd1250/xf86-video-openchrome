@@ -30,6 +30,16 @@
 enum{ XV_ADAPT_SWOV=0, 
       XV_ADAPT_NUM};
 
+typedef enum{ 
+  xve_none = 0,
+  xve_bandwidth,
+  xve_dmablit,
+  xve_mem,
+  xve_general,
+  xve_adaptor,
+  xve_numerr
+} XvError;
+
 #define VIA_MAX_XV_PORTS 1
 
 typedef struct {
@@ -66,6 +76,7 @@ typedef struct {
     unsigned char *dmaBounceBuffer;
     unsigned dmaBounceStride;
     unsigned dmaBounceLines;
+    XvError xvErr;
 
 } viaPortPrivRec, *viaPortPrivPtr;
 

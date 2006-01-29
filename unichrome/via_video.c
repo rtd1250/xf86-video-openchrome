@@ -226,6 +226,7 @@ static unsigned numAdaptPort[XV_ADAPT_NUM] =
  *   Decide if the mode support video overlay. This depends on the bandwidth
  *   of the mode and the type of RAM available.
  */
+
 static Bool DecideOverlaySupport(ScrnInfoPtr pScrn)
 {
     VIAPtr  pVia = VIAPTR(pScrn);
@@ -377,6 +378,29 @@ static Bool DecideOverlaySupport(ScrnInfoPtr pScrn)
 	return FALSE;
     }
     return FALSE;
+}
+
+static const char *viaXvErrMsg[xve_numerr] = 
+  {"No Error.",
+   "Bandwidth is insufficient. Check bios memory settings.",
+   "PCI DMA blit failed. You probably encountered a bug.",
+   "Not enough resources to complete the request. Probably out of memory.",
+   "General Error. I wish I could be more specific.",
+   "Wrong adaptor used. Try another port number."};
+
+static void
+viaXvError(ScrnInfoPtr pScrn, viaPortPrivPtr pPriv, XvError error)
+{
+    if (error == xve_none) {
+	pPriv->xvErr = xve_none;
+	return;
+    }
+    if (error == pPriv->xvErr) {
+	return;
+    } 
+    pPriv->xvErr = error;
+    xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "[Xv] Port %d: %s\n", pPriv->xv_portnum,
+	viaXvErrMsg[error]);
 }
 
 static void
@@ -591,9 +615,10 @@ viaReputImage(ScrnInfoPtr pScrn,
     if (drw_x == pPriv->old_drw_x &&
 	drw_y == pPriv->old_drw_y &&
 	pVia->swov.oldPanningX == pVia->swov.panning_x &&
-	pVia->swov.oldPanningY == pVia->swov.panning_y)
-      
+	pVia->swov.oldPanningY == pVia->swov.panning_y) {
+	viaXvError(pScrn, pPriv, xve_none);
 	return Success;
+    }
 	
     lpUpdateOverlay->SrcLeft = pPriv->old_src_x;
     lpUpdateOverlay->SrcTop = pPriv->old_src_y;
@@ -616,6 +641,7 @@ viaReputImage(ScrnInfoPtr pScrn,
     
     VIAVidUpdateOverlay(pScrn, lpUpdateOverlay);
 
+    viaXvError(pScrn, pPriv, xve_none);
     return Success;
 }
 
@@ -697,6 +723,7 @@ viaSetupAdaptors(ScreenPtr pScreen, XF86VideoAdaptorPtr **adaptors)
  	    viaPortPriv[j].hue = 0;
 	    viaPortPriv[j].FourCC = 0;
  	    viaPortPriv[j].xv_portnum = j + usedPorts;
+	    viaPortPriv[j].xvErr = xve_none;
 	      
 #ifdef X_USE_REGION_NULL
 	    REGION_NULL(pScreen, &viaPortPriv[j].clip);
@@ -1023,10 +1050,8 @@ viaDmaBlitImage(VIAPtr pVia,
 #endif
     while(-EAGAIN == (err = drmCommandWriteRead(pVia->drmFD, DRM_VIA_DMA_BLIT, 
 						&blit, sizeof(blit))));
-    if (err < 0) {
-	ErrorF("Luma blit failed!\n");
+    if (err < 0) 
 	return -1;
-    }
 
     lumaSync = blit.sync;
 
@@ -1062,19 +1087,15 @@ viaDmaBlitImage(VIAPtr pVia,
 
 	while(-EAGAIN == (err = drmCommandWriteRead(pVia->drmFD, DRM_VIA_DMA_BLIT, 
 						    &blit, sizeof(blit))));
-	if (err < 0) {
-	    ErrorF("Chroma blit failed!\n");
+	if (err < 0) 
 	    return -1;
-	}
 
     }	
 
     while(-EAGAIN == (err = drmCommandWrite(pVia->drmFD, DRM_VIA_BLIT_SYNC, 
 					    chromaSync, sizeof(*chromaSync))));
-    if (err < 0) {
-	ErrorF("Chroma sync failed!\n");
+    if (err < 0) 
 	return -1;
-    }
 
     return Success;    
 }
@@ -1104,7 +1125,7 @@ viaPutImage(
     ErrorF(" via_video.c : drw_x=%d drw_y=%d drw_w=%d drw_h=%d\n",drw_x,drw_y,drw_w,drw_h);
 # endif
 
-    switch ( pPriv->xv_portnum )
+    switch ( pPriv->xv_adaptor )
 	{
         case XV_ADAPT_SWOV:
 	{
@@ -1125,6 +1146,7 @@ viaPutImage(
 	    if (Success != ( retCode = ViaSwovSurfaceCreate(pScrn, pPriv, id, width, height) ))
                 {
 		    DBG_DD(ErrorF("             : Fail to Create SW Video Surface\n"));
+		    viaXvError(pScrn, pPriv, xve_mem);
 		    return retCode;
                 }
 
@@ -1137,10 +1159,13 @@ viaPutImage(
 
 		if (pVia->useDmaBlit) {
 #ifdef XF86DRI
-		    viaDmaBlitImage(pVia, pPriv, buf,  
+		    if (viaDmaBlitImage(pVia, pPriv, buf,  
 				    (unsigned char *)pVia->swov.SWDevice.lpSWOverlaySurface[pVia->dwFrameNum&1] -
 				    (unsigned char *)pVia->FBBase,
-				    width, height, dstPitch, id);
+					width, height, dstPitch, id)) {
+			viaXvError(pScrn, pPriv, xve_dmablit);
+			return BadAccess;
+		    }
 #endif
 		} else {
 		    switch(id) {
@@ -1171,6 +1196,7 @@ viaPutImage(
 		!(pVia->OverlaySupported = DecideOverlaySupport(pScrn))) {
 		DBG_DD(ErrorF(" via_video.c : Xv Overlay rejected due to insufficient "
 			      "memory bandwidth.\n"));
+		viaXvError(pScrn, pPriv, xve_bandwidth);
 		return BadAlloc;
 	    }
 
@@ -1222,6 +1248,7 @@ viaPutImage(
 		 && (pVia->VideoStatus & VIDEO_SWOV_ON) &&
 		 RegionsEqual(&pPriv->clip, clipBoxes))
                 {
+		    viaXvError(pScrn, pPriv, xve_none);
                     return Success;
                 }
 
@@ -1251,15 +1278,18 @@ viaPutImage(
 		DBG_DD(ErrorF(" via_video.c : call v4l updateoverlay fail. \n"));
 	    } else {
 		DBG_DD(ErrorF(" via_video.c : PutImage done OK\n"));
+		viaXvError(pScrn, pPriv, xve_none);
 		return Success;
 	    }
             break;
 	}
         default:
             DBG_DD(ErrorF(" via_video.c : XVPort not supported\n"));
+	    viaXvError(pScrn, pPriv, xve_adaptor);
             break;
 	}
     DBG_DD(ErrorF(" via_video.c : PutImage done OK\n"));
+    viaXvError(pScrn, pPriv, xve_none);
     return Success;
 }
 

@@ -31,8 +31,6 @@
 #include "xf86_OSproc.h"
 #include "xf86_ansic.h"
 #include "xf86fbman.h"
-#include "time.h"
-#include "sys/time.h"
 
 #include "via.h"
 #ifdef XF86DRI

@@ -1,3 +1,14 @@
+2006-01-29  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+
+	* unichrome/via_swov.c:
+	* unichrome/via_video.c: (viaXvError), (viaReputImage),
+	(viaSetupAdaptors), (viaDmaBlitImage), (viaPutImage):
+	* unichrome/via_xvpriv.h:
+
+	- Removed time.h and sys/time.h includes from via_swov.c
+	  (Reported by George E Sollish).
+	- More verbose Xv error reporting.
+
 2006-01-27  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
 	
 	* unichrome/via.man:
