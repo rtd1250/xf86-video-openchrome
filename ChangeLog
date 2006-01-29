@@ -1,5 +1,11 @@
 2006-01-29  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
 
+	* unichrome/via_vbe.c: (ViaVbeSetMode):
+
+	- Fix VBE refresh setting.
+	
+2006-01-29  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+
 	* unichrome/via_accel.c: (viaInitExa):
 	* unichrome/via_driver.c: (VIAPreInit):
 
