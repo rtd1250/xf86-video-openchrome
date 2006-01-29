@@ -45,8 +45,6 @@
 #include "via_regs.h"
 #include "via_id.h"
 #include "via_dmabuffer.h"
-#include <time.h>
-#include <sys/time.h>
 
 #ifdef X_HAVE_XAAGETROP
 #define VIAACCELPATTERNROP(vRop) (XAAGetPatternROP(vRop) << 24)
@@ -2125,11 +2123,12 @@ viaInitExa(ScreenPtr pScreen)
     pExa->accel.UploadToScratch = viaExaUploadToScratch;
 
     if (!pVia->noComposite) {
-	xf86DrvMsg(pScrn->scrnIndex, X_INFO,"[EXA] Disabling EXA accelerated composite.\n");
 	pExa->accel.CheckComposite = viaExaCheckComposite;
 	pExa->accel.PrepareComposite = viaExaPrepareComposite;
 	pExa->accel.Composite = viaExaComposite;
 	pExa->accel.DoneComposite = viaExaDoneSolidCopy;
+    } else {
+	xf86DrvMsg(pScrn->scrnIndex, X_INFO,"[EXA] Disabling EXA accelerated composite.\n");
     }
 
     if (!exaDriverInit(pScreen, pExa)) {

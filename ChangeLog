@@ -1,5 +1,12 @@
 2006-01-29  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
 
+	* unichrome/via_accel.c: (viaInitExa):
+	* unichrome/via_driver.c: (VIAPreInit):
+
+	- Merge EXA branch revisions 152:155
+	
+2006-01-29  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+
 	* unichrome/via_swov.c:
 	* unichrome/via_video.c: (viaXvError), (viaReputImage),
 	(viaSetupAdaptors), (viaDmaBlitImage), (viaPutImage):

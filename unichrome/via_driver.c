@@ -928,10 +928,8 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
 	if (pVia->useEXA) {
 	    if (xf86ReturnOptValBool(VIAOptions, OPTION_EXA_NOCOMPOSITE, FALSE)) {
 		pVia->noComposite = TRUE;
-		if (pVia->agpEnable) {
-		    xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-			       "Option: ExaNoComposite - Disable Composite acceleration for EXA\n");
-		}
+		xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+			   "Option: ExaNoComposite - Disable Composite acceleration for EXA\n");
 	    } else {
 		pVia->noComposite = FALSE;
 	    }
