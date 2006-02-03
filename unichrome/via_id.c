@@ -95,6 +95,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Asustek Terminator C3V",                VIA_CLE266,  0x1043, 0x8155, VIA_DEVICE_CRT},
     {"VIA VT3122 (CLE266)-EPIA M/MII/...",    VIA_CLE266,  0x1106, 0x3122, VIA_DEVICE_CRT | VIA_DEVICE_TV},
     /* KM400 */
+    {"ECS KM400-M2",                          VIA_KM400,   0x1019, 0x1842, VIA_DEVICE_CRT},
     {"Acer Aspire 135x",                      VIA_KM400,   0x1025, 0x0033, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
     {"Asustek A7V8X-MX",                      VIA_KM400,   0x1043, 0x80ED, VIA_DEVICE_CRT},
     {"Asustek A7V8X-LA",                      VIA_KM400,   0x1043, 0x80F9, VIA_DEVICE_CRT},
@@ -117,6 +118,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"FIC K7M-400A",                          VIA_KM400,   0x1509, 0x9233, VIA_DEVICE_CRT},
     {"Biostar P4M800-M7",                     VIA_KM400,   0x1565, 0x1202, VIA_DEVICE_CRT},
     {"Uniwill 755CI",                         VIA_KM400,   0x1584, 0x800A, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV}, /* aka "Gericom hummer advance", "Maxdata M-Book 1200X" */
+    {"Packard Bell Quasar2 (MSI MS6786)",     VIA_KM400,   0x1631, 0xD002, VIA_DEVICE_CRT},
     {"Epox EP-8KMM3I",                        VIA_KM400,   0x1695, 0x9023, VIA_DEVICE_CRT},
     {"ASRock Inc. K7VM2/3/4",                 VIA_KM400,   0x1849, 0x7205, VIA_DEVICE_CRT},
     {"ACorp KM400QP",                         VIA_KM400,   0x1915, 0x1100, VIA_DEVICE_CRT| VIA_DEVICE_TV},
@@ -128,7 +130,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Asustek K8V-MX",                        VIA_K8M800,  0x1043, 0x8129, VIA_DEVICE_CRT},
     {"Mitac 8399",                            VIA_K8M800,  0x1071, 0x8399, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV}, /* aka "pogolinux konabook 3100" */
     {"Mitac 8889",                            VIA_K8M800,  0x1071, 0x8889, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
-    {"VIA VT3108 (K8M800)",                   VIA_K8M800,  0x1106, 0x3108, VIA_DEVICE_CRT}, /* VIA/K8M800 -- ??? PciInfo Alignment issue ??? */
+    {"VIA VT3108 (K8M800)",                   VIA_K8M800,  0x1106, 0x3108, VIA_DEVICE_CRT}, /* borrowed by Asustek A8V-MX */ 
     {"Shuttle FX21",                          VIA_K8M800,  0x1297, 0x3052, VIA_DEVICE_CRT},
     {"Shuttle FX83",                          VIA_K8M800,  0x1297, 0xF683, VIA_DEVICE_CRT | VIA_DEVICE_TV},
     {"Sharp Actius AL27",                     VIA_K8M800,  0x13BD, 0x1044, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
