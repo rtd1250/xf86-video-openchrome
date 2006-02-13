@@ -161,6 +161,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Chaintech MPM800-3",                    VIA_PM800,   0x270F, 0x7671, VIA_DEVICE_CRT},
     {"MaxSelect Optima C4",                   VIA_PM800,   0x1558, 0x5402, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     /* VN800 */
+    {"Gateway MX3210",                        VIA_VM800,   0x107B, 0x0216, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Gigabyte GA-8VM800M-775",               VIA_VM800,   0x1458, 0xD000, VIA_DEVICE_CRT},
     {"MSI PM8PM",                             VIA_VM800,   0x1462, 0x7222, VIA_DEVICE_CRT},
     {"Biostar P4M80-M4",                      VIA_VM800,   0x1565, 0x1202, VIA_DEVICE_CRT},
