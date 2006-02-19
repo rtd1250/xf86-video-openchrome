@@ -240,13 +240,19 @@ VIAVidHWDiffInit(ScrnInfoPtr pScrn)
         HWDiff->dwHQVInitPatch = VID_HWDIFF_FALSE;
         HWDiff->dwHQVDisablePatch = VID_HWDIFF_TRUE;
         break;
-    case VIA_VM800:
     case VIA_PM800:
         HWDiff->dwThreeHQVBuffer = VID_HWDIFF_TRUE;
         HWDiff->dwHQVFetchByteUnit = VID_HWDIFF_TRUE;
         HWDiff->dwSupportTwoColorKey = VID_HWDIFF_TRUE;
         HWDiff->dwHQVInitPatch = VID_HWDIFF_FALSE;
         HWDiff->dwHQVDisablePatch = VID_HWDIFF_FALSE;
+        break;
+    case VIA_VM800:
+        HWDiff->dwThreeHQVBuffer = VID_HWDIFF_TRUE;
+        HWDiff->dwHQVFetchByteUnit = VID_HWDIFF_TRUE;
+        HWDiff->dwSupportTwoColorKey = VID_HWDIFF_FALSE;
+        HWDiff->dwHQVInitPatch = VID_HWDIFF_FALSE;
+        HWDiff->dwHQVDisablePatch = VID_HWDIFF_TRUE;
         break;
     default:
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "VIAVidHWDiffInit: Unhandled ChipSet.\n");
@@ -385,13 +391,13 @@ viaOverlayGetSrcStartAddress(VIAPtr pVia, unsigned long videoFlag,
 	case FOURCC_XVMC:
 	    
 	    if (videoFlag & VIDEO_HQV_INUSE)
-		offset = (((pUpdate->SrcTop & ~3) * (srcPitch << 1)) + ((pUpdate->SrcLeft << 1) & ~31));
-	    else {
-		offset = ((((pUpdate->SrcTop & ~3) * srcPitch) + pUpdate->SrcLeft) & ~31);
-		if (pUpdate->SrcTop > 0)
-		    pVia->swov.overlayRecordV1.dwUVoffset = (((((pUpdate->SrcTop & ~3)>>1) * srcPitch) + pUpdate->SrcLeft) & ~31) >> 1;
-		else
-		    pVia->swov.overlayRecordV1.dwUVoffset = offset >> 1;
+            offset = (((pUpdate->SrcTop & ~3) * (srcPitch << 1)) + ((pUpdate->SrcLeft << 1) & ~31));
+        else {
+            offset = ((((pUpdate->SrcTop & ~3) * srcPitch) + pUpdate->SrcLeft) & ~31);
+            if (pUpdate->SrcTop > 0)
+                pVia->swov.overlayRecordV1.dwUVoffset = (((((pUpdate->SrcTop & ~3)>>1) * srcPitch) + pUpdate->SrcLeft) & ~31) >> 1;
+            else
+                pVia->swov.overlayRecordV1.dwUVoffset = offset >> 1;
 	    }
 	    break;
 	    
@@ -697,6 +703,7 @@ viaCalculateVideoColor(VIAPtr pVia, int hue, int saturation, int brightness,
     case PCI_CHIP_VT3205:
     case PCI_CHIP_VT3204:
     case PCI_CHIP_VT3259:
+    case PCI_CHIP_VT3314:
         model = 0;
         break;
     case PCI_CHIP_CLE3122:
@@ -818,6 +825,7 @@ void viaSetColorSpace(VIAPtr pVia, int hue, int saturation, int brightness, int 
     case PCI_CHIP_VT3205:
     case PCI_CHIP_VT3204:
     case PCI_CHIP_VT3259:
+    case PCI_CHIP_VT3314:
         VIDOutD(V3_ColorSpaceReg_1, col1);
         VIDOutD(V3_ColorSpaceReg_2, col2);
         DBG_DD(ErrorF("000002C4 %08lx\n",col1));
@@ -844,6 +852,7 @@ static unsigned long ViaInitVideoStatusFlag(VIAPtr pVia)
     case PCI_CHIP_VT3205:
     case PCI_CHIP_VT3204:
     case PCI_CHIP_VT3259:
+    case PCI_CHIP_VT3314:
         return VIDEO_HQV_INUSE | SW_USE_HQV | VIDEO_3_INUSE;
     case PCI_CHIP_CLE3122:
         return VIDEO_HQV_INUSE | SW_USE_HQV | VIDEO_1_INUSE;
@@ -874,7 +883,8 @@ static unsigned long ViaSetVidCtl(VIAPtr pVia, unsigned int videoFlag)
         {
         case PCI_CHIP_VT3205:
         case PCI_CHIP_VT3204:
-	case PCI_CHIP_VT3259:
+        case PCI_CHIP_VT3259:
+        case PCI_CHIP_VT3314:
             return V3_ENABLE | V3_EXPIRE_NUM_3205;
 
         case PCI_CHIP_CLE3122:
@@ -1128,12 +1138,24 @@ static void SetFIFO_V1(VIAPtr pVia, CARD8 depth, CARD8 prethreshold, CARD8 thres
 
 static void SetFIFO_V3(VIAPtr pVia, CARD8 depth, CARD8 prethreshold, CARD8 threshold)
 {
-    SaveVideoRegister(pVia, ALPHA_V3_FIFO_CONTROL,
-        (VIDInD(ALPHA_V3_FIFO_CONTROL) & ALPHA_FIFO_MASK) |
-        ((depth - 1) & 0xff) | ((threshold & 0xff) << 8));
-    SaveVideoRegister(pVia, ALPHA_V3_PREFIFO_CONTROL,
-        (VIDInD(ALPHA_V3_PREFIFO_CONTROL) & ~V3_FIFO_MASK) |
-        (prethreshold & 0x7f));
+    if (pVia->ChipId == PCI_CHIP_VT3314)
+    {
+        SaveVideoRegister(pVia, ALPHA_V3_FIFO_CONTROL,
+            (VIDInD(ALPHA_V3_FIFO_CONTROL) & ALPHA_FIFO_MASK) |
+            ((depth - 1) & 0xff) | ((threshold & 0xff) << 8));
+        SaveVideoRegister(pVia, ALPHA_V3_PREFIFO_CONTROL,
+            (VIDInD(ALPHA_V3_PREFIFO_CONTROL) & ~V3_FIFO_MASK_3314) |
+            (prethreshold & 0xff));
+    }
+    else
+    {
+        SaveVideoRegister(pVia, ALPHA_V3_FIFO_CONTROL,
+            (VIDInD(ALPHA_V3_FIFO_CONTROL) & ALPHA_FIFO_MASK) |
+            ((depth - 1) & 0xff) | ((threshold & 0xff) << 8));
+        SaveVideoRegister(pVia, ALPHA_V3_PREFIFO_CONTROL,
+            (VIDInD(ALPHA_V3_PREFIFO_CONTROL) & ~V3_FIFO_MASK) |
+            (prethreshold & 0x7f));
+    }
 }
 
 static void SetFIFO_64or32(VIAPtr pVia)
@@ -1174,8 +1196,13 @@ static void SetFIFO_V3_64or32or32(VIAPtr pVia)
 {
     switch (pVia->ChipId)
     {
-    case PCI_CHIP_VT3205:
     case PCI_CHIP_VT3204:
+        SetFIFO_V3(pVia, 100, 89, 89);
+        break;
+    case PCI_CHIP_VT3314:
+        SetFIFO_V3(pVia, 64, 61, 61);
+        break;
+    case PCI_CHIP_VT3205:
     case PCI_CHIP_VT3259:
         SetFIFO_V3(pVia, 32, 29, 29);
         break;
@@ -1196,8 +1223,13 @@ static void SetFIFO_V3_64or32or16(VIAPtr pVia)
 {
     switch (pVia->ChipId)
     {
-    case PCI_CHIP_VT3205:
     case PCI_CHIP_VT3204:
+        SetFIFO_V3(pVia, 100, 89, 89);
+        break;
+    case PCI_CHIP_VT3314:
+        SetFIFO_V3(pVia, 64, 61, 61);
+        break;
+    case PCI_CHIP_VT3205:
     case PCI_CHIP_VT3259:
         SetFIFO_V3(pVia, 32, 29, 29);
         break;
@@ -1314,8 +1346,8 @@ static CARD32 SetColorKey(VIAPtr pVia, unsigned long videoFlag,
                           CARD32 keyLow, CARD32 keyHigh, CARD32 compose)
 {
     keyLow &= 0x00FFFFFF;
-    if ((pVia->ChipId == PCI_CHIP_VT3259))
-	keyLow |= 0x40000000;
+    if (pVia->ChipId == PCI_CHIP_VT3259)
+        keyLow |= 0x40000000;
 
     /*SaveVideoRegister(pVia, V_COLOR_KEY, keyLow);*/
 
@@ -1346,8 +1378,8 @@ static CARD32 SetChromaKey(VIAPtr pVia, unsigned long videoFlag,
     chromaLow  |= (VIDInD(V_CHROMAKEY_LOW) & ~CHROMA_KEY_LOW);
     chromaHigh |= (VIDInD(V_CHROMAKEY_HIGH)& ~CHROMA_KEY_HIGH);
 
-    if ((pVia->ChipId == PCI_CHIP_VT3259))
-	chromaLow |= 0x40000000;
+    if (pVia->ChipId == PCI_CHIP_VT3259)
+        chromaLow |= 0x40000000;
 
 
     SaveVideoRegister(pVia, V_CHROMAKEY_HIGH, chromaHigh);
@@ -1394,6 +1426,7 @@ static void SetHQVFetch(VIAPtr pVia, CARD32 srcFetch, unsigned long srcHeight)
     if (!pVia->HWDiff.dwHQVFetchByteUnit) {   /* CLE_C0 */
         srcFetch >>= 3; /* fetch unit is 8-byte */
     }
+
     SaveVideoRegister(pVia, HQV_SRC_FETCH_LINE + proReg, 
 		      ((srcFetch - 1) << 16) | (srcHeight - 1));
 }
@@ -1645,7 +1678,7 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
 
     fetch = viaOverlayGetFetch(pVia, videoFlag,
 			       srcWidth, dstWidth, oriSrcWidth, &hqvSrcFetch);
-    DBG_DD(ErrorF("===fetch= 0x%lx \n", fetch));
+    DBG_DD(ErrorF("===fetch= 0x%lx\n", fetch));
 
 #if 0
     /* For DCT450 test-BOB INTERLEAVE */
@@ -1675,8 +1708,12 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
 		SaveVideoRegister(pVia, V1_STRIDE, srcPitch << 1);
 	    else
 		SaveVideoRegister(pVia, V3_STRIDE, srcPitch << 1);
-	    
-	    SaveVideoRegister(pVia, HQV_SRC_STRIDE + proReg, ((srcPitch >> 1) << 16) | srcPitch);
+	   
+	    if (pVia->HWDiff.dwHQVFetchByteUnit)
+	    	SaveVideoRegister(pVia, HQV_SRC_STRIDE + proReg, ((srcPitch >> 1) << 16) | srcPitch | HQV_FIFO_DEPTH_1);
+	    else
+	    	SaveVideoRegister(pVia, HQV_SRC_STRIDE + proReg, ((srcPitch >> 1) << 16) | srcPitch);
+		
 	    SaveVideoRegister(pVia, HQV_DST_STRIDE + proReg, (srcPitch << 1));
 	} else {
 	    if (videoFlag & VIDEO_1_INUSE)

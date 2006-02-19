@@ -1,3 +1,22 @@
+2006-02-10  Ivor Hewitt <ivor-at-ivor-dot-org>
+
+	* unichrome/via.h:
+	* unichrome/via_bandwidth.c: (ViaSetPrimaryFIFO),
+	(ViaSetSecondaryFIFO):
+	* unichrome/via_dri.c: (VIADRIRingBufferInit):
+	* unichrome/via_mode.c: (ViaModePrimary):
+	* unichrome/via_swov.c: (VIAVidHWDiffInit),
+	(viaOverlayGetSrcStartAddress), (viaOverlayGetFetch),
+	(viaCalculateVideoColor), (viaSetColorSpace),
+	(ViaInitVideoStatusFlag), (ViaSetVidCtl), (SetFIFO_V3),
+	(SetFIFO_V3_64or32or32), (SetFIFO_V3_64or32or16), (SetColorKey),
+	(SetChromaKey), (SetHQVFetch), (Upd_Video):
+	* unichrome/via_video.c: (DecideOverlaySupport), (viaInitVideo),
+	(viaDmaBlitImage):
+	* unichrome/via_xvmc.c: (ViaInitXVMC), (ViaXvMCCreateContext):
+
+    - Get some code exercised for VM800, lets see where it crumbles.
+
 2006-01-29  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via_vbe.c: (ViaVbeSetMode):

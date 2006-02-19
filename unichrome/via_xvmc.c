@@ -338,7 +338,7 @@ ViaInitXVMC(ScreenPtr pScreen)
   pVia->XvMCEnabled = 0;
 
   if (!(pVia->Chipset == VIA_CLE266) && !(pVia->Chipset == VIA_K8M800) &&
-      !(pVia->Chipset == VIA_PM800)) {
+      !(pVia->Chipset == VIA_PM800) && !(pVia->Chipset == VIA_VM800)) {
       xf86DrvMsg(pScrn->scrnIndex, X_WARNING, 
 		 "[XvMC] Not supported on this chipset.\n");
       return;
@@ -517,7 +517,8 @@ ViaXvMCCreateContext (ScrnInfoPtr pScrn, XvMCContextPtr pContext,
   contextRec->useAGP = pViaDRI->ringBufActive && 
 	((pVia->Chipset == VIA_CLE266) || 
 	 (pVia->Chipset == VIA_KM400) || 
-	 (pVia->Chipset == VIA_PM800));	
+	 (pVia->Chipset == VIA_PM800) ||
+	 (pVia->Chipset == VIA_VM800));	
   contextRec->chipId = pVia->ChipId;
   contextRec->screen = pScrn->pScreen->myNum;
   contextRec->depth = pScrn->bitsPerPixel;

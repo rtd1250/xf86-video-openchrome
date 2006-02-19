@@ -237,7 +237,8 @@ static Bool DecideOverlaySupport(ScrnInfoPtr pScrn)
 
     if ( pVia->ChipId != PCI_CHIP_VT3205 && 
 	 pVia->ChipId != PCI_CHIP_VT3204 &&
-	 pVia->ChipId != PCI_CHIP_VT3259) {
+	 pVia->ChipId != PCI_CHIP_VT3259 &&
+    pVia->ChipId != PCI_CHIP_VT3314) {
 	CARD32 bandwidth = (mode->HDisplay >> 4) * (mode->VDisplay >> 5) *
 	    pScrn->bitsPerPixel * mode->VRefresh;
 	
@@ -509,7 +510,8 @@ void viaInitVideo(ScreenPtr pScreen)
 	((pVia->Chipset == VIA_CLE266) || 
 	 (pVia->Chipset == VIA_KM400) ||
 	 (pVia->Chipset == VIA_K8M800) ||
-	 (pVia->Chipset == VIA_PM800));
+	 (pVia->Chipset == VIA_PM800) ||
+	 (pVia->Chipset == VIA_VM800));
     if ((pVia->drmVerMajor < 2) || 
 	((pVia->drmVerMajor == 2) && 
 	 (pVia->drmVerMinor < 9)))
@@ -524,7 +526,8 @@ void viaInitVideo(ScreenPtr pScreen)
 	viaFastVidCpy = viaVidCopyInit("video", pScreen);
 
     if ( (pVia->Chipset == VIA_CLE266) || (pVia->Chipset == VIA_KM400) ||
-	 (pVia->Chipset == VIA_K8M800) || (pVia->Chipset == VIA_PM800)) {
+	 (pVia->Chipset == VIA_K8M800) || (pVia->Chipset == VIA_PM800) ||
+	 (pVia->Chipset == VIA_VM800)) {
 	num_new = viaSetupAdaptors(pScreen, &newAdaptors);
 	num_adaptors = xf86XVListGenericAdaptors(pScrn, &adaptors);
     } else {
@@ -996,7 +999,7 @@ viaDmaBlitImage(VIAPtr pVia,
     Bool nv12Conversion;
 
     bounceBuffer = ((unsigned long)src & 15);
-    nv12Conversion = ((pVia->ChipId == PCI_CHIP_VT3259) && (id == FOURCC_YV12));
+    nv12Conversion = ((pVia->ChipId == PCI_CHIP_VT3259)  && (id == FOURCC_YV12));
     
     switch(id) {
     case FOURCC_YUY2:
