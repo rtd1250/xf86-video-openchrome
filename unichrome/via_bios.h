@@ -33,6 +33,7 @@
 #define     VIA_PANEL12X10                  4
 #define     VIA_PANEL14X10                  5
 #define     VIA_PANEL16X12                  6
+#define     VIA_PANEL12X8                   7
 #define     VIA_PANEL_INVALID               255
 
 #define     TVTYPE_NONE                     0x00

@@ -20,6 +20,7 @@
 #define FOURCC_XVMC     (('C' << 24) + ('M' << 16) + ('V' << 8) + 'X')
 #define FOURCC_RV15     (('5' << 24) + ('1' << 16) + ('V' << 8) + 'R')
 #define FOURCC_RV16     (('6' << 24) + ('1' << 16) + ('V' << 8) + 'R')
+#define FOURCC_RV32     (('2' << 24) + ('3' << 16) + ('V' << 8) + 'R')
 
 /*
  * Structures for create surface

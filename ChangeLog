@@ -1,3 +1,19 @@
+2006-02-21  Ivor Hewitt <ivor-at-ivor-dot-org>
+
+	* unichrome/via_bios.h:
+	* unichrome/via_driver.c: (VIAPreInit):
+	* unichrome/via_mode.h:
+	* unichrome/via_priv.h:
+	* unichrome/via_swov.c: (viaOverlayGetV1V3Format),
+	(viaOverlayGetSrcStartAddress), (viaOverlayGetFetch),
+	(CreateSurface), (ViaSwovSurfaceCreate), (ViaSwovSurfaceDestroy),
+	(VIAVidUpdateOverlay), (ViaOverlayHide):
+	* unichrome/via_video.c: (viaInitVideo), (Flip), (viaDmaBlitImage),
+	(viaPutImage), (viaQueryImageAttributes):
+
+        - Lets have RV32 too.
+        - Add 12x8 panel
+
 2006-02-10  Ivor Hewitt <ivor-at-ivor-dot-org>
 
 	* unichrome/via.h:

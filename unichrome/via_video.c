@@ -143,7 +143,7 @@ static XF86AttributeRec AttributesG[NUM_ATTRIBUTES_G] =
    {XvSettable | XvGettable,0,1,"XV_AUTOPAINT_COLORKEY"}
 };
 
-#define NUM_IMAGES_G 5
+#define NUM_IMAGES_G 6
 
 static XF86ImageRec ImagesG[NUM_IMAGES_G] =
 {
@@ -205,7 +205,25 @@ static XF86ImageRec ImagesG[NUM_IMAGES_G] =
       {'R', 'V', 'B',0,
        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
       XvTopToBottom
+    },
+    { /* RGB 888 */
+      FOURCC_RV32,
+      XvRGB,
+      LSBFirst,
+      {'R','V','3','2',
+       0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
+      32,
+      XvPacked,
+      1,
+      24, 0xff0000, 0x00ff00, 0x0000ff,
+      0, 0, 0,
+      0, 0, 0,
+      0, 0, 0,
+      {'R', 'V', 'B',0,
+       0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+      XvTopToBottom
     }
+
 };
 
 static char * XvAdaptorName[XV_ADAPT_NUM] =
@@ -925,6 +943,7 @@ static void Flip(VIAPtr pVia, viaPortPrivPtr pPriv, int fourcc, unsigned long Di
         case FOURCC_YUY2:
         case FOURCC_RV15:
         case FOURCC_RV16:
+        case FOURCC_RV32:
             while ((VIDInD(HQV_CONTROL + proReg) & HQV_SW_FLIP) );
             VIDOutD(HQV_SRC_STARTADDR_Y + proReg, 
 		    pVia->swov.SWDevice.dwSWPhysicalAddr[DisplayBufferIndex]);
@@ -1008,6 +1027,11 @@ viaDmaBlitImage(VIAPtr pVia,
 	bounceStride = ALIGN_TO(2*width, 16);
 	bounceLines = height;
 	break;
+    case FOURCC_RV32:
+	bounceStride = ALIGN_TO(4*width, 16);
+	bounceLines = height;
+	break;
+        
     case FOURCC_YV12:
     default:
         bounceStride = ALIGN_TO(width,16);
@@ -1181,6 +1205,10 @@ viaPutImage(
 					     buf,dstPitch,width,height,0);
 			}
 			break;
+		    case FOURCC_RV32:
+			(*viaFastVidCpy)(pVia->swov.SWDevice.lpSWOverlaySurface[pVia->dwFrameNum&1],
+					 buf,dstPitch,width<<1,height,1);
+			break;
 		    case FOURCC_UYVY:
 		    case FOURCC_YUY2:
 		    case FOURCC_RV15:
@@ -1351,6 +1379,14 @@ viaQueryImageAttributes(
       if (pitches) pitches[0] = *w;
       if (offsets) offsets[0] = 0;
       break;
+    case FOURCC_RV32:
+        size = *w << 2;
+	if (pVia->useDmaBlit)
+	    size = (size + 15) & ~15;
+        if(pitches) 
+             pitches[0] = size;
+        size *= *h;
+        break;
     case FOURCC_UYVY:  /*Packed format : UYVY -4:2:2*/
     case FOURCC_YUY2:  /*Packed format : YUY2 -4:2:2*/
     case FOURCC_RV15:

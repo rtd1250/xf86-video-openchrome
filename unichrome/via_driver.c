@@ -1097,6 +1097,11 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
                        "Selected Panel Size is 1280x768\n");
         }
+        else if (!xf86NameCmp(s, "1280x800")) {
+            pBIOSInfo->PanelSize = VIA_PANEL12X8;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+                       "Selected Panel Size is 1280x800\n");
+        }
         else if (!xf86NameCmp(s, "1280x1024")) {
             pBIOSInfo->PanelSize = VIA_PANEL12X10;
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
