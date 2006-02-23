@@ -22,7 +22,7 @@
 
 AC_PREREQ(2.57)
 AC_INIT([xf86-video-openchrome],
-        0.1.32,
+        0.1.33.1,
         [https://www.openchrome.org/trac/report],
         xf86-video-openchrome)
 
@@ -118,7 +118,7 @@ AC_DEFINE(X_HAVE_XAAGETROP,1,[Compatibility define for older Xen])
 AC_DEFINE(X_NEED_I2CSTART,1,[Compatibility define for older Xen])
 AC_DEFINE(VIA_HAVE_EXA,1,[Compatibility define for older Xen])
 
-DRIVER_MAN_SUFFIX="4x"
+DRIVER_MAN_SUFFIX="4"
 AC_SUBST([DRIVER_MAN_SUFFIX])
 
 XORG_RELEASE_VERSION
