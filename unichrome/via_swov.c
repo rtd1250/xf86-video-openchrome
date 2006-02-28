@@ -296,69 +296,67 @@ viaOverlayGetV1V3Format(VIAPtr pVia, int vport, /* 1 or 3, as in V1 or V3 */
 			unsigned long videoFlag,
 			unsigned long * pVidCtl, unsigned long * pHQVCtl)
 {
-    BOOL is_ok = TRUE;
-
-    /* FIXME - tidy this up */
-    
-    *pVidCtl |= V1_COLORSPACE_SIGN;
-    switch (pVia->swov.SrcFourCC) {
-    case FOURCC_YV12:
-    case FOURCC_XVMC:
-	if (videoFlag & VIDEO_HQV_INUSE) {
-	    *pVidCtl |= V1_YUV422 | V1_SWAP_HW_HQV;
-	    *pHQVCtl |= HQV_SRC_SW | HQV_YUV420 | HQV_ENABLE | HQV_SW_FLIP;
-	} else {
-	    if (vport == 1)
-		*pVidCtl |= V1_YCbCr420;
-	    else {
-		DBG_DD(ErrorF("viaOverlayGetV1V3Format: V3 does not support planar YUV.\n"));
-		is_ok = FALSE;
-	    }
-	}
-	break;
-	
-    case FOURCC_YUY2:
-	if (videoFlag & VIDEO_HQV_INUSE) {
-	    *pVidCtl |= V1_YUV422 | V1_SWAP_HW_HQV;
-	    *pHQVCtl |= HQV_SRC_SW | HQV_YUV422 | HQV_ENABLE | HQV_SW_FLIP;
-	} else
-	    *pVidCtl |= V1_YUV422;
-	break;
-
-    case FOURCC_RV32:
-	if (videoFlag & VIDEO_HQV_INUSE) {
-	    *pVidCtl |= V1_RGB32 | V1_SWAP_HW_HQV;
-	    *pHQVCtl |= HQV_SRC_SW | HQV_RGB32 | HQV_ENABLE | HQV_SW_FLIP;
-	} else {
-	    ErrorF("viaOverlayGetV1V3Format: Can't display RGB video in this configuration.\n");
-	    is_ok = FALSE;
-	}
-	break;
-
-    case FOURCC_RV15:
-    case FOURCC_RV16:
-	if (videoFlag & VIDEO_HQV_INUSE) {
-	    *pVidCtl |= 
-	      ((pVia->swov.SrcFourCC == FOURCC_RV15) ? V1_RGB15 : V1_RGB16) | 
-	      V1_SWAP_HW_HQV;
-	    *pHQVCtl |= HQV_SRC_SW |
-	      ((pVia->swov.SrcFourCC == FOURCC_RV15) ? HQV_RGB15 : HQV_RGB16) | 
-	      HQV_ENABLE | HQV_SW_FLIP;
-	} else {
-	    ErrorF("viaOverlayGetV1V3Format: Can't display RGB video in this configuration.\n");
-	    is_ok = FALSE;
-	}
-	break;
-	
-    default:
-	DBG_DD(ErrorF("viaOverlayGetV1V3Format: Invalid FOURCC format (0x%lx).\n",
-		      pVia->swov.SrcFourCC));
-	is_ok = FALSE;
-	
-	*pVidCtl |= V1_YUV422;
-	break;
+    if (videoFlag & VIDEO_HQV_INUSE)
+    {
+        switch (pVia->swov.SrcFourCC)
+        {
+            case FOURCC_YV12:
+            case FOURCC_XVMC:
+                *pHQVCtl |= HQV_YUV420;
+                break;
+            case FOURCC_YUY2:
+	        *pHQVCtl |= HQV_YUV422;
+                break;
+            case FOURCC_RV32:
+	        *pVidCtl |= V1_RGB32;
+	        *pHQVCtl |= HQV_RGB32;
+                break;
+            case FOURCC_RV15:
+	        *pVidCtl |= V1_RGB15;
+    	        *pHQVCtl |= HQV_RGB15;
+                break;
+            case FOURCC_RV16:
+    	        *pVidCtl |= V1_RGB16;
+	        *pHQVCtl |= HQV_RGB16;
+                break;
+            default:
+	        DBG_DD(ErrorF("viaOverlayGetV1V3Format: Invalid FOURCC format (0x%lx).\n", pVia->swov.SrcFourCC));
+                return FALSE;
+        }
+        *pVidCtl |= V1_SWAP_HW_HQV;
+        *pHQVCtl |= HQV_SRC_SW|HQV_ENABLE|HQV_SW_FLIP;
     }
-    return is_ok;
+    else
+    {
+        switch (pVia->swov.SrcFourCC)
+        {
+            case FOURCC_YV12:
+            case FOURCC_XVMC:
+                if (vport == 1)
+                {
+		    *pVidCtl |= V1_YCbCr420;
+                }
+                else
+                {
+		    DBG_DD(ErrorF("viaOverlayGetV1V3Format: V3 does not support planar YUV.\n"));
+                    return FALSE;
+                }
+                break;
+            case FOURCC_YUY2:
+		*pVidCtl |= V1_YUV422;
+                break;
+            case FOURCC_RV32:
+            case FOURCC_RV15:
+            case FOURCC_RV16:
+	        ErrorF("viaOverlayGetV1V3Format: Can't display RGB video in this configuration.\n");
+                return FALSE;
+            default:
+	        DBG_DD(ErrorF("viaOverlayGetV1V3Format: Invalid FOURCC format (0x%lx).\n", pVia->swov.SrcFourCC));
+                return FALSE;
+        }
+    }
+    *pVidCtl |= V1_COLORSPACE_SIGN;
+    return TRUE;
 }
 
 static unsigned long
@@ -982,7 +980,6 @@ static long AddHQVSurface(ScrnInfoPtr pScrn, unsigned int numbuf, CARD32 fourcc)
  * Create a FOURCC surface (Supported: YUY2, YV12 or VIA)
   * doalloc: set true to actually allocate memory for the framebuffers
  */
-/* FIXME please tidy me */
 static long 
 CreateSurface(ScrnInfoPtr pScrn, CARD32 FourCC, CARD16 Width,
 	      CARD16 Height, BOOL doalloc)
@@ -995,19 +992,25 @@ CreateSurface(ScrnInfoPtr pScrn, CARD32 FourCC, CARD16 Width,
     pVia->swov.SrcFourCC = FourCC;
     pVia->swov.gdwVideoFlagSW = ViaInitVideoStatusFlag(pVia);
 
-    isplanar = ((FourCC == FOURCC_YV12) || (FourCC == FOURCC_XVMC));
-
-    if (FourCC == FOURCC_RV32)
+    isplanar = FALSE;
+    switch (FourCC)
     {
-    pitch  = ALIGN_TO(Width*4, 32);
-    fbsize = pitch * Height;
+        case FOURCC_YV12:
+        case FOURCC_XVMC:
+            isplanar = TRUE;
+            pitch  = ALIGN_TO(Width, 32);
+            fbsize = pitch * Height * 1.5;
+            break;
+        case FOURCC_RV32:
+            pitch  = ALIGN_TO(Width<<2, 32);
+            fbsize = pitch * Height;
+            break;
+        default:
+            pitch  = ALIGN_TO(Width<<1, 32);
+            fbsize = pitch * Height;
+            break;
     }
-    else
-    {
-    pitch  = ALIGN_TO((Width*(isplanar ? 1:2)), 32);
-    fbsize = pitch * Height * (isplanar ? 1.5 : 1.0);
-    }
-
+    
     if (doalloc) {
         VIAFreeLinear(&pVia->swov.SWfbMem);
         retCode = VIAAllocLinear(&pVia->swov.SWfbMem, pScrn, fbsize * 2);
