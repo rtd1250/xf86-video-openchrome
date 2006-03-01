@@ -1,6 +1,9 @@
 /*
  * Copyright 2005 Terry Lewis. All Rights Reserved.
  * Copyright 2005 Philip Langdale. All Rights Reserved. (CH7011 additions)
+ * Copyright 2004 The Unichrome Project  [unichrome.sf.net]
+ * Copyright 1998-2003 VIA Technologies, Inc. All Rights Reserved.
+ * Copyright 2001-2003 S3 Graphics, Inc. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -20,10 +23,6 @@
  * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- */
-
-/*
- * 08/2005 Ivor Hewitt, updated to unichrome-pro codebase
  */
 
 #ifdef HAVE_CONFIG_H
