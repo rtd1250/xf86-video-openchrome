@@ -27,34 +27,38 @@
 
 #include "xf86xv.h"
 
-enum{ XV_ADAPT_SWOV=0, 
-      XV_ADAPT_NUM};
+enum
+{ XV_ADAPT_SWOV = 0,
+    XV_ADAPT_NUM
+};
 
-typedef enum{ 
-  xve_none = 0,
-  xve_bandwidth,
-  xve_dmablit,
-  xve_mem,
-  xve_general,
-  xve_adaptor,
-  xve_numerr
+typedef enum
+{
+    xve_none = 0,
+    xve_bandwidth,
+    xve_dmablit,
+    xve_mem,
+    xve_general,
+    xve_adaptor,
+    xve_numerr
 } XvError;
 
 #define VIA_MAX_XV_PORTS 1
 
-typedef struct {
-    unsigned char  xv_adaptor;
-    unsigned char  xv_portnum;
-    int  adaptor;
-    int  brightness;
-    int  saturation;
-    int  contrast;
-    int  hue;
+typedef struct
+{
+    unsigned char xv_adaptor;
+    unsigned char xv_portnum;
+    int adaptor;
+    int brightness;
+    int saturation;
+    int contrast;
+    int hue;
     RegionRec clip;
-    CARD32    colorKey;
-    Bool      autoPaint;
+    CARD32 colorKey;
+    Bool autoPaint;
 
-    CARD32 FourCC; /* from old SurfaceDesc -- passed down from viaPutImageG */
+    CARD32 FourCC;		       /* from old SurfaceDesc -- passed down from viaPutImageG */
 
     /* store old video source & dst data */
     short old_src_x;
@@ -68,7 +72,7 @@ typedef struct {
     short old_drw_h;
 
     void *xvmc_priv;
-    
+
     /*
      * For PCI DMA image transfer to frame-buffer memory.
      */
@@ -82,6 +86,5 @@ typedef struct {
 
 extern viaPortPrivPtr viaPortPriv[];
 extern unsigned viaNumXvPorts;
-
 
 #endif /* _VIA_XVPRIV_H_ */

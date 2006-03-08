@@ -1,3 +1,17 @@
+2006-03-08  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+
+
+	* libxvmc/Imakefile:
+	* unichrome/via_swov.c: 
+	* unichrome/via_swov.h:
+	* unichrome/via_video.c: (viaInitVideo), (viaExitVideo),
+	* unichrome/via_video.h:
+	* unichrome/via_xvmc.c: (initViaXvMC), (cleanupViaXvMC), (stride),
+	* unichrome/via_xvmc.h:
+	* unichrome/via_xvpriv.h:
+
+	- Run indent on above files after syncing them with Xorg.
+
 2006-02-23  Xavier Bachelot <xb_ml AT kelkoo DOT net>
 
 	* configure.ac:

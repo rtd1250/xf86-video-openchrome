@@ -28,7 +28,7 @@ ALLOC_DEFINES = -DMALLOC_0_RETURNS_NULL
 #endif
 
       DEFINES = $(ALLOC_DEFINES) $(PICFLAGS) -DTRUE=1 -DFALSE=0
-     INCLUDES = -I$(XINCLUDESRC) -I$(INCLUDESRC) -I$(XLIBSRC) -I$(EXTINCSRC) \
+     INCLUDES = -I/usr/local/include -I/usr/local/include/drm/ -I$(XINCLUDESRC) -I$(INCLUDESRC) -I$(XLIBSRC) -I$(EXTINCSRC) \
 		-I$(XF86COMSRC) -I$(XF86OSSRC) -I$(DRMSRCDIR)/shared-core \
 		-I$(DRMSRCDIR)/shared \
 		-I$(XF86OSSRC)/linux/drm/kernel -I$(VIADRIVERSRC)
@@ -49,10 +49,10 @@ InstallSharedLibrary(viaXvMCPro,$(SoRev),$(SHLIBDIR))
 #if defined(LinuxArchitecture)
 OS_SUBDIR = linux
 
-LinkSourceFile(xf86drm.c,$(XF86OSSRC)/$(OS_SUBDIR)/drm)
-LinkSourceFile(xf86drmHash.c,$(XF86OSSRC)/$(OS_SUBDIR)/drm)
-LinkSourceFile(xf86drmRandom.c,$(XF86OSSRC)/$(OS_SUBDIR)/drm)
-LinkSourceFile(xf86drmSL.c,$(XF86OSSRC)/$(OS_SUBDIR)/drm)
+LinkSourceFile(xf86drm.c,/usr/local/src/drm-devel/drm/libdrm)
+LinkSourceFile(xf86drmHash.c,/usr/local/src/drm-devel/drm/libdrm)
+LinkSourceFile(xf86drmRandom.c,/usr/local/src/drm-devel/drm/libdrm)
+LinkSourceFile(xf86drmSL.c,/usr/local/src/drm-devel/drm/libdrm)
 #endif
 
 DependTarget()
