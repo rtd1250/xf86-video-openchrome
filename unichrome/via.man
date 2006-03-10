@@ -72,9 +72,11 @@ Rotation is only supported unaccelerated.
 .TP
 .BI "Option \*qActiveDevice\*q \*q" string \*q
 Specify the active device combination. Any string containing \*qCRT\*q,
-\*qLCD\*q, \*qTV\*q should be possible. The default is to use what is
-detected. The driver is currently unable to use LCD and TV simultaneously,
-and will favour the LCD.
+\*qLCD\*q, \*qDFP\*q, \*qTV\*q should be possible. \*qCRT\*q represents anything
+that is connected to the VGA port, \*qLCD\*q and \*qDFP\*q are for laptop panels
+(not TFT screens attached to the VGA port), \*qTV\*q is self explanatory. The
+default is to use what is detected. The driver is currently unable to use LCD
+and TV simultaneously, and will favour the LCD.
 .TP
 .BI "Option \*qLCDDualEdge\*q \*q" boolean \*q
 Use dual edge mode to set the LCD.
