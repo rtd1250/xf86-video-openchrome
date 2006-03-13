@@ -1,3 +1,12 @@
+2006-03-13  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+
+	* unichrome/via_accel.c: (viaSetupForSolidLine),
+	(viaSubsequentSolidTwoPointLine), (viaSetupForDashedLine):
+	* unichrome/via_driver.h:
+
+	- Possible fix for XAA bug rendering solid lines as dashed.
+	  (Reported by Lewin Edwards)
+	
 2006-03-08  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
 
 

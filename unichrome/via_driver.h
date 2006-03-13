@@ -171,6 +171,7 @@ typedef struct _twodContext {
     unsigned Bpp;
     unsigned bytesPPShift;
     Bool clipping;
+    Bool dashed;
     int clipX1;
     int clipX2;
     int clipY1;

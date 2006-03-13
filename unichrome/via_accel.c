@@ -860,6 +860,7 @@ viaSetupForSolidLine(ScrnInfoPtr pScrn, int color, int rop,
     viaAccelTransparentHelper(tdc, cb, 0x00, 0x00, FALSE);
     tdc->cmd = VIA_GEC_FIXCOLOR_PAT | VIAACCELPATTERNROP(rop);
     tdc->fgColor = color;
+    tdc->dashed = FALSE;
 
     BEGIN_RING(6);
     OUT_RING_H1(VIA_REG_GEMODE, tdc->mode);
@@ -926,7 +927,7 @@ viaSubsequentSolidTwoPointLine(ScrnInfoPtr pScrn, int x1, int y1,
     OUT_RING_H1(VIA_REG_LINE_XY, ((y1 << 16) | x1));
     OUT_RING_H1(VIA_REG_DIMENSION, dx);
     OUT_RING_H1(VIA_REG_LINE_ERROR,
-	(((dy << 1) - dx - error) & 0x3fff) | 0xFF0000);
+	(((dy << 1) - dx - error) & 0x3fff) | ((tdc->dashed) ? 0xFF0000 : 0));
     OUT_RING_H1(VIA_REG_GECMD, cmd);
     ADVANCE_RING;
 
@@ -996,6 +997,7 @@ viaSetupForDashedLine(ScrnInfoPtr pScrn, int fg, int bg, int rop,
     }
 
     tdc->pattern0 = pat;
+    tdc->dashed = TRUE;
 
     BEGIN_RING(8);
     OUT_RING_H1(VIA_REG_GEMODE, tdc->mode);
