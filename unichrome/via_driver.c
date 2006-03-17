@@ -294,6 +294,11 @@ static const char *exaSymbols[] = {
   "exaGetPixmapPitch",
   "exaGetPixmapOffset",
   "exaWaitSync",
+#if (EXA_VERSION_MAJOR >= 2)
+  "exaDriverAlloc",
+#else
+  "exaGetVersion",
+#endif
   NULL
 };
 #endif
@@ -1545,18 +1550,37 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
 #endif
 
     if (!pVia->NoAccel) {
+#ifdef VIA_HAVE_EXA
+	if(pVia->useEXA) {
+#if (EXA_VERSION_MAJOR >= 2)
+	    XF86ModReqInfo req;
+	    int errmaj, errmin;
+	    
+	    memset(&req, 0, sizeof(req));
+	    req.majorversion = 2;
+	    req.minorversion = 0;
+	    if (!LoadSubModule(pScrn->module, "exa", NULL, NULL, NULL, &req,
+			       &errmaj, &errmin)) {
+		    LoaderErrorMsg(NULL, "exa", errmaj, errmin);
+		    VIAFreeRec(pScrn);
+		    return FALSE;
+	    }
+	    
+#else
+	    
+	    if(!xf86LoadSubModule(pScrn, "exa")) {
+		VIAFreeRec(pScrn);
+		return FALSE;
+	    }
+#endif /* EXA_VERSION */
+	    xf86LoaderReqSymLists(exaSymbols, NULL);
+	}
+#endif /* VIA_HAVE_EXA */
         if(!xf86LoadSubModule(pScrn, "xaa")) {
             VIAFreeRec(pScrn);
             return FALSE;
         }
         xf86LoaderReqSymLists(xaaSymbols, NULL);
-#ifdef VIA_HAVE_EXA
-        if(!xf86LoadSubModule(pScrn, "exa")) {
-            VIAFreeRec(pScrn);
-            return FALSE;
-        }
-        xf86LoaderReqSymLists(exaSymbols, NULL);
-#endif
     }
 
     if (pVia->hwcursor) {

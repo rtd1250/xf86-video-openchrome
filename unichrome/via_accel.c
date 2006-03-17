@@ -2075,6 +2075,76 @@ viaExaComposite(PixmapPtr pDst, int srcX, int srcY, int maskX, int maskY,
 	height);
 }
 
+
+#if (EXA_VERSION_MAJOR >= 2)
+
+static ExaDriverPtr
+viaInitExa(ScreenPtr pScreen)
+{
+    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    VIAPtr pVia = VIAPTR(pScrn);
+    ExaDriverPtr pExa = exaDriverAlloc();
+    memset(pExa, 0 , sizeof(*pExa));
+
+    if (!pExa)
+	return NULL;
+
+    pExa->exa_major = EXA_VERSION_MAJOR;
+    pExa->exa_minor = EXA_VERSION_MINOR;
+    pExa->memoryBase = pVia->FBBase;
+    pExa->memorySize = pVia->FBFreeEnd;
+    pExa->offScreenBase = pScrn->virtualY * pVia->Bpl;
+    pExa->pixmapOffsetAlign = 32;
+    pExa->pixmapPitchAlign = 16;
+    pExa->flags = EXA_OFFSCREEN_PIXMAPS | EXA_OFFSCREEN_ALIGN_POT;
+    pExa->maxX = 2047;
+    pExa->maxY = 2047;
+    pExa->WaitMarker = viaAccelWaitMarker;
+    pExa->MarkSync = viaAccelMarkSync;
+    pExa->PrepareSolid = viaExaPrepareSolid;
+    pExa->Solid = viaExaSolid;
+    pExa->DoneSolid = viaExaDoneSolidCopy;
+    pExa->PrepareCopy = viaExaPrepareCopy;
+    pExa->Copy = viaExaCopy;
+    pExa->DoneCopy = viaExaDoneSolidCopy;
+
+#ifdef XF86DRI
+    if (pVia->directRenderingEnabled) {
+#ifdef linux
+	if ((pVia->drmVerMajor > 2) ||
+	    ((pVia->drmVerMajor == 2) && (pVia->drmVerMinor >= 7))) {
+	    if (pVia->Chipset != VIA_K8M800)
+		pExa->UploadToScreen = viaExaUploadToScreen;
+	    pExa->DownloadFromScreen = viaExaDownloadFromScreen;
+	}
+#endif /* linux */
+	if (pVia->Chipset == VIA_K8M800)
+	    pExa->UploadToScreen = viaExaTexUploadToScreen;
+    }
+#endif /*XF86DRI*/
+
+    pExa->UploadToScratch = viaExaUploadToScratch; 
+
+    if (!pVia->noComposite) {
+	pExa->CheckComposite = viaExaCheckComposite;
+	pExa->PrepareComposite = viaExaPrepareComposite;
+	pExa->Composite = viaExaComposite;
+	pExa->DoneComposite = viaExaDoneSolidCopy;
+    } else {
+	xf86DrvMsg(pScrn->scrnIndex, X_INFO,"[EXA] Disabling EXA accelerated composite.\n");
+    }
+
+    if (!exaDriverInit(pScreen, pExa)) {
+	xfree(pExa);
+	return NULL;
+    }
+
+    viaInit3DState(&pVia->v3d);
+    return pExa;
+}
+
+#else
+
 /*
  * Init EXA. Alignments are 2D engine constraints.
  */
@@ -2116,11 +2186,11 @@ viaInitExa(ScreenPtr pScreen)
 		pExa->accel.UploadToScreen = viaExaUploadToScreen;
 	    pExa->accel.DownloadFromScreen = viaExaDownloadFromScreen;
 	}
-#endif
+#endif /* linux */
 	if (pVia->Chipset == VIA_K8M800)
 	    pExa->accel.UploadToScreen = viaExaTexUploadToScreen;
     }
-#endif
+#endif /*XF86DRI*/
 
     pExa->accel.UploadToScratch = viaExaUploadToScratch;
 
@@ -2142,6 +2212,7 @@ viaInitExa(ScreenPtr pScreen)
     return pExa;
 }
 
+#endif /* EXA_VERSION */
 #endif /* VIA_HAVE_EXA */
 
 /*
@@ -2327,10 +2398,13 @@ viaFinishInitAccel(ScreenPtr pScreen)
 	    /*
 	     * Allocate upload and scratch space.
 	     */
-
+#if (EXA_VERSION_MAJOR >= 2)
+	    if (pVia->exaDriverPtr->UploadToScreen ==
+		viaExaTexUploadToScreen) {
+#else
 	    if (pVia->exaDriverPtr->accel.UploadToScreen ==
 		viaExaTexUploadToScreen) {
-
+#endif
 		size = VIA_AGP_UPL_SIZE * 2 + 32;
 		pVia->texAGPBuffer.context = 1;
 		pVia->texAGPBuffer.size = size;
