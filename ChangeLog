@@ -1,5 +1,12 @@
 2006-03-17  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
 
+	* unichrome/via_driver.c:
+
+	- Update the built-against macro to recognize Xorg if present.
+	  (Reported by Eric Anholt).
+	
+2006-03-17  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+
 	* configure.ac:
 
 	- Update compatibility check for XvMC.
