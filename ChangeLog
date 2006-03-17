@@ -1,5 +1,11 @@
 2006-03-17  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
 
+	* configure.ac:
+
+	- Update compatibility check for XvMC.
+	
+2006-03-17  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+
 	* unichrome/via_accel.c: (viaInitExa):
 	* unichrome/via_driver.c: (VIAPreInit):
 

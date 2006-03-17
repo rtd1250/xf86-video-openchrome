@@ -103,6 +103,14 @@ if test "$DRI" = yes; then
                 XVMC=no ;;
         esac
 fi
+
+if test "x$XVMC" = xyes; then
+	AC_CHECK_HEADERS(pthread.h sys/ioctl.h sys/time.h time.h,,[XVMC="no"; break],)
+fi
+
+AC_MSG_CHECKING([whether to build XvMC driver support])
+AC_MSG_RESULT([$XVMC])
+
 AM_CONDITIONAL(XVMC, test x$XVMC = xyes)
 
 AC_SUBST([DRI_CFLAGS])
