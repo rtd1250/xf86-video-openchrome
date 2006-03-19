@@ -71,9 +71,17 @@ if DRI
 via_drv_la_SOURCES += \
          via_dri.c \
          via_dri.h \
+         via_drmclient.h \
          via_xvmc.c \
-         via_xvmc.h \
-         via_drmclient.h
+         via_xvmc.h 
+
+else
+EXTRA_DIST += \
+         via_dri.c \
+         via_dri.h \
+         via_drmclient.h \
+         via_xvmc.c \
+         via_xvmc.h 
 endif
 
 via_driver.lo: svnversion.h

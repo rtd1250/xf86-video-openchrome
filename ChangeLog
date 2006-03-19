@@ -1,3 +1,10 @@
+2006-03-19  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+
+	* libxvmc/Makefile.am:
+	* unichrome/Makefile.am:
+
+	- Backport Makefile changes form xorg.
+
 2006-03-17  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via_driver.c:
