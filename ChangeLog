@@ -1,3 +1,6 @@
+2006-03-26  Ivor Hewitt <ivor-at-ivor-dot-org>
+        - test commit.
+        
 2006-03-19  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
 
 	* libxvmc/Makefile.am:
