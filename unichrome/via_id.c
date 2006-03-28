@@ -146,6 +146,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Averatec 3715",                         VIA_K8M800,  0x14FF, 0x0322, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Averatec 54xx",                         VIA_K8M800,  0x1509, 0x3930, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"FIC K8M-800M",                          VIA_K8M800,  0x1509, 0x6001, VIA_DEVICE_CRT},
+    {"Mesh Pegasus",                          VIA_K8M800,  0x1558, 0x4702, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Biostar K8VGA-M",                       VIA_K8M800,  0x1565, 0x1203, VIA_DEVICE_CRT},
     {"DFI K8M800-MLVF",                       VIA_K8M800,  0x15BD, 0x1002, VIA_DEVICE_CRT},
     {"Packard Bell Easynote E6116/E63xx",     VIA_K8M800,  0x1631, 0xC008, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
