@@ -125,7 +125,8 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Soyo K7VME",                            VIA_KM400,   0xA723, 0x10FD, VIA_DEVICE_CRT},
     /* K8M800 */
     {"ZX-5360",                               VIA_K8M800,  0x1019, 0x0F60, VIA_DEVICE_CRT | VIA_DEVICE_LCD },
-    {"ECS K8M800-M2",                         VIA_K8M800,  0x1019, 0x1828, VIA_DEVICE_CRT},
+    {"ECS K8M800-M2 (1.0)",                   VIA_K8M800,  0x1019, 0x1828, VIA_DEVICE_CRT},
+    {"ECS K8M800-M2 (2.0)",                   VIA_K8M800,  0x1019, 0x1B45, VIA_DEVICE_CRT},
     {"Acer Aspire 136x",                      VIA_K8M800,  0x1025, 0x006E, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
     {"Asustek K8V-MX",                        VIA_K8M800,  0x1043, 0x8129, VIA_DEVICE_CRT},
     {"Mitac 8399",                            VIA_K8M800,  0x1071, 0x8399, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV}, /* aka "pogolinux konabook 3100" */
@@ -157,6 +158,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Mitac 8666",                            VIA_PM800,   0x1071, 0x8666, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
     {"Medion MIM2080",                        VIA_PM800,   0x1071, 0x8965, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
     {"Biostar P4VMA-M",                       VIA_PM800,   0x1565, 0x1202, VIA_DEVICE_CRT},
+    {"Sotec WA2330S5"                         VIA_PM800,   0x161F, 0x2037, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
     {"Packard Bell Easynote R1100",           VIA_PM800,   0x1631, 0xC015, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Fujitsu/Siemens Amilo Pro V2010",       VIA_PM800,   0x1734, 0x1078, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
     {"ASRock P4VM8",                          VIA_PM800,   0x1849, 0x3118, VIA_DEVICE_CRT},
