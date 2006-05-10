@@ -147,6 +147,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Averatec 3715",                         VIA_K8M800,  0x14FF, 0x0322, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Averatec 54xx",                         VIA_K8M800,  0x1509, 0x3930, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"FIC K8M-800M",                          VIA_K8M800,  0x1509, 0x6001, VIA_DEVICE_CRT},
+    {"Clevo L570W",                           VIA_K8M800,  0x1558, 0x0570, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Mesh Pegasus",                          VIA_K8M800,  0x1558, 0x4702, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Biostar K8VGA-M",                       VIA_K8M800,  0x1565, 0x1203, VIA_DEVICE_CRT},
     {"DFI K8M800-MLVF",                       VIA_K8M800,  0x15BD, 0x1002, VIA_DEVICE_CRT},
@@ -158,6 +159,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"VIA VT3118 (PM800)",                    VIA_PM800,   0x1106, 0x3118, VIA_DEVICE_CRT}, /* borrowed by ECS PM800-M2 */
     {"Mitac 8666",                            VIA_PM800,   0x1071, 0x8666, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
     {"Medion MIM2080",                        VIA_PM800,   0x1071, 0x8965, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
+    {"TwinHead E12BL",                        VIA_PM800,   0x14FF, 0x0314, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Biostar P4VMA-M",                       VIA_PM800,   0x1565, 0x1202, VIA_DEVICE_CRT},
     {"Sotec WA2330S5",                        VIA_PM800,   0x161F, 0x2037, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
     {"Packard Bell Easynote R1100",           VIA_PM800,   0x1631, 0xC015, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
