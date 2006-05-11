@@ -28,7 +28,6 @@
 
 #include "xf86.h"
 #include "xf86_OSproc.h"
-#include "xf86_ansic.h"
 #include "xf86Priv.h"
 
 #include "xf86PciInfo.h"
@@ -38,6 +37,7 @@
 #include "GL/glxtokens.h"
 #include "sarea.h"
 
+#include "via.h"
 #include "via_driver.h"
 #include "via_drm.h"
 #include "via_dri.h"

@@ -30,7 +30,6 @@
 #include "xf86.h"
 #include "xf86_OSproc.h"
 #include "xf86Resources.h"
-#include "xf86_ansic.h"
 #include "compiler.h"
 #include "xf86PciInfo.h"
 #include "xf86Pci.h"
@@ -122,7 +121,11 @@ static int viaXvMCInterceptXvAttribute(ScrnInfoPtr pScrn, Atom attribute,
     INT32 value, pointer data);
 static int viaXvMCInterceptPutImage(ScrnInfoPtr, short, short, short, short,
     short, short, short, short, int, unsigned char *, short, short, Bool,
+#ifdef USE_OLD_XVABI
     RegionPtr, pointer);
+#else
+    RegionPtr, pointer, DrawablePtr);
+#endif
 static int viaXvMCInterceptXvGetAttribute(ScrnInfoPtr pScrn, Atom attribute,
     INT32 * value, pointer data);
 /*
@@ -940,7 +943,11 @@ viaXvMCInterceptPutImage(ScrnInfoPtr pScrn, short src_x, short src_y,
     short drw_x, short drw_y, short src_w,
     short src_h, short drw_w, short drw_h,
     int id, unsigned char *buf, short width,
-    short height, Bool sync, RegionPtr clipBoxes, pointer data)
+    short height, Bool sync, RegionPtr clipBoxes, pointer data
+#ifndef USE_OLD_XVABI
+    , DrawablePtr pDraw
+#endif
+    )
 {
     viaPortPrivPtr pPriv = (viaPortPrivPtr) data;
     ViaXvMCXVPriv *vx = (ViaXvMCXVPriv *) pPriv->xvmc_priv;
@@ -997,7 +1004,11 @@ viaXvMCInterceptPutImage(ScrnInfoPtr pScrn, short src_x, short src_y,
 	}
     }
     return vx->PutImage(pScrn, src_x, src_y, drw_x, drw_y, src_w, src_h,
-	drw_w, drw_h, id, buf, width, height, sync, clipBoxes, data);
+	drw_w, drw_h, id, buf, width, height, sync, clipBoxes, data
+#ifndef USE_OLD_XVABI
+        , pDraw
+#endif
+        );
 }
 
 unsigned long

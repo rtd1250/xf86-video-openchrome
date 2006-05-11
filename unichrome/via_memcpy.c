@@ -25,6 +25,7 @@
 #include "config.h"
 #endif
 
+#include "via.h"
 #include "via_driver.h"
 #include "via_memcpy.h"
 #include "compiler.h"

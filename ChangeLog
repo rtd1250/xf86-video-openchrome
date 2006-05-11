@@ -1,3 +1,23 @@
+2006-05-11  Ivor Hewitt  <ivor-at-ivor-dot-org>
+
+	* configure.ac:
+	* unichrome/via.h:
+	* unichrome/via_accel.c:
+	* unichrome/via_cursor.c:
+	* unichrome/via_dri.c:
+	* unichrome/via_driver.h:
+	* unichrome/via_memcpy.c:
+	* unichrome/via_memory.c:
+	* unichrome/via_mode.c:
+	* unichrome/via_shadow.c:
+	* unichrome/via_swov.c:
+	* unichrome/via_vbe.c:
+	* unichrome/via_vgahw.c:
+	* unichrome/via_video.c:
+	* unichrome/via_xvmc.c:
+
+    - xorg xv ABI compatibility patch (Marcin Kurek)
+
 2006-04-14  Ivor Hewitt  <ivor-at-ivor-dot-org>
 
 	* libxvmc/Imakefile:

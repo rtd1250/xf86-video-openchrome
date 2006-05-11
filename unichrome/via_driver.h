@@ -37,7 +37,6 @@
 #include "vgaHW.h"
 #include "xf86.h"
 #include "xf86Resources.h"
-#include "xf86_ansic.h"
 #include "xf86Pci.h"
 #include "xf86PciInfo.h"
 #include "xf86_OSproc.h"
@@ -94,8 +93,12 @@
 
 #define DRIVER_NAME     "via"
 #define VERSION_MAJOR   0
-#define VERSION_MINOR   0
+#define VERSION_MINOR   2
+#ifdef USE_OLD_XVABI
 #define PATCHLEVEL      0
+#else
+#define PATCHLEVEL      1
+#endif
 #define VIA_VERSION     ((VERSION_MAJOR<<24) | (VERSION_MINOR<<16) | PATCHLEVEL)
 
 #define VIA_CURSOR_SIZE         (4 * 1024)

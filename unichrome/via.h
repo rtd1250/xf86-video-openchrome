@@ -25,6 +25,12 @@
 #ifndef _VIA_H_
 #define _VIA_H_ 1
 
+#include <errno.h>
+#include <string.h>
+#include <stdio.h>
+#include <math.h>
+#include <assert.h>
+
 /* Video status flag */
 
 #define VIDEO_MPEG_INUSE        0x08000000  /*Video is used with MPEG */

@@ -34,6 +34,7 @@
 #include "config.h"
 #endif
 
+#include "via.h"
 #include "via_driver.h"
 #include "via_vgahw.h"
 #include "via_id.h"

@@ -33,6 +33,7 @@
 #include "config.h"
 #endif
 
+#include "via.h"
 #include "via_driver.h"
 
 static void VIALoadCursorImage(ScrnInfoPtr pScrn, unsigned char *src);

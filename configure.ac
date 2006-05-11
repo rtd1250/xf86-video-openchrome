@@ -22,7 +22,7 @@
 
 AC_PREREQ(2.57)
 AC_INIT([xf86-video-openchrome],
-        0.1.33.1,
+        0.2.1,
         [https://www.openchrome.org/trac/report],
         xf86-video-openchrome)
 
@@ -60,7 +60,7 @@ XORG_DRIVER_CHECK_EXT(DPMSExtension, xextproto)
 XORG_DRIVER_CHECK_EXT(XV, videoproto)
 
 # Checks for pkg-config packages
-PKG_CHECK_MODULES(XORG, [xorg-server xproto xvmc fontsproto $REQUIRED_MODULES])
+PKG_CHECK_MODULES(XORG, [xorg-server xproto xvmc fontsproto libdrm $REQUIRED_MODULES])
 sdkdir=$(pkg-config --variable=sdkdir xorg-server)
 
 # Checks for libraries.
@@ -112,6 +112,37 @@ AC_MSG_CHECKING([whether to build XvMC driver support])
 AC_MSG_RESULT([$XVMC])
 
 AM_CONDITIONAL(XVMC, test x$XVMC = xyes)
+
+AC_CHECK_FILE([${sdkdir}/xf86Module.h],
+              [have_xf86Module_h="yes"], [have_xf86Module_h="no"])
+
+# Check the ABI_VIDEODRV_VERSION
+SAVE_CPPFLAGS="$CPPFLAGS"
+CPPFLAGS="$CPPFLAGS $XORG_CFLAGS"
+		
+if test "x$have_xf86Module_h" = xyes; then
+AC_MSG_CHECKING([whether to use old Xv ABI])
+        AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[
+#include "xf86Module.h"
+#if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 1
+#error Old Xv ABI
+#endif
+                           ]])],
+                           [OLD_XVABI=no],
+			   [OLD_XVABI=yes])
+else
+        OLD_XVABI=yes
+        echo -n "xf86Module.h not found, "
+fi;
+
+CPPFLAGS="$SAVE_CPPFLAGS"
+
+if test "x$OLD_XVABI" = xyes; then
+                echo "yes."
+                AC_DEFINE(USE_OLD_XVABI, 1, [Use old Xv ABI (Pre 7.1RC1)])
+else
+                echo "no."
+fi
 
 AC_SUBST([DRI_CFLAGS])
 AC_SUBST([XORG_CFLAGS])
