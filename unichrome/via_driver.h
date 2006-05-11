@@ -94,10 +94,10 @@
 #define DRIVER_NAME     "via"
 #define VERSION_MAJOR   0
 #define VERSION_MINOR   2
-#ifdef USE_OLD_XVABI
-#define PATCHLEVEL      0
-#else
+#ifdef USE_NEW_XVABI
 #define PATCHLEVEL      1
+#else
+#define PATCHLEVEL      0
 #endif
 #define VIA_VERSION     ((VERSION_MAJOR<<24) | (VERSION_MINOR<<16) | PATCHLEVEL)
 

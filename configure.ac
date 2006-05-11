@@ -139,7 +139,7 @@ CPPFLAGS="$SAVE_CPPFLAGS"
 
 if test "x$OLD_XVABI" = xyes; then
                 echo "yes."
-                AC_DEFINE(USE_OLD_XVABI, 1, [Use old Xv ABI (Pre 7.1RC1)])
+                AC_DEFINE(USE_NEW_XVABI, 1, [Use new Xv ABI (7.1RC1+)])
 else
                 echo "no."
 fi

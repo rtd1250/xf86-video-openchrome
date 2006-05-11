@@ -32,6 +32,7 @@
 #include "config.h"
 #endif
 
+#include "via.h"
 #include "compiler.h"
 #include "xf86.h"
 #include "via_driver.h" /* for HAVE_DEBUG */

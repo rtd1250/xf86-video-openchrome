@@ -151,7 +151,7 @@ INCLUDES = -I. -I$(XF86COMSRC) -I$(XF86OSSRC) \
            -I$(XF86SRC)/xf24_32bpp -I$(SERVERSRC)/Xext \
            -I$(XF86SRC)/vgahw -I$(XF86SRC)/ramdac \
            -I$(XF86SRC)/ddc -I$(XF86SRC)/i2c \
-           -I$(XF86SRC)/rac -I$(XF86SRC)/int10 -I$(SERVERSRC)/render \
+           -I$(XF86SRC)/rac -I$(XF86SRC)/int10 -I$(XF86SRC) -I$(SERVERSRC)/render \
            -I$(SERVERSRC)/include -I$(XINCLUDESRC) -I$(FONTINCSRC) \
            -I$(EXTINCSRC) -I$(XF86SRC)/vbe -I$(XF86SRC)/shadowfb \
            -I$(SERVERSRC)/fb $(DRIINCLUDES) $(EXAINCLUDES)
