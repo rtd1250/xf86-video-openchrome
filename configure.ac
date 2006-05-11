@@ -139,9 +139,9 @@ CPPFLAGS="$SAVE_CPPFLAGS"
 
 if test "x$OLD_XVABI" = xyes; then
                 echo "yes."
-                AC_DEFINE(USE_NEW_XVABI, 1, [Use new Xv ABI (7.1RC1+)])
 else
                 echo "no."
+                AC_DEFINE(USE_NEW_XVABI, 1, [Use new Xv ABI (7.1RC1+)])
 fi
 
 AC_SUBST([DRI_CFLAGS])
