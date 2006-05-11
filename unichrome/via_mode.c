@@ -1553,6 +1553,41 @@ ViaModePrimaryVGA(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x33, 0, 0xC8);
 }
 
+static CARD32
+ViaComputeDotClock(unsigned clock)
+{
+    double fvco, fout, fref, err, minErr;
+    CARD32 dr,dn,dm,maxdm,maxdn;
+    CARD32 factual,best;
+
+    fref = 14.31818e6;
+    fout = (double) clock * 1.e3;
+    factual = ~0;
+    maxdm=127;
+    maxdn = 7;
+    minErr = 1e10;
+    best = 0;
+
+    for (dr = 0; dr<4; ++dr )
+    {
+        for (dn = (dr==0)?2:1; dn<=maxdn; ++dn)
+        {
+            for (dm = 1; dm<=maxdm; ++dm)
+            {
+                factual = fref * dm;
+                factual /= (dn << dr);
+                err = fabs((double)factual/fout-1.);
+                if (err<minErr)
+                {
+                    minErr = err;
+                    best = (dm & 127) | ((dn & 31)<<8) | (dr << 14);
+                }
+            }
+        }
+    }
+    return best;
+}
+
 static CARD32 
 ViaComputeProDotClock(unsigned clock)
 {
@@ -1613,9 +1648,14 @@ ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode)
     int i;
 
     if ((pVia->Chipset == VIA_CLE266) || (pVia->Chipset == VIA_KM400)) {
+        CARD32 best1=0, best2;
         for (i = 0; ViaDotClocks[i].DotClock; i++)
             if (ViaDotClocks[i].DotClock == mode->Clock)
-                return ViaDotClocks[i].UniChrome;
+                best1= ViaDotClocks[i].UniChrome;
+         best2 = ViaComputeDotClock(mode->Clock);
+         
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaComputeDotClock %d : %04x : %04x\n",mode->Clock, best1,best2));
+        return best2;
     } else {
         for (i = 0; ViaDotClocks[i].DotClock; i++)
             if (ViaDotClocks[i].DotClock == mode->Clock)
