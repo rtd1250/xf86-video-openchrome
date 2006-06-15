@@ -1,3 +1,11 @@
+2006-06-15  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+
+	* unichrome/via_dri.c: (VIADRIFBInit):
+	* unichrome/via_driver.h:
+	* unichrome/via_memory.c: (viaOffScreenLinear), (VIAAllocLinear):
+
+	Fix severe dri memory allocation bug. (Reported by Trevor Kramer).
+	
 2006-05-11  Ivor Hewitt  <ivor-at-ivor-dot-org>
 
 	* configure.ac:

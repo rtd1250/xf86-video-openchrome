@@ -81,8 +81,9 @@ void VIAFreeLinear(VIAMemPtr mem)
     }
 }
 
-static unsigned long offScreenLinear(VIAMemPtr mem, ScrnInfoPtr pScrn,
-				     unsigned long size) {
+int
+viaOffScreenLinear(VIAMemPtr mem, ScrnInfoPtr pScrn,
+		   unsigned long size) {
 
     int depth = pScrn->bitsPerPixel >> 3;
 
@@ -108,11 +109,13 @@ static unsigned long offScreenLinear(VIAMemPtr mem, ScrnInfoPtr pScrn,
 	return BadAlloc;
     mem->base = mem->linear->offset * depth;
     mem->pool = 1;
+    mem->pScrn = pScrn;
     return Success;
 
 }
 
-unsigned long VIAAllocLinear(VIAMemPtr mem, ScrnInfoPtr pScrn, unsigned long size)
+int
+VIAAllocLinear(VIAMemPtr mem, ScrnInfoPtr pScrn, unsigned long size)
 {
 
 #ifdef XF86DRI
@@ -136,7 +139,7 @@ unsigned long VIAAllocLinear(VIAMemPtr mem, ScrnInfoPtr pScrn, unsigned long siz
 	     * Try X Offsceen fallback before failing.
 	     */ 
 		    
-	    if (Success == offScreenLinear(mem, pScrn, size))
+	    if (Success == viaOffScreenLinear(mem, pScrn, size))
 		return Success;
 	    ErrorF("DRM memory allocation failed\n");
 	    return BadAlloc;
@@ -149,8 +152,7 @@ unsigned long VIAAllocLinear(VIAMemPtr mem, ScrnInfoPtr pScrn, unsigned long siz
     }
 #endif 
     {
-	mem->pScrn = pScrn;
-	if (Success == offScreenLinear(mem, pScrn, size))
+	if (Success == viaOffScreenLinear(mem, pScrn, size))
 	    return Success;
 	ErrorF("Linear memory allocation failed\n");
 	return BadAlloc;

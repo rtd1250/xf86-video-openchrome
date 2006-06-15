@@ -360,7 +360,7 @@ static Bool VIADRIFBInit(ScreenPtr pScreen, VIAPtr pVia)
     }
 
     pVia->driOffScreenMem.pool = 0;
-    if (Success != VIAAllocLinear(&pVia->driOffScreenMem, pScrn, FBSize)) {
+    if (Success != viaOffScreenLinear(&pVia->driOffScreenMem, pScrn, FBSize)) {
         xf86DrvMsg(pScreen->myNum, X_ERROR,
 		   "[drm] failed to allocate offscreen frame buffer area\n");
 	return FALSE;
