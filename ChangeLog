@@ -1,5 +1,13 @@
 2006-07-10  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
 
+	* libxvmc/viaXvMC.c: (XvMCCreateContext):
+	* unichrome/via_dri.c: (VIADRIRingBufferInit), (VIADRIScreenInit):
+	* unichrome/via_xvmc.c: (ViaInitXVMC):
+
+	Update DRM version checking.
+
+2006-07-10  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+
 	* unichrome/via_swov.c: (viaWaitVideoCommandFire):
 
 	Increase video command fire timeout.

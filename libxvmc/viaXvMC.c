@@ -53,7 +53,11 @@
 		       (((CARD8 *)(ctx)->sAreaAddress) +	\
 			(ctx)->sAreaPrivOffset))
 
-
+typedef struct {
+    int major;
+    int minor;
+    int patchlevel;
+} ViaDRMVersion;
 
 static int error_base;
 static int event_base;
@@ -62,6 +66,8 @@ static int globalFD;
 static drmAddress sAreaAddress;
 static drmAddress fbAddress;
 static drmAddress mmioAddress;
+static const ViaDRMVersion drmExpected = {2, 0, 0};
+static const ViaDRMVersion drmCompat = {3, 0, 0};
 
 
 #define FOURCC_XVMC (('C' << 24) + ('M' << 16) + ('V' << 8) + 'X')
@@ -318,7 +324,7 @@ Status XvMCCreateContext(Display *display, XvPortID port,
     if((ret = _xvmc_create_context(display, context, &priv_count, 
 				       &priv_data))) {
       XUnlockDisplay(display);
-      fprintf(stderr,"Unable to create XvMC Context.\n");
+      fprintf(stderr,"Unable to create XvMC Context %d.\n", ret);
       return releaseContextResources(display, context, 1, BadAlloc);
     }
     XUnlockDisplay(display);
@@ -332,7 +338,7 @@ Status XvMCCreateContext(Display *display, XvPortID port,
 	fprintf(stderr,"_xvmc_create_context() returned incorrect "
 		"data size!\n");
 	fprintf(stderr,"\tExpected %d, got %d\n",
-		(sizeof(ViaXvMCCreateContextRec) >> 2),
+		((int) (sizeof(ViaXvMCCreateContextRec) >> 2)),
 		priv_count);
 	XFree(priv_data);
 	return releaseContextResources(display, context, 1, BadAlloc);
@@ -411,15 +417,19 @@ Status XvMCCreateContext(Display *display, XvPortID port,
 		    "viaXvMC: Could not get drm version.");
 	    return releaseContextResources(display, context, 1, BadAlloc);
 	}
-	if (((drmVer->version_major != 2 ) || (drmVer->version_minor < 0))) {
+	if ((drmVer->version_major < drmExpected.major) || 
+	    (drmVer->version_major > drmCompat.major) ||
+	    ((drmVer->version_major == drmExpected.major ) && 
+	     (drmVer->version_minor < drmExpected.minor))) {
 	    fprintf(stderr, 
 		    "viaXvMC: Kernel drm is not compatible with XvMC.\n"); 
 	    fprintf(stderr, 
 		    "viaXvMC: Kernel drm version: %d.%d.%d "
-		    "and I need at least version 2.0.0.\n"
-		    "Please update.\n",
+		    "and I can work with versions %d.%d.x - %d.x.x\n"
+		    "Please update either this XvMC driver or your kernel DRM.\n",
 		    drmVer->version_major,drmVer->version_minor,
-		    drmVer->version_patchlevel); 
+		    drmVer->version_patchlevel, drmExpected.major, 
+		    drmExpected.minor, drmCompat.major); 
 	    drmFreeVersion(drmVer);
 	    return releaseContextResources(display, context, 1, BadAlloc);
 	} 
