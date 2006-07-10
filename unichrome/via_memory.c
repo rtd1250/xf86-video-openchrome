@@ -98,6 +98,7 @@ viaOffScreenLinear(VIAMemPtr mem, ScrnInfoPtr pScrn,
 	    return BadAlloc;
 	mem->base = mem->exa->offset;
 	mem->pool = 1;
+	mem->pScrn = pScrn;
 	return Success;
     }
 #endif
