@@ -1,5 +1,11 @@
 2006-07-10  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
 
+	* unichrome/via_swov.c: (viaWaitVideoCommandFire):
+
+	Increase video command fire timeout.
+
+2006-07-10  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+
 	* unichrome/via_memory.c: (viaOffScreenLinear):
 
 	Fix dri close screen segfault caused by previous commit.
