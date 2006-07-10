@@ -31,10 +31,6 @@
  * Authors: Andreas Robinson 2003. Thomas Hellström 2004.
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "viaXvMCPriv.h"
 #include "viaLowLevel.h"
 #include <time.h>

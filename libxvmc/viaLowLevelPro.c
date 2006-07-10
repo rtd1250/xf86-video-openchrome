@@ -41,10 +41,6 @@
  * are also operated through independent registers also.
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #undef VIDEO_DMA
 #define HQV_USE_IRQ
 #define UNICHROME_PRO
@@ -508,7 +504,7 @@ finish_header_agp(ViaCommandBuffer * cb)
 {
     int numDWords, i;
 
-    CARD32 * hb;
+    CARD32 *hb;
 
     if (!cb->mode)
 	return;
@@ -1612,7 +1608,7 @@ static void
 computeHQVScaleAndFilter(XvMCLowLevel * xl)
 {
     int srcW, srcH;
-    const XvMCRegion * src = &xl->sRegion, *back = &xl->dRegion;
+    const XvMCRegion *src = &xl->sRegion, *back = &xl->dRegion;
 
     xl->downScaling = FALSE;
 
