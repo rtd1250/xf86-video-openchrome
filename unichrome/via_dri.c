@@ -82,7 +82,7 @@ typedef struct {
 static char VIAKernelDriverName[] = "via";
 static char VIAClientDriverName[] = "unichrome";
 static const ViaDRMVersion drmExpected = {1, 3, 0};
-static const ViaDRMVersion drmCompat = {3, 0, 0};
+static const ViaDRMVersion drmCompat = {2, 0, 0};
 
 int test_alloc_FB(ScreenPtr pScreen, VIAPtr pVia, int Size);
 int test_alloc_AGP(ScreenPtr pScreen, VIAPtr pVia, int Size);

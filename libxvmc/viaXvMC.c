@@ -63,7 +63,7 @@ static drmAddress sAreaAddress;
 static drmAddress fbAddress;
 static drmAddress mmioAddress;
 static const ViaDRMVersion drmExpected = { 2, 0, 0 };
-static const ViaDRMVersion drmCompat = { 3, 0, 0 };
+static const ViaDRMVersion drmCompat = { 2, 0, 0 };
 
 #define FOURCC_XVMC (('C' << 24) + ('M' << 16) + ('V' << 8) + 'X')
 
