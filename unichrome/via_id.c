@@ -153,8 +153,9 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"DFI K8M800-MLVF",                       VIA_K8M800,  0x15BD, 0x1002, VIA_DEVICE_CRT},
     {"Packard Bell Easynote E6116/E63xx",     VIA_K8M800,  0x1631, 0xC008, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
     {"Packard Bell Easynote B3 800/B3340",    VIA_K8M800,  0x1631, 0xC009, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
-    {"ASRock K8Upgrade-VM800",                VIA_K8M800,  0x1849, 0x3108, VIA_DEVICE_CRT},
     {"Packard Bell Imedia 2097",              VIA_K8M800,  0x1631, 0xD007, VIA_DEVICE_CRT},
+    {"Fujitsu-Siemens Amilo K7610",           VIA_K8M800,  0x1734, 0x10B3, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
+    {"ASRock K8Upgrade-VM800",                VIA_K8M800,  0x1849, 0x3108, VIA_DEVICE_CRT},
     /* PM800 */
     {"VIA VT3118 (PM800)",                    VIA_PM800,   0x1106, 0x3118, VIA_DEVICE_CRT}, /* borrowed by ECS PM800-M2 */
     {"Mitac 8666",                            VIA_PM800,   0x1071, 0x8666, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
