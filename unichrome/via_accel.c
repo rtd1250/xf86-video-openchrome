@@ -2535,6 +2535,35 @@ viaAccelFillRect(ScrnInfoPtr pScrn, int x, int y, int w, int h,
 }
 
 void
+viaAccelFillPixmap(ScrnInfoPtr pScrn, 
+		   unsigned long offset,
+		   unsigned long pitch,
+		   int depth,
+		   int x, int y, int w, int h,
+		   unsigned long color)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+    unsigned dstBase = offset + y * pitch;
+    ViaTwodContext *tdc = &pVia->td;
+    CARD32 cmd = VIA_GEC_BLT | VIA_GEC_FIXCOLOR_PAT |
+	VIAACCELPATTERNROP(GXcopy);
+    RING_VARS;
+
+    if (!w || !h)
+	return;
+
+    if (!pVia->NoAccel) {
+	viaAccelSetMode(depth, tdc);
+	viaAccelTransparentHelper(tdc, cb, 0x0, 0x0, FALSE);
+	viaAccelSolidHelper(cb, x, 0, w, h, dstBase, tdc->mode,
+	    pitch, color, cmd);
+	pVia->accelMarker = viaAccelMarkSync(pScrn->pScreen);
+	ADVANCE_RING;
+    }
+}
+
+
+void
 viaAccelSyncMarker(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);

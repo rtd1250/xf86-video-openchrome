@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <assert.h>
+#include <stdlib.h>
 #else
 #include "xf86_ansic.h"
 #endif

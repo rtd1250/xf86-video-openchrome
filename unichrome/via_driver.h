@@ -355,6 +355,7 @@ typedef struct _VIA {
     Bool                useDmaBlit;
 
 #ifdef HAVE_DEBUG
+    Bool                disableXvBWCheck;
     Bool                DumpVGAROM;
     Bool                PrintVGARegs;
     Bool                PrintTVRegs;

@@ -72,7 +72,6 @@
 
 #define  XV_IMAGE          0
 #define MAKE_ATOM(a) MakeAtom(a, sizeof(a) - 1, TRUE)
-
 #ifndef XvExtension
 void
 viaInitVideo(ScreenPtr pScreen)
@@ -267,6 +266,11 @@ DecideOverlaySupport(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     DisplayModePtr mode = pScrn->currentMode;
+
+#ifdef HAVE_DEBUG
+    if (pVia->disableXvBWCheck)
+        return TRUE;
+#endif
 
     /* Small trick here. We keep the height in 16's of lines and width in 32's 
      * to avoid numeric overflow */
@@ -633,6 +637,112 @@ RegionsEqual(RegionPtr A, RegionPtr B)
     return TRUE;
 }
 
+#ifdef USE_NEW_XVABI
+
+static void
+viaVideoFillPixmap(ScrnInfoPtr pScrn, 
+		   char *base,
+		   unsigned long pitch,
+		   int depth,
+		   int x, int y, int w, int h,
+		   unsigned long color) 
+{
+    int i;
+
+    ErrorF("pitch %lu, depth %d, x %d, y %d, w %d h %d, color 0x%08x\n",
+	   pitch, depth, x, y, w, h, color);
+ 
+    depth = (depth + 7) >> 3;
+
+    base += y*pitch + x*depth;
+    
+    switch(depth) {
+    case 4: 
+	while(h--) {
+	    register CARD32 *p = (CARD32 *)base;
+	    for (i=0; i<w; ++i) {
+		*p++ = color;
+	    }
+	    base += pitch;
+	}
+	break;
+    case 2: {
+	register CARD16 col = color & 0x0000FFFF;
+	while(h--) {
+	    register CARD16 *p = (CARD16 *)base;
+	    for (i=0; i<w; ++i) {
+		*p++ = col;
+	    }
+	    base += pitch;
+	}
+	break;
+    }
+    case 1: {
+	register CARD8 col = color & 0xFF;
+	while(h--) {
+	    register CARD8 *p = (CARD8 *)base;
+	    for (i=0; i<w; ++i) {
+		*p++ = col;
+	    }
+	    base += pitch;
+	}
+	break;
+    }
+    default:
+	break;
+    }
+}
+    
+
+
+static int
+viaPaintColorkey(ScrnInfoPtr pScrn, viaPortPrivPtr pPriv, RegionPtr clipBoxes,
+		 DrawablePtr pDraw)
+{
+
+    if (pDraw->type == DRAWABLE_WINDOW) {
+
+        VIAPtr pVia = VIAPTR(pScrn);
+	PixmapPtr pPix = (pScrn->pScreen->GetWindowPixmap)((WindowPtr) pDraw);
+	unsigned long pitch = pPix->devKind;
+	long offset = (long) pPix->devPrivate.ptr - 
+	  (long) pVia->FBBase;
+	int x,y;
+	BoxPtr pBox;
+	int nBox;
+
+
+	REGION_TRANSLATE(pScrn->pScreen, clipBoxes, - pPix->screen_x, 
+			 - pPix->screen_y);
+
+	nBox = REGION_NUM_RECTS(clipBoxes);
+	pBox = REGION_RECTS(clipBoxes);
+
+	while(nBox--) {
+	    if (1 /*pVia->NoAccel || offset < 0 || 
+		    offset > pScrn->videoRam*1024*/) {
+	      ErrorF("nBox %d offSet 0x%08x\n", nBox, offset);
+		viaVideoFillPixmap(pScrn, pPix->devPrivate.ptr, pitch,
+				   pDraw->bitsPerPixel, pBox->x1, pBox->y1, 
+				   pBox->x2 - pBox->x1, pBox->y2 - pBox->y1, 
+				   pPriv->colorKey);
+	    } else {
+		viaAccelFillPixmap(pScrn, offset, pitch, 
+				   pDraw->bitsPerPixel, pBox->x1, pBox->y1, 
+				   pBox->x2 - pBox->x1, pBox->y2 - pBox->y1, 
+				   pPriv->colorKey);
+	    }
+	    pBox++;
+	}
+
+	DamageDamageRegion(pPix, clipBoxes);
+    }
+
+    return 0;
+}      
+#endif
+
+
 /*
  * This one gets called, for example, on panning.
  */
@@ -653,8 +763,19 @@ viaReputImage(ScrnInfoPtr pScrn,
 
     if (!RegionsEqual(&pPriv->clip, clipBoxes)) {
 	REGION_COPY(pScrn->pScreen, &pPriv->clip, clipBoxes);
-	if (pPriv->autoPaint)
-	    xf86XVFillKeyHelper(pScrn->pScreen, pPriv->colorKey, clipBoxes);
+	if (pPriv->autoPaint) {
+#ifdef USE_NEW_XVABI
+	    if (pDraw->type == DRAWABLE_WINDOW) {
+		viaPaintColorkey(pScrn, pPriv, clipBoxes, pDraw);
+	    } else {
+		xf86XVFillKeyHelper(pScrn->pScreen, pPriv->colorKey,
+				    clipBoxes);
+	    }
+#else
+	    xf86XVFillKeyHelper(pScrn->pScreen, pPriv->colorKey,
+				clipBoxes);    
+#endif
+	}
     }
 
     if (drw_x == pPriv->old_drw_x &&
@@ -1133,6 +1254,7 @@ viaDmaBlitImage(VIAPtr pVia,
 
 #endif
 
+
 static int
 viaPutImage(ScrnInfoPtr pScrn,
     short src_x, short src_y,
@@ -1236,7 +1358,7 @@ viaPutImage(ScrnInfoPtr pScrn,
 
 	    /* If there is bandwidth issue, block the H/W overlay */
 
-	    if (!pVia->OverlaySupported &&
+	    if (!pVia->OverlaySupported && 
 		!(pVia->OverlaySupported = DecideOverlaySupport(pScrn))) {
 		DBG_DD(ErrorF
 		    (" via_video.c : Xv Overlay rejected due to insufficient "
@@ -1311,11 +1433,25 @@ viaPutImage(ScrnInfoPtr pScrn,
 	    /*  BitBlt: Draw the colorkey rectangle */
 	    if (!RegionsEqual(&pPriv->clip, clipBoxes)) {
 		REGION_COPY(pScrn->pScreen, &pPriv->clip, clipBoxes);
-		if (pPriv->autoPaint)
-		    xf86XVFillKeyHelper(pScrn->pScreen, pPriv->colorKey,
-			clipBoxes);
-	    }
+		if (pPriv->autoPaint) {
+#ifdef USE_NEW_XVABI
+		    ErrorF("Autopaint New ABI\n");
 
+		    if (pDraw->type == DRAWABLE_WINDOW) {
+		        ErrorF("PaintcolorKey\n");
+			viaPaintColorkey(pScrn, pPriv, clipBoxes, pDraw);
+		    } else {
+		        ErrorF("Fillkeyhelper\n");
+			xf86XVFillKeyHelper(pScrn->pScreen, pPriv->colorKey,
+					    clipBoxes);
+		    }
+#else
+		    ErrorF("Autopaint Old ABI\n");
+		    xf86XVFillKeyHelper(pScrn->pScreen, pPriv->colorKey,
+					clipBoxes);    
+#endif
+		}
+	    }
 	    /*
 	     *  Update video overlay
 	     */

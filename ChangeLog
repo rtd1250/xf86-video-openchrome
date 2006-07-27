@@ -1,3 +1,23 @@
+2006-07-27  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+
+	* unichrome/via.h:
+	* unichrome/via_accel.c:
+	* unichrome/via_dri.h:
+	* unichrome/via_driver.h:
+	* unichrome/via_mode.c: (ViaModeDotClockTranslate):
+	* unichrome/via_swov.c: (ViaOverlayHide):
+	* unichrome/via_video.c: (DecideOverlaySupport),
+	(viaVideoFillPixmap), (viaPaintColorkey), (viaReputImage),
+	(viaPutImage):
+
+	Changes donated by "PConRails, LLC" and "Tungsten Graphics, Inc.":
+	Video optimizations: 
+	Paint colorkey correctly under composite manager.
+	Make sure the driver compiles with Xorg git.
+	Don't reset the primary display FIFO after XV. It's never touched
+	by the Xv code, and slows things down in VBE mode.
+		
+	
 2006-07-11  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
 
 	* libxvmc/viaXvMC.c:

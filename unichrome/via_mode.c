@@ -1651,7 +1651,7 @@ ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode)
         CARD32 best1=0, best2;
         for (i = 0; ViaDotClocks[i].DotClock; i++)
             if (ViaDotClocks[i].DotClock == mode->Clock)
-                best1= ViaDotClocks[i].UniChrome;
+                return  ViaDotClocks[i].UniChrome;
          best2 = ViaComputeDotClock(mode->Clock);
          
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaComputeDotClock %d : %04x : %04x\n",mode->Clock, best1,best2));

@@ -2205,9 +2205,5 @@ ViaOverlayHide(ScrnInfoPtr pScrn)
 	ViaSeqMask(hwp, 0x2E, 0x10, 0x10);
 
     pVia->swov.SWVideo_ON = FALSE;
-
-    if (pVia->swov.gdwUseExtendedFIFO)
-	ViaSetPrimaryFIFO(pScrn, pScrn->currentMode);
-
     pVia->VideoStatus &= ~VIDEO_SWOV_ON;
 }
