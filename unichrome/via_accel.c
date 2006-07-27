@@ -32,6 +32,7 @@
  *
  ************************************************************************/
 
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -54,7 +55,6 @@
 #define VIAACCELPATTERNROP(vRop) (XAAPatternROP[vRop] << 24)
 #define VIAACCELCOPYROP(vRop) (XAACopyROP[vRop] << 24)
 #endif
-
 
 /*
  * Use PCI MMIO to flush the command buffer. When AGP DMA is not available.
@@ -1826,8 +1826,9 @@ viaExaUploadToScratch(PixmapPtr pSrc, PixmapPtr pDst)
     dstPitch = 1 << dstPitch;
     if (dstPitch < 8)
 	dstPitch = 8;
-    if (dstPitch * h > VIA_SCRATCH_SIZE) {
-	ErrorF("EXA UploadToScratch Failed\n");
+    if (dstPitch * h > pVia->exaScratchSize*1024) {
+      ErrorF("EXA UploadToScratch Failed %u %u %u %u\n",
+	     dstPitch,h,dstPitch*h, pVia->exaScratchSize*1024);
 	return FALSE;
     }
 
@@ -1840,6 +1841,8 @@ viaExaUploadToScratch(PixmapPtr pSrc, PixmapPtr pDst)
      * Copying to AGP needs not be HW accelerated.
      * and if scratch is in FB, we are without DRI and hw accel.
      */
+
+    viaAccelSync(pScrn);
 
     while (h--) {
 	memcpy(dst, src, wBytes);
@@ -1874,11 +1877,17 @@ viaExaCheckComposite(int op, PicturePtr pSrcPicture,
 	pMaskPicture->pDrawable->height < VIA_MIN_COMPOSITE)
       return FALSE;
 
-    if (pMaskPicture && pMaskPicture->componentAlpha)
+    if (pMaskPicture && pMaskPicture->componentAlpha) {
+#ifdef VIA_DEBUG_COMPOSITE
+	ErrorF("Component Alpha operation\n");
+#endif
 	return FALSE;
+    }
+
 
     if (!v3d->opSupported(op)) {
 #ifdef VIA_DEBUG_COMPOSITE
+#warning Composite verbose debug turned on.
 	ErrorF("Operator not supported\n");
 	viaExaPrintComposite(op, pSrcPicture, pMaskPicture, pDstPicture);
 #endif
@@ -1898,8 +1907,7 @@ viaExaCheckComposite(int op, PicturePtr pSrcPicture,
 	viaExaPrintComposite(op, pSrcPicture, pMaskPicture, pDstPicture);
 #endif
 	return FALSE;
-    }
-
+    } 
     if (v3d->texSupported(pSrcPicture->format)) {
 	if (pMaskPicture && (PICT_FORMAT_A(pMaskPicture->format) == 0 ||
 		!v3d->texSupported(pMaskPicture->format))) {
@@ -1929,7 +1937,7 @@ viaIsAGP(VIAPtr pVia, PixmapPtr pPix, unsigned long *offset)
 	offs = (unsigned long)pPix->devPrivate.ptr -
 	    (unsigned long)pVia->agpMappedAddr;
 
-	if ((offs - pVia->scratchOffset) < VIA_SCRATCH_SIZE) {
+	if ((offs - pVia->scratchOffset) < pVia->exaScratchSize*1024) {
 	    *offset = offs + pVia->agpAddr;
 	    return TRUE;
 	}
@@ -2114,13 +2122,18 @@ viaInitExa(ScreenPtr pScreen)
 #ifdef linux
 	if ((pVia->drmVerMajor > 2) ||
 	    ((pVia->drmVerMajor == 2) && (pVia->drmVerMinor >= 7))) {
-	    if (pVia->Chipset != VIA_K8M800)
-		pExa->UploadToScreen = viaExaUploadToScreen;
 	    pExa->DownloadFromScreen = viaExaDownloadFromScreen;
 	}
 #endif /* linux */
-	if (pVia->Chipset == VIA_K8M800)
+	switch (pVia->Chipset) {
+	case VIA_K8M800:
+	case VIA_KM400:
 	    pExa->UploadToScreen = viaExaTexUploadToScreen;
+	    break;
+	default:
+	    pExa->UploadToScreen = NULL;
+	    break;
+	}
     }
 #endif /*XF86DRI*/
 
@@ -2276,8 +2289,9 @@ viaInitAccel(ScreenPtr pScreen)
 	}
 
 	pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart) / 2;
-	if (pVia->driSize > (16 * 1024 * 1024))
-	    pVia->driSize = 16 * 1024 * 1024;
+
+	if ((pVia->driSize > (pVia->maxDriSize * 1024)) && pVia->maxDriSize > 0)
+	    pVia->driSize = pVia->maxDriSize * 1024;
 
 	xf86DrvMsg(pScrn->scrnIndex, X_INFO,"[EXA] Enabled EXA acceleration.\n");
 	return TRUE;
@@ -2313,6 +2327,8 @@ viaInitAccel(ScreenPtr pScreen)
     VIAInitLinear(pScreen);
 
     pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart - pVia->Bpl);
+    if ((pVia->driSize > (pVia->maxDriSize * 1024)) && pVia->maxDriSize > 0)
+	pVia->driSize = pVia->maxDriSize * 1024;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
 	    "Using %d lines for offscreen memory.\n",
@@ -2427,7 +2443,7 @@ viaFinishInitAccel(ScreenPtr pScreen)
 
 	    }
 
-	    size = VIA_SCRATCH_SIZE + 32;
+	    size = pVia->exaScratchSize*1024 + 32;
 	    pVia->scratchAGPBuffer.context = 1;
 	    pVia->scratchAGPBuffer.size = size;
 	    pVia->scratchAGPBuffer.type = VIA_MEM_AGP;
@@ -2452,12 +2468,13 @@ viaFinishInitAccel(ScreenPtr pScreen)
     if (!pVia->scratchAddr && pVia->useEXA) {
 
 	pVia->scratchFBBuffer =
-	    exaOffscreenAlloc(pScreen, VIA_SCRATCH_SIZE, 32, TRUE, NULL,
+	    exaOffscreenAlloc(pScreen, pVia->exaScratchSize*1024, 
+			      32, TRUE, NULL,
 	    NULL);
 	if (pVia->scratchFBBuffer) {
 	    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
 		"Allocated %u kiB of framebuffer memory for EXA scratch area.\n",
-		VIA_SCRATCH_SIZE / 1024);
+		pVia->exaScratchSize);
 	    pVia->scratchOffset = pVia->scratchFBBuffer->offset;
 	    pVia->scratchAddr = (char *)pVia->FBBase + pVia->scratchOffset;
 	}

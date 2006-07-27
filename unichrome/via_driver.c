@@ -122,13 +122,15 @@ typedef enum {
     OPTION_PRINTVGAREGS,
     OPTION_PRINTTVREGS,
     OPTION_I2CSCAN,
-    OPTION_VBEMODES,
 #endif /* HAVE_DEBUG */
+    OPTION_VBEMODES,
     OPTION_PCI_BURST,
     OPTION_PCI_RETRY,
     OPTION_NOACCEL,
 #ifdef VIA_HAVE_EXA
     OPTION_ACCELMETHOD,
+    OPTION_EXA_NOCOMPOSITE,
+    OPTION_EXA_SCRATCH_SIZE,
 #endif
     OPTION_SWCURSOR,
     OPTION_HWCURSOR,
@@ -152,7 +154,10 @@ typedef enum {
     OPTION_AGP_DMA,
     OPTION_2D_DMA,
     OPTION_XV_DMA,
-    OPTION_EXA_NOCOMPOSITE
+    OPTION_VBE_SAVERESTORE,
+    OPTION_MAX_DRIMEM,
+    OPTION_AGPMEM,
+    OPTION_DISABLE_XV_BW_CHECK
 } VIAOpts;
 
 
@@ -162,11 +167,13 @@ static OptionInfoRec VIAOptions[] =
     {OPTION_PRINTVGAREGS, "PrintVGARegs", OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_PRINTTVREGS,  "PrintTVRegs",  OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_I2CSCAN, "I2CScan", OPTV_BOOLEAN, {0}, FALSE},
-    {OPTION_VBEMODES, "VBEModes", OPTV_BOOLEAN, {0}, FALSE},
 #endif /* HAVE_DEBUG */
+    {OPTION_VBEMODES,   "VBEModes", OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_NOACCEL,    "NoAccel",      OPTV_BOOLEAN, {0}, FALSE},
 #ifdef VIA_HAVE_EXA
     {OPTION_ACCELMETHOD, "AccelMethod", OPTV_STRING,  {0}, FALSE},
+    {OPTION_EXA_NOCOMPOSITE, "ExaNoComposite", OPTV_BOOLEAN, {0}, FALSE},
+    {OPTION_EXA_SCRATCH_SIZE, "ExaScratchSize", OPTV_INTEGER, {0}, FALSE},
 #endif /* VIA_HAVE_EXA */
     {OPTION_HWCURSOR,   "HWCursor",     OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_SWCURSOR,   "SWCursor",     OPTV_BOOLEAN, {0}, FALSE},
@@ -190,7 +197,10 @@ static OptionInfoRec VIAOptions[] =
     {OPTION_AGP_DMA, "EnableAGPDMA", OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_2D_DMA, "NoAGPFor2D", OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_XV_DMA, "NoXVDMA", OPTV_BOOLEAN, {0}, FALSE},
-    {OPTION_EXA_NOCOMPOSITE, "ExaNoComposite", OPTV_BOOLEAN, {0}, FALSE},
+    {OPTION_VBE_SAVERESTORE, "VbeSaveRestore", OPTV_BOOLEAN, {0}, FALSE},
+    {OPTION_DISABLE_XV_BW_CHECK, "DisableXvBWCheck", OPTV_BOOLEAN, {0}, FALSE},
+    {OPTION_MAX_DRIMEM,   "MaxDRIMem",     OPTV_INTEGER, {0}, FALSE},
+    {OPTION_AGPMEM,   "AGPMem",     OPTV_INTEGER, {0}, FALSE},
     {-1,                NULL,           OPTV_NONE,    {0}, FALSE}
 };
 
@@ -495,7 +505,6 @@ static void VIAIdentify(int flags)
 {
     xf86PrintChipsets("VIA", "driver for VIA chipsets", VIAChipsets);
 } /* VIAIdentify */
-
 
 static Bool VIAProbe(DriverPtr drv, int flags)
 {
@@ -942,6 +951,22 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
 	    } else {
 		pVia->noComposite = FALSE;
 	    }
+
+	    pVia->exaScratchSize = VIA_SCRATCH_SIZE / 1024;
+	    if(xf86GetOptValInteger(VIAOptions, OPTION_EXA_SCRATCH_SIZE, 
+				    &pVia->exaScratchSize)) {
+		xf86DrvMsg( pScrn->scrnIndex, X_CONFIG,
+			    "Option: ExaScratchSize %dkB\n", 
+			    pVia->exaScratchSize );
+	    }
+
+	    if (xf86ReturnOptValBool(VIAOptions, OPTION_EXA_NOCOMPOSITE, FALSE)) {
+		pVia->noComposite = TRUE;
+		xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+			   "Option: ExaNoComposite - Disable Composite acceleration for EXA\n");
+	    } else {
+		pVia->noComposite = FALSE;
+	    }
 	}
     }
 #endif /* VIA_HAVE_EXA */
@@ -1027,13 +1052,45 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
         pVia->dmaXV = TRUE;
     }
 
-#ifdef HAVE_DEBUG
     if (xf86ReturnOptValBool(VIAOptions, OPTION_VBEMODES, FALSE)) {
 	xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
 		   "Option: VBEModes - Using BIOS modes\n");
 	UseVBEModes = TRUE;
     }
-#endif /* HAVE_DEBUG */
+
+    pVia->vbeSR = FALSE;
+    if (xf86ReturnOptValBool(VIAOptions, OPTION_VBE_SAVERESTORE, FALSE)) {
+	xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+		   "Option: VBESaveRestore - "
+		   "Using BIOS VGA register save & restore.\n");
+	pVia->vbeSR = TRUE;
+    }
+
+#ifdef HAVE_DEBUG
+    pVia->disableXvBWCheck = FALSE;
+    if (xf86ReturnOptValBool(VIAOptions, OPTION_DISABLE_XV_BW_CHECK, FALSE)) {
+	xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+		   "Option: DisableXvBWCheck - "
+		   "Disabling Xv Bandwidth check. You may get a snowy screen.\n");
+	pVia->disableXvBWCheck = TRUE;
+    }
+#endif
+
+    pVia->maxDriSize = 0;
+    if(xf86GetOptValInteger(VIAOptions, OPTION_MAX_DRIMEM, 
+			    &pVia->maxDriSize)) {
+      xf86DrvMsg( pScrn->scrnIndex, X_CONFIG,
+		  "Option: MaxDRIMem  - %dkB\n", 
+		  pVia->maxDriSize );
+    }
+
+    pVia->agpMem = AGP_SIZE;
+    if(xf86GetOptValInteger(VIAOptions, OPTION_AGPMEM, 
+			    &pVia->agpMem)) {
+      xf86DrvMsg( pScrn->scrnIndex, X_CONFIG,
+		  "Option: AGPMem  - %dkB\n", 
+		  pVia->agpMem );
+    }
 
     /* ActiveDevice Option for device selection */
     pVia->ActiveDevice = 0x00;
@@ -1620,7 +1677,10 @@ static Bool VIAEnterVT(int scrnIndex, int flags)
     DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIAEnterVT\n"));
     
     if (pVia->pVbe) {
-	ViaVbeSaveRestore(pScrn, MODE_SAVE);
+	if (pVia->vbeSR) 
+	    ViaVbeSaveRestore(pScrn, MODE_SAVE);
+	else
+	    VIASave(pScrn);
 	ret = ViaVbeSetMode(pScrn, pScrn->currentMode); 
     } else {
 	VIASave(pScrn);
@@ -1689,7 +1749,7 @@ static void VIALeaveVT(int scrnIndex, int flags)
     if (pVia->hwcursor)
 	ViaCursorStore(pScrn);
 
-    if (pVia->pVbe)
+    if (pVia->pVbe && pVia->vbeSR) 
 	ViaVbeSaveRestore(pScrn, MODE_RESTORE);
     else
 	VIARestore(pScrn);
@@ -2099,9 +2159,9 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     if (!VIAMapMMIO(pScrn))
         return FALSE;
 
-    if (pVia->pVbe)
+    if (pVia->pVbe && pVia->vbeSR)
 	ViaVbeSaveRestore(pScrn, MODE_SAVE);
-    else
+    else 
 	VIASave(pScrn);
 
     vgaHWUnlock(hwp);
@@ -2392,7 +2452,6 @@ static Bool VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
     VIAPtr      pVia = VIAPTR(pScrn);
 
     DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIACloseScreen\n"));
-
     /* Is the display currently visible ? */
     if(pScrn->vtSema)
     {
@@ -2406,6 +2465,7 @@ static Bool VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
  
 
 	/* Fix 3D Hang after X restart */
+
 	hwp->writeSeq(hwp, 0x1A, pVia->SavedReg.SR1A | 0x40);
 
 	if (!pVia->IsSecondary) {
@@ -2418,10 +2478,12 @@ static Bool VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
         if (pVia->VQEnable)
 	    viaDisableVQ(pScrn);
     }
+
 #ifdef XF86DRI
     if (pVia->directRenderingEnabled)
 	VIADRICloseScreen(pScreen);
 #endif
+
     viaExitAccel(pScreen);
     if (pVia->CursorInfoRec) {
         xf86DestroyCursorInfoRec(pVia->CursorInfoRec);
@@ -2437,9 +2499,9 @@ static Bool VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
     }
 
     if (pScrn->vtSema) {
-	if (pVia->pVbe)
+	if (pVia->pVbe && pVia->vbeSR)
 	    ViaVbeSaveRestore(pScrn, MODE_RESTORE); 
-	else
+	else 
 	    VIARestore(pScrn);
 
 	vgaHWLock(hwp);

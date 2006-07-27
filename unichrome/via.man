@@ -145,6 +145,64 @@ screen uploads and downlads (if DRI is enabled) and the Render / Composite exten
 If Exa is enabled using the above option, Don't accelerate composite. Since EXA, and in
 particular, it's composite acceleration is still experimental, This is a way to disable
 exa composite acceleration.
+.TP
+.BI "Option \*qExaScratchSize\*q \*q" integer \*q
+Set the size of the exa scratch area to "integer" kB. This area is
+used by EXA as a last place to look for available space for
+pixmaps. Too little space and compositing will slow down. This should
+be set to the size of the largest pixmap used. If you have screen
+width of over 1024 and use 24Bpp, set this to 8192. Otherwise you can
+leave this with the default 4096. The space will be allocated from AGP
+memory if available. Otherwise from VRAM.
+.TP
+.BI "Option \*qMigrationHeuristic\*q \*q" string \*q
+Set the migration heuristic for EXA pixmap migration. This is an EXA
+core option, and on Xorg xserver versions after 1.1.0, this defaults
+to "smart", otherwise to "greedy". The openChrome driver performs best
+with the "greedy" option, so you should really add this option. The
+third option is "always", which might become more useful in the
+future.
+.TP
+.BI "Option \*qMaxDRIMem\*q \*q" integer \*q
+Set the maximum amount of VRAM memory allocated for DRI
+clients. Normally they get half the available VRAM size, but in some
+cases it might make sense to limit this amount of memory. For example
+if you are using a composite manager and you want to get as much
+memory as possible to the EXA pixmap storage area. DRI VRAM will be
+limited to "integer" kB.
+.TP
+.BI "Option \*qAGPMem\*q \*q" integer \*q
+Set the amount of AGP memory allocated at X server startup. The AGP
+memory allocated will be "integer" kB. The AGP
+memory is used for the AGP command buffer (If option EnableAGPDMA is
+set to "true"), DRI textures and for the EXA scratch area. The driver
+will allocate at least one system page of AGP memory and if the AGP
+command buffer is used, at least 2MB + one system page. If there is no
+room for the EXA scratch area in AGP space, it will be allocated from
+VRAM. If there is no room for DRI textures they will be allocated from
+the DRI part of VRAM. See "Option \*qMaxDRIMem\*q". The default amount
+of AGP is 32768kB. Note that the AGP aperture set in BIOS must be able
+to accomodate the amount of AGP memory specified here. Otherwise \*qno\*q
+AGP memory will be available. It is safe to set a very large AGP
+aperture in BIOS.
+.TP
+.BI "Option \*qVBEModes\*q \*q" boolean \*q
+Use the VBE bios calls to set the display mode. This mimics the
+behaviour of the vesa video driver but still provides acceleration and
+other features. This option may be used if your hardware works with
+the vesa driver, but not with the openChrome driver. May not work on
+64-bit systems. Using VBEModes may speed up driver acceleration
+significantly due to a more agressive hardware setting. Particularly
+on systems with low memory bandwidth. Your refresh rate may be limited
+to 60Hz on some systems.
+.TP
+.BI "Option \*qVBESaveRestore\*q \*q" boolean \*q
+Use the VBE bios calls to save and restore the display state when the
+X server is launched. This can be extremely slow on some hardware. And
+the system may appear to have locked for 10 seconds or so. 
+The default is to use the driver builtin function. This option only works
+if VBEModes is enabled.
+.TP 
 
 .SH "Supported TV Encoders"
 Unichromes tend to be paired with several different TV Encoders.

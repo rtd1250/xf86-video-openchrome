@@ -619,7 +619,9 @@ ViaCH7xxxInit(ScrnInfoPtr pScrn)
             pBIOSInfo->TVModes = CH7011Modes;
             pBIOSInfo->LCDPower = NULL;
             pBIOSInfo->TVNumRegs = CH_7011_MAX_NUM_REG;
+#ifdef HAVE_DEBUG
             pBIOSInfo->TVPrintRegs = CH7xxxPrintRegs;
+#endif
             break;
         case VIA_CH7019A:
         case VIA_CH7019B:
@@ -633,7 +635,9 @@ ViaCH7xxxInit(ScrnInfoPtr pScrn)
             pBIOSInfo->TVModes = CH7019Modes;
             pBIOSInfo->LCDPower = CH7019LCDPower;
             pBIOSInfo->TVNumRegs = CH_7019_MAX_NUM_REG;
+#ifdef HAVE_DEBUG
             pBIOSInfo->TVPrintRegs = CH7xxxPrintRegs;
+#endif
             break;
         default:
             DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "ViaCH7xxxInit missing\n"));

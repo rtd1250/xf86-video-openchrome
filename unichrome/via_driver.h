@@ -78,17 +78,19 @@
 #include "exa.h"
 #define VIA_AGP_UPL_SIZE    (1024*128)
 #define VIA_DMA_DL_SIZE     (1024*128)
-#define VIA_SCRATCH_SIZE    (2048*1024)
-#define VIA_SCRATCH_SIZE    (2048*1024)
+#define VIA_SCRATCH_SIZE    (4*1024*1024)
+#define AGP_PAGE_SIZE 4096
+#define AGP_PAGES 8192
+#define AGP_SIZE (AGP_PAGE_SIZE * AGP_PAGES)
 
 /*
  * Pixmap sizes below which we don't try to do hw accel.
  */
 
-#define VIA_MIN_COMPOSITE   1 /*400*/  
+#define VIA_MIN_COMPOSITE   400
 #define VIA_MIN_UPLOAD 4000
-#define VIA_MIN_TEX_UPLOAD 400
-#define VIA_MIN_DOWNLOAD 400
+#define VIA_MIN_TEX_UPLOAD 200
+#define VIA_MIN_DOWNLOAD 200
 #endif
 
 #define DRIVER_NAME     "via"
@@ -201,6 +203,7 @@ typedef struct _VIA {
     int                 FBFreeStart;
     int                 FBFreeEnd;
     int                 driSize;
+    int                 maxDriSize;
     int                 CursorStart;
     int                 VQStart;
     int                 VQEnd;
@@ -226,6 +229,8 @@ typedef struct _VIA {
     Bool                NoAccel;
     Bool                shadowFB;
     int                 rotate;
+    Bool                vbeSR;
+    int                 agpMem;
 
     CloseScreenProcPtr  CloseScreen;
     pciVideoPtr         PciInfo;
@@ -268,6 +273,7 @@ typedef struct _VIA {
     CARD32              srcFormat;
     ExaOffscreenArea   *scratchFBBuffer;
     unsigned            scratchOffset;
+    int                 exaScratchSize;
     char *              scratchAddr;
     Bool                noComposite;
 #ifdef XF86DRI
@@ -353,7 +359,6 @@ typedef struct _VIA {
     
     ViaSharedPtr	sharedData;
     Bool                useDmaBlit;
-
 #ifdef HAVE_DEBUG
     Bool                disableXvBWCheck;
     Bool                DumpVGAROM;
@@ -404,6 +409,8 @@ void viaAccelSyncMarker(ScrnInfoPtr);
 void viaFinishInitAccel(ScreenPtr);
 void viaAccelWaitMarker(ScreenPtr, int);
 int viaAccelMarkSync(ScreenPtr);
+void viaAccelFillPixmap(ScrnInfoPtr, unsigned long, unsigned long, 
+			int, int, int, int, int, unsigned long);
 
 
 

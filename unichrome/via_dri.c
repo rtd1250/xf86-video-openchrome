@@ -53,9 +53,6 @@
 
 #define VIDEO	0 
 #define AGP		1
-#define AGP_PAGE_SIZE 4096
-#define AGP_PAGES 8192
-#define AGP_SIZE (AGP_PAGE_SIZE * AGP_PAGES)
 #define AGP_CMDBUF_PAGES 512
 #define AGP_CMDBUF_SIZE (AGP_PAGE_SIZE * AGP_CMDBUF_PAGES)
 #define VIA_AGP_MODE_MASK 0x17
@@ -260,6 +257,8 @@ static Bool VIADRIAgpInit(ScreenPtr pScreen, VIAPtr pVia)
     pDRIInfo = pVia->pDRIInfo;
     pVIADRI = pDRIInfo->devPrivate;
     pVia->agpSize = 0;
+    int agpPages;
+    unsigned long agpCmdSize;
 
     if (drmAgpAcquire(pVia->drmFD) < 0) {
         xf86DrvMsg(pScreen->myNum, X_ERROR, "[drm] drmAgpAcquire failed %d\n", errno);
@@ -273,8 +272,19 @@ static Bool VIADRIAgpInit(ScreenPtr pScreen, VIAPtr pVia)
     }
     
     xf86DrvMsg(pScreen->myNum, X_INFO, "[drm] drmAgpEnabled succeeded\n");
+    
+    agpCmdSize = (pVia->agpEnable) ? AGP_CMDBUF_SIZE : 0;
 
-    if (drmAgpAlloc(pVia->drmFD, AGP_SIZE, 0, &agp_phys, &pVia->agpHandle) < 0) {
+    if (pVia->agpMem*1024 < agpCmdSize + AGP_PAGE_SIZE) {
+	pVia->agpMem = (agpCmdSize + AGP_PAGE_SIZE) / 1024;
+	xf86DrvMsg(pScreen->myNum, X_INFO, 
+		   "[drm] Forcing AGP size to %d kB\n", pVia->agpMem);
+    }
+
+    agpPages = (pVia->agpMem*1024 + AGP_PAGE_SIZE - 1) / AGP_PAGE_SIZE;
+    
+    if (drmAgpAlloc(pVia->drmFD, agpPages*AGP_PAGE_SIZE, 
+		    0, &agp_phys, &pVia->agpHandle) < 0) {
         xf86DrvMsg(pScreen->myNum, X_ERROR,
                  "[drm] drmAgpAlloc failed\n");
         drmAgpRelease(pVia->drmFD);
@@ -295,7 +305,7 @@ static Bool VIADRIAgpInit(ScreenPtr pScreen, VIAPtr pVia)
      * public map not to include the buffer for security reasons.
      */
 
-    pVia->agpSize = AGP_SIZE - AGP_CMDBUF_SIZE;
+    pVia->agpSize = pVia->agpMem*1024 - agpCmdSize;
     pVia->agpAddr = drmAgpBase(pVia->drmFD);
     xf86DrvMsg(pScreen->myNum, X_INFO,
                  "[drm] agpAddr = 0x%08lx\n",pVia->agpAddr);
@@ -312,7 +322,7 @@ static Bool VIADRIAgpInit(ScreenPtr pScreen, VIAPtr pVia)
 	drmAgpRelease(pVia->drmFD);
 	return FALSE;
     }  
-    /* Map AGP from kernel to Xserver - Not really needed */
+
     drmMap(pVia->drmFD, pVIADRI->agp.handle, pVIADRI->agp.size, &agpaddr);
     pVia->agpMappedAddr = agpaddr;
 
@@ -328,7 +338,7 @@ static Bool VIADRIAgpInit(ScreenPtr pScreen, VIAPtr pVia)
     {
 	drm_via_agp_t agp;
 	agp.offset = 0;
-	agp.size = AGP_SIZE-AGP_CMDBUF_SIZE;
+	agp.size = pVia->agpSize;
 	if (drmCommandWrite(pVia->drmFD, DRM_VIA_AGP_INIT, &agp,
 			    sizeof(drm_via_agp_t)) < 0) {
 	    drmUnmap(agpaddr,pVia->agpSize);
