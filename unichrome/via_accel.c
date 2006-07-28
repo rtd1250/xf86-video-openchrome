@@ -1937,7 +1937,7 @@ viaIsAGP(VIAPtr pVia, PixmapPtr pPix, unsigned long *offset)
 	offs = (unsigned long)pPix->devPrivate.ptr -
 	    (unsigned long)pVia->agpMappedAddr;
 
-	if ((offs - pVia->scratchOffset) < pVia->exaScratchSize*1024) {
+	if ((offs - pVia->scratchOffset) < pVia->agpSize) {
 	    *offset = offs + pVia->agpAddr;
 	    return TRUE;
 	}

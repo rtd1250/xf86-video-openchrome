@@ -1,3 +1,30 @@
+2006-07-28  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+
+	* unichrome/via_accel.c: (viaIsAGP):
+	* unichrome/via_dri.c: (VIADRIAgpInit):
+
+	Fix false AGP detection and make sure we have the correct AGP
+	size.
+	
+2006-07-27  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+
+	* unichrome/via.man:
+	* unichrome/via_accel.c: (viaExaUploadToScratch),
+	(viaExaCheckComposite), (viaIsAGP), (viaInitExa), (viaInitAccel):
+	* unichrome/via_ch7xxx.c: (ViaCH7xxxInit):
+	* unichrome/via_dri.c: (VIADRIAgpInit):
+	* unichrome/via_driver.c: (VIAPreInit), (VIAEnterVT), (VIALeaveVT),
+	(VIAScreenInit), (VIACloseScreen):
+	* unichrome/via_driver.h:
+	
+	Changes donated by "PConRails, LLC" and "Tungsten Graphics, Inc.":
+	EXA and memory management optimizations, Manpage update.
+	New options:
+	  ExaScratchSize
+	  MaxDRIMem
+	  AGPMem
+	  VBESaveRestore	
+	
 2006-07-27  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via.h:

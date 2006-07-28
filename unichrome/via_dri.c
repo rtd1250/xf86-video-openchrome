@@ -305,7 +305,7 @@ static Bool VIADRIAgpInit(ScreenPtr pScreen, VIAPtr pVia)
      * public map not to include the buffer for security reasons.
      */
 
-    pVia->agpSize = pVia->agpMem*1024 - agpCmdSize;
+    pVia->agpSize = agpPages*AGP_PAGE_SIZE - agpCmdSize;
     pVia->agpAddr = drmAgpBase(pVia->drmFD);
     xf86DrvMsg(pScreen->myNum, X_INFO,
                  "[drm] agpAddr = 0x%08lx\n",pVia->agpAddr);
