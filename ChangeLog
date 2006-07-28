@@ -1,3 +1,9 @@
+2006-07-28 Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+
+	* unichrome/via_driver.c: (VIAPreInit):
+
+	...And get default AGP size correct as well.
+
 2006-07-28  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via_accel.c: (viaIsAGP):

@@ -1084,7 +1084,7 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
 		  pVia->maxDriSize );
     }
 
-    pVia->agpMem = AGP_SIZE;
+    pVia->agpMem = AGP_SIZE / 1024;
     if(xf86GetOptValInteger(VIAOptions, OPTION_AGPMEM, 
 			    &pVia->agpMem)) {
       xf86DrvMsg( pScrn->scrnIndex, X_CONFIG,
