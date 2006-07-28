@@ -172,6 +172,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     /* VN800 */
     {"ECS P4M800PRO-M",                       VIA_VM800,   0x1019, 0x2122, VIA_DEVICE_CRT},
     {"Gateway MX3210",                        VIA_VM800,   0x107B, 0x0216, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
+    {"VIA VT3344 (VM800) - EPIA EN",          VIA_VM800,   0x1106, 0x3344, VIA_DEVICE_CRT | VIA_DEVICE_TV},	
     {"Gigabyte GA-8VM800M-775",               VIA_VM800,   0x1458, 0xD000, VIA_DEVICE_CRT},
     {"MSI PM8M-V",                            VIA_VM800,   0x1462, 0x7104, VIA_DEVICE_CRT},
     {"MSI PM8M3-V",                           VIA_VM800,   0x1462, 0x7211, VIA_DEVICE_CRT},
