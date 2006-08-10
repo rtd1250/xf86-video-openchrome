@@ -719,9 +719,8 @@ viaPaintColorkey(ScrnInfoPtr pScrn, viaPortPrivPtr pPriv, RegionPtr clipBoxes,
 	pBox = REGION_RECTS(clipBoxes);
 
 	while(nBox--) {
-	    if (1 /*pVia->NoAccel || offset < 0 || 
-		    offset > pScrn->videoRam*1024*/) {
-	      ErrorF("nBox %d offSet 0x%08x\n", nBox, offset);
+	    if (pVia->NoAccel || offset < 0 || 
+		offset > pScrn->videoRam*1024) {
 		viaVideoFillPixmap(pScrn, pPix->devPrivate.ptr, pitch,
 				   pDraw->bitsPerPixel, pBox->x1, pBox->y1, 
 				   pBox->x2 - pBox->x1, pBox->y2 - pBox->y1, 
