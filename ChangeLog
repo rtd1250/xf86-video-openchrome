@@ -1,6 +1,13 @@
+2006-08-19  Benno Schulenberg  <bensberg-at-justemail-dot-net> 
+
+	* unichrome/via_swov.c: (viaWaitVideoCommandFire),
+	(SetVideoWindow):
+
+	Comment tweaks.
+
 2006-08-18  Benno Schulenberg  <bensberg-at-justemail-dot-net> 
 
-	* unichrome/via_driver.h
+	* unichrome/via_driver.h:
 
 	Move definition of AGP_SIZE out of #ifdef VIA_HAVE_EXA block,
 	to make the driver compile again for Xorg-6.8.2.

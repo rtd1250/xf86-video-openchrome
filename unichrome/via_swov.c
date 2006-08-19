@@ -59,8 +59,6 @@
 
 /*
  * Old via_regrec code.
- *
- *
  */
 #define VIDREG_BUFFER_SIZE  100	       /* Number of entries in the VidRegBuffer. */
 #define IN_VIDEO_DISPLAY     (*((unsigned long volatile *)(pVia->VidMapBase+V_FLAGS))&VBI_STATUS)
@@ -70,8 +68,8 @@ static void
 viaWaitVideoCommandFire(VIAPtr pVia)
 {
 /*
- * Assume uncached PCI reading throughputs about 9MB/s. 8Bytes / loop means
- * Appox 1Mloops / second. We want to time out after 50 ms which means 50000 loops.
+ * Assume uncached PCI reading throughput is about 9 MB/s. 8 bytes/loop means
+ * approx 1M loops/second. We want to time out after 50 ms which means 50000 loops.
  */
 
     unsigned count = 50000;
@@ -202,7 +200,6 @@ SaveVideoRegister(VIAPtr pVia, CARD32 index, CARD32 data)
  *
  * This is now up to date with CLEXF40040. All unused entries were removed.
  * The functions depending on this struct are untouched. 
- *
  */
 void
 VIAVidHWDiffInit(ScrnInfoPtr pScrn)
@@ -262,7 +259,6 @@ VIAVidHWDiffInit(ScrnInfoPtr pScrn)
 
 /*
  * Old via_overlay code.
- *
  */
 typedef struct _YCBCRREC
 {
@@ -713,9 +709,10 @@ static colorCoeff colorCTable[] = { {1.1875, 1.625, 0.875, 0.375, 2.0},
 };
 
 /*
- * This function is a partial rewrite of the overlay.c file of the original VIA drivers,
- * which was extremely nasty and difficult to follow. Coefficient for new chipset models should
- * be added in the table above and, if needed, implemented in the model switch below.
+ * This function is a partial rewrite of the overlay.c file of the original VIA
+ * drivers, which was extremely nasty and difficult to follow. Coefficients for
+ * new chipset models should be added in the table above and, if needed,
+ * implemented in the model switch below.
  */
 
 static void
@@ -1010,7 +1007,7 @@ AddHQVSurface(ScrnInfoPtr pScrn, unsigned int numbuf, CARD32 fourcc)
 
 /*
  * Create a FOURCC surface (Supported: YUY2, YV12 or VIA)
-  * doalloc: set true to actually allocate memory for the framebuffers
+ * doalloc: set true to actually allocate memory for the framebuffers
  */
 static long
 CreateSurface(ScrnInfoPtr pScrn, CARD32 FourCC, CARD16 Width,
@@ -1561,9 +1558,9 @@ SetVideoWindow(ScrnInfoPtr pScrn, unsigned long videoFlag,
     DBG_DD(ErrorF("SetVideoWindow: X (%ld,%ld) Y (%ld,%ld)\n",
 	    left, right, top, bottom));
 
-    /* modify for HW DVI limitation,
-     * When we enable the CRT and DVI both, then change resolution.
-     * If the resolution small than the panel physical size,
+    /* Modify for HW DVI limitation.
+     * When we enable both the CRT and DVI, then change resolution.
+     * If the resolution is smaller than the panel's physical size,
      * the video display in Y direction will be cut.
      * So, we need to adjust the Y top and bottom position.
      */
@@ -1806,7 +1803,7 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
 
     compose |= ALWAYS_SELECT_VIDEO;
 
-    /* Setup X zoom factor */
+    /* Set up X zoom factor */
 
     pVia->swov.overlayRecordV1.dwFetchAlignment = 0;
 
@@ -1821,7 +1818,7 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
 
     SetFetch(pVia, videoFlag, fetch);
 
-    /* Setup Y zoom factor */
+    /* Set up Y zoom factor */
 
     /* For DCT450 test-BOB INTERLEAVE */
     if ((deinterlaceMode & DDOVER_INTERLEAVED)
@@ -1899,7 +1896,7 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
 	compose = SetChromaKey(pVia, videoFlag, chromaKeyLow, chromaKeyHigh,
 	    miniCtl, compose);
 
-    /* Setup video control */
+    /* Set up video control */
     if (videoFlag & VIDEO_HQV_INUSE) {
 	if (!pVia->swov.SWVideo_ON) {
 	    DBG_DD(ErrorF("    First HQV\n"));
