@@ -1,3 +1,10 @@
+2006-08-18  Benno Schulenberg  <bensberg-at-justemail-dot-net> 
+
+	* unichrome/via_driver.h
+
+	Move definition of AGP_SIZE out of #ifdef VIA_HAVE_EXA block,
+	to make the driver compile again for Xorg-6.8.2.
+
 2006-08-10 Thomas Hellström <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_mode.c: (ViaModeDotClockTranslate):

@@ -79,9 +79,6 @@
 #define VIA_AGP_UPL_SIZE    (1024*128)
 #define VIA_DMA_DL_SIZE     (1024*128)
 #define VIA_SCRATCH_SIZE    (4*1024*1024)
-#define AGP_PAGE_SIZE 4096
-#define AGP_PAGES 8192
-#define AGP_SIZE (AGP_PAGE_SIZE * AGP_PAGES)
 
 /*
  * Pixmap sizes below which we don't try to do hw accel.
@@ -92,6 +89,10 @@
 #define VIA_MIN_TEX_UPLOAD 200
 #define VIA_MIN_DOWNLOAD 200
 #endif
+
+#define AGP_PAGE_SIZE 4096
+#define AGP_PAGES 8192
+#define AGP_SIZE (AGP_PAGE_SIZE * AGP_PAGES)
 
 #define DRIVER_NAME     "via"
 #define VERSION_MAJOR   0
