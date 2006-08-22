@@ -56,7 +56,7 @@
 #endif
 
 /*
- * Use PCI MMIO to flush the command buffer. When AGP DMA is not available.
+ * Use PCI MMIO to flush the command buffer when AGP DMA is not available.
  */
 
 static void
@@ -105,8 +105,8 @@ viaFlushPCI(ViaCommandBuffer * buf)
 		if (offset == 0) {
 		    /*
 		     * Not doing this wait will probably stall the processor
-		     * for an unacceptable amount of time in VIASETREG while other high
-		     * priority interrupts may be pending.
+		     * for an unacceptable amount of time in VIASETREG while
+		     * other high priority interrupts may be pending.
 		     */
 		    while (!(VIAGETREG(VIA_REG_STATUS) & VIA_VR_QUEUE_BUSY)
 			&& (loop++ < MAXLOOP)) ;
@@ -221,7 +221,7 @@ viaTearDownCBuffer(ViaCommandBuffer * buf)
 }
 
 /*
- * Leftover from VIAs code.
+ * Leftover from VIA's code.
  */
 
 static void
@@ -1359,7 +1359,7 @@ viaExaPrintComposite(CARD8 op,
 	"                    mask %s, \n"
 	"                    dst  %s, \n", sop, srcdesc, maskdesc, dstdesc);
 }
-#endif
+#endif /* VIA_DEBUG_COMPOSITE */
 
 /*
  * Helper for bitdepth expansion.
@@ -1460,8 +1460,9 @@ viaExpandablePixel(int format)
 }
 
 /*
- * Check if we need to force upload of the whole 3D state (if other clients or)
- * subsystems have touched the 3D engine). Also tell DRI clients and subsystems * that we have touched the 3D engine.
+ * Check if we need to force upload of the whole 3D state (when other
+ * clients or subsystems have touched the 3D engine). Also tell DRI
+ * clients and subsystems that we have touched the 3D engine.
  */
 
 static Bool
@@ -1499,9 +1500,9 @@ viaOrder(CARD32 val, CARD32 * shift)
 #ifdef XF86DRI
 
 /*
- * Use PCI DMA if we can. If the system alignments don't match we're using 
+ * Use PCI DMA if we can. If the system alignments don't match, we're using
  * an aligned bounce buffer for pipelined PCI DMA and memcpy.
- * throughput for large transfers is around 65 MB/s.
+ * Throughput for large transfers is around 65 MB/s.
  */
 
 static Bool
@@ -1736,9 +1737,9 @@ viaExaTexUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
 }
 
 /*
- * I'm not sure PCI DMA upload is necessary. Seems buggy for widths below 65, and I'd guess that in
- * most situations, CPU direct writes are faster. Use DMA only when alignments match. At least
- * it saves some CPU cycles.
+ * I'm not sure PCI DMA upload is necessary. Seems buggy for widths below 65,
+ * and I'd guess that in most situations CPU direct writes are faster.
+ * Use DMA only when alignments match. At least it saves some CPU cycles.
  */
 
 static Bool
@@ -1800,7 +1801,7 @@ viaExaUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
     return (err == 0);
 }
 
-#endif
+#endif /* XF86DRI */
 
 static Bool
 viaExaUploadToScratch(PixmapPtr pSrc, PixmapPtr pDst)
@@ -1837,7 +1838,7 @@ viaExaUploadToScratch(PixmapPtr pSrc, PixmapPtr pDst)
 
     /*
      * Copying to AGP needs not be HW accelerated.
-     * and if scratch is in FB, we are without DRI and hw accel.
+     * If scratch is in FB, we are without DRI and HW accel.
      */
 
     viaAccelSync(pScrn);
@@ -1892,8 +1893,8 @@ viaExaCheckComposite(int op, PicturePtr pSrcPicture,
     }
 
     /*
-     * FIXME: A8 destination formats are currently not supported and does
-     * not seem supported by the hardware, althought there are some left-over
+     * FIXME: A8 destination formats are currently not supported and do not
+     * seem supported by the hardware, although there are some leftover
      * register settings apparent in the via_3d_reg.h file. We need to fix this
      * (if important), by using component ARGB8888 operations with bitmask.
      */
@@ -1973,10 +1974,10 @@ viaExaPrepareComposite(int op, PicturePtr pSrcPicture,
     viaOrder(pSrc->drawable.height, &height);
 
     /*
-     * For One-pixel repeat mask pictures we avoid using multitexturing by
+     * For one-pixel repeat mask pictures we avoid using multitexturing by
      * modifying the src's texture blending equation and feed the pixel
      * value as a constant alpha for the src's texture. Multitexturing on the
-     * unichromes seem somewhat slow, so this speeds up translucent windows.
+     * unichromes seems somewhat slow, so this speeds up translucent windows.
      */
 
     srcMode = via_src;
@@ -2131,7 +2132,7 @@ viaInitExa(ScreenPtr pScreen)
 	    break;
 	}
     }
-#endif /*XF86DRI*/
+#endif /* XF86DRI */
 
     pExa->UploadToScratch = viaExaUploadToScratch;
 
@@ -2201,7 +2202,7 @@ viaInitExa(ScreenPtr pScreen)
 	if (pVia->Chipset == VIA_K8M800)
 	    pExa->accel.UploadToScreen = viaExaTexUploadToScreen;
     }
-#endif /*XF86DRI*/
+#endif /* XF86DRI */
 
     pExa->accel.UploadToScratch = viaExaUploadToScratch;
 
@@ -2224,7 +2225,7 @@ viaInitExa(ScreenPtr pScreen)
     return pExa;
 }
 
-#endif /* EXA_VERSION */
+#endif /* EXA_VERSION_MAJOR */
 #endif /* VIA_HAVE_EXA */
 
 /*
@@ -2271,7 +2272,7 @@ viaInitAccel(ScreenPtr pScreen)
     pVia->texAddr = NULL;
     pVia->dBounce = NULL;
     pVia->scratchAddr = NULL;
-#endif
+#endif /* XF86DRI */
     if (pVia->useEXA) {
 	pVia->exaDriverPtr = viaInitExa(pScreen);
 	if (!pVia->exaDriverPtr) {
@@ -2296,7 +2297,7 @@ viaInitAccel(ScreenPtr pScreen)
 	    "[EXA] Enabled EXA acceleration.\n");
 	return TRUE;
     }
-#endif
+#endif /* VIA_HAVE_EXA */
 
     AvailFBArea.x1 = 0;
     AvailFBArea.y1 = 0;
@@ -2338,7 +2339,7 @@ viaInitAccel(ScreenPtr pScreen)
 }
 
 /*
- * Free used acceleration resorces.
+ * Free the used acceleration resources.
  */
 
 void
@@ -2370,7 +2371,7 @@ viaExitAccel(ScreenPtr pScreen)
 	}
 	if (pVia->dBounce)
 	    xfree(pVia->dBounce);
-#endif
+#endif /* XF86DRI */
 	if (pVia->scratchAddr) {
 	    exaOffscreenFree(pScreen, pVia->scratchFBBuffer);
 	    pVia->scratchAddr = NULL;
@@ -2382,7 +2383,7 @@ viaExitAccel(ScreenPtr pScreen)
 	pVia->exaDriverPtr = NULL;
 	return;
     }
-#endif
+#endif /* VIA_HAVE_EXA */
     if (pVia->AccelInfoRec) {
 	XAADestroyInfoRec(pVia->AccelInfoRec);
 	pVia->AccelInfoRec = NULL;
@@ -2390,10 +2391,9 @@ viaExitAccel(ScreenPtr pScreen)
 }
 
 /*
- * Allocate command buffer and 
- * buffers for accelerated upload, download and 
- * the EXA scratch area. The Scratch area resides primarily in 
- * AGP memory but reverts to FB if AGP is not available. 
+ * Allocate a command buffer and  buffers for accelerated upload, download,
+ * and EXA scratch area. The scratch area resides primarily in AGP memory,
+ * but reverts to FB if AGP is not available. 
  */
 
 void
@@ -2463,7 +2463,7 @@ viaFinishInitAccel(ScreenPtr pScreen)
 
 	}
     }
-#endif
+#endif /* XF86DRI */
     if (!pVia->scratchAddr && pVia->useEXA) {
 
 	pVia->scratchFBBuffer =
@@ -2478,7 +2478,7 @@ viaFinishInitAccel(ScreenPtr pScreen)
 	}
 
     }
-#endif
+#endif /* VIA_HAVE_EXA */
     if (Success != viaSetupCBuffer(pScrn, &pVia->cb, 0)) {
 	pVia->NoAccel = TRUE;
 	viaExitAccel(pScreen);

@@ -3,6 +3,7 @@
 	* unichrome/via_accel.c:
 
 	Whitespace adjustment; getting back close to Xorg.
+	Comment tweaks and #endif clarifications.
 
 2006-08-19  Benno Schulenberg  <bensberg-at-justemail-dot-net> 
 
