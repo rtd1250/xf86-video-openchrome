@@ -1,3 +1,9 @@
+2006-08-22  Benno Schulenberg  <bensberg-at-justemail-dot-net>
+
+	* unichrome/via_accel.c:
+
+	Whitespace adjustment; getting back close to Xorg.
+
 2006-08-19  Benno Schulenberg  <bensberg-at-justemail-dot-net> 
 
 	* unichrome/via_swov.c: (viaWaitVideoCommandFire),
