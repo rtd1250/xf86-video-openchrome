@@ -245,20 +245,19 @@ static Bool VIASetAgpMode(ScrnInfoPtr pScrn)
     }
     return TRUE;
 }
-    
-    
-	
-static Bool VIADRIAgpInit(ScreenPtr pScreen, VIAPtr pVia)
+
+static Bool
+VIADRIAgpInit(ScreenPtr pScreen, VIAPtr pVia)
 {
-    unsigned long  agp_phys;
+    int agpPages;
+    unsigned long agpCmdSize;
+    unsigned long agp_phys;
     drmAddress agpaddr;
     VIADRIPtr pVIADRI;
     DRIInfoPtr pDRIInfo;
     pDRIInfo = pVia->pDRIInfo;
     pVIADRI = pDRIInfo->devPrivate;
     pVia->agpSize = 0;
-    int agpPages;
-    unsigned long agpCmdSize;
 
     if (drmAgpAcquire(pVia->drmFD) < 0) {
         xf86DrvMsg(pScreen->myNum, X_ERROR, "[drm] drmAgpAcquire failed %d\n", errno);
@@ -349,10 +348,10 @@ static Bool VIADRIAgpInit(ScreenPtr pScreen, VIAPtr pVia)
 	    return FALSE;
 	}
     }
-    
+ 
     return TRUE;
-  
 }
+
 static Bool VIADRIFBInit(ScreenPtr pScreen, VIAPtr pVia)
 {   
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];

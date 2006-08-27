@@ -1,3 +1,10 @@
+2006-08-27  Benno Schulenberg  <bensberg-at-justemail-dot-net>
+
+	* unichrome/via_dri.c: (VIADRIAgpInit):
+
+	Rearrange declarations to fix compilation problem with gcc-2.96,
+	reported by Nikolai V. Ivanyushin <nvi-at-sven-dot-ru>.
+
 2006-08-22  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 
 	* unichrome/via_accel.c:
