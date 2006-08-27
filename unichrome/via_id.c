@@ -1,7 +1,6 @@
 /*
  * Copyright 2004-2005 The Unichrome Project  [unichrome.sf.net]
  *
- *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
@@ -22,6 +21,11 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+/*
+ * Contents: a rather big structure with card-id information,
+ *            and checking functions.
+ */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -30,24 +34,18 @@
 #include "via_id.h"
 
 /*
- * Since we are going to hold a rather big structure with
- * basic card-id information, we might as well seperate this
- * into its own file.
- *
- */
-
-/*
  * Known missing devices:
- * cle266:
+ * 
+ *   CLE266:
  * Biostar M6VLQ Grand
  * Biostar M6VLQ Pro
  * PcChips M789CLU (with C3 onboard)
  * PcChips M791G
  * Soltek SL-B6A-F800 (C3 800Mhz onboard)
  * Soltek SL-B6A-F1000 (Qbic IQ3601 | C3 1Ghz onboard)
- * + loads of semi-embedded devices.
+ * plus loads of semi-embedded devices
  *
- * km400:
+ *   KM400:
  * ECS KM400-M
  * ECS KM400-M2
  * ECS KM400A-M2
@@ -57,7 +55,7 @@
  * Soyo SY-K7VMP
  * Soyo SY-K7VMP2
  *
- * k8m800:
+ *   K8M800:
  * Abit KV8-MAX3
  * Abit KV8
  * Biostar Ideq 210V (km400a)
@@ -71,7 +69,7 @@
  * Soltek SL-B9C-FGR (Qbic EQ3802-300P)
  * Soltek SL-K8M800I-R
  *
- * pm800:
+ *   PM800:
  * Biostar Ideq 210M
  * Biostar P4VMA-M
  * Biostar P4M80-M7 (is this even a unichrome?)
@@ -81,12 +79,11 @@
  * Soltek SL-PM800I-R
  * Soltek SL-PM800
  * Soyo SY-P4VM800
- *
  */
+
 /*
- * There's no reason for this to be known outside of via_id.o
- * Only a pointer to an single entry will ever be used outside.
- *
+ * There's no reason for this to be known outside of via_id.o;
+ * only a pointer to a single entry will ever be used outside.
  */
 static struct ViaCardIdStruct ViaCardId[] = {
     /* CLE266 */
@@ -99,9 +96,9 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Acer Aspire 135x",                      VIA_KM400,   0x1025, 0x0033, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
     {"Asustek A7V8X-MX",                      VIA_KM400,   0x1043, 0x80ED, VIA_DEVICE_CRT},
     {"Asustek A7V8X-LA",                      VIA_KM400,   0x1043, 0x80F9, VIA_DEVICE_CRT},
-    {"Asustek A7V8X-MX SE/A7V400-MX",         VIA_KM400,   0x1043, 0x8118, VIA_DEVICE_CRT},
+    {"Asustek A7V8X-MX SE / A7V400-MX",       VIA_KM400,   0x1043, 0x8118, VIA_DEVICE_CRT},
     {"Asustek Terminator A7VT",               VIA_KM400,   0x1043, 0x813E, VIA_DEVICE_CRT | VIA_DEVICE_TV},
-    {"Mitac 8375X",                           VIA_KM400,   0x1071, 0x8375, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV}, /* aka UMAX 585T */
+    {"Mitac 8375X",                           VIA_KM400,   0x1071, 0x8375, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV}, /* aka "UMAX 585T" */
     {"Soltek SL-75MIV2",                      VIA_KM400,   0x1106, 0x0000, VIA_DEVICE_CRT}, /* VIA/0x0000 */
     {"VIA VT3205 (KM400)",                    VIA_KM400,   0x1106, 0x3205, VIA_DEVICE_CRT | VIA_DEVICE_TV}, /* borrowed by Soltek SL-B7C-FGR */ 
     {"VIA VT7205 (KM400A)",                   VIA_KM400,   0x1106, 0x7205, VIA_DEVICE_CRT}, /* borrowed by Biostar iDEQ 200V/Chaintech 7VIF4 */
@@ -117,7 +114,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Averatec 322x",                         VIA_KM400,   0x14FF, 0x030D, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"FIC K7M-400A",                          VIA_KM400,   0x1509, 0x9233, VIA_DEVICE_CRT},
     {"Biostar P4M800-M7",                     VIA_KM400,   0x1565, 0x1202, VIA_DEVICE_CRT},
-    {"Uniwill 755CI",                         VIA_KM400,   0x1584, 0x800A, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV}, /* aka "Gericom hummer advance", "Maxdata M-Book 1200X" */
+    {"Uniwill 755CI",                         VIA_KM400,   0x1584, 0x800A, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV}, /* aka "Gericom Hummer Advance", "Maxdata M-Book 1200X" */
     {"Packard Bell Quasar2 (MSI MS6786)",     VIA_KM400,   0x1631, 0xD002, VIA_DEVICE_CRT},
     {"Epox EP-8KMM3I",                        VIA_KM400,   0x1695, 0x9023, VIA_DEVICE_CRT},
     {"ASRock Inc. K7VM2/3/4",                 VIA_KM400,   0x1849, 0x7205, VIA_DEVICE_CRT},
@@ -129,7 +126,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"ECS K8M800-M2 (2.0)",                   VIA_K8M800,  0x1019, 0x1B45, VIA_DEVICE_CRT},
     {"Acer Aspire 136x",                      VIA_K8M800,  0x1025, 0x006E, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
     {"Asustek K8V-MX",                        VIA_K8M800,  0x1043, 0x8129, VIA_DEVICE_CRT},
-    {"Mitac 8399",                            VIA_K8M800,  0x1071, 0x8399, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV}, /* aka "pogolinux konabook 3100" */
+    {"Mitac 8399",                            VIA_K8M800,  0x1071, 0x8399, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV}, /* aka "Pogolinux Konabook 3100" */
     {"Mitac 8889",                            VIA_K8M800,  0x1071, 0x8889, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
     {"VIA VT3108 (K8M800)",                   VIA_K8M800,  0x1106, 0x3108, VIA_DEVICE_CRT}, /* borrowed by Asustek A8V-MX */ 
     {"Shuttle FX21",                          VIA_K8M800,  0x1297, 0x3052, VIA_DEVICE_CRT},
@@ -186,7 +183,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
 };
 
 /*
- * Fancy little routine stolen from fb
+ * Fancy little routine stolen from fb.
  * We don't do anything but warn really.
  */
 void
@@ -236,7 +233,7 @@ ViaCheckCardId(ScrnInfoPtr pScrn)
     }
     
     xf86DrvMsg(pScrn->scrnIndex, X_ERROR, 
-	       "Unknown Card-Ids (%4X|%4X), report this to openchrome-users@openchrome.org ASAP\n"
+	       "Unknown Card-Ids (%4X|%4X); please report to openchrome-users@openchrome.org\n"
 	       , pVia->PciInfo->subsysVendor, pVia->PciInfo->subsysCard);
     pVia->Id = NULL;
 }
