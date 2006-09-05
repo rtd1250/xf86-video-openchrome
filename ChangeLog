@@ -1,3 +1,10 @@
+2006-09-05  Benno Schulenberg  <bensberg-at-justemail-dot-net>
+
+	* unichrome/via_id.c:
+
+	Add an ID (trac ticket #67), note identical numbers, remove
+	a duplicate, remove obsolete unknown, remove trailing tab.
+
 2006-08-27  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 
 	* unichrome/via_id.c:
@@ -18,14 +25,14 @@
 	Whitespace adjustment; getting back close to Xorg.
 	Comment tweaks and #endif clarifications.
 
-2006-08-19  Benno Schulenberg  <bensberg-at-justemail-dot-net> 
+2006-08-19  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 
 	* unichrome/via_swov.c: (viaWaitVideoCommandFire),
 	(SetVideoWindow):
 
 	Comment tweaks.
 
-2006-08-18  Benno Schulenberg  <bensberg-at-justemail-dot-net> 
+2006-08-18  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 
 	* unichrome/via_driver.h:
 
