@@ -48,11 +48,11 @@
 #include <math.h>
 
 /*
- * Warning: this file contains revision checks which are CLE266 specific.
+ * Warning: this file contains revision checks which are CLE266-specific.
  * There seems to be no checking present for KM400 or more recent devices.
  *
  * TODO:
- *   - pVia->Chipset checking of course.
+ *   - pVia->Chipset checking, of course
  *   - move content of pVia->HWDiff into pVia->swov
  *   - merge with CLEXF40040
  */
@@ -187,8 +187,7 @@ SaveVideoRegister(VIAPtr pVia, CARD32 index, CARD32 data)
 }
 
 /*
- * HW Difference Flag
- * Moved here from via_hwdiff.c
+ * HW Difference Flag (moved here from via_hwdiff.c)
  *
  * These are the entries of HWDiff used in our code (currently):
  *                     CLE266Ax   CLE266Cx   KM400     K8M800    PM800
@@ -267,8 +266,9 @@ typedef struct _YCBCRREC
     CARD32 dwCR;
 } YCBCRREC;
 
-/* Verify that using V1 bit definitions on V3
- * is not broken in OverlayGetV1V3Format()
+/* 
+ * Verify that using V1 bit definitions on V3
+ * is not broken in OverlayGetV1V3Format().
  */
 
 #if V1_COLORSPACE_SIGN != V3_COLORSPACE_SIGN
@@ -495,7 +495,7 @@ viaOverlayHQVCalcZoomWidth(VIAPtr pVia, unsigned long videoFlag,
 
     } else {			       /* srcWidth > dstWidth - Zoom out */
 
-	/*HQV rounding patch
+	/* HQV rounding patch, instead of:
 	 * //tmp = dstWidth*0x0800 / srcWidth; */
 	tmp = dstWidth * 0x800 * 0x400 / srcWidth;
 	tmp = tmp / 0x400 + ((tmp & 0x3ff) ? 1 : 0);
@@ -577,7 +577,7 @@ viaOverlayHQVCalcZoomHeight(VIAPtr pVia, unsigned long srcHeight,
 	*pHQVfilterCtl |= HQV_V_TAP4_121;
     } else {			       /* srcHeight > dstHeight - Zoom out */
 
-	/*HQV rounding patch
+	/* HQV rounding patch, instead of:
 	 * //tmp = dstHeight*0x0800 / srcHeight; */
 	tmp = dstHeight * 0x0800 * 0x400 / srcHeight;
 	tmp = tmp / 0x400 + ((tmp & 0x3ff) ? 1 : 0);
@@ -714,7 +714,6 @@ static colorCoeff colorCTable[] = { {1.1875, 1.625, 0.875, 0.375, 2.0},
  * new chipset models should be added in the table above and, if needed,
  * implemented in the model switch below.
  */
-
 static void
 viaCalculateVideoColor(VIAPtr pVia, int hue, int saturation, int brightness,
     int contrast, Bool reset, CARD32 * col1, CARD32 * col2)
@@ -942,10 +941,10 @@ ViaSetVidCtl(VIAPtr pVia, unsigned int videoFlag)
 	}
     }
     return 0;
-}				       /*End of DeviceID */
+}
 
 /*
- * Fill the buffer with 0x8000 (YUV2 black)
+ * Fill the buffer with 0x8000 (YUV2 black).
  */
 static void
 ViaYUVFillBlack(VIAPtr pVia, int offset, int num)
@@ -1006,7 +1005,7 @@ AddHQVSurface(ScrnInfoPtr pScrn, unsigned int numbuf, CARD32 fourcc)
 }
 
 /*
- * Create a FOURCC surface (Supported: YUY2, YV12 or VIA)
+ * Create a FOURCC surface.
  * doalloc: set true to actually allocate memory for the framebuffers
  */
 static long
@@ -1430,14 +1429,14 @@ SetChromaKey(VIAPtr pVia, unsigned long videoFlag,
     SaveVideoRegister(pVia, V_CHROMAKEY_HIGH, chromaHigh);
     if (videoFlag & VIDEO_1_INUSE) {
 	SaveVideoRegister(pVia, V_CHROMAKEY_LOW, chromaLow & ~V_CHROMAKEY_V3);
-	/*Temporarily solve the H/W Interpolation error when using Chroma Key */
+	/* Temporarily solve the HW interpolation error when using Chroma key */
 	SaveVideoRegister(pVia, V1_MINI_CONTROL, miniCtl & 0xFFFFFFF8);
     } else {
 	SaveVideoRegister(pVia, V_CHROMAKEY_LOW, chromaLow | V_CHROMAKEY_V3);
 	SaveVideoRegister(pVia, V3_MINI_CONTROL, miniCtl & 0xFFFFFFF8);
     }
 
-    /*Modified by Scottie[2001.12.5] for select video if (color key & chroma key) */
+    /* Modified by Scottie[2001.12.5] for select video if (Color key & Chroma key) */
     if (compose == SELECT_VIDEO_IF_COLOR_KEY)
 	compose = SELECT_VIDEO_IF_COLOR_KEY | SELECT_VIDEO_IF_CHROMA_KEY;
     else
@@ -1604,11 +1603,9 @@ SetVideoWindow(ScrnInfoPtr pScrn, unsigned long videoFlag,
     }
 }
 
-/****************************************************************************
- *
+/*
  * Upd_Video()
- *
- ***************************************************************************/
+ */
 static Bool
 Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
     unsigned long startAddr, LPDDUPDATEOVERLAY pUpdate,
@@ -1920,7 +1917,7 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
 		    (CARD32 volatile *)(pVia->VidMapBase + HQV_CONTROL +
 		    proReg);
 
-		/* check HQV is idle */
+		/* Check that HQV is idle */
 		DBG_DD(ErrorF("HQV control wf - %08lx\n", *HQVCtrl));
 		while (!(*HQVCtrl & HQV_IDLE)) {
 		    DBG_DD(ErrorF("HQV control busy - %08lx\n", *HQVCtrl));
@@ -1954,7 +1951,7 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
 		VIDOutD(V1_CONTROL, vidCtl);
 		VIDOutD(V_COMPOSE_MODE, compose | V1_COMMAND_FIRE);
 		if (pVia->swov.gdwUseExtendedFIFO) {
-		    /*Set Display FIFO */
+		    /* Set Display FIFO */
 		    DBG_DD(ErrorF(" Wait flips7"));
 		    viaWaitVBI(pVia);
 		    DBG_DD(ErrorF(" Wait flips 8"));
@@ -1990,13 +1987,13 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
 
     return TRUE;
 
-}				       /* Upd_Video */
+}					/* Upd_Video */
 
 /*
- *  VIAVidUpdateOverlay
+ *  VIAVidUpdateOverlay()
  *  Parameters:   src rectangle, dst rectangle, colorkey...
- *  Return Value: unsigned long of state
- *  note: Update the overlay image param.
+ *  Return value: unsigned long of state
+ *  Note: updates the overlay image parameter.
  */
 Bool
 VIAVidUpdateOverlay(ScrnInfoPtr pScrn, LPDDUPDATEOVERLAY pUpdate)
@@ -2056,7 +2053,7 @@ VIAVidUpdateOverlay(ScrnInfoPtr pScrn, LPDDUPDATEOVERLAY pUpdate)
 
     ResetVidRegBuffer(pVia);
 
-    /*for SW decode HW overlay use */
+    /* For SW decode HW overlay use */
     startAddr = VIDInD(HQV_SRC_STARTADDR_Y + proReg);
 
     if (flags & DDOVER_KEYDEST) {
@@ -2104,7 +2101,7 @@ VIAVidUpdateOverlay(ScrnInfoPtr pScrn, LPDDUPDATEOVERLAY pUpdate)
 	    ((dstBottom - dstTop) >> 1)) / (dstBottom - dstTop);
     }
 
-    /* Save modified src & original dest rectangle param. */
+    /* Save modified src & original dest rectangle parameters */
 
     if ((pVia->swov.SrcFourCC == FOURCC_YUY2) ||
 	(pVia->swov.SrcFourCC == FOURCC_RV15) ||
@@ -2152,7 +2149,7 @@ VIAVidUpdateOverlay(ScrnInfoPtr pScrn, LPDDUPDATEOVERLAY pUpdate)
 
     return TRUE;
 
-}				       /*VIAVidUpdateOverlay */
+}					/* VIAVidUpdateOverlay */
 
 /*
  *

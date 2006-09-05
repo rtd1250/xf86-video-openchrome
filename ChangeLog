@@ -1,5 +1,11 @@
 2006-09-05  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 
+	* unichrome/via_swov.c:
+
+	Comment and whitespace tweaks.
+
+2006-09-05  Benno Schulenberg  <bensberg-at-justemail-dot-net>
+
 	* unichrome/via_id.c:
 
 	Add an ID (trac ticket #67), note identical numbers, remove
