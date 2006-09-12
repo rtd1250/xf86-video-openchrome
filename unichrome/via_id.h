@@ -34,6 +34,7 @@ enum VIACHIPTAGS {
     VIA_K8M800,
     VIA_PM800,
     VIA_VM800,
+    VIA_K8M890,
     VIA_LAST
 };
 
@@ -56,6 +57,7 @@ enum VIACHIPTAGS {
 #define PCI_CHIP_CLE3122        0x3122 /* CLE266 */
 #define PCI_CHIP_VT3205         0x7205 /* KM400 */
 #define PCI_CHIP_VT3314         0x3344 /* VM800 */
+#define PCI_CHIP_VT3336         0x3230 /* K8M890 */
 
 /*
  * There is also quite some conflicting information on the

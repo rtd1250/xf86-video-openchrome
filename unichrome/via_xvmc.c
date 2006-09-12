@@ -330,7 +330,8 @@ ViaInitXVMC(ScreenPtr pScreen)
     pVia->XvMCEnabled = 0;
 
     if (!(pVia->Chipset == VIA_CLE266) && !(pVia->Chipset == VIA_K8M800) &&
-	!(pVia->Chipset == VIA_PM800) && !(pVia->Chipset == VIA_VM800)) {
+	!(pVia->Chipset == VIA_PM800) && !(pVia->Chipset == VIA_VM800) &&
+        !(pVia->Chipset == VIA_K8M890)) {
 	xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
 	    "[XvMC] Not supported on this chipset.\n");
 	return;

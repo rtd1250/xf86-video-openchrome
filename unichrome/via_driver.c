@@ -101,6 +101,7 @@ static SymTabRec VIAChipsets[] = {
     {VIA_K8M800,   "K8M800"},
     {VIA_PM800,    "PM800/PM880/CN400"},
     {VIA_VM800,    "VM800"},
+    {VIA_K8M890,   "K8M890"},
     {-1,            NULL }
 };
 
@@ -112,6 +113,7 @@ static PciChipsets VIAPciChipsets[] = {
     {VIA_K8M800,   PCI_CHIP_VT3204,    RES_SHARED_VGA},
     {VIA_PM800,    PCI_CHIP_VT3259,    RES_SHARED_VGA},
     {VIA_VM800,    PCI_CHIP_VT3314,    RES_SHARED_VGA},
+    {VIA_K8M890,   PCI_CHIP_VT3336,    RES_SHARED_VGA},
     {-1,            -1,                RES_UNDEFINED}
 };
 
@@ -1468,8 +1470,9 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
 
     if (pBIOSInfo->PanelActive && ((pVia->Chipset == VIA_K8M800) ||
 				   (pVia->Chipset == VIA_PM800) ||
-                    (pVia->Chipset == VIA_VM800))) {
-	xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Panel on K8M800, PM800 or VM800 is"
+                    (pVia->Chipset == VIA_VM800) ||
+                    (pVia->Chipset == VIA_K8M890))) {
+	xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Panel on K8M800, PM800 ,VM800, or K8M890 is"
 		   " currently not supported.\n");
 	xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Using VBE to set modes to"
 		   " work around this.\n");
