@@ -557,9 +557,7 @@ viaInitVideo(ScreenPtr pScreen)
 	((pVia->Chipset == VIA_CLE266) ||
 	(pVia->Chipset == VIA_KM400) ||
 	(pVia->Chipset == VIA_K8M800) ||
-	(pVia->Chipset == VIA_PM800) || 
-        (pVia->Chipset == VIA_VM800) ||
-        (pVia->Chipset == VIA_K8M890));
+	(pVia->Chipset == VIA_PM800) || (pVia->Chipset == VIA_VM800));
     if ((pVia->drmVerMajor < 2) ||
 	((pVia->drmVerMajor == 2) && (pVia->drmVerMinor < 9)))
 	pVia->useDmaBlit = FALSE;
@@ -575,7 +573,7 @@ viaInitVideo(ScreenPtr pScreen)
 
     if ((pVia->Chipset == VIA_CLE266) || (pVia->Chipset == VIA_KM400) ||
 	(pVia->Chipset == VIA_K8M800) || (pVia->Chipset == VIA_PM800) ||
-	(pVia->Chipset == VIA_VM800) || (pVia->Chipset == VIA_K8M890)) {
+	(pVia->Chipset == VIA_VM800)) {
 	num_new = viaSetupAdaptors(pScreen, &newAdaptors);
 	num_adaptors = xf86XVListGenericAdaptors(pScrn, &adaptors);
     } else {

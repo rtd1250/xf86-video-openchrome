@@ -250,13 +250,6 @@ VIAVidHWDiffInit(ScrnInfoPtr pScrn)
 	HWDiff->dwHQVInitPatch = VID_HWDIFF_FALSE;
 	HWDiff->dwHQVDisablePatch = VID_HWDIFF_TRUE;
 	break;
-    case VIA_K8M890:
-	HWDiff->dwThreeHQVBuffer = VID_HWDIFF_TRUE;
-	HWDiff->dwHQVFetchByteUnit = VID_HWDIFF_TRUE;
-	HWDiff->dwSupportTwoColorKey = VID_HWDIFF_FALSE;
-	HWDiff->dwHQVInitPatch = VID_HWDIFF_FALSE;
-	HWDiff->dwHQVDisablePatch = VID_HWDIFF_TRUE;
-	break;
     default:
 	xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
 	    "VIAVidHWDiffInit: Unhandled ChipSet.\n");

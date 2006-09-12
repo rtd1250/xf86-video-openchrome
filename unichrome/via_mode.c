@@ -794,8 +794,6 @@ ViaGetMemoryBandwidth(ScrnInfoPtr pScrn)
 	return ViaBandwidthTable[VIA_BW_PM800].Bandwidth[pVia->MemClk];
     case VIA_VM800:
 	return ViaBandwidthTable[VIA_BW_VM800].Bandwidth[pVia->MemClk];
-    case VIA_K8M890:
-	return ViaBandwidthTable[VIA_BW_K8M890].Bandwidth[pVia->MemClk];
     default:
 	xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "ViaBandwidthAllowed: Unknown Chipset.\n");
 	return VIA_BW_MIN;
@@ -1715,7 +1713,7 @@ ViaModePrimary(ScrnInfoPtr pScrn, DisplayModePtr mode)
 	   is removed -- copy from clock handling code below */
 	if ((pVia->Chipset == VIA_CLE266) && CLE266_REV_IS_AX(pVia->ChipRev))
 	    ViaSetPrimaryDotclock(pScrn, 0x471C); /* CLE266Ax use 2x XCLK */
-	else if ((pVia->Chipset == VIA_K8M800) || (pVia->Chipset == VIA_PM800) || (pVia->Chipset == VIA_VM800) || (pVia->Chipset == VIA_K8M890))
+	else if ((pVia->Chipset == VIA_K8M800) || (pVia->Chipset == VIA_PM800) || (pVia->Chipset == VIA_VM800))
 	    ViaSetPrimaryDotclock(pScrn, 0x529001);
 	else
 	    ViaSetPrimaryDotclock(pScrn, 0x871C);
@@ -1730,11 +1728,11 @@ ViaModePrimary(ScrnInfoPtr pScrn, DisplayModePtr mode)
     if (pBIOSInfo->ClockExternal) {
 	if ((pVia->Chipset == VIA_CLE266) && CLE266_REV_IS_AX(pVia->ChipRev))
 	    ViaSetPrimaryDotclock(pScrn, 0x471C); /* CLE266Ax use 2x XCLK */
-	else if ((pVia->Chipset == VIA_K8M800) || (pVia->Chipset == VIA_PM800) ||(pVia->Chipset == VIA_VM800) || (pVia->Chipset == VIA_K8M890))
+	else if ((pVia->Chipset == VIA_K8M800) || (pVia->Chipset == VIA_PM800) ||(pVia->Chipset == VIA_VM800))
 	    ViaSetPrimaryDotclock(pScrn, 0x529001);
 	else
 	    ViaSetPrimaryDotclock(pScrn, 0x871C);
-	if ((pVia->Chipset != VIA_K8M800) && (pVia->Chipset != VIA_PM800) && (pVia->Chipset != VIA_VM800) || (pVia->Chipset == VIA_K8M890))
+	if ((pVia->Chipset != VIA_K8M800) && (pVia->Chipset != VIA_PM800) && (pVia->Chipset != VIA_VM800))
 	  ViaCrtcMask(hwp, 0x6B, 0x01, 0x01);
     } else {
 	ViaSetPrimaryDotclock(pScrn, pBIOSInfo->Clock);

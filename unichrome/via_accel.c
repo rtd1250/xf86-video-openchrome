@@ -223,13 +223,6 @@ viaTearDownCBuffer(ViaCommandBuffer * buf)
 /*
  * Leftover from VIA's code.
  */
-static void
-viaInitPCIe(VIAPtr pVia)
-{
-    VIASETREG(0x41c, 0x00100000);
-    VIASETREG(0x420, 0x680A0000);
-    VIASETREG(0x420, 0x02000000);
-}
 
 static void
 viaInitAgp(VIAPtr pVia)
@@ -256,61 +249,39 @@ viaInitAgp(VIAPtr pVia)
  */
 
 static void
-viaEnableAgpVQ(VIAPtr pVia)
+viaEnableVQ(VIAPtr pVia)
 {
-   CARD32
-       vqStartAddr = pVia->VQStart,
-       vqEndAddr = pVia->VQEnd,
-       vqStartL = 0x50000000 | (vqStartAddr & 0xFFFFFF),
-       vqEndL = 0x51000000 | (vqEndAddr & 0xFFFFFF),
-       vqStartEndH = 0x52000000 | ((vqStartAddr & 0xFF000000) >> 24) |
-       ((vqEndAddr & 0xFF000000) >> 16),
-       vqLen = 0x53000000 | (VIA_VQ_SIZE >> 3);
+    CARD32
+	vqStartAddr = pVia->VQStart,
+	vqEndAddr = pVia->VQEnd,
+	vqStartL = 0x50000000 | (vqStartAddr & 0xFFFFFF),
+	vqEndL = 0x51000000 | (vqEndAddr & 0xFFFFFF),
+	vqStartEndH = 0x52000000 | ((vqStartAddr & 0xFF000000) >> 24) |
+	((vqEndAddr & 0xFF000000) >> 16),
+	vqLen = 0x53000000 | (VIA_VQ_SIZE >> 3);
 
+    VIASETREG(VIA_REG_TRANSET, 0x00fe0000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x080003fe);
+    VIASETREG(VIA_REG_TRANSPACE, 0x0a00027c);
+    VIASETREG(VIA_REG_TRANSPACE, 0x0b000260);
+    VIASETREG(VIA_REG_TRANSPACE, 0x0c000274);
+    VIASETREG(VIA_REG_TRANSPACE, 0x0d000264);
+    VIASETREG(VIA_REG_TRANSPACE, 0x0e000000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x0f000020);
+    VIASETREG(VIA_REG_TRANSPACE, 0x1000027e);
+    VIASETREG(VIA_REG_TRANSPACE, 0x110002fe);
+    VIASETREG(VIA_REG_TRANSPACE, 0x200f0060);
 
-   VIASETREG(VIA_REG_TRANSET, 0x00fe0000);
-   VIASETREG(VIA_REG_TRANSPACE, 0x080003fe);
-   VIASETREG(VIA_REG_TRANSPACE, 0x0a00027c);
-   VIASETREG(VIA_REG_TRANSPACE, 0x0b000260);
-   VIASETREG(VIA_REG_TRANSPACE, 0x0c000274);
-   VIASETREG(VIA_REG_TRANSPACE, 0x0d000264);
-   VIASETREG(VIA_REG_TRANSPACE, 0x0e000000);
-   VIASETREG(VIA_REG_TRANSPACE, 0x0f000020);
-   VIASETREG(VIA_REG_TRANSPACE, 0x1000027e);
-   VIASETREG(VIA_REG_TRANSPACE, 0x110002fe);
-   VIASETREG(VIA_REG_TRANSPACE, 0x200f0060);
+    VIASETREG(VIA_REG_TRANSPACE, 0x00000006);
+    VIASETREG(VIA_REG_TRANSPACE, 0x40008c0f);
+    VIASETREG(VIA_REG_TRANSPACE, 0x44000000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x45080c04);
+    VIASETREG(VIA_REG_TRANSPACE, 0x46800408);
 
-   VIASETREG(VIA_REG_TRANSPACE, 0x00000006);
-   VIASETREG(VIA_REG_TRANSPACE, 0x40008c0f);
-   VIASETREG(VIA_REG_TRANSPACE, 0x44000000);
-   VIASETREG(VIA_REG_TRANSPACE, 0x45080c04);
-   VIASETREG(VIA_REG_TRANSPACE, 0x46800408);
-
-   VIASETREG(VIA_REG_TRANSPACE, vqStartEndH);
-   VIASETREG(VIA_REG_TRANSPACE, vqStartL);
-   VIASETREG(VIA_REG_TRANSPACE, vqEndL);
-   VIASETREG(VIA_REG_TRANSPACE, vqLen);
-}
-
-static void
-viaEnablePCIeVQ(VIAPtr pVia)
-{
-   CARD32
-       vqStartAddr = pVia->VQStart,
-       vqEndAddr = pVia->VQEnd,
-       vqStartL = 0x70000000 | (vqStartAddr & 0xFFFFFF),
-       vqEndL = 0x71000000 | (vqEndAddr & 0xFFFFFF),
-       vqStartEndH = 0x72000000 | ((vqStartAddr & 0xFF000000) >> 24) |
-       ((vqEndAddr & 0xFF000000) >> 16),
-       vqLen = 0x73000000 | (VIA_VQ_SIZE >> 3);
-
-       VIASETREG(0x41c, 0x00100000);
-       VIASETREG(0x420, vqStartEndH);
-       VIASETREG(0x420, vqStartL); 
-       VIASETREG(0x420, vqEndL);
-       VIASETREG(0x420, vqLen);
-       VIASETREG(0x420, 0x74301001);
-       VIASETREG(0x420, 0x00000000);
+    VIASETREG(VIA_REG_TRANSPACE, vqStartEndH);
+    VIASETREG(VIA_REG_TRANSPACE, vqStartL);
+    VIASETREG(VIA_REG_TRANSPACE, vqEndL);
+    VIASETREG(VIA_REG_TRANSPACE, vqLen);
 }
 
 /*
@@ -322,21 +293,12 @@ viaDisableVQ(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
 
-    switch ( pVia->Chipset )
-    {
-      case VIA_K8M890:
-        VIASETREG(0x41c, 0x00100000);
-        VIASETREG(0x420, 0x74301000);
-       break;
-      default:
-        VIASETREG(VIA_REG_TRANSET, 0x00fe0000);
-        VIASETREG(VIA_REG_TRANSPACE, 0x00000004);
-        VIASETREG(VIA_REG_TRANSPACE, 0x40008c0f);
-        VIASETREG(VIA_REG_TRANSPACE, 0x44000000);
-        VIASETREG(VIA_REG_TRANSPACE, 0x45080c04);
-        VIASETREG(VIA_REG_TRANSPACE, 0x46800408);
-       break;
-     }
+    VIASETREG(VIA_REG_TRANSET, 0x00fe0000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x00000004);
+    VIASETREG(VIA_REG_TRANSPACE, 0x40008c0f);
+    VIASETREG(VIA_REG_TRANSPACE, 0x44000000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x45080c04);
+    VIASETREG(VIA_REG_TRANSPACE, 0x46800408);
 }
 
 /*
@@ -385,24 +347,10 @@ viaInitialize2DEngine(ScrnInfoPtr pScrn)
 	VIASETREG(i, 0x0);
     }
 
-    switch( pVia->Chipset ) {
-        case VIA_K8M890:
-         viaInitPCIe(pVia);
-         break;
-        default:
-         viaInitAgp(pVia);
-         break;
-    }
+    viaInitAgp(pVia);
 
     if (pVia->VQStart != 0) {
-	switch( pVia->Chipset ) {
-            case VIA_K8M890:
-	      viaEnablePCIeVQ(pVia);
-             break;
-            default:
-              viaEnableAgpVQ(pVia);
-             break;
-        }
+	viaEnableVQ(pVia);
     } else {
 	viaDisableVQ(pScrn);
     }
@@ -422,21 +370,12 @@ viaAccelSync(ScrnInfoPtr pScrn)
 
     mem_barrier();
 
-    switch (pVia->Chipset) { 
-    case VIA_K8M890:
-        while ((VIAGETREG(VIA_REG_STATUS) &
-             (VIA_CMD_RGTR_BUSY | VIA_2D_ENG_BUSY)) &&
-             (loop++ < MAXLOOP)) ;
-        break;
-    default:
-        while (!(VIAGETREG(VIA_REG_STATUS) & VIA_VR_QUEUE_BUSY)
-	     && (loop++ < MAXLOOP)) ;
+    while (!(VIAGETREG(VIA_REG_STATUS) & VIA_VR_QUEUE_BUSY)
+	&& (loop++ < MAXLOOP)) ;
 
-        while ((VIAGETREG(VIA_REG_STATUS) &
-	        (VIA_CMD_RGTR_BUSY | VIA_2D_ENG_BUSY | VIA_3D_ENG_BUSY)) &&
-	     (loop++ < MAXLOOP)) ;
-        break;
-    }
+    while ((VIAGETREG(VIA_REG_STATUS) &
+	    (VIA_CMD_RGTR_BUSY | VIA_2D_ENG_BUSY | VIA_3D_ENG_BUSY)) &&
+	(loop++ < MAXLOOP)) ;
 }
 
 /*
@@ -1168,7 +1107,7 @@ viaInitXAA(ScreenPtr pScreen)
      * test with x11perf -shmput500!
      */
 
-    if ((pVia->Chipset != VIA_K8M800) && (pVia->Chipset != VIA_K8M890))
+    if (pVia->Chipset != VIA_K8M800)
 	xaaptr->ImageWriteFlags |= NO_GXCOPY;
 
     xaaptr->SetupForImageWrite = viaSetupForImageWrite;
