@@ -1772,6 +1772,8 @@ VIASave(ScrnInfoPtr pScrn)
 
     if(pVia->IsSecondary)
     {
+	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Secondary\n"));
+
         DevUnion* pPriv;
         VIAEntPtr pVIAEnt;
         VIAPtr   pVia1;
@@ -1785,6 +1787,8 @@ VIASave(ScrnInfoPtr pScrn)
         pVia->SavedReg = pVia1->SavedReg;
     }
     else {
+	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Primary\n"));
+
         vgaHWProtect(pScrn, TRUE);
 
         if (xf86IsPrimaryPci(pVia->PciInfo))
@@ -1793,6 +1797,7 @@ VIASave(ScrnInfoPtr pScrn)
             vgaHWSave(pScrn, &hwp->SavedReg, VGA_SR_MODE);
 
         /* Unlock Extended Regs */
+	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Unlocking...\n"));
 	hwp->writeSeq(hwp, 0x10, 0x01);
 	Regs->SR14 = hwp->readSeq(hwp, 0x14);
 	Regs->SR15 = hwp->readSeq(hwp, 0x15);
@@ -1825,6 +1830,7 @@ VIASave(ScrnInfoPtr pScrn)
 	Regs->SR46 = hwp->readSeq(hwp, 0x46);
 	Regs->SR47 = hwp->readSeq(hwp, 0x47);
 
+	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Crtc...\n"));
 	Regs->CR13 = hwp->readCrtc(hwp, 0x13);
 
 	Regs->CR32 = hwp->readCrtc(hwp, 0x32);

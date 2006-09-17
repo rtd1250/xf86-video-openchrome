@@ -1,3 +1,9 @@
+2006-09-17  Benno Schulenberg  <bensberg-at-justemail-dot-net>
+
+	* unichrome/via_driver.c: (VIASave):
+
+	Put in a few extra debugging lines.
+
 2006-09-05  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 
 	* unichrome/via_swov.c:
