@@ -26,8 +26,7 @@
 
 #include "drm.h"
 #include "xf86drm.h"
-
-typedef CARD32 uint32_t;
+#include "stdint.h"
 
 #ifdef X_NEED_DRMLOCK
 #define drm_hw_lock_t drmLock
