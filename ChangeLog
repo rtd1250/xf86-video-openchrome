@@ -1,4 +1,10 @@
-2006-09-22   Jon Nettleton <jon-dot-nettleton-at-gmail-dot-com>
+2006-09-24  Michal Ludvig  <michal-at-logix-dot-cz>
+
+	* man/Makefile.am:
+
+	Fix man-page symlink for out-of-tree build (trac ticket #50).
+
+2006-09-22  Jon Nettleton  <jon-dot-nettleton-at-gmail-dot-com>
 
 	* unichrome/via_drmclient.h:
 

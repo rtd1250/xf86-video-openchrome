@@ -59,4 +59,4 @@ SUFFIXES = .$(DRIVER_MAN_SUFFIX) .man
 	sed $(MAN_SUBSTS) < $< > $@
 
 @DRIVER_NAME@.man:
-	ln -s -f ../unichrome/@DRIVER_NAME@.man .
+	ln -s -f $(top_srcdir)/unichrome/@DRIVER_NAME@.man .
