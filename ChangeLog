@@ -1,3 +1,10 @@
+2006-09-25  Benno Schulenberg  <bensberg-at-justemail-dot-net>
+
+	* unichrome/Makefile.am:
+
+	Mention the overall revision number in the log, not just
+	the driver code revision.
+
 2006-09-24  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com>
 
 	* libxvmc/viaLowLevel.c: (initXvMCLowLevel):
