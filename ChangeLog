@@ -1,3 +1,12 @@
+2006-09-24  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com>
+
+	* libxvmc/viaLowLevel.c: (initXvMCLowLevel):
+	* libxvmc/viaLowLevelPro.c: (initXvMCLowLevel):
+	* libxvmc/viaXvMC.c: (XvMCSetAttribute):
+
+	Fix a mutex unlocking issue (Luc Verhaegen).
+	Have the lowlevel drivers check for the correct chipid.
+	
 2006-09-24  Michal Ludvig  <michal-at-logix-dot-cz>
 
 	* man/Makefile.am:

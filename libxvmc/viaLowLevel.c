@@ -1004,8 +1004,15 @@ initXvMCLowLevel(int fd, drm_context_t * ctx,
     unsigned width, unsigned height, int useAgp, unsigned chipId)
 {
     int ret;
+    XvMCLowLevel *xl;
 
-    XvMCLowLevel *xl = (XvMCLowLevel *) malloc(sizeof(XvMCLowLevel));
+    if (chipId == PCI_CHIP_VT3259) {
+	fprintf(stderr, "You are using an XvMC driver for the wrong chip.\n");
+	fprintf(stderr, "Chipid is 0x%04x.\n", chipId);
+	return NULL;
+    }
+
+    xl = (XvMCLowLevel *) malloc(sizeof(XvMCLowLevel));
 
     if (!xl)
 	return NULL;

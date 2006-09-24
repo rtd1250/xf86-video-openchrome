@@ -1821,8 +1821,10 @@ XvMCSetAttribute(Display * display,
 	if (attribute == pViaXvMC->attrib.attributes[i].attribute) {
 	    if ((!(pViaXvMC->attribDesc[i].flags & XvSettable)) ||
 		value < pViaXvMC->attribDesc[i].min_value ||
-		value > pViaXvMC->attribDesc[i].max_value)
+		value > pViaXvMC->attribDesc[i].max_value) {
+		ppthread_mutex_unlock(&pViaXvMC->ctxMutex);
 		return BadValue;
+	    }
 	    pViaXvMC->attrib.attributes[i].value = value;
 	    found = 1;
 	    pViaXvMC->attribChanged = 1;
