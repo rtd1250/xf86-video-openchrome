@@ -1,3 +1,9 @@
+2006-09-27  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com>
+
+	* unichrome/via_memory.c:
+
+	Don't include drm headers in non-dri build.
+	
 2006-09-25  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 
 	* unichrome/Makefile.am:

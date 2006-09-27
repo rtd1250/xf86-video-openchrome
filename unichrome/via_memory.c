@@ -30,13 +30,17 @@
 #include "xf86fbman.h"
 
 #include "via.h"
+
+#ifdef XF86DRI
 #include "xf86drm.h"
+#endif
 
 #include "via_driver.h"
 #include "via_priv.h"
 #include "via_swov.h"
+#ifdef XF86DRI
 #include "via_drm.h"
-
+#endif
 
 /*
  *	Isolate the wonders of X memory allocation and DRI memory allocation
