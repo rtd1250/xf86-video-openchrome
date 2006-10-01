@@ -1772,12 +1772,13 @@ VIASave(ScrnInfoPtr pScrn)
 
     if(pVia->IsSecondary)
     {
-	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Secondary\n"));
-
         DevUnion* pPriv;
         VIAEntPtr pVIAEnt;
         VIAPtr   pVia1;
         vgaHWPtr hwp1;
+
+	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Secondary\n"));
+
         pPriv = xf86GetEntityPrivate(pScrn->entityList[0],
               gVIAEntityIndex);
         pVIAEnt = pPriv->ptr;
@@ -1796,9 +1797,9 @@ VIASave(ScrnInfoPtr pScrn)
         else
             vgaHWSave(pScrn, &hwp->SavedReg, VGA_SR_MODE);
 
-        /* Unlock Extended Regs */
-	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Unlocking...\n"));
+        /* Unlock extended regs */
 	hwp->writeSeq(hwp, 0x10, 0x01);
+
 	Regs->SR14 = hwp->readSeq(hwp, 0x14);
 	Regs->SR15 = hwp->readSeq(hwp, 0x15);
 	Regs->SR16 = hwp->readSeq(hwp, 0x16);
@@ -1830,7 +1831,6 @@ VIASave(ScrnInfoPtr pScrn)
 	Regs->SR46 = hwp->readSeq(hwp, 0x46);
 	Regs->SR47 = hwp->readSeq(hwp, 0x47);
 
-	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Crtc...\n"));
 	Regs->CR13 = hwp->readCrtc(hwp, 0x13);
 
 	Regs->CR32 = hwp->readCrtc(hwp, 0x32);
@@ -1839,6 +1839,7 @@ VIASave(ScrnInfoPtr pScrn)
 	Regs->CR35 = hwp->readCrtc(hwp, 0x35);
 	Regs->CR36 = hwp->readCrtc(hwp, 0x36);
 
+	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "TVSave...\n"));
 	if (pBIOSInfo->TVI2CDev)
 	    ViaTVSave(pScrn);
 
@@ -1865,7 +1866,8 @@ VIARestore(ScrnInfoPtr pScrn)
     /* Secondary? */
 
     vgaHWProtect(pScrn, TRUE);
-    /* Unlock Extended Regs */
+
+    /* Unlock extended regs */
     hwp->writeSeq(hwp, 0x10, 0x01);
 
     hwp->writeCrtc(hwp, 0x6A, 0x00);
@@ -1875,13 +1877,13 @@ VIARestore(ScrnInfoPtr pScrn)
     if (pBIOSInfo->TVI2CDev)
 	ViaTVRestore(pScrn);
 
-    /* restore the standard vga regs */
+    /* Restore the standard vga regs */
     if (xf86IsPrimaryPci(pVia->PciInfo))
         vgaHWRestore(pScrn, &hwp->SavedReg, VGA_SR_ALL);
     else
         vgaHWRestore(pScrn, &hwp->SavedReg, VGA_SR_MODE);
 
-    /* restore extended regs */
+    /* Restore extended regs */
     hwp->writeSeq(hwp, 0x14, Regs->SR14);
     hwp->writeSeq(hwp, 0x15, Regs->SR15);
     hwp->writeSeq(hwp, 0x16, Regs->SR16);
@@ -1913,7 +1915,7 @@ VIARestore(ScrnInfoPtr pScrn)
     hwp->writeSeq(hwp, 0x46, Regs->SR46);
     hwp->writeSeq(hwp, 0x47, Regs->SR47);
 
-    /* reset dotclocks */
+    /* Reset dotclocks */
     ViaSeqMask(hwp, 0x40, 0x06, 0x06);
     ViaSeqMask(hwp, 0x40, 0x00, 0x06);
 	

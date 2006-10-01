@@ -1,3 +1,10 @@
+2006-10-02  Benno Schulenberg  <bensberg-at-justemail-dot-net>
+
+	* unichrome/via_driver.c: (VIASave), (VIARestore):
+
+	Moved a line to after declarations for picky gcc-2.96,
+	tweaked comments and debugging lines.
+
 2006-09-27  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via_memory.c:
