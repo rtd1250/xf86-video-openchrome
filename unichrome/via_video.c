@@ -1434,18 +1434,13 @@ viaPutImage(ScrnInfoPtr pScrn,
 		REGION_COPY(pScrn->pScreen, &pPriv->clip, clipBoxes);
 		if (pPriv->autoPaint) {
 #ifdef USE_NEW_XVABI
-		    ErrorF("Autopaint New ABI\n");
-
 		    if (pDraw->type == DRAWABLE_WINDOW) {
-		        ErrorF("PaintcolorKey\n");
 			viaPaintColorkey(pScrn, pPriv, clipBoxes, pDraw);
 		    } else {
-		        ErrorF("Fillkeyhelper\n");
 			xf86XVFillKeyHelper(pScrn->pScreen, pPriv->colorKey,
 					    clipBoxes);
 		    }
 #else
-		    ErrorF("Autopaint Old ABI\n");
 		    xf86XVFillKeyHelper(pScrn->pScreen, pPriv->colorKey,
 					clipBoxes);    
 #endif
