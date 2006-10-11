@@ -1,8 +1,21 @@
+2006-10-11  Xavier Bachelot <xb_ml-at-kelkoo-dot-net>
+
+	reviewed by: Ivor
+
+	* unichrome/via_bios.h:
+	* unichrome/via_id.c:
+	* unichrome/via_mode.h:
+	* unichrome/via_video.c: (DecideOverlaySupport):
+
+	DDR533 memory support and small clean up.
+	Fujitsu/Siemens Amilo L7320 pci id (reported by DeNayGo).
+
 2006-10-03 Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via_video.c: (viaPutImage):
 
 	Removed some stray debug messages.
+	
 
 2006-10-02  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 

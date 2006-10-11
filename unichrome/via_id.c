@@ -176,6 +176,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Biostar P4M80-M4",                      VIA_VM800,   0x1565, 0x1202, VIA_DEVICE_CRT}, /* shares numbers with Biostar P4VMA-M */
     {"Fujitsu/Siemens Amilo Pro V2030",       VIA_VM800,   0x1734, 0x109B, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Fujitsu/Siemens Amilo Pro V2035",       VIA_VM800,   0x1734, 0x10AE, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
+    {"Fujitsu/Siemens Amilo L7320",           VIA_VM800,   0x1734, 0x10CD, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"ASRock P4VM800",                        VIA_VM800,   0x1849, 0x3344, VIA_DEVICE_CRT},
     {"Asustek P5V800-MX",                     VIA_VM800,   0x3344, 0x1122, VIA_DEVICE_CRT},
     /* keep this */

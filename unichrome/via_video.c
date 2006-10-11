@@ -277,7 +277,8 @@ DecideOverlaySupport(ScrnInfoPtr pScrn)
 
     if (pVia->ChipId != PCI_CHIP_VT3205 &&
 	pVia->ChipId != PCI_CHIP_VT3204 &&
-	pVia->ChipId != PCI_CHIP_VT3259 && pVia->ChipId != PCI_CHIP_VT3314) {
+	pVia->ChipId != PCI_CHIP_VT3259 &&
+	pVia->ChipId != PCI_CHIP_VT3314) {
 	CARD32 bandwidth = (mode->HDisplay >> 4) * (mode->VDisplay >> 5) *
 	    pScrn->bitsPerPixel * mode->VRefresh;
 
@@ -316,39 +317,36 @@ DecideOverlaySupport(ScrnInfoPtr pScrn)
 	switch (pVia->MemClk) {
 	case VIA_MEM_SDR100:
 	    mClock = 50;	       /*HW base on 128 bit */
+	    memEfficiency = (float)SINGLE_3205_100;
 	    break;
 	case VIA_MEM_SDR133:
 	    mClock = 66.5;
+	    memEfficiency = (float)SINGLE_3205_100;
 	    break;
 	case VIA_MEM_DDR200:
 	    mClock = 100;
+	    memEfficiency = (float)SINGLE_3205_100;
 	    break;
 	case VIA_MEM_DDR266:
 	    mClock = 133;
+	    memEfficiency = (float)SINGLE_3205_133;
 	    break;
 	case VIA_MEM_DDR333:
 	    mClock = 166;
+	    memEfficiency = (float)SINGLE_3205_133;
+	    break;
+	case VIA_MEM_DDR400:
+	    mClock = 200;
+	    memEfficiency = (float)SINGLE_3205_133;
+	    break;
+	case VIA_MEM_DDR533:
+	    mClock = 266;
+	    memEfficiency = (float)SINGLE_3205_133;
 	    break;
 	default:
 	    /*Unknow DRAM Type */
 	    DBG_DD(ErrorF("Unknow DRAM Type!\n"));
 	    mClock = 166;
-	    break;
-	}
-
-	switch (pVia->MemClk) {
-	case VIA_MEM_SDR100:
-	case VIA_MEM_SDR133:
-	case VIA_MEM_DDR200:
-	    memEfficiency = (float)SINGLE_3205_100;
-	    break;
-	case VIA_MEM_DDR266:
-	case VIA_MEM_DDR333:
-	    memEfficiency = (float)SINGLE_3205_133;
-	    break;
-	default:
-	    /*Unknow DRAM Type . */
-	    DBG_DD(ErrorF("Unknow DRAM Type!\n"));
 	    memEfficiency = (float)SINGLE_3205_133;
 	    break;
 	}
