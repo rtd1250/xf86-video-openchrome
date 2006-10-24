@@ -1,3 +1,9 @@
+2006-10-24 Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+
+	* unichrome/via_xvmc.c: (ViaXvMCCreateContext):
+
+	Remove VT3314 (CN700, VM800 etc.) mpeg2 AGP DMA support.
+
 2006-10-11  Xavier Bachelot <xb_ml-at-kelkoo-dot-net>
 
 	reviewed by: Ivor

@@ -501,8 +501,8 @@ ViaXvMCCreateContext(ScrnInfoPtr pScrn, XvMCContextPtr pContext,
     contextRec->initAttrs = vx->xvAttr;
     contextRec->useAGP = pViaDRI->ringBufActive &&
 	((pVia->Chipset == VIA_CLE266) ||
-	(pVia->Chipset == VIA_KM400) ||
-	(pVia->Chipset == VIA_PM800) || (pVia->Chipset == VIA_VM800));
+	 (pVia->Chipset == VIA_KM400) ||
+	 (pVia->Chipset == VIA_PM800));
     contextRec->chipId = pVia->ChipId;
     contextRec->screen = pScrn->pScreen->myNum;
     contextRec->depth = pScrn->bitsPerPixel;
