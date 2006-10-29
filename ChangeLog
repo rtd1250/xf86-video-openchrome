@@ -1,3 +1,12 @@
+2006-10-29  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+
+	* libxvmc/viaLowLevel.c:
+	* libxvmc/viaLowLevelPro.c:
+	* unichrome/via_regs.h:
+
+	Via managed to mix up the 2D / 3D engine busy status bits.
+	Funny we never noticed this before.
+
 2006-10-24 Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_xvmc.c: (ViaXvMCCreateContext):

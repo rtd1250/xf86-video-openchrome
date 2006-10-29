@@ -197,8 +197,8 @@ typedef struct _XvMCLowLevel
 
 #define VIA_VR_QUEUE_BUSY       0x00020000	/* Virtual Queue is busy */
 #define VIA_CMD_RGTR_BUSY       0x00000080	/* Command Regulator is busy */
-#define VIA_2D_ENG_BUSY         0x00000001	/* 2D Engine is busy */
-#define VIA_3D_ENG_BUSY         0x00000002	/* 3D Engine is busy */
+#define VIA_2D_ENG_BUSY         0x00000002	/* 2D Engine is busy */
+#define VIA_3D_ENG_BUSY         0x00000001	/* 3D Engine is busy */
 #define VIA_GEM_8bpp            0x00000000
 #define VIA_GEM_16bpp           0x00000100
 #define VIA_GEM_32bpp           0x00000300

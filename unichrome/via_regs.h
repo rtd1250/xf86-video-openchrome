@@ -93,8 +93,8 @@
 
 /* VIA_REG_STATUS(0x400): Engine Status */
 #define VIA_CMD_RGTR_BUSY       0x00000080  /* Command Regulator is busy */
-#define VIA_2D_ENG_BUSY         0x00000001  /* 2D Engine is busy */
-#define VIA_3D_ENG_BUSY         0x00000002  /* 3D Engine is busy */
+#define VIA_2D_ENG_BUSY         0x00000002  /* 2D Engine is busy */
+#define VIA_3D_ENG_BUSY         0x00000001  /* 3D Engine is busy */
 #define VIA_VR_QUEUE_BUSY       0x00020000 /* Virtual Queue is busy */
 
 
