@@ -106,7 +106,6 @@ typedef struct _VIABIOSINFO {
     Bool        ForcePanel;
     int         PanelIndex;
     int         PanelSize;
-    Bool	LCDDualEdge;	/* mean add-on card is 2CH or Dual or DDR */
     Bool        Center;
     CARD8	BusWidth;		/* Digital Output Bus Width */
     Bool        SetDVI;
@@ -122,7 +121,6 @@ typedef struct _VIABIOSINFO {
     Bool        TVActive;
     I2CDevPtr   TVI2CDev;
     int         TVType;
-    Bool        TVProgressive;
     Bool        TVDotCrawl;
     int         TVDeflicker;
     CARD8       TVRegs[0xFF];

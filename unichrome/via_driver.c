@@ -124,8 +124,6 @@ typedef enum {
     OPTION_I2CSCAN,
 #endif /* HAVE_DEBUG */
     OPTION_VBEMODES,
-    OPTION_PCI_BURST,
-    OPTION_PCI_RETRY,
     OPTION_NOACCEL,
 #ifdef VIA_HAVE_EXA
     OPTION_ACCELMETHOD,
@@ -138,7 +136,6 @@ typedef enum {
     OPTION_ROTATE,
     OPTION_VIDEORAM,
     OPTION_ACTIVEDEVICE,
-    OPTION_LCDDUALEDGE,
     OPTION_BUSWIDTH,
     OPTION_CENTER,
     OPTION_PANELSIZE,
@@ -181,7 +178,6 @@ static OptionInfoRec VIAOptions[] =
     {OPTION_ROTATE,     "Rotate",       OPTV_ANYSTR,  {0}, FALSE},
     {OPTION_VIDEORAM,   "VideoRAM",     OPTV_INTEGER, {0}, FALSE},
     {OPTION_ACTIVEDEVICE,     "ActiveDevice",       OPTV_ANYSTR,  {0}, FALSE},
-    {OPTION_LCDDUALEDGE,    "LCDDualEdge",  OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_BUSWIDTH,	"BusWidth",  	OPTV_ANYSTR, {0}, FALSE},
     {OPTION_CENTER,     "Center",       OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_PANELSIZE,  "PanelSize",    OPTV_ANYSTR,  {0}, FALSE},
@@ -192,7 +188,6 @@ static OptionInfoRec VIAOptions[] =
     {OPTION_TVTYPE,     "TVType",       OPTV_ANYSTR,  {0}, FALSE},
     {OPTION_TVOUTPUT,   "TVOutput",     OPTV_ANYSTR,  {0}, FALSE},
     {OPTION_DISABLEVQ,  "DisableVQ",    OPTV_BOOLEAN, {0}, FALSE},
-    {OPTION_DRIXINERAMA,  "DRIXINERAMA",    OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_DISABLEIRQ, "DisableIRQ", OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_AGP_DMA, "EnableAGPDMA", OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_2D_DMA, "NoAGPFor2D", OPTV_BOOLEAN, {0}, FALSE},
@@ -836,7 +831,7 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
         /* We don't currently support DirectColor at > 8bpp */
         if (pScrn->depth > 8 && pScrn->defaultVisual != TrueColor) {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Given default visual"
-                       " (%s) is not supported at depth %d\n",
+                       " (%s) is not supported at depth %d.\n",
                        xf86GetVisualName(pScrn->defaultVisual), pScrn->depth);
             xfree(pEnt);
             VIAFreeRec(pScrn);
@@ -853,46 +848,18 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
     if (pScrn->depth == 8)
         pScrn->rgbBits = 6;
 
+    pVia->PciInfo = xf86GetPciInfoForEntity(pEnt->index);
+    xf86RegisterResources(pEnt->index, NULL, ResNone);
+
     xf86ProcessOptions(pScrn->scrnIndex, pScrn->options, VIAOptions);
 
-#ifdef XF86DRI
-    pVia->drixinerama = FALSE;
-    if (xf86IsOptionSet(VIAOptions, OPTION_DRIXINERAMA))
-        pVia->drixinerama = TRUE;
-#else
-    if (xf86IsOptionSet(VIAOptions, OPTION_DRIXINERAMA))
-    	xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-    		"Option: drixinerama ignored, no DRI support compiled into driver.\n");
-#endif
-    if (xf86ReturnOptValBool(VIAOptions, OPTION_PCI_BURST, FALSE)) {
-        pVia->pci_burst = TRUE;
-        xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                   "Option: pci_burst - PCI burst read enabled\n");
-    }
-    else {
-        pVia->pci_burst = FALSE;
-    }
-
-    pVia->NoPCIRetry = 1;       /* default */
-    if (xf86ReturnOptValBool(VIAOptions, OPTION_PCI_RETRY, FALSE)) {
-        if (xf86ReturnOptValBool(VIAOptions, OPTION_PCI_BURST, FALSE)) {
-            pVia->NoPCIRetry = 0;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "Option: pci_retry\n");
-        }
-        else {
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                       "\"pci_retry\" option requires \"pci_burst\"\n");
-        }
-    }
-
-    if (xf86IsOptionSet(VIAOptions, OPTION_SHADOW_FB)) {
-        pVia->shadowFB = TRUE;
-        xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "Option: ShadowFB %s.\n",
-                   pVia->shadowFB ? "enabled" : "disabled");
-    }
-    else {
-        pVia->shadowFB = FALSE;
-    }
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
+	       "Starting to parse config file options...\n");
+    pVia->shadowFB = FALSE;
+    from = xf86GetOptValBool(VIAOptions, OPTION_SHADOW_FB, &pVia->shadowFB) ? 
+	X_CONFIG : X_DEFAULT;
+    xf86DrvMsg(pScrn->scrnIndex, from, "ShadowFB is %s.\n",
+	       pVia->shadowFB ? "enabled" : "disabled");
 
     if ((s = xf86GetOptValString(VIAOptions, OPTION_ROTATE))) {
         if (!xf86NameCmp(s, "CW")) {
@@ -901,31 +868,35 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
             pVia->rotate = 1;
             pVia->hwcursor = FALSE;
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                       "Rotating screen clockwise - acceleration disabled\n");
+                       "Rotating screen clockwise - acceleration disabled.\n");
         }
         else if(!xf86NameCmp(s, "CCW")) {
             pVia->shadowFB = TRUE;
             pVia->rotate = -1;
             pVia->hwcursor = FALSE;
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,  "Rotating screen"
-                       "counter clockwise - acceleration disabled\n");
+                       "counter clockwise - acceleration disabled.\n");
         }
         else {
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "\"%s\" is not a valid"
-                       "value for Option \"Rotate\"\n", s);
+                       "value for Option \"Rotate\".\n", s);
             xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                       "Valid options are \"CW\" or \"CCW\"\n");
+                       "Valid options are \"CW\" or \"CCW\".\n");
         }
     }
 
-    if (xf86ReturnOptValBool(VIAOptions, OPTION_NOACCEL, FALSE)) {
+    pVia->NoAccel = FALSE;
+    from = xf86GetOptValBool(VIAOptions, OPTION_NOACCEL, &pVia->NoAccel) ? 
+	X_CONFIG : X_DEFAULT;
+    xf86DrvMsg(pScrn->scrnIndex, from, "Acceleration is %s.\n",
+	       !pVia->NoAccel ? "enabled" : "disabled");
+
+    if (pVia->shadowFB && !pVia->NoAccel) {
+        xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                   "HW acceleration not supported with \"shadowFB\".\n");
         pVia->NoAccel = TRUE;
-        xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                   "Option: NoAccel -Acceleration Disabled\n");
     }
-    else {
-        pVia->NoAccel = FALSE;
-    }
+
 #ifdef VIA_HAVE_EXA 
     if(!pVia->NoAccel) {
         from = X_DEFAULT;
@@ -939,43 +910,28 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
 		pVia->useEXA = TRUE;
 	    }
 	}
-	xf86DrvMsg(pScrn->scrnIndex, from, "Using %s acceleration architecture\n",
+	xf86DrvMsg(pScrn->scrnIndex, from, "Using %s acceleration architecture.\n",
 		   pVia->useEXA ? "EXA" : "XAA");
 
 	pVia->noComposite = FALSE;
 	if (pVia->useEXA) {
-	    if (xf86ReturnOptValBool(VIAOptions, OPTION_EXA_NOCOMPOSITE, FALSE)) {
-		pVia->noComposite = TRUE;
-		xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-			   "Option: ExaNoComposite - Disable Composite acceleration for EXA\n");
-	    } else {
-		pVia->noComposite = FALSE;
-	    }
-
+	    from = xf86GetOptValBool(VIAOptions, OPTION_EXA_NOCOMPOSITE, 
+				     &pVia->noComposite) ? 
+		X_CONFIG : X_DEFAULT;
+	    xf86DrvMsg(pScrn->scrnIndex, from, 
+		       "EXA composite acceleration %s.\n",
+		       !pVia->noComposite ? "enabled" : "disabled");
+	    
 	    pVia->exaScratchSize = VIA_SCRATCH_SIZE / 1024;
-	    if(xf86GetOptValInteger(VIAOptions, OPTION_EXA_SCRATCH_SIZE, 
-				    &pVia->exaScratchSize)) {
-		xf86DrvMsg( pScrn->scrnIndex, X_CONFIG,
-			    "Option: ExaScratchSize %dkB\n", 
-			    pVia->exaScratchSize );
-	    }
-
-	    if (xf86ReturnOptValBool(VIAOptions, OPTION_EXA_NOCOMPOSITE, FALSE)) {
-		pVia->noComposite = TRUE;
-		xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-			   "Option: ExaNoComposite - Disable Composite acceleration for EXA\n");
-	    } else {
-		pVia->noComposite = FALSE;
-	    }
+	    from = xf86GetOptValInteger(VIAOptions, OPTION_EXA_SCRATCH_SIZE, 
+					&pVia->exaScratchSize) ? 
+		X_CONFIG : X_DEFAULT;
+	    xf86DrvMsg( pScrn->scrnIndex, from,
+			"EXA scratch area size is %dkB.\n", 
+			pVia->exaScratchSize );
 	}
     }
 #endif /* VIA_HAVE_EXA */
-
-    if (pVia->shadowFB && !pVia->NoAccel) {
-        xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                   "HW acceleration not supported with \"shadowFB\".\n");
-        pVia->NoAccel = TRUE;
-    }
 
     /*
      * The SWCursor setting takes priority over HWCursor.  The default
@@ -987,110 +943,113 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
     if (xf86GetOptValBool(VIAOptions, OPTION_HWCURSOR, &pVia->hwcursor))
         from = X_CONFIG;
 
-    if (xf86ReturnOptValBool(VIAOptions, OPTION_SWCURSOR, FALSE)) {
-        pVia->hwcursor = FALSE;
+    if (xf86GetOptValBool(VIAOptions, OPTION_SWCURSOR, &pVia->hwcursor)) {
+        pVia->hwcursor = !pVia->hwcursor;
         from = X_CONFIG;
     }
 
-    if (pVia->IsSecondary) pVia->hwcursor = FALSE;
+    if (pVia->IsSecondary) 
+	pVia->hwcursor = FALSE;
 
-    xf86DrvMsg(pScrn->scrnIndex, from, "Using %s cursor\n",
-               pVia->hwcursor ? "HW" : "SW");
+    if (pVia->hwcursor) {
+	xf86DrvMsg(pScrn->scrnIndex, from, 
+		   "Hardware two-color cursors.\n"
+		   "\tSoftware full color cursors.\n");
+    } else {
+	xf86DrvMsg(pScrn->scrnIndex, from, "Using software cursors.\n");
+    }
 
     from = X_DEFAULT;
 
-    pScrn->videoRam = 0;
-    if(xf86GetOptValInteger(VIAOptions, OPTION_VIDEORAM, &pScrn->videoRam)) {
-    	xf86DrvMsg( pScrn->scrnIndex, X_CONFIG,
-    	            "Option: VideoRAM %dkB\n", pScrn->videoRam );
+    pScrn->videoRam = pEnt->device->videoRam;
+    from = xf86GetOptValInteger(VIAOptions, OPTION_VIDEORAM, 
+				&pScrn->videoRam) ? 
+	X_CONFIG : X_PROBED;
+    xf86DrvMsg( pScrn->scrnIndex, X_CONFIG,
+		"VideoRAM %dkB\n", pScrn->videoRam );
+
+    pVia->VQEnable = TRUE;
+    from = xf86GetOptValBool(VIAOptions, OPTION_DISABLEVQ, &pVia->VQEnable)
+	? X_CONFIG : X_DEFAULT;
+    xf86DrvMsg(pScrn->scrnIndex, from, "GPU virtual command queue will be %s.\n",
+	       (pVia->VQEnable) ? "enabled" : "disabled");
+
+    pVia->DRIIrqEnable = TRUE;
+    from = xf86GetOptValBool(VIAOptions, OPTION_DISABLEIRQ, 
+			     &pVia->DRIIrqEnable)
+	? X_CONFIG : X_DEFAULT;
+    xf86DrvMsg(pScrn->scrnIndex, from, "DRI IRQ will be %s if DRI is enabled.\n",
+	       (pVia->DRIIrqEnable) ? "enabled" : "disabled");
+
+    pVia->agpEnable = FALSE;
+    from = xf86GetOptValBool(VIAOptions, OPTION_AGP_DMA, &pVia->agpEnable)
+	? X_CONFIG : X_DEFAULT;
+    xf86DrvMsg(pScrn->scrnIndex, from, "AGP DMA will be %s if DRI is enabled.\n",
+	       (pVia->agpEnable) ? "enabled" : "disabled");
+
+    pVia->dma2d = TRUE;
+    if (pVia->agpEnable) {
+	from = xf86GetOptValBool(VIAOptions, OPTION_2D_DMA, &pVia->dma2d)
+	    ? X_CONFIG : X_DEFAULT;
+	xf86DrvMsg(pScrn->scrnIndex, from, "AGP DMA will %sbe used for 2D "
+		   "acceleration.\n",
+		   (pVia->dma2d) ? "" : "not ");
     }
 
-    if (xf86ReturnOptValBool(VIAOptions, OPTION_DISABLEVQ, FALSE)) {
-        pVia->VQEnable = FALSE;
-        xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                   "Option: DisableVQ -VQ Disabled\n");
-    }
-    else {
-        pVia->VQEnable = TRUE;
-    }
+    pVia->dmaXV = TRUE;
+    from = xf86GetOptValBool(VIAOptions, OPTION_XV_DMA, &pVia->dmaXV)
+	? X_CONFIG : X_DEFAULT;	
+    xf86DrvMsg(pScrn->scrnIndex, from, "PCI DMA will %sbe used for XV "
+	       "image transfer if DRI is enabled.\n",
+	       (pVia->dmaXV) ? "" : "not ");
 
-    if (xf86ReturnOptValBool(VIAOptions, OPTION_DISABLEIRQ, FALSE)) {
-        pVia->DRIIrqEnable = FALSE;
-        xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                   "Option: DisableIRQ - DRI IRQ Disabled\n");
-    }
-    else {
-        pVia->DRIIrqEnable = TRUE;
-    }
-
-
-    if (xf86ReturnOptValBool(VIAOptions, OPTION_AGP_DMA, FALSE)) {
-        pVia->agpEnable = TRUE;
-        xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                   "Option: EnableAGPDMA - Enabling AGP DMA\n");
-    } else {
-	pVia->agpEnable = FALSE;
-    }
-
-    if (xf86ReturnOptValBool(VIAOptions, OPTION_2D_DMA, FALSE)) {
-        pVia->dma2d = FALSE;
-	if (pVia->agpEnable) {
-	    xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-		       "Option: NoAGPFor2D - AGP DMA is not used for 2D "
-		       "acceleration\n");
-	}
-    } else {
-        pVia->dma2d = TRUE;
-    }
-
-    if (xf86ReturnOptValBool(VIAOptions, OPTION_XV_DMA, FALSE)) {
-        pVia->dmaXV = FALSE;
-	xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-		   "Option: NoXVDMA - PCI DMA is not used for XV "
-		   "image transfer\n");
-    } else {
-        pVia->dmaXV = TRUE;
-    }
-
-    if (xf86ReturnOptValBool(VIAOptions, OPTION_VBEMODES, FALSE)) {
-	xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-		   "Option: VBEModes - Using BIOS modes\n");
-	UseVBEModes = TRUE;
-    }
+    UseVBEModes = FALSE;
+    from = xf86GetOptValBool(VIAOptions, OPTION_VBEMODES, &UseVBEModes)
+      ? X_CONFIG : X_DEFAULT;
+    xf86DrvMsg(pScrn->scrnIndex, from, "Will %senable VBE modes.\n",
+	       UseVBEModes ? "" : "not ");
+    
 
     pVia->vbeSR = FALSE;
-    if (xf86ReturnOptValBool(VIAOptions, OPTION_VBE_SAVERESTORE, FALSE)) {
-	xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-		   "Option: VBESaveRestore - "
-		   "Using BIOS VGA register save & restore.\n");
-	pVia->vbeSR = TRUE;
-    }
+    from = xf86GetOptValBool(VIAOptions, OPTION_VBE_SAVERESTORE, &pVia->vbeSR)
+	? X_CONFIG : X_DEFAULT;	
+    xf86DrvMsg(pScrn->scrnIndex, from, "VBE VGA register save & restore "
+	       "will %sbe used\n\tif VBE modes are enabled.\n",
+	       (pVia->vbeSR) ? "" : "not ");
 
 #ifdef HAVE_DEBUG
     pVia->disableXvBWCheck = FALSE;
-    if (xf86ReturnOptValBool(VIAOptions, OPTION_DISABLE_XV_BW_CHECK, FALSE)) {
-	xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-		   "Option: DisableXvBWCheck - "
-		   "Disabling Xv Bandwidth check. You may get a snowy screen.\n");
-	pVia->disableXvBWCheck = TRUE;
+    from = xf86GetOptValBool(VIAOptions, OPTION_DISABLE_XV_BW_CHECK, 
+			     &pVia->disableXvBWCheck)
+	? X_CONFIG : X_DEFAULT;	
+    xf86DrvMsg(pScrn->scrnIndex, from, "Xv Bandwidth check is %s.\n",
+	       pVia->disableXvBWCheck ? "disabled" : "enabled");
+    if (pVia->disableXvBWCheck) {
+	xf86DrvMsg(pScrn->scrnIndex, X_WARNING, 
+		   "You may get a \"snowy\" screen"
+		   " when using the Xv overlay.\n");
     }
 #endif
 
     pVia->maxDriSize = 0;
-    if(xf86GetOptValInteger(VIAOptions, OPTION_MAX_DRIMEM, 
-			    &pVia->maxDriSize)) {
-      xf86DrvMsg( pScrn->scrnIndex, X_CONFIG,
-		  "Option: MaxDRIMem  - %dkB\n", 
-		  pVia->maxDriSize );
-    }
+    from = xf86GetOptValInteger(VIAOptions, OPTION_MAX_DRIMEM, 
+				&pVia->maxDriSize)
+	? X_CONFIG : X_DEFAULT;	
+    if (pVia->maxDriSize > 0)
+	xf86DrvMsg( pScrn->scrnIndex, from,
+		    "Will impose a %dkB limit on video-ram set aside for DRI.\n", 
+		    pVia->maxDriSize );
+    else
+	xf86DrvMsg( pScrn->scrnIndex, from, 
+		    "Will not impose a limit on video-ram set aside for DRI.\n");
 
     pVia->agpMem = AGP_SIZE / 1024;
-    if(xf86GetOptValInteger(VIAOptions, OPTION_AGPMEM, 
-			    &pVia->agpMem)) {
-      xf86DrvMsg( pScrn->scrnIndex, X_CONFIG,
-		  "Option: AGPMem  - %dkB\n", 
-		  pVia->agpMem );
-    }
+    from = xf86GetOptValInteger(VIAOptions, OPTION_AGPMEM, 
+				&pVia->agpMem)
+	? X_CONFIG : X_DEFAULT;	
+    xf86DrvMsg(pScrn->scrnIndex, from, 
+	       "Will try to allocate %dkB of AGP memory.\n", 
+	       pVia->agpMem );
 
     /* ActiveDevice Option for device selection */
     pVia->ActiveDevice = 0x00;
@@ -1105,40 +1064,29 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
 	    pVia->ActiveDevice |= VIA_DEVICE_TV;
     }
 
-    /* LCDDualEdge Option */
-    pBIOSInfo->LCDDualEdge = FALSE;
-    if (xf86ReturnOptValBool(VIAOptions, OPTION_LCDDUALEDGE, FALSE)) {
-        pBIOSInfo->LCDDualEdge = TRUE;
-        xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-         "Option: Using Dual Edge mode to set LCD\n");
-    }
-    else {
-        pBIOSInfo->LCDDualEdge = FALSE;
-    }
-
     /* Digital Output Bus Width Option */
     pBIOSInfo->BusWidth = VIA_DI_12BIT;
+    from = X_DEFAULT;
     if ((s = xf86GetOptValString(VIAOptions, OPTION_BUSWIDTH))) {
+	from = X_CONFIG;
         if (!xf86NameCmp(s, "12BIT")) {
             pBIOSInfo->BusWidth = VIA_DI_12BIT;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                       "Digital Output Bus Width is 12BIT\n");
-        }
-        else if (!xf86NameCmp(s, "24BIT")) {
+        } else if (!xf86NameCmp(s, "24BIT")) {
             pBIOSInfo->BusWidth = VIA_DI_24BIT;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                       "Digital Output Bus Width is 24BIT\n");
         }
     }
+    xf86DrvMsg(pScrn->scrnIndex, from,
+	       "Digital output bus width is %d bits.\n",
+	       (pBIOSInfo->BusWidth == VIA_DI_12BIT) ? 12:24);
+
 
     /* LCD Center/Expend Option */
-    if (xf86ReturnOptValBool(VIAOptions, OPTION_CENTER, FALSE)) {
-        pBIOSInfo->Center = TRUE;
-        xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "DVI Center is On\n");
-    }
-    else {
-        pBIOSInfo->Center = FALSE;
-    }
+    pBIOSInfo->Center = FALSE;
+    from = xf86GetOptValBool(VIAOptions, OPTION_CENTER, &pBIOSInfo->Center)
+	? X_CONFIG : X_DEFAULT;
+    xf86DrvMsg(pScrn->scrnIndex, from, "DVI Center is %s.\n",
+	       pBIOSInfo->Center ? "enabled" : "disabled");
+
 
     /* Panel Size Option */
     pBIOSInfo->PanelSize = VIA_PANEL_INVALID;
@@ -1178,103 +1126,95 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
                        "Selected Panel Size is 1400x1050\n");
         }
+    } else {
+	xf86DrvMsg(pScrn->scrnIndex, X_DEFAULT,
+		   "Panel size is not selected from config file.\n");
     }
+	
 
     /* Force the use of the Panel? */
-    if (xf86ReturnOptValBool(VIAOptions, OPTION_FORCEPANEL, FALSE))
-        pBIOSInfo->ForcePanel = TRUE;
-    else
-        pBIOSInfo->ForcePanel = FALSE;
-
-    /* TV DotCrawl Enable Option */
-    if (xf86ReturnOptValBool(VIAOptions, OPTION_TVDOTCRAWL, FALSE)) {
-        pBIOSInfo->TVDotCrawl = TRUE;
-        xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "DotCrawl is Enable\n");
-    }
-    else {
-        pBIOSInfo->TVDotCrawl = FALSE;
-    }
+    pBIOSInfo->ForcePanel = FALSE;
+    from = xf86GetOptValBool(VIAOptions, OPTION_FORCEPANEL, 
+			     &pBIOSInfo->ForcePanel)
+	? X_CONFIG:X_DEFAULT;
+    xf86DrvMsg(pScrn->scrnIndex, from,
+	       "Panel will %sbe forced.\n",
+	       pBIOSInfo->ForcePanel ? "" : "not ");
+    
+    pBIOSInfo->TVDotCrawl = FALSE;
+    from = xf86GetOptValBool(VIAOptions, OPTION_TVDOTCRAWL, 
+			     &pBIOSInfo->TVDotCrawl)
+	? X_CONFIG:X_DEFAULT;
+    xf86DrvMsg(pScrn->scrnIndex, from, "TV dotCrawl is %s.\n",
+	       pBIOSInfo->TVDotCrawl ? "enabled" : "disabled");
 
     /* TV Deflicker */
     pBIOSInfo->TVDeflicker = 0;
-    if(xf86GetOptValInteger(VIAOptions, OPTION_TVDEFLICKER, &pBIOSInfo->TVDeflicker)) {
-        xf86DrvMsg( pScrn->scrnIndex, X_CONFIG, "Option: TVDeflicker %d\n", pBIOSInfo->TVDeflicker );
-    }
+    from = xf86GetOptValInteger(VIAOptions, OPTION_TVDEFLICKER, 
+				&pBIOSInfo->TVDeflicker)
+	? X_CONFIG:X_DEFAULT;
+    xf86DrvMsg( pScrn->scrnIndex, from, "TV deflicker is set to %d.\n", 
+		pBIOSInfo->TVDeflicker );
     
     pBIOSInfo->TVType = TVTYPE_NONE;
     if ((s = xf86GetOptValString(VIAOptions, OPTION_TVTYPE))) {
         if (!xf86NameCmp(s, "NTSC")) {
             pBIOSInfo->TVType = TVTYPE_NTSC;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Type is NTSC\n");
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Type is NTSC.\n");
         }
         else if(!xf86NameCmp(s, "PAL")) {
             pBIOSInfo->TVType = TVTYPE_PAL;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Type is PAL\n");
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Type is PAL.\n");
         }
         else if(!xf86NameCmp(s, "480P")) {
             pBIOSInfo->TVType = TVTYPE_480P;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Type is SDTV 480P\n");
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Type is SDTV 480P.\n");
         }
         else if(!xf86NameCmp(s, "576P")) {
             pBIOSInfo->TVType = TVTYPE_576P;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Type is SDTV 576P\n");
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Type is SDTV 576P.\n");
         }
         else if(!xf86NameCmp(s, "720P")) {
             pBIOSInfo->TVType = TVTYPE_720P;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Type is HDTV 720P\n");
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Type is HDTV 720P.\n");
         }
         else if(!xf86NameCmp(s, "1080I")) {
             pBIOSInfo->TVType = TVTYPE_1080I;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Type is HDTV 1080i\n");
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Type is HDTV 1080i.\n");
         }
+    } else {
+	xf86DrvMsg(pScrn->scrnIndex, X_DEFAULT, 
+		   "No default TV type is set.\n");
     }
-
-    if (xf86ReturnOptValBool(VIAOptions, OPTION_TVPROGRESSIVE, FALSE))
-    {
-        pBIOSInfo->TVProgressive=TRUE;
-
-        if (pBIOSInfo->TVType == TVTYPE_NTSC)
-        {
-            pBIOSInfo->TVType = TVTYPE_480P;
-        }
-        else if (pBIOSInfo->TVType == TVTYPE_PAL)
-        {
-            pBIOSInfo->TVType = TVTYPE_576P;
-        }
-        xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Progressive Mode is Enable\n");    
-    }
-    else
-    {
-        pBIOSInfo->TVProgressive=FALSE;
-    }
-
+	
     /* TV out put signal Option */
     pBIOSInfo->TVOutput = TVOUTPUT_NONE;
     if ((s = xf86GetOptValString(VIAOptions, OPTION_TVOUTPUT))) {
         if (!xf86NameCmp(s, "S-Video")) {
             pBIOSInfo->TVOutput = TVOUTPUT_SVIDEO;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Output Signal is S-Video\n");
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Output Signal is S-Video.\n");
         }
         else if(!xf86NameCmp(s, "Composite")) {
             pBIOSInfo->TVOutput = TVOUTPUT_COMPOSITE;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Output Signal is Composite\n");
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Output Signal is Composite.\n");
         }
         else if(!xf86NameCmp(s, "SC")) {
             pBIOSInfo->TVOutput = TVOUTPUT_SC;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Output Signal is SC\n");
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Output Signal is SC.\n");
         }
         else if(!xf86NameCmp(s, "RGB")) {
             pBIOSInfo->TVOutput = TVOUTPUT_RGB;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Output Signal is RGB\n");
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Output Signal is RGB.\n");
         }
         else if(!xf86NameCmp(s, "YCbCr")) {
             pBIOSInfo->TVOutput = TVOUTPUT_YCBCR;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Output Signal is YCbCr\n");
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Output Signal is YCbCr.\n");
         }
+    } else {
+	xf86DrvMsg(pScrn->scrnIndex, X_DEFAULT, 
+		   "No default TV output signal type is set.\n");
     }
 
-    pVia->PciInfo = xf86GetPciInfoForEntity(pEnt->index);
-    xf86RegisterResources(pEnt->index, NULL, ResNone);
     /*
     xf86SetOperatingState(RES_SHARED_VGA, pEnt->index, ResUnusedOpr);
     xf86SetOperatingState(resVgaMemShared, pEnt->index, ResDisableOpr);
@@ -1341,21 +1281,20 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
 
 
 #ifdef HAVE_DEBUG
-    if (xf86ReturnOptValBool(VIAOptions, OPTION_PRINTVGAREGS, FALSE)) {
-        pVia->PrintVGARegs = TRUE;
+    pVia->PrintVGARegs = FALSE;
+    from = xf86GetOptValBool(VIAOptions, OPTION_PRINTVGAREGS, 
+			     &pVia->PrintVGARegs)
+	? X_CONFIG : X_DEFAULT;
+    xf86DrvMsg(pScrn->scrnIndex, from, "Will %sprint VGA Registers.\n",
+	       pVia->PrintVGARegs ? "" : "not ");
+    if (pVia->PrintVGARegs)
 	ViaVgahwPrint(VGAHWPTR(pScrn)); /* Do this as early as possible */
-    } else
-        pVia->PrintVGARegs = FALSE;
 
-    if (xf86ReturnOptValBool(VIAOptions, OPTION_PRINTTVREGS, FALSE))
-        pVia->PrintTVRegs = TRUE;
-    else
-        pVia->PrintTVRegs = FALSE;
-
-    if (xf86ReturnOptValBool(VIAOptions, OPTION_I2CSCAN, FALSE))
-        pVia->I2CScan = TRUE;
-    else
-        pVia->I2CScan = FALSE;
+    pVia->I2CScan = FALSE;
+    from = xf86GetOptValBool(VIAOptions, OPTION_I2CSCAN, &pVia->I2CScan)
+	? X_CONFIG : X_DEFAULT;
+    xf86DrvMsg(pScrn->scrnIndex, from, "Will %sscan I2C buses.\n",
+	       pVia->I2CScan ? "" : "not ");
 #endif /* HAVE_DEBUG */
 
     if (pVia->Chipset == VIA_CLE266)
@@ -1364,6 +1303,9 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
     xf86DrvMsg(pScrn->scrnIndex, from, "Chipset Rev.: %d\n", pVia->ChipRev);
 
     ViaCheckCardId(pScrn);   
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
+	       "...Finished parsing config file options.\n");
+
 
     /* read memory bandwidth from registers */
     pVia->MemClk = hwp->readCrtc(hwp, 0x3D) >> 4;

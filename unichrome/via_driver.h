@@ -224,8 +224,6 @@ typedef struct _VIA {
 
     /* Here are all the Options */
     Bool                VQEnable;
-    Bool                pci_burst;
-    Bool                NoPCIRetry;
     Bool                hwcursor;
     Bool                NoAccel;
     Bool                shadowFB;
@@ -327,7 +325,6 @@ typedef struct _VIA {
     unsigned char 	*agpBase;
     unsigned int 	agpSize;
     Bool 		IsPCI;
-    Bool 		drixinerama;
     ViaXvMC             xvmc;
     int                 drmVerMajor;
     int                 drmVerMinor;

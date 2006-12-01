@@ -796,7 +796,7 @@ Bool VIADRIScreenInit(ScreenPtr pScreen)
     xf86DrvMsg(pScreen->myNum, X_INFO, "[drm] mmio Registers = 0x%08lx\n",
                (unsigned long) pVIADRI->regs.handle);
     
-    pVIADRI->drixinerama = pVia->drixinerama;
+    pVIADRI->drixinerama = FALSE;
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[dri] mmio mapped.\n" );
 

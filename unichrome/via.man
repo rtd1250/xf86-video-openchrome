@@ -109,9 +109,6 @@ selected.
 .BI "Option \*qDisableVQ\*q \*q" boolean \*q
 Disable or enable the use of VQ. VQ is enabled by default.
 .TP
-.BI "Option \*qDRIXINERAMA\*q \*q" boolean \*q
-Set DRI Xinerama mode. Currently unsupported.
-.TP
 .BI "Option \*qDisableIRQ\*q \*q" boolean \*q
 Disables Vblank IRQ. A workaround for some mainboards that have
 problems with IRQs from the unichrome chip. With IRQ disabled,
