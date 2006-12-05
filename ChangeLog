@@ -1,3 +1,11 @@
+2006-12-05  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+
+	* unichrome/via_bandwidth.c: (ViaSetPrimaryFIFO):
+
+	Use a more aggressive fifo setting for CLE266 Cx.
+	Boosts performance.
+	Please report problems with this.
+	
 2006-12-01  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via.man:

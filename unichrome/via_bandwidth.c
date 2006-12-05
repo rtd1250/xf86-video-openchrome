@@ -146,15 +146,17 @@ ViaSetPrimaryFIFO(ScrnInfoPtr pScrn, DisplayModePtr mode)
 		if (mode->HDisplay >= 1024) {
 		    ViaSeqMask(hwp, 0x16, 0x1C, 0x3F); /* 28 */
 		    hwp->writeSeq(hwp, 0x17, 0x3F); /* 63 */
+		    hwp->writeSeq(hwp, 0x18, 0x57); /* 23 */
 		}
 	    } else {   /* Single view or Simultaneous case */
+#if 0
 		if (mode->HDisplay > 1024) {
 		    ViaSeqMask(hwp, 0x16, 0x17, 0x3F); /* 23 */
 		    hwp->writeSeq(hwp, 0x17, 0x2F); /* 47 */
+		    hwp->writeSeq(hwp, 0x18, 0x57); /* 23 */
 		}
+#endif
 	    }
-	    hwp->writeSeq(hwp, 0x18, 0x57); /* 23 */
-
 	    /* originally when setting secondary */
 	    ViaSetPrimaryExpireNumber(pScrn, mode, CLE266CExpireNumber);
 	} else {
