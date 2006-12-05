@@ -1,3 +1,9 @@
+2006-12-05 Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+	
+	* unichrome/via_driver.c: (VIAPreInit):
+
+	Fix the dma2d option setting.
+
 2006-12-05  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_bandwidth.c: (ViaSetPrimaryFIFO):

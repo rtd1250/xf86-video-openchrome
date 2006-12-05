@@ -991,6 +991,8 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
     if (pVia->agpEnable) {
 	from = xf86GetOptValBool(VIAOptions, OPTION_2D_DMA, &pVia->dma2d)
 	    ? X_CONFIG : X_DEFAULT;
+	if (from == X_CONFIG)
+	    pVia->dma2d = !pVia->dma2d;
 	xf86DrvMsg(pScrn->scrnIndex, from, "AGP DMA will %sbe used for 2D "
 		   "acceleration.\n",
 		   (pVia->dma2d) ? "" : "not ");
