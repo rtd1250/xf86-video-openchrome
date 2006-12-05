@@ -2378,7 +2378,7 @@ VIAWriteMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
     pScrn->vtSema = TRUE;
 
-    /* FIXME - need DRI lock for this bit - see i810 */
+    /* FIXME - need DRI lock And engine idle */
     if (!pVia->IsSecondary)
 	ViaModePrimary(pScrn, mode);
     else
@@ -2620,81 +2620,68 @@ VIAInitialize3DEngine(ScrnInfoPtr pScrn)
     VIAPtr  pVia = VIAPTR(pScrn);
     int i;
 
-    /*
-     * FIXME: Reinitializing the 3D engine after VT switch seems to be the way
-     * to go to avoid hangs and rendering errors. But what happens with secondary?
-     * Test this for a while, but keep the old code in case...
-     */
+    VIASETREG(0x43C, 0x00010000);
 
-    if (!pVia->sharedData->b3DRegsInitialized)
-    {
+    for (i = 0; i <= 0x7D; i++)
+      {
+	VIASETREG(0x440, (CARD32) i << 24);
+      }
 
-        VIASETREG(0x43C, 0x00010000);
+    VIASETREG(0x43C, 0x00020000);
 
-        for (i = 0; i <= 0x7D; i++)
-        {
-            VIASETREG(0x440, (CARD32) i << 24);
-        }
+    for (i = 0; i <= 0x94; i++)
+      {
+	VIASETREG(0x440, (CARD32) i << 24);
+      }
 
-        VIASETREG(0x43C, 0x00020000);
+    VIASETREG(0x440, 0x82400000);
 
-        for (i = 0; i <= 0x94; i++)
-        {
-            VIASETREG(0x440, (CARD32) i << 24);
-        }
-
-        VIASETREG(0x440, 0x82400000);
-
-        VIASETREG(0x43C, 0x01020000);
+    VIASETREG(0x43C, 0x01020000);
 
 
-        for (i = 0; i <= 0x94; i++)
-        {
-            VIASETREG(0x440, (CARD32) i << 24);
-        }
+    for (i = 0; i <= 0x94; i++)
+      {
+	VIASETREG(0x440, (CARD32) i << 24);
+      }
 
-        VIASETREG(0x440, 0x82400000);
-        VIASETREG(0x43C, 0xfe020000);
+    VIASETREG(0x440, 0x82400000);
+    VIASETREG(0x43C, 0xfe020000);
 
-        for (i = 0; i <= 0x03; i++)
-        {
-            VIASETREG(0x440, (CARD32) i << 24);
-        }
+    for (i = 0; i <= 0x03; i++)
+      {
+	VIASETREG(0x440, (CARD32) i << 24);
+      }
 
-        VIASETREG(0x43C, 0x00030000);
+    VIASETREG(0x43C, 0x00030000);
 
-        for (i = 0; i <= 0xff; i++)
-        {
-            VIASETREG(0x440, 0);
-        }
-        VIASETREG(0x43C, 0x00100000);
-        VIASETREG(0x440, 0x00333004);
-        VIASETREG(0x440, 0x10000002);
-        VIASETREG(0x440, 0x60000000);
-        VIASETREG(0x440, 0x61000000);
-        VIASETREG(0x440, 0x62000000);
-        VIASETREG(0x440, 0x63000000);
-        VIASETREG(0x440, 0x64000000);
+    for (i = 0; i <= 0xff; i++)
+      {
+	VIASETREG(0x440, 0);
+      }
+    VIASETREG(0x43C, 0x00100000);
+    VIASETREG(0x440, 0x00333004);
+    VIASETREG(0x440, 0x10000002);
+    VIASETREG(0x440, 0x60000000);
+    VIASETREG(0x440, 0x61000000);
+    VIASETREG(0x440, 0x62000000);
+    VIASETREG(0x440, 0x63000000);
+    VIASETREG(0x440, 0x64000000);
 
-        VIASETREG(0x43C, 0x00fe0000);
+    VIASETREG(0x43C, 0x00fe0000);
 
-        if (pVia->ChipRev >= 3 )
-            VIASETREG(0x440,0x40008c0f);
-        else
-            VIASETREG(0x440,0x4000800f);
+    if (pVia->ChipRev >= 3 )
+      VIASETREG(0x440,0x40008c0f);
+    else
+      VIASETREG(0x440,0x4000800f);
 
-        VIASETREG(0x440,0x44000000);
-        VIASETREG(0x440,0x45080C04);
-        VIASETREG(0x440,0x46800408);
-        VIASETREG(0x440,0x50000000);
-        VIASETREG(0x440,0x51000000);
-        VIASETREG(0x440,0x52000000);
-        VIASETREG(0x440,0x53000000);
+    VIASETREG(0x440,0x44000000);
+    VIASETREG(0x440,0x45080C04);
+    VIASETREG(0x440,0x46800408);
+    VIASETREG(0x440,0x50000000);
+    VIASETREG(0x440,0x51000000);
+    VIASETREG(0x440,0x52000000);
+    VIASETREG(0x440,0x53000000);
 
-        pVia->sharedData->b3DRegsInitialized = 1;
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-            "3D Engine has been initialized.\n");
-    }
     
     VIASETREG(0x43C,0x00fe0000);
     VIASETREG(0x440,0x08000001);

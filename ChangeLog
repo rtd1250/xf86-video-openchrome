@@ -1,3 +1,12 @@
+2006-12-05  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+
+	* unichrome/via_driver.c: (VIAWriteMode), (VIAInitialize3DEngine):
+	* unichrome/via_vbe.c: (ViaVbeSetMode):
+
+	With EXA + 3D we need to reinitialize the 3D engine after
+	a mode switch (possibly the soft reset + 2D engine
+	initialization). Otherwise the GPU will hang.
+
 2006-12-05 Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
 	
 	* unichrome/via_driver.c: (VIAPreInit):

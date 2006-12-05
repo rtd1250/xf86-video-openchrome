@@ -158,10 +158,14 @@ ViaVbeSetMode(ScrnInfoPtr pScrn, DisplayModePtr pMode)
 
     pScrn->vtSema = TRUE;
 
+    /*
+     * FIXME: Take DRI lock and wait for engine idle here.
+     */
+
     if (!pVia->NoAccel)
 	viaInitialize2DEngine(pScrn);
     
-#ifdef XF86DRI
+#ifdef XF86DRI || defined(VIA_HAVE_EXA)
     VIAInitialize3DEngine(pScrn);
 #endif 
 
