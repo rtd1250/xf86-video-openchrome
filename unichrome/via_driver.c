@@ -1663,8 +1663,13 @@ static void VIALeaveVT(int scrnIndex, int flags)
     DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIALeaveVT\n"));
 
 #ifdef XF86DRI
-    if (pVia->directRenderingEnabled)
+    if (pVia->directRenderingEnabled) {
+	volatile drm_via_sarea_t *saPriv = (drm_via_sarea_t *)
+	    DRIGetSAREAPrivate(pScrn->pScreen);
+
 	DRILock(screenInfo.screens[scrnIndex], 0);
+	saPriv->ctxOwner = ~0;
+    }
 #endif
 
     viaAccelSync(pScrn);
