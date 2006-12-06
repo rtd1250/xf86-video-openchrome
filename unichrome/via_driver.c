@@ -1644,6 +1644,7 @@ static Bool VIAEnterVT(int scrnIndex, int flags)
 #ifdef XF86DRI
     if (pVia->directRenderingEnabled) {
         kickVblank(pScrn);
+	viaDRIOffscreenRestore(pScrn);
 	VIADRIRingBufferInit(pScrn);
 	DRIUnlock(screenInfo.screens[scrnIndex]);
     }
@@ -1677,8 +1678,8 @@ static void VIALeaveVT(int scrnIndex, int flags)
 
 #ifdef XF86DRI
     if (pVia->directRenderingEnabled) {
-
-	VIADRIRingBufferCleanup(pScrn); 
+	VIADRIRingBufferCleanup(pScrn);
+	viaDRIOffscreenSave(pScrn);
     }
 #endif
 

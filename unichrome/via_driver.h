@@ -330,6 +330,7 @@ typedef struct _VIA {
     int                 drmVerMinor;
     int                 drmVerPL;
     VIAMem              driOffScreenMem;
+    void *              driOffScreenSave;
 #endif
     Bool		DRIIrqEnable;
     Bool                agpEnable;
@@ -457,6 +458,9 @@ void VIADRICloseScreen(ScreenPtr pScreen);
 Bool VIADRIFinishScreenInit(ScreenPtr pScreen);
 void VIADRIRingBufferCleanup(ScrnInfoPtr pScrn);
 Bool VIADRIRingBufferInit(ScrnInfoPtr pScrn);
+void viaDRIOffscreenRestore(ScrnInfoPtr pScrn);
+void viaDRIOffscreenSave(ScrnInfoPtr pScrn);
+
 #endif /* XF86DRI */
 
 #endif /* _VIA_DRIVER_H_ */

@@ -1,3 +1,14 @@
+2006-12-06  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+
+	* unichrome/via_dri.c: (viaDRIOffscreenSave),
+	(viaDRIOffscreenRestore):
+	* unichrome/via_driver.c: (VIAEnterVT), (VIALeaveVT):
+	* unichrome/via_driver.h:
+
+	Back up DRI offscreen memory before leaving VT and restore it
+	when entering VT. It may be overwritten in between.
+	Use PCI DMA blit for this if available.
+	
 2006-12-05  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_driver.c: (VIAWriteMode), (VIAInitialize3DEngine):
