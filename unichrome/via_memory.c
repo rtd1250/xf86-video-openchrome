@@ -52,6 +52,15 @@
  *	2	-	DRM
  */
  
+static void
+viaExaFBSave(ScreenPtr pScreen, ExaOffscreenArea *exa)
+{
+    FatalError("Xserver is not properly patched and incompatible with OpenChrome exa.\n"
+	       "\tPlease look at Xorg bugzilla bug #7639, and\n"
+	       "\thttp://wiki.openchrome.org/tikiwiki/tiki-index.php?page=EXAAcceleration .\n");
+}
+
+
 void VIAFreeLinear(VIAMemPtr mem)
 {
     DEBUG(ErrorF("Freed %lu (pool %d)\n", mem->base, mem->pool));
@@ -100,6 +109,7 @@ viaOffScreenLinear(VIAMemPtr mem, ScrnInfoPtr pScrn,
 				     32, TRUE, NULL,NULL);
 	if (mem->exa == NULL)
 	    return BadAlloc;
+	mem->exa->save = viaExaFBSave;
 	mem->base = mem->exa->offset;
 	mem->pool = 1;
 	mem->pScrn = pScrn;

@@ -1,5 +1,12 @@
 2006-12-06  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
 
+	* unichrome/via_memory.c: (viaExaFBSave), (viaOffScreenLinear):
+
+	Cause a "FatalError" if EXA is used with an un-patched Xserver,
+	and an illegal save locked memory action is requested.
+	
+2006-12-06  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+
 	* unichrome/via_driver.c: (VIAInitialize3DEngine):
 
 	Proper register names in VIAInitialize3DEngine.
