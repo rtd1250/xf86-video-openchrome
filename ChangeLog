@@ -1,3 +1,10 @@
+2006-12-06  Jon Nettleton  <jon-dot-nettleton-at-gmail-dot-com>
+
+        * unichrome/via_driver.c:
+ 
+        Fixed some of the boolean option changes that need
+        to be negated such as DisableIRQ. 
+
 2006-12-06  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_memory.c: (viaExaFBSave), (viaOffScreenLinear):

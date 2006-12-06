@@ -971,6 +971,8 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
     pVia->VQEnable = TRUE;
     from = xf86GetOptValBool(VIAOptions, OPTION_DISABLEVQ, &pVia->VQEnable)
 	? X_CONFIG : X_DEFAULT;
+    if (from == X_CONFIG)
+         pVia->VQEnable = !pVia->VQEnable;
     xf86DrvMsg(pScrn->scrnIndex, from, "GPU virtual command queue will be %s.\n",
 	       (pVia->VQEnable) ? "enabled" : "disabled");
 
@@ -978,6 +980,8 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
     from = xf86GetOptValBool(VIAOptions, OPTION_DISABLEIRQ, 
 			     &pVia->DRIIrqEnable)
 	? X_CONFIG : X_DEFAULT;
+    if (from == X_CONFIG)
+         pVia->DRIIrqEnable = !pVia->DRIIrqEnable;
     xf86DrvMsg(pScrn->scrnIndex, from, "DRI IRQ will be %s if DRI is enabled.\n",
 	       (pVia->DRIIrqEnable) ? "enabled" : "disabled");
 
@@ -1001,6 +1005,8 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
     pVia->dmaXV = TRUE;
     from = xf86GetOptValBool(VIAOptions, OPTION_XV_DMA, &pVia->dmaXV)
 	? X_CONFIG : X_DEFAULT;	
+    if (from == X_CONFIG)
+         pVia->dmaXV = !pVia->dmaXV;
     xf86DrvMsg(pScrn->scrnIndex, from, "PCI DMA will %sbe used for XV "
 	       "image transfer if DRI is enabled.\n",
 	       (pVia->dmaXV) ? "" : "not ");
