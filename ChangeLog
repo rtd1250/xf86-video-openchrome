@@ -1,5 +1,11 @@
 2006-12-06  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
 
+	* unichrome/via_driver.c: (VIAInitialize3DEngine):
+
+	Proper register names in VIAInitialize3DEngine.
+	
+2006-12-06  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+
 	* unichrome/via_driver.c: (VIALeaveVT), (VIAWriteMode),
 	(VIACloseScreen):
 	* unichrome/via_vbe.c: (ViaVbeSetMode):
