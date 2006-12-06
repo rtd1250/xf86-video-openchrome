@@ -1675,8 +1675,7 @@ static void VIALeaveVT(int scrnIndex, int flags)
     viaAccelSync(pScrn);
 
     /*
-     * Next line apparently helps fix 3D hang on VT switch.
-     * No idea why. Taken from VIA's binary drivers.
+     * A soft reset helps fix 3D hang on VT switch.
      */
 
     hwp->writeSeq(hwp, 0x1A, pVia->SavedReg.SR1A | 0x40);
@@ -2384,19 +2383,18 @@ VIAWriteMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
     pScrn->vtSema = TRUE;
 
-    /* FIXME - need DRI lock And engine idle */
     if (!pVia->IsSecondary)
 	ViaModePrimary(pScrn, mode);
     else
 	ViaModeSecondary(pScrn, mode);
 
     /* Enable the graphics engine. */
-    if (!pVia->NoAccel)
-	viaInitialize2DEngine(pScrn);
-    
+    if (!pVia->NoAccel) {
 #if defined(XF86DRI) || defined(VIA_HAVE_EXA)
-    VIAInitialize3DEngine(pScrn);
+	VIAInitialize3DEngine(pScrn);
 #endif 
+	viaInitialize2DEngine(pScrn);
+    }
 
     VIAAdjustFrame(pScrn->scrnIndex, pScrn->frameX0, pScrn->frameY0, 0);
     return TRUE;
@@ -2422,7 +2420,7 @@ static Bool VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
         viaAccelSync(pScrn);
  
 
-	/* Fix 3D Hang after X restart */
+	/* A soft reset Fixes 3D Hang after X restart */
 
 	hwp->writeSeq(hwp, 0x1A, pVia->SavedReg.SR1A | 0x40);
 

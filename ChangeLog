@@ -1,5 +1,17 @@
 2006-12-06  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
 
+	* unichrome/via_driver.c: (VIALeaveVT), (VIAWriteMode),
+	(VIACloseScreen):
+	* unichrome/via_vbe.c: (ViaVbeSetMode):
+
+	Now that we initialize the 3D engine every time we write
+	mode, make sure this is done before setting up VQ and AGP
+	so that those settings persist. The GPU will be unstable
+	otherwise.
+	Also fix some code comments.
+	
+2006-12-06  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+
 	* unichrome/via_driver.c: (VIALeaveVT):
 
 	Force 3D context upload after a VT switch.
