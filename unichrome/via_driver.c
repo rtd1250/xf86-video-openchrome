@@ -1649,6 +1649,14 @@ static Bool VIAEnterVT(int scrnIndex, int flags)
     if (!pVia->IsSecondary)
         viaRestoreVideo(pScrn);
 
+#ifdef XF86DRI
+    if (pVia->directRenderingEnabled) {
+        kickVblank(pScrn);
+	VIADRIRingBufferInit(pScrn);
+	viaDRIOffscreenRestore(pScrn);
+    }
+#endif 
+
     if (pVia->NoAccel) {
 	memset(pVia->FBBase, 0x00, pVia->Bpl * pScrn->virtualY);
     } else {
@@ -1659,9 +1667,6 @@ static Bool VIAEnterVT(int scrnIndex, int flags)
 
 #ifdef XF86DRI
     if (pVia->directRenderingEnabled) {
-        kickVblank(pScrn);
-	viaDRIOffscreenRestore(pScrn);
-	VIADRIRingBufferInit(pScrn);
 	DRIUnlock(screenInfo.screens[scrnIndex]);
     }
 #endif 
