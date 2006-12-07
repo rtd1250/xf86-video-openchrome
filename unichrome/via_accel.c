@@ -1508,7 +1508,7 @@ viaAccelDMADownload(ScrnInfoPtr pScrn, unsigned long fbOffset,
     drm_via_dmablit_t blit[2], *curBlit;
     unsigned char *sysAligned = NULL;
     Bool doSync[2], useBounceBuffer;
-    unsigned bouncePitch;
+    unsigned pitch, numLines[2];
     int curBuf, err, i , ret, blitHeight;
     ret = 0;
     
@@ -1517,9 +1517,10 @@ viaAccelDMADownload(ScrnInfoPtr pScrn, unsigned long fbOffset,
     doSync[1] = FALSE;
     curBuf = 1;
     blitHeight = h;
+    pitch = dstPitch;
     if (useBounceBuffer) {
-	bouncePitch = ALIGN_TO(dstPitch, 16);
-	blitHeight = VIA_DMA_DL_SIZE / bouncePitch;
+	pitch = ALIGN_TO(dstPitch, 16);
+	blitHeight = VIA_DMA_DL_SIZE / pitch;
     }
 
     while (doSync[0] || doSync[1] || h != 0) {
@@ -1537,10 +1538,10 @@ viaAccelDMADownload(ScrnInfoPtr pScrn, unsigned long fbOffset,
 
 	    doSync[curBuf] = FALSE;
 	    if (useBounceBuffer) {
-		for (i = 0; i < curBlit->num_lines; ++i) {
-		    memcpy(dst, curBlit->mem_addr, curBlit->line_length);
+		for (i = 0; i < numLines[curBuf]; ++i) {
+		    memcpy(dst, curBlit->mem_addr, w);
 		    dst += dstPitch;
-		    curBlit->mem_addr += curBlit->mem_stride;
+		    curBlit->mem_addr += pitch;
 		}
 	    }
 	}
@@ -1550,6 +1551,7 @@ viaAccelDMADownload(ScrnInfoPtr pScrn, unsigned long fbOffset,
 			    
 	curBlit->num_lines = (h > blitHeight) ? blitHeight : h;
 	h -= curBlit->num_lines;
+	numLines[curBuf] = curBlit->num_lines;
 
 	sysAligned = (unsigned char *)pVia->dBounce + (curBuf * VIA_DMA_DL_SIZE);
 	sysAligned = (unsigned char *) 
@@ -1557,7 +1559,7 @@ viaAccelDMADownload(ScrnInfoPtr pScrn, unsigned long fbOffset,
 
 	curBlit->mem_addr = (useBounceBuffer) ? sysAligned : dst;
 	curBlit->line_length = w;
-	curBlit->mem_stride = (useBounceBuffer) ? bouncePitch : dstPitch;
+	curBlit->mem_stride = pitch;
 	curBlit->fb_addr = fbOffset;
 	curBlit->fb_stride = srcPitch;
 	curBlit->to_fb = 0;
