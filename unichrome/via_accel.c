@@ -1501,17 +1501,18 @@ viaOrder(CARD32 val, CARD32 * shift)
 
 static int
 viaAccelDMADownload(ScrnInfoPtr pScrn, unsigned long fbOffset,
-		    unsigned srcPitch, unsigned char *dst,
-		    unsigned dstPitch, unsigned w, unsigned h)
+    unsigned srcPitch, unsigned char *dst,
+    unsigned dstPitch, unsigned w, unsigned h)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     drm_via_dmablit_t blit[2], *curBlit;
     unsigned char *sysAligned = NULL;
     Bool doSync[2], useBounceBuffer;
     unsigned pitch, numLines[2];
-    int curBuf, err, i , ret, blitHeight;
+    int curBuf, err, i, ret, blitHeight;
+
     ret = 0;
-    
+
     useBounceBuffer = (((unsigned long)dst & 15) || (dstPitch & 15));
     doSync[0] = FALSE;
     doSync[1] = FALSE;
@@ -1530,7 +1531,7 @@ viaAccelDMADownload(ScrnInfoPtr pScrn, unsigned long fbOffset,
 
 	    do {
 		err = drmCommandWrite(pVia->drmFD, DRM_VIA_BLIT_SYNC,
-				      &curBlit->sync, sizeof(curBlit->sync));
+		    &curBlit->sync, sizeof(curBlit->sync));
 	    } while (err == -EAGAIN);
 
 	    if (err)
@@ -1546,16 +1547,17 @@ viaAccelDMADownload(ScrnInfoPtr pScrn, unsigned long fbOffset,
 	    }
 	}
 
-	if (h == 0) 
+	if (h == 0)
 	    continue;
-			    
+
 	curBlit->num_lines = (h > blitHeight) ? blitHeight : h;
 	h -= curBlit->num_lines;
 	numLines[curBuf] = curBlit->num_lines;
 
-	sysAligned = (unsigned char *)pVia->dBounce + (curBuf * VIA_DMA_DL_SIZE);
-	sysAligned = (unsigned char *) 
-	    ALIGN_TO((unsigned long) sysAligned, 16);
+	sysAligned =
+	    (unsigned char *)pVia->dBounce + (curBuf * VIA_DMA_DL_SIZE);
+	sysAligned = (unsigned char *)
+	    ALIGN_TO((unsigned long)sysAligned, 16);
 
 	curBlit->mem_addr = (useBounceBuffer) ? sysAligned : dst;
 	curBlit->line_length = w;
@@ -1567,9 +1569,8 @@ viaAccelDMADownload(ScrnInfoPtr pScrn, unsigned long fbOffset,
 
 	do {
 	    err = drmCommandWriteRead(pVia->drmFD, DRM_VIA_DMA_BLIT, curBlit,
-				      sizeof(*curBlit));
+		sizeof(*curBlit));
 	} while (err == -EAGAIN);
-
 
 	if (err) {
 	    ret = err;
@@ -1578,11 +1579,11 @@ viaAccelDMADownload(ScrnInfoPtr pScrn, unsigned long fbOffset,
 	}
 
 	doSync[curBuf] = TRUE;
-    } 
-    
+    }
+
     return ret;
 }
-    
+
 /*
  * Use PCI DMA if we can. If the system alignments don't match, we're using
  * an aligned bounce buffer for pipelined PCI DMA and memcpy.
@@ -1631,7 +1632,7 @@ viaExaDownloadFromScreen(PixmapPtr pSrc, int x, int y, int w, int h,
     }
 
     if (viaAccelDMADownload(pScrn, srcOffset, srcPitch, (unsigned char *)dst,
-			    dst_pitch, wBytes, h)) 
+	    dst_pitch, wBytes, h))
 	return FALSE;
 
     return TRUE;
@@ -2107,6 +2108,7 @@ viaInitExa(ScreenPtr pScreen)
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
     VIAPtr pVia = VIAPTR(pScrn);
     ExaDriverPtr pExa = exaDriverAlloc();
+
     memset(pExa, 0, sizeof(*pExa));
 
     if (!pExa)
@@ -2485,7 +2487,7 @@ viaFinishInitAccel(ScreenPtr pScreen)
 
 	pVia->scratchFBBuffer =
 	    exaOffscreenAlloc(pScreen, pVia->exaScratchSize * 1024,
-			      32, TRUE, NULL, NULL);
+	    32, TRUE, NULL, NULL);
 	if (pVia->scratchFBBuffer) {
 	    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
 		"Allocated %u kiB of framebuffer memory for EXA scratch area.\n",
@@ -2567,12 +2569,10 @@ viaAccelFillRect(ScrnInfoPtr pScrn, int x, int y, int w, int h,
 }
 
 void
-viaAccelFillPixmap(ScrnInfoPtr pScrn, 
-		   unsigned long offset,
-		   unsigned long pitch,
-		   int depth,
-		   int x, int y, int w, int h,
-		   unsigned long color)
+viaAccelFillPixmap(ScrnInfoPtr pScrn,
+    unsigned long offset,
+    unsigned long pitch,
+    int depth, int x, int y, int w, int h, unsigned long color)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     unsigned dstBase = offset + y * pitch;
