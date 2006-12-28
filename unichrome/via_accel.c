@@ -1696,7 +1696,7 @@ viaExaTexUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
     dstOffset = exaGetPixmapOffset(pDst);
 
     if (pVia->nPOT[0]) {
-	texPitch = ALIGN_TO(wBytes, 8);
+	texPitch = ALIGN_TO(wBytes, 32);
 	height = VIA_AGP_UPL_SIZE / texPitch;
     } else {
 	viaOrder(wBytes, &texPitch);

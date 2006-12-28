@@ -1,5 +1,12 @@
 2006-12-28  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
 
+	* unichrome/via_accel.c: (viaExaTexUploadToScreen):
+
+	Work around an obscure hardware limitation when texturing from
+	AGP.
+	
+2006-12-28  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+
 	* unichrome/via_dri.c: (VIASetAgpMode):
 
 	Fix AGP mode setting.
