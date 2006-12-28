@@ -64,6 +64,7 @@ typedef struct _ViaTextureUnit
     Bool agpTexture;
     Bool textureDirty;
     Bool texBColDirty;
+    Bool npot;
 } ViaTextureUnit;
 
 typedef struct _Via3DState
@@ -97,7 +98,7 @@ typedef struct _Via3DState
     void (*setFlags) (struct _Via3DState * v3d, int numTextures,
 	Bool writeAlpha, Bool writeColor, Bool blend);
         Bool(*setTexture) (struct _Via3DState * v3d, int tex, CARD32 offset,
-	CARD32 pitch, CARD32 width, CARD32 height, int format,
+	CARD32 pitch, Bool nPot, CARD32 width, CARD32 height, int format,
 	ViaTextureModes sMode, ViaTextureModes tMode,
 	ViaTexBlendingModes blendingMode, Bool agpTexture);
     void (*setTexBlendCol) (struct _Via3DState * v3d, int tex, Bool component,

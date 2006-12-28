@@ -260,6 +260,7 @@ typedef struct _VIA {
     CARD32              curMarker;
     CARD32              lastMarkerRead;
     Bool                agpDMA;
+    Bool                nPOT[VIA_NUM_TEXUNITS];
 #ifdef VIA_HAVE_EXA
     ExaDriverPtr        exaDriverPtr;
     ExaOffscreenArea   *exa_scratch;
@@ -410,6 +411,10 @@ void viaAccelWaitMarker(ScreenPtr, int);
 int viaAccelMarkSync(ScreenPtr);
 void viaAccelFillPixmap(ScrnInfoPtr, unsigned long, unsigned long, 
 			int, int, int, int, int, unsigned long);
+void viaAccelTextureBlit(ScrnInfoPtr, unsigned long, unsigned, unsigned, 
+			 unsigned, unsigned, unsigned, unsigned,
+			 unsigned long, unsigned, unsigned,
+			 unsigned, unsigned, int);
 
 
 

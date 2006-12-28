@@ -168,14 +168,15 @@ viaOrder(CARD32 val, CARD32 * shift)
 
 static Bool
 viaSet3DTexture(Via3DState * v3d, int tex, CARD32 offset,
-    CARD32 pitch, CARD32 width, CARD32 height, int format,
+    CARD32 pitch, Bool npot, CARD32 width, CARD32 height, int format,
     ViaTextureModes sMode, ViaTextureModes tMode,
     ViaTexBlendingModes blendingMode, Bool agpTexture)
 {
     ViaTextureUnit *vTex = v3d->tex + tex;
 
     vTex->textureLevel0Offset = offset;
-    if (!viaOrder(pitch, &vTex->textureLevel0Exp))
+    vTex->npot = npot;
+    if (!viaOrder(pitch, &vTex->textureLevel0Exp) && !vTex->npot)
 	return FALSE;
     vTex->textureLevel0Pitch = pitch;
     if (!viaOrder(width, &vTex->textureLevel0WExp))
@@ -479,7 +480,14 @@ via3DEmitState(Via3DState * v3d, ViaCommandBuffer * cb, Bool forceUpload)
 		vTex->textureLevel0Offset & 0x00FFFFFF);
 	    OUT_RING_SubA(HC_SubA_HTXnL012BasH,
 		vTex->textureLevel0Offset >> 24);
-	    OUT_RING_SubA(HC_SubA_HTXnL0Pit, vTex->textureLevel0Exp << 20);
+	    if (vTex->npot) {
+		OUT_RING_SubA(HC_SubA_HTXnL0Pit,
+		    (vTex->textureLevel0Pitch & HC_HTXnLnPit_MASK) |
+		    HC_HTXnEnPit_MASK);
+	    } else {
+		OUT_RING_SubA(HC_SubA_HTXnL0Pit,
+		    vTex->textureLevel0Exp << HC_HTXnLnPitE_SHIFT);
+	    }
 	    OUT_RING_SubA(HC_SubA_HTXnL0_5WE, vTex->textureLevel0WExp);
 	    OUT_RING_SubA(HC_SubA_HTXnL0_5HE, vTex->textureLevel0HExp);
 	    OUT_RING_SubA(HC_SubA_HTXnL0OS, 0x00);

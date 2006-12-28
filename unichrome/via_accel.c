@@ -277,7 +277,6 @@ viaEnableVQ(VIAPtr pVia)
     VIASETREG(VIA_REG_TRANSPACE, 0x44000000);
     VIASETREG(VIA_REG_TRANSPACE, 0x45080c04);
     VIASETREG(VIA_REG_TRANSPACE, 0x46800408);
-
     VIASETREG(VIA_REG_TRANSPACE, vqStartEndH);
     VIASETREG(VIA_REG_TRANSPACE, vqStartL);
     VIASETREG(VIA_REG_TRANSPACE, vqEndL);
@@ -1695,13 +1694,20 @@ viaExaTexUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
     }
 
     dstOffset = exaGetPixmapOffset(pDst);
-    viaOrder(wBytes, &texPitch);
-    if (texPitch < 3)
-	texPitch = 3;
-    height = VIA_AGP_UPL_SIZE >> texPitch;
+
+    if (pVia->nPOT[0]) {
+	texPitch = ALIGN_TO(wBytes, 8);
+	height = VIA_AGP_UPL_SIZE / texPitch;
+    } else {
+	viaOrder(wBytes, &texPitch);
+	if (texPitch < 3)
+	    texPitch = 3;
+	height = VIA_AGP_UPL_SIZE >> texPitch;
+	texPitch = 1 << texPitch;
+    }
+
     if (height > 1024)
 	height = 1024;
-    texPitch = 1 << texPitch;
     viaOrder(w, &texWidth);
     texWidth = 1 << texWidth;
 
@@ -1712,8 +1718,8 @@ viaExaTexUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
     v3d->setDrawing(v3d, 0x0c, 0xFFFFFFFF, 0x000000FF, 0x00);
     v3d->setFlags(v3d, 1, TRUE, TRUE, FALSE);
     if (!v3d->setTexture(v3d, 0, pVia->texOffset + pVia->agpAddr, texPitch,
-	    texWidth, texHeight, format, via_single, via_single, via_src,
-	    TRUE))
+	    pVia->nPOT[0], texWidth, texHeight, format, via_single,
+	    via_single, via_src, TRUE))
 	return FALSE;
 
     v3d->emitState(v3d, &pVia->cb, viaCheckUpload(pScrn, v3d));
@@ -2041,12 +2047,13 @@ viaExaPrepareComposite(int op, PicturePtr pSrcPicture,
 	isAGP = viaIsAGP(pVia, pSrc, &offset);
 	if (!isAGP && !viaIsOffscreen(pVia, pSrc))
 	    return FALSE;
-	if (!v3d->setTexture(v3d, curTex++, offset,
-		exaGetPixmapPitch(pSrc), 1 << width, 1 << height,
-		pSrcPicture->format, via_repeat, via_repeat,
+	if (!v3d->setTexture(v3d, curTex, offset,
+		exaGetPixmapPitch(pSrc), pVia->nPOT[curTex], 1 << width,
+		1 << height, pSrcPicture->format, via_repeat, via_repeat,
 		srcMode, isAGP)) {
 	    return FALSE;
 	}
+	curTex++;
     }
 
     if (pMaskPicture && !pVia->maskP) {
@@ -2056,13 +2063,14 @@ viaExaPrepareComposite(int op, PicturePtr pSrcPicture,
 	    return FALSE;
 	viaOrder(pMask->drawable.width, &width);
 	viaOrder(pMask->drawable.height, &height);
-	if (!v3d->setTexture(v3d, curTex++, offset,
-		exaGetPixmapPitch(pMask), 1 << width, 1 << height,
-		pMaskPicture->format, via_repeat, via_repeat,
+	if (!v3d->setTexture(v3d, curTex, offset,
+		exaGetPixmapPitch(pMask), pVia->nPOT[curTex], 1 << width,
+		1 << height, pMaskPicture->format, via_repeat, via_repeat,
 		(pMaskPicture->componentAlpha) ? via_comp_mask : via_mask,
 		isAGP)) {
 	    return FALSE;
 	}
+	curTex++;
     }
 
     v3d->setFlags(v3d, curTex, FALSE, TRUE, TRUE);
@@ -2121,7 +2129,8 @@ viaInitExa(ScreenPtr pScreen)
     pExa->offScreenBase = pScrn->virtualY * pVia->Bpl;
     pExa->pixmapOffsetAlign = 32;
     pExa->pixmapPitchAlign = 16;
-    pExa->flags = EXA_OFFSCREEN_PIXMAPS | EXA_OFFSCREEN_ALIGN_POT;
+    pExa->flags = EXA_OFFSCREEN_PIXMAPS |
+	(pVia->nPOT[1] ? 0 : EXA_OFFSCREEN_ALIGN_POT);
     pExa->maxX = 2047;
     pExa->maxY = 2047;
     pExa->WaitMarker = viaAccelWaitMarker;
@@ -2195,7 +2204,8 @@ viaInitExa(ScreenPtr pScreen)
     pExa->card.offScreenBase = pScrn->virtualY * pVia->Bpl;
     pExa->card.pixmapOffsetAlign = 32;
     pExa->card.pixmapPitchAlign = 16;
-    pExa->card.flags = EXA_OFFSCREEN_PIXMAPS | EXA_OFFSCREEN_ALIGN_POT;
+    pExa->card.flags = EXA_OFFSCREEN_PIXMAPS |
+	(pVia->nPOT[1] ? 0 : EXA_OFFSCREEN_ALIGN_POT);
     pExa->card.maxX = 2047;
     pExa->card.maxY = 2047;
 
@@ -2259,6 +2269,7 @@ viaInitAccel(ScreenPtr pScreen)
     VIAPtr pVia = VIAPTR(pScrn);
     BoxRec AvailFBArea;
     int maxY;
+    Bool nPOTSupported;
 
     pVia->VQStart = 0;
     if (((pVia->FBFreeEnd - pVia->FBFreeStart) >= VIA_VQ_SIZE) &&
@@ -2285,6 +2296,21 @@ viaInitAccel(ScreenPtr pScreen)
     *pVia->markerBuf = 0;
     pVia->curMarker = 0;
     pVia->lastMarkerRead = 0;
+
+    /*
+     * nPOT textures. DRM versions below 2.11.0 don't allow them.
+     * Also some CLE266 hardware may not allow nPOT textures for 
+     * texture engine 1. We need to figure that out.
+     */
+
+    nPOTSupported = TRUE;
+#ifdef XF86DRI
+    nPOTSupported = (!pVia->directRenderingEnabled) ||
+	(pVia->drmVerMajor > 2) ||
+	((pVia->drmVerMajor == 2) && (pVia->drmVerMinor >= 11));
+#endif
+    pVia->nPOT[0] = nPOTSupported;
+    pVia->nPOT[1] = nPOTSupported;
 
 #ifdef VIA_HAVE_EXA
 #ifdef XF86DRI
@@ -2600,4 +2626,27 @@ viaAccelSyncMarker(ScrnInfoPtr pScrn)
     VIAPtr pVia = VIAPTR(pScrn);
 
     viaAccelWaitMarker(pScrn->pScreen, pVia->accelMarker);
+}
+
+void
+viaAccelTextureBlit(ScrnInfoPtr pScrn, unsigned long srcOffset,
+    unsigned srcPitch, unsigned w, unsigned h, unsigned srcX, unsigned srcY,
+    unsigned srcFormat, unsigned long dstOffset, unsigned dstPitch,
+    unsigned dstX, unsigned dstY, unsigned dstFormat, int rotate)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+    unsigned wOrder, hOrder;
+    Via3DState *v3d = &pVia->v3d;
+
+    viaOrder(w, &wOrder);
+    viaOrder(h, &hOrder);
+
+    v3d->setDestination(v3d, dstOffset, dstPitch, dstFormat);
+    v3d->setDrawing(v3d, 0x0c, 0xFFFFFFFF, 0x000000FF, 0x00);
+    v3d->setFlags(v3d, 1, TRUE, TRUE, FALSE);
+    v3d->setTexture(v3d, 0, srcOffset, srcPitch, TRUE, 1 << wOrder,
+	1 << hOrder, srcFormat, via_single, via_single, via_src, FALSE);
+    v3d->emitState(v3d, &pVia->cb, viaCheckUpload(pScrn, v3d));
+    v3d->emitClipRect(v3d, &pVia->cb, dstX, dstY, w, h);
+    v3d->emitQuad(v3d, &pVia->cb, dstX, dstY, srcX, srcY, 0, 0, w, h);
 }
