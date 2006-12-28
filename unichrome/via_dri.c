@@ -218,21 +218,16 @@ static Bool VIASetAgpMode(ScrnInfoPtr pScrn)
     unsigned int vendor = drmAgpVendorId(pVia->drmFD);
     unsigned int device = drmAgpDeviceId(pVia->drmFD);
 
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] Detected AGP vendor 0x%x, device 0x%x\n",
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] Detected AGP vendor 0x%04x, device 0x04%x\n",
 	       vendor, device);
 
     mode &= ~VIA_AGP_MODE_MASK;
     if ((mode & VIA_AGPv3_MODE)) {
-	mode |= 
-	    VIA_AGPv3_8X_MODE | 
-	    VIA_AGPv3_4X_MODE;
+	mode |= VIA_AGPv3_8X_MODE;
 	xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] Found AGP v3 compatible device. "
 		   "Trying AGP 8X mode.\n");
     } else {
-	mode |= 
-	    VIA_AGP_4X_MODE | 
-	    VIA_AGP_2X_MODE |
-	    VIA_AGP_1X_MODE;
+	mode |= VIA_AGP_4X_MODE;
 	xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] Didn't find any AGP v3 compatible device. "
 		   "Trying AGP 4X mode.\n");
     }

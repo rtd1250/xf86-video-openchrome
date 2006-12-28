@@ -1,3 +1,13 @@
+2006-12-28  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+
+	* unichrome/via_dri.c: (VIASetAgpMode):
+
+	Fix AGP mode setting.
+
+2006-12-28  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+
+	Use non-power-of-two textures for EXA whenever possible.
+	
 2006-12-07  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_driver.c: (VIAEnterVT):
