@@ -1,4 +1,6 @@
 /*
+ * Copyright 2005-2007 The Openchrome Project  [openchrome.org]
+ * Copyright 2004-2006 Luc Verhaegen.
  * Copyright 2004-2005 The Unichrome Project  [unichrome.sf.net]
  * Copyright 1998-2003 VIA Technologies, Inc. All Rights Reserved.
  * Copyright 2001-2003 S3 Graphics, Inc. All Rights Reserved.
@@ -80,6 +82,8 @@ static const OptionInfoRec * VIAAvailableOptions(int chipid, int busid);
 static Bool VIAMapMMIO(ScrnInfoPtr pScrn);
 static Bool VIAMapFB(ScrnInfoPtr pScrn);
 static void VIAUnmapMem(ScrnInfoPtr pScrn);
+
+static void VIALoadRgbLut(ScrnInfoPtr pScrn, int numColors, int *indices, LOCO *colors, VisualPtr pVisual);
 
 DriverRec VIA =
 {
@@ -2063,9 +2067,54 @@ VIAUnmapMem(ScrnInfoPtr pScrn)
         xf86UnMapVidMem(pScrn->scrnIndex, (pointer)pVia->FBBase, pVia->videoRambytes);
 }
 
-/*
- *
- */
+static void
+VIALoadRgbLut(ScrnInfoPtr pScrn, int numColors, int *indices, LOCO *colors, VisualPtr pVisual)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    int i, j, index;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIALoadRgbLut\n"));
+
+    hwp->enablePalette(hwp);
+    hwp->writeDacMask(hwp, 0xFF);
+
+    /* We need the same palette contents for both 16 and 24 bits, but X doesn't
+     * play: X's colormap handling is hopelessly intertwined with almost every
+     * X subsystem.  So we just space out RGB values over the 256*3. */
+
+    switch (pScrn->bitsPerPixel) {
+	case 16:
+  	    for (i = 0; i < numColors; i++) {
+	        index = indices[i];
+	        hwp->writeDacWriteAddr(hwp, index * 4);
+	        for (j = 0; j < 4; j++) {
+		    hwp->writeDacData(hwp, colors[index/2].red);
+		    hwp->writeDacData(hwp, colors[index].green);
+		    hwp->writeDacData(hwp, colors[index/2].blue);
+	        }
+	    }
+	    break;
+	case 8:
+	case 24:
+	case 32:
+	    for (i = 0; i < numColors; i++) {
+	        index = indices[i];
+	        hwp->writeDacWriteAddr(hwp, index);
+	        hwp->writeDacData(hwp, colors[index].red);
+	        hwp->writeDacData(hwp, colors[index].green);
+	        hwp->writeDacData(hwp, colors[index].blue);
+	    }
+	    break;
+	default:
+	    xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+		       "Unsupported bitdepth: %d\n", pScrn->bitsPerPixel);
+	    break;
+    }
+    hwp->disablePalette(hwp);
+}
+
 static void
 VIALoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
 	       LOCO *colors, VisualPtr pVisual)
@@ -2077,8 +2126,37 @@ VIALoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIALoadPalette\n"));
 
-    if (pScrn->bitsPerPixel != 8)
+    if (pScrn->bitsPerPixel != 8) {
+	switch(pVia->Chipset) {
+	    case VIA_CLE266:
+	    case VIA_KM400:
+		ViaSeqMask(hwp, 0x16, 0x80, 0x80);
+		break;
+	    default:
+		ViaCrtcMask(hwp, 0x33, 0x80, 0x80);
+		break;
+	}
+
+	ViaSeqMask(hwp, 0x1A, 0x00, 0x01);
+	VIALoadRgbLut(pScrn, numColors, indices, colors, pVisual);
+
+	/* If secondary is enabled, adjust its palette too. */
+	if (hwp->readCrtc(hwp, 0x6A) & 0x80) {
+	    ViaSeqMask(hwp, 0x1A, 0x01, 0x01);
+	    ViaCrtcMask(hwp, 0x6A, 0x02, 0x02);
+	    switch(pVia->Chipset) {
+		case VIA_K8M800:
+		case VIA_PM800:
+		    break;
+	        default:
+		    ViaSeqMask(hwp, 0x6A, 0x20, 0x20);
+		    break;
+	    }
+	    VIALoadRgbLut(pScrn, numColors, indices, colors, pVisual);
+	}
+
 	return;
+    }
 
     SR1A = hwp->readSeq(hwp, 0x1A);
     SR1B = hwp->readSeq(hwp, 0x1B);
@@ -2244,7 +2322,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
         return FALSE;
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Def Color map set up\n"));
 
-    if (!xf86HandleColormaps(pScreen, 256, 6, VIALoadPalette, NULL,
+    if (!xf86HandleColormaps(pScreen, 256, 8, VIALoadPalette, NULL,
                              CMAP_RELOAD_ON_MODE_SWITCH
                              | CMAP_PALETTED_TRUECOLOR))
         return FALSE;

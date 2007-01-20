@@ -1,3 +1,12 @@
+2007-01-20  Benno Schulenberg  <bensberg-at-justemail-dot-net>
+
+	* unichrome/via_driver.c: (VIALoadRgbLut), (VIALoadPalette),
+	(VIAScreenInit):
+
+	Add ability to change gamma setting.  Original patch by
+	Gonzalo A. de la Vega <gadelavega-at-gmail-dot-com>,
+	adapted	from Luc Verhaegen's implementation.
+
 2006-12-28  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_accel.c: (viaExaTexUploadToScreen):
