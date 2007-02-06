@@ -760,7 +760,7 @@ static DisplayModeRec VT1625Modes[] = {
     { MODEPREFIX("1024x768"), 57000, 1024, 1040, 1112, 1200, 0,  768,  829,  840,  950, 0, V_NHSYNC | V_NVSYNC, MODESUFFIXPAL  },
 
     { MODEPREFIX("720x576"),  28500,  720,  728,  744,  760, 0,  576,  635,  643,  750, 0, V_NHSYNC | V_PVSYNC, MODESUFFIXPAL  },
-
+    { MODEPREFIX("720x576Over"),  27000,  720,  768,  800,  864, 0,  576,  577,  579,  625, 0, V_NHSYNC | V_PVSYNC, MODESUFFIXPAL  },
     { MODEPREFIX("1280x720"), 74250, 1280, 1320, 1376, 1650, 0, 720, 722, 728, 750, 0, V_NHSYNC | V_NVSYNC,   MODESUFFIX720P },
     { MODEPREFIX("1920x1080"), 74250, 1920, 1960, 2016, 2200, 0, 1080, 1082, 1088, 1125, 0, V_NHSYNC | V_NVSYNC,  MODESUFFIX1080I },
 
@@ -872,6 +872,22 @@ VT1625Table[] = {
       { 0x55, 0x56, 0x55 },
       /* Subcarrier 19,18,17,16, DotCrawl Subcarrier (set bit 3 of reg 11 then subcarrier) */
       0x0, 0x0,
+    },
+    { "720x576Over", 720, 576, TVTYPE_PAL, 0, 0,
+      /*  00                                                                                         0F */
+      { 0x03,    0, 0x10, 0x1F, 0x03,    0,    0, 0x39,  0x19, 0x01, 0x88, 0x00, 0x55, 0x5E, 0x00, 0x9E,
+           0, 0x80, 0x04, 0x08, 0x08, 0x10, 0xCB, 0x8A,  0x09, 0x2A, 0x00, 0x50, 0x41, 0x80,    0, 0x10,
+        0x17, 0x0C, 0x32, 0x7D, 0x02,    0,    0,    0,     0,    0,    0,    0,    0,    0,    0,    0 },
+      /*  4A                            4F    50                                                     59 */
+      { 0xC5, 0x0F,    0, 0x01, 0x10, 0x51, 0x5F, 0xCF,  0x23, 0x70, 0x22, 0x5F, 0xD0, 0x7F, 0x23, 0x92,
+      /*  5A                            5F    60                       64 */
+        0xCE, 0x0C, 0x8E, 0x16,    0,    0, 0x80, 0x20,  0xFF, 0x5F, 0x03 },
+      /* RBG 65,66,67,27,2b,2c */
+      { 0x6A, 0x62, 0x65, 0x90, 0x99,    0 },
+      /* Y-Cb-Cr 65,66,67 */
+      { 0x58, 0x48, 0x49 },
+      /* Subcarrier 19,18,17,16, DotCrawl Subcarrier (set bit 3 of reg 11 then subcarrier) */
+      0x2A098ACB, 0,
     },
 
 /*
