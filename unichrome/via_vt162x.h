@@ -766,9 +766,9 @@ static DisplayModeRec VT1625Modes[] = {
 
 
     { MODEPREFIX("640x480"),    24696,  640,  656,  744,  784, 0,  480,  482,  483,  525, 0, V_NHSYNC | V_NVSYNC, MODESUFFIXNTSC },
-    { MODEPREFIX("720x480Under"),    28225,  720,  728,  744,  784, 0,  480,  490,  496,  600, 0, V_NHSYNC | V_NVSYNC, MODESUFFIXNTSC },
-    { MODEPREFIX("720x480Fit"),    28980,  720,  728,  744,  784, 0,  480,  490,  496,  600, 0, V_NHSYNC | V_NVSYNC, MODESUFFIXNTSC },
-    { MODEPREFIX("720x480Over"),    27025,  720,  728,  744,  784, 0,  480,  490,  496,  600, 0, V_NHSYNC | V_NVSYNC, MODESUFFIXNTSC },
+    { MODEPREFIX("720x480Under"),    28225,  720,  728,  744,  784, 0,  480,  490,  496,  600, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX480P },
+    { MODEPREFIX("720x480Fit"),    28980,  720,  728,  744,  784, 0,  480,  490,  496,  600, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX480P },
+    { MODEPREFIX("720x480Over"),    27025,  720,  728,  744,  784, 0,  480,  490,  496,  600, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX480P },
     { MODEPREFIX(NULL), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, MODESUFFIXNTSC },
 };
 
@@ -790,7 +790,7 @@ VT1625Table[] = {
       /* Subcarrier 19,18,17,16, DotCrawl Subcarrier (set bit 3 of reg 11 then subcarrier) */
       0x21F07BD6, 0x21F087BE,
     },
-    { "720x480Under", 720, 480, TVTYPE_NTSC, 0, 0,
+    { "720x480Under", 720, 480, TVTYPE_480P, 0, 0,
       /*  00                                                                                         0F */
       { 0x03,    0, 0x10, 0x40, 0x10,    0,    0, 0x2A,  0x41, 0x14, 0x7B,    0, 0x50, 0x57,    0, 0xB7,
 	   0, 0x80, 0xAB, 0x27, 0x70, 0x2C, 0xD6, 0x7B,  0xF0, 0x21, 0x02, 0x50, 0x41, 0x80,    0, 0x01,
@@ -806,7 +806,7 @@ VT1625Table[] = {
       /* Subcarrier 19,18,17,16, DotCrawl Subcarrier (set bit 3 of reg 11 then subcarrier) */
       0x21F07BD6, 0x21F087BE,
     },
-    { "720x480Fit", 720, 480, TVTYPE_NTSC, 0, 0,
+    { "720x480Fit", 720, 480, TVTYPE_480P, 0, 0,
       /*  00                                                                                         0F */
       { 0x03,    0, 0x10, 0x40, 0x10,    0,    0, 0x41,  0x43, 0x07, 0x7B,    0, 0x50, 0x57,    0, 0xB7,
            0, 0x80, 0xCD, 0x21, 0x73, 0x34, 0xD6, 0x7B,  0xF0, 0x21, 0x02, 0x50, 0x43, 0x80,    0, 0x01,
@@ -822,7 +822,7 @@ VT1625Table[] = {
       /* Subcarrier 19,18,17,16, DotCrawl Subcarrier (set bit 3 of reg 11 then subcarrier) */
       0x21F07BD6, 0x21F087BE,
     },
-    { "720x480Over", 720, 480, TVTYPE_NTSC, 0, 0,
+    { "720x480Over", 720, 480, TVTYPE_480P, 0, 0,
       /*  00                                                                                         0F */
       { 0x03,    0, 0x10, 0x40, 0x10,    0,    0, 0x33,  0x20,    0, 0x7B,    0, 0x50, 0x57,    0, 0x9E,
            0, 0x80, 0x04, 0x08, 0x08, 0x10, 0xD6, 0x7B,  0xF0, 0x21, 0x02, 0x50, 0x43, 0x80,    0, 0x01,
