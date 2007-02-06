@@ -1350,11 +1350,16 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
         }
     }
 
-    /* detect amount of installed ram */
+    /* Detect amount of installed RAM */
     if (pScrn->videoRam < 16384 || pScrn->videoRam > 65536) {
-	if(pVia->Chipset == VIA_CLE266)
+	if(pVia->Chipset == VIA_CLE266) {
 	    bMemSize = hwp->readSeq(hwp, 0x34);
-	else
+	    if (!bMemSize) {
+		xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+			   "CR34 says nothing; trying CR39.\n");
+		bMemSize = hwp->readSeq(hwp, 0x39);
+	    }
+	} else
 	    bMemSize = hwp->readSeq(hwp, 0x39);
 
 	if (bMemSize > 16 && bMemSize <= 128)
@@ -1362,8 +1367,9 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
 	else if (bMemSize > 0 && bMemSize < 31)
 	    pScrn->videoRam = bMemSize << 12;
 	else {
-	    xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Memory size detection failed: using 16MB\n");
-	    pScrn->videoRam = 16 << 10;	/* Assume the base 16Mb */
+	    xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+		       "Memory size detection failed: using 16MB.\n");
+	    pScrn->videoRam = 16 << 10;	/* Assume the basic 16MB */
 	}
     }
 
