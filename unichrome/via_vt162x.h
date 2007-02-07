@@ -754,21 +754,22 @@ static DisplayModeRec VT1625Modes[] = {
     { MODEPREFIX("800x600Over"), ... ,   MODESUFFIXPAL },
     { MODEPREFIX("1024x768Over"), ... ,   MODESUFFIXPAL },
     { MODEPREFIX("720x576Over"), ... ,   MODESUFFIXPAL },*/
+/*                                clock    HR   SH1   SH2   HFL       VR   SV1   SV2   VFL*/
+    { MODEPREFIX("640x480"),      30000,  640,  680,  808, 1000, 0,  480,  520,  523,  600, 0, V_NHSYNC | V_NVSYNC, MODESUFFIXPAL   },
+    { MODEPREFIX("800x600"),      34500,  800,  816,  880,  920, 0,  600,  604,  620,  750, 0, V_PHSYNC | V_PVSYNC, MODESUFFIXPAL   },
+    { MODEPREFIX("1024x768"),     57000, 1024, 1040, 1112, 1200, 0,  768,  829,  840,  950, 0, V_NHSYNC | V_NVSYNC, MODESUFFIXPAL   },
+    { MODEPREFIX("720x576"),      28500,  720,  728,  744,  760, 0,  576,  635,  643,  750, 0, V_NHSYNC | V_PVSYNC, MODESUFFIXPAL   },
+    { MODEPREFIX("720x576Over"),  27000,  720,  768,  800,  864, 0,  576,  577,  579,  625, 0, V_NHSYNC | V_PVSYNC, MODESUFFIXPAL   },
 
-    { MODEPREFIX("640x480"),  30000,  640,  680,  808, 1000, 0,  480,  520,  523,  600, 0, V_NHSYNC | V_NVSYNC, MODESUFFIXPAL  },
-    { MODEPREFIX("800x600"),  34500,  800,  816,  880,  920, 0,  600,  604,  620,  750, 0, V_PHSYNC | V_PVSYNC, MODESUFFIXPAL  },
-    { MODEPREFIX("1024x768"), 57000, 1024, 1040, 1112, 1200, 0,  768,  829,  840,  950, 0, V_NHSYNC | V_NVSYNC, MODESUFFIXPAL  },
+    { MODEPREFIX("1280x720"),     74250, 1280, 1320, 1376, 1650, 0,  720,  722,  728,  750, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX720P  },
+    { MODEPREFIX("1920x1080"),    74250, 1920, 1960, 2016, 2200, 0, 1080, 1082, 1088, 1125, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX1080I },
 
-    { MODEPREFIX("720x576"),  28500,  720,  728,  744,  760, 0,  576,  635,  643,  750, 0, V_NHSYNC | V_PVSYNC, MODESUFFIXPAL  },
-    { MODEPREFIX("720x576Over"),  27000,  720,  768,  800,  864, 0,  576,  577,  579,  625, 0, V_NHSYNC | V_PVSYNC, MODESUFFIXPAL  },
-    { MODEPREFIX("1280x720"), 74250, 1280, 1320, 1376, 1650, 0, 720, 722, 728, 750, 0, V_NHSYNC | V_NVSYNC,   MODESUFFIX720P },
-    { MODEPREFIX("1920x1080"), 74250, 1920, 1960, 2016, 2200, 0, 1080, 1082, 1088, 1125, 0, V_NHSYNC | V_NVSYNC,  MODESUFFIX1080I },
+    { MODEPREFIX("640x480"),      24696,  640,  656,  744,  784, 0,  480,  482,  483,  525, 0, V_NHSYNC | V_NVSYNC, MODESUFFIXNTSC  },
 
+    { MODEPREFIX("720x480Under"), 28224,  720,  728,  744,  784, 0,  480,  490,  496,  600, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX480P  },
+    { MODEPREFIX("720x480Fit"),   28980,  720,  728,  776,  840, 0,  480,  484,  499,  575, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX480P  },
+    { MODEPREFIX("720x480Over"),  27027,  720,  784,  808,  858, 0,  480,  483,  486,  525, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX480P  },
 
-    { MODEPREFIX("640x480"),    24696,  640,  656,  744,  784, 0,  480,  482,  483,  525, 0, V_NHSYNC | V_NVSYNC, MODESUFFIXNTSC },
-    { MODEPREFIX("720x480Under"),    28225,  720,  728,  744,  784, 0,  480,  490,  496,  600, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX480P },
-    { MODEPREFIX("720x480Fit"),    28980,  720,  728,  744,  784, 0,  480,  490,  496,  600, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX480P },
-    { MODEPREFIX("720x480Over"),    27025,  720,  728,  744,  784, 0,  480,  490,  496,  600, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX480P },
     { MODEPREFIX(NULL), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, MODESUFFIXNTSC },
 };
 
@@ -808,7 +809,7 @@ VT1625Table[] = {
     },
     { "720x480Fit", 720, 480, TVTYPE_480P, 0, 0,
       /*  00                                                                                         0F */
-      { 0x03,    0, 0x10, 0x40, 0x10,    0,    0, 0x41,  0x43, 0x07, 0x7B,    0, 0x50, 0x57,    0, 0xB7,
+      { 0x03,    0, 0x10, 0x40, 0x10,    0,    0, 0x41,  0x43, 0xFF, 0x7B,    0, 0x50, 0x57,    0, 0xB7,
            0, 0x80, 0xCD, 0x21, 0x73, 0x34, 0xD6, 0x7B,  0xF0, 0x21, 0x02, 0x50, 0x43, 0x80,    0, 0x01,
         0x2F, 0x08, 0xCA, 0x7E, 0x02,    0,    0,    0,     0,    0,    0,    0,    0,    0,    0,    0 },
       /*  4A                            4F    50                                                     59 */
@@ -824,7 +825,7 @@ VT1625Table[] = {
     },
     { "720x480Over", 720, 480, TVTYPE_480P, 0, 0,
       /*  00                                                                                         0F */
-      { 0x03,    0, 0x10, 0x40, 0x10,    0,    0, 0x33,  0x20,    0, 0x7B,    0, 0x50, 0x57,    0, 0x9E,
+      { 0x03,    0, 0x10, 0x40, 0x10,    0,    0, 0x33,  0x20, 0xFF, 0x7B,    0, 0x50, 0x57,    0, 0x9E,
            0, 0x80, 0x04, 0x08, 0x08, 0x10, 0xD6, 0x7B,  0xF0, 0x21, 0x02, 0x50, 0x43, 0x80,    0, 0x01,
         0x2F, 0x08, 0xDC, 0x7E, 0x02,    0,    0,    0,     0,    0,    0,    0,    0,    0,    0,    0 },
       /*  4A                            4F    50                                                     59 */
