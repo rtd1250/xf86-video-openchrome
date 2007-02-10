@@ -147,6 +147,7 @@ viaFlushDRIEnabled(ViaCommandBuffer * cb)
      * Align command buffer end for AGP DMA.
      */
 
+    OUT_RING_H1(0x2f8, 0x67676767);
     if (pVia->agpDMA && cb->mode == 2 && cb->rindex != HC_ParaType_CmdVdata
 	&& (cb->pos & 1)) {
 	OUT_RING(HC_DUMMY);
@@ -879,6 +880,7 @@ viaSubsequentSolidTwoPointLine(ScrnInfoPtr pScrn, int x1, int y1,
 
     RING_VARS;
 
+    sub = viaAccelClippingHelper(cb, (y1 < y2) ? y1 : y2, tdc);
     cmd = tdc->cmd | VIA_GEC_LINE;
 
     dx = x2 - x1;
@@ -904,8 +906,6 @@ viaSubsequentSolidTwoPointLine(ScrnInfoPtr pScrn, int x1, int y1,
     if (flags & OMIT_LAST) {
 	cmd |= VIA_GEC_LASTPIXEL_OFF;
     }
-
-    sub = viaAccelClippingHelper(cb, (y1 < y2) ? y1 : y2, tdc);
 
     dstBase = pScrn->fbOffset + sub * pVia->Bpl;
     y1 -= sub;
