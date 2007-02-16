@@ -389,9 +389,9 @@ viaSetClippingRectangle(ScrnInfoPtr pScrn, int x1, int y1, int x2, int y2)
     ViaTwodContext *tdc = &pVia->td;
 
     tdc->clipping = TRUE;
-    tdc->clipX1 = x1;
+    tdc->clipX1 = (x1 & 0xFFFF);
     tdc->clipY1 = y1;
-    tdc->clipX2 = x2;
+    tdc->clipX2 = (x2 & 0xFFFF);
     tdc->clipY2 = y2;
 }
 
@@ -443,7 +443,7 @@ viaAccelSolidHelper(ViaCommandBuffer * cb, int x, int y, int w, int h,
     OUT_RING_H1(VIA_REG_GEMODE, mode);
     OUT_RING_H1(VIA_REG_DSTBASE, fbBase >> 3);
     OUT_RING_H1(VIA_REG_PITCH, VIA_PITCH_ENABLE | (pitch >> 3) << 16);
-    OUT_RING_H1(VIA_REG_DSTPOS, (y << 16) | x);
+    OUT_RING_H1(VIA_REG_DSTPOS, (y << 16) | (x & 0xFFFF));
     OUT_RING_H1(VIA_REG_DIMENSION, ((h - 1) << 16) | (w - 1));
     OUT_RING_H1(VIA_REG_FGCOLOR, fg);
     OUT_RING_H1(VIA_REG_GECMD, cmd);
@@ -537,8 +537,8 @@ viaAccelCopyHelper(ViaCommandBuffer * cb, int xs, int ys, int xd, int yd,
     OUT_RING_H1(VIA_REG_DSTBASE, dstFbBase >> 3);
     OUT_RING_H1(VIA_REG_PITCH, VIA_PITCH_ENABLE |
 	((dstPitch >> 3) << 16) | (srcPitch >> 3));
-    OUT_RING_H1(VIA_REG_SRCPOS, (ys << 16) | xs);
-    OUT_RING_H1(VIA_REG_DSTPOS, (yd << 16) | xd);
+    OUT_RING_H1(VIA_REG_SRCPOS, (ys << 16) | (xs & 0xFFFF));
+    OUT_RING_H1(VIA_REG_DSTPOS, (yd << 16) | (xd & 0xFFFF));
     OUT_RING_H1(VIA_REG_DIMENSION, ((h - 1) << 16) | (w - 1));
     OUT_RING_H1(VIA_REG_GECMD, cmd);
 }
@@ -691,7 +691,7 @@ viaSubsequentMono8x8PatternFillRect(ScrnInfoPtr pScrn, int patOffx,
     OUT_RING_H1(VIA_REG_GEMODE, tdc->mode);
     OUT_RING_H1(VIA_REG_DSTBASE, dstBase >> 3);
     OUT_RING_H1(VIA_REG_PITCH, VIA_PITCH_ENABLE | ((pVia->Bpl >> 3) << 16));
-    OUT_RING_H1(VIA_REG_DSTPOS, ((y - sub) << 16) | x);
+    OUT_RING_H1(VIA_REG_DSTPOS, ((y - sub) << 16) | (x & 0xFFFF));
     OUT_RING_H1(VIA_REG_DIMENSION, (((h - 1) << 16) | (w - 1)));
     OUT_RING_H1(VIA_REG_PATADDR, patOffset);
     OUT_RING_H1(VIA_REG_FGCOLOR, tdc->fgColor);
@@ -741,7 +741,7 @@ viaSubsequentColor8x8PatternFillRect(ScrnInfoPtr pScrn, int patOffx,
     OUT_RING_H1(VIA_REG_GEMODE, tdc->mode);
     OUT_RING_H1(VIA_REG_DSTBASE, dstBase >> 3);
     OUT_RING_H1(VIA_REG_PITCH, VIA_PITCH_ENABLE | ((pVia->Bpl >> 3) << 16));
-    OUT_RING_H1(VIA_REG_DSTPOS, ((y - sub) << 16) | x);
+    OUT_RING_H1(VIA_REG_DSTPOS, ((y - sub) << 16) | (x & 0xFFFF));
     OUT_RING_H1(VIA_REG_DIMENSION, (((h - 1) << 16) | (w - 1)));
     OUT_RING_H1(VIA_REG_PATADDR, patAddr);
     OUT_RING_H1(VIA_REG_GECMD, tdc->cmd);
@@ -923,7 +923,7 @@ viaSubsequentSolidTwoPointLine(ScrnInfoPtr pScrn, int x1, int y1,
 
     OUT_RING_H1(VIA_REG_LINE_K1K2,
 	((((dy << 1) & 0x3fff) << 16) | (((dy - dx) << 1) & 0x3fff)));
-    OUT_RING_H1(VIA_REG_LINE_XY, ((y1 << 16) | x1));
+    OUT_RING_H1(VIA_REG_LINE_XY, ((y1 << 16) | (x1 & 0xFFFF)));
     OUT_RING_H1(VIA_REG_DIMENSION, dx);
     OUT_RING_H1(VIA_REG_LINE_ERROR,
 	(((dy << 1) - dx - error) & 0x3fff) | ((tdc->dashed) ? 0xFF0000 : 0));
@@ -951,11 +951,11 @@ viaSubsequentSolidHorVertLine(ScrnInfoPtr pScrn, int x, int y, int len,
     OUT_RING_H1(VIA_REG_PITCH, VIA_PITCH_ENABLE | ((pVia->Bpl >> 3) << 16));
 
     if (dir == DEGREES_0) {
-	OUT_RING_H1(VIA_REG_DSTPOS, ((y - sub) << 16) | x);
+	OUT_RING_H1(VIA_REG_DSTPOS, ((y - sub) << 16) | (x & 0xFFFF));
 	OUT_RING_H1(VIA_REG_DIMENSION, (len - 1));
 	OUT_RING_H1(VIA_REG_GECMD, tdc->cmd | VIA_GEC_BLT);
     } else {
-	OUT_RING_H1(VIA_REG_DSTPOS, ((y - sub) << 16) | x);
+	OUT_RING_H1(VIA_REG_DSTPOS, ((y - sub) << 16) | (x & 0xFFFF));
 	OUT_RING_H1(VIA_REG_DIMENSION, ((len - 1) << 16));
 	OUT_RING_H1(VIA_REG_GECMD, tdc->cmd | VIA_GEC_BLT);
     }
