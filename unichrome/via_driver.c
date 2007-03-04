@@ -104,7 +104,7 @@ static SymTabRec VIAChipsets[] = {
     {VIA_KM400,    "KM400/KN400"},
     {VIA_K8M800,   "K8M800"},
     {VIA_PM800,    "PM800/PM880/CN400"},
-    {VIA_VM800,    "VM800"},
+    {VIA_VM800,    "VM800/CN700/P4M800Pro"},
     {-1,            NULL }
 };
 
