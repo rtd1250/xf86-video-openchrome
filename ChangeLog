@@ -1,8 +1,8 @@
 2007-03-04  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 
-        * unichrome/via.man:
+	* unichrome/via.man:
 
-        Textual tweaks and options ordered alphabetically.
+	Textual tweaks and options ordered alphabetically.
 
 2007-02-16  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 
@@ -16,12 +16,13 @@
 	by Marg Huijgen <mark-dot-sf-dot-net-at-huijgen-dot-tk>; solution
 	found by Thomas.
 
-2007-02-10  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+2007-02-10  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 	
 	* unichrome/via_accel.c: (viaFlushDRIEnabled),
 	(viaSubsequentSolidTwoPointLine):
 
-	Fix possible line clipping bug.
+	Fix line-clipping bug reported by Manuel Bilderbeek
+	<manuel-dot-bilderbeek-at-oce-dot-com>.
 	
 2007-02-06  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 

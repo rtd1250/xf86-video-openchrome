@@ -77,7 +77,7 @@ least one system page of AGP memory and, if the AGP command buffer is
 used, at least 2MB + one system page.  If there is no room for the EXA
 scratch area in AGP space, it will be allocated from VRAM.  If there is
 no room for DRI textures, they will be allocated from the DRI part of
-VRAM (sSee the option "MaxDRIMem").  The default amount of AGP is
+VRAM (see the option "MaxDRIMem").  The default amount of AGP is
 32768kB.  Note that the AGP aperture set in the BIOS must be able
 to accomodate the amount of AGP memory specified here.  Otherwise no
 AGP memory will be available.  It is safe to set a very large AGP
