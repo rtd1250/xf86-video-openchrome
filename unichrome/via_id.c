@@ -17,7 +17,7 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
  * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
 
@@ -35,7 +35,7 @@
 
 /*
  * Known missing devices:
- * 
+ *
  *   CLE266:
  * Biostar M6VLQ Grand
  * Biostar M6VLQ Pro
@@ -166,7 +166,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"ASRock P4VM8",                          VIA_PM800,   0x1849, 0x3118, VIA_DEVICE_CRT},
     {"Chaintech MPM800-3",                    VIA_PM800,   0x270F, 0x7671, VIA_DEVICE_CRT},
     {"MaxSelect Optima C4",                   VIA_PM800,   0x1558, 0x5402, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
-    /* VN800 */
+    /* VM800 */
     {"Clevo/RoverBook Partner E419L",         VIA_VM800,   0x1019, 0x0F75, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"ECS P4M800PRO-M",                       VIA_VM800,   0x1019, 0x2122, VIA_DEVICE_CRT},
     {"ECS C7VCM",                             VIA_VM800,   0x1019, 0xAA2D, VIA_DEVICE_CRT},
@@ -201,9 +201,9 @@ ViaDoubleCheckCLE266Revision(ScrnInfoPtr pScrn)
     VIAPtr pVia = VIAPTR(pScrn);
     /* Crtc 0x4F is only defined in CLE266Cx */
     CARD8 tmp = hwp->readCrtc(hwp, 0x4F);
-    
+
     hwp->writeCrtc(hwp, 0x4F, 0x55);
-    
+
     if (hwp->readCrtc(hwp, 0x4F) == 0x55) {
 	if (CLE266_REV_IS_AX(pVia->ChipRev))
 	    xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "CLE266 Revision seems"
@@ -224,14 +224,14 @@ ViaCheckCardId(ScrnInfoPtr pScrn)
 {
     struct ViaCardIdStruct *Id;
     VIAPtr pVia = VIAPTR(pScrn);
-    
+
     if ((pVia->PciInfo->subsysVendor == pVia->PciInfo->vendor) &&
 	(pVia->PciInfo->subsysCard == pVia->PciInfo->chipType))
-	xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Manufacturer plainly copied main PCI"
-		   " ids to Subsystem/Card ids.\n");
-    
+        xf85DrvMsg(pScrn->scrnIndex, X_WARNING,
+                   "Manufacturer plainly copied main PCI IDs to subsystem/card IDs.\n");
+
     for (Id = ViaCardId; Id->String; Id++) {
-	if ((Id->Chip == pVia->Chipset) && 
+	if ((Id->Chip == pVia->Chipset) &&
 	    (Id->Vendor == pVia->PciInfo->subsysVendor) &&
 	    (Id->Device == pVia->PciInfo->subsysCard)) {
 	    xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "Detected %s.\n", Id->String);
@@ -239,10 +239,9 @@ ViaCheckCardId(ScrnInfoPtr pScrn)
 	    return;
 	}
     }
-    
-    xf86DrvMsg(pScrn->scrnIndex, X_ERROR, 
-	       "Unknown Card-Ids (%4X|%4X); please report to openchrome-users@openchrome.org\n"
-	       , pVia->PciInfo->subsysVendor, pVia->PciInfo->subsysCard);
+
+    xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+               "Unknown Card-IDs (%4X|%4X); please report to <openchrome-users@openchrome.org>\n",
+               pVia->PciInfo->subsysVendor, pVia->PciInfo->subsysCard);
     pVia->Id = NULL;
 }
-
