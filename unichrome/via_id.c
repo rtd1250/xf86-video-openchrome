@@ -227,7 +227,7 @@ ViaCheckCardId(ScrnInfoPtr pScrn)
 
     if ((pVia->PciInfo->subsysVendor == pVia->PciInfo->vendor) &&
 	(pVia->PciInfo->subsysCard == pVia->PciInfo->chipType))
-        xf85DrvMsg(pScrn->scrnIndex, X_WARNING,
+        xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
                    "Manufacturer plainly copied main PCI IDs to subsystem/card IDs.\n");
 
     for (Id = ViaCardId; Id->String; Id++) {
