@@ -1,3 +1,12 @@
+2007-05-18 Xavier Bachelot <xavier-at-bachelot-dot-org> 
+
+	* libxvmc/Makefile.am:
+	* libxvmc/viaXvMC.c: (XvMCCreateContext):
+
+	Backport 2 fixes from Xorg tree.
+	http://gitweb.freedesktop.org/?p=xorg/driver/xf86-video-via.git;a=commit;h=362e03a38682bfcf366242c53444fa36b6052794
+	http://gitweb.freedesktop.org/?p=xorg/driver/xf86-video-via.git;a=commit;h=3cd7dac2b5a1c4bfb66bd1b67904d72dc08cbd0e
+
 2007-04-14  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 
 	* unichrome/via_id.c: (ViaDoubleCheckCLE266Revision),

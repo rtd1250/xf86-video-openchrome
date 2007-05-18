@@ -25,10 +25,12 @@ libviaXvMCPro_la_SOURCES = \
 	vldXvMC.h
 
 libviaXvMC_la_CFLAGS = @XORG_CFLAGS@ @DRI_CFLAGS@ -I$(top_srcdir)/unichrome -I$(top_srcdir)/libxvmc -DTRUE=1 -DFALSE=0
-libviaXvMC_la_LDFLAGS = @DRI_LIBS@ -version-number 1:0:0
+libviaXvMC_la_LDFLAGS = -version-number 1:0:0
+libviaXvMC_la_LIBADD = @DRI_LIBS@
 
 libviaXvMCPro_la_CFLAGS = @XORG_CFLAGS@ @DRI_CFLAGS@ -I$(top_srcdir)/unichrome -I$(top_srcdir)/libxvmc -DTRUE=1 -DFALSE=0
-libviaXvMCPro_la_LDFLAGS = @DRI_LIBS@ -version-number 1:0:0
+libviaXvMCPro_la_LDFLAGS = -version-number 1:0:0
+libviaXvMCPro_la_LIBADD = @DRI_LIBS@
 else
 EXTRA_DIST = \
 	driDrawable.c \

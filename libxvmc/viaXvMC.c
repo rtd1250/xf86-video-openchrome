@@ -376,6 +376,7 @@ XvMCCreateContext(Display * display, XvPortID port,
      */
 
     XFree(priv_data);
+    priv_data = NULL;
 
     /*
      * Check for direct rendering capable, establish DRI and DRM connections,
@@ -445,7 +446,6 @@ XvMCCreateContext(Display * display, XvPortID port,
 	    XUnlockDisplay(display);
 	    fprintf(stderr,
 		"viaXvMC: X server did not allow DRI. Check permissions.\n");
-	    XFree(priv_data);
 	    return releaseContextResources(display, context, 1, BadAlloc);
 	}
 	XUnlockDisplay(display);
