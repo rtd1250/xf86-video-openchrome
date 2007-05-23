@@ -1,3 +1,11 @@
+2007-05-18 Jon Nettleton <jon-dot-nettleton-at-gmail-dot-com> 
+
+	* unichrome/via.h:
+
+	Remove version check for older version of Xorg.  This is 
+	really not necessary anymore, and was causing some breakage
+	with xorg-server's new version numbering.
+
 2007-05-18 Xavier Bachelot <xavier-at-bachelot-dot-org> 
 
 	* libxvmc/Makefile.am:

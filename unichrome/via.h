@@ -27,17 +27,10 @@
 
 #include "xorgVersion.h"
 
-/* use xf86_ansic for < xorg 7.1 */
-#if ( XORG_VERSION_MAJOR > 6 && XORG_VERSION_MINOR > 0 )
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
-#include <assert.h>
-#include <stdlib.h>
-#else
-#include "xf86_ansic.h"
-#endif
 
 /* Video status flag */
 
