@@ -1,3 +1,13 @@
+2007-06-06  Jon Nettleton  <jon-dot-nettleton-at-gmail-dot-com>
+
+	* unichrome/via_driver.c:
+	* unichrome/via_driver.h:
+	* unichrome/via.man:
+
+	Added per chipset option defaults.  This should allow the
+	driver to install and work out of the box with almost all
+	hardware and xorg.conf configurations.
+
 2007-05-23 Jon Nettleton <jon-dot-nettleton-at-gmail-dot-com> 
 
 	* unichrome/via.h:
