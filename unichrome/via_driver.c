@@ -714,12 +714,6 @@ static Bool VIASetupDefaultOptions(ScrnInfoPtr pScrn)
         case VIA_K8M800:
             pVia->DRIIrqEnable = FALSE;
             break;
-        case VIA_K8M890:
-            pVia->agpEnable = FALSE;
-            break;
-        case VIA_P4M900:
-            pVia->agpEnable = FALSE;
-            break;
     }
 
     return TRUE;

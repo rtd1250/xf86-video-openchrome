@@ -1,6 +1,13 @@
 2007-06-06  Jon Nettleton  <jon-dot-nettleton-at-gmail-dot-com>
 
 	* unichrome/via_driver.c:
+
+	Removed to chipset option definitions that aren't in
+	trunk yet.
+
+2007-06-06  Jon Nettleton  <jon-dot-nettleton-at-gmail-dot-com>
+
+	* unichrome/via_driver.c:
 	* unichrome/via_driver.h:
 	* unichrome/via.man:
 
