@@ -1,5 +1,12 @@
 2007-06-10  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 
+	* unichrome/via_driver.c: (VIAPreInit):
+
+	Print VideoRAM again only when it's actually been probed.
+	Further tiny code cleanups: comments, line wraps, whitespace.
+
+2007-06-10  Benno Schulenberg  <bensberg-at-justemail-dot-net>
+
 	* unichrome/via.man:
 	* unichrome/via_driver.c: (VIAPreInit):
 
