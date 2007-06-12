@@ -1,3 +1,9 @@
+2007-06-12  Gabriel Mansi  <gabriel-dot-mansi-at-gmail-dot-com>
+
+	* unichrome/via.h:
+
+	Added missing includes
+
 2007-06-10  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 
 	* unichrome/via_driver.c: (VIAPreInit):
