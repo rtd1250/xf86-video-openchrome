@@ -92,6 +92,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"VIA VT3122 (CLE266)-EPIA M/MII/...",    VIA_CLE266,  0x1106, 0x3122, VIA_DEVICE_CRT | VIA_DEVICE_TV},
     {"MSI MS-6723",                           VIA_CLE266,  0x1462, 0X7238, VIA_DEVICE_CRT | VIA_DEVICE_TV},
     {"Clevo T200V",                           VIA_CLE266,  0x1558, 0x200A, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
+    {"Biostar ARKplus III",                   VIA_CLE266,  0x1565, 0x3204, VIA_DEVICE_CRT | VIA_DEVICE_TV}, /* FS454 TV encoder */
     /* KM400 */
     {"ECS KM400-M2",                          VIA_KM400,   0x1019, 0x1842, VIA_DEVICE_CRT},
     {"Acer Aspire 135x",                      VIA_KM400,   0x1025, 0x0033, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
