@@ -1,7 +1,7 @@
 if XVMC
-lib_LTLIBRARIES=libviaXvMC.la libviaXvMCPro.la
+lib_LTLIBRARIES=libchromeXvMC.la libchromeXvMCPro.la
 
-libviaXvMC_la_SOURCES = \
+libchromeXvMC_la_SOURCES = \
 	viaLowLevel.c \
 	driDrawable.c \
 	viaXvMC.c \
@@ -12,7 +12,7 @@ libviaXvMC_la_SOURCES = \
 	xf86dri.h \
 	xf86dristr.h \
 	vldXvMC.h
-libviaXvMCPro_la_SOURCES = \
+libchromeXvMCPro_la_SOURCES = \
 	viaLowLevelPro.c \
 	driDrawable.c \
 	viaXvMC.c \
@@ -24,13 +24,13 @@ libviaXvMCPro_la_SOURCES = \
 	xf86dristr.h \
 	vldXvMC.h
 
-libviaXvMC_la_CFLAGS = @XORG_CFLAGS@ @DRI_CFLAGS@ -I$(top_srcdir)/unichrome -I$(top_srcdir)/libxvmc -DTRUE=1 -DFALSE=0
-libviaXvMC_la_LDFLAGS = -version-number 1:0:0
-libviaXvMC_la_LIBADD = @DRI_LIBS@
+libchromeXvMC_la_CFLAGS = @XORG_CFLAGS@ @DRI_CFLAGS@ -I$(top_srcdir)/src -I$(top_srcdir)/libxvmc -DTRUE=1 -DFALSE=0
+libchromeXvMC_la_LDFLAGS = -version-number 1:0:0
+libchromeXvMC_la_LIBADD = @DRI_LIBS@
 
-libviaXvMCPro_la_CFLAGS = @XORG_CFLAGS@ @DRI_CFLAGS@ -I$(top_srcdir)/unichrome -I$(top_srcdir)/libxvmc -DTRUE=1 -DFALSE=0
-libviaXvMCPro_la_LDFLAGS = -version-number 1:0:0
-libviaXvMCPro_la_LIBADD = @DRI_LIBS@
+libchromeXvMCPro_la_CFLAGS = @XORG_CFLAGS@ @DRI_CFLAGS@ -I$(top_srcdir)/src -I$(top_srcdir)/libxvmc -DTRUE=1 -DFALSE=0
+libchromeXvMCPro_la_LDFLAGS = -version-number 1:0:0
+libchromeXvMCPro_la_LIBADD = @DRI_LIBS@
 else
 EXTRA_DIST = \
 	driDrawable.c \

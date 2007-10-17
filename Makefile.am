@@ -19,4 +19,6 @@
 #  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 AUTOMAKE_OPTIONS = foreign
-SUBDIRS = unichrome man libxvmc
+SUBDIRS = src man libxvmc
+
+EXTRA_DIST = release_notes-0.3.0

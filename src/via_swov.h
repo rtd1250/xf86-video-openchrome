@@ -26,7 +26,7 @@
 #ifndef _VIA_SWOV_H_
 #define _VIA_SWOV_H_ 1
 
-			     /* #define XV_DEBUG 1 *//* write log msg to /var/log/XFree86.0.log */
+/*#define XV_DEBUG 1 write log msg to /var/log/XFree86.0.log */
 
 #ifdef XV_DEBUG
 # define DBG_DD(x) (x)
@@ -60,6 +60,7 @@ typedef struct __VIAHWDiff
     /*unsigned long dwUpdFlip; *//* Set HQV3D0[15] to flip video */
     unsigned long dwHQVDisablePatch;   /* Change Video Engine Clock setting for HQV disable bug */
     /*unsigned long dwSUBFlip; *//* Set HQV3D0[15] to flip video for sub-picture blending */
+    unsigned long dwNeedV1Prefetch;             /*V1 pre-fetch function for K8*/
     /*unsigned long dwNeedV3Prefetch; *//* V3 pre-fetch function for K8 */
     /*unsigned long dwNeedV4Prefetch; *//* V4 pre-fetch function for K8 */
     /*unsigned long dwUseSystemMemory; *//* Use system memory for DXVA compressed data buffers */

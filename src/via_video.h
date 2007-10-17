@@ -29,7 +29,7 @@
  * I N C L U D E S
  */
 
-				 /*#define   XV_DEBUG      1*//* write log msg to /var/log/XFree86.0.log */
+/*#define   XV_DEBUG        1            write log msg to /var/log/XFree86.0.log */
 #define   COLOR_KEY       1	       /* set color key value from driver layer */
 
 #define HW_3123

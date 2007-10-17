@@ -276,14 +276,25 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
 	    pBIOSInfo->CrtPresent = TRUE;
     }
 
-    /* TV encoder */
-    if (ViaTVDetect(pScrn) && ViaTVInit(pScrn)) {
-	if (!pBIOSInfo->TVOutput) /* Config might've set this already */
-	    ViaTVDACSense(pScrn);
-    } else if (pVia->Id && (pVia->Id->Outputs & VIA_DEVICE_TV)) {
-	xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "This device is supposed to have a"
-		   " TV encoder but we are unable to detect it (support missing?).\n");
-	pBIOSInfo->TVOutput = 0;
+    /* 
+     * FIXME: xf86I2CProbeAddress(pVia->pI2CBus3, 0x40)
+     * disables the panel on P4M900
+     * See ViaTVDetect.
+     */
+    if (pVia->Chipset == VIA_P4M900 && pBIOSInfo->PanelPresent) {
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+	"Will not try to detect TV encoder." );
+    } else {
+        /* TV encoder */
+        if (ViaTVDetect(pScrn) && ViaTVInit(pScrn)) {
+            if (!pBIOSInfo->TVOutput) /* Config might've set this already */
+                ViaTVDACSense(pScrn);
+        } else if (pVia->Id && (pVia->Id->Outputs & VIA_DEVICE_TV)) {
+            xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                "This device is supposed to have a"
+                " TV encoder but we are unable to detect it (support missing?).\n");
+            pBIOSInfo->TVOutput = 0;
+        }
     }
 }
 
@@ -794,6 +805,14 @@ ViaGetMemoryBandwidth(ScrnInfoPtr pScrn)
 	return ViaBandwidthTable[VIA_BW_PM800].Bandwidth[pVia->MemClk];
     case VIA_VM800:
 	return ViaBandwidthTable[VIA_BW_VM800].Bandwidth[pVia->MemClk];
+    case VIA_K8M890:
+	return ViaBandwidthTable[VIA_BW_K8M890].Bandwidth[pVia->MemClk];
+    case VIA_P4M900:
+	return ViaBandwidthTable[VIA_BW_P4M900].Bandwidth[pVia->MemClk];
+    case VIA_CX700:
+        return ViaBandwidthTable[VIA_BW_CX700].Bandwidth[pVia->MemClk];
+    case VIA_P4M890:
+        return ViaBandwidthTable[VIA_BW_P4M890].Bandwidth[pVia->MemClk];
     default:
 	xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "ViaBandwidthAllowed: Unknown Chipset.\n");
 	return VIA_BW_MIN;
@@ -1713,7 +1732,10 @@ ViaModePrimary(ScrnInfoPtr pScrn, DisplayModePtr mode)
 	   is removed -- copy from clock handling code below */
 	if ((pVia->Chipset == VIA_CLE266) && CLE266_REV_IS_AX(pVia->ChipRev))
 	    ViaSetPrimaryDotclock(pScrn, 0x471C); /* CLE266Ax use 2x XCLK */
-	else if ((pVia->Chipset == VIA_K8M800) || (pVia->Chipset == VIA_PM800) || (pVia->Chipset == VIA_VM800))
+	else if ((pVia->Chipset == VIA_K8M800) || (pVia->Chipset == VIA_PM800) || 
+	   (pVia->Chipset == VIA_VM800) || (pVia->Chipset == VIA_K8M890) ||
+	   (pVia->Chipset == VIA_P4M900) || (pVia->Chipset == VIA_CX700) ||
+	   (pVia->Chipset == VIA_P4M890))
 	    ViaSetPrimaryDotclock(pScrn, 0x529001);
 	else
 	    ViaSetPrimaryDotclock(pScrn, 0x871C);
@@ -1728,11 +1750,17 @@ ViaModePrimary(ScrnInfoPtr pScrn, DisplayModePtr mode)
     if (pBIOSInfo->ClockExternal) {
 	if ((pVia->Chipset == VIA_CLE266) && CLE266_REV_IS_AX(pVia->ChipRev))
 	    ViaSetPrimaryDotclock(pScrn, 0x471C); /* CLE266Ax use 2x XCLK */
-	else if ((pVia->Chipset == VIA_K8M800) || (pVia->Chipset == VIA_PM800) ||(pVia->Chipset == VIA_VM800))
+	else if ((pVia->Chipset == VIA_K8M800) || (pVia->Chipset == VIA_PM800) ||
+	    (pVia->Chipset == VIA_VM800) || (pVia->Chipset == VIA_K8M890) ||
+	    (pVia->Chipset == VIA_P4M900) || (pVia->Chipset == VIA_CX700) ||
+	    (pVia->Chipset == VIA_P4M890))
 	    ViaSetPrimaryDotclock(pScrn, 0x529001);
 	else
 	    ViaSetPrimaryDotclock(pScrn, 0x871C);
-	if ((pVia->Chipset != VIA_K8M800) && (pVia->Chipset != VIA_PM800) && (pVia->Chipset != VIA_VM800))
+	if ((pVia->Chipset != VIA_K8M800) && (pVia->Chipset != VIA_PM800) &&
+	    (pVia->Chipset != VIA_VM800) && (pVia->Chipset != VIA_K8M890) &&
+	    (pVia->Chipset != VIA_P4M900) && (pVia->Chipset != VIA_CX700) &&
+	    (pVia->Chipset != VIA_P4M890))
 	  ViaCrtcMask(hwp, 0x6B, 0x01, 0x01);
     } else {
 	ViaSetPrimaryDotclock(pScrn, pBIOSInfo->Clock);
@@ -1744,6 +1772,42 @@ ViaModePrimary(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x17, 0x80, 0x80);
 
     hwp->disablePalette(hwp);
+}
+
+void
+ViaModeSecondaryVGAFetchCount(ScrnInfoPtr pScrn, int width) {
+
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    CARD16 temp;
+
+    /* fetch count */
+    temp = (width * (pScrn->bitsPerPixel >> 3)) >> 3;
+    /* Make sure that this is 32byte aligned */
+    if (temp & 0x03) {
+        temp += 0x03;
+        temp &= ~0x03;
+    }
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Fetch Count: 0x%03X\n", temp));
+    hwp->writeCrtc(hwp, 0x65, (temp >> 1) & 0xFF);
+    ViaCrtcMask(hwp, 0x67, temp >> 7, 0x0C);
+}
+
+void
+ViaModeSecondaryVGAOffset(ScrnInfoPtr pScrn) {
+
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    CARD16 temp;
+
+    /* offset */
+    temp = (pScrn->displayWidth * (pScrn->bitsPerPixel >> 3)) >> 3;
+    if (temp & 0x03) { /* Make sure that this is 32byte aligned */
+        temp += 0x03;
+        temp &= ~0x03;
+    }
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Offset: 0x%03X\n", temp));
+    hwp->writeCrtc(hwp, 0x66, temp & 0xFF);
+    ViaCrtcMask(hwp, 0x67, temp >> 8, 0x03);
+
 }
 
 /*
@@ -1873,26 +1937,9 @@ ViaModeSecondaryVGA(ScrnInfoPtr pScrn, DisplayModePtr mode)
     temp = mode->CrtcVSyncEnd;
     ViaCrtcMask(hwp, 0x5F, temp, 0x1F);
 
-    /* offset */
-    temp = (pScrn->displayWidth * (pScrn->bitsPerPixel >> 3)) >> 3;
-    if (temp & 0x03) { /* Make sure that this is 32byte aligned */
-	temp += 0x03;
-	temp &= ~0x03;
-    }
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Offset: 0x%03X\n", temp));
-    hwp->writeCrtc(hwp, 0x66, temp & 0xFF);
-    ViaCrtcMask(hwp, 0x67, temp >> 8, 0x03);
+    ViaModeSecondaryVGAOffset(pScrn);
+    ViaModeSecondaryVGAFetchCount(pScrn, mode->CrtcHDisplay);
 
-    /* fetch count */
-    temp = (mode->CrtcHDisplay * (pScrn->bitsPerPixel >> 3)) >> 3;
-    /* Make sure that this is 32byte aligned */
-    if (temp & 0x03) {
-	temp += 0x03;
-	temp &= ~0x03;
-    }
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Fetch Count: 0x%03X\n", temp));
-    hwp->writeCrtc(hwp, 0x65, (temp >> 1) & 0xFF);
-    ViaCrtcMask(hwp, 0x67, temp >> 7, 0x0C);
 }
 
 /*

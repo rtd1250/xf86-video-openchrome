@@ -26,11 +26,11 @@
 EXTRA_DIST = svnversion.h
 CONFIG_CLEAN_FILES= svnversion.h
 AM_CFLAGS = @XORG_CFLAGS@ @DRI_CFLAGS@
-via_drv_la_LTLIBRARIES = via_drv.la
-via_drv_la_LDFLAGS = -module -avoid-version
-via_drv_ladir = @moduledir@/drivers
+openchrome_drv_la_LTLIBRARIES = openchrome_drv.la
+openchrome_drv_la_LDFLAGS = -module -avoid-version
+openchrome_drv_ladir = @moduledir@/drivers
 
-via_drv_la_SOURCES = \
+openchrome_drv_la_SOURCES = \
 	 via_3d_reg.h \
 	 via_3d.c \
 	 via_3d.h \
@@ -68,7 +68,7 @@ via_drv_la_SOURCES = \
          via_xvpriv.h
 
 if DRI
-via_drv_la_SOURCES += \
+openchrome_drv_la_SOURCES += \
          via_dri.c \
          via_dri.h \
          via_drmclient.h \

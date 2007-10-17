@@ -226,7 +226,20 @@ ViaSetPrimaryFIFO(ScrnInfoPtr pScrn, DisplayModePtr mode)
 	else
 	    ViaSeqMask(hwp, 0x22, 0x00, 0x1F);
 	break;
-
+    case VIA_K8M890:
+    case VIA_P4M900:
+        hwp->writeSeq(hwp, 0x16, 0x92);
+        hwp->writeSeq(hwp, 0x17, 0xB3);
+        hwp->writeSeq(hwp, 0x18, 0x8A);
+        break;
+    case VIA_P4M890:
+        break;
+    case VIA_CX700:
+        hwp->writeSeq(hwp, 0x16, 0x26);
+        hwp->writeSeq(hwp, 0x17, 0x5F);
+        hwp->writeSeq(hwp, 0x18, 0x66);
+        hwp->writeSeq(hwp, 0x22, 0x1F);
+        break;
     default:
 	xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "ViaSetPrimaryFIFO:"
 		   " Chipset %d not implemented\n", pVia->Chipset);
@@ -343,6 +356,26 @@ ViaSetSecondaryFIFO(ScrnInfoPtr pScrn, DisplayModePtr mode)
 	else
 	    ViaCrtcMask(hwp, 0x94, 0x20, 0x7F);
 	break;
+    case VIA_P4M890:
+    case VIA_K8M890:
+    case VIA_P4M900:
+        break;
+    case VIA_CX700:
+        ViaCrtcMask(hwp, 0x68, 0xA0, 0xF0);
+        ViaCrtcMask(hwp, 0x94, 0x00, 0x80);
+        ViaCrtcMask(hwp, 0x95, 0x00, 0x80);
+
+        ViaCrtcMask(hwp, 0x68, 0x04, 0x0F);
+        ViaCrtcMask(hwp, 0x95, 0x10, 0x70);
+
+        ViaCrtcMask(hwp, 0x92, 0x08, 0x0F);
+        ViaCrtcMask(hwp, 0x95, 0x00, 0x07);
+
+        if ((mode->HDisplay >= 1400) && (pScrn->bitsPerPixel == 32))
+            ViaCrtcMask(hwp, 0x94, 0x10, 0x7F);
+        else
+            ViaCrtcMask(hwp, 0x94, 0x20, 0x7F);
+        break;
     default:
 	xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "ViaSetSecondaryFIFO:"
 		   " Chipset %d not implemented\n", pVia->Chipset);

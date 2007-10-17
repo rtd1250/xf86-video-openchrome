@@ -1516,7 +1516,7 @@ initXvMCLowLevel(int fd, drm_context_t * ctx,
 {
     XvMCLowLevel *xl;
     
-    if (chipId != PCI_CHIP_VT3259) {
+    if (chipId != PCI_CHIP_VT3259 && chipId != PCI_CHIP_VT3364) {
 	fprintf(stderr, "You are using an XvMC driver for the wrong chip.\n");
 	fprintf(stderr, "Chipid is 0x%04x.\n", chipId);
 	return NULL;

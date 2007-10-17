@@ -24,9 +24,9 @@
 #ifndef _VIA_DRMCLIENT_H
 #define _VIA_DRMCLIENT_H
 
+#include "stdint.h"
 #include "drm.h"
 #include "xf86drm.h"
-#include "stdint.h"
 
 #ifdef X_NEED_DRMLOCK
 #define drm_hw_lock_t drmLock

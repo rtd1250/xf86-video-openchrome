@@ -42,7 +42,7 @@
 #define VIA_MMIO_REGBASE        0x0
 #define VIA_MMIO_VGABASE        0x8000
 #define VIA_MMIO_BLTBASE        0x200000
-#define VIA_MMIO_BLTSIZE        0x10000
+#define VIA_MMIO_BLTSIZE        0x20000
 
 
 /* defines for VIA 2D registers */

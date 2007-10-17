@@ -26,7 +26,7 @@
 #ifndef _VIA_DRIVER_H_
 #define _VIA_DRIVER_H_ 1
 
-#define HAVE_DEBUG
+#define HAVE_DEBUG 1
 
 #ifdef HAVE_DEBUG
 #define DEBUG(x) x
@@ -94,11 +94,11 @@
 #define AGP_PAGES 8192
 #define AGP_SIZE (AGP_PAGE_SIZE * AGP_PAGES)
 
-#define DRIVER_NAME     "via"
+#define DRIVER_NAME     "openchrome"
 #define VERSION_MAJOR   0
 #define VERSION_MINOR   2
 #ifdef USE_NEW_XVABI
-#define PATCHLEVEL      1
+#define PATCHLEVEL      900
 #else
 #define PATCHLEVEL      0
 #endif
@@ -117,11 +117,13 @@ typedef struct {
     CARD8   SR27, SR28, SR29, SR2A,SR2B,SR2C,SR2D,SR2E;
     CARD8   SR2F, SR30, SR31, SR32,SR33,SR34,SR40,SR41;
     CARD8   SR42, SR43, SR44, SR45,SR46,SR47;
+    CARD8   SR4A, SR4B, SR4C;
 
     /*   extended CRTC registers */
     CARD8   CR13, CR30, CR31, CR32, CR33, CR34, CR35, CR36;
     CARD8   CR37, CR38, CR39, CR3A, CR40, CR41, CR42, CR43;
     CARD8   CR44, CR45, CR46, CR47, CR48, CR49, CR4A;
+    CARD8   CR97, CR99, CR9B, CR9F, CRA0, CRA1, CRA2;
     CARD8   CRTCRegs[68];
 /*    CARD8   LCDRegs[0x40];*/
 } VIARegRec, *VIARegPtr;
@@ -243,6 +245,7 @@ typedef struct _VIA {
     vbeInfoPtr          pVbe;
     ViaVbeModeInfo      vbeMode;
     Bool                useVBEModes;
+    Bool                useLegacyVBE;
 
     /* Support for shadowFB and rotation */
     unsigned char*      ShadowPtr;
@@ -346,6 +349,7 @@ typedef struct _VIA {
     CARD32		CursorMC;
 
     /* Video */
+    int                 VideoEngine;
     swovRec		swov;
     CARD32              VideoStatus;
     VIAHWDiff		HWDiff;

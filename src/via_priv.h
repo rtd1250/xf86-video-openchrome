@@ -165,6 +165,10 @@ typedef struct  {
     int oldPanningX;
     int oldPanningY;
 
+/* Maximum resolution with interpolation */
+    unsigned long maxWInterp;
+    unsigned long maxHInterp;
+
 } swovRec, *swovPtr;
 
 #endif /* _VIA_PRIV_H_ */

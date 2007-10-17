@@ -330,7 +330,9 @@ ViaInitXVMC(ScreenPtr pScreen)
     pVia->XvMCEnabled = 0;
 
     if (!(pVia->Chipset == VIA_CLE266) && !(pVia->Chipset == VIA_K8M800) &&
-	!(pVia->Chipset == VIA_PM800) && !(pVia->Chipset == VIA_VM800)) {
+	!(pVia->Chipset == VIA_PM800) && !(pVia->Chipset == VIA_VM800) &&
+        !(pVia->Chipset == VIA_K8M890) && !(pVia->Chipset == VIA_P4M900) &&
+	!(pVia->Chipset == VIA_P4M890)) {
 	xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
 	    "[XvMC] Not supported on this chipset.\n");
 	return;
@@ -377,15 +379,15 @@ ViaInitXVMC(ScreenPtr pScreen)
     {
 	DRIInfoPtr pDRIInfo = pVia->pDRIInfo;
 
-	if (pVia->ChipId != PCI_CHIP_VT3259) {
+	if (pVia->ChipId != PCI_CHIP_VT3259 && pVia->ChipId != PCI_CHIP_VT3364) {
 	    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-		"[XvMC] Registering viaXvMC.\n");
-	    xf86XvMCRegisterDRInfo(pScreen, "viaXvMC", pDRIInfo->busIdString,
+		"[XvMC] Registering chromeXvMC.\n");
+	    xf86XvMCRegisterDRInfo(pScreen, "chromeXvMC", pDRIInfo->busIdString,
 		VIAXVMC_MAJOR, VIAXVMC_MINOR, VIAXVMC_PL);
 	} else {
 	    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-		"[XvMC] Registering viaXvMCPro.\n");
-	    xf86XvMCRegisterDRInfo(pScreen, "viaXvMCPro",
+		"[XvMC] Registering chromeXvMCPro.\n");
+	    xf86XvMCRegisterDRInfo(pScreen, "chromeXvMCPro",
 		pDRIInfo->busIdString, VIAXVMC_MAJOR, VIAXVMC_MINOR,
 		VIAXVMC_PL);
 	}
@@ -502,6 +504,7 @@ ViaXvMCCreateContext(ScrnInfoPtr pScrn, XvMCContextPtr pContext,
     contextRec->useAGP = pViaDRI->ringBufActive &&
 	((pVia->Chipset == VIA_CLE266) ||
 	 (pVia->Chipset == VIA_KM400) ||
+	 (pVia->Chipset == VIA_P4M900) ||
 	 (pVia->Chipset == VIA_PM800));
     contextRec->chipId = pVia->ChipId;
     contextRec->screen = pScrn->pScreen->myNum;

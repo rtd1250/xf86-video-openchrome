@@ -185,6 +185,7 @@ VIADRIRingBufferInit(ScrnInfoPtr pScrn)
 	switch (pVia->ChipId) {
 	case PCI_CHIP_VT3314:
 	case PCI_CHIP_VT3259:
+        case PCI_CHIP_VT3324:
 	    pVIADRI->reg_pause_addr = 0x40c;
 	    break;
 	default:
