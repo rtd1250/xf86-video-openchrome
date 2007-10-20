@@ -758,7 +758,7 @@ static DisplayModeRec VT1625Modes[] = {
     { MODEPREFIX("640x480"),      30000,  640,  680,  808, 1000, 0,  480,  520,  523,  600, 0, V_NHSYNC | V_NVSYNC, MODESUFFIXPAL   },
     { MODEPREFIX("800x600"),      34500,  800,  816,  880,  920, 0,  600,  604,  620,  750, 0, V_PHSYNC | V_PVSYNC, MODESUFFIXPAL   },
     { MODEPREFIX("1024x768"),     57000, 1024, 1040, 1112, 1200, 0,  768,  829,  840,  950, 0, V_NHSYNC | V_NVSYNC, MODESUFFIXPAL   },
-    { MODEPREFIX("720x576"),      28500,  720,  728,  744,  760, 0,  576,  635,  643,  750, 0, V_NHSYNC | V_PVSYNC, MODESUFFIXPAL   },
+    { MODEPREFIX("720x576"),      34500,  720,  766,  800, 1000, 0,  576,  576,  579,  690, 0, V_NHSYNC | V_PVSYNC, MODESUFFIXPAL   },
     { MODEPREFIX("720x576Over"),  27000,  720,  768,  800,  864, 0,  576,  577,  579,  625, 0, V_NHSYNC | V_PVSYNC, MODESUFFIXPAL   },
 
     { MODEPREFIX("1280x720"),     74250, 1280, 1320, 1376, 1650, 0,  720,  722,  728,  750, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX720P  },
@@ -874,6 +874,25 @@ VT1625Table[] = {
       /* Subcarrier 19,18,17,16, DotCrawl Subcarrier (set bit 3 of reg 11 then subcarrier) */
       0x0, 0x0,
     },
+
+    { "720x576", 720, 576, TVTYPE_PAL, 0, 0,
+      /*  00                                                                                         0F */
+      { 0x03, 0x00, 0x10, 0x1f, 0x03, 0x00, 0x00, 0xc9,  0x4c, 0x11, 0x7c, 0x00, 0x56, 0x57, 0x07, 0xbf,
+	0x00, 0x80, 0x09, 0x08, 0x17, 0x24, 0xcb, 0x8a,  0x09, 0x2a, 0x06, 0x50, 0x01, 0x80, 0x00, 0x10,
+	0x14, 0x0c, 0x32, 0x7e, 0x00, 0x5f, 0x34, 0x8c,  0x4f, 0x5e, 0x15, 0xa2, 0x22, 0x80, 0xd3, 0x10
+      },
+      /*  4A                            4F    50                                                     59 */
+      { 0xc5, 0x0f, 0x00, 0x01, 0x00, 0x4b, 0xe7, 0xd2,  0x23, 0xb1, 0x22, 0x5f, 0x61, 0x7f, 0x23, 0x90, 
+      /*  5A                            5F    60                       64 */
+	0xcd, 0x35, 0x83, 0x16, 0x4F, 0x76, 0x8d, 0xa9,  0xff, 0x4f, 0x04 },
+      /* RBG 65,66,67,27,2b,2c */
+      { 0x6A, 0x62, 0x65, 0x90, 0x99,    0 },
+      /* Y-Cb-Cr 65,66,67 */
+      { 0x58, 0x48, 0x49 },
+      /* Subcarrier 19,18,17,16, DotCrawl Subcarrier (set bit 3 of reg 11 then subcarrier) */
+      0x2A098ACB, 0,
+    },
+
     { "720x576Over", 720, 576, TVTYPE_PAL, 0, 0,
       /*  00                                                                                         0F */
       { 0x03,    0, 0x10, 0x1F, 0x03,    0,    0, 0x39,  0x19, 0x01, 0x88, 0x00, 0x55, 0x5E, 0x00, 0x9E,
