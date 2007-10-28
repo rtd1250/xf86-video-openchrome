@@ -8,7 +8,7 @@
 
 	* src/via_driver.c: (VIAPreInit):
 
-	Fix memory detection for P4M900 and CX700
+	Fix memory detection for P4M900 and CX700.
 
 2007-09-12  Gabriel Mansi  <gabriel-dot-mansi-at-gmail-dot-com>
 
@@ -20,9 +20,9 @@
 	* src/via_swov.c: (Upd_Video):
 	* src/via_vbe.c: (ViaVbeSetPanelMode), (ViaVbeSetMode):
 
-	Fix offset when using vbe modes on secondary
+	Fix offset when using vbe modes on secondary.
 
-2007-09-11  Xavier Bachelot <xavier-at-bachelot-dot-org>
+2007-09-11  Xavier Bachelot  <xavier-at-bachelot-dot-org>
 
 	* libxvmc/viaLowLevel.c: (initXvMCLowLevel):
 	* libxvmc/viaLowLevel.h:
@@ -43,13 +43,13 @@
 	(ViaVbeSaveRestore), (ViaVbeModePreInit):
 	* src/via_xvmc.c: (ViaInitXVMC), (ViaXvMCCreateContext):
 
-	Sync with experimental_branch
+	Sync with experimental_branch.
 
 2007-09-07  Gabriel Mansi  <gabriel-dot-mansi-at-gmail-dot-com>
 
 	* unichrome/via_id.c:
 
-	Added Gigabyte GA-VM900M ID, reported by Alexandre Penasso Teixeira
+	Added Gigabyte GA-VM900M ID, reported by Alexandre Penasso Teixeira.
 
 2007-09-07  Gabiel Mansi  <gabriel-dot-mansi-at-gmail-dot-com>
 
@@ -69,7 +69,7 @@
 	(ViaVbeModePreInit):
 	* unichrome/via_xvmc.c: (ViaInitXVMC), (ViaXvMCCreateContext):
 
-	Merged vn896_branch from revision 361 to 391
+	Merged vn896_branch from revision 361 to 391.
 
 2007-09-07  Gabriel Mansi  <gabriel-dot-mansi-at-gmail-dot-com>
 
@@ -77,7 +77,7 @@
 	* unichrome/via_mode.c: (ViaOutputsDetect):
 	* unichrome/via_vbe.c: (ViaVbeSetActiveDevices):
 
-	Disabled TV detection for P4M900
+	Disabled TV detection for P4M900.
 
 2007-09-07  Gabriel Mansi  <gabriel-dot-mansi-at-gmail-dot-com>
 
@@ -87,7 +87,7 @@
 	(ViaVbeSetActiveDevices), (ViaVbeSetPanelExpansion),
 	(ViaVbeSetRefresh), (ViaVbeSetMode), (ViaVbeModePreInit):
 
-	VBE code clean up
+	VBE code cleanup.
 
 2007-09-02  Gabriel Mansi  <gabriel-dot-mansi-at-gmail-dot-com>
 
@@ -95,8 +95,8 @@
 	(VIARestore):
 	* unichrome/via_vbe.c: (ViaVbeSetMode):
 
-	Disabled XvDMA for P4M900
-	Modified VBE functions calling order 
+	Disabled XvDMA for P4M900.
+	Modified VBE functions calling order.
 
 2007-08-18  Gabriel Mansi  <gabriel-dot-mansi-at-gmail-dot-com>
 
@@ -104,10 +104,10 @@
 	* unichrome/via_priv.h:
 	* unichrome/via_swov.c: (Upd_Video):
 
-	Xvideo code clean up, added maximum resolution with
+	Xvideo code cleanup; added maximum resolution with
 	interpolation for all chipsets.
 
-2007-08-03  Xavier Bachelot <xavier-at-bachelot-dot-org>
+2007-08-03  Xavier Bachelot  <xavier-at-bachelot-dot-org>
 
 	* src/via_bios.h:
 	* src/via_mode.h:
@@ -115,14 +115,14 @@
 
 	Add basic support for DDR667.
 
-2007-07-31  Jon Nettleton <jon-dot-nettleton-at-gmail-dot-com> 
+2007-07-31  Jon Nettleton  <jon-dot-nettleton-at-gmail-dot-com> 
 
 	* src/via_xvmc.c: (ViaInitXVMC):
 
 	Fixed the xvmc name we register.  Was still looking for
 	the old via xvmc library names.
 
-2007-07-04  Xavier Bachelot <xavier-at-bachelot-dot-org>
+2007-07-04  Xavier Bachelot  <xavier-at-bachelot-dot-org>
 
 	* configure.ac:
 	* src/via_driver.c: (VIAPreInit):
@@ -136,7 +136,7 @@
 
 	* unichrome/via_bandwidth.c: (ViaSetPrimaryFIFO)
 
-	FIFO settings for CX700
+	FIFO settings for CX700.
 
 2007-06-14  Jon Nettleton  <jon-dot-nettleton-at-gmail-dot-com>
 
@@ -197,7 +197,7 @@
 
 	* unichrome/via.h:
 
-	Added missing includes
+	Added missing includes.
 
 2007-06-10  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 
@@ -226,7 +226,7 @@
 	* src/via_driver.h:
 
 	Renaming driver to openchrome_drv.so and XvMC library to
-	libchromeXvMC.so
+	libchromeXvMC.so.
 
 2007-06-06  Jon Nettleton  <jon-dot-nettleton-at-gmail-dot-com>
 
@@ -245,7 +245,7 @@
 	driver to work out of the box with almost all hardware and
 	xorg.conf configurations.
 
-2007-05-23 Jon Nettleton <jon-dot-nettleton-at-gmail-dot-com> 
+2007-05-23  Jon Nettleton  <jon-dot-nettleton-at-gmail-dot-com> 
 
 	* unichrome/via.h:
 
@@ -308,8 +308,8 @@
 	* unichrome/via_xvmc.c: (ViaInitXVMC):
 
 	Disable interpolation when the source width is greater than 800, 
-	otherwise the picture wraps around the screen. Bug #109
-	Fix a typo in ViaInitXVMC. Bug #111
+	otherwise the picture wraps around the screen (bug #109).
+	Fix a typo in ViaInitXVMC (bug #111).
 
 2007-04-14  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 
@@ -329,7 +329,7 @@
 
 	Fix Xv for CX700.
 
-2007-03-20 Xavier Bachelot  <xavier-at-bachelot-dot-org>
+2007-03-20  Xavier Bachelot  <xavier-at-bachelot-dot-org>
 
 	* unichrome/via_bandwidth.c: (ViaSetPrimaryFIFO),
 	(ViaSetSecondaryFIFO):
@@ -467,16 +467,16 @@
 	* unichrome/via.h:
 	* unichrome/via_swov.c:
 
-	This is my cleanup committ of the excellent patch that 
-	Gabriel Mansi <gabriel-dot-mansi-at-gmail-dot-com> provided
+	This is my cleanup commit of the excellent patch that 
+	Gabriel Mansi <gabriel-dot-mansi-at-gmail-dot-com> provided,
 	which finishes the XVideo work on the VT3336 chipset.  Nice
-	Work Gabriel.
+	work Gabriel.
 
 2006-12-13  Jon Nettleton  <jon-dot-nettleton-at-gmail-dot-com>
 
 	* unichrome/via_video.c:
 
-	Don't use HQV Offset for HQV_CONTROL
+	Don't use HQV Offset for HQV_CONTROL.
 
 2006-12-11  Jon Nettleton  <jon-dot-nettleton-at-gmail-dot-com>
 
@@ -484,31 +484,31 @@
 	* unichrome/via_swov.c:
 
 	Looks like the VT3336 has the same offset as the VT3259
-	for the hardware overlay
+	for the hardware overlay.
 
 2006-12-10  Jon Nettleton  <jon-dot-nettleton-at-gmail-dot-com>
 
 	* unichrome/via_memcpy.c:
 	* unichrome/via_swov.c:
 
-	Removed the previous changes I am not ready to rewrite
+	Removed the previous changes; I am not ready to rewrite
 	the assembly code for x86_64.
-	The ColorSpace registers were being setup incorrectly
-	for VT3336
+	The ColorSpace registers were being set up incorrectly
+	for VT3336.
 
 2006-12-09  Jon Nettleton  <jon-dot-nettleton-at-gmail-dot-com>
 
 	* unichrome/via_memcpy.c:
 
-	ifdef's in memcpy.c only support i386 arch should
-	also support i86_64
+	The ifdef's in memcpy.c only support i386 arch; should
+	also support i86_64.
 
 2006-12-09  Jon Nettleton  <jon-dot-nettleton-at-gmail-dot-com>
 
 	* unichrome/via_xvmc.c:
 
-	K8M890 does not support XvMC like the other chipsets
-	disable it for now
+	K8M890 does not support XvMC like the other chipsets;
+	disable it for now.
 
 2006-12-09  Jon Nettleton  <jon-dot-nettleton-at-gmail-dot-com>
 
@@ -516,8 +516,8 @@
 	* unichrome/via_swov.h:
 	* unichrome/via_swov.c:
 
-	Made K8M890 XV FIFO settings match K8M800
-	Enabled XV_DEBUG
+	Made K8M890 XV FIFO settings match K8M800.
+	Enabled XV_DEBUG.
 
 2006-12-07  Jon Nettleton  <jon-dot-nettleton-at-gmail-dot-com>
 
@@ -525,39 +525,39 @@
 
 	Updated the BandwidthTable for K8M890 chipset.
 
-2006-12-07  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+2006-12-07  Thomas Hellström  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_driver.c: (VIAEnterVT):
 
 	Initialize the AGP ring buffer before command submission.
 
-2006-12-07  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+2006-12-07  Thomas Hellström  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_driver.c: (VIAEnterVT):
 
 	Blank and clear screen when entering VT.
 	
-2006-12-07  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+2006-12-07  Thomas Hellström  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_driver.c: (VIAEnterVT):
 
 	Blank and clear screen when entering VT.
 	
-2006-12-07  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+2006-12-07  Thomas Hellström  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_accel.c: (viaAccelDMADownload),
 	(viaExaDownloadFromScreen), (viaInitExa):
 
-	Indent via_accel.c
+	Indent via_accel.c.
 
-2006-12-07  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+2006-12-07  Thomas Hellström  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_accel.c: (viaAccelDMADownload):
 
 	Fix download from screen which was reusing kernel argument
 	data that was altered by the kernel.
 	
-2006-12-07  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+2006-12-07  Thomas Hellström  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_accel.c: (viaAccelDMADownload),
 	(viaExaDownloadFromScreen):
@@ -572,20 +572,20 @@
 	Fixed some of the boolean option changes that are
 	inverses such as DisableIRQ. 
 
-2006-12-06  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+2006-12-06  Thomas Hellström  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_memory.c: (viaExaFBSave), (viaOffScreenLinear):
 
 	Cause a "FatalError" if EXA is used with an un-patched Xserver,
 	and an illegal save locked memory action is requested.
 	
-2006-12-06  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+2006-12-06  Thomas Hellström  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_driver.c: (VIAInitialize3DEngine):
 
 	Proper register names in VIAInitialize3DEngine.
 	
-2006-12-06  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+2006-12-06  Thomas Hellström  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_driver.c: (VIALeaveVT), (VIAWriteMode),
 	(VIACloseScreen):
@@ -597,19 +597,19 @@
 	otherwise.
 	Also fix some code comments.
 	
-2006-12-06  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+2006-12-06  Thomas Hellström  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_driver.c: (VIALeaveVT):
 
 	Force 3D context upload after a VT switch.
 	
-2006-12-06  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+2006-12-06  Thomas Hellström  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_dri.c: (viaDRIFBMemcpy), (viaDRIOffscreenSave):
 
 	Fix up previous commit for > 16MB sizes. 
 
-2006-12-06  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+2006-12-06  Thomas Hellström  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_dri.c: (viaDRIOffscreenSave),
 	(viaDRIOffscreenRestore):
@@ -620,7 +620,7 @@
 	when entering VT. It may be overwritten in between.
 	Use PCI DMA blit for this if available.
 	
-2006-12-05  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+2006-12-05  Thomas Hellström  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_driver.c: (VIAWriteMode), (VIAInitialize3DEngine):
 	* unichrome/via_vbe.c: (ViaVbeSetMode):
@@ -629,13 +629,13 @@
 	a mode switch (possibly the soft reset + 2D engine
 	initialization). Otherwise the GPU will hang.
 
-2006-12-05 Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+2006-12-05  Thomas Hellström  <thomas-at-tungstengraphics-dot-com> 
 	
 	* unichrome/via_driver.c: (VIAPreInit):
 
 	Fix the dma2d option setting.
 
-2006-12-05  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+2006-12-05  Thomas Hellström  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_bandwidth.c: (ViaSetPrimaryFIFO):
 
@@ -648,17 +648,16 @@
 	* unichrome/via_video.c:
 	* unichrome/via_swov.c:
 	
-	Added missing hardware overlay support for VT3336
+	Added missing hardware overlay support for VT3336.
 
 2006-12-04  Jon Nettleton  <jon-dot-nettleton-at-gmail-dot-com>
 	
 	* unichrome/via_driver.c:
 	
-	Added patch submitted by Gabriel Mansi 
-	<gabriel-dot-mansi-at-gmail-dot-com> to fix the K8M890 hang on 
-	VT switch.
+	Added patch to fix the K8M890 hang on VT switch; submitted
+	by Gabriel Mansi <gabriel-dot-mansi-at-gmail-dot-com>.
 
-2006-12-01  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+2006-12-01  Thomas Hellström  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via.man:
 	* unichrome/via_bios.h:
@@ -676,28 +675,27 @@
 	* unichrome/via_mode.c:
 	* unichrome/via_accel.c:
 	
-	Added patch submitted by Gabriel Mansi 
-	<gabriel-dot-mansi-at-gmail-dot-com> to fix some of the K8M890
-	logic.
+	Added patch to fix some of the K8M890 logic; submitted by
+	Gabriel Mansi <gabriel-dot-mansi-at-gmail-dot-com>.
 
 2006-11-28  Jon Nettleton  <jon-dot-nettleton-at-gmail-dot-com>
 	
 	* unichrome/via_bandwidth.c:
 	* unichrome/via_accel.c:
 	
-	Patched via_bandwidth.c for dumb mistake I made thanks Gabriel Mansi 
-	For the second set of eyes.  Move HWCursor memory allocation even 
-	further in the driver initialization. 
+	Patched via_bandwidth.c for dumb mistake I made.  Thanks, Gabriel
+	Mansi, for the second set of eyes.  Move HWCursor memory allocation
+	even further in the driver initialization. 
 
 2006-11-25  Jon Nettleton  <jon-dot-nettleton-at-gmail-dot-com>
 	
 	* unichrome/via_id.c:
 	* unichrome/via_accel.c:
 	
-	Added additional ID's for the K8M890 cards
-	Changed memory allocation order for the HW cursor and 2d engine. 
+	Added additional IDs for the K8M890 cards.
+	Changed memory allocation order for the HW cursor and 2D engine. 
 
-2006-10-29  Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+2006-10-29  Thomas Hellström  <thomas-at-tungstengraphics-dot-com> 
 
 	* libxvmc/viaLowLevel.c:
 	* libxvmc/viaLowLevelPro.c:
@@ -706,13 +704,13 @@
 	Via managed to mix up the 2D / 3D engine busy status bits.
 	Funny we never noticed this before.
 
-2006-10-24 Thomas Hellstrom  <thomas-at-tungstengraphics-dot-com> 
+2006-10-24  Thomas Hellström  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_xvmc.c: (ViaXvMCCreateContext):
 
 	Remove VT3314 (CN700, VM800 etc.) mpeg2 AGP DMA support.
 
-2006-10-11  Xavier Bachelot <xb_ml-at-kelkoo-dot-net>
+2006-10-11  Xavier Bachelot  <xb_ml-at-kelkoo-dot-net>
 
 	reviewed by: Ivor
 
@@ -721,10 +719,10 @@
 	* unichrome/via_mode.h:
 	* unichrome/via_video.c: (DecideOverlaySupport):
 
-	DDR533 memory support and small clean up.
+	DDR533 memory support and small cleanup.
 	Fujitsu/Siemens Amilo L7320 pci id (reported by DeNayGo).
 
-2006-10-03 Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
+2006-10-03  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via_video.c: (viaPutImage):
 
@@ -738,9 +736,9 @@
 	tweaked comments and debugging lines.
 
 2006-09-27  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
- 
+
 	* unichrome/via_memory.c:
- 
+
 	Don't include drm headers in non-dri build.
 
 2006-09-25  Benno Schulenberg  <bensberg-at-justemail-dot-net>
@@ -785,7 +783,7 @@
 	* src/via_xvmc.c
 	* src/via_id.c
 
-	Initial code for support of VT3336 cards	
+	Initial code for support of VT3336 cards.
 
 2006-09-17  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 
@@ -840,7 +838,7 @@
 	Move definition of AGP_SIZE out of #ifdef VIA_HAVE_EXA block,
 	to make the driver compile again for Xorg-6.8.2.
 
-2006-08-10 Thomas Hellström <thomas-at-tungstengraphics-dot-com> 
+2006-08-10  Thomas Hellström  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_mode.c: (ViaModeDotClockTranslate):
 	* unichrome/via_video.c: (viaPaintColorkey):
@@ -848,13 +846,13 @@
 	Re-enable Ivor's Dotclock computation.
 	Enable accelerated redirected colorkey painting for Xv.
 
-2006-07-28 Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+2006-07-28  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via_driver.c: (VIAPreInit):
 
 	...And get default AGP size correct as well.
 
-2006-07-28  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+2006-07-28  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via_accel.c: (viaIsAGP):
 	* unichrome/via_dri.c: (VIADRIAgpInit):
@@ -862,7 +860,7 @@
 	Fix false AGP detection and make sure we have the correct AGP
 	size.
 
-2006-07-27  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+2006-07-27  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via.man:
 	* unichrome/via_accel.c: (viaExaUploadToScratch),
@@ -881,7 +879,7 @@
 	  AGPMem
 	  VBESaveRestore	
 
-2006-07-27  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+2006-07-27  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via.h:
 	* unichrome/via_accel.c:
@@ -901,14 +899,14 @@
 	by the Xv code, and slows things down in VBE mode.
 		
 
-2006-07-11  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+2006-07-11  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 
 	* libxvmc/viaXvMC.c:
 	* unichrome/via_dri.c:
 
 	Change DRM major compatibility from 3.x.x to 2.x.x.
 
-2006-07-10  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+2006-07-10  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 
 	* libxvmc/driDrawable.c:
 	* libxvmc/viaLowLevel.c:
@@ -937,7 +935,7 @@
 
 	Indent viaXvMC.c.
 
-2006-07-10  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+2006-07-10  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 
 	* libxvmc/viaXvMC.c: (XvMCCreateContext):
 	* unichrome/via_dri.c: (VIADRIRingBufferInit), (VIADRIScreenInit):
@@ -945,19 +943,19 @@
 
 	Update DRM version checking.
 
-2006-07-10  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+2006-07-10  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via_swov.c: (viaWaitVideoCommandFire):
 
 	Increase video command fire timeout.
 
-2006-07-10  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+2006-07-10  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via_memory.c: (viaOffScreenLinear):
 
 	Fix dri close screen segfault caused by previous commit.
 
-2006-06-15  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+2006-06-15  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via_dri.c: (VIADRIFBInit):
 	* unichrome/via_driver.h:
@@ -991,34 +989,34 @@
 
 	- Unbreak makefile.
 
-2006-03-19  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+2006-03-19  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 
 	* libxvmc/Makefile.am:
 	* unichrome/Makefile.am:
 
 	- Backport Makefile changes form xorg.
 
-2006-03-17  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+2006-03-17  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via_driver.c:
 
 	- Update the built-against macro to recognize Xorg if present.
 	  (Reported by Eric Anholt)
 
-2006-03-17  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+2006-03-17  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 
 	* configure.ac:
 
 	- Update compatibility check for XvMC.
 
-2006-03-17  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+2006-03-17  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via_accel.c: (viaInitExa):
 	* unichrome/via_driver.c: (VIAPreInit):
 
 	- Support EXA 2.0.
 
-2006-03-13  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+2006-03-13  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via_accel.c: (viaSetupForSolidLine),
 	(viaSubsequentSolidTwoPointLine), (viaSetupForDashedLine):
@@ -1027,7 +1025,7 @@
 	- Possible fix for XAA bug rendering solid lines as dashed.
 	  (Reported by Lewin Edwards)
 
-2006-03-08  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+2006-03-08  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 
 
 	* libxvmc/Imakefile:
@@ -1041,14 +1039,14 @@
 
 	- Run indent on above files after syncing them with Xorg.
 
-2006-02-23  Xavier Bachelot <xb_ml AT kelkoo DOT net>
+2006-02-23  Xavier Bachelot  <xb_ml AT kelkoo DOT net>
 
 	* configure.ac:
 
 	- Fix man pages suffix.
 	- Bump driver version number to be equal to xorg.
 
-2006-02-21  Ivor Hewitt <ivor-at-ivor-dot-org>
+2006-02-21  Ivor Hewitt  <ivor-at-ivor-dot-org>
 
 	* unichrome/via_bios.h:
 	* unichrome/via_driver.c: (VIAPreInit):
@@ -1064,7 +1062,7 @@
 	- Lets have RV32 too.
 	- Add 12x8 panel.
 
-2006-02-10  Ivor Hewitt <ivor-at-ivor-dot-org>
+2006-02-10  Ivor Hewitt  <ivor-at-ivor-dot-org>
 
 	* unichrome/via.h:
 	* unichrome/via_bandwidth.c: (ViaSetPrimaryFIFO),
@@ -1083,20 +1081,20 @@
 
 	- Get some code exercised for VM800, let's see where it crumbles.
 
-2006-01-29  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+2006-01-29  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via_vbe.c: (ViaVbeSetMode):
 
 	- Fix VBE refresh setting.
 
-2006-01-29  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+2006-01-29  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via_accel.c: (viaInitExa):
 	* unichrome/via_driver.c: (VIAPreInit):
 
 	- Merge EXA branch revisions 152:155
 
-2006-01-29  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+2006-01-29  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via_swov.c:
 	* unichrome/via_video.c: (viaXvError), (viaReputImage),
@@ -1107,7 +1105,7 @@
 	  (Reported by George E Sollish).
 	- More verbose Xv error reporting.
 
-2006-01-27  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+2006-01-27  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via.man:
 	* unichrome/via_3d.c:
@@ -1118,27 +1116,27 @@
 
 	- Merge EXA branch revisions 138:152
 
-2006-01-27  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+2006-01-27  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via_mode.c: (ViaModePrimary):
 
 	- Import Luc's fix for sometimes-blanking CRTs on CLE266.
 	  (Luc Verhaegen)
 
-2006-01-27 Thomas Hellström <thomas-at-tungstengraphics-dot-com> 
+2006-01-27  Thomas Hellström  <thomas-at-tungstengraphics-dot-com> 
 
 	* unichrome/via_swov.c: (viaWaitVideoCommandFire):
 
 	- The previous commit causes problems with older X versions.
 	  Avoid using gettimeofday(). Reported by Paul Bender.
 
-2006-01-26 Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+2006-01-26  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via_swov.c: (viaTimeDiff), (viaWaitVideoCommandFire):
 
 	- Make the Xv viaWaitVideoCommandFire loop time out. Better than server hang?
 
-2006-01-26  Thomas Hellström <thomas-at-tungstengraphics-dot-com>
+2006-01-26  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>
 
 	* unichrome/via.man:
 	* unichrome/via_driver.c: (VIAPreInit):
@@ -1149,20 +1147,20 @@
 	  May turn out useful to vlc users.
 	- Updated man page.
 
-2006-01-26  Thomas Hellström <thomas-at-tungstengraphics-dot-com>   
+2006-01-26  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>   
 
 	* unichrome/via_driver.c:
 
 	- Added vgaHWGetIndex to vgaHW symbol list.
 	  (Reported by Ole Sandum)
 
-2006-01-26  Thomas Hellström <thomas-at-tungstengraphics-dot-com>   
+2006-01-26  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>   
 
 	* unichrome/via_swov.c: (ViaOverlayHide):
 
 	- Fix HQV offset bug.
 
-2006-01-26  Thomas Hellström <thomas-at-tungstengraphics-dot-com>   
+2006-01-26  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>   
 
 	* libxvmc/driDrawable.c: (drawStamp), (getDRIDrawableInfoLocked),
 	(driDestroyHashContents):
@@ -1207,7 +1205,7 @@
 
 	- Run indent on libXvMC. Sync XvMC with Xorg 7.0.
 
-2006-01-26  Thomas Hellström <thomas-at-tungstengraphics-dot-com>   
+2006-01-26  Thomas Hellström  <thomas-at-tungstengraphics-dot-com>   
 
 	* unichrome/via_dri.c: (VIADRIKernelInit), (VIADRIMapInit):
 	* unichrome/via_driver.h:
@@ -1215,7 +1213,7 @@
 	- Add a framebuffer map for DRI. Don't just assume that the
 	  framebuffer map handle is the physical address.
 
-2006-01-12  Thomas Hellström <unichrome-at-shipmail-dot-org> 
+2006-01-12  Thomas Hellström  <unichrome-at-shipmail-dot-org> 
 
 	* unichrome/via_accel.c: (viaExaDownloadFromScreen),
 	(viaExaTexUploadToScreen), (viaExaUploadToScreen),
@@ -1224,7 +1222,7 @@
 
 	- Exa branch revision 132:138 merge.
 
-2006-01-12  Thomas Hellström <unichrome-at-shipmail-dot-org>   
+2006-01-12  Thomas Hellström  <unichrome-at-shipmail-dot-org>   
 
 	* unichrome/via_swov.c: (CreateSurface):
 	* unichrome/via_video.c: (viaInitVideo), (Flip), (viaDmaBlitImage):
@@ -1234,7 +1232,7 @@
 	- Fix Xv dmablit strides and bump drm version for dmablit to 2.9.0, since
 	  there is a direction bug in earlier versions.
 	  
-2006-01-09  Thomas Hellström <unichrome-at-shipmail-dot-org>   
+2006-01-09  Thomas Hellström  <unichrome-at-shipmail-dot-org>   
 
 	* libxvmc/viaXvMC.c: (releaseContextResources):
 	* unichrome/via_swov.c: (CreateSurface), (ViaSwovSurfaceDestroy):
@@ -1263,7 +1261,7 @@
 
 	- Modular build fix. (Boris Dusek)
 
-2006-01-07  Thomas Hellström <unichrome-at-shipmail-dot-org>  
+2006-01-07  Thomas Hellström  <unichrome-at-shipmail-dot-org>  
 
 	* unichrome/Imakefile:
 	* unichrome/via_accel.c: (viaDumpDMA), (viaFlushPCI),
@@ -1325,7 +1323,7 @@
 	- Modular built two identical XvMC libs. The pro lib was not a pro lib. 
 	  Fix this. (Tim Dodge)
 
-2005-12-15  Thomas Hellström <unichrome-at-shipmail-dot-org> 
+2005-12-15  Thomas Hellström  <unichrome-at-shipmail-dot-org> 
 
 	* unichrome/via_accel.c: (viaInitAccel):
 
@@ -1366,7 +1364,7 @@
 
 	- Removed Makefile.in since it is generated by the build process.
 
-2005-12-06  Jon Nettleton <jon-dot-nettleton-at-gmail-dot-com>
+2005-12-06  Jon Nettleton  <jon-dot-nettleton-at-gmail-dot-com>
 
 	* Makefile.am:
 	* Makefile.in:
@@ -1474,7 +1472,7 @@
 
 	- Yet another drm.h include fixup. For 6.8 and earlier?
 
-2005-11-28  Ivor Hewitt <ivor-at-ivor-dot-org>
+2005-11-28  Ivor Hewitt  <ivor-at-ivor-dot-org>
 
 	* unichrome/via_id.c:
 
@@ -1530,7 +1528,7 @@
 	- Fix Xv surface destruction and re-allocation.
 	  (Reported by Cedric Berger).
 
-2005-11-15  Thomas Hellström <unichrome-at-shipmail-dot-org>  
+2005-11-15  Thomas Hellström  <unichrome-at-shipmail-dot-org>  
 
 	* unichrome/Imakefile:
 	* unichrome/via_accel.c: (viaTearDownCBuffer),
@@ -1541,7 +1539,7 @@
 	- Merged changes in exa_branch revisions 67 to 74. For a detailed
 	  ChangeLog, see that branch.
 
-2005-11-09  Thomas Hellström <unichrome-at-shipmail-dot-org> 
+2005-11-09  Thomas Hellström  <unichrome-at-shipmail-dot-org> 
 
 	* unichrome/Imakefile:
 	* unichrome/via_accel.c: (viaFlushPCI), (viaFlushDRIEnabled),
@@ -1583,27 +1581,27 @@
 	- Merge exa_branch from revision 52 to 67. For a detailed Changelog,
 	  check that branch. 
 
-2005-11-09  Ivor Hewitt <ivor-at-ivor-dot-org>
+2005-11-09  Ivor Hewitt  <ivor-at-ivor-dot-org>
 
 	* unichrome/via_driver.c: (VIAPreInit):
 	* unichrome/via_mode.c: (ViaModeDotClockTranslate):
 
 	- Fix pro-mode and remove pro warning. (Paul Bender)
 
-2005-11-08  Ivor Hewitt <ivor-at-ivor-dot-org>
+2005-11-08  Ivor Hewitt  <ivor-at-ivor-dot-org>
 
 	* unichrome/via_driver.c: (VIASwitchMode):
 
 	- Don't kickVblank with no DRI enabled. (Joris van Rantwijk)
 
-2005-11-02  Ivor Hewitt <ivor-at-ivor-dot-org>
+2005-11-02  Ivor Hewitt  <ivor-at-ivor-dot-org>
 
 	* unichrome/via_mode.c: (ViaGetMemoryBandwidth):
 	* unichrome/via_mode.h:
 
 	- Give VM800 some bandwidth.
 
-2005-11-01  Thomas Hellström <unichrome-at-shipmail-dot-org> 
+2005-11-01  Thomas Hellström  <unichrome-at-shipmail-dot-org> 
 
 	* libxvmc/viaLowLevel.c: (viaDMAInitTimeStamp):
 	* libxvmc/viaLowLevelPro.c: (viaDMAInitTimeStamp),
@@ -1627,7 +1625,7 @@
 
 	- Fix stray include left over by previous commit.
 
-2005-10-31 Ivor Hewitt <ivor-at-ivor-dot-org>
+2005-10-31  Ivor Hewitt  <ivor-at-ivor-dot-org>
 
 	 * unichrome/via_id.c:
 
@@ -1690,7 +1688,7 @@
 
 	- Fix HW cursor memory allocation.
 
-2005-10-18  Ivor Hewitt <ivor-at-ivor-dot-org>
+2005-10-18  Ivor Hewitt  <ivor-at-ivor-dot-org>
 
 	* unichrome/via_bandwidth.c: (ViaSetPrimaryFIFO),
 	(ViaSetSecondaryFIFO):
@@ -1702,7 +1700,7 @@
 	- Remaining device id's lying about. 
 	- Remove PM800 conditionals.
 
-2005-10-18  Ivor Hewitt <ivor-at-ivor-dot-org>
+2005-10-18  Ivor Hewitt  <ivor-at-ivor-dot-org>
 
 	* unichrome/via_driver.c: (VIAPreInit):
 	* unichrome/via_id.c:
