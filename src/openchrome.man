@@ -89,8 +89,8 @@ Enables or disables image centering on DVI displays.
 .BI "Option \*qDisableIRQ\*q  \*q" boolean \*q
 Disables the Vblank IRQ.  This is a workaround for some mainboards that
 have problems with IRQs from the Unichrome engine.  With IRQs disabled,
-DRI clients have no way to synchronize drawing to Vblank.  ( Enabled by 
-default on the KM400 and K8M800 Chipsets )
+DRI clients have no way to synchronize drawing to Vblank.  (This option
+is enabled by default on the KM400 and K8M800 chipsets.)
 .TP
 .BI "Option \*qDisableVQ\*q  \*q" boolean \*q
 Disables the use of VQ.  VQ is enabled by default.
@@ -98,8 +98,8 @@ Disables the use of VQ.  VQ is enabled by default.
 .BI "Option \*qEnableAGPDMA\*q  \*q" boolean \*q
 Enables the AGP DMA functionality in DRM.  This requires that DRI is enabled
 and will force 2D and 3D acceleration to use AGP DMA.  The XvMC DRI client
-will also make use of this on the CLE266 to consume much less CPU.  ( This is
-enabled by default on all chipsets except the K8M890 and P4M900 ) 
+will also make use of this on the CLE266 to consume much less CPU.  (This
+option is enabled by default on all chipsets except the K8M890 and P4M900.) 
 .TP
 .BI "Option \*qExaNoComposite\*q  \*q" boolean \*q
 If EXA is enabled (using the option "AccelMethod"), this option enables
