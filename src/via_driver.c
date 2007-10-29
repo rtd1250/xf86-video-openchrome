@@ -957,41 +957,25 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
                                                    pVia->Chipset);
     }
 
+    xf86DrvMsg(pScrn->scrnIndex, from, "Chipset: \"%s\"\n", pScrn->chipset);
+
     if (pEnt->device->chipRev >= 0) {
         pVia->ChipRev = pEnt->device->chipRev;
         xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "ChipRev override: %d\n",
                    pVia->ChipRev);
     }
     else {
-        /*pVia->ChipRev = pVia->PciInfo->chipRev;*/
-        /* Read PCI bus 0, dev 0, function 0, index 0xF6 to get chip rev. */
+        /* Read PCI bus 0, dev 0, function 0, index 0xF6 to get chip revision */
         pVia->ChipRev = pciReadByte(pciTag(0, 0, 0), 0xF6);
     }
 
-    from = X_DEFAULT;
+    if (pVia->Chipset == VIA_CLE266)
+        ViaDoubleCheckCLE266Revision(pScrn);
 
-    pScrn->videoRam = pEnt->device->videoRam;
-    from = xf86GetOptValInteger(VIAOptions, OPTION_VIDEORAM, 
-				&pScrn->videoRam) ? 
-	X_CONFIG : X_PROBED;
-    xf86DrvMsg( pScrn->scrnIndex, X_CONFIG,
-		"VideoRAM %dkB\n", pScrn->videoRam );
-
-    if (pEnt->device->videoRam != 0) {
-        if (!pScrn->videoRam)
-    	    pScrn->videoRam = pEnt->device->videoRam;
-    	else {
-        	xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-        	"Video Memory Size in Option is %d KB, Detect is %d KB!\n",
-            pScrn->videoRam, pEnt->device->videoRam);
-    	}
-    }
-
-    xfree(pEnt);
+    xf86DrvMsg(pScrn->scrnIndex, from, "Chipset revision: %d\n", pVia->ChipRev);
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
 	       "Setting up default chipset options...\n");
-
     if (!VIASetupDefaultOptions(pScrn)) {
         VIAFreeRec(pScrn);
         return FALSE;
@@ -1001,6 +985,18 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
 	       "Starting to parse config file options...\n");
+
+    pScrn->videoRam = pEnt->device->videoRam;
+    from = xf86GetOptValInteger(VIAOptions, OPTION_VIDEORAM,
+				&pScrn->videoRam) ? 
+	X_CONFIG : X_PROBED;
+    xf86DrvMsg(pScrn->scrnIndex, from, "VideoRAM is set to %d kB\n",
+               pScrn->videoRam);
+    if (pScrn->videoRam != pEnt->device->videoRam)
+        xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                   "Detected VideoRAM was %d kB!\n", pEnt->device->videoRam);
+    xfree(pEnt);
+
     //pVia->shadowFB = FALSE;
     from = xf86GetOptValBool(VIAOptions, OPTION_SHADOW_FB, &pVia->shadowFB) ? 
 	X_CONFIG : X_DEFAULT;
@@ -1084,26 +1080,21 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
      * if neither is specified is HW.
      */
 
-    from = X_DEFAULT;
     //pVia->hwcursor = pVia->shadowFB ? FALSE : TRUE;
+    from = X_DEFAULT;
     if (xf86GetOptValBool(VIAOptions, OPTION_HWCURSOR, &pVia->hwcursor))
         from = X_CONFIG;
-
     if (xf86GetOptValBool(VIAOptions, OPTION_SWCURSOR, &pVia->hwcursor)) {
         pVia->hwcursor = !pVia->hwcursor;
         from = X_CONFIG;
     }
-
     if (pVia->IsSecondary) 
 	pVia->hwcursor = FALSE;
-
-    if (pVia->hwcursor) {
-	xf86DrvMsg(pScrn->scrnIndex, from, 
-		   "Hardware two-color cursors.\n"
-		   "\tSoftware full color cursors.\n");
-    } else {
+    if (pVia->hwcursor)
+        xf86DrvMsg(pScrn->scrnIndex, from, "Hardware two-color cursors; "
+                                           "software full-color cursors.\n");
+    else
 	xf86DrvMsg(pScrn->scrnIndex, from, "Using software cursors.\n");
-    }
 
     //pVia->VQEnable = TRUE;
     from = xf86GetOptValBool(VIAOptions, OPTION_DISABLEVQ, &pVia->VQEnable)
@@ -1331,7 +1322,7 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
 		   "No default TV type is set.\n");
     }
 	
-    /* TV out put signal Option */
+    /* TV output signal Option */
     pBIOSInfo->TVOutput = TVOUTPUT_NONE;
     if ((s = xf86GetOptValString(VIAOptions, OPTION_TVOUTPUT))) {
         if (!xf86NameCmp(s, "S-Video")) {
@@ -1363,8 +1354,6 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
 
     /* maybe throw in some more sanity checks here */
 
-    xf86DrvMsg(pScrn->scrnIndex, from, "Chipset: \"%s\"\n", pScrn->chipset);
-
     pVia->PciTag = pciTag(pVia->PciInfo->bus, pVia->PciInfo->device,
                           pVia->PciInfo->func);
 
@@ -1391,11 +1380,6 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
     xf86DrvMsg(pScrn->scrnIndex, from, "Will %sscan I2C buses.\n",
 	       pVia->I2CScan ? "" : "not ");
 #endif /* HAVE_DEBUG */
-
-    if (pVia->Chipset == VIA_CLE266)
-	ViaDoubleCheckCLE266Revision(pScrn);
-
-    xf86DrvMsg(pScrn->scrnIndex, from, "Chipset Rev.: %d\n", pVia->ChipRev);
 
     ViaCheckCardId(pScrn);   
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, 

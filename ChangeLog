@@ -1,3 +1,12 @@
+2007-10-29  Benno Schulenberg  <bensberg-at-justemail-dot-net>
+
+	* src/via_driver.c: (VIAPreInit):
+
+	Redoing the first change of June 10:  Putting the chipset and
+	revision print statements together at the beginning; moving
+	the reading of the VideoRAM option to after X has parsed the
+	config file; plus a few small layout tweaks.
+
 2007-10-05  Gabriel Mansi  <gabriel-dot-mansi-at-gmail-dot-com>
 
 	* src/via_swov.c: (Upd_Video):
