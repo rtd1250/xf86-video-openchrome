@@ -2,6 +2,14 @@
 
 	* src/via_driver.c: (VIAPreInit):
 
+	Redoing the second change of June 10:  Printing VideoRAM again
+	only when it's actually been probed; plus further tiny code
+	cleanups: comments, line wraps, whitespace.
+
+2007-10-29  Benno Schulenberg  <bensberg-at-justemail-dot-net>
+
+	* src/via_driver.c: (VIAPreInit):
+
 	Redoing the first change of June 10:  Putting the chipset and
 	revision print statements together at the beginning; moving
 	the reading of the VideoRAM option to after X has parsed the
