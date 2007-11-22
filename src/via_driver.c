@@ -1430,6 +1430,7 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
             pScrn->videoRam = ( 1 << ( ( pciReadByte(pciTag(0, 0, 3), 0xA1) & 0x70 ) >> 4 ) ) << 10 ;
             break;
         case VIA_K8M890:
+        case VIA_P4M890:
         case VIA_P4M900:
         case VIA_CX700:
             pScrn->videoRam = ( 1 << ( ( pciReadByte(pciTag(0, 0, 3), 0xA1) & 0x70 ) >> 4 ) ) << 12 ;
@@ -1437,7 +1438,7 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
         default:
             if (pScrn->videoRam < 16384 || pScrn->videoRam > 65536) {
                 xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                          "Using old memory-detection method.");
+                          "Using old memory-detection method.\n");
                 bMemSize = hwp->readSeq(hwp, 0x39);
                 if (bMemSize > 16 && bMemSize <= 128)
                     pScrn->videoRam = (bMemSize + 1) << 9;
