@@ -828,18 +828,18 @@ ViaVT162xInit(ScrnInfoPtr pScrn)
 	pBIOSInfo->TVPrintRegs = VT162xPrintRegs;
 	pBIOSInfo->TVNumRegs = 0x6C;
 	break;
-        case VIA_VT1625:
-            pBIOSInfo->TVSave = VT162xSave;
-            pBIOSInfo->TVRestore = VT162xRestore;
-            pBIOSInfo->TVDACSense = VT1625DACSense;
-            pBIOSInfo->TVModeValid = VT1625ModeValid;
-            pBIOSInfo->TVModeI2C = VT1622ModeI2C;
-            pBIOSInfo->TVModeCrtc = VT1622ModeCrtc;
-            pBIOSInfo->TVPower = VT1625Power;
-            pBIOSInfo->TVModes = VT1625Modes;
-            pBIOSInfo->TVPrintRegs = VT162xPrintRegs;
-            pBIOSInfo->TVNumRegs = 0x6C;
-        break;
+    case VIA_VT1625:
+	pBIOSInfo->TVSave = VT162xSave;
+	pBIOSInfo->TVRestore = VT162xRestore;
+	pBIOSInfo->TVDACSense = VT1625DACSense;
+	pBIOSInfo->TVModeValid = VT1625ModeValid;
+	pBIOSInfo->TVModeI2C = VT1622ModeI2C;
+	pBIOSInfo->TVModeCrtc = VT1622ModeCrtc;
+	pBIOSInfo->TVPower = VT1625Power;
+	pBIOSInfo->TVModes = VT1625Modes;
+	pBIOSInfo->TVPrintRegs = VT162xPrintRegs;
+	pBIOSInfo->TVNumRegs = 0x6C;
+	break;
     default:
 	break;
     }
