@@ -722,8 +722,9 @@ static Bool VIASetupDefaultOptions(ScrnInfoPtr pScrn)
     {
         case VIA_KM400:
             /* IRQ is not broken on KM400A */
-            if (pVia->ChipRev < 0x80)
-                pVia->DRIIrqEnable = FALSE;
+            /* But test below is not enough to make sure we have a KM400A */
+            /* if (pVia->ChipRev < 0x80) */
+            pVia->DRIIrqEnable = FALSE;
             break;
         case VIA_K8M800:
             pVia->DRIIrqEnable = FALSE;
