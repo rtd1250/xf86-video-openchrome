@@ -656,7 +656,8 @@ static int LookupChipSet(PciChipsets *pset, int chipSet)
 }
       
 
-static int LookupChipID(PciChipsets* pset, int ChipID)
+static int
+LookupChipID(PciChipsets* pset, int ChipID)
 {
     /* Is there a function to do this for me? */
     while (pset->numChipset >= 0)
@@ -684,7 +685,8 @@ VIAProbeDDC(ScrnInfoPtr pScrn, int index)
     }
 }
 
-static Bool VIASetupDefaultOptions(ScrnInfoPtr pScrn)
+static Bool
+VIASetupDefaultOptions(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
 
@@ -753,7 +755,8 @@ static Bool VIASetupDefaultOptions(ScrnInfoPtr pScrn)
 }
     
 
-static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags)
+static Bool
+VIAPreInit(ScrnInfoPtr pScrn, int flags)
 {
     EntityInfoPtr   pEnt;
     VIAPtr          pVia;
@@ -2124,7 +2127,8 @@ VIAMapMMIO(ScrnInfoPtr pScrn)
 }
 
 
-static Bool VIAMapFB(ScrnInfoPtr pScrn)
+static Bool
+VIAMapFB(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
 
@@ -2672,7 +2676,8 @@ VIAWriteMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 }
 
 
-static Bool VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
+static Bool
+VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
     vgaHWPtr    hwp = VGAHWPTR(pScrn);
@@ -2743,17 +2748,19 @@ static Bool VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
  * This only gets called when a screen is being deleted.  It does not
  * get called routinely at the end of a server generation.
  */
-static void VIAFreeScreen(int scrnIndex, int flags)
+static void
+VIAFreeScreen(int scrnIndex, int flags)
 {
     DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIAFreeScreen\n"));
 
     VIAFreeRec(xf86Screens[scrnIndex]);
 
     if (xf86LoaderCheckSymbol("vgaHWFreeHWRec"))
-	    vgaHWFreeHWRec(xf86Screens[scrnIndex]);
+        vgaHWFreeHWRec(xf86Screens[scrnIndex]);
 }
 
-static Bool VIASaveScreen(ScreenPtr pScreen, int mode)
+static Bool
+VIASaveScreen(ScreenPtr pScreen, int mode)
 {
     return vgaHWSaveScreen(pScreen, mode);
 }
@@ -2829,11 +2836,11 @@ VIASwitchMode(int scrnIndex, DisplayModePtr mode, int flags)
     }
 #endif
     return ret;
-    
 }
 
 
-static void VIADPMS(ScrnInfoPtr pScrn, int mode, int flags)
+static void
+VIADPMS(ScrnInfoPtr pScrn, int mode, int flags)
 {
     vgaHWPtr        hwp = VGAHWPTR(pScrn);
     VIAPtr          pVia = VIAPTR(pScrn);
