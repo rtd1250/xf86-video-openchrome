@@ -68,16 +68,15 @@ static void
 viaWaitVideoCommandFire(VIAPtr pVia)
 {
 /*
- * Assume uncached PCI reading throughput is about 9 MB/s. 8 bytes/loop means
- * approx 1M loops/second. We want to time out after 50 ms which means 50000 loops.
+ * Uncached PCI reading throughput is about 9 MB/s; so 8 bytes/loop means about
+ * 1M loops/second.  We want to time out after 50 ms, which means 50000 loops.
  */
-
     unsigned count = 50000;
     CARD32 volatile *pdwState =
-        (CARD32 volatile *)(pVia->VidMapBase + V_COMPOSE_MODE);
+            (CARD32 volatile *)(pVia->VidMapBase + V_COMPOSE_MODE);
 
     while (--count && ((*pdwState & V1_COMMAND_FIRE)
-                       || (*pdwState & V3_COMMAND_FIRE)));
+                       || (*pdwState & V3_COMMAND_FIRE))) ;
     if (!count) {
         ErrorF("viaWaitVideoCommandFire: Timeout.\n");
     }
@@ -96,9 +95,9 @@ viaWaitHQVFlip(VIAPtr pVia)
     pdwState = (CARD32 volatile *)(pVia->VidMapBase + (HQV_CONTROL + proReg));
 
     if (pVia->VideoEngine == VIDEO_ENGINE_CME) {
-        while (*pdwState & (HQV_SUBPIC_FLIP | HQV_SW_FLIP));
+        while (*pdwState & (HQV_SUBPIC_FLIP | HQV_SW_FLIP)) ;
     } else {
-        while (!(*pdwState & HQV_FLIP_STATUS));
+        while (!(*pdwState & HQV_FLIP_STATUS)) ;
     }
 }
 
@@ -106,7 +105,7 @@ static void
 viaWaitHQVFlipClear(VIAPtr pVia, unsigned long dwData)
 {
     CARD32 volatile *pdwState =
-        (CARD32 volatile *)(pVia->VidMapBase + HQV_CONTROL);
+            (CARD32 volatile *)(pVia->VidMapBase + HQV_CONTROL);
     *pdwState = dwData;
 
     while ((*pdwState & HQV_FLIP_STATUS)) {
@@ -117,7 +116,7 @@ viaWaitHQVFlipClear(VIAPtr pVia, unsigned long dwData)
 static void
 viaWaitVBI(VIAPtr pVia)
 {
-    while (IN_VIDEO_DISPLAY);
+    while (IN_VIDEO_DISPLAY) ;
 }
 
 static void
@@ -132,7 +131,7 @@ viaWaitHQVDone(VIAPtr pVia)
 
     pdwState = (CARD32 volatile *)(pVia->VidMapBase + (HQV_CONTROL + proReg));
     if (pVia->swov.MPEG_ON) {
-        while ((*pdwState & HQV_SW_FLIP));
+        while ((*pdwState & HQV_SW_FLIP)) ;
     }
 }
 
@@ -168,7 +167,7 @@ ResetVidRegBuffer(VIAPtr pVia)
     /* BUG: (Memory leak) This allocation may need have a corresponding free somewhere... /A */
     if (!pVia->VidRegBuffer)
         pVia->VidRegBuffer =
-            xnfcalloc(VIDREG_BUFFER_SIZE, sizeof(CARD32) * 2);
+                xnfcalloc(VIDREG_BUFFER_SIZE, sizeof(CARD32) * 2);
     pVia->VidRegCursor = 0;
 }
 
@@ -394,14 +393,14 @@ viaOverlayGetSrcStartAddress(VIAPtr pVia,
                              unsigned long srcPitch,
                              unsigned long *pHQVoffset)
 {
-    unsigned long srcWidth = 
-        (unsigned long)(pUpdate->SrcRight - pUpdate->SrcLeft);
-    unsigned long dstWidth = 
-        (unsigned long)(pUpdate->DstRight - pUpdate->DstLeft);
-    unsigned long srcHeight = 
-        (unsigned long)(pUpdate->SrcBottom - pUpdate->SrcTop);
-    unsigned long dstHeight = 
-        (unsigned long)(pUpdate->DstBottom - pUpdate->DstTop);
+    unsigned long srcWidth =
+            (unsigned long)(pUpdate->SrcRight - pUpdate->SrcLeft);
+    unsigned long dstWidth =
+            (unsigned long)(pUpdate->DstRight - pUpdate->DstLeft);
+    unsigned long srcHeight =
+            (unsigned long)(pUpdate->SrcBottom - pUpdate->SrcTop);
+    unsigned long dstHeight =
+            (unsigned long)(pUpdate->DstBottom - pUpdate->DstTop);
 
     unsigned long offset = 0;
     unsigned long srcTopOffset = 0;
@@ -450,9 +449,8 @@ viaOverlayGetSrcStartAddress(VIAPtr pVia,
                                + pUpdate->SrcLeft) & ~31);
                     if (pUpdate->SrcTop > 0)
                         pVia->swov.overlayRecordV1.dwUVoffset
-                                 =
-                                 (((((pUpdate->SrcTop & ~3) >> 1) * srcPitch)
-                                   + pUpdate->SrcLeft) & ~31) >> 1;
+                                = (((((pUpdate->SrcTop & ~3) >> 1) * srcPitch)
+                                    + pUpdate->SrcLeft) & ~31) >> 1;
                     else
                         pVia->swov.overlayRecordV1.dwUVoffset = offset >> 1;
                 }
@@ -849,7 +847,7 @@ viaCalculateVideoColor(VIAPtr pVia, int hue, int saturation,
             dwC3 = vPackFloat(fC3, 3.875, -3.875, 16, 5, 1);
             *col1 = (dwA << 24) | (dwB1 << 16) | (dwC1 << 8) | dwD_Int;
             *col2 = (dwD_Dec << 29 | dwB2 << 24) | (dwC2 << 16) | (dwB3 << 8)
-                     | (dwC3);
+                    | (dwC3);
             break;
 
         default:
@@ -1101,19 +1099,21 @@ CreateSurface(ScrnInfoPtr pScrn, CARD32 FourCC, CARD16 Width,
         pVia->swov.SWDevice.dwSWPhysicalAddr[1] = addr + fbsize;
         pVia->swov.SWDevice.lpSWOverlaySurface[0] = pVia->FBBase + addr;
         pVia->swov.SWDevice.lpSWOverlaySurface[1] =
-            pVia->swov.SWDevice.lpSWOverlaySurface[0] + fbsize;
+                pVia->swov.SWDevice.lpSWOverlaySurface[0] + fbsize;
 
         if (isplanar) {
             pVia->swov.SWDevice.dwSWCrPhysicalAddr[0] =
-            pVia->swov.SWDevice.dwSWPhysicalAddr[0] + (pitch * Height);
+                    pVia->swov.SWDevice.dwSWPhysicalAddr[0] +
+                    (pitch * Height);
             pVia->swov.SWDevice.dwSWCrPhysicalAddr[1] =
-            pVia->swov.SWDevice.dwSWPhysicalAddr[1] + (pitch * Height);
+                    pVia->swov.SWDevice.dwSWPhysicalAddr[1] +
+                    (pitch * Height);
             pVia->swov.SWDevice.dwSWCbPhysicalAddr[0] =
-            pVia->swov.SWDevice.dwSWCrPhysicalAddr[0] +
-            ((pitch >> 1) * (Height >> 1));
+                    pVia->swov.SWDevice.dwSWCrPhysicalAddr[0] +
+                    ((pitch >> 1) * (Height >> 1));
             pVia->swov.SWDevice.dwSWCbPhysicalAddr[1] =
-            pVia->swov.SWDevice.dwSWCrPhysicalAddr[1] +
-            ((pitch >> 1) * (Height >> 1));
+                    pVia->swov.SWDevice.dwSWCrPhysicalAddr[1] +
+                    ((pitch >> 1) * (Height >> 1));
         }
     }
 
@@ -1260,18 +1260,18 @@ SetFIFO_V3(VIAPtr pVia, CARD8 depth, CARD8 prethreshold, CARD8 threshold)
         || (pVia->ChipId == PCI_CHIP_VT3324)
         || (pVia->ChipId == PCI_CHIP_VT3327)) {
         SaveVideoRegister(pVia, ALPHA_V3_FIFO_CONTROL,
-            (VIDInD(ALPHA_V3_FIFO_CONTROL) & ALPHA_FIFO_MASK)
-            | ((depth - 1) & 0xff) | ((threshold & 0xff) << 8));
-        SaveVideoRegister(pVia, ALPHA_V3_PREFIFO_CONTROL, 
-            (VIDInD(ALPHA_V3_PREFIFO_CONTROL) & ~V3_FIFO_MASK_3314) 
-            | (prethreshold & 0xff));
+                          (VIDInD(ALPHA_V3_FIFO_CONTROL) & ALPHA_FIFO_MASK)
+                          | ((depth - 1) & 0xff) | ((threshold & 0xff) << 8));
+        SaveVideoRegister(pVia, ALPHA_V3_PREFIFO_CONTROL,
+                          (VIDInD(ALPHA_V3_PREFIFO_CONTROL)
+                           & ~V3_FIFO_MASK_3314) | (prethreshold & 0xff));
     } else {
-        SaveVideoRegister(pVia, ALPHA_V3_FIFO_CONTROL, 
-            (VIDInD(ALPHA_V3_FIFO_CONTROL) & ALPHA_FIFO_MASK)
-            | ((depth - 1) & 0xff) | ((threshold & 0xff) << 8));
-        SaveVideoRegister(pVia, ALPHA_V3_PREFIFO_CONTROL, 
-            (VIDInD(ALPHA_V3_PREFIFO_CONTROL) & ~V3_FIFO_MASK)
-            | (prethreshold & 0x7f));
+        SaveVideoRegister(pVia, ALPHA_V3_FIFO_CONTROL,
+                          (VIDInD(ALPHA_V3_FIFO_CONTROL) & ALPHA_FIFO_MASK)
+                          | ((depth - 1) & 0xff) | ((threshold & 0xff) << 8));
+        SaveVideoRegister(pVia, ALPHA_V3_PREFIFO_CONTROL,
+                          (VIDInD(ALPHA_V3_PREFIFO_CONTROL) & ~V3_FIFO_MASK)
+                          | (prethreshold & 0x7f));
     }
 }
 
@@ -1694,9 +1694,10 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
     if (pVia->ChipId == PCI_CHIP_VT3259 && !(videoFlag & VIDEO_1_INUSE))
         proReg = PRO_HQV1_OFFSET;
 
-    compose = (VIDInD(V_COMPOSE_MODE) &
-        ~(SELECT_VIDEO_IF_COLOR_KEY | V1_COMMAND_FIRE | V3_COMMAND_FIRE)) |
-        V_COMMAND_LOAD_VBI;
+    compose = ((VIDInD(V_COMPOSE_MODE)
+                & ~(SELECT_VIDEO_IF_COLOR_KEY
+                    | V1_COMMAND_FIRE | V3_COMMAND_FIRE))
+               | V_COMMAND_LOAD_VBI);
 
     DBG_DD(ErrorF("// Upd_Video:\n"));
     DBG_DD(ErrorF("Modified rSrc  X (%ld,%ld) Y (%ld,%ld)\n",
@@ -1726,8 +1727,7 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
      * FIXME:
      * Enable video on secondary 
      */
-    if (pVia->Chipset == VIA_P4M900 &&
-        pVia->pBIOSInfo->PanelActive) {
+    if (pVia->Chipset == VIA_P4M900 && pVia->pBIOSInfo->PanelActive) {
         /* V1_ON_SND_DISPLAY */
         vidCtl |= 0x80000000;
         /* SECOND_DISPLAY_COLOR_KEY_ENABLE */
@@ -1743,9 +1743,8 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
     }
 
     /* Starting address of source and Source offset */
-    dwOffset =
-        viaOverlayGetSrcStartAddress(pVia, videoFlag, pUpdate, srcPitch,
-            &hqvOffset);
+    dwOffset = viaOverlayGetSrcStartAddress(pVia, videoFlag, pUpdate,
+                                            srcPitch, &hqvOffset);
     DBG_DD(ErrorF("===dwOffset= 0x%lx \n", dwOffset));
 
     pVia->swov.overlayRecordV1.dwOffset = dwOffset;
@@ -1763,9 +1762,9 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
 
             if (pVia->swov.SrcFourCC != FOURCC_XVMC) {
                 YCbCr = viaOverlayGetYCbCrStartAddress(videoFlag, startAddr,
-                        pVia->swov.overlayRecordV1.dwOffset,
-                        pVia->swov.overlayRecordV1.dwUVoffset,
-                        srcPitch, oriSrcHeight);
+                                pVia->swov.overlayRecordV1.dwOffset,
+                                pVia->swov.overlayRecordV1.dwUVoffset,
+                                srcPitch, oriSrcHeight);
                 if (pVia->VideoEngine == VIDEO_ENGINE_CME) {
                     SaveVideoRegister(pVia, HQV_SRC_STARTADDR_Y + proReg,
                                       YCbCr.dwY);
@@ -1779,9 +1778,9 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
             }
         } else {
             YCbCr = viaOverlayGetYCbCrStartAddress(videoFlag, startAddr,
-            pVia->swov.overlayRecordV1.dwOffset,
-            pVia->swov.overlayRecordV1.dwUVoffset,
-            srcPitch, oriSrcHeight);
+                            pVia->swov.overlayRecordV1.dwOffset,
+                            pVia->swov.overlayRecordV1.dwUVoffset,
+                            srcPitch, oriSrcHeight);
 
             if (videoFlag & VIDEO_1_INUSE) {
                 SaveVideoRegister(pVia, V1_STARTADDR_0, YCbCr.dwY);
@@ -2004,8 +2003,8 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
                 DBG_DD(ErrorF(" done.\n"));
             } else {               /* CLE_C0 */
                 CARD32 volatile *HQVCtrl =
-                    (CARD32 volatile *)(pVia->VidMapBase + HQV_CONTROL +
-                        proReg);
+                        (CARD32 volatile *)(pVia->VidMapBase + HQV_CONTROL +
+                                            proReg);
     
                 /* Check that HQV is idle */
                 DBG_DD(ErrorF("HQV control wf - %08lx\n", *HQVCtrl));
@@ -2175,20 +2174,24 @@ VIAVidUpdateOverlay(ScrnInfoPtr pScrn, LPDDUPDATEOVERLAY pUpdate)
     scrnHeight = pScrn->currentMode->VDisplay;
 
     if (dstLeft < 0) {
-        pUpdate->SrcLeft = (((-dstLeft) * ovlV1->dwV1OriWidth) +
-        ((dstRight - dstLeft) >> 1)) / (dstRight - dstLeft);
+        pUpdate->SrcLeft = ((((-dstLeft) * ovlV1->dwV1OriWidth) +
+                             ((dstRight - dstLeft) >> 1))
+                            / (dstRight - dstLeft));
     }
     if (dstRight > scrnWidth) {
-        pUpdate->SrcRight = (((scrnWidth - dstLeft) * ovlV1->dwV1OriWidth) +
-        ((dstRight - dstLeft) >> 1)) / (dstRight - dstLeft);
+        pUpdate->SrcRight = ((((scrnWidth - dstLeft) * ovlV1->dwV1OriWidth) +
+                              ((dstRight - dstLeft) >> 1))
+                             / (dstRight - dstLeft));
     }
     if (dstTop < 0) {
-        pUpdate->SrcTop = (((-dstTop) * ovlV1->dwV1OriHeight) +
-        ((dstBottom - dstTop) >> 1)) / (dstBottom - dstTop);
+        pUpdate->SrcTop = ((((-dstTop) * ovlV1->dwV1OriHeight) +
+                            ((dstBottom - dstTop) >> 1))
+                           / (dstBottom - dstTop));
     }
     if (dstBottom > scrnHeight) {
-        pUpdate->SrcBottom = (((scrnHeight - dstTop) * ovlV1->dwV1OriHeight) +
-        ((dstBottom - dstTop) >> 1)) / (dstBottom - dstTop);
+        pUpdate->SrcBottom = ((((scrnHeight - dstTop) * ovlV1->dwV1OriHeight) +
+                               ((dstBottom - dstTop) >> 1))
+                              / (dstBottom - dstTop));
     }
 
     /* Save modified src & original dest rectangle parameters */
@@ -2202,14 +2205,14 @@ VIAVidUpdateOverlay(ScrnInfoPtr pScrn, LPDDUPDATEOVERLAY pUpdate)
         pVia->swov.SWDevice.gdwSWDstLeft = pUpdate->DstLeft + panDX;
         pVia->swov.SWDevice.gdwSWDstTop = pUpdate->DstTop + panDY;
         pVia->swov.SWDevice.gdwSWDstWidth =
-            pUpdate->DstRight - pUpdate->DstLeft;
+                pUpdate->DstRight - pUpdate->DstLeft;
         pVia->swov.SWDevice.gdwSWDstHeight =
-            pUpdate->DstBottom - pUpdate->DstTop;
-    
-        pVia->swov.SWDevice.gdwSWSrcWidth =
-            ovlV1->dwV1SrcWidth = pUpdate->SrcRight - pUpdate->SrcLeft;
-        pVia->swov.SWDevice.gdwSWSrcHeight =
-            ovlV1->dwV1SrcHeight = pUpdate->SrcBottom - pUpdate->SrcTop;
+                pUpdate->DstBottom - pUpdate->DstTop;
+
+        pVia->swov.SWDevice.gdwSWSrcWidth = ovlV1->dwV1SrcWidth =
+                pUpdate->SrcRight - pUpdate->SrcLeft;
+        pVia->swov.SWDevice.gdwSWSrcHeight = ovlV1->dwV1SrcHeight =
+                pUpdate->SrcBottom - pUpdate->SrcTop;
     }
 
     ovlV1->dwV1SrcLeft = pUpdate->SrcLeft;
