@@ -58,13 +58,13 @@ VIAHWCursorInit(ScreenPtr pScreen)
 
     infoPtr->MaxWidth = MAX_CURS;
     infoPtr->MaxHeight = MAX_CURS;
-    infoPtr->Flags = HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_32 |
-                     HARDWARE_CURSOR_AND_SOURCE_WITH_MASK |
-                     /*HARDWARE_CURSOR_SWAP_SOURCE_AND_MASK |*/
-                     HARDWARE_CURSOR_TRUECOLOR_AT_8BPP |
-                     HARDWARE_CURSOR_INVERT_MASK |
-                     HARDWARE_CURSOR_BIT_ORDER_MSBFIRST|
-                     0;
+    infoPtr->Flags = (HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_32 |
+                      HARDWARE_CURSOR_AND_SOURCE_WITH_MASK |
+                      /*HARDWARE_CURSOR_SWAP_SOURCE_AND_MASK | */
+                      HARDWARE_CURSOR_TRUECOLOR_AT_8BPP |
+                      HARDWARE_CURSOR_INVERT_MASK |
+                      HARDWARE_CURSOR_BIT_ORDER_MSBFIRST |
+                      0);
 
     infoPtr->SetCursorColors = VIASetCursorColors;
     infoPtr->SetCursorPosition = VIASetCursorPosition;
@@ -77,13 +77,12 @@ VIAHWCursorInit(ScreenPtr pScreen)
         pVia->CursorStart = pVia->FBFreeEnd - VIA_CURSOR_SIZE;
         pVia->FBFreeEnd -= VIA_CURSOR_SIZE;
     }
-    
-    /* Set cursor location in frame buffer. */    
+
+    /* Set cursor location in frame buffer. */
     VIASETREG(VIA_REG_CURSOR_MODE, pVia->CursorStart);
 
     return xf86InitCursor(pScreen, infoPtr);
 }
-
 
 
 void
@@ -94,7 +93,7 @@ VIAShowCursor(ScrnInfoPtr pScrn)
 
     dwCursorMode = VIAGETREG(VIA_REG_CURSOR_MODE);
 
-    /* Turn on Hardware Cursor */
+    /* Turn on hardware cursor. */
     VIASETREG(VIA_REG_CURSOR_MODE, dwCursorMode | 0x3);
 }
 
@@ -113,7 +112,7 @@ VIAHideCursor(ScrnInfoPtr pScrn)
 
 
 static void
-VIALoadCursorImage(ScrnInfoPtr pScrn, unsigned char* src)
+VIALoadCursorImage(ScrnInfoPtr pScrn, unsigned char *src)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     CARD32 dwCursorMode;
@@ -135,10 +134,10 @@ VIALoadCursorImage(ScrnInfoPtr pScrn, unsigned char* src)
 static void
 VIASetCursorPosition(ScrnInfoPtr pScrn, int x, int y)
 {
-    VIAPtr          pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr  pBIOSInfo = pVia->pBIOSInfo;
-    unsigned char   xoff, yoff;
-    CARD32          dwCursorMode;
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+    unsigned char xoff, yoff;
+    CARD32 dwCursorMode;
 
     if (x < 0) {
         xoff = ((-x) & 0xFE);
@@ -154,7 +153,8 @@ VIASetCursorPosition(ScrnInfoPtr pScrn, int x, int y)
         yoff = 0;
         /* LCD Expand Mode Cursor Y Position Re-Calculated */
         if (pBIOSInfo->scaleY) {
-            y = (int)(((pBIOSInfo->panelY * y) + (pBIOSInfo->resY >> 1)) / pBIOSInfo->resY);
+            y = (int)(((pBIOSInfo->panelY * y) + (pBIOSInfo->resY >> 1))
+                      / pBIOSInfo->resY);
         }
     }
 
@@ -181,34 +181,28 @@ VIASetCursorColors(ScrnInfoPtr pScrn, int bg, int fg)
 
     VIASETREG(VIA_REG_CURSOR_FG, fg);
     VIASETREG(VIA_REG_CURSOR_BG, bg);
-
 }
 
-/*
- *
- */
 void
 ViaCursorStore(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    
+
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaCursorStore\n"));
-    
+
     if (pVia->CursorImage) {
-	xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "ViaCursorStore: stale image left.\n");
-	xfree(pVia->CursorImage);
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                   "ViaCursorStore: stale image left.\n");
+        xfree(pVia->CursorImage);
     }
 
     pVia->CursorImage = xcalloc(1, 0x1000);
     memcpy(pVia->CursorImage, pVia->FBBase + pVia->CursorStart, 0x1000);
-    pVia->CursorFG = (CARD32)VIAGETREG(VIA_REG_CURSOR_FG);
-    pVia->CursorBG = (CARD32)VIAGETREG(VIA_REG_CURSOR_BG);
-    pVia->CursorMC = (CARD32)VIAGETREG(VIA_REG_CURSOR_MODE);
+    pVia->CursorFG = (CARD32) VIAGETREG(VIA_REG_CURSOR_FG);
+    pVia->CursorBG = (CARD32) VIAGETREG(VIA_REG_CURSOR_BG);
+    pVia->CursorMC = (CARD32) VIAGETREG(VIA_REG_CURSOR_MODE);
 }
 
-/*
- *
- */
 void
 ViaCursorRestore(ScrnInfoPtr pScrn)
 {
@@ -217,12 +211,13 @@ ViaCursorRestore(ScrnInfoPtr pScrn)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaCursorRestore\n"));
 
     if (pVia->CursorImage) {
-	memcpy(pVia->FBBase + pVia->CursorStart, pVia->CursorImage, 0x1000);
-	VIASETREG(VIA_REG_CURSOR_FG, pVia->CursorFG);
-	VIASETREG(VIA_REG_CURSOR_BG, pVia->CursorBG);
-	VIASETREG(VIA_REG_CURSOR_MODE, pVia->CursorMC);
-	xfree(pVia->CursorImage);
-	pVia->CursorImage = NULL;
+        memcpy(pVia->FBBase + pVia->CursorStart, pVia->CursorImage, 0x1000);
+        VIASETREG(VIA_REG_CURSOR_FG, pVia->CursorFG);
+        VIASETREG(VIA_REG_CURSOR_BG, pVia->CursorBG);
+        VIASETREG(VIA_REG_CURSOR_MODE, pVia->CursorMC);
+        xfree(pVia->CursorImage);
+        pVia->CursorImage = NULL;
     } else
-	xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "ViaCursorRestore: No cursor image stored.\n");
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                   "ViaCursorRestore: No cursor image stored.\n");
 }
