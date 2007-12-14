@@ -511,7 +511,8 @@ static const OptionInfoRec * VIAAvailableOptions(int chipid, int busid)
 
 static void VIAIdentify(int flags)
 {
-    xf86PrintChipsets("VIA", "driver for VIA chipsets", VIAChipsets);
+    xf86PrintChipsets("OPENCHROME", "Driver for VIA Chrome chipsets",
+                      VIAChipsets);
 } /* VIAIdentify */
 
 static Bool VIAProbe(DriverPtr drv, int flags)
@@ -544,8 +545,7 @@ static Bool VIAProbe(DriverPtr drv, int flags)
         return FALSE;
 
     xf86Msg(X_NOTICE, "VIA Technologies does not support or endorse this driver in any way.\n");
-    xf86Msg(X_NOTICE, "For support, please refer to http://www.openchrome.org/ or\n");
-    xf86Msg(X_NOTICE, "your X vendor.\n");
+    xf86Msg(X_NOTICE, "For support, refer to http://www.openchrome.org/.\n");
 
 #ifdef BUILDCOMMENT
     xf86Msg(X_NOTICE, BUILDCOMMENT);
@@ -563,7 +563,7 @@ static Bool VIAProbe(DriverPtr drv, int flags)
             {
                 pScrn->driverVersion = VIA_VERSION;
                 pScrn->driverName = DRIVER_NAME;
-                pScrn->name = "VIA";
+                pScrn->name = "CHROME";
                 pScrn->Probe = VIAProbe;
                 pScrn->PreInit = VIAPreInit;
                 pScrn->ScreenInit = VIAScreenInit;
