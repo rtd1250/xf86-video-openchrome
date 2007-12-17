@@ -1,6 +1,7 @@
 /*
  * Copyright 2006-2007 The Openchrome Project  [openchrome.org]
- * Copyright 2004-2005 The Unichrome Project  [unichrome.sf.net]
+ * Copyright 1998-2003 VIA Technologies, Inc. All Rights Reserved.
+ * Copyright 2001-2003 S3 Graphics, Inc. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
