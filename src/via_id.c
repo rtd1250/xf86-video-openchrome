@@ -168,6 +168,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Fujitsu/Siemens Amilo L7310",           VIA_PM800,   0x1734, 0x10AB, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"ASRock P4VM8",                          VIA_PM800,   0x1849, 0x3118, VIA_DEVICE_CRT},
     {"Chaintech MPM800-3",                    VIA_PM800,   0x270F, 0x7671, VIA_DEVICE_CRT},
+    {"Hasee F700C",                           VIA_PM800,   0x1071, 0x8650, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     /* VN800 */
     {"Clevo/RoverBook Partner E419L",         VIA_VM800,   0x1019, 0x0F75, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"PCChips P23G",                          VIA_VM800,   0x1019, 0x1623, VIA_DEVICE_CRT},
