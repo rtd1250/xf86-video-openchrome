@@ -157,6 +157,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"ASRock K8Upgrade-VM800",                VIA_K8M800,  0x1849, 0x3108, VIA_DEVICE_CRT},
     /* PM800 */
     {"VIA VT3118 (PM800)",                    VIA_PM800,   0x1106, 0x3118, VIA_DEVICE_CRT}, /* borrowed by ECS PM800-M2 */
+    {"Hasee F700C",                           VIA_PM800,   0x1071, 0x8650, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Mitac 8666",                            VIA_PM800,   0x1071, 0x8666, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
     {"Medion MIM2080",                        VIA_PM800,   0x1071, 0x8965, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
     {"TwinHead E12BL",                        VIA_PM800,   0x14FF, 0x0314, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
@@ -168,7 +169,6 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Fujitsu/Siemens Amilo L7310",           VIA_PM800,   0x1734, 0x10AB, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"ASRock P4VM8",                          VIA_PM800,   0x1849, 0x3118, VIA_DEVICE_CRT},
     {"Chaintech MPM800-3",                    VIA_PM800,   0x270F, 0x7671, VIA_DEVICE_CRT},
-    {"Hasee F700C",                           VIA_PM800,   0x1071, 0x8650, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     /* VN800 */
     {"Clevo/RoverBook Partner E419L",         VIA_VM800,   0x1019, 0x0F75, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"PCChips P23G",                          VIA_VM800,   0x1019, 0x1623, VIA_DEVICE_CRT},
@@ -276,8 +276,8 @@ ViaCheckCardId(ScrnInfoPtr pScrn)
     }
     
     xf86DrvMsg(pScrn->scrnIndex, X_ERROR, 
-	       "Unknown Card-Ids (%4X|%4X); please report to openchrome-users@openchrome.org\n",
-	       pVia->PciInfo->subsysVendor, pVia->PciInfo->subsysCard);
+	       "Unknown Card-Ids (%4X|%4X|%4X); please report to openchrome-users@openchrome.org\n",
+	       pVia->PciInfo->chipType, pVia->PciInfo->subsysVendor, pVia->PciInfo->subsysCard);
     pVia->Id = NULL;
 }
 
