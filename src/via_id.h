@@ -21,12 +21,11 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
  * DEALINGS IN THE SOFTWARE.
  */
+
 #ifndef _VIA_ID_H_
 #define _VIA_ID_H_ 1
 
-/* Chip tags.  These are used to group the adapters into
- * related families.
- */
+/* Chip tags, used to group the adapters into families. */
 enum VIACHIPTAGS {
     VIA_UNKNOWN = 0,
     VIA_CLE266,
@@ -44,53 +43,28 @@ enum VIACHIPTAGS {
 
 #define PCI_VIA_VENDOR_ID       0x1106
 
-/*
- * I have disabled CLE3022. This way anyone using this device 
- * will have to read this comment or at least complain 
- * someplace. There is also the possibility that it just does 
- * not exist in the wild.
- *
- * Contact unichrome-devel@lists.sf.net asap if you can
- * provide any further information.
- *
- */
-/* #define PCI_CHIP_CLE3022        0x3022 */ /* CLE266??? */
-#define PCI_CHIP_VT3204         0x3108 /* K8M800 */
-#define PCI_CHIP_VT3259         0x3118 /* PM800/PM880/CN400 */
 #define PCI_CHIP_CLE3122        0x3122 /* CLE266 */
 #define PCI_CHIP_VT3205         0x7205 /* KM400 */
+#define PCI_CHIP_VT3204         0x3108 /* K8M800 */
+#define PCI_CHIP_VT3259         0x3118 /* PM800 */
 #define PCI_CHIP_VT3314         0x3344 /* VM800 */
 #define PCI_CHIP_VT3336         0x3230 /* K8M890 */
 #define PCI_CHIP_VT3364         0x3371 /* P4M900 */
 #define PCI_CHIP_VT3324         0x3157 /* CX700 */
 #define PCI_CHIP_VT3327         0x3343 /* P4M890 */
 
-/*
- * There is also quite some conflicting information on the
- * 2 major revisions of the CLE266, oft labelled as Ax and Cx
- * It seems to center around 
- *        ChipRev > 15 == Cx
- *   and
- *        ChipRev < 15 == Ax
- * There is only one case in original xfree86 code where 15 is
- * handled; in via_bandwidth.c:
- *   if (pBIOSInfo->ChipRev > 14) {  // For 3123Cx
- * While setting the primary fifo, the secondary is > 15 again.
- *
- * So does this rule out the existence of CLE266B?
- *
- * It seems to be 0x10, anything from that and up is Cx, anything
- * below is Ax
- */
-#define CLE266_REV_IS_CX(x) ((x) >= 0x10)
+/* There is some conflicting information about the two major revisions of
+ * the CLE266, often labelled Ax and Cx.  The dividing line seems to be
+ * either 0x0f or 0x10. */
 #define CLE266_REV_IS_AX(x) ((x) < 0x10)
+#define CLE266_REV_IS_CX(x) ((x) >= 0x10)
 
 struct ViaCardIdStruct {
-    char*  String;  /* Full identification string. */
-    CARD8  Chip;    /* Which unichrome device? */
-    CARD16 Vendor;  /* PCI Card/Subsystem vendor id */
-    CARD16 Device;  /* PCI Card/Subsystem device id */
-    CARD8  Outputs; /* ORed list of VIA_DEVICE_CRT, VIA_DEVICE_LCD, VIA_DEVICE_TV */
+    char*  String;  /* full identification string */
+    CARD8  Chip;    /* which family of unichrome */
+    CARD16 Vendor;  /* PCI subsystem Vendor ID */
+    CARD16 Device;  /* PCI subsystem Device ID */
+    CARD8  Outputs; /* whether it supports CRT, LCD, and TV */
 };
 
 void ViaDoubleCheckCLE266Revision(ScrnInfoPtr pScrn);
