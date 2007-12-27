@@ -172,6 +172,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     /*** CX700 ***/
     {"VIA VT8454B",                           VIA_CX700,   0x0908, 0x1975, VIA_DEVICE_CRT}, /* Evaluation board, reference possibly wrong */
     {"VIA VT3324 (CX700)",                    VIA_CX700,   0x1106, 0x3157, VIA_DEVICE_CRT},
+    {"FIC CE260",                             VIA_CX700,   0x1509, 0x2D30, VIA_DEVICE_LCD},
 
     /*** P4M890, VN890 ***/
     {"PCChips P29G",                          VIA_P4M890,  0x1019, 0x1629, VIA_DEVICE_CRT},
