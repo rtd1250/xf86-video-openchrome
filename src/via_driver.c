@@ -976,6 +976,52 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 
     xf86DrvMsg(pScrn->scrnIndex, from, "Chipset revision: %d\n", pVia->ChipRev);
 
+    xfree(pEnt);
+
+    /* Detect the amount of installed RAM */
+    from = X_PROBED;
+    switch (pVia->Chipset) {
+        case VIA_CLE266:
+        case VIA_KM400:
+            pScrn->videoRam = ( 1 << ( ( pciReadByte(pciTag(0, 0, 0), 0xE1) & 0x70 ) >> 4 ) ) << 10 ;
+            break;
+        case VIA_PM800:
+        case VIA_VM800:
+        case VIA_K8M800:
+            pScrn->videoRam = ( 1 << ( ( pciReadByte(pciTag(0, 0, 3), 0xA1) & 0x70 ) >> 4 ) ) << 10 ;
+            break;
+        case VIA_K8M890:
+        case VIA_P4M890:
+        case VIA_P4M900:
+        case VIA_CX700:
+            pScrn->videoRam = ( 1 << ( ( pciReadByte(pciTag(0, 0, 3), 0xA1) & 0x70 ) >> 4 ) ) << 12 ;
+            break;
+        default:
+            if (pScrn->videoRam < 16384 || pScrn->videoRam > 65536) {
+                xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                           "Using old memory-detection method.\n");
+                bMemSize = hwp->readSeq(hwp, 0x39);
+                if (bMemSize > 16 && bMemSize <= 128)
+                    pScrn->videoRam = (bMemSize + 1) << 9;
+                else if (bMemSize > 0 && bMemSize < 31)
+                    pScrn->videoRam = bMemSize << 12;
+                else {
+                    from = X_DEFAULT;
+                    xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                               "Memory size detection failed: using 16 MB.\n");
+                    pScrn->videoRam = 16 << 10;
+                }
+            } else {
+                from = X_DEFAULT;
+                xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                           "No memory-detection done.  Use VideoRAM option.\n");
+            }
+    }
+
+    if (from == X_PROBED)
+        xf86DrvMsg(pScrn->scrnIndex, from,
+                   "Probed amount of VideoRAM = %d kB\n", pScrn->videoRam);
+
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
 	       "Setting up default chipset options...\n");
     if (!VIASetupDefaultOptions(pScrn)) {
@@ -988,16 +1034,9 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
 	       "Starting to parse config file options...\n");
 
-    pScrn->videoRam = pEnt->device->videoRam;
-    from = xf86GetOptValInteger(VIAOptions, OPTION_VIDEORAM,
-				&pScrn->videoRam) ? 
-	X_CONFIG : X_PROBED;
-    xf86DrvMsg(pScrn->scrnIndex, from, "VideoRAM is set to %d kB\n",
-               pScrn->videoRam);
-    if (pScrn->videoRam != pEnt->device->videoRam)
-        xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                   "Detected VideoRAM was %d kB!\n", pEnt->device->videoRam);
-    xfree(pEnt);
+    if (xf86GetOptValInteger(VIAOptions, OPTION_VIDEORAM, &pScrn->videoRam))
+        xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+                   "Setting amount of VideoRAM to %d kB\n", pScrn->videoRam);
 
     //pVia->shadowFB = FALSE;
     from = xf86GetOptValBool(VIAOptions, OPTION_SHADOW_FB, &pVia->shadowFB) ? 
@@ -1415,51 +1454,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         VIAFreeRec(pScrn);
         return FALSE;
     }
-
-    from = X_PROBED;
-
-    /* Detect the amount of installed RAM */
-    switch (pVia->Chipset) {
-        case VIA_CLE266:
-        case VIA_KM400:
-            pScrn->videoRam = ( 1 << ( ( pciReadByte(pciTag(0, 0, 0), 0xE1) & 0x70 ) >> 4 ) ) << 10 ;
-            break;
-        case VIA_PM800:
-        case VIA_VM800:
-        case VIA_K8M800:
-            pScrn->videoRam = ( 1 << ( ( pciReadByte(pciTag(0, 0, 3), 0xA1) & 0x70 ) >> 4 ) ) << 10 ;
-            break;
-        case VIA_K8M890:
-        case VIA_P4M890:
-        case VIA_P4M900:
-        case VIA_CX700:
-            pScrn->videoRam = ( 1 << ( ( pciReadByte(pciTag(0, 0, 3), 0xA1) & 0x70 ) >> 4 ) ) << 12 ;
-            break;
-        default:
-            if (pScrn->videoRam < 16384 || pScrn->videoRam > 65536) {
-                xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                          "Using old memory-detection method.\n");
-                bMemSize = hwp->readSeq(hwp, 0x39);
-                if (bMemSize > 16 && bMemSize <= 128)
-                    pScrn->videoRam = (bMemSize + 1) << 9;
-                else if (bMemSize > 0 && bMemSize < 31)
-                    pScrn->videoRam = bMemSize << 12;
-                else {
-                    from = X_DEFAULT;
-                    xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                               "Memory size detection failed: using 16 MB.\n");
-                    pScrn->videoRam = 16 << 10;
-                }
-            } else {
-                from = X_DEFAULT;
-                xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                          "No memory-detection done.  Use VideoRAM option.\n");
-            }
-    }
-
-    if (from == X_PROBED)
-        xf86DrvMsg(pScrn->scrnIndex, from, "Probed VideoRAM = %d kB\n",
-                   pScrn->videoRam);
 
     /* Split FB for SAMM */
     /* FIXME: For now, split FB into two equal sections. This should
