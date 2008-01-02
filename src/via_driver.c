@@ -442,7 +442,8 @@ VIASetup(pointer module, pointer opts, int *errmaj, int *errmin)
 
 #endif /* XFree86LOADER */
 
-static Bool VIAGetRec(ScrnInfoPtr pScrn)
+static Bool
+VIAGetRec(ScrnInfoPtr pScrn)
 {
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAGetRec\n"));
     if (pScrn->driverPrivate)
@@ -482,22 +483,22 @@ static void VIAFreeRec(ScrnInfoPtr pScrn)
 } /* VIAFreeRec */
 
 
-
-static const OptionInfoRec * VIAAvailableOptions(int chipid, int busid)
+static const
+OptionInfoRec * VIAAvailableOptions(int chipid, int busid)
 {
-
     return VIAOptions;
+}
 
-} /* VIAAvailableOptions */
 
-
-static void VIAIdentify(int flags)
+static void
+VIAIdentify(int flags)
 {
     xf86PrintChipsets("OPENCHROME", "Driver for VIA Chrome chipsets",
                       VIAChipsets);
-} /* VIAIdentify */
+}
 
-static Bool VIAProbe(DriverPtr drv, int flags)
+static Bool
+VIAProbe(DriverPtr drv, int flags)
 {
     GDevPtr *devSections;
     int     *usedChips;
@@ -609,7 +610,8 @@ static Bool VIAProbe(DriverPtr drv, int flags)
 } /* VIAProbe */
 
 #ifdef XF86DRI
-static void kickVblank(ScrnInfoPtr pScrn)
+static void
+kickVblank(ScrnInfoPtr pScrn)
 {
     /*
      * Switching mode will clear registers that make vblank
@@ -628,7 +630,8 @@ static void kickVblank(ScrnInfoPtr pScrn)
 }
 #endif
 
-static int LookupChipSet(PciChipsets *pset, int chipSet)
+static int
+LookupChipSet(PciChipsets *pset, int chipSet)
 {
   while (pset->numChipset >= 0) {
     if (pset->numChipset == chipSet) return pset->PCIid;
@@ -642,8 +645,7 @@ static int
 LookupChipID(PciChipsets* pset, int ChipID)
 {
     /* Is there a function to do this for me? */
-    while (pset->numChipset >= 0)
-    {
+    while (pset->numChipset >= 0) {
         if (pset->PCIid == ChipID)
             return pset->numChipset;
 
@@ -651,8 +653,7 @@ LookupChipID(PciChipsets* pset, int ChipID)
     }
 
     return -1;
-
-} /* LookupChipID */
+}
 
 static void
 VIAProbeDDC(ScrnInfoPtr pScrn, int index)
@@ -698,12 +699,11 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
 #ifdef HAVE_DEBUG
     pVia->PrintVGARegs = FALSE;
 #endif
-    pVia->swov.maxWInterp = 800 ;
-    pVia->swov.maxHInterp = 600 ;
+    pVia->swov.maxWInterp = 800;
+    pVia->swov.maxHInterp = 600;
     pVia->useLegacyVBE = TRUE;
 
-    switch (pVia->Chipset)
-    {
+    switch (pVia->Chipset) {
         case VIA_KM400:
             /* IRQ is not broken on KM400A */
             /* But test below is not enough to make sure we have a KM400A */
@@ -725,8 +725,8 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
 	case VIA_PM800:
 	case VIA_CX700:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
-            pVia->swov.maxWInterp = 1920 ;
-            pVia->swov.maxHInterp = 1080 ;
+            pVia->swov.maxWInterp = 1920;
+            pVia->swov.maxHInterp = 1080;
 	    break;
 	case VIA_P4M890:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
@@ -1459,8 +1459,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     if (!xf86LoadSubModule(pScrn, "i2c")) {
         VIAFreeRec(pScrn);
         return FALSE;
-    }
-    else {
+    } else {
         xf86LoaderReqSymLists(i2cSymbols,NULL);
         ViaI2CInit(pScrn);
     }
@@ -1879,8 +1878,7 @@ VIASave(ScrnInfoPtr pScrn)
         Regs->SR46 = hwp->readSeq(hwp, 0x46);
         Regs->SR47 = hwp->readSeq(hwp, 0x47);
 
-        switch (pVia->Chipset)
-        {
+        switch (pVia->Chipset) {
             case VIA_CLE266:
             case VIA_KM400:
                 break;
@@ -1988,8 +1986,7 @@ VIARestore(ScrnInfoPtr pScrn)
     hwp->writeSeq(hwp, 0x46, Regs->SR46);
     hwp->writeSeq(hwp, 0x47, Regs->SR47);
 
-    switch (pVia->Chipset)
-    {
+    switch (pVia->Chipset) {
         case VIA_CLE266:
         case VIA_KM400:
             break;
@@ -2322,9 +2319,6 @@ VIALoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
     }
 }
 
-/*
- *
- */
 static Bool 
 VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 {
@@ -2670,7 +2664,6 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
 #endif
         /* Wait Hardware Engine idle to exit graphical mode */
         viaAccelSync(pScrn);
- 
 
 	/* A soft reset Fixes 3D Hang after X restart */
         if (pVia->Chipset != VIA_K8M890 && pVia->Chipset != VIA_P4M900)	
@@ -2873,43 +2866,27 @@ VIAInitialize3DEngine(ScrnInfoPtr pScrn)
     int i;
 
     VIASETREG(VIA_REG_TRANSET, 0x00010000);
-
     for (i = 0; i <= 0x7D; i++)
-      {
 	VIASETREG(VIA_REG_TRANSPACE, (CARD32) i << 24);
-      }
 
     VIASETREG(VIA_REG_TRANSET, 0x00020000);
-
     for (i = 0; i <= 0x94; i++)
-      {
 	VIASETREG(VIA_REG_TRANSPACE, (CARD32) i << 24);
-      }
-
     VIASETREG(VIA_REG_TRANSPACE, 0x82400000);
 
     VIASETREG(VIA_REG_TRANSET, 0x01020000);
-
-
     for (i = 0; i <= 0x94; i++)
-      {
 	VIASETREG(VIA_REG_TRANSPACE, (CARD32) i << 24);
-      }
-
     VIASETREG(VIA_REG_TRANSPACE, 0x82400000);
-    VIASETREG(VIA_REG_TRANSET, 0xfe020000);
 
+    VIASETREG(VIA_REG_TRANSET, 0xfe020000);
     for (i = 0; i <= 0x03; i++)
-      {
 	VIASETREG(VIA_REG_TRANSPACE, (CARD32) i << 24);
-      }
 
     VIASETREG(VIA_REG_TRANSET, 0x00030000);
-
     for (i = 0; i <= 0xff; i++)
-      {
 	VIASETREG(VIA_REG_TRANSPACE, 0);
-      }
+
     VIASETREG(VIA_REG_TRANSET, 0x00100000);
     VIASETREG(VIA_REG_TRANSPACE, 0x00333004);
     VIASETREG(VIA_REG_TRANSPACE, 0x10000002);
@@ -2920,12 +2897,10 @@ VIAInitialize3DEngine(ScrnInfoPtr pScrn)
     VIASETREG(VIA_REG_TRANSPACE, 0x64000000);
 
     VIASETREG(VIA_REG_TRANSET, 0x00fe0000);
-
     if (pVia->ChipRev >= 3 )
-      VIASETREG(VIA_REG_TRANSPACE,0x40008c0f);
+        VIASETREG(VIA_REG_TRANSPACE,0x40008c0f);
     else
-      VIASETREG(VIA_REG_TRANSPACE,0x4000800f);
-
+        VIASETREG(VIA_REG_TRANSPACE,0x4000800f);
     VIASETREG(VIA_REG_TRANSPACE,0x44000000);
     VIASETREG(VIA_REG_TRANSPACE,0x45080C04);
     VIASETREG(VIA_REG_TRANSPACE,0x46800408);
@@ -2933,7 +2908,6 @@ VIAInitialize3DEngine(ScrnInfoPtr pScrn)
     VIASETREG(VIA_REG_TRANSPACE,0x51000000);
     VIASETREG(VIA_REG_TRANSPACE,0x52000000);
     VIASETREG(VIA_REG_TRANSPACE,0x53000000);
-
     
     VIASETREG(VIA_REG_TRANSET,0x00fe0000);
     VIASETREG(VIA_REG_TRANSPACE,0x08000001);
