@@ -140,11 +140,9 @@ typedef enum {
     OPTION_PANELSIZE,
     OPTION_FORCEPANEL,
     OPTION_TVDOTCRAWL,
-    OPTION_TVPROGRESSIVE,
     OPTION_TVTYPE,
     OPTION_TVOUTPUT,
     OPTION_DISABLEVQ,
-    OPTION_DRIXINERAMA,
     OPTION_DISABLEIRQ,
     OPTION_TVDEFLICKER,
     OPTION_AGP_DMA,
@@ -183,7 +181,6 @@ static OptionInfoRec VIAOptions[] = {
     {OPTION_FORCEPANEL,          "ForcePanel",       OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_TVDOTCRAWL,          "TVDotCrawl",       OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_TVDEFLICKER,         "TVDeflicker",      OPTV_INTEGER, {0}, FALSE},
-    {OPTION_TVPROGRESSIVE,       "TVProgressive",    OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_TVTYPE,              "TVType",           OPTV_ANYSTR,  {0}, FALSE},
     {OPTION_TVOUTPUT,            "TVOutput",         OPTV_ANYSTR,  {0}, FALSE},
     {OPTION_DISABLEVQ,           "DisableVQ",        OPTV_BOOLEAN, {0}, FALSE},
@@ -925,27 +922,25 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     */
 
     if (pEnt->device->chipset && *pEnt->device->chipset) {
+        from = X_CONFIG;
         pScrn->chipset = pEnt->device->chipset;
         pVia->Chipset = xf86StringToToken(VIAChipsets, pScrn->chipset);
-        pVia->ChipId = pEnt->device->chipID = LookupChipSet(VIAPciChipsets, pVia->Chipset);
-        from = X_CONFIG;
+        pVia->ChipId = LookupChipSet(VIAPciChipsets, pVia->Chipset);
     } else if (pEnt->device->chipID >= 0) {
+        from = X_CONFIG;
         pVia->ChipId = pEnt->device->chipID;
         pVia->Chipset = LookupChipID(VIAPciChipsets, pVia->ChipId);
-        pScrn->chipset = (char *)xf86TokenToString(VIAChipsets,
-                                                   pVia->Chipset);
-        from = X_CONFIG;
+        pScrn->chipset = (char *)xf86TokenToString(VIAChipsets, pVia->Chipset);
         xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "ChipID override: 0x%04X\n",
                    pEnt->device->chipID);
     } else {
         from = X_PROBED;
         pVia->ChipId = pVia->PciInfo->chipType;
         pVia->Chipset = LookupChipID(VIAPciChipsets, pVia->ChipId);
-        pScrn->chipset = (char *)xf86TokenToString(VIAChipsets,
-                                                   pVia->Chipset);
+        pScrn->chipset = (char *)xf86TokenToString(VIAChipsets, pVia->Chipset);
     }
 
-    xf86DrvMsg(pScrn->scrnIndex, from, "Chipset: \"%s\"\n", pScrn->chipset);
+    xf86DrvMsg(pScrn->scrnIndex, from, "Chipset: %s\n", pScrn->chipset);
 
     if (pEnt->device->chipRev >= 0) {
         pVia->ChipRev = pEnt->device->chipRev;
@@ -1008,12 +1003,13 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
                    "Probed amount of VideoRAM = %d kB\n", pScrn->videoRam);
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
-	       "Setting up default chipset options...\n");
+	       "Setting up default chipset options.\n");
     if (!VIASetupDefaultOptions(pScrn)) {
         VIAFreeRec(pScrn);
         return FALSE;
     }
 
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Reading config file...\n");
     xf86ProcessOptions(pScrn->scrnIndex, pScrn->options, VIAOptions);
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
