@@ -2706,7 +2706,7 @@ viaAccelTextureBlit(ScrnInfoPtr pScrn, unsigned long srcOffset,
     unsigned dstX, unsigned dstY, unsigned dstFormat, int rotate)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    unsigned wOrder, hOrder;
+    CARD32 wOrder, hOrder;
     Via3DState *v3d = &pVia->v3d;
 
     viaOrder(w, &wOrder);
