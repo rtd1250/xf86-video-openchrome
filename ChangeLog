@@ -1,3 +1,8 @@
+2008-01-08  Benno Schulenberg  <bensberg-at-justemail-dot-net>
+
+	* src/via_accel.c: (viaBitExpandHelper), (viaPixelARGB8888):
+	Moving a little more computation into the helper function.
+
 2007-10-29  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 
 	* src/via_driver.c: (VIAPreInit):

@@ -1390,13 +1390,14 @@ viaExaPrintComposite(CARD8 op,
  * Helper for bitdepth expansion.
  */
 static CARD32
-viaBitExpandHelper(CARD32 component, CARD32 bits)
+viaBitExpandHelper(CARD32 pixel, CARD32 bits)
 {
-    CARD32 tmp, mask;
+    CARD32 component, mask, tmp;
 
+    component = pixel & ((1 << bits) - 1);
     mask = (1 << (8 - bits)) - 1;
     tmp = component << (8 - bits);
-    return ((component & 1) ? tmp | mask : tmp);
+    return ((component & 1) ? (tmp | mask) : tmp);
 }
 
 /*
@@ -1420,51 +1421,42 @@ viaPixelARGB8888(unsigned format, void *pixelP, CARD32 * argb8888)
     }
 
     switch (PICT_FORMAT_TYPE(format)) {
-    case PICT_TYPE_A:
-	bits = PICT_FORMAT_A(format);
-	*argb8888 = viaBitExpandHelper(pixel & ((1 << bits) - 1), bits) << 24;
-	return;
-    case PICT_TYPE_ARGB:
-	shift = 0;
-	bits = PICT_FORMAT_B(format);
-	*argb8888 = viaBitExpandHelper(pixel & ((1 << bits) - 1), bits);
-	shift += bits;
-	bits = PICT_FORMAT_G(format);
-	*argb8888 |=
-	    viaBitExpandHelper((pixel >> shift) & ((1 << bits) - 1),
-	    bits) << 8;
-	shift += bits;
-	bits = PICT_FORMAT_R(format);
-	*argb8888 |=
-	    viaBitExpandHelper((pixel >> shift) & ((1 << bits) - 1),
-	    bits) << 16;
-	shift += bits;
-	bits = PICT_FORMAT_A(format);
-	*argb8888 |= ((bits) ?
-	    viaBitExpandHelper((pixel >> shift) & ((1 << bits) - 1),
-		bits) : 0xFF) << 24;
-	return;
-    case PICT_TYPE_ABGR:
-	shift = 0;
-	bits = PICT_FORMAT_B(format);
-	*argb8888 = viaBitExpandHelper(pixel & ((1 << bits) - 1), bits) << 16;
-	shift += bits;
-	bits = PICT_FORMAT_G(format);
-	*argb8888 |=
-	    viaBitExpandHelper((pixel >> shift) & ((1 << bits) - 1),
-	    bits) << 8;
-	shift += bits;
-	bits = PICT_FORMAT_R(format);
-	*argb8888 |=
-	    viaBitExpandHelper((pixel >> shift) & ((1 << bits) - 1), bits);
-	shift += bits;
-	bits = PICT_FORMAT_A(format);
-	*argb8888 |= ((bits) ?
-	    viaBitExpandHelper((pixel >> shift) & ((1 << bits) - 1),
-		bits) : 0xFF) << 24;
-	return;
-    default:
-	break;
+        case PICT_TYPE_A:
+            bits = PICT_FORMAT_A(format);
+            *argb8888 = viaBitExpandHelper(pixel, bits) << 24;
+            return;
+        case PICT_TYPE_ARGB:
+            shift = 0;
+            bits = PICT_FORMAT_B(format);
+            *argb8888 = viaBitExpandHelper(pixel, bits);
+            shift += bits;
+            bits = PICT_FORMAT_G(format);
+            *argb8888 |= viaBitExpandHelper(pixel >> shift, bits) << 8;
+            shift += bits;
+            bits = PICT_FORMAT_R(format);
+            *argb8888 |= viaBitExpandHelper(pixel >> shift, bits) << 16;
+            shift += bits;
+            bits = PICT_FORMAT_A(format);
+            *argb8888 |= ((bits) ? viaBitExpandHelper(pixel >> shift,
+                                                      bits) : 0xFF) << 24;
+            return;
+        case PICT_TYPE_ABGR:
+            shift = 0;
+            bits = PICT_FORMAT_B(format);
+            *argb8888 = viaBitExpandHelper(pixel, bits) << 16;
+            shift += bits;
+            bits = PICT_FORMAT_G(format);
+            *argb8888 |= viaBitExpandHelper(pixel >> shift, bits) << 8;
+            shift += bits;
+            bits = PICT_FORMAT_R(format);
+            *argb8888 |= viaBitExpandHelper(pixel >> shift, bits);
+            shift += bits;
+            bits = PICT_FORMAT_A(format);
+            *argb8888 |= ((bits) ? viaBitExpandHelper(pixel >> shift,
+                                                      bits) : 0xFF) << 24;
+            return;
+        default:
+            break;
     }
     return;
 }
