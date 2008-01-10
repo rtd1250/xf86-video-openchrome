@@ -35,8 +35,8 @@ The XvMC client library implements a non-standard
 "VLD" extension to the XvMC standard.  The current Direct Rendering
 Manager (DRM) kernel module is available at dri.sourceforge.net.
 .PP
-The driver supports free modes for Unichrome Pros (K8M/N800, PM/N800, and
-CN400).  For plain Unichromes (CLE266, KM/N400), it currently supports
+The driver supports free modes for Unichrome Pros (K8M800/K8N800, PM800/PN800,
+and CN400).  For plain Unichromes (CLE266, KM400/KN400), it currently supports
 only a limited number of dotclocks, so if you are using X modelines you
 must make sure that the dotclock is one of those supported.  Supported
 dotclocks on plain Unichromes are currently (in MHz): 25.2, 25.312,
@@ -73,41 +73,42 @@ to use LCD and TV simultaneously, and will favour the LCD.
 .BI "Option \*qAGPMem\*q  \*q" integer \*q
 Sets the amount of AGP memory that is allocated at X server startup.
 The allocated memory will be "integer" kB.  This AGP memory is used for
-the AGP command buffer (if option "EnableAGPDMA" is set to "true"), for
+the AGP command buffer (if the option "EnableAGPDMA" is set to "true"), for
 DRI textures, and for the EXA scratch area.  The driver will allocate at
-least one system page of AGP memory and, if the AGP command buffer is
-used, at least 2MB + one system page.  If there is no room for the EXA
-scratch area in AGP space, it will be allocated from VRAM.  If there is
+least one system page of AGP memory, or \-\- if the AGP command buffer is
+used \-\- at least 2 MB plus one system page.  If there is no room for the
+EXA scratch area in AGP space, it will be allocated from VRAM.  If there is
 no room for DRI textures, they will be allocated from the DRI part of
 VRAM (see the option "MaxDRIMem").  The default amount of AGP is
-32768kB.  Note that the AGP aperture set in the BIOS must be able
+32768 kB.  Note that the AGP aperture set in the BIOS must be able
 to accomodate the amount of AGP memory specified here.  Otherwise no
 AGP memory will be available.  It is safe to set a very large AGP
 aperture in the BIOS.
 .TP
 .BI "Option \*qCenter\*q  \*q" boolean \*q
-Enables or disables image centering on DVI displays.
+Enables image centering on DVI displays.  The default is disabled.
 .TP
 .BI "Option \*qDisableIRQ\*q  \*q" boolean \*q
-Disables the Vblank IRQ.  This is a workaround for some mainboards that
-have problems with IRQs from the Unichrome engine.  With IRQs disabled,
-DRI clients have no way to synchronize drawing to Vblank.  (This option
-is enabled by default on the KM400 and K8M800 chipsets.)
+Disables the vertical blank IRQ.  This is a workaround for some mainboards
+that have problems with IRQs coming from the Unichrome engine.  With IRQs
+disabled, DRI clients have no way to synchronize their drawing to Vblank.
+(IRQ is disabled by default on the KM400 and K8M800 chipsets.)
 .TP
 .BI "Option \*qDisableVQ\*q  \*q" boolean \*q
-Disables the use of VQ.  VQ is enabled by default.
+Disables the use of the virtual command queue.  The queue is enabled
+by default.
 .TP
 .BI "Option \*qEnableAGPDMA\*q  \*q" boolean \*q
 Enables the AGP DMA functionality in DRM.  This requires that DRI is enabled
-and will force 2D and 3D acceleration to use AGP DMA.  The XvMC DRI client
-will also make use of this on the CLE266 to consume much less CPU.  (This
-option is enabled by default on all chipsets except the K8M890 and P4M900.) 
+and will force 2D and 3D acceleration to use AGP DMA.  The XvMC DRI
+client will also make use of this on the CLE266 to consume much less CPU.
+(This option is enabled by default, except on the K8M890 and P4M900.) 
 .TP
 .BI "Option \*qExaNoComposite\*q  \*q" boolean \*q
 If EXA is enabled (using the option "AccelMethod"), this option enables
-or disables acceleration of compositing.  Since EXA, and in particular its
-composite acceleration, is still experimental, this is a way to disable
-a misbehaving composite acceleration.
+acceleration of compositing.  Since EXA, and in particular its composite
+acceleration, is still experimental, this is a way to disable a misbehaving
+composite acceleration.
 .TP
 .BI "Option \*qExaScratchSize\*q  \*q" integer \*q
 Sets the size of the EXA scratch area to "integer" kB.  This area is
@@ -119,10 +120,10 @@ leave this at the default 4096.  The space will be allocated from AGP
 memory if available, otherwise from VRAM.
 .TP
 .BI "Option \*qHWCursor\*q  \*q" boolean \*q
-Enables or disables the use of hardware cursors.  The default is enabled.
+Enables the use of the hardware cursor.  The default is enabled.
 .TP
 .BI "Option \*qLCDDualEdge\*q  \*q" boolean \*q
-Enables or disables the use of dual-edge mode to set the LCD.
+Enables the use of dual-edge mode to set the LCD.  The default is disabled.
 .TP
 .BI "Option \*qMaxDRIMem\*q  \*q" integer \*q
 Sets the maximum amount of VRAM memory allocated for DRI clients to
@@ -133,17 +134,18 @@ as possible to the EXA pixmap storage area.
 .TP
 .BI "Option \*qMigrationHeuristic\*q  \*q" string \*q
 Sets the heuristic for EXA pixmap migration.  This is an EXA core
-option, and on Xorg xserver versions after 1.1.0 this defaults to
-"smart".  The Openchrome driver performs best with "greedy", so you
+option, and on Xorg server versions after 1.1.0 this defaults to
+"smart".  The openchrome driver performs best with "greedy", so you
 should really add this option to your configuration file.  The third
 possibility is "always", which might become more useful in the future.
 .TP
 .BI "Option \*qNoAccel\*q  \*q" boolean \*q
-Disables or enables acceleration.  Default: acceleration is enabled.
+Disables the use of hardware acceleration.  Acceleration is enabled
+by default.
 .TP
 .BI "Option \*qNoAGPFor2D\*q  \*q" boolean \*q
-With this option set, 2D acceleration will not use AGP DMA even if
-it is enabled.
+Disables the use of AGP DMA for 2D acceleration, even when AGP DMA is
+enabled.  The default is enabled.
 .TP
 .BI "Option \*qNoXVDMA\*q  \*q" boolean \*q
 If DRI is enabled, Xv normally uses PCI DMA to transfer video images
@@ -165,23 +167,25 @@ Rotates the display either clockwise ("CW") or counterclockwise ("CCW").
 Rotation is only supported unaccelerated.
 .TP
 .BI "Option \*qShadowFB\*q  \*q" boolean \*q
-Uses a shadow frame buffer.  This is required when rotating the display,
-but otherwise defaults to disabled.
+Enables the use of a shadow frame buffer.  This is required when
+rotating the display, but otherwise defaults to disabled.
 .TP
 .BI "Option \*qSWCursor\*q  \*q" boolean \*q
-Enables or disables the use of a software cursor.  The default is disabled.
+Enables the use of a software cursor.  The default is disabled:
+the hardware cursor is used.
 .TP
 .BI "Option \*qTVDeflicker\*q  \*q" integer \*q
 Specifies the deflicker setting for TV output.  Valid values are "0", "1",
-and "2".  0) No deflicker, 1) 1:1:1 deflicker, 2) 1:2:1 deflicker.
+and "2".  Here 0 means no deflicker, 1 means 1:1:1 deflicker, and 2 means
+1:2:1 deflicker.
 .TP
 .BI "Option \*qTVDotCrawl\*q  \*q" boolean \*q
-Enables or disables dotcrawl.
+Enables dot-crawl suppression.  The default is disabled.
 .TP
 .BI "Option \*qTVOutput\*q  \*q" string \*q
 Specifies which TV output to use.  The driver supports "S-Video",
-"Composite", "SC", "RGB" and "YCbCr" outputs.  Note that on some
-EPIA boards the compositer-video port is shared with audio-out and
+"Composite", "SC", "RGB", and "YCbCr" outputs.  Note that on some
+EPIA boards the composite-video port is shared with audio-out and
 is selected via a jumper.
 .TP
 .BI "Option \*qTVType\*q  \*q" string \*q
@@ -189,19 +193,19 @@ Specifies TV output format.  The driver currently supports "NTSC" and
 "PAL" timings only.
 .TP
 .BI "Option \*qVBEModes\*q  \*q" boolean \*q
-Uses the VBE BIOS calls to set the display mode.  This mimics the
-behaviour of the vesa video driver but still provides acceleration and
+Enables the use of VBE BIOS calls for setting the display mode.  This mimics
+the behaviour of the vesa driver but still provides acceleration and
 other features.  This option may be used if your hardware works with
-the vesa driver but not with the Openchrome driver.  It may not work
+the vesa driver but not with the openchrome driver.  It may not work
 on 64-bit systems.  Using "VBEModes" may speed up driver acceleration
 significantly due to a more aggressive hardware setting, particularly
 on systems with low memory bandwidth.  Your refresh rate may be limited
 to 60 Hz on some systems.
 .TP
 .BI "Option \*qVBESaveRestore\*q  \*q" boolean \*q
-Uses the VBE BIOS calls to save and restore the display state when the
-X server is launched.  This can be extremely slow on some hardware, and
-the system may appear to have locked for 10 seconds or so.  The default
+Enables the use of VBE BIOS calls for saving and restoring the display state
+when the X server is launched.  This can be extremely slow on some hardware,
+and the system may appear to have locked for 10 seconds or so.  The default
 is to use the driver builtin function.  This option only works if option
 "VBEModes" is enabled.
 .TP

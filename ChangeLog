@@ -1,3 +1,8 @@
+2008-01-10  Benno Schulenberg  <bensberg-at-justemail-dot-net>
+
+	* src/openchrome.man: Tweaking the text, clarifying the effect
+	of an option, giving the default value.
+
 2008-01-08  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 
 	* src/via_accel.c: (viaBitExpandHelper), (viaPixelARGB8888):
