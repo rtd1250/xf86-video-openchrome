@@ -705,22 +705,23 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
 
     switch (pVia->Chipset) {
         case VIA_KM400:
-            /* IRQ is not broken on KM400A */
-            /* But test below is not enough to make sure we have a KM400A */
-            /* if (pVia->ChipRev < 0x80) */
+            /* IRQ is not broken on KM400A, but testing (pVia->ChipRev < 0x80)
+               is not enough to make sure we have a KM400A. */
             pVia->DRIIrqEnable = FALSE;
             break;
         case VIA_K8M800:
             pVia->DRIIrqEnable = FALSE;
             break;
-        case VIA_P4M900:
-	    pVia->useLegacyVBE = FALSE;
-	    /* FIXME: It needs to be tested */
-	    pVia->dmaXV = FALSE;
-	    /* no break here */
         case VIA_K8M890:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
             pVia->agpEnable = FALSE;
+            break;
+        case VIA_P4M900:
+            pVia->VideoEngine = VIDEO_ENGINE_CME;
+            pVia->agpEnable = FALSE;
+            pVia->useLegacyVBE = FALSE;
+            /* FIXME: this needs to be tested */
+            pVia->dmaXV = FALSE;
             break;
 	case VIA_PM800:
 	case VIA_CX700:
