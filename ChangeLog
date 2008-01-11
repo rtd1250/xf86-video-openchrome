@@ -1,3 +1,10 @@
+2008-01-11  Benno Schulenberg  <bensberg-at-justemail-dot-net>
+
+	* src/openchrome.man:
+	* src/via_driver.c: (VIASetupDefaultOptions), (VIAPreInit):
+
+	Removing the redundant HWCursor option.
+
 2008-01-10  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 
 	* src/openchrome.man: Tweaking the text, clarifying the effect

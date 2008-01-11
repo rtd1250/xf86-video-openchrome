@@ -130,7 +130,6 @@ typedef enum {
     OPTION_EXA_SCRATCH_SIZE,
 #endif
     OPTION_SWCURSOR,
-    OPTION_HWCURSOR,
     OPTION_SHADOW_FB,
     OPTION_ROTATE,
     OPTION_VIDEORAM,
@@ -168,7 +167,6 @@ static OptionInfoRec VIAOptions[] = {
     {OPTION_EXA_NOCOMPOSITE,     "ExaNoComposite",   OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_EXA_SCRATCH_SIZE,    "ExaScratchSize",   OPTV_INTEGER, {0}, FALSE},
 #endif
-    {OPTION_HWCURSOR,            "HWCursor",         OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_SWCURSOR,            "SWCursor",         OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_SHADOW_FB,           "ShadowFB",         OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_ROTATE,              "Rotate",           OPTV_ANYSTR,  {0}, FALSE},
@@ -680,8 +678,8 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
 #ifdef VIA_HAVE_EXA 
     pVia->noComposite = FALSE;
     pVia->exaScratchSize = VIA_SCRATCH_SIZE / 1024;
-#endif /* VIA_HAVE_EXA */
-    pVia->hwcursor = pVia->shadowFB ? FALSE : TRUE;
+#endif
+    pVia->hwcursor = TRUE;
     pVia->VQEnable = TRUE;
     pVia->DRIIrqEnable = TRUE;
     pVia->agpEnable = TRUE;
@@ -1096,24 +1094,17 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     }
 #endif /* VIA_HAVE_EXA */
 
-    /*
-     * The SWCursor setting takes priority over HWCursor.  The default
-     * if neither is specified is HW.
-     */
-
-    //pVia->hwcursor = pVia->shadowFB ? FALSE : TRUE;
+    /* Whether to use a software cursor or the default hardware cursor. */
     from = X_DEFAULT;
-    if (xf86GetOptValBool(VIAOptions, OPTION_HWCURSOR, &pVia->hwcursor))
-        from = X_CONFIG;
-    if (xf86GetOptValBool(VIAOptions, OPTION_SWCURSOR, &pVia->hwcursor)) {
+    if (pVia->IsSecondary || pVia->shadowFB)
+        pVia->hwcursor = FALSE;
+    else if (xf86GetOptValBool(VIAOptions, OPTION_SWCURSOR, &pVia->hwcursor)) {
         pVia->hwcursor = !pVia->hwcursor;
         from = X_CONFIG;
     }
-    if (pVia->IsSecondary) 
-	pVia->hwcursor = FALSE;
     if (pVia->hwcursor)
-        xf86DrvMsg(pScrn->scrnIndex, from, "Hardware two-color cursors; "
-                                           "software full-color cursors.\n");
+        xf86DrvMsg(pScrn->scrnIndex, from, "Using hardware two-color "
+                   "cursors and software full-color cursors.\n");
     else
 	xf86DrvMsg(pScrn->scrnIndex, from, "Using software cursors.\n");
 

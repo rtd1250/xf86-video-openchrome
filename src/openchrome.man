@@ -119,9 +119,6 @@ over 1024 pixels and use 24 bpp, set this to 8192.  Otherwise you can
 leave this at the default 4096.  The space will be allocated from AGP
 memory if available, otherwise from VRAM.
 .TP
-.BI "Option \*qHWCursor\*q  \*q" boolean \*q
-Enables the use of the hardware cursor.  The default is enabled.
-.TP
 .BI "Option \*qLCDDualEdge\*q  \*q" boolean \*q
 Enables the use of dual-edge mode to set the LCD.  The default is disabled.
 .TP
