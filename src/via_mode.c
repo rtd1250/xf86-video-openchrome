@@ -131,7 +131,7 @@ ViaTVInit(ScrnInfoPtr pScrn)
         || !pBIOSInfo->TVPrintRegs) {
 
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                   "ViaTVInit: TVEncoder was not properly initialised.");
+                   "ViaTVInit: TVEncoder was not properly initialised.\n");
 
         xf86DestroyI2CDevRec(pBIOSInfo->TVI2CDev, TRUE);
         pBIOSInfo->TVI2CDev = NULL;
@@ -284,7 +284,7 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
      */
     if (pVia->Chipset == VIA_P4M900 && pBIOSInfo->PanelPresent) {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                   "Will not try to detect TV encoder.");
+                   "Will not try to detect TV encoder.\n");
     } else {
         /* TV encoder */
         if (ViaTVDetect(pScrn) && ViaTVInit(pScrn)) {
