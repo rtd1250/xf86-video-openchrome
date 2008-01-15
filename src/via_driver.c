@@ -529,7 +529,7 @@ VIAProbe(DriverPtr drv, int flags)
     xf86Msg(X_NOTICE, "For support, refer to http://www.openchrome.org/.\n");
 
 #ifdef BUILDCOMMENT
-    xf86Msg(X_NOTICE, BUILDCOMMENT);
+    xf86Msg(X_NOTICE, BUILDCOMMENT"\n");
 #endif
 
     if (flags & PROBE_DETECT) {

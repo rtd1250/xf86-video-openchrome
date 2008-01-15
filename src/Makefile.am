@@ -90,10 +90,13 @@ svnversion.h:
 	echo '#include "svnrelease.h"' > $@.tmp; \
 	elif [ -d .svn ]; then \
 	echo '#define BUILDCOMMENT "(development build, at svn revision '\
-	"`svnversion -nc .. | sed -e s/^[^:]*://`"')\n"' > $@.tmp; \
-	else date +'#define BUILDCOMMENT "(development build, compiled on %c)\n"' > $@.tmp; fi
+	"`svnversion -nc .. | sed -e s/^[^:]*://`"')"' > $@.tmp; \
+	else \
+	date +'#define BUILDCOMMENT "(development build, compiled on %c)"' \
+	> $@.tmp; \
+	fi
 
 	@(chmod 666 $@.tmp 2> /dev/null || /bin/true)
-	@cmp -s $@ $@.tmp || (mv $@.tmp $@ ; echo created $@)
+	@cmp -s $@ $@.tmp || (mv $@.tmp $@; echo created $@)
 
 .PHONY: svnversion.h
