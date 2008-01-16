@@ -219,7 +219,7 @@ static Bool VIASetAgpMode(ScrnInfoPtr pScrn)
     unsigned int vendor = drmAgpVendorId(pVia->drmFD);
     unsigned int device = drmAgpDeviceId(pVia->drmFD);
 
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] Detected AGP vendor 0x%04x, device 0x04%x\n",
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] Detected AGP vendor 0x%04x, device 0x%04x\n",
 	       vendor, device);
 
     mode &= ~VIA_AGP_MODE_MASK;
