@@ -210,35 +210,36 @@ VIADRIRingBufferInit(ScrnInfoPtr pScrn)
 	pVIADRI->ringBufActive = 1;
     }
     return TRUE;
-}	    
+}    
 
 static Bool VIASetAgpMode(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    CARD32       mode   = drmAgpGetMode(pVia->drmFD);
+    CARD32 mode = drmAgpGetMode(pVia->drmFD);
     unsigned int vendor = drmAgpVendorId(pVia->drmFD);
     unsigned int device = drmAgpDeviceId(pVia->drmFD);
 
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] Detected AGP vendor 0x%04x, device 0x%04x\n",
-	       vendor, device);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] Detected AGP "
+               "vendor 0x%04x, device 0x%04x\n", vendor, device);
 
     mode &= ~VIA_AGP_MODE_MASK;
-    if ((mode & VIA_AGPv3_MODE)) {
-	mode |= VIA_AGPv3_8X_MODE;
-	xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] Found AGP v3 compatible device. "
-		   "Trying AGP 8X mode.\n");
+    if (mode & VIA_AGPv3_MODE) {
+        mode |= VIA_AGPv3_8X_MODE;
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] Found AGP v3 "
+                   "compatible device. Trying AGP 8X mode.\n");
     } else {
-	mode |= VIA_AGP_4X_MODE;
-	xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] Didn't find any AGP v3 compatible device. "
-		   "Trying AGP 4X mode.\n");
+        mode |= VIA_AGP_4X_MODE;
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] Didn't find any AGP v3 "
+                   "compatible device. Trying AGP 4X mode.\n");
     }
-	
-    mode |= VIA_AGP_FW_MODE;
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] Trying to enable AGP fast writes.\n");
 
-    if (drmAgpEnable(pVia->drmFD, mode) < 0) {
+    mode |= VIA_AGP_FW_MODE;
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+               "[drm] Trying to enable AGP fast writes.\n");
+
+    if (drmAgpEnable(pVia->drmFD, mode) < 0)
         return FALSE;
-    }
+
     return TRUE;
 }
 
