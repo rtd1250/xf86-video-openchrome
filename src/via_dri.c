@@ -423,205 +423,110 @@ VIAInitVisualConfigs(ScreenPtr pScreen)
     VIAConfigPrivPtr *pVIAConfigPtrs = 0;
     int i, db, stencil, accum;
 
-    switch (pScrn->bitsPerPixel) {
-        case 8:
-        case 24:
-            break;
-        case 16:
-            numConfigs = 12;
-            if (!(pConfigs = (__GLXvisualConfig*)xcalloc(sizeof(__GLXvisualConfig),
-                                                   numConfigs)))
-                return FALSE;
-            if (!(pVIAConfigs = (VIAConfigPrivPtr)xcalloc(sizeof(VIAConfigPrivRec),
-                                                    numConfigs))) {
-                xfree(pConfigs);
-                return FALSE;
-            }
-            if (!(pVIAConfigPtrs = (VIAConfigPrivPtr*)xcalloc(sizeof(VIAConfigPrivPtr),
-                                                          numConfigs))) {
-                xfree(pConfigs);
-                xfree(pVIAConfigs);
-                return FALSE;
-            }
-            for (i = 0; i < numConfigs; i++)
-                pVIAConfigPtrs[i] = &pVIAConfigs[i];
+    if (pScrn->bitsPerPixel == 16 || pScrn->bitsPerPixel == 32) {
+        numConfigs = 12;
+        if (!(pConfigs = (__GLXvisualConfig *)
+                         xcalloc(sizeof(__GLXvisualConfig), numConfigs)))
+            return FALSE;
+        if (!(pVIAConfigs = (VIAConfigPrivPtr)
+                            xcalloc(sizeof(VIAConfigPrivRec), numConfigs))) {
+            xfree(pConfigs);
+            return FALSE;
+        }
+        if (!(pVIAConfigPtrs = (VIAConfigPrivPtr *)
+                               xcalloc(sizeof(VIAConfigPrivPtr), numConfigs))) {
+            xfree(pConfigs);
+            xfree(pVIAConfigs);
+            return FALSE;
+        }
+        for (i = 0; i < numConfigs; i++)
+            pVIAConfigPtrs[i] = &pVIAConfigs[i];
 
-            i = 0;
-            for (accum = 0; accum <= 1; accum++) {
-                /* 32bpp depth buffer disabled, as Mesa has limitations */
-                for (stencil = 0; stencil <= 2; stencil++) {
-                    for (db = 0; db <= 1; db++) {
-                        pConfigs[i].vid = -1;
-                        pConfigs[i].class = -1;
-                        pConfigs[i].rgba = TRUE;
-                        pConfigs[i].redSize = -1;
-                        pConfigs[i].greenSize = -1;
-                        pConfigs[i].blueSize = -1;
-                        pConfigs[i].redMask = -1;
-                        pConfigs[i].greenMask = -1;
-                        pConfigs[i].blueMask = -1;
-                        pConfigs[i].alphaSize = 0;
-                        pConfigs[i].alphaMask = 0;
-
-                        if (accum) {
-                            pConfigs[i].accumRedSize = 16;
-                            pConfigs[i].accumGreenSize = 16;
-                            pConfigs[i].accumBlueSize = 16;
-                            pConfigs[i].accumAlphaSize = 0;
-                        } else {
-                            pConfigs[i].accumRedSize = 0;
-                            pConfigs[i].accumGreenSize = 0;
-                            pConfigs[i].accumBlueSize = 0;
-                            pConfigs[i].accumAlphaSize = 0;
-                        }
-                        if (!db)
-                            pConfigs[i].doubleBuffer = TRUE;
-                        else
-                            pConfigs[i].doubleBuffer = FALSE;
-
-                        pConfigs[i].stereo = FALSE;
-                        pConfigs[i].bufferSize = -1;
-
-                        switch (stencil) {
-                            case 0:
-                                pConfigs[i].depthSize = 24;
-                                pConfigs[i].stencilSize = 8;
-                                break;
-                            case 1:
-                                pConfigs[i].depthSize = 16;
-                                pConfigs[i].stencilSize = 0;
-                                break;
-                            case 2:
-                                pConfigs[i].depthSize = 0;
-                                pConfigs[i].stencilSize = 0;
-                                break;
-                            case 3:
-                                pConfigs[i].depthSize = 32;
-                                pConfigs[i].stencilSize = 0;
-                                break;
-                        }
-
-                        pConfigs[i].auxBuffers = 0;
-                        pConfigs[i].level = 0;
-                        if (accum)
-                            pConfigs[i].visualRating = GLX_SLOW_VISUAL_EXT;
-                        else
-                            pConfigs[i].visualRating = GLX_NONE_EXT;
-                        pConfigs[i].transparentPixel = GLX_NONE_EXT;
-                        pConfigs[i].transparentRed = 0;
-                        pConfigs[i].transparentGreen = 0;
-                        pConfigs[i].transparentBlue = 0;
-                        pConfigs[i].transparentAlpha = 0;
-                        pConfigs[i].transparentIndex = 0;
-                        i++;
-                    }
-                }
-            }
-
-            if (i != numConfigs) {
-                xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "[dri] Incorrect "
-                           "initialization of visuals.  Disabling DRI.\n");
-                return FALSE;
-            }
-            break;
-
-        case 32:
-            numConfigs = 12;
-            if (!(pConfigs = (__GLXvisualConfig*)xcalloc(sizeof(__GLXvisualConfig),
-                                                   numConfigs)))
-                return FALSE;
-            if (!(pVIAConfigs = (VIAConfigPrivPtr)xcalloc(sizeof(VIAConfigPrivRec),
-                                                    numConfigs))) {
-                xfree(pConfigs);
-                return FALSE;
-            }
-            if (!(pVIAConfigPtrs = (VIAConfigPrivPtr*)xcalloc(sizeof(VIAConfigPrivPtr),
-                                                          numConfigs))) {
-                xfree(pConfigs);
-                xfree(pVIAConfigs);
-                return FALSE;
-            }
-            for (i = 0; i < numConfigs; i++)
-                pVIAConfigPtrs[i] = &pVIAConfigs[i];
-
-            i = 0;
-            for (accum = 0; accum <= 1; accum++) {
-                /* 32bpp depth buffer disabled, as Mesa has limitations */
-                for (stencil = 0; stencil <= 2; stencil++) {
-                    for (db = 0; db <= 1; db++) {
-                        pConfigs[i].vid = -1;
-                        pConfigs[i].class = -1;
-                        pConfigs[i].rgba = TRUE;
-                        pConfigs[i].redSize = -1;
-                        pConfigs[i].greenSize = -1;
-                        pConfigs[i].blueSize = -1;
-                        pConfigs[i].redMask = -1;
-                        pConfigs[i].greenMask = -1;
-                        pConfigs[i].blueMask = -1;
+        i = 0;
+        for (accum = 0; accum <= 1; accum++) {
+            /* 32bpp depth buffer disabled, as Mesa has limitations */
+            for (stencil = 0; stencil <= 2; stencil++) {
+                for (db = 0; db <= 1; db++) {
+                    pConfigs[i].vid = -1;
+                    pConfigs[i].class = -1;
+                    pConfigs[i].rgba = TRUE;
+                    pConfigs[i].redSize = -1;
+                    pConfigs[i].greenSize = -1;
+                    pConfigs[i].blueSize = -1;
+                    pConfigs[i].redMask = -1;
+                    pConfigs[i].greenMask = -1;
+                    pConfigs[i].blueMask = -1;
+                    if (pScrn->bitsPerPixel == 32) {
                         pConfigs[i].alphaSize = 8;
                         pConfigs[i].alphaMask = 0xFF000000;
-
-                        if (accum) {
-                            pConfigs[i].accumRedSize = 16;
-                            pConfigs[i].accumGreenSize = 16;
-                            pConfigs[i].accumBlueSize = 16;
-                            pConfigs[i].accumAlphaSize = 16;
-                        } else {
-                            pConfigs[i].accumRedSize = 0;
-                            pConfigs[i].accumGreenSize = 0;
-                            pConfigs[i].accumBlueSize = 0;
-                            pConfigs[i].accumAlphaSize = 0;
-                        }
-                        if (!db)
-                            pConfigs[i].doubleBuffer = TRUE;
-                        else
-                            pConfigs[i].doubleBuffer = FALSE;
-
-                        pConfigs[i].stereo = FALSE;
-                        pConfigs[i].bufferSize = -1;
-
-                        switch (stencil) {
-                            case 0:
-                                pConfigs[i].depthSize = 24;
-                                pConfigs[i].stencilSize = 8;
-                                break;
-                            case 1:
-                                pConfigs[i].depthSize = 16;
-                                pConfigs[i].stencilSize = 0;
-                                break;
-                            case 2:
-                                pConfigs[i].depthSize = 0;
-                                pConfigs[i].stencilSize = 0;
-                                break;
-                            case 3:
-                                pConfigs[i].depthSize = 32;
-                                pConfigs[i].stencilSize = 0;
-                                break;
-                        }
-
-                        pConfigs[i].auxBuffers = 0;
-                        pConfigs[i].level = 0;
-                        if (accum)
-                            pConfigs[i].visualRating = GLX_SLOW_VISUAL_EXT;
-                        else
-                            pConfigs[i].visualRating = GLX_NONE_EXT;
-                        pConfigs[i].transparentPixel = GLX_NONE_EXT;
-                        pConfigs[i].transparentRed = 0;
-                        pConfigs[i].transparentGreen = 0;
-                        pConfigs[i].transparentBlue = 0;
-                        pConfigs[i].transparentAlpha = 0;
-                        pConfigs[i].transparentIndex = 0;
-                        i++;
+                    } else {
+                        pConfigs[i].alphaSize = 0;
+                        pConfigs[i].alphaMask = 0;
                     }
+
+                    if (accum) {
+                        pConfigs[i].accumRedSize = 16;
+                        pConfigs[i].accumGreenSize = 16;
+                        pConfigs[i].accumBlueSize = 16;
+                        if (pScrn->bitsPerPixel == 32)
+                            pConfigs[i].accumAlphaSize = 16;
+                        else
+                            pConfigs[i].accumAlphaSize = 0;
+                    } else {
+                        pConfigs[i].accumRedSize = 0;
+                        pConfigs[i].accumGreenSize = 0;
+                        pConfigs[i].accumBlueSize = 0;
+                        pConfigs[i].accumAlphaSize = 0;
+                    }
+                    if (!db)
+                        pConfigs[i].doubleBuffer = TRUE;
+                    else
+                        pConfigs[i].doubleBuffer = FALSE;
+
+                    pConfigs[i].stereo = FALSE;
+                    pConfigs[i].bufferSize = -1;
+
+                    switch (stencil) {
+                        case 0:
+                            pConfigs[i].depthSize = 24;
+                            pConfigs[i].stencilSize = 8;
+                            break;
+                        case 1:
+                            pConfigs[i].depthSize = 16;
+                            pConfigs[i].stencilSize = 0;
+                            break;
+                        case 2:
+                            pConfigs[i].depthSize = 0;
+                            pConfigs[i].stencilSize = 0;
+                            break;
+                        case 3:
+                            pConfigs[i].depthSize = 32;
+                            pConfigs[i].stencilSize = 0;
+                            break;
+                    }
+
+                    pConfigs[i].auxBuffers = 0;
+                    pConfigs[i].level = 0;
+                    if (accum)
+                        pConfigs[i].visualRating = GLX_SLOW_VISUAL_EXT;
+                    else
+                        pConfigs[i].visualRating = GLX_NONE_EXT;
+                    pConfigs[i].transparentPixel = GLX_NONE_EXT;
+                    pConfigs[i].transparentRed = 0;
+                    pConfigs[i].transparentGreen = 0;
+                    pConfigs[i].transparentBlue = 0;
+                    pConfigs[i].transparentAlpha = 0;
+                    pConfigs[i].transparentIndex = 0;
+                    i++;
                 }
             }
+        }
 
-            if (i != numConfigs) {
-                xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "[dri] Incorrect "
-                           "initialization of visuals.  Disabling DRI.\n");
-                return FALSE;
-            }
-            break;
+        if (i != numConfigs) {
+            xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "[dri] Incorrect "
+                       "initialization of visuals.  Disabling DRI.\n");
+            return FALSE;
+        }
     }
 
     pVia->numVisualConfigs = numConfigs;

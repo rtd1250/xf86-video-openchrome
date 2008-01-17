@@ -1,3 +1,9 @@
+2008-01-18  Benno Schulenberg  <bensberg-at-justemail-dot-net>
+
+	* src/via_dri.c: (VIAInitVisualConfigs):
+
+	Condensing an unneeded code duplication.
+
 2008-01-11  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 
 	* src/openchrome.man:
