@@ -227,11 +227,17 @@ ViaSetPrimaryFIFO(ScrnInfoPtr pScrn, DisplayModePtr mode)
 	    ViaSeqMask(hwp, 0x22, 0x00, 0x1F);
 	break;
     case VIA_K8M890:
-    case VIA_P4M900:
         hwp->writeSeq(hwp, 0x16, 0x92);
         hwp->writeSeq(hwp, 0x17, 0xB3);
         hwp->writeSeq(hwp, 0x18, 0x8A);
         break;
+        case VIA_P4M900:
+            ViaSeqMask(hwp, 0x17, 0x2F, 0xFF);
+            ViaSeqMask(hwp, 0x16, 0x13, 0x3F);
+            ViaSeqMask(hwp, 0x16, 0x00, 0x80);
+            ViaSeqMask(hwp, 0x18, 0x13, 0x3F);
+            ViaSeqMask(hwp, 0x18, 0x00, 0x80);
+            break;
     case VIA_P4M890:
         break;
     case VIA_CX700:
@@ -358,7 +364,17 @@ ViaSetSecondaryFIFO(ScrnInfoPtr pScrn, DisplayModePtr mode)
 	break;
     case VIA_P4M890:
     case VIA_K8M890:
+            break;
     case VIA_P4M900:
+            ViaCrtcMask(hwp, 0x68, 0xB0, 0xF0);
+            ViaCrtcMask(hwp, 0x94, 0x00, 0x80);
+            ViaCrtcMask(hwp, 0x95, 0x00, 0x80);
+            
+            ViaCrtcMask(hwp, 0x68, 0x03, 0x0F); 
+            ViaCrtcMask(hwp, 0x95, 0x10, 0x70);
+            ViaCrtcMask(hwp, 0x92, 0x03, 0x0F);
+            ViaCrtcMask(hwp, 0x95, 0x01, 0x07);
+            ViaCrtcMask(hwp, 0x94, 0x08, 0x7F);  
         break;
     case VIA_CX700:
         ViaCrtcMask(hwp, 0x68, 0xA0, 0xF0);
