@@ -22,10 +22,8 @@
  */
 
 /*
- * Wrap around xf86 vgaHW
- * Provide general IO calls too as they are not part of the vgaHW implementation
- * It's a bit daft to provide this short stuff in a seperate file, 
- * but then again, we'd only complicate matters in already complicated files.
+ * Wrappers around xf86 vgaHW functions.
+ * And some generic IO calls lacking in the current vgaHW implementation.
  */
 
 #ifdef HAVE_CONFIG_H
@@ -38,87 +36,61 @@
 #include "via_driver.h" /* for HAVE_DEBUG */
 #include "via_vgahw.h"
 
-/*
- * The current vgaHW implementation lacks generic IO
- *
- */
 
-/*
- *
- */
-static
-CARD8
+static CARD8
 ViaVgahwIn(vgaHWPtr hwp, int address)
 {
     if (hwp->MMIOBase)
-	return MMIO_IN8(hwp->MMIOBase, hwp->MMIOOffset + address);
+        return MMIO_IN8(hwp->MMIOBase, hwp->MMIOOffset + address);
     else
-	return inb(hwp->PIOOffset + address);
+        return inb(hwp->PIOOffset + address);
 }
 
-/*
- *
- */
-static
-void
+static void
 ViaVgahwOut(vgaHWPtr hwp, int address, CARD8 value)
 {
     if (hwp->MMIOBase)
-	MMIO_OUT8(hwp->MMIOBase, hwp->MMIOOffset + address, value);
+        MMIO_OUT8(hwp->MMIOBase, hwp->MMIOOffset + address, value);
     else
-	outb(hwp->PIOOffset + address, value);
+        outb(hwp->PIOOffset + address, value);
 }
 
 /*
- * indexed.
+ * An indexed read.
  */
-static
-CARD8
-ViaVgahwRead(vgaHWPtr hwp, int indexaddress, CARD8 index,
-	     int valueaddress)
+static CARD8
+ViaVgahwRead(vgaHWPtr hwp, int indexaddress, CARD8 index, int valueaddress)
 {
     ViaVgahwOut(hwp, indexaddress, index);
     return ViaVgahwIn(hwp, valueaddress);
 }
 
 /*
- * indexed.
+ * An indexed write.
  */
 void
 ViaVgahwWrite(vgaHWPtr hwp, int indexaddress, CARD8 index,
-	     int valueaddress, CARD8 value)
+              int valueaddress, CARD8 value)
 {
     ViaVgahwOut(hwp, indexaddress, index);
     ViaVgahwOut(hwp, valueaddress, value);
 }
 
-/*
- * This code makes a big change in readability, allows one to clearly
- * formulate what is changed. 
- *
- */
 
-/*
- *
- */
-void 
+void
 ViaVgahwMask(vgaHWPtr hwp, int indexaddress, CARD8 index,
-	       int valueaddress, CARD8 value, CARD8 mask)
+             int valueaddress, CARD8 value, CARD8 mask)
 {
     CARD8 tmp;
 
     tmp = ViaVgahwRead(hwp, indexaddress, index, valueaddress);
-    
     tmp &= ~mask;
     tmp |= (value & mask);
-    
+
     ViaVgahwWrite(hwp, indexaddress, index, valueaddress, tmp);
 }
 
-/*
- * 
- */
-void 
+void
 ViaCrtcMask(vgaHWPtr hwp, CARD8 index, CARD8 value, CARD8 mask)
 {
     CARD8 tmp;
@@ -130,10 +102,7 @@ ViaCrtcMask(vgaHWPtr hwp, CARD8 index, CARD8 value, CARD8 mask)
     hwp->writeCrtc(hwp, index, tmp);
 }
 
-/*
- *
- */
-void 
+void
 ViaSeqMask(vgaHWPtr hwp, CARD8 index, CARD8 value, CARD8 mask)
 {
     CARD8 tmp;
@@ -145,10 +114,7 @@ ViaSeqMask(vgaHWPtr hwp, CARD8 index, CARD8 value, CARD8 mask)
     hwp->writeSeq(hwp, index, tmp);
 }
 
-/*
- *
- */
-void 
+void
 ViaGrMask(vgaHWPtr hwp, CARD8 index, CARD8 value, CARD8 mask)
 {
     CARD8 tmp;
@@ -160,35 +126,40 @@ ViaGrMask(vgaHWPtr hwp, CARD8 index, CARD8 value, CARD8 mask)
     hwp->writeGr(hwp, index, tmp);
 }
 
-/*
- *
- */
+
 #ifdef HAVE_DEBUG
 void
 ViaVgahwPrint(vgaHWPtr hwp)
 {
     int i;
-    xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO, "Printing VGA Sequence registers:\n");
+
+    xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO, "VGA Sequence registers:\n");
     for (i = 0x00; i < 0x80; i++)
-	xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO, "SR%02X: 0x%02X\n", i, hwp->readSeq(hwp, i));
+        xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO,
+                   "SR%02X: 0x%02X\n", i, hwp->readSeq(hwp, i));
 
-    xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO, "Printing VGA CRTM/C registers:\n");
+    xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO, "VGA CRTM/C registers:\n");
     for (i = 0x00; i < 0x19; i++)
-        xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO, "CR%02X: 0x%02X\n", i, hwp->readCrtc(hwp, i));
+        xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO,
+                   "CR%02X: 0x%02X\n", i, hwp->readCrtc(hwp, i));
     for (i = 0x33; i < 0xA3; i++)
-	xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO, "CR%02X: 0x%02X\n", i, hwp->readCrtc(hwp, i));
+        xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO,
+                   "CR%02X: 0x%02X\n", i, hwp->readCrtc(hwp, i));
 
-    xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO, "Printing VGA Graphics registers:\n");
+    xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO, "VGA Graphics registers:\n");
     for (i = 0x00; i < 0x08; i++)
-	xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO, "GR%02X: 0x%02X\n", i, hwp->readGr(hwp, i));
+        xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO,
+                   "GR%02X: 0x%02X\n", i, hwp->readGr(hwp, i));
 
-    xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO, "Printing VGA Attribute registers:\n");
+    xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO, "VGA Attribute registers:\n");
     for (i = 0x00; i < 0x14; i++)
-	xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO, "AR%02X: 0x%02X\n", i, hwp->readAttr(hwp, i));
-    
-    xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO, "Printing VGA Miscellaneous register:\n");
-    xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO, "Misc: 0x%02X\n", hwp->readMiscOut(hwp));
+        xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO,
+                   "AR%02X: 0x%02X\n", i, hwp->readAttr(hwp, i));
 
-    xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO, "End of VGA Registers.\n");
+    xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO, "VGA Miscellaneous register:\n");
+    xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO,
+               "Misc: 0x%02X\n", hwp->readMiscOut(hwp));
+
+    xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO, "End of VGA registers.\n");
 }
 #endif /* HAVE_DEBUG */
