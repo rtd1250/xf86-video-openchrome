@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Thomas Hellstrom. All Rights Reserved.
+ * Copyright 2006 Thomas Hellström. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -108,7 +108,7 @@ via3DDstSupported(int format)
     Via3DFormat *fm = via3DFormats + VIA_FMT_HASH(format);
 
     if (fm->pictFormat != format)
-	return FALSE;
+        return FALSE;
     return fm->dstSupported;
 }
 
@@ -118,14 +118,14 @@ via3DTexSupported(int format)
     Via3DFormat *fm = via3DFormats + VIA_FMT_HASH(format);
 
     if (fm->pictFormat != format)
-	return FALSE;
+        return FALSE;
     return fm->texSupported;
 }
 
 static void
 viaSet3DDestination(Via3DState * v3d, CARD32 offset, CARD32 pitch, int format)
 {
-    v3d->drawingDirty = TRUE;	       /* Affects planemask format. */
+    v3d->drawingDirty = TRUE;  /* Affects planemask format. */
     v3d->destDirty = TRUE;
     v3d->destOffset = offset;
     v3d->destPitch = pitch;
@@ -135,7 +135,7 @@ viaSet3DDestination(Via3DState * v3d, CARD32 offset, CARD32 pitch, int format)
 
 static void
 viaSet3DDrawing(Via3DState * v3d, int rop,
-    CARD32 planeMask, CARD32 solidColor, CARD32 solidAlpha)
+                CARD32 planeMask, CARD32 solidColor, CARD32 solidAlpha)
 {
     v3d->drawingDirty = TRUE;
     v3d->rop = rop;
@@ -146,7 +146,7 @@ viaSet3DDrawing(Via3DState * v3d, int rop,
 
 static void
 viaSet3DFlags(Via3DState * v3d, int numTextures,
-    Bool writeAlpha, Bool writeColor, Bool blend)
+              Bool writeAlpha, Bool writeColor, Bool blend)
 {
     v3d->enableDirty = TRUE;
     v3d->blendDirty = TRUE;
@@ -162,66 +162,66 @@ viaOrder(CARD32 val, CARD32 * shift)
     *shift = 0;
 
     while (val > (1 << *shift))
-	(*shift)++;
+        (*shift)++;
     return (val == (1 << *shift));
 }
 
 static Bool
 viaSet3DTexture(Via3DState * v3d, int tex, CARD32 offset,
-    CARD32 pitch, Bool npot, CARD32 width, CARD32 height, int format,
-    ViaTextureModes sMode, ViaTextureModes tMode,
-    ViaTexBlendingModes blendingMode, Bool agpTexture)
+                CARD32 pitch, Bool npot, CARD32 width, CARD32 height,
+                int format, ViaTextureModes sMode, ViaTextureModes tMode,
+                ViaTexBlendingModes blendingMode, Bool agpTexture)
 {
     ViaTextureUnit *vTex = v3d->tex + tex;
 
     vTex->textureLevel0Offset = offset;
     vTex->npot = npot;
     if (!viaOrder(pitch, &vTex->textureLevel0Exp) && !vTex->npot)
-	return FALSE;
+        return FALSE;
     vTex->textureLevel0Pitch = pitch;
     if (!viaOrder(width, &vTex->textureLevel0WExp))
-	return FALSE;
+        return FALSE;
     if (!viaOrder(height, &vTex->textureLevel0HExp))
-	return FALSE;
+        return FALSE;
 
     if (pitch <= 4) {
-	ErrorF("Warning! texture pitch is leq 4\n");
+        ErrorF("Warning: texture pitch <= 4 !\n");
     }
 
     vTex->textureFormat = via3DTexFormat(format);
 
     switch (blendingMode) {
-    case via_src:
-	vTex->texCsat = (0x01 << 23) | (0x10 << 14) | (0x03 << 7) | 0x00;
-	vTex->texAsat =
-	    (0x0B << 14) | ((PICT_FORMAT_A(format) ? 0x04 : 0x02) << 7) |
-	    0x03;
-	vTex->texRCa = 0x00000000;
-	vTex->texRAa = 0x00000000;
-	vTex->texBColDirty = TRUE;
-	break;
-    case via_src_onepix_mask:
-	vTex->texCsat = (0x01 << 23) | (0x09 << 14) | (0x03 << 7) | 0x00;
-	vTex->texAsat =
-	    (0x03 << 14) | ((PICT_FORMAT_A(format) ? 0x04 : 0x02) << 7) |
-	    0x03;
-	break;
-    case via_src_onepix_comp_mask:
-	vTex->texCsat = (0x01 << 23) | (0x09 << 14) | (0x03 << 7) | 0x00;
-	vTex->texAsat =
-	    (0x03 << 14) | ((PICT_FORMAT_A(format) ? 0x04 : 0x02) << 7) |
-	    0x03;
-	break;
-    case via_mask:
-	vTex->texCsat = (0x01 << 23) | (0x07 << 14) | (0x04 << 7) | 0x00;
-	vTex->texAsat = (0x01 << 23) | (0x04 << 14) | (0x02 << 7) | 0x03;
-	break;
-    case via_comp_mask:
-	vTex->texCsat = (0x01 << 23) | (0x03 << 14) | (0x04 << 7) | 0x00;
-	vTex->texAsat = (0x01 << 23) | (0x04 << 14) | (0x02 << 7) | 0x03;
-	break;
-    default:
-	return FALSE;
+        case via_src:
+            vTex->texCsat = (0x01 << 23) | (0x10 << 14) | (0x03 << 7) | 0x00;
+            vTex->texAsat = ((0x0B << 14)
+                             | ((PICT_FORMAT_A(format) ? 0x04 : 0x02) << 7)
+                             | 0x03);
+            vTex->texRCa = 0x00000000;
+            vTex->texRAa = 0x00000000;
+            vTex->texBColDirty = TRUE;
+            break;
+        case via_src_onepix_mask:
+            vTex->texCsat = (0x01 << 23) | (0x09 << 14) | (0x03 << 7) | 0x00;
+            vTex->texAsat = ((0x03 << 14)
+                             | ((PICT_FORMAT_A(format) ? 0x04 : 0x02) << 7)
+                             | 0x03);
+            break;
+        case via_src_onepix_comp_mask:
+            vTex->texCsat = (0x01 << 23) | (0x09 << 14) | (0x03 << 7) | 0x00;
+            vTex->texAsat = ((0x03 << 14)
+                             | ((PICT_FORMAT_A(format) ? 0x04 : 0x02) << 7)
+                             | 0x03);
+            break;
+        case via_mask:
+            vTex->texCsat = (0x01 << 23) | (0x07 << 14) | (0x04 << 7) | 0x00;
+            vTex->texAsat = (0x01 << 23) | (0x04 << 14) | (0x02 << 7) | 0x03;
+            break;
+        case via_comp_mask:
+            vTex->texCsat = (0x01 << 23) | (0x03 << 14) | (0x04 << 7) | 0x00;
+            vTex->texAsat = (0x01 << 23) | (0x04 << 14) | (0x02 << 7) | 0x03;
+            break;
+        default:
+            return FALSE;
     }
 
     vTex->textureDirty = TRUE;
@@ -240,18 +240,18 @@ viaSet3DTexBlendCol(Via3DState * v3d, int tex, Bool component, CARD32 color)
 
     vTex->texRAa = (color >> 8) & 0x00FF0000;
     if (component) {
-	vTex->texRCa = (color & 0x00FFFFFF);
+        vTex->texRCa = (color & 0x00FFFFFF);
     } else {
-	alpha = color >> 24;
-	vTex->texRCa = alpha | (alpha << 8) | (alpha << 16) | (alpha << 24);
+        alpha = color >> 24;
+        vTex->texRCa = alpha | (alpha << 8) | (alpha << 16) | (alpha << 24);
     }
     vTex->texBColDirty = TRUE;
 }
 
 /*
- * Check if compositing operator is supported and return corresponding register setting.
+ * Check if the compositing operator is supported and
+ * return the corresponding register setting.
  */
-
 static void
 viaSet3DCompositeOperator(Via3DState * v3d, CARD8 op)
 {
@@ -259,10 +259,10 @@ viaSet3DCompositeOperator(Via3DState * v3d, CARD8 op)
 
     v3d->blendDirty = TRUE;
     if (v3d && vOp->supported) {
-	v3d->blendCol0 = vOp->col0 << 4;
-	v3d->blendCol1 = vOp->col1 << 2;
-	v3d->blendAl0 = vOp->al0 << 4;
-	v3d->blendAl1 = vOp->al1 << 2;
+        v3d->blendCol0 = vOp->col0 << 4;
+        v3d->blendCol1 = vOp->col1 << 2;
+        v3d->blendAl0 = vOp->al0 << 4;
+        v3d->blendAl1 = vOp->al1 << 2;
     }
 }
 
@@ -274,7 +274,7 @@ via3DOpSupported(CARD8 op)
 
 static void
 via3DEmitQuad(Via3DState * v3d, ViaCommandBuffer * cb, int dstX, int dstY,
-    int src0X, int src0Y, int src1X, int src1Y, int w, int h)
+              int src0X, int src0Y, int src1X, int src1Y, int w, int h)
 {
     CARD32 acmd;
     float dx1, dx2, dy1, dy2, sx1[2], sx2[2], sy1[2], sy2[2], wf;
@@ -289,21 +289,21 @@ via3DEmitQuad(Via3DState * v3d, ViaCommandBuffer * cb, int dstX, int dstY,
     dy2 = dstY + h;
 
     if (numTex) {
-	sx1[0] = src0X;
-	sx1[1] = src1X;
-	sy1[0] = src0Y;
-	sy1[1] = src1Y;
-	for (i = 0; i < numTex; ++i) {
-	    vTex = v3d->tex + i;
-	    scalex = 1. / (double)((1 << vTex->textureLevel0WExp));
-	    scaley = 1. / (double)((1 << vTex->textureLevel0HExp));
-	    sx2[i] = sx1[i] + w;
-	    sy2[i] = sy1[i] + h;
-	    sx1[i] *= scalex;
-	    sy1[i] *= scaley;
-	    sx2[i] *= scalex;
-	    sy2[i] *= scaley;
-	}
+        sx1[0] = src0X;
+        sx1[1] = src1X;
+        sy1[0] = src0Y;
+        sy1[1] = src1Y;
+        for (i = 0; i < numTex; ++i) {
+            vTex = v3d->tex + i;
+            scalex = 1. / (double)((1 << vTex->textureLevel0WExp));
+            scaley = 1. / (double)((1 << vTex->textureLevel0HExp));
+            sx2[i] = sx1[i] + w;
+            sy2[i] = sy1[i] + h;
+            sx1[i] *= scalex;
+            sy1[i] *= scaley;
+            sx2[i] *= scalex;
+            sy2[i] *= scaley;
+        }
     }
 
     wf = 0.05;
@@ -318,7 +318,7 @@ via3DEmitQuad(Via3DState * v3d, ViaCommandBuffer * cb, int dstX, int dstY,
     BEGIN_H2(HC_ParaType_CmdVdata, 22 + numTex * 6);
     acmd = ((1 << 14) | (1 << 13) | (1 << 11));
     if (numTex)
-	acmd |= ((1 << 7) | (1 << 8));
+        acmd |= ((1 << 7) | (1 << 8));
     OUT_RING_SubA(0xEC, acmd);
 
     acmd = 2 << 16;
@@ -328,53 +328,53 @@ via3DEmitQuad(Via3DState * v3d, ViaCommandBuffer * cb, int dstX, int dstY,
     OUT_RING(*((CARD32 *) (&dy1)));
     OUT_RING(*((CARD32 *) (&wf)));
     for (i = 0; i < numTex; ++i) {
-	OUT_RING(*((CARD32 *) (sx1 + i)));
-	OUT_RING(*((CARD32 *) (sy1 + i)));
+        OUT_RING(*((CARD32 *) (sx1 + i)));
+        OUT_RING(*((CARD32 *) (sy1 + i)));
     }
 
     OUT_RING(*((CARD32 *) (&dx2)));
     OUT_RING(*((CARD32 *) (&dy1)));
     OUT_RING(*((CARD32 *) (&wf)));
     for (i = 0; i < numTex; ++i) {
-	OUT_RING(*((CARD32 *) (sx2 + i)));
-	OUT_RING(*((CARD32 *) (sy1 + i)));
+        OUT_RING(*((CARD32 *) (sx2 + i)));
+        OUT_RING(*((CARD32 *) (sy1 + i)));
     }
 
     OUT_RING(*((CARD32 *) (&dx1)));
     OUT_RING(*((CARD32 *) (&dy2)));
     OUT_RING(*((CARD32 *) (&wf)));
     for (i = 0; i < numTex; ++i) {
-	OUT_RING(*((CARD32 *) (sx1 + i)));
-	OUT_RING(*((CARD32 *) (sy2 + i)));
+        OUT_RING(*((CARD32 *) (sx1 + i)));
+        OUT_RING(*((CARD32 *) (sy2 + i)));
     }
 
     OUT_RING(*((CARD32 *) (&dx1)));
     OUT_RING(*((CARD32 *) (&dy2)));
     OUT_RING(*((CARD32 *) (&wf)));
     for (i = 0; i < numTex; ++i) {
-	OUT_RING(*((CARD32 *) (sx1 + i)));
-	OUT_RING(*((CARD32 *) (sy2 + i)));
+        OUT_RING(*((CARD32 *) (sx1 + i)));
+        OUT_RING(*((CARD32 *) (sy2 + i)));
     }
 
     OUT_RING(*((CARD32 *) (&dx2)));
     OUT_RING(*((CARD32 *) (&dy1)));
     OUT_RING(*((CARD32 *) (&wf)));
     for (i = 0; i < numTex; ++i) {
-	OUT_RING(*((CARD32 *) (sx2 + i)));
-	OUT_RING(*((CARD32 *) (sy1 + i)));
+        OUT_RING(*((CARD32 *) (sx2 + i)));
+        OUT_RING(*((CARD32 *) (sy1 + i)));
     }
 
     OUT_RING(*((CARD32 *) (&dx2)));
     OUT_RING(*((CARD32 *) (&dy2)));
     OUT_RING(*((CARD32 *) (&wf)));
     for (i = 0; i < numTex; ++i) {
-	OUT_RING(*((CARD32 *) (sx2 + i)));
-	OUT_RING(*((CARD32 *) (sy2 + i)));
+        OUT_RING(*((CARD32 *) (sx2 + i)));
+        OUT_RING(*((CARD32 *) (sy2 + i)));
     }
     OUT_RING_SubA(0xEE,
-	acmd | HC_HPLEND_MASK | HC_HPMValidN_MASK | HC_HE3Fire_MASK);
+                  acmd | HC_HPLEND_MASK | HC_HPMValidN_MASK | HC_HE3Fire_MASK);
     OUT_RING_SubA(0xEE,
-	acmd | HC_HPLEND_MASK | HC_HPMValidN_MASK | HC_HE3Fire_MASK);
+                  acmd | HC_HPLEND_MASK | HC_HPMValidN_MASK | HC_HE3Fire_MASK);
 
     ADVANCE_RING;
 }
@@ -391,133 +391,135 @@ via3DEmitState(Via3DState * v3d, ViaCommandBuffer * cb, Bool forceUpload)
      */
 
     if (forceUpload || v3d->destDirty) {
-	v3d->destDirty = FALSE;
-	BEGIN_H2(HC_ParaType_NotTex, 3);
+        v3d->destDirty = FALSE;
+        BEGIN_H2(HC_ParaType_NotTex, 3);
 
-	OUT_RING_SubA(HC_SubA_HDBBasL, v3d->destOffset & 0x00FFFFFF);
-	OUT_RING_SubA(HC_SubA_HDBBasH, v3d->destOffset >> 24);
-	OUT_RING_SubA(HC_SubA_HDBFM, v3d->destFormat |
-	    (v3d->destPitch & HC_HDBPit_MASK) | HC_HDBLoc_Local);
+        OUT_RING_SubA(HC_SubA_HDBBasL, v3d->destOffset & 0x00FFFFFF);
+        OUT_RING_SubA(HC_SubA_HDBBasH, v3d->destOffset >> 24);
+        OUT_RING_SubA(HC_SubA_HDBFM, v3d->destFormat |
+                      (v3d->destPitch & HC_HDBPit_MASK) | HC_HDBLoc_Local);
     }
 
     if (forceUpload || v3d->blendDirty) {
-	v3d->blendDirty = FALSE;
-	BEGIN_H2(HC_ParaType_NotTex, 6);
-	OUT_RING_SubA(HC_SubA_HABLRFCa, 0x00);
-	OUT_RING_SubA(HC_SubA_HABLRFCb, 0x00);
-	OUT_RING_SubA(HC_SubA_HABLCsat, v3d->blendCol0);
-	OUT_RING_SubA(HC_SubA_HABLCop, v3d->blendCol1);
-	OUT_RING_SubA(HC_SubA_HABLAsat, v3d->blendAl0);
-	OUT_RING_SubA(HC_SubA_HABLAop, v3d->blendAl1);
+        v3d->blendDirty = FALSE;
+        BEGIN_H2(HC_ParaType_NotTex, 6);
+        OUT_RING_SubA(HC_SubA_HABLRFCa, 0x00);
+        OUT_RING_SubA(HC_SubA_HABLRFCb, 0x00);
+        OUT_RING_SubA(HC_SubA_HABLCsat, v3d->blendCol0);
+        OUT_RING_SubA(HC_SubA_HABLCop, v3d->blendCol1);
+        OUT_RING_SubA(HC_SubA_HABLAsat, v3d->blendAl0);
+        OUT_RING_SubA(HC_SubA_HABLAop, v3d->blendAl1);
     }
 
     if (forceUpload || v3d->drawingDirty) {
 
-	CARD32 planeMaskLo, planeMaskHi;
+        CARD32 planeMaskLo, planeMaskHi;
 
-	v3d->drawingDirty = FALSE;
-	BEGIN_H2(HC_ParaType_NotTex, 4);
+        v3d->drawingDirty = FALSE;
+        BEGIN_H2(HC_ParaType_NotTex, 4);
 
-	/*
-	 * Raster operation and Planemask.
-	 */
+        /*
+         * Raster operation and Planemask.
+         */
 
-	if ( /* v3d->destDepth == 16 Bad Docs? */ FALSE) {
-	    planeMaskLo = (v3d->planeMask & 0x000000FF) << 16;
-	    planeMaskHi = (v3d->planeMask & 0x0000FF00) >> 8;
-	} else {
-	    planeMaskLo = v3d->planeMask & 0x00FFFFFF;
-	    planeMaskHi = v3d->planeMask >> 24;
-	}
+        if ( /* v3d->destDepth == 16 Bad Docs? */ FALSE) {
+            planeMaskLo = (v3d->planeMask & 0x000000FF) << 16;
+            planeMaskHi = (v3d->planeMask & 0x0000FF00) >> 8;
+        } else {
+            planeMaskLo = v3d->planeMask & 0x00FFFFFF;
+            planeMaskHi = v3d->planeMask >> 24;
+        }
 
-	OUT_RING_SubA(HC_SubA_HROP, ((v3d->rop & 0x0F) << 8) | planeMaskHi);
-	OUT_RING_SubA(HC_SubA_HFBBMSKL, planeMaskLo);
+        OUT_RING_SubA(HC_SubA_HROP, ((v3d->rop & 0x0F) << 8) | planeMaskHi);
+        OUT_RING_SubA(HC_SubA_HFBBMSKL, planeMaskLo);
 
-	/*
-	 * Solid shading color and alpha. Pixel center at 
-	 * floating coordinates (X.5,Y.5).
-	 */
+        /*
+         * Solid shading color and alpha. Pixel center at 
+         * floating coordinates (X.5,Y.5).
+         */
 
-	OUT_RING_SubA(HC_SubA_HSolidCL,
-	    (v3d->solidColor & 0x00FFFFFF) | (0 << 23));
-	OUT_RING_SubA(HC_SubA_HPixGC,
-	    ((v3d->solidColor & 0xFF000000) >> 16) | (0 << 23) | (v3d->
-		solidAlpha & 0xFF));
+        OUT_RING_SubA(HC_SubA_HSolidCL,
+                      (v3d->solidColor & 0x00FFFFFF) | (0 << 23));
+        OUT_RING_SubA(HC_SubA_HPixGC,
+                      (((v3d->solidColor & 0xFF000000) >> 16) | (0 << 23)
+                       | (v3d->solidAlpha & 0xFF)));
     }
 
     if (forceUpload || v3d->enableDirty) {
-	v3d->enableDirty = FALSE;
-	BEGIN_H2(HC_ParaType_NotTex, 1);
+        v3d->enableDirty = FALSE;
+        BEGIN_H2(HC_ParaType_NotTex, 1);
 
-	OUT_RING_SubA(HC_SubA_HEnable,
-	    ((v3d->writeColor) ? HC_HenCW_MASK : 0) |
-	    ((v3d->blend) ? HC_HenABL_MASK : 0) |
-	    ((v3d->numTextures) ? HC_HenTXMP_MASK : 0) |
-	    ((v3d->writeAlpha) ? HC_HenAW_MASK : 0));
+        OUT_RING_SubA(HC_SubA_HEnable,
+                      ((v3d->writeColor) ? HC_HenCW_MASK : 0) |
+                      ((v3d->blend) ? HC_HenABL_MASK : 0) |
+                      ((v3d->numTextures) ? HC_HenTXMP_MASK : 0) |
+                      ((v3d->writeAlpha) ? HC_HenAW_MASK : 0));
 
-	if (v3d->numTextures) {
-	    BEGIN_H2((HC_ParaType_Tex | (HC_SubType_TexGeneral << 8)), 2);
-	    OUT_RING_SubA(HC_SubA_HTXSMD, (0 << 7) | (0 << 6) |
-		(((v3d->numTextures - 1) & 0x1) << 3) | (0 << 1) | 1);
-	    OUT_RING_SubA(HC_SubA_HTXSMD, (0 << 7) | (0 << 6) |
-		(((v3d->numTextures - 1) & 0x1) << 3) | (0 << 1) | 0);
-	}
+        if (v3d->numTextures) {
+            BEGIN_H2((HC_ParaType_Tex | (HC_SubType_TexGeneral << 8)), 2);
+            OUT_RING_SubA(HC_SubA_HTXSMD, (0 << 7) | (0 << 6) |
+                          (((v3d->numTextures - 1) & 0x1) << 3) | (0 << 1) | 1);
+            OUT_RING_SubA(HC_SubA_HTXSMD, (0 << 7) | (0 << 6) |
+                          (((v3d->numTextures - 1) & 0x1) << 3) | (0 << 1) | 0);
+        }
     }
 
     for (i = 0; i < v3d->numTextures; ++i) {
-	vTex = v3d->tex + i;
+        vTex = v3d->tex + i;
 
-	if (forceUpload || vTex->textureDirty) {
-	    vTex->textureDirty = FALSE;
+        if (forceUpload || vTex->textureDirty) {
+            vTex->textureDirty = FALSE;
 
-	    BEGIN_H2((HC_ParaType_Tex |
-		    (((i == 0) ? HC_SubType_Tex0 : HC_SubType_Tex1) << 8)),
-		13);
+            BEGIN_H2((HC_ParaType_Tex |
+                      (((i == 0) ? HC_SubType_Tex0 : HC_SubType_Tex1) << 8)),
+                     13);
 
-	    OUT_RING_SubA(HC_SubA_HTXnFM, (vTex->textureFormat |
-		    (vTex->agpTexture ? HC_HTXnLoc_AGP : HC_HTXnLoc_Local)));
-	    OUT_RING_SubA(HC_SubA_HTXnL0BasL,
-		vTex->textureLevel0Offset & 0x00FFFFFF);
-	    OUT_RING_SubA(HC_SubA_HTXnL012BasH,
-		vTex->textureLevel0Offset >> 24);
-	    if (vTex->npot) {
-		OUT_RING_SubA(HC_SubA_HTXnL0Pit,
-		    (vTex->textureLevel0Pitch & HC_HTXnLnPit_MASK) |
-		    HC_HTXnEnPit_MASK);
-	    } else {
-		OUT_RING_SubA(HC_SubA_HTXnL0Pit,
-		    vTex->textureLevel0Exp << HC_HTXnLnPitE_SHIFT);
-	    }
-	    OUT_RING_SubA(HC_SubA_HTXnL0_5WE, vTex->textureLevel0WExp);
-	    OUT_RING_SubA(HC_SubA_HTXnL0_5HE, vTex->textureLevel0HExp);
-	    OUT_RING_SubA(HC_SubA_HTXnL0OS, 0x00);
-	    OUT_RING_SubA(HC_SubA_HTXnTB, 0x00);
-	    OUT_RING_SubA(HC_SubA_HTXnMPMD,
-		(((unsigned)vTex->textureModesT) << 19) | (((unsigned)vTex->
-			textureModesS) << 16));
+            OUT_RING_SubA(HC_SubA_HTXnFM, (vTex->textureFormat |
+                                           (vTex->
+                                            agpTexture ? HC_HTXnLoc_AGP :
+                                            HC_HTXnLoc_Local)));
+            OUT_RING_SubA(HC_SubA_HTXnL0BasL,
+                          vTex->textureLevel0Offset & 0x00FFFFFF);
+            OUT_RING_SubA(HC_SubA_HTXnL012BasH,
+                          vTex->textureLevel0Offset >> 24);
+            if (vTex->npot) {
+                OUT_RING_SubA(HC_SubA_HTXnL0Pit,
+                              (vTex->textureLevel0Pitch & HC_HTXnLnPit_MASK) |
+                              HC_HTXnEnPit_MASK);
+            } else {
+                OUT_RING_SubA(HC_SubA_HTXnL0Pit,
+                              vTex->textureLevel0Exp << HC_HTXnLnPitE_SHIFT);
+            }
+            OUT_RING_SubA(HC_SubA_HTXnL0_5WE, vTex->textureLevel0WExp);
+            OUT_RING_SubA(HC_SubA_HTXnL0_5HE, vTex->textureLevel0HExp);
+            OUT_RING_SubA(HC_SubA_HTXnL0OS, 0x00);
+            OUT_RING_SubA(HC_SubA_HTXnTB, 0x00);
+            OUT_RING_SubA(HC_SubA_HTXnMPMD,
+                          ((((unsigned)vTex->textureModesT) << 19)
+                           | (((unsigned)vTex->textureModesS) << 16)));
 
-	    OUT_RING_SubA(HC_SubA_HTXnTBLCsat, vTex->texCsat);
-	    OUT_RING_SubA(HC_SubA_HTXnTBLCop, (0x00 << 22) | (0x00 << 19) |
-		(0x00 << 14) | (0x02 << 11) |
-		(0x00 << 7) | (0x03 << 3) | 0x02);
-	    OUT_RING_SubA(HC_SubA_HTXnTBLAsat, vTex->texAsat);
-	    OUT_RING_SubA(HC_SubA_HTXnTBLRFog, 0x00);
-	}
+            OUT_RING_SubA(HC_SubA_HTXnTBLCsat, vTex->texCsat);
+            OUT_RING_SubA(HC_SubA_HTXnTBLCop, (0x00 << 22) | (0x00 << 19) |
+                          (0x00 << 14) | (0x02 << 11) |
+                          (0x00 << 7) | (0x03 << 3) | 0x02);
+            OUT_RING_SubA(HC_SubA_HTXnTBLAsat, vTex->texAsat);
+            OUT_RING_SubA(HC_SubA_HTXnTBLRFog, 0x00);
+        }
     }
 
     for (i = 0; i < v3d->numTextures; ++i) {
-	vTex = v3d->tex + i;
+        vTex = v3d->tex + i;
 
-	if (forceUpload || vTex->texBColDirty) {
-	    saveHas3dState = cb->has3dState;
-	    vTex->texBColDirty = FALSE;
-	    BEGIN_H2((HC_ParaType_Tex |
-		    (((i == 0) ? HC_SubType_Tex0 : HC_SubType_Tex1) << 8)),
-		2);
-	    OUT_RING_SubA(HC_SubA_HTXnTBLRAa, vTex->texRAa);
-	    OUT_RING_SubA(HC_SubA_HTXnTBLRCa, vTex->texRCa);
-	    cb->has3dState = saveHas3dState;
-	}
+        if (forceUpload || vTex->texBColDirty) {
+            saveHas3dState = cb->has3dState;
+            vTex->texBColDirty = FALSE;
+            BEGIN_H2((HC_ParaType_Tex |
+                      (((i == 0) ? HC_SubType_Tex0 : HC_SubType_Tex1) << 8)),
+                     2);
+            OUT_RING_SubA(HC_SubA_HTXnTBLRAa, vTex->texRAa);
+            OUT_RING_SubA(HC_SubA_HTXnTBLRCa, vTex->texRCa);
+            cb->has3dState = saveHas3dState;
+        }
     }
 }
 
@@ -525,10 +527,9 @@ via3DEmitState(Via3DState * v3d, ViaCommandBuffer * cb, Bool forceUpload)
  * Cliprect. Considered not important for the DRM 3D State, so restore the
  * has3dState flag afterwards.
  */
-
 static void
 via3DEmitClipRect(Via3DState * v3d, ViaCommandBuffer * cb, int x, int y,
-    int w, int h)
+                  int w, int h)
 {
     Bool saveHas3dState;
 
@@ -561,32 +562,32 @@ viaInit3DState(Via3DState * v3d)
     v3d->texSupported = via3DTexSupported;
 
     for (i = 0; i < 256; ++i) {
-	viaOperatorModes[i].supported = FALSE;
+        viaOperatorModes[i].supported = FALSE;
     }
 
     for (i = 0; i < VIA_NUM_3D_OPCODES; ++i) {
-	op = viaOperatorModes + viaOpCodes[i][0];
-	op->supported = TRUE;
-	op->col0 = viaOpCodes[i][1];
-	op->col1 = viaOpCodes[i][2];
-	op->al0 = viaOpCodes[i][3];
-	op->al1 = viaOpCodes[i][4];
+        op = viaOperatorModes + viaOpCodes[i][0];
+        op->supported = TRUE;
+        op->col0 = viaOpCodes[i][1];
+        op->col1 = viaOpCodes[i][2];
+        op->al0 = viaOpCodes[i][3];
+        op->al1 = viaOpCodes[i][4];
     }
 
     for (i = 0; i < 256; ++i) {
-	via3DFormats[i].pictFormat = 0x00;
+        via3DFormats[i].pictFormat = 0x00;
     }
     for (i = 0; i < VIA_NUM_3D_FORMATS; ++i) {
-	tmp = viaFormats[i][0];
-	hash = VIA_FMT_HASH(tmp);
-	format = via3DFormats + hash;
-	if (format->pictFormat) {
-	    ErrorF("BUG: Bad hash function\n");
-	}
-	format->pictFormat = tmp;
-	format->dstSupported = (viaFormats[i][3] != 0x00);
-	format->texSupported = (viaFormats[i][4] != 0x00);
-	format->dstFormat = viaFormats[i][1];
-	format->texFormat = viaFormats[i][2];
+        tmp = viaFormats[i][0];
+        hash = VIA_FMT_HASH(tmp);
+        format = via3DFormats + hash;
+        if (format->pictFormat) {
+            ErrorF("BUG: Bad hash function\n");
+        }
+        format->pictFormat = tmp;
+        format->dstSupported = (viaFormats[i][3] != 0x00);
+        format->texSupported = (viaFormats[i][4] != 0x00);
+        format->dstFormat = viaFormats[i][1];
+        format->texFormat = viaFormats[i][2];
     }
 }
