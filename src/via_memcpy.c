@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 Thomas Hellstrom, All Rights Reserved.
+ * Copyright (C) 2004 Thomas Hellström, All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -31,10 +31,10 @@
 #include "compiler.h"
 
 
-#define BSIZ 2048 /* Size of /proc/cpuinfo buffer */
-#define BSIZW 720 /* Typical Copy Width (YUV420) Copy. */
-#define BSIZA 736 /* Multiple of 32 bytes */
-#define BSIZH 576 /* Typical Copy Hight */
+#define BSIZ 2048  /* size of /proc/cpuinfo buffer */
+#define BSIZW 720  /* typical copy width (YUV420) */
+#define BSIZA 736  /* multiple of 32 bytes */
+#define BSIZH 576  /* typical copy height */
 
 #define SSE_PREFETCH "  prefetchnta "
 #define FENCE __asm__ __volatile__ ("sfence":::"memory");
@@ -72,12 +72,11 @@
 			  : : "r" (from) );
 
 
-
-#define small_memcpy(to,from,n)						\
+#define small_memcpy(to, from, n)					\
     {									\
 	__asm__ __volatile__(						\
 			     "movl %2,%%ecx\n\t"			\
-                             "sarl $2,%%ecx\n\t"			\
+			     "sarl $2,%%ecx\n\t"			\
 			     "rep ; movsl\n\t"				\
 			     "testb $2,%b2\n\t"				\
 			     "je 1f\n\t"				\
@@ -92,11 +91,11 @@
     }
 
 
-#define SSE_CPY(prefetch,from,to,dummy,lcnt)				\
-    if ((unsigned long) from & 15)			 {		\
+#define SSE_CPY(prefetch, from, to, dummy, lcnt)			\
+    if ((unsigned long) from & 15) {					\
 	__asm__ __volatile__ (						\
 			      "1:\n"					\
-                              prefetch "320(%1)\n"			\
+			      prefetch "320(%1)\n"			\
 			      "  movups (%1), %%xmm0\n"			\
 			      "  movups 16(%1), %%xmm1\n"		\
 			      "  movntps %%xmm0, (%0)\n"		\
@@ -120,7 +119,7 @@
 			      "  movaps 16(%1), %%xmm1\n"		\
 			      "  movntps %%xmm0, (%0)\n"		\
 			      "  movntps %%xmm1, 16(%0)\n"		\
-                              prefetch "352(%1)\n"			\
+			      prefetch "352(%1)\n"			\
 			      "  movaps 32(%1), %%xmm2\n"		\
 			      "  movaps 48(%1), %%xmm3\n"		\
 			      "  movntps %%xmm2, 32(%0)\n"		\
@@ -133,7 +132,7 @@
 			      :"0" (to), "1" (from), "2" (lcnt): "memory"); \
     }
 
-#define MMX_CPY(prefetch,from,to,dummy,lcnt)				\
+#define MMX_CPY(prefetch, from, to, dummy, lcnt)			\
     __asm__ __volatile__ (						\
 			  "1:\n"					\
 			  prefetch "320(%1)\n"				\
@@ -159,9 +158,9 @@
 			  "  decl %2\n"					\
 			  "  jne 1b\n"					\
 			  :"=&D"(to), "=&S"(from), "=&r"(dummy)		\
-			  :"0" (to), "1" (from), "2" (lcnt) : "memory"); 
+			  :"0" (to), "1" (from), "2" (lcnt) : "memory");
 
-#define MMXEXT_CPY(prefetch,from,to,dummy,lcnt)				\
+#define MMXEXT_CPY(prefetch, from, to, dummy, lcnt)			\
     __asm__ __volatile__ (						\
 			  ".p2align 4,,7\n"				\
 			  "1:\n"					\
@@ -188,10 +187,10 @@
 			  "  decl %2\n"					\
 			  "  jne 1b\n"					\
 			  :"=&D"(to), "=&S"(from), "=&r"(dummy)		\
-			  :"0" (to), "1" (from), "2" (lcnt) : "memory"); 
+			  :"0" (to), "1" (from), "2" (lcnt) : "memory");
 
 
-#define PREFETCH_FUNC(prefix,itype,ptype,begin,fence)			\
+#define PREFETCH_FUNC(prefix, itype, ptype, begin, fence)		\
 									\
     static void prefix##_YUV42X(unsigned char *to,			\
 				const unsigned char *from,		\
@@ -199,20 +198,16 @@
 				int w,					\
 				int h,					\
 				int yuv422)				\
-     									\
     {									\
-	int								\
-	    dadd,rest,count,hc,lcnt;					\
+	int dadd, rest, count, hc, lcnt;				\
 	register int dummy;						\
-	PREFETCH1(ptype##_PREFETCH,from);				\
+	PREFETCH1(ptype##_PREFETCH, from);				\
 	begin;								\
 	count = 2;							\
 									\
-	/*								\
-	 * If destination pitch and width ar equal, do it all in one go. \
-	 */								\
+	/* If destination pitch equals width, do it all in one go. */	\
 									\
-	if ( yuv422 ) {							\
+	if (yuv422) {							\
 	    w <<= 1;							\
 	    if (w == dstPitch) {					\
 		w *= h;							\
@@ -232,20 +227,19 @@
 									\
 	lcnt = w >> 6;							\
 	rest = w & 63;							\
-	while(count--) {						\
+	while (count--) {						\
 	    hc = h;							\
 	    lcnt = w >> 6;						\
 	    rest = w & 63;						\
 	    dadd = dstPitch - w;					\
-	    while(hc--) {						\
+	    while (hc--) {						\
 		if (lcnt) {						\
-		    itype##_CPY(ptype##_PREFETCH,from,to,dummy,		\
-				lcnt);					\
+		    itype##_CPY(ptype##_PREFETCH, from, to, dummy, lcnt); \
 		}							\
 		if (rest) {						\
-		    PREFETCH2(ptype##_PREFETCH,from);			\
+		    PREFETCH2(ptype##_PREFETCH, from);			\
 		    small_memcpy(to, from, rest);			\
-		    PREFETCH3(ptype##_PREFETCH,from);			\
+		    PREFETCH3(ptype##_PREFETCH, from);			\
 		}							\
 		to += dadd;						\
 	    }								\
@@ -255,36 +249,33 @@
 	}								\
 	if (lcnt > 5) {							\
 	    lcnt -= 5;							\
-	    itype##_CPY(ptype##_PREFETCH,from,to,dummy,lcnt);		\
+	    itype##_CPY(ptype##_PREFETCH, from, to, dummy, lcnt);	\
 	    lcnt = 5;							\
 	}								\
 	if (lcnt) {							\
-	    itype##_CPY("#",from,to,dummy,lcnt);			\
+	    itype##_CPY("#", from, to, dummy, lcnt);			\
 	}								\
 	if (rest) small_memcpy(to, from, rest);				\
 	fence;								\
     }
 
-#define NOPREFETCH_FUNC(prefix,itype,begin,fence)			\
+#define NOPREFETCH_FUNC(prefix, itype, begin, fence)			\
     static void prefix##_YUV42X(unsigned char *to,			\
 				const unsigned char *from,		\
 				int dstPitch,				\
 				int w,					\
 				int h,					\
 				int yuv422)				\
-						\
-    {						\
-	int					\
-	    dadd,rest,count,hc,lcnt;		\
-	register int dummy;			\
-	begin;					\
-	count = 2;				\
-						\
-	/*								\
-	 * If destination pitch and width ar equal, do it all in one go. \
-	 */								\
 									\
-	if ( yuv422 ) {							\
+    {									\
+	int dadd, rest, count, hc, lcnt;				\
+	register int dummy;						\
+	begin;								\
+	count = 2;							\
+									\
+	/* If destination pitch equals width, do it all in one go. */	\
+									\
+	if (yuv422) {							\
 	    w <<= 1;							\
 	    count = 1;							\
 	    if (w == dstPitch) {					\
@@ -301,14 +292,14 @@
 									\
 	lcnt = w >> 6;							\
 	rest = w & 63;							\
-	while(count--) {						\
+	while (count--) {						\
 	    hc = h;							\
 	    dadd = dstPitch - w;					\
 	    lcnt = w >> 6;						\
 	    rest = w & 63;						\
-	    while(hc--) {						\
+	    while (hc--) {						\
 		if (lcnt) {						\
-		    itype##_CPY("#",from,to,dummy,lcnt);		\
+		    itype##_CPY("#", from, to, dummy, lcnt);		\
 		}							\
 		if (rest) small_memcpy(to, from, rest);			\
 		to += dadd;						\
@@ -317,379 +308,364 @@
 	    dstPitch >>= 1;						\
 	}								\
 	fence;								\
-    }									\
+    }
 
-#if !defined(__i386__) || (defined(linux) && defined(__i386__)) 
 
-static void libc_YUV42X(unsigned char *dst,
-			const unsigned char *src,
-			int dstPitch,
-			int w,
-			int h, int yuv422) {
-    if ( yuv422 ) w <<= 1;
+#if !defined(__i386__) || (defined(linux) && defined(__i386__))
+
+static void
+libc_YUV42X(unsigned char *dst, const unsigned char *src,
+            int dstPitch, int w, int h, int yuv422)
+{
+    if (yuv422)
+        w <<= 1;
     if (dstPitch == w) {
-	int size = h*((yuv422) ? w : (w + (w >> 1)));
-	xf86memcpy(dst, src, size);
-	return;
+        int size = h * ((yuv422) ? w : (w + (w >> 1)));
+
+        xf86memcpy(dst, src, size);
+        return;
     } else {
-	int count;
+        int count;
 
-	/* copy Y component to video memory */
+        /* Copy Y component to video memory. */
+        count = h;
+        while (count--) {
+            xf86memcpy(dst, src, w);
+            src += w;
+            dst += dstPitch;
+        }
 
-	count = h;
-	while(count--) {
-	    xf86memcpy(dst, src, w);
-	    src += w;
-	    dst += dstPitch;
-	}
-	
-	/* UV component is 1/2 of Y */
+        /* UV component is 1/2 of Y. */
+        if (!yuv422) {
+            w >>= 1;
+            dstPitch >>= 1;
 
-	if (! yuv422 ) {
-
-	    w >>= 1;
-	    dstPitch >>= 1;
-	    
-	    /* copy V(Cr),U(Cb) components to video memory */
-
-	    count = h;
-	    while(count--) {
-		xf86memcpy(dst, src, w);
-		src += w;
-		dst += dstPitch;
-	    }
-	}
+            /* Copy V(Cr),U(Cb) components to video memory. */
+            count = h;
+            while (count--) {
+                xf86memcpy(dst, src, w);
+                src += w;
+                dst += dstPitch;
+            }
+        }
     }
 }
 #endif
 
+
 #ifdef __i386__
 
-
-
-/* linux kernel __memcpy */
-static __inline void * __memcpy(void * to, const void * from, size_t n)
+/* Linux kernel __memcpy. */
+static __inline void *
+__memcpy(void *to, const void *from, size_t n)
 {
-    int d1,d2,d3;
+    int d1, d2, d3;
 
     __asm__ __volatile__(
-			 "rep ; movsl\n\t"
-			 "testb $2,%b4\n\t"
-			 "je 1f\n\t"
-			 "movsw\n"
-			 "1:\ttestb $1,%b4\n\t"
-			 "je 2f\n\t"
-			 "movsb\n"
-			 "2:"
-			 : "=&c" (d1), "=&D" (d2), "=&S" (d3)	
-			 :"0" (n >> 2), "q" (n),"1" ((long) to),"2" ((long) from)
-			 : "memory");
-  
+                         "rep ; movsl\n\t"
+                         "testb $2,%b4\n\t"
+                         "je 1f\n\t"
+                         "movsw\n"
+                         "1:\ttestb $1,%b4\n\t"
+                         "je 2f\n\t"
+                         "movsb\n"
+                         "2:"
+                         :"=&c"(d1), "=&D"(d2), "=&S"(d3)
+                         :"0"(n >> 2), "q"(n), "1"((long)to), "2"((long)from)
+                         :"memory");
+
     return (to);
 }
 
 
-static void kernel_YUV42X(unsigned char *dst,
-			  const unsigned char *src,
-			  int dstPitch,
-			  int w,
-			  int h, int yuv422) {
-
-    if ( yuv422 ) w <<= 1;
+static void
+kernel_YUV42X(unsigned char *dst, const unsigned char *src,
+              int dstPitch, int w, int h, int yuv422)
+{
+    if (yuv422)
+        w <<= 1;
     if (dstPitch == w) {
-	int size = h*((yuv422) ? w : (w + (w >> 1)));
-	__memcpy(dst, src, size);
-	return;
+        int size = h * ((yuv422) ? w : (w + (w >> 1)));
+
+        __memcpy(dst, src, size);
+        return;
     } else {
-	int count;
+        int count;
 
-	/* copy Y component to video memory */
+        /* Copy Y component to video memory. */
+        count = h;
+        while (count--) {
+            __memcpy(dst, src, w);
+            src += w;
+            dst += dstPitch;
+        }
 
-	count = h;
-	while(count--) {
-	    __memcpy(dst, src, w);
-	    src += w;
-	    dst += dstPitch;
-	}
-	
-	/* UV component is 1/2 of Y */
+        /* UV component is 1/2 of Y. */
+        if (!yuv422) {
 
-	if (! yuv422 ) {
+            w >>= 1;
+            dstPitch >>= 1;
 
-	    w >>= 1;
-	    dstPitch >>= 1;
-	    
-	    /* copy V(Cr),U(Cb) components to video memory */
-
-	    count = h;
-	    while(count--) {
-		__memcpy(dst, src, w);
-		src += w;
-		dst += dstPitch;
-	    }
-	}
+            /* Copy V(Cr),U(Cb) components to video memory. */
+            count = h;
+            while (count--) {
+                __memcpy(dst, src, w);
+                src += w;
+                dst += dstPitch;
+            }
+        }
     }
 }
 
 #ifdef linux
+PREFETCH_FUNC(sse, SSE, SSE,, FENCE)
+PREFETCH_FUNC(mmxext, MMXEXT, SSE, EMMS, FENCEMMS)
+PREFETCH_FUNC(now, MMX, NOW, FEMMS, FEMMS)
+NOPREFETCH_FUNC(mmx, MMX, EMMS, EMMS)
 
-PREFETCH_FUNC(sse,SSE,SSE,,FENCE) 
-PREFETCH_FUNC(mmxext,MMXEXT,SSE,EMMS,FENCEMMS)
-PREFETCH_FUNC(now,MMX,NOW,FEMMS,FEMMS)
-NOPREFETCH_FUNC(mmx,MMX,EMMS,EMMS)
-
-
-static void * kernel_memcpy(void * to, const void * from, size_t len) {
+static void
+*kernel_memcpy(void *to, const void *from, size_t len)
+{
     return __memcpy(to, from, len);
 }
 
-static unsigned fastrdtsc(void)
+static unsigned
+fastrdtsc(void)
 {
     unsigned eax;
+
     __asm__ volatile ("\t"
-                      "pushl  %%ebx\n\t"
-		      "cpuid\n\t"
-		      ".byte 0x0f, 0x31\n\t"
-		      "popl %%ebx\n"
-		      : "=a" (eax)
-		      : "0"(0)
-		      : "ecx","edx","cc");     
-    return eax; 
+                      "pushl %%ebx\n\t"
+                      "cpuid\n\t"
+                      ".byte 0x0f, 0x31\n\t"
+                      "popl %%ebx\n"
+                      :"=a" (eax)
+                      :"0"(0)
+                      :"ecx", "edx", "cc");
+
+    return eax;
 }
 
 
-
-static unsigned time_function(vidCopyFunc mf,unsigned char *buf1, 
-			      unsigned char *buf2) {
-    unsigned t,t2;
+static unsigned
+time_function(vidCopyFunc mf, unsigned char *buf1, unsigned char *buf2)
+{
+    unsigned t, t2;
 
     t = fastrdtsc();
 
-    (*mf)(buf1,buf2,BSIZA,BSIZW,BSIZH,0);
+    (*mf) (buf1, buf2, BSIZA, BSIZW, BSIZH, 0);
 
-    t2 = fastrdtsc(); 
-    return ((t <  t2) ? t2 - t : 0xFFFFFFFFU - (t - t2 -1)); 
+    t2 = fastrdtsc();
+    return ((t < t2) ? t2 - t : 0xFFFFFFFFU - (t - t2 - 1));
 }
 
-enum {libc=0,kernel,sse,mmx,now,mmxext,totNum};
+enum
+{ libc = 0, kernel, sse, mmx, now, mmxext, totNum };
 
-
-typedef struct {
+typedef struct
+{
     vidCopyFunc mFunc;
-    char *mName,**cpuFlag;
+    char *mName, **cpuFlag;
 } McFuncData;
 
-static char *libc_cpuflags[] = {" ",0};
-static char *kernel_cpuflags[] = {" ",0};
-static char *sse_cpuflags[] = {" sse ",0};
-static char *mmx_cpuflags[] = {" mmx ",0};
-static char *now_cpuflags[] = {" 3dnow ",0};
-static char *mmx2_cpuflags[] = {" mmxext ", " sse ",0};
+static char *libc_cpuflags[] = { " ", 0 };
+static char *kernel_cpuflags[] = { " ", 0 };
+static char *sse_cpuflags[] = { " sse ", 0 };
+static char *mmx_cpuflags[] = { " mmx ", 0 };
+static char *now_cpuflags[] = { " 3dnow ", 0 };
+static char *mmx2_cpuflags[] = { " mmxext ", " sse ", 0 };
 
-static McFuncData mcFunctions[totNum] = 
-    {{libc_YUV42X,"libc",libc_cpuflags},
-     {kernel_YUV42X,"kernel",kernel_cpuflags}, 
-     {sse_YUV42X,"SSE",sse_cpuflags}, 
-     {mmx_YUV42X,"MMX",mmx_cpuflags}, 
-     {now_YUV42X,"3DNow!",now_cpuflags}, 
-     {mmxext_YUV42X,"MMX2",mmx2_cpuflags}}; 
+static McFuncData mcFunctions[totNum] = {
+{libc_YUV42X, "libc", libc_cpuflags},
+{kernel_YUV42X, "kernel", kernel_cpuflags},
+{sse_YUV42X, "SSE", sse_cpuflags},
+{mmx_YUV42X, "MMX", mmx_cpuflags},
+{now_YUV42X, "3DNow!", now_cpuflags},
+{mmxext_YUV42X, "MMX2", mmx2_cpuflags}
+};
 
 
-static int flagValid(const char *cpuinfo, char *flag) {
-
-    const char *flagLoc,*nextProc;
+static int
+flagValid(const char *cpuinfo, char *flag)
+{
+    const char *flagLoc, *nextProc;
     int located = 0;
 
     while ((cpuinfo = strstr(cpuinfo, "processor\t:"))) {
         located = 1;
         cpuinfo += 11;
-	if ((flagLoc = strstr(cpuinfo,flag))) {
-	    if ((nextProc = strstr(cpuinfo,"processor\t:"))) {
-	        if (nextProc < flagLoc) return 0;
-	    }
-	} else {
-	    return 0;
-	}
+        if ((flagLoc = strstr(cpuinfo, flag))) {
+            if ((nextProc = strstr(cpuinfo, "processor\t:"))) {
+                if (nextProc < flagLoc)
+                    return 0;
+            }
+        } else {
+            return 0;
+        }
     }
     return located;
 }
-      
-
-static int cpuValid(const char *cpuinfo, char **flags) {
 
 
-    for(; *flags != 0; flags++) {
-        if (flagValid(cpuinfo, *flags)) return 1;
+static int
+cpuValid(const char *cpuinfo, char **flags)
+{
+    for (; *flags != 0; flags++) {
+        if (flagValid(cpuinfo, *flags))
+            return 1;
     }
     return 0;
 }
-#endif 
+#endif /* linux */
 
+/*
+ * Benchmark the video copy routines and choose the fastest.
+ */
+vidCopyFunc
+viaVidCopyInit(char *copyType, ScreenPtr pScreen)
+{
+    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
 
-vidCopyFunc viaVidCopyInit( char *copyType, 
-			    ScreenPtr pScreen ) {
-
-    /*
-     * Benchmark the video copy routines using a relevant benchmark
-     * and choose the fastest.
-     */ 
-
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];  
 #ifdef linux
     char buf[BSIZ];
-    unsigned char *buf1,*buf2,*buf3;
-    char *tmpBuf,*endBuf;
-    int count,j,bestSoFar;
-    unsigned best,tmp,testSize,alignSize,tmp2;
+    unsigned char *buf1, *buf2, *buf3;
+    char *tmpBuf, *endBuf;
+    int count, j, bestSoFar;
+    unsigned best, tmp, testSize, alignSize, tmp2;
     VIAMem tmpFbBuffer;
     McFuncData *curData;
     FILE *cpuInfoFile;
     double cpuFreq;
     VIAPtr pVia = VIAPTR(pScrn);
 
-    if (NULL == (cpuInfoFile = fopen("/proc/cpuinfo","r"))) {
-	return libc_YUV42X;
+    if (NULL == (cpuInfoFile = fopen("/proc/cpuinfo", "r"))) {
+        return libc_YUV42X;
     }
-    count = fread(buf,1,BSIZ,cpuInfoFile);
+    count = fread(buf, 1, BSIZ, cpuInfoFile);
     if (ferror(cpuInfoFile)) {
-	fclose(cpuInfoFile);
-	return libc_YUV42X;
+        fclose(cpuInfoFile);
+        return libc_YUV42X;
     }
     fclose(cpuInfoFile);
     if (BSIZ == count) {
-	xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-		   "\"/proc/cpuinfo\" file too long. "
-		   "Using Linux kernel memcpy.\n");
-	return libc_YUV42X;
+        xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                   "\"/proc/cpuinfo\" file too long. "
+                   "Using Linux kernel memcpy.\n");
+        return libc_YUV42X;
     }
     buf[count] = 0;
 
-    while(count--) 
-	if ('\n' == buf[count]) buf[count] = ' '; 
-    
-    /*
-     * Extract the cpu frequency.
-     */ 
-    
-    cpuFreq = 0.;
+    while (count--)
+        if ('\n' == buf[count])
+            buf[count] = ' ';
 
-    if (NULL != (tmpBuf = strstr(buf,"cpu MHz"))) {
-	if (NULL != (tmpBuf = strstr(tmpBuf,":") + 1)) {
-	    cpuFreq = strtod(tmpBuf,&endBuf);
-	    if (endBuf == tmpBuf) tmpBuf = NULL;
-	}
+    /* Extract the CPU frequency. */
+    cpuFreq = 0.;
+    if (NULL != (tmpBuf = strstr(buf, "cpu MHz"))) {
+        if (NULL != (tmpBuf = strstr(tmpBuf, ":") + 1)) {
+            cpuFreq = strtod(tmpBuf, &endBuf);
+            if (endBuf == tmpBuf)
+                tmpBuf = NULL;
+        }
     }
-	
-    alignSize = BSIZH*(BSIZA + (BSIZA >> 1));
-    testSize = BSIZH*(BSIZW + (BSIZW >> 1));
+
+    alignSize = BSIZH * (BSIZA + (BSIZA >> 1));
+    testSize = BSIZH * (BSIZW + (BSIZW >> 1));
     tmpFbBuffer.pool = 0;
 
     /*
      * Allocate an area of offscreen FB memory, (buf1), a simulated video
      * player buffer (buf2) and a pool of uninitialized "video" data (buf3). 
-     */ 
+     */
 
     if (VIAAllocLinear(&tmpFbBuffer, pScrn, alignSize + 31))
-	return libc_YUV42X;
+        return libc_YUV42X;
     if (NULL == (buf2 = (unsigned char *)xalloc(testSize))) {
-	VIAFreeLinear(&tmpFbBuffer);
-	return libc_YUV42X;
+        VIAFreeLinear(&tmpFbBuffer);
+        return libc_YUV42X;
     }
     if (NULL == (buf3 = (unsigned char *)xalloc(testSize))) {
-	xfree(buf2);
-	VIAFreeLinear(&tmpFbBuffer);
-	return libc_YUV42X;
+        xfree(buf2);
+        VIAFreeLinear(&tmpFbBuffer);
+        return libc_YUV42X;
     }
     buf1 = (unsigned char *)pVia->FBBase + tmpFbBuffer.base;
 
-    /*
-     * Align the frame buffer destination memory to a 32 byte boundary.
-     */
+    /* Align the frame buffer destination memory to a 32 byte boundary. */
+    if ((unsigned long)buf1 & 31)
+        buf1 += (32 - ((unsigned long)buf1 & 31));
 
-    if ((unsigned long)buf1 & 31) 
-	buf1 += (32 - ((unsigned long)buf1 & 31));
-      
     bestSoFar = 0;
     best = 0xFFFFFFFFU;
-  
-    /*
-     * Make probable buf1 and buf2 are not paged out by
-     * referencing them.
-     */ 
 
-    libc_YUV42X(buf1,buf2,BSIZA,BSIZW,BSIZH,0);
-
+    /* Make probable that buf1 and buf2 are in memory by referencing them. */
+    libc_YUV42X(buf1, buf2, BSIZA, BSIZW, BSIZH, 0);
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-	       "Benchmarking %s copy. Less is better.\n",copyType);
-    for (j=0; j<totNum; ++j) {
-	curData = mcFunctions + j;   
+               "Benchmarking %s copy.  Less time is better.\n", copyType);
+    for (j = 0; j < totNum; ++j) {
+        curData = mcFunctions + j;
 
-	if (cpuValid(buf,curData->cpuFlag)) {
+        if (cpuValid(buf, curData->cpuFlag)) {
 
-	    /*
-	     * Simulate setup of the video buffer.
-	     */ 
+            /* Simulate setup of the video buffer. */
+            kernel_memcpy(buf2, buf3, testSize);
 
-	    kernel_memcpy(buf2,buf3,testSize);
+            /* Copy the video buffer to frame-buffer memory. */
+            tmp = time_function(curData->mFunc, buf1, buf2);
 
-	    /*
-	     * Copy the video buffer to frame-buffer memory.
-	     */
+            /* Do it again to avoid context-switch effects. */
+            kernel_memcpy(buf2, buf3, testSize);
+            tmp2 = time_function(curData->mFunc, buf1, buf2);
+            tmp = (tmp2 < tmp) ? tmp2 : tmp;
 
-	    tmp = time_function(curData->mFunc,buf1,buf2);
-
-	    /*
-	     * Do it again to avoid context switch effects.
-	     */
-
-	    kernel_memcpy(buf2,buf3,testSize);
-	    tmp2 = time_function(curData->mFunc,buf1,buf2);
-	    tmp = (tmp2 < tmp) ? tmp2 : tmp;
-
-	    if (NULL == tmpBuf) {
-		xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-			   "Timed %6s YUV420 copy... %u.\n",curData->mName,tmp);
-	    } else {
-		xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-			   "Timed %6s YUV420 copy... %u. "
-			   "Throughput: %.1f MiB/s.\n",curData->mName,tmp,
-			   cpuFreq * 1.e6 * (double)testSize / 
-			   ((double)(tmp) * (double)(0x100000)));
-	    }		
-	    if (tmp < best) {
-		best = tmp;
-		bestSoFar = j;
-	    }
-	} else {
-	    xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-		       "Ditch %6s YUV420 copy... Not supported by CPU.\n",
-		       curData->mName);
-
-	} 
+            if (NULL == tmpBuf) {
+                xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                           "Timed %6s YUV420 copy... %u.\n",
+                           curData->mName, tmp);
+            } else {
+                xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                           "Timed %6s YUV420 copy... %u. "
+                           "Throughput: %.1f MiB/s.\n",
+                           curData->mName, tmp,
+                           cpuFreq * 1.e6 * (double)testSize /
+                           ((double)(tmp) * (double)(0x100000)));
+            }
+            if (tmp < best) {
+                best = tmp;
+                bestSoFar = j;
+            }
+        } else {
+            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                       "Ditching %6s YUV420 copy. Not supported by CPU.\n",
+                       curData->mName);
+        }
     }
     xfree(buf3);
     xfree(buf2);
     VIAFreeLinear(&tmpFbBuffer);
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-	       "Using %s YUV42X copy for %s.\n",mcFunctions[bestSoFar].mName,
-	       copyType);
+               "Using %s YUV42X copy for %s.\n",
+               mcFunctions[bestSoFar].mName, copyType);
     return mcFunctions[bestSoFar].mFunc;
-#endif
+#else
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-	       "Using copy of Linux kernel memcpy for video.\n");
+               "Using Linux kernel memcpy for video.\n");
     return kernel_YUV42X;
+#endif /* linux */
 }
 
 #else
- 
-vidCopyFunc viaVidCopyInit( char *copyType, 
-			    ScreenPtr pScreen ) {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];  
+
+vidCopyFunc
+viaVidCopyInit(char *copyType, ScreenPtr pScreen)
+{
+    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-	       "Using default xfree86 memcpy for video.\n");
+               "Using default xfree86 memcpy for video.\n");
     return libc_YUV42X;
 }
 
-#endif
-
+#endif /* __i386__ */
