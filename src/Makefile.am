@@ -85,7 +85,7 @@ EXTRA_DIST += \
 endif
 
 via_driver.lo: svnversion.h
-svnversion.h:
+svnversion.h: $(openchrome_drv_la_SOURCES)
 	@if [ -f svnrelease.h ]; then \
 	echo '#include "svnrelease.h"' > $@.tmp; \
 	elif [ -d .svn ]; then \
@@ -96,7 +96,7 @@ svnversion.h:
 	> $@.tmp; \
 	fi
 
-	@(chmod 666 $@.tmp 2> /dev/null || /bin/true)
-	@cmp -s $@ $@.tmp || (mv $@.tmp $@; echo created $@)
+	@chmod 666 $@.tmp
+	@mv $@.tmp $@
+	@echo "created $@"
 
-.PHONY: svnversion.h

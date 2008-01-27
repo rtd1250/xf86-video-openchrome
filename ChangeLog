@@ -1,3 +1,9 @@
+2008-01-28  Benno Schulenberg  <bensberg-at-justemail-dot-net>
+
+	* src/Makefile.am:
+
+	Recreating svnversion.h only when a source file has changed.
+
 2008-01-18  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 
 	* src/via_dri.c: (VIAInitVisualConfigs):
@@ -19,6 +25,7 @@
 2008-01-08  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 
 	* src/via_accel.c: (viaBitExpandHelper), (viaPixelARGB8888):
+
 	Moving a little more computation into the helper function.
 
 2007-10-29  Benno Schulenberg  <bensberg-at-justemail-dot-net>
