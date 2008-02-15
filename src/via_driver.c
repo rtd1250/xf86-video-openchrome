@@ -381,8 +381,8 @@ static const char *driSymbols[] = {
 static MODULESETUPPROTO(VIASetup);
 
 static XF86ModuleVersionInfo VIAVersRec = {
-    "via",
-    MODULEVENDORSTRING,
+    "openchrome",
+    "http://openchrome.org/",
     MODINFOSTRING1,
     MODINFOSTRING2,
 #ifdef XORG_VERSION_CURRENT
@@ -525,8 +525,8 @@ VIAProbe(DriverPtr drv, int flags)
     if (numUsed <= 0)
         return FALSE;
 
-    xf86Msg(X_NOTICE, "VIA Technologies does not support or endorse this driver in any way.\n");
-    xf86Msg(X_NOTICE, "For support, refer to http://www.openchrome.org/.\n");
+    xf86Msg(X_NOTICE, "VIA Technologies does not support this driver in any way.\n");
+    xf86Msg(X_NOTICE, "For support, please refer to http://openchrome.org/.\n");
 
 #ifdef BUILDCOMMENT
     xf86Msg(X_NOTICE, BUILDCOMMENT"\n");
