@@ -1019,44 +1019,43 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
                    "Setting amount of VideoRAM to %d kB\n", pScrn->videoRam);
 
-    //pVia->shadowFB = FALSE;
-    from = xf86GetOptValBool(VIAOptions, OPTION_SHADOW_FB, &pVia->shadowFB) ? 
-	X_CONFIG : X_DEFAULT;
-    xf86DrvMsg(pScrn->scrnIndex, from, "ShadowFB is %s.\n",
+    from = (xf86GetOptValBool(VIAOptions, OPTION_SHADOW_FB, &pVia->shadowFB)
+            ? X_CONFIG : X_DEFAULT);
+    xf86DrvMsg(pScrn->scrnIndex, from, "Shadow framebuffer is %s.\n",
 	       pVia->shadowFB ? "enabled" : "disabled");
 
+    /* Use hardware acceleration, unless on shadow framebuffer. */
+    from = (xf86GetOptValBool(VIAOptions, OPTION_NOACCEL, &pVia->NoAccel)
+            ? X_CONFIG : X_DEFAULT);
+    if (!pVia->NoAccel && pVia->shadowFB) {
+        xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Acceleration is "
+                   "not supported when using shadow framebuffer.\n");
+        pVia->NoAccel = TRUE;
+        from = X_DEFAULT;
+    }
+    xf86DrvMsg(pScrn->scrnIndex, from, "Hardware acceleration is %s.\n",
+               !pVia->NoAccel ? "enabled" : "disabled");
+
+    /* When rotating, switch shadow framebuffer on and acceleration off. */
     if ((s = xf86GetOptValString(VIAOptions, OPTION_ROTATE))) {
         if (!xf86NameCmp(s, "CW")) {
-            /* accel is disabled below for shadowFB */
             pVia->shadowFB = TRUE;
+            pVia->NoAccel = TRUE;
             pVia->rotate = 1;
-            pVia->hwcursor = FALSE;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                       "Rotating screen clockwise - acceleration disabled.\n");
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "Rotating screen "
+                       "clockwise -- acceleration is disabled.\n");
         } else if(!xf86NameCmp(s, "CCW")) {
             pVia->shadowFB = TRUE;
+            pVia->NoAccel = TRUE;
             pVia->rotate = -1;
-            pVia->hwcursor = FALSE;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,  "Rotating screen"
-                       "counterclockwise - acceleration disabled.\n");
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "Rotating screen "
+                       "counterclockwise -- acceleration is disabled.\n");
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "\"%s\" is not a valid"
                        "value for Option \"Rotate\".\n", s);
             xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                        "Valid options are \"CW\" or \"CCW\".\n");
         }
-    }
-
-    //pVia->NoAccel = FALSE;
-    from = xf86GetOptValBool(VIAOptions, OPTION_NOACCEL, &pVia->NoAccel) ? 
-	X_CONFIG : X_DEFAULT;
-    xf86DrvMsg(pScrn->scrnIndex, from, "Acceleration is %s.\n",
-	       !pVia->NoAccel ? "enabled" : "disabled");
-
-    if (pVia->shadowFB && !pVia->NoAccel) {
-        xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                   "HW acceleration not supported with \"shadowFB\".\n");
-        pVia->NoAccel = TRUE;
     }
 
 #ifdef VIA_HAVE_EXA 
@@ -1095,7 +1094,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     }
 #endif /* VIA_HAVE_EXA */
 
-    /* Whether to use a software cursor or the default hardware cursor. */
+    /* Use a hardware cursor, unless on secondary or on shadow framebuffer. */
     from = X_DEFAULT;
     if (pVia->IsSecondary || pVia->shadowFB)
         pVia->hwcursor = FALSE;

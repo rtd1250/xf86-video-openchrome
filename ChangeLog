@@ -1,3 +1,10 @@
+2008-02-19  Benno Schulenberg  <bensberg-at-justemail-dot-net>
+
+	* src/via_driver.c: (VIAPreInit):
+
+	Dealing with the NoAccel option before the Rotate option, since
+	the latter overrides the first.
+
 2008-01-28  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 
 	* src/Makefile.am:
