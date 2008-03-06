@@ -1727,7 +1727,8 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
      * FIXME:
      * Enable video on secondary 
      */
-    if (pVia->Chipset == VIA_P4M900 && pVia->pBIOSInfo->PanelActive) {
+    if ((pVia->Chipset == VIA_P4M900 || pVia->Chipset == VIA_VM800)
+        && pVia->pBIOSInfo->PanelActive) {
         /* V1_ON_SND_DISPLAY */
         vidCtl |= 0x80000000;
         /* SECOND_DISPLAY_COLOR_KEY_ENABLE */
