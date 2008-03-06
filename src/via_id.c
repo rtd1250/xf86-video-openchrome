@@ -170,6 +170,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"MSI P4M900M / P4M900M2-F/L",            VIA_P4M900,  0x1462, 0x7255, VIA_DEVICE_CRT},
     {"Everex NC1501/NC1503",                  VIA_P4M900,  0x1509, 0x1E30, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Clevo M660SE",                          VIA_P4M900,  0x1558, 0x0664, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
+    {"Clevo M660SR",                          VIA_P4M900,  0x1558, 0x0669, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Neo Endura 540SLe",                     VIA_P4M900,  0x1558, 0x5408, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Clevo M54xSR",                          VIA_P4M900,  0x1558, 0x5409, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Biostar P4M900M-M7 SE",                 VIA_P4M900,  0x1565, 0x1207, VIA_DEVICE_CRT},
