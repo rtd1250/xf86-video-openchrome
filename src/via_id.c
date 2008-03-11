@@ -164,6 +164,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"VIA Epia SN",                           VIA_P4M900,  0x0908, 0x1975, VIA_DEVICE_CRT},
     {"Asustek P5VD2-VM",                      VIA_P4M900,  0x1043, 0x81CE, VIA_DEVICE_CRT},
     {"Asustek P5VD2-VM SE",                   VIA_P4M900,  0x1043, 0x8252, VIA_DEVICE_CRT},
+    {"Mitac 8515",                            VIA_P4M900,  0x1071, 0x8515, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Medion Notebook MD96483",               VIA_P4M900,  0x1071, 0x8615, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"VIA VT3364 (P4M900)",                   VIA_P4M900,  0x1106, 0x3371, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Gigabyte GA-VM900M",                    VIA_P4M900,  0x1458, 0xD000, VIA_DEVICE_CRT},
