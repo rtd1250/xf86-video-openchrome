@@ -25,8 +25,6 @@
 #ifndef _VIA_H_
 #define _VIA_H_ 1
 
-#include "xorgVersion.h"
-
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
@@ -663,5 +661,21 @@
 #define	MPG_SLICE_DATA		0xA0
 
 #define VBE_DEFAULT_REFRESH                     6000
+
+#ifdef XSERVER_LIBPCIACCESS
+#define VIA_MEMBASE(p,n)  (p)->regions[(n)].base_addr
+#define VENDOR_ID(p)      (p)->vendor_id
+#define DEVICE_ID(p)      (p)->device_id
+#define SUBVENDOR_ID(p)   (p)->subvendor_id
+#define SUBSYS_ID(p)      (p)->subdevice_id
+#define CHIP_REVISION(p)  (p)->revision
+#else
+#define VIA_MEMBASE(p,n)  (p)->memBase[n]
+#define VENDOR_ID(p)      (p)->vendor
+#define DEVICE_ID(p)      (p)->chipType
+#define SUBVENDOR_ID(p)   (p)->subsysVendor
+#define SUBSYS_ID(p)      (p)->subsysCard
+#define CHIP_REVISION(p)  (p)->chipRev
+#endif
 
 #endif /* _VIA_H_ */

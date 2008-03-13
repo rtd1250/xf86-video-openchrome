@@ -1,3 +1,15 @@
+2008-03-11  Xavier Bachelot  <xavier-at-bachelot-dot-org>
+
+	* configure.ac:
+	* src/via.h:
+	* src/via_dri.c: (VIADRIIrqInit), (VIADRIScreenInit):
+	* src/via_driver.c: (via_pci_device), (via_host_bridge),
+	(viaPciDeviceVga), (if), (switch):
+	* src/via_driver.h:
+	* src/via_id.c: (ViaCheckCardId):
+
+	Merge changes from pciaccess branch.
+
 2008-02-19  Benno Schulenberg  <bensberg-at-justemail-dot-net>
 
 	* src/via_driver.c: (VIAPreInit):

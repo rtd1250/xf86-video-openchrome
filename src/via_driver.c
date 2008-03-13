@@ -50,7 +50,43 @@
 
 /* Prototypes. */
 static void VIAIdentify(int flags);
+#ifdef XSERVER_LIBPCIACCESS
+struct pci_device*
+via_pci_device(const struct pci_slot_match *bridge_match) {
+    struct pci_device_iterator  *slot_iterator;
+    struct pci_device           *bridge;
+
+    slot_iterator = pci_slot_match_iterator_create (bridge_match);
+    bridge = pci_device_next (slot_iterator);
+    pci_iterator_destroy (slot_iterator);
+    return bridge;
+}
+
+struct pci_device *
+via_host_bridge (void)
+{
+    static const struct pci_slot_match bridge_match = {
+        0, 0, 0, 0, 0
+    };
+    return via_pci_device(&bridge_match);
+}
+
+viaPciDeviceVga(void)
+{
+    static const struct pci_slot_match bridge_match = {
+        0, 0, 0, 3, 0
+    };
+    return via_pci_device(&bridge_match);
+}
+
+static Bool via_pci_probe (DriverPtr          drv,
+                           int                entity_num,
+                           struct pci_device  *dev,
+                           intptr_t           match_data);
+#else
 static Bool VIAProbe(DriverPtr drv, int flags);
+#endif
+
 static Bool VIASetupDefaultOptions(ScrnInfoPtr pScrn);
 static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags);
 static Bool VIAEnterVT(int scrnIndex, int flags);
@@ -75,16 +111,46 @@ static void VIAUnmapMem(ScrnInfoPtr pScrn);
 
 static void VIALoadRgbLut(ScrnInfoPtr pScrn, int numColors, int *indices,
                           LOCO *colors, VisualPtr pVisual);
+#ifdef XSERVER_LIBPCIACCESS
 
-DriverRec VIA = {
+#define VIA_DEVICE_MATCH(d,i) \
+    { 0x1106, (d), PCI_MATCH_ANY, PCI_MATCH_ANY, 0, 0, (i) }
+
+static const struct pci_id_match via_device_match[] = {
+   VIA_DEVICE_MATCH (PCI_CHIP_VT3204, 0 ),
+   VIA_DEVICE_MATCH (PCI_CHIP_VT3259, 0 ),
+   VIA_DEVICE_MATCH (PCI_CHIP_CLE3122, 0 ),
+   VIA_DEVICE_MATCH (PCI_CHIP_VT3205, 0 ),
+   VIA_DEVICE_MATCH (PCI_CHIP_VT3314, 0 ),
+   VIA_DEVICE_MATCH (PCI_CHIP_VT3336, 0 ),
+   VIA_DEVICE_MATCH (PCI_CHIP_VT3364, 0 ),
+   VIA_DEVICE_MATCH (PCI_CHIP_VT3324, 0 ),
+   VIA_DEVICE_MATCH (PCI_CHIP_VT3327, 0 ),
+    { 0, 0, 0 },
+};
+
+#endif /* XSERVER_LIBPCIACCESS */
+
+_X_EXPORT DriverRec VIA =
+ {
     VIA_VERSION,
     DRIVER_NAME,
     VIAIdentify,
+#ifdef XSERVER_LIBPCIACCESS
+    NULL,
+#else
     VIAProbe,
+#endif
     VIAAvailableOptions,
     NULL,
-    0
-};
+    0,
+    NULL,
+#ifdef XSERVER_LIBPCIACCESS
+    via_device_match,
+    via_pci_probe
+#endif
+
+ };
 
 /* Supported chipsets */
 static SymTabRec VIAChipsets[] = {
@@ -398,8 +464,7 @@ static XF86ModuleVersionInfo VIAVersRec = {
     {0, 0, 0, 0}
 };
 
-XF86ModuleData openchromeModuleData = { &VIAVersRec, VIASetup, NULL };
-
+_X_EXPORT XF86ModuleData openchromeModuleData = { &VIAVersRec, VIASetup, NULL };
 
 static pointer
 VIASetup(pointer module, pointer opts, int *errmaj, int *errmin)
@@ -408,7 +473,13 @@ VIASetup(pointer module, pointer opts, int *errmaj, int *errmin)
 
     if (!setupDone) {
         setupDone = TRUE;
-        xf86AddDriver(&VIA, module, 0);
+        xf86AddDriver(&VIA, module,
+#ifdef XSERVER_LIBPCIACCESS
+                     HaveDriverFuncs
+#else
+                     0
+#endif
+                     );
         LoaderRefSymLists(vgaHWSymbols,
 #ifdef USE_FB
                           fbSymbols,
@@ -497,6 +568,46 @@ VIAIdentify(int flags)
     xf86PrintChipsets("OPENCHROME", "Driver for VIA Chrome chipsets",
                       VIAChipsets);
 }
+
+#ifdef XSERVER_LIBPCIACCESS
+static Bool via_pci_probe (DriverPtr          driver,
+                           int                entity_num,
+                           struct pci_device  *device,
+                           intptr_t           match_data)
+{
+    ScrnInfoPtr     scrn = NULL;
+    EntityInfoPtr   entity;
+    DevUnion        *private;
+
+    scrn = xf86ConfigPciEntity (scrn, 0, entity_num, VIAPciChipsets,
+                                NULL,
+                                NULL, NULL, NULL, NULL);
+
+    if (scrn != NULL)
+    {
+        scrn->driverVersion = VIA_VERSION;
+        scrn->driverName = DRIVER_NAME;
+        scrn->name = "CHROME";
+        scrn->Probe = NULL;
+
+        entity = xf86GetEntityInfo (entity_num);
+
+        scrn->PreInit = VIAPreInit;
+        scrn->ScreenInit = VIAScreenInit;
+        scrn->SwitchMode = VIASwitchMode;
+        scrn->AdjustFrame = VIAAdjustFrame;
+        scrn->EnterVT = VIAEnterVT;
+        scrn->LeaveVT = VIALeaveVT;
+        scrn->FreeScreen = VIAFreeScreen;
+        scrn->ValidMode = ViaValidMode;
+
+        xf86Msg(X_NOTICE, "VIA Technologies does not support or endorse this driver in any way.\n");
+        xf86Msg(X_NOTICE, "For support, please refer to http://www.openchrome.org/ or\n");
+        xf86Msg(X_NOTICE, "your X vendor.\n");
+     }
+     return scrn != NULL;
+}
+#else /* XSERVER_LIBPCIACCESS */
 
 static Bool
 VIAProbe(DriverPtr drv, int flags)
@@ -607,6 +718,7 @@ VIAProbe(DriverPtr drv, int flags)
     return foundScreen;
 
 } /* VIAProbe */
+#endif /* else XSERVER_LIBPCIACCESS */
 
 #ifdef XF86DRI
 static void
@@ -755,6 +867,10 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 #endif
     vgaHWPtr hwp;
     int i, bMemSize = 0;
+
+#ifdef XSERVER_LIBPCIACCESS
+    struct pci_device *bridge = via_host_bridge ();
+#endif
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAPreInit\n"));
 
@@ -932,7 +1048,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
                    pEnt->device->chipID);
     } else {
         from = X_PROBED;
-        pVia->ChipId = pVia->PciInfo->chipType;
+        pVia->ChipId = DEVICE_ID(pVia->PciInfo); 
         pVia->Chipset = LookupChipID(VIAPciChipsets, pVia->ChipId);
         pScrn->chipset = (char *)xf86TokenToString(VIAChipsets, pVia->Chipset);
     }
@@ -945,7 +1061,13 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
                    pVia->ChipRev);
     } else {
         /* Read PCI bus 0, dev 0, function 0, index 0xF6 to get chip revision */
+#ifdef XSERVER_LIBPCIACCESS
+        struct pci_device *bridge = via_host_bridge ();
+
+        pci_device_cfg_read_u32 (bridge, &  pVia->ChipRev, 0xF6);
+#else
         pVia->ChipRev = pciReadByte(pciTag(0, 0, 0), 0xF6);
+#endif
     }
 
     if (pVia->Chipset == VIA_CLE266)
@@ -957,24 +1079,41 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 
     /* Detect the amount of installed RAM */
     from = X_PROBED;
+    CARD8 videoRam ;
+#ifdef XSERVER_LIBPCIACCESS
+    struct pci_device *vgaDevice = viaPciDeviceVga() ;
+#endif
+
     switch (pVia->Chipset) {
         case VIA_CLE266:
         case VIA_KM400:
-            pScrn->videoRam = (1 << ((pciReadByte(pciTag(0, 0, 0), 0xE1)
-                                      & 0x70) >> 4)) << 10;
+#ifdef XSERVER_LIBPCIACCESS
+            pci_device_cfg_read_u8(bridge, &videoRam, 0xE1);
+#else
+            videoRam = pciReadByte(pciTag(0, 0, 0), 0xE1) & 0x70 ;
+#endif
+            pScrn->videoRam = ( 1 << ((videoRam & 0x70) >> 4 )) << 10 ;
             break;
         case VIA_PM800:
         case VIA_VM800:
         case VIA_K8M800:
-            pScrn->videoRam = (1 << ((pciReadByte(pciTag(0, 0, 3), 0xA1)
-                                      & 0x70) >> 4)) << 10;
+#ifdef XSERVER_LIBPCIACCESS
+            pci_device_cfg_read_u8(vgaDevice, &videoRam, 0xA1);
+#else
+            videoRam = pciReadByte(pciTag(0, 0, 3), 0xA1) & 0x70;
+#endif
+            pScrn->videoRam = (1 << ((videoRam & 0x70) >> 4)) << 10;
             break;
         case VIA_K8M890:
         case VIA_P4M890:
         case VIA_P4M900:
         case VIA_CX700:
-            pScrn->videoRam = (1 << ((pciReadByte(pciTag(0, 0, 3), 0xA1)
-                                      & 0x70) >> 4)) << 12;
+#ifdef XSERVER_LIBPCIACCESS
+            pci_device_cfg_read_u8(vgaDevice, &videoRam, 0xA1);
+#else
+            videoRam = pciReadByte(pciTag(0, 0, 3), 0xA1) & 0x70;
+#endif
+            pScrn->videoRam = (1 << ((videoRam & 0x70) >> 4 )) << 12;
             break;
         default:
             if (pScrn->videoRam < 16384 || pScrn->videoRam > 65536) {
@@ -1350,8 +1489,10 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 
     /* maybe throw in some more sanity checks here */
 
+#ifndef XSERVER_LIBPCIACCESS
     pVia->PciTag = pciTag(pVia->PciInfo->bus, pVia->PciInfo->device,
                           pVia->PciInfo->func);
+#endif
 
     if (!VIAMapMMIO(pScrn)) {
         VIAFreeRec(pScrn);
@@ -2008,26 +2149,73 @@ static Bool
 VIAMapMMIO(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
+#ifdef XSERVER_LIBPCIACCESS
+    int err;
+#endif
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAMapMMIO\n"));
 
+#ifdef XSERVER_LIBPCIACCESS
+    pVia->FrameBufferBase = pVia->PciInfo->regions[0].base_addr;
+    pVia->MmioBase = pVia->PciInfo->regions[1].base_addr;
+#else
     pVia->FrameBufferBase = pVia->PciInfo->memBase[0];
     pVia->MmioBase = pVia->PciInfo->memBase[1];
+#endif
 
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                "mapping MMIO @ 0x%lx with size 0x%x\n",
                pVia->MmioBase, VIA_MMIO_REGSIZE);
 
-    pVia->MapBase = xf86MapPciMem(pScrn->scrnIndex, VIDMEM_MMIO, pVia->PciTag,
-                                  pVia->MmioBase, VIA_MMIO_REGSIZE);
+#ifdef XSERVER_LIBPCIACCESS
+        err = pci_device_map_range (pVia->PciInfo,
+                                    pVia->MmioBase,
+                                    VIA_MMIO_REGSIZE,
+                                    PCI_DEV_MAP_FLAG_WRITABLE,
+                                    (void **) &pVia->MapBase);
+
+        if (err)
+        {
+            xf86DrvMsg (pScrn->scrnIndex, X_ERROR,
+                        "Unable to map mmio BAR. %s (%d)\n",
+                        strerror (err), err);
+            return FALSE;
+        }
+#else
+        pVia->MapBase = xf86MapPciMem(pScrn->scrnIndex, VIDMEM_MMIO, 
+                                      pVia->PciTag,
+                                      pVia->MmioBase, VIA_MMIO_REGSIZE);
+        if (!pVia->MapBase)
+            return FALSE;
+#endif
 
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                "mapping BitBlt MMIO @ 0x%lx with size 0x%x\n",
                pVia->MmioBase + VIA_MMIO_BLTBASE, VIA_MMIO_BLTSIZE);
 
-    pVia->BltBase = xf86MapPciMem(pScrn->scrnIndex, VIDMEM_MMIO, pVia->PciTag,
-                                  pVia->MmioBase + VIA_MMIO_BLTBASE,
-                                  VIA_MMIO_BLTSIZE);
+#ifdef XSERVER_LIBPCIACCESS
+        err = pci_device_map_range (pVia->PciInfo,
+                                    pVia->MmioBase + VIA_MMIO_BLTBASE,
+                                    VIA_MMIO_BLTSIZE,
+                                    (PCI_DEV_MAP_FLAG_WRITABLE
+                                    |PCI_DEV_MAP_FLAG_WRITE_COMBINE),
+                                    (void **) &pVia->BltBase);
+
+        if (err)
+        {
+            xf86DrvMsg (pScrn->scrnIndex, X_ERROR,
+                        "Unable to map blt BAR. %s (%d)\n",
+                        strerror (err), err);
+            return FALSE;
+        }
+#else
+        pVia->BltBase = xf86MapPciMem(pScrn->scrnIndex, VIDMEM_MMIO,
+                                      pVia->PciTag,
+                                      pVia->MmioBase + VIA_MMIO_BLTBASE,
+                                      VIA_MMIO_BLTSIZE);
+        if (!pVia->BltBase)
+            return FALSE;
+#endif
 
     if (!pVia->MapBase || !pVia->BltBase) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
@@ -2073,6 +2261,9 @@ static Bool
 VIAMapFB(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
+#ifdef XSERVER_LIBPCIACCESS
+    int err;
+#endif
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAMapFB\n"));
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
@@ -2087,6 +2278,7 @@ VIAMapFB(ScrnInfoPtr pScrn)
          * in the OS support layer.
          */
 
+#ifndef XSERVER_LIBPCIACCESS
         unsigned char *tmp;
 
         tmp = xf86MapPciMem(pScrn->scrnIndex, VIDMEM_MMIO,
@@ -2104,10 +2296,24 @@ VIAMapFB(ScrnInfoPtr pScrn)
                             pVia->videoRambytes);
         xf86UnMapVidMem(pScrn->scrnIndex, (pointer) tmp, pVia->videoRambytes);
 
+#endif
         /*
          * End of hack.
          */
 
+#ifdef XSERVER_LIBPCIACCESS
+        err = pci_device_map_range (pVia->PciInfo, pVia->FrameBufferBase,
+                                    pVia->videoRambytes,
+                                    PCI_DEV_MAP_FLAG_WRITABLE,
+                                    (void **) &pVia->FBBase);
+        if (err)
+        {
+            xf86DrvMsg (pScrn->scrnIndex, X_ERROR,
+                        "Unable to map mmio BAR. %s (%d)\n",
+                        strerror (err), err);
+            return FALSE;
+        }
+#else
         pVia->FBBase = xf86MapPciMem(pScrn->scrnIndex, VIDMEM_FRAMEBUFFER,
                                      pVia->PciTag, pVia->FrameBufferBase,
                                      pVia->videoRambytes);
@@ -2117,6 +2323,7 @@ VIAMapFB(ScrnInfoPtr pScrn)
                        "Internal error: could not map framebuffer\n");
             return FALSE;
         }
+#endif
 
         pVia->FBFreeStart = (pScrn->displayWidth * pScrn->bitsPerPixel >> 3) *
                 pScrn->virtualY;
@@ -2127,7 +2334,11 @@ VIAMapFB(ScrnInfoPtr pScrn)
                    pVia->FBBase, pVia->FBFreeStart, pVia->FBFreeEnd);
     }
 
+#ifdef XSERVER_LIBPCIACCESS
+    pScrn->memPhysBase = pVia->PciInfo->regions[0].base_addr;
+#else
     pScrn->memPhysBase = pVia->PciInfo->memBase[0];
+#endif
     pScrn->fbOffset = 0;
     if (pVia->IsSecondary)
         pScrn->fbOffset = pScrn->videoRam << 10;
@@ -2146,6 +2357,16 @@ VIAUnmapMem(ScrnInfoPtr pScrn)
     /* Disable MMIO */
     ViaSeqMask(VGAHWPTR(pScrn), 0x1A, 0x00, 0x60);
 
+#ifdef XSERVER_LIBPCIACCESS
+    if (pVia->MapBase)
+        pci_device_unmap_range(pVia->PciInfo, (pointer)pVia->MapBase, VIA_MMIO_REGSIZE);
+
+    if (pVia->BltBase)
+        pci_device_unmap_range(pVia->PciInfo, (pointer)pVia->BltBase, VIA_MMIO_BLTSIZE);
+
+    if (pVia->FBBase)
+        pci_device_unmap_range(pVia->PciInfo, (pointer)pVia->FBBase, pVia->videoRambytes);
+#else
     if (pVia->MapBase)
         xf86UnMapVidMem(pScrn->scrnIndex, (pointer) pVia->MapBase,
                         VIA_MMIO_REGSIZE);
@@ -2157,6 +2378,7 @@ VIAUnmapMem(ScrnInfoPtr pScrn)
     if (pVia->FBBase)
         xf86UnMapVidMem(pScrn->scrnIndex, (pointer) pVia->FBBase,
                         pVia->videoRambytes);
+#endif
 }
 
 static void

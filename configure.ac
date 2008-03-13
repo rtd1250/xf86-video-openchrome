@@ -77,6 +77,14 @@ sdkdir=$(pkg-config --variable=sdkdir xorg-server)
 
 # Checks for header files.
 AC_HEADER_STDC
+AC_CHECK_HEADER(xf86Modes.h,[XMODES=yes],[XMODES=no],[#include "xorg-server.h"])
+AC_CHECK_DECL(XSERVER_LIBPCIACCESS,
+             [XSERVER_LIBPCIACCESS=yes],[XSERVER_LIBPCIACCESS=no],
+             [#include "xorg/xorg-server.h"])
+
+if test x$XSERVER_LIBPCIACCESS = xyes; then
+       PKG_CHECK_MODULES([PCIACCESS], [pciaccess >= 0.8.0])
+fi
 
 if test "$DRI" != no; then
         AC_CHECK_FILE([${sdkdir}/dri.h],
@@ -129,16 +137,12 @@ AC_CHECK_FILE([${sdkdir}/xf86Module.h],
               [have_xf86Module_h="yes"], [have_xf86Module_h="no"])
 
 # Check the ABI_VIDEODRV_VERSION
-SAVE_CPPFLAGS="$CPPFLAGS"
-CPPFLAGS="$CPPFLAGS $XORG_CFLAGS"
+SAVE_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS $XORG_CFLAGS"
 		
 if test "x$have_xf86Module_h" = xyes; then
 AC_MSG_CHECKING([whether to use old Xv ABI])
         AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[
-#include "xf86Module.h"
-#if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 1
-#error Old Xv ABI
-#endif
                            ]])],
                            [OLD_XVABI=no],
 			   [OLD_XVABI=yes])
@@ -147,13 +151,20 @@ else
         echo -n "xf86Module.h not found, "
 fi
 
-CPPFLAGS="$SAVE_CPPFLAGS"
+CFLAGS="$SAVE_CFLAGS"
+
+
 
 if test "x$OLD_XVABI" = xyes; then
                 echo "yes."
 else
                 echo "no."
                 AC_DEFINE(USE_NEW_XVABI, 1, [Use new Xv ABI (7.1RC1+)])
+fi
+
+AM_CONDITIONAL(XSERVER_LIBPCIACCESS, test x$XSERVER_LIBPCIACCESS = xyes)
+if test "$XSERVER_LIBPCIACCESS" = yes; then
+        AC_DEFINE(XSERVER_LIBPCIACCESS,1,[Enable libpciaccess])
 fi
 
 AM_CONDITIONAL(DEBUG, test x$DEBUG = xyes)

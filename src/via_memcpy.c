@@ -322,7 +322,7 @@ libc_YUV42X(unsigned char *dst, const unsigned char *src,
     if (dstPitch == w) {
         int size = h * ((yuv422) ? w : (w + (w >> 1)));
 
-        xf86memcpy(dst, src, size);
+        memcpy(dst, src, size);
         return;
     } else {
         int count;
@@ -330,7 +330,7 @@ libc_YUV42X(unsigned char *dst, const unsigned char *src,
         /* Copy Y component to video memory. */
         count = h;
         while (count--) {
-            xf86memcpy(dst, src, w);
+            memcpy(dst, src, w);
             src += w;
             dst += dstPitch;
         }
@@ -343,7 +343,7 @@ libc_YUV42X(unsigned char *dst, const unsigned char *src,
             /* Copy V(Cr),U(Cb) components to video memory. */
             count = h;
             while (count--) {
-                xf86memcpy(dst, src, w);
+                memcpy(dst, src, w);
                 src += w;
                 dst += dstPitch;
             }
