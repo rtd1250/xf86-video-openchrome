@@ -239,13 +239,13 @@ typedef struct _VIA {
 
     CloseScreenProcPtr  CloseScreen;
 #ifdef XSERVER_LIBPCIACCESS
-        struct pci_device *PciInfo;
-        int mmio_bar;
-        int fb_bar;
-        PCITAG PciTag;
+    struct pci_device *PciInfo;
+    int mmio_bar;
+    int fb_bar;
+    PCITAG PciTag;
 #else
-        pciVideoPtr PciInfo;
-        PCITAG PciTag;
+    pciVideoPtr PciInfo;
+    PCITAG PciTag;
 #endif
     int                 Chipset;
     int                 ChipId;

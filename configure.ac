@@ -153,8 +153,6 @@ fi
 
 CFLAGS="$SAVE_CFLAGS"
 
-
-
 if test "x$OLD_XVABI" = xyes; then
                 echo "yes."
 else
