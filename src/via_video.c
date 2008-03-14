@@ -718,8 +718,7 @@ viaPaintColorkey(ScrnInfoPtr pScrn, viaPortPrivPtr pPriv, RegionPtr clipBoxes,
         VIAPtr pVia = VIAPTR(pScrn);
 	PixmapPtr pPix = (pScrn->pScreen->GetWindowPixmap)((WindowPtr) pDraw);
 	unsigned long pitch = pPix->devKind;
-	long offset = (long) pPix->devPrivate.ptr - 
-	  (long) pVia->FBBase;
+	long offset = (long) pPix->devPrivate.ptr - (long) pVia->FBBase;
 	int x,y;
 	BoxPtr pBox;
 	int nBox;
@@ -1070,7 +1069,8 @@ Flip(VIAPtr pVia, viaPortPrivPtr pPriv, int fourcc,
 {
     unsigned long proReg = 0;
 
-    if (pVia->ChipId == PCI_CHIP_VT3259 && !(pVia->swov.gdwVideoFlagSW & VIDEO_1_INUSE))
+    if (pVia->ChipId == PCI_CHIP_VT3259
+        && !(pVia->swov.gdwVideoFlagSW & VIDEO_1_INUSE))
 	proReg = PRO_HQV1_OFFSET;
 
     switch (fourcc) {

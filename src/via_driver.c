@@ -836,8 +836,8 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
             /* FIXME: this needs to be tested */
             pVia->dmaXV = FALSE;
             break;
-        case VIA_PM800:
         case VIA_CX700:
+        case VIA_PM800:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
             pVia->swov.maxWInterp = 1920;
             pVia->swov.maxHInterp = 1080;
@@ -1668,9 +1668,8 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
          *   Max Line Pitch: 4080, (FB corruption when higher, driver problem?)
          *   Max Height: 4096 (and beyond)
          *
-         * CLE266A: primary AdjustFrame is able to use 24 bits only, so we are
-         * limited to 12x11 bits; 4080x2048 (~2:1), 3344x2508 (4:3),
-         * or 2896x2896 (1:1).
+         * CLE266A: primary AdjustFrame can use only 24 bits, so we are limited
+         * to 12x11 bits; 4080x2048 (~2:1), 3344x2508 (4:3), or 2896x2896 (1:1).
          * Test CLE266Cx, KM400, KM400A, K8M800, PM800, CN400 please.
          *
          * We should be able to limit the memory available for a mode to 32 MB,
@@ -2126,12 +2125,12 @@ VIARestore(ScrnInfoPtr pScrn)
     hwp->writeCrtc(hwp, 0xA0, Regs->CRA0);
     hwp->writeCrtc(hwp, 0xA1, Regs->CRA1);
     hwp->writeCrtc(hwp, 0xA2, Regs->CRA2);
-/*
+#if 0
     hwp->writeCrtc(hwp, 0x97, Regs->CR97);
     hwp->writeCrtc(hwp, 0x99, Regs->CR99);
     hwp->writeCrtc(hwp, 0x9B, Regs->CR9B);
     hwp->writeCrtc(hwp, 0x9F, Regs->CR9F);
-*/
+#endif
     if (pBIOSInfo->PanelActive)
         ViaLCDPower(pScrn, TRUE);
 
