@@ -1665,7 +1665,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
          *   Max Height: 4096 (and beyond)
          *
          * CLE266A: primary AdjustFrame can use only 24 bits, so we are limited
-         * to 12x11 bits; 4080x2048 (~2:1), 3344x2508 (4:3), or 2896x2896 (1:1).
+         * to 12x11 bits; 4080x2048 (~2:1), 3344x2508 (4:3) or 2896x2896 (1:1).
          * Test CLE266Cx, KM400, KM400A, K8M800, PM800, CN400 please.
          *
          * We should be able to limit the memory available for a mode to 32 MB,
@@ -3081,6 +3081,7 @@ VIAInitialize3DEngine(ScrnInfoPtr pScrn)
     VIASETREG(VIA_REG_TRANSPACE, 0x64000000);
 
     VIASETREG(VIA_REG_TRANSET, 0x00fe0000);
+
     if (pVia->Chipset == VIA_CLE266 && pVia->ChipRev >= 3)
         VIASETREG(VIA_REG_TRANSPACE, 0x40008c0f);
     else
