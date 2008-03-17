@@ -25,7 +25,7 @@
 # TODO: -nostdlib/-Bstatic/-lgcc platform magic, not installing the .a, etc.
 
 EXTRA_DIST = svnversion.h
-CONFIG_CLEAN_FILES= svnversion.h
+CONFIG_CLEAN_FILES= svnversion.h svnrelease.h
 AM_CFLAGS = @XORG_CFLAGS@ @DRI_CFLAGS@
 openchrome_drv_la_LTLIBRARIES = openchrome_drv.la
 openchrome_drv_la_LDFLAGS = -module -avoid-version
@@ -101,3 +101,6 @@ svnversion.h: $(openchrome_drv_la_SOURCES)
 	@mv $@.tmp $@
 	@echo "created $@"
 
+dist-hook:
+	echo '#define BUILDCOMMENT "(openchrome '$(VERSION)' release)\n"' \
+	> svnrelease.h
