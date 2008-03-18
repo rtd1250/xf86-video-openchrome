@@ -23,7 +23,7 @@
 AC_PREREQ(2.57)
 AC_INIT([xf86-video-openchrome],
         0.2.901,
-        [https://www.openchrome.org/trac/report],
+        [http://www.openchrome.org/trac/report/1],
         xf86-video-openchrome)
 
 AC_CONFIG_SRCDIR([Makefile.am])

@@ -102,5 +102,5 @@ svnversion.h: $(openchrome_drv_la_SOURCES)
 	@echo "created $@"
 
 dist-hook:
-	echo '#define BUILDCOMMENT "(openchrome '$(VERSION)' release)\n"' \
+	echo '#define BUILDCOMMENT "(openchrome '$(VERSION)' release)"' \
 	> svnrelease.h
