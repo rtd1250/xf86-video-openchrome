@@ -21,4 +21,4 @@
 AUTOMAKE_OPTIONS = foreign
 SUBDIRS = src man libxvmc
 
-EXTRA_DIST = release_notes-0.3.0 COPYING
+EXTRA_DIST = COPYING NEWS README

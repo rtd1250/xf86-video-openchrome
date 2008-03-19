@@ -1,6 +1,5 @@
-xf86-video-openchrome-0.3.0
-
-This  is the first official openchrome driver release.
+xf86-video-openchrome
+---------------------
 (http://www.openchrome.org)
 
 SUPPORTED CHIPSETS :
@@ -37,8 +36,6 @@ KNOWN BUGS/LIMITATIONS :
 * Laptop panel
 - Laptop displays for anything other than CLE266 and KM400/P4M800 are only
   supported thru VBE calls.
-- Xv is not working on laptop displays for VM800/CN700/P4M800PRO. It is however
-  working on VGA.
 - Virtual terminal is broken on some laptop displays. Use a vesa framebuffer to
   work around that (append vga=791 to your kernel command line, for example).
 
