@@ -820,6 +820,9 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
             pVia->agpEnable = FALSE;
             pVia->DRIIrqEnable = FALSE;
             break;
+        case VIA_VM800:
+            pVia->agpEnable = FALSE;
+            break;
         case VIA_K8M890:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
             pVia->agpEnable = FALSE;
