@@ -154,7 +154,8 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Asustek P5V800-MX",                     VIA_VM800,   0x3344, 0x1122, VIA_DEVICE_CRT},
 
     /*** K8M890 ***/
-    {"ASUS A8V-VM",                           VIA_K8M890,  0x1043, 0x81B5, VIA_DEVICE_CRT},
+    {"Asustek A8V-VM",                        VIA_K8M890,  0x1043, 0x81B5, VIA_DEVICE_CRT},
+    {"Asustek M2V-MX SE",                     VIA_K8M890,  0x1043, 0x8297, VIA_DEVICE_CRT},
     {"Foxconn K8M890M2MA-RS2H",               VIA_K8M890,  0x105B, 0x0C84, VIA_DEVICE_CRT},
     {"Shuttle FX22V1",                        VIA_K8M890,  0x1297, 0x3080, VIA_DEVICE_CRT},
     {"MSI K9VGM-V",                           VIA_K8M890,  0x1462, 0x7253, VIA_DEVICE_CRT},
