@@ -1,4 +1,4 @@
-openchrome 0.2.902 (19/03/2008)
+openchrome 0.2.902 (29/03/2008)
 -------------------------------
 * Enhancements and bug fixes:
 - libpciaccess support.
@@ -7,9 +7,9 @@ openchrome 0.2.902 (19/03/2008)
 - Various code clean up.
 
 * New boards:
-- ASRock P4VM900-SATA2, Asustek P5VD2-VM SE, Biostar P4M800 Pro-M7,
-  Clevo M54xSR, Clevo M660SR, Medion Notebook MD96483, Mitac 8515,
-  Mitac 8624, MSI Fuzzy CX700/CX700D, Packard Bell EasyNote XS
+- ASRock P4VM900-SATA2, Asustek M2V-MX SE, Asustek P5VD2-VM SE,
+  Biostar P4M800 Pro-M7, Clevo M54xSR, Clevo M660SR, Medion Notebook MD96483,
+  Mitac 8515, Mitac 8624, MSI Fuzzy CX700/CX700D, Packard Bell EasyNote XS
   (aka Everex Cloudbook CE1200V), VIA Epia SN.
 
 * Notes:
@@ -27,7 +27,7 @@ openchrome 0.2.902 (19/03/2008)
 
 
 openchrome 0.2.901 (02/01/2008)
---------------------
+-------------------------------
 * Enhancements :
 - New pci ids : FIC CE260, Hasee F700C, MSI P4M900M / P4M900M2-F/L,
   PCChips V21G, Biostar P4M900M-M7 SE.
@@ -44,5 +44,5 @@ openchrome 0.2.901 (02/01/2008)
 - Various code cleanups.
 
 openchrome 0.2.900 (20/10/2007)
---------------------
+-------------------------------
 - First openchrome official release.
