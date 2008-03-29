@@ -24,7 +24,7 @@
 # _ladir passes a dummy rpath to libtool so the thing will actually link
 # TODO: -nostdlib/-Bstatic/-lgcc platform magic, not installing the .a, etc.
 
-EXTRA_DIST = svnversion.h
+EXTRA_DIST = svnversion.h svnrelease.h
 CONFIG_CLEAN_FILES= svnversion.h svnrelease.h
 AM_CFLAGS = @XORG_CFLAGS@ @DRI_CFLAGS@
 openchrome_drv_la_LTLIBRARIES = openchrome_drv.la
