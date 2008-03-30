@@ -24,8 +24,8 @@
 # _ladir passes a dummy rpath to libtool so the thing will actually link
 # TODO: -nostdlib/-Bstatic/-lgcc platform magic, not installing the .a, etc.
 
-EXTRA_DIST = svnversion.h svnrelease.h
-CONFIG_CLEAN_FILES= svnversion.h svnrelease.h
+EXTRA_DIST = svnversion.h
+CONFIG_CLEAN_FILES= svnversion.h
 AM_CFLAGS = @XORG_CFLAGS@ @DRI_CFLAGS@
 openchrome_drv_la_LTLIBRARIES = openchrome_drv.la
 openchrome_drv_la_LDFLAGS = -module -avoid-version
@@ -87,9 +87,7 @@ endif
 
 via_driver.lo: svnversion.h
 svnversion.h: $(openchrome_drv_la_SOURCES)
-	@if [ -f svnrelease.h ]; then \
-	echo '#include "svnrelease.h"' > $@.tmp; \
-	elif [ -d .svn ]; then \
+	@if [ -d .svn ]; then \
 	echo '#define BUILDCOMMENT "(development build, at svn revision '\
 	"`svnversion -nc .. | sed -e s/^[^:]*://`"')"' > $@.tmp; \
 	else \
@@ -103,4 +101,4 @@ svnversion.h: $(openchrome_drv_la_SOURCES)
 
 dist-hook:
 	echo '#define BUILDCOMMENT "(openchrome '$(VERSION)' release)"' \
-	> svnrelease.h
+	> svnversion.h
