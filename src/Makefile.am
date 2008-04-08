@@ -24,6 +24,7 @@
 # _ladir passes a dummy rpath to libtool so the thing will actually link
 # TODO: -nostdlib/-Bstatic/-lgcc platform magic, not installing the .a, etc.
 
+BUILT_SOURCES = svnversion.h
 EXTRA_DIST = svnversion.h
 CONFIG_CLEAN_FILES= svnversion.h
 AM_CFLAGS = @XORG_CFLAGS@ @DRI_CFLAGS@
@@ -100,5 +101,6 @@ svnversion.h: $(openchrome_drv_la_SOURCES)
 	@echo "created $@"
 
 dist-hook:
+	rm svnversion.h;
 	echo '#define BUILDCOMMENT "(openchrome '$(VERSION)' release)"' \
 	> svnversion.h
