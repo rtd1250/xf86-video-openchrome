@@ -600,6 +600,9 @@ via_pci_probe(DriverPtr driver, int entity_num,
                 "VIA Technologies does not support this driver in any way.\n");
         xf86Msg(X_NOTICE,
                 "For support, please refer to http://www.openchrome.org/.\n");
+#ifdef BUILDCOMMENT
+        xf86Msg(X_NOTICE, BUILDCOMMENT"\n");
+#endif
     }
     return scrn != NULL;
 }
