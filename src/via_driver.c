@@ -1065,7 +1065,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 #ifdef XSERVER_LIBPCIACCESS
         struct pci_device *bridge = via_host_bridge();
 
-        pci_device_cfg_read_u32(bridge, &pVia->ChipRev, 0xF6);
+        pci_device_cfg_read_u8(bridge, &pVia->ChipRev, 0xF6);
 #else
         pVia->ChipRev = pciReadByte(pciTag(0, 0, 0), 0xF6);
 #endif
