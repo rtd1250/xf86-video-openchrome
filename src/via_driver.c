@@ -1338,13 +1338,13 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     /* ActiveDevice Option for device selection */
     //pVia->ActiveDevice = 0x00;
     if ((s = xf86GetOptValString(VIAOptions, OPTION_ACTIVEDEVICE))) {
-        if (xf86strstr(s, "CRT"))
+        if (strstr(s, "CRT"))
             pVia->ActiveDevice |= VIA_DEVICE_CRT;
-        if (xf86strstr(s, "LCD"))
+        if (strstr(s, "LCD"))
             pVia->ActiveDevice |= VIA_DEVICE_LCD;
-        if (xf86strstr(s, "DFP"))  /* just treat this the same as LCD */
+        if (strstr(s, "DFP"))  /* just treat this the same as LCD */
             pVia->ActiveDevice |= VIA_DEVICE_LCD;
-        if (xf86strstr(s, "TV"))
+        if (strstr(s, "TV"))
             pVia->ActiveDevice |= VIA_DEVICE_TV;
     }
 
