@@ -75,6 +75,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Epox EP-8KMM3I",                        VIA_KM400,   0x1695, 0x9023, VIA_DEVICE_CRT},
     {"ASRock Inc. K7VM2/3/4",                 VIA_KM400,   0x1849, 0x7205, VIA_DEVICE_CRT},
     {"ACorp KM400QP",                         VIA_KM400,   0x1915, 0x1100, VIA_DEVICE_CRT | VIA_DEVICE_TV},
+    {"Mercury P4VM800M7 (1.0)",               VIA_KM400,   0x3344, 0x1122, VIA_DEVICE_CRT},
     {"Soyo K7VME",                            VIA_KM400,   0xA723, 0x10FD, VIA_DEVICE_CRT},
 
     /*** K8M800, K8N800, K8N800A ***/
@@ -200,7 +201,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Mitac 8615",                            VIA_P4M890,  0x1071, 0x8615, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"VIA VT3343 (P4M890)",                   VIA_P4M890,  0x1106, 0x3343, VIA_DEVICE_CRT},
     {"MSI P4M890M-L/IL (MS-7255)",            VIA_P4M890,  0x1462, 0x7255, VIA_DEVICE_CRT},
-    {"Biostar P4M890-M7 FE/SE/TE",            VIA_P4M890,  0x1565, 0x1207, VIA_DEVICE_CRT},
+    {"Biostar P4M890-M7 TE",                  VIA_P4M890,  0x1565, 0x1207, VIA_DEVICE_CRT},
     {"ASRock P4VM890",                        VIA_P4M890,  0x1849, 0x3343, VIA_DEVICE_CRT},
 
     /* keep this */
