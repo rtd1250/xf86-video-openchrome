@@ -1728,6 +1728,7 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
      * Enable video on secondary 
      */
     if ((pVia->Chipset == VIA_P4M900 ||
+         pVia->Chipset == VIA_K8M890 ||
          pVia->Chipset == VIA_VM800 ||
          pVia->Chipset == VIA_CX700)
         && pVia->pBIOSInfo->PanelActive) {
