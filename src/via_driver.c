@@ -823,6 +823,9 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
             pVia->agpEnable = FALSE;
             pVia->DRIIrqEnable = FALSE;
             break;
+        case VIA_PM800:
+            pVia->VideoEngine = VIDEO_ENGINE_CME;
+            break;
         case VIA_VM800:
             pVia->agpEnable = FALSE;
             break;
@@ -839,7 +842,6 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
             pVia->dmaXV = FALSE;
             break;
         case VIA_CX700:
-        case VIA_PM800:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
             pVia->swov.maxWInterp = 1920;
             pVia->swov.maxHInterp = 1080;
