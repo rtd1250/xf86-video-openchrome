@@ -39,6 +39,7 @@
  */
 static struct ViaCardIdStruct ViaCardId[] = {
     /*** CLE266 ***/
+    {"ECS CLE266 (1.0)",                      VIA_CLE266,  0x1019, 0x1B43, VIA_DEVICE_CRT | VIA_DEVICE_TV},
     {"LT21 VA28",                             VIA_CLE266,  0x1019, 0x1B44, VIA_DEVICE_CRT},
     {"ECS G320",                              VIA_CLE266,  0x1019, 0xB320, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Asustek Terminator C3V",                VIA_CLE266,  0x1043, 0x8155, VIA_DEVICE_CRT},
