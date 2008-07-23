@@ -170,6 +170,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Hewlett Packard 2133 Mini-Note",        VIA_P4M900,  0x103C, 0x3030, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Asustek P5VD2-VM",                      VIA_P4M900,  0x1043, 0x81CE, VIA_DEVICE_CRT},
     {"Asustek P5VD2-VM SE",                   VIA_P4M900,  0x1043, 0x8252, VIA_DEVICE_CRT},
+    {"Foxconn P4M9007MB-8RS2H",               VIA_P4M900,  0x105B, 0x0C87, VIA_DEVICE_CRT},
     {"Mitac 8515",                            VIA_P4M900,  0x1071, 0x8515, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Medion Notebook MD96483",               VIA_P4M900,  0x1071, 0x8615, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Mitac 8624",                            VIA_P4M900,  0x1071, 0x8624, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
