@@ -101,11 +101,7 @@
 #define DRIVER_NAME     "openchrome"
 #define VERSION_MAJOR   0
 #define VERSION_MINOR   2
-#ifdef USE_NEW_XVABI
 #define PATCHLEVEL      903
-#else
-#define PATCHLEVEL      0
-#endif
 #define VIA_VERSION     ((VERSION_MAJOR<<24) | (VERSION_MINOR<<16) | PATCHLEVEL)
 
 #define VIA_CURSOR_SIZE         (4 * 1024)

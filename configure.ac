@@ -133,33 +133,10 @@ AC_MSG_RESULT([$XVMC])
 
 AM_CONDITIONAL(XVMC, test x$XVMC = xyes)
 
-AC_CHECK_FILE([${sdkdir}/xf86Module.h],
-              [have_xf86Module_h="yes"], [have_xf86Module_h="no"])
-
 # Check the ABI_VIDEODRV_VERSION
 SAVE_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS $XORG_CFLAGS"
 		
-if test "x$have_xf86Module_h" = xyes; then
-AC_MSG_CHECKING([whether to use old Xv ABI])
-        AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[
-                           ]])],
-                           [OLD_XVABI=no],
-			   [OLD_XVABI=yes])
-else
-        OLD_XVABI=yes
-        echo -n "xf86Module.h not found, "
-fi
-
-CFLAGS="$SAVE_CFLAGS"
-
-if test "x$OLD_XVABI" = xyes; then
-                echo "yes."
-else
-                echo "no."
-                AC_DEFINE(USE_NEW_XVABI, 1, [Use new Xv ABI (7.1RC1+)])
-fi
-
 AM_CONDITIONAL(XSERVER_LIBPCIACCESS, test x$XSERVER_LIBPCIACCESS = xyes)
 if test "$XSERVER_LIBPCIACCESS" = yes; then
         AC_DEFINE(XSERVER_LIBPCIACCESS,1,[Enable libpciaccess])
