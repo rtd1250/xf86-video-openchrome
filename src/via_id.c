@@ -196,6 +196,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Samsung Q1B",                           VIA_CX700,   0x144D, 0xC02C, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"FIC CE260",                             VIA_CX700,   0x1509, 0x2D30, VIA_DEVICE_LCD},
     {"FIC CE261",                             VIA_CX700,   0x1509, 0x2F07, VIA_DEVICE_LCD},
+    {"Gigabyte M704 / RoverPC A700GQ",        VIA_CX700,   0x161F, 0x2060, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Packard Bell EasyNote XS",              VIA_CX700,   0x1631, 0xC201, VIA_DEVICE_LCD}, /* aka Everex Cloudbook CE1200V */
 
     /*** P4M890, VN890 ***/
