@@ -1,3 +1,66 @@
+2008-05-26  Gabriel Mansi <gabriel.mansi@gmail.com>
+
+	* src/Makefile.am:
+	* src/via_accel.c: (viaInitAccel):
+	* src/via_bios.h:
+	* src/via_crtc.c: (ViaCRTCSetGraphicsRegisters),
+	(ViaCRTCSetAttributeRegisters), (ViaCRTCInit),
+	(ViaFirstCRTCSetMode), (ViaFirstCRTCSetStartingAddress),
+	(ViaSecondCRTCSetStartingAddress),
+	(ViaSecondCRTCHorizontalQWCount), (ViaSecondCRTCHorizontalOffset),
+	(ViaSecondCRTCSetMode), (ViaFirstCRTCModeValid),
+	(ViaSecondCRTCModeValid), (ViaShadowCRTCSetMode):
+	* src/via_cursor.c: (viaCursorARGBInit), (viaCursorSetFB),
+	(viaCursorHWInit), (viaCursorHWShow), (viaCursorHWHide),
+	(viaCursorShow), (viaCursorHide), (viaCursorLoadImage),
+	(viaCursorHWSetPosition), (viaCursorSetPosition),
+	(viaCursorSetColors), (viaCursorStore), (viaCursorRestore),
+	(viaCursorARGBShow), (viaCursorARGBHide),
+	(viaCursorARGBSetPosition), (viaCursorARGBUse),
+	(viaCursorARGBLoad), (viaCursorRecInit), (viaCursorRecDestroy),
+	(viaCursorHWUse):
+	* src/via_dga.c: (VIADGASetMode):
+	* src/via_display.c: (ViaSecondDisplayChannelEnable),
+	(ViaSecondDisplayChannelDisable), (ViaDisplayInit),
+	(ViaDisplayEnableSimultaneous), (ViaDisplayDisableSimultaneous),
+	(ViaDisplayEnableCRT), (ViaDisplayDisableCRT),
+	(ViaDisplaySetStreamOnCRT):
+	* src/via_driver.c: (VIAGetRec), (VIAFreeRec),
+	(VIASetupDefaultOptions), (VIAPreInit), (VIAEnterVT), (VIALeaveVT),
+	(ViaGammaDisable), (VIASave), (VIARestore), (ViaMMIOEnable),
+	(ViaMMIODisable), (VIAMapMMIO), (VIAUnmapMem), (VIALoadPalette),
+	(VIAScreenInit), (VIAWriteMode), (VIACloseScreen),
+	(VIAAdjustFrame), (VIADPMS):
+	* src/via_driver.h:
+	* src/via_lvds.c: (ViaLVDSPowerFirstSequence),
+	(ViaLVDSPowerSecondSequence), (ViaLVDSDFPPower),
+	(ViaLVDSPowerChannel), (ViaLVDSPower):
+	* src/via_mode.c: (ViaPrintMode), (ViaOutputsSelect),
+	(VIAGetPanelSize), (ViaPanelGetIndex), (ViaModesAttach),
+	(ViaValidMode), (VIASetLCDMode), (ViaModePrimaryLegacy),
+	(ViaModeSecondaryLegacy), (ViaLCDPower), (ViaModeFirstCRTC),
+	(ViaModeSecondCRTC), (ViaModeSet):
+	* src/via_panel.c: (ViaPanelLookUpModeIndex),
+	(ViaPanelGetNativeModeFromOption),
+	(ViaPanelGetNativeModeFromScratchPad), (ViaPanelScaleDisable),
+	(ViaPanelScale), (ViaPanelGetNativeDisplayMode), (ViaPanelPreInit),
+	(ViaPanelCenterMode), (ViaPanelGetSizeFromEDID),
+	(ViaPanelGetSizeFromDDCv1), (ViaPanelGetSizeFromDDCv2):
+	* src/via_regs.h:
+	* src/via_swov.c: (Upd_Video):
+	* src/via_timing.c: (froundf), (timingGenerateMode),
+	(viaTimingCvt), (viaTimingGtf):
+	* src/via_timing.h:
+	* src/via_vbe.c: (ViaVbeGetActiveDevices), (ViaVbeSetMode),
+	(ViaVbeDoDPMS):
+	* src/via_video.c: (DecideOverlaySupport), (viaSaveVideo),
+	(viaRestoreVideo):
+
+	Merge panel code from randr branch (rev. 427 to 553)
+	Add native mode setting for P4M890, P4M900, K8M890 and CX700
+	Add LVDS power functions for P4M900 and CX700
+	Add ARGB hardware cursor support
+
 2008-03-11  Xavier Bachelot  <xavier-at-bachelot-dot-org>
 
 	* configure.ac:

@@ -2273,16 +2273,14 @@ viaInitAccel(ScreenPtr pScreen)
 
     pVia->VQStart = 0;
     if (((pVia->FBFreeEnd - pVia->FBFreeStart) >= VIA_VQ_SIZE)
-        && pVia->VQEnable) {
-        pVia->VQStart = pVia->FBFreeEnd - VIA_VQ_SIZE;
-        pVia->VQEnd = pVia->VQStart + VIA_VQ_SIZE - 1;
-        pVia->FBFreeEnd -= VIA_VQ_SIZE;
+	&& pVia->VQEnable) {
+	pVia->VQStart = pVia->FBFreeEnd - VIA_VQ_SIZE;
+	pVia->VQEnd = pVia->VQStart + VIA_VQ_SIZE - 1;
+	pVia->FBFreeEnd -= VIA_VQ_SIZE;
     }
 
-    if (pVia->hwcursor) {
-        pVia->FBFreeEnd -= VIA_CURSOR_SIZE;
-        pVia->CursorStart = pVia->FBFreeEnd;
-    }
+    if (pVia->cursor->isHWCursorEnabled)
+        viaCursorSetFB(pScrn);
 
     viaInitialize2DEngine(pScrn);
 

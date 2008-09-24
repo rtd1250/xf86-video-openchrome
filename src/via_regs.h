@@ -42,7 +42,7 @@
 #define VIA_MMIO_REGBASE        0x0
 #define VIA_MMIO_VGABASE        0x8000
 #define VIA_MMIO_BLTBASE        0x200000
-#define VIA_MMIO_BLTSIZE        0x20000
+#define VIA_MMIO_BLTSIZE        0x200000
 
 
 /* defines for VIA 2D registers */
@@ -84,6 +84,25 @@
 #define VIA_REG_CURSOR_ORG      0x2D8
 #define VIA_REG_CURSOR_BG       0x2DC
 #define VIA_REG_CURSOR_FG       0x2E0
+
+/*CN400 and older Hardware Icon engine register*/
+#define VIA_REG_HI_POSSTART             0x208
+#define VIA_REG_HI_CENTEROFFSET         0x20C
+#define VIA_REG_HI_FBOFFSET             0x224
+#define VIA_REG_HI_CONTROL              0x260
+#define VIA_REG_HI_TRANSPARENT_COLOR    0x270
+#define VIA_REG_HI_INVTCOLOR            0x274
+/* VT3324 primary Hardware Icon engine register */
+#define VIA_REG_PRIM_HI_POSEND          0x290
+#define VIA_REG_V327_HI_INVTCOLOR       0x2E4
+#define VIA_REG_PRIM_HI_FIFO            0x2E8
+#define VIA_REG_PRIM_HI_TRANSCOLOR      0x2EC
+#define VIA_REG_PRIM_HI_CTRL            0x2F0
+#define VIA_REG_PRIM_HI_FBOFFSET        0x2F4
+#define VIA_REG_PRIM_HI_POSSTART        0x2F8
+#define VIA_REG_PRIM_HI_CENTEROFFSET    0x2FC
+#define VIA_REG_PRIM_HI_INVTCOLOR       0x120C
+
 
 
 /* defines for VIA 3D registers */

@@ -95,7 +95,8 @@ viaWaitHQVFlip(VIAPtr pVia)
     pdwState = (CARD32 volatile *)(pVia->VidMapBase + (HQV_CONTROL + proReg));
 
     if (pVia->VideoEngine == VIDEO_ENGINE_CME) {
-        while (*pdwState & (HQV_SUBPIC_FLIP | HQV_SW_FLIP)) ;
+        // while (*pdwState & (HQV_SUBPIC_FLIP | HQV_SW_FLIP)) ;
+	while (*pdwState & HQV_SUBPIC_FLIP);
     } else {
         while (!(*pdwState & HQV_FLIP_STATUS)) ;
     }
@@ -1674,6 +1675,7 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
           unsigned long chromaKeyLow, unsigned long chromaKeyHigh)
 {
     VIAPtr pVia = VIAPTR(pScrn);
+    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAHWDiff *hwDiff = &pVia->HWDiff;
 
@@ -1707,8 +1709,15 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
                   pUpdate->DstLeft, pUpdate->DstRight,
                   pUpdate->DstTop, pUpdate->DstBottom));
 
-    pVia->swov.overlayRecordV1.dwWidth = dstWidth =
-            pUpdate->DstRight - pUpdate->DstLeft;
+    dstWidth = pUpdate->DstRight - pUpdate->DstLeft;
+    if (pBIOSInfo->Panel->IsActive && pBIOSInfo->Panel->Scale) {
+        /* FIXME: We need to determine if the panel is using V1 or V3 */
+        float hfactor = (float)pBIOSInfo->Panel->NativeMode->Width
+                        / pScrn->currentMode->HDisplay;
+        dstWidth *= hfactor;
+    }
+
+    pVia->swov.overlayRecordV1.dwWidth = dstWidth;
     pVia->swov.overlayRecordV1.dwHeight = dstHeight =
             pUpdate->DstBottom - pUpdate->DstTop;
     srcWidth = (unsigned long)pUpdate->SrcRight - pUpdate->SrcLeft;
@@ -1729,7 +1738,8 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
      */
     if ((pVia->VideoEngine == VIDEO_ENGINE_CME
          || pVia->Chipset == VIA_VM800)
-        && pVia->pBIOSInfo->PanelActive) {
+        && pVia->pBIOSInfo->Panel->IsActive) {
+
         /* V1_ON_SND_DISPLAY */
         vidCtl |= 0x80000000;
         /* SECOND_DISPLAY_COLOR_KEY_ENABLE */
