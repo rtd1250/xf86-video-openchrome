@@ -545,6 +545,7 @@ viaCursorRecInit(ScrnInfoPtr pScrn)
             case VIA_CLE266:
             case VIA_KM400:
             case VIA_K8M800:
+            case VIA_K8M890:
                 cursor->isARGBSupported = FALSE;
                 cursor->isARGBEnabled = FALSE;
                 cursor->maxWidth = 32;
