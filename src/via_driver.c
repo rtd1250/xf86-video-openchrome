@@ -126,6 +126,7 @@ static const struct pci_id_match via_device_match[] = {
    VIA_DEVICE_MATCH (PCI_CHIP_VT3364, 0 ),
    VIA_DEVICE_MATCH (PCI_CHIP_VT3324, 0 ),
    VIA_DEVICE_MATCH (PCI_CHIP_VT3327, 0 ),
+   VIA_DEVICE_MATCH (PCI_CHIP_VT3353, 0 ),
     { 0, 0, 0 },
 };
 
@@ -161,6 +162,7 @@ static SymTabRec VIAChipsets[] = {
     {VIA_P4M900,   "P4M900/VN896/CN896"},
     {VIA_CX700,    "CX700/VX700"},
     {VIA_P4M890,   "P4M890"},
+    {VIA_VX800,    "VX800"},
     {-1,            NULL }
 };
 
@@ -175,6 +177,7 @@ static PciChipsets VIAPciChipsets[] = {
     {VIA_P4M900,   PCI_CHIP_VT3364,    RES_SHARED_VGA},
     {VIA_CX700,    PCI_CHIP_VT3324,    RES_SHARED_VGA},
     {VIA_P4M890,   PCI_CHIP_VT3327,    RES_SHARED_VGA},
+    {VIA_VX800,    PCI_CHIP_VT3353,    RES_SHARED_VGA},
     {-1,           -1,                 RES_UNDEFINED}
 };
 
@@ -887,14 +890,12 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
             pVia->DRIIrqEnable = FALSE;
             break;
         case VIA_K8M800:
-            pVia->agpEnable = FALSE;
             pVia->DRIIrqEnable = FALSE;
             break;
         case VIA_PM800:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
             break;
         case VIA_VM800:
-            pVia->agpEnable = FALSE;
             break;
         case VIA_K8M890:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
@@ -919,6 +920,12 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
         case VIA_P4M890:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
             pVia->dmaXV = FALSE;
+            pVia->UseLegacyModeSwitch = FALSE;
+            break;
+        case VIA_VX800:
+            pVia->VideoEngine = VIDEO_ENGINE_CME;
+            /* pVia->agpEnable = FALSE;
+            pVia->dmaXV = FALSE;*/
             pVia->UseLegacyModeSwitch = FALSE;
             break;
     }
@@ -1190,6 +1197,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         case VIA_P4M890:
         case VIA_P4M900:
         case VIA_CX700:
+        case VIA_VX800:
 #ifdef XSERVER_LIBPCIACCESS
             pci_device_cfg_read_u8(vgaDevice, &videoRam, 0xA1);
 #else
@@ -1215,7 +1223,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             } else {
                 from = X_DEFAULT;
                 xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                           "No memory-detection done. Use VideoRAM option.\n");
+                           "No memory-detection done.  Use VideoRAM option.\n");
             }
     }
 
@@ -1946,7 +1954,7 @@ VIALeaveVT(int scrnIndex, int flags)
     viaAccelSync(pScrn);
 
     /* A soft reset helps to avoid a 3D hang on VT switch. */
-    if (pVia->Chipset != VIA_K8M890 && pVia->Chipset != VIA_P4M900)
+    if (pVia->Chipset != VIA_K8M890 && pVia->Chipset != VIA_P4M900 && pVia->Chipset != VIA_VX800)
         hwp->writeSeq(hwp, 0x1A, pVia->SavedReg.SR1A | 0x40);
 
 #ifdef XF86DRI
@@ -3010,7 +3018,8 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
         viaAccelSync(pScrn);
 
         /* A soft reset avoids a 3D hang after X restart. */
-        if (pVia->Chipset != VIA_K8M890 && pVia->Chipset != VIA_P4M900)
+        if (pVia->Chipset != VIA_K8M890 && pVia->Chipset != VIA_P4M900 &&
+            pVia->Chipset != VIA_VX800)
             hwp->writeSeq(hwp, 0x1A, pVia->SavedReg.SR1A | 0x40);
 
         if (!pVia->IsSecondary) {

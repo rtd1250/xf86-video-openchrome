@@ -1,3 +1,50 @@
+2008-11-02  Jon Nettleton  <jon.nettleton@gmail.com>
+
+	* src/via_accel.c: (viaFlushPCI), (viaDisableVQ),
+	(viaInitialize2DEngine), (viaAccelSync), (viaPitchHelper),
+	(viaAccelClippingHelper), (viaAccelSolidHelper),
+	(viaAccelTransparentHelper), (viaAccelCopyHelper),
+	(viaSetupForScreenToScreenCopy), (viaSubsequentScreenToScreenCopy),
+	(viaSetupForSolidFill), (viaSubsequentSolidFillRect),
+	(viaSetupForMono8x8PatternFill),
+	(viaSubsequentMono8x8PatternFillRect),
+	(viaSetupForColor8x8PatternFill),
+	(viaSubsequentColor8x8PatternFillRect),
+	(viaSetupForCPUToScreenColorExpandFill),
+	(viaSubsequentScanlineCPUToScreenColorExpandFill),
+	(viaSetupForImageWrite), (viaSubsequentImageWriteRect),
+	(viaSetupForSolidLine), (viaSubsequentSolidTwoPointLine),
+	(viaSubsequentSolidHorVertLine), (viaSetupForDashedLine),
+	(viaInitXAA), (viaAccelMarkSync), (viaExaPrepareSolid),
+	(viaExaSolid), (viaExaPrepareCopy), (viaExaCopy):
+	* src/via_bandwidth.c: (ViaSetPrimaryFIFO), (ViaSetSecondaryFIFO):
+	* src/via_cursor.c: (viaCursorARGBInit), (viaCursorARGBShow),
+	(viaCursorARGBHide), (viaCursorARGBSetPosition),
+	(viaCursorRecInit):
+	* src/via_driver.c: (VIASetupDefaultOptions), (VIAPreInit),
+	(VIALeaveVT), (VIACloseScreen):
+	* src/via_driver.h:
+	* src/via_id.c:
+	* src/via_id.h:
+	* src/via_mode.c: (ViaOutputsSelect), (VIAGetPanelSize),
+	(ViaPanelGetIndex):
+	* src/via_mode.h:
+	* src/via_panel.c: (ViaPanelPreInit):
+	* src/via_regs.h:
+	* src/via_swov.c: (VIAVidHWDiffInit), (viaCalculateVideoColor),
+	(viaSetColorSpace), (ViaInitVideoStatusFlag), (ViaSetVidCtl),
+	(SetFIFO_V3_64or32or32), (SetFIFO_V3_64or32or16):
+	* src/via_video.c: (viaInitVideo):
+
+        Initial support for the VX800 chipset.  This is based off the
+        Basic chipset support work of Xavier Bachelot and the inital
+        Acceleration work done by Harald Welte.  I verified the changes
+        based off the most recent VIA codebaase and fixed a couple of
+        rendering issues.
+
+        Still needs more work on EXA ( font rendering glitches ) and
+        XVideo.
+
 2008-05-26  Gabriel Mansi <gabriel.mansi@gmail.com>
 
 	* src/Makefile.am:

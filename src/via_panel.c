@@ -279,7 +279,7 @@ ViaPanelPreInit(ScrnInfoPtr pScrn)
         ret = ViaPanelGetSizeFromDDCv1(pScrn, &width, &height);
 /*
         if (!ret)
-            ret = ViaPanelGetSizeFromDDCv2(pScrn, &width, &height);
+            ret = ViaPanelGetSizeFromDDCv2(pScrn, &width);
 */
         if (ret) {
             panel->NativeModeIndex = ViaPanelLookUpModeIndex(width, height);

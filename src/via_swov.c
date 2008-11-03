@@ -281,6 +281,14 @@ VIAVidHWDiffInit(ScrnInfoPtr pScrn)
             HWDiff->dwHQVDisablePatch = VID_HWDIFF_FALSE;
             HWDiff->dwNeedV1Prefetch = VID_HWDIFF_FALSE;
             break;
+        case VIA_VX800:
+            HWDiff->dwThreeHQVBuffer = VID_HWDIFF_TRUE;
+            HWDiff->dwHQVFetchByteUnit = VID_HWDIFF_TRUE;
+            HWDiff->dwSupportTwoColorKey = VID_HWDIFF_TRUE;
+            HWDiff->dwHQVInitPatch = VID_HWDIFF_FALSE;
+            HWDiff->dwHQVDisablePatch = VID_HWDIFF_FALSE;
+            HWDiff->dwNeedV1Prefetch = VID_HWDIFF_FALSE;
+            break;
         default:
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                        "VIAVidHWDiffInit: Unhandled ChipSet.\n");
@@ -775,6 +783,7 @@ viaCalculateVideoColor(VIAPtr pVia, int hue, int saturation,
         case PCI_CHIP_VT3364:
         case PCI_CHIP_VT3324:
         case PCI_CHIP_VT3327:
+        case PCI_CHIP_VT3353:
             model = 0;
             break;
         case PCI_CHIP_CLE3122:
@@ -912,6 +921,7 @@ viaSetColorSpace(VIAPtr pVia, int hue, int saturation, int brightness,
         case PCI_CHIP_VT3336:
         case PCI_CHIP_VT3324:
         case PCI_CHIP_VT3364:
+        case PCI_CHIP_VT3353:
         case PCI_CHIP_CLE3122:
             VIDOutD(V1_ColorSpaceReg_2, col2);
             VIDOutD(V1_ColorSpaceReg_1, col1);
@@ -940,6 +950,7 @@ ViaInitVideoStatusFlag(VIAPtr pVia)
         case PCI_CHIP_VT3336:
         case PCI_CHIP_VT3324:
         case PCI_CHIP_VT3364:
+        case PCI_CHIP_VT3353:
             return (VIDEO_HQV_INUSE | SW_USE_HQV | VIDEO_1_INUSE
                     | VIDEO_ACTIVE | VIDEO_SHOW);
         case PCI_CHIP_CLE3122:
@@ -977,6 +988,7 @@ ViaSetVidCtl(VIAPtr pVia, unsigned int videoFlag)
             case PCI_CHIP_VT3336:
             case PCI_CHIP_VT3324:
             case PCI_CHIP_VT3364:
+            case PCI_CHIP_VT3353:
                 return V3_ENABLE | VIDEO_EXPIRE_NUM_VT3336;
             case PCI_CHIP_CLE3122:
                 if (CLE266_REV_IS_CX(pVia->ChipRev))
@@ -1321,6 +1333,7 @@ SetFIFO_V3_64or32or32(VIAPtr pVia)
         case PCI_CHIP_VT3336:
         case PCI_CHIP_VT3324:
         case PCI_CHIP_VT3364:
+        case PCI_CHIP_VT3353:
             SetFIFO_V3(pVia, 225, 200, 250);
             break;
         case PCI_CHIP_VT3204:
@@ -1352,6 +1365,7 @@ SetFIFO_V3_64or32or16(VIAPtr pVia)
         case PCI_CHIP_VT3336:
         case PCI_CHIP_VT3324:
         case PCI_CHIP_VT3364:
+        case PCI_CHIP_VT3353:
             SetFIFO_V3(pVia, 225, 200, 250);
             break;
         case PCI_CHIP_VT3204:

@@ -71,6 +71,33 @@
 #define VIA_REG_MONOPAT1        0x040
 #define VIA_REG_COLORPAT        0x100       /* from 0x100 to 0x1ff */
 
+/* defineds vor VIA 2D registers for VT3353 (M1 engine) */
+#define VIA_REG_GECMD_M1        0x000
+#define VIA_REG_GEMODE_M1       0x004
+#define VIA_REG_GESTATUS_M1     0x004       /* as same as VIA_REG_GEMODE */
+#define VIA_REG_PITCH_M1        0x008       /* pitch of src and dst */
+#define VIA_REG_DIMENSION_M1    0x00C       /* width and height */
+#define VIA_REG_DSTPOS_M1       0x010
+#define VIA_REG_LINE_XY_M1      0x010
+#define VIA_REG_DSTBASE_M1      0x014
+#define VIA_REG_SRCPOS_M1       0x018
+#define VIA_REG_LINE_K1K2_M1    0x018
+#define VIA_REG_SRCBASE_M1      0x01C
+#define VIA_REG_PATADDR_M1      0x020
+#define VIA_REG_MONOPAT0_M1     0x024
+#define VIA_REG_MONOPAT1_M1     0x028
+#define VIA_REG_OFFSET_M1       0x02C
+#define VIA_REG_LINE_ERROR_M1   0x02C
+#define VIA_REG_CLIPTL_M1       0x040       /* top and left of clipping */
+#define VIA_REG_CLIPBR_M1       0x044       /* bottom and right of clipping */
+#define VIA_REG_KEYCONTROL_M1   0x048       /* color key control */
+#define VIA_REG_FGCOLOR_M1      0x04C
+#define VIA_REG_DSTCOLORKEY_M1  0x04C       /* as same as VIA_REG_FG */
+#define VIA_REG_BGCOLOR_M1      0x050
+#define VIA_REG_SRCCOLORKEY_M1  0x050       /* as same as VIA_REG_BG */
+#define VIA_REG_MONOPATFGC_M1   0x058       /* Add foreground color of Pattern */
+#define VIA_REG_MONOPATBGC_M1   0x05C       /* Add background color of Pattern */
+#define VIA_REG_COLORPAT_M1     0x100       /* from 0x100 to 0x1ff */
 
 
 /* defines for VIA video registers */
@@ -116,6 +143,11 @@
 #define VIA_3D_ENG_BUSY         0x00000001  /* 3D Engine is busy */
 #define VIA_VR_QUEUE_BUSY       0x00020000 /* Virtual Queue is busy */
 
+/* VIA_REG_STATUS(0x400): Egine Status */
+#define VIA_CMD_RGTR_BUSY_H5    0x00000010  /* Command Regulator is busy */
+#define VIA_2D_ENG_BUSY_H5      0x00000002  /* 2D Engine is busy */
+#define VIA_3D_ENG_BUSY_H5      0x00001FE1  /* 3D Engine is busy */
+#define VIA_VR_QUEUE_BUSY_H5    0x00000004  /* Virtual Queue is busy */
 
 /* VIA_REG_GECMD(0x00): 2D Engine Command  */
 #define VIA_GEC_NOOP            0x00000000

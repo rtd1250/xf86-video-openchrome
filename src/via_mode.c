@@ -445,7 +445,7 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
             pBIOSInfo->FirstCRTC->IsActive = TRUE ;
         if (pBIOSInfo->Panel->IsActive) {
             pVia->pBIOSInfo->SecondCRTC->IsActive = TRUE ;
-            if (pVia->Chipset == VIA_P4M900 || pVia->Chipset == VIA_CX700)
+            if (pVia->Chipset == VIA_P4M900 || pVia->Chipset == VIA_CX700 || pVia->Chipset == VIA_VX800 )
                 pVia->pBIOSInfo->Lvds->IsActive = TRUE ;
         }
     }
@@ -473,7 +473,7 @@ VIAGetPanelSize(ScrnInfoPtr pScrn)
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-    char *PanelSizeString[7] = { "640x480", "800x600", "1024x768", "1280x768"
+    char *PanelSizeString[7] = { "640x480", "800x480", "800x600", "1024x768", "1280x768"
                                  "1280x1024", "1400x1050", "1600x1200" };
     int width = 0;
     int height = 0;
@@ -491,7 +491,10 @@ VIAGetPanelSize(ScrnInfoPtr pScrn)
                 pBIOSInfo->Panel->NativeModeIndex = VIA_PANEL6X4;
                 break;
             case 800:
-                pBIOSInfo->Panel->NativeModeIndex = VIA_PANEL8X6;
+		if (height == 480)
+               	    pBIOSInfo->Panel->NativeModeIndex = VIA_PANEL8X4;
+		else
+               	    pBIOSInfo->Panel->NativeModeIndex = VIA_PANEL8X6;
                 break;
             case 1024:
                 pBIOSInfo->Panel->NativeModeIndex = VIA_PANEL10X7;
@@ -640,6 +643,9 @@ ViaPanelGetIndex(ScrnInfoPtr pScrn, DisplayModePtr mode)
     }
 
     for (i = 0; i < VIA_BIOS_NUM_PANEL; i++)
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaPanelGetIndex:"
+                         "Match Debug: %d == %d)\n", pBIOSInfo->Panel->NativeModeIndex,
+                         lcdTable[i].fpSize));
         if (lcdTable[i].fpSize == pBIOSInfo->Panel->NativeModeIndex) {
             int modeNum, tmp;
 

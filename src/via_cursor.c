@@ -73,6 +73,7 @@ viaCursorARGBInit(ScrnInfoPtr pScrn)
         /* case VIA_CN750: */
         case VIA_P4M890:
         case VIA_P4M900:
+        case VIA_VX800:
             if (pBIOSInfo->FirstCRTC->IsActive) {
                 VIASETREG(VIA_REG_PRIM_HI_FBOFFSET, fbOffset);
                 /* Set 0 as transparent color key. */
@@ -399,14 +400,18 @@ viaCursorARGBShow(ScrnInfoPtr pScrn)
         /* case VIA_CN750: */
         case VIA_P4M890:
         case VIA_P4M900:
+	case VIA_VX800:
             /* Turn on hardware icon cursor. */
+            if (pVia->pBIOSInfo->FirstCRTC->IsActive)
+                VIASETREG(VIA_REG_PRIM_HI_CTRL, 0x36000005);
+            if (pVia->pBIOSInfo->SecondCRTC->IsActive)
+                VIASETREG(VIA_REG_HI_CONTROL, 0xb6000005);
+            break;
+        default:
             if (pVia->pBIOSInfo->FirstCRTC->IsActive)
                 VIASETREG(VIA_REG_PRIM_HI_CTRL, 0x76000005);
             if (pVia->pBIOSInfo->SecondCRTC->IsActive)
                 VIASETREG(VIA_REG_HI_CONTROL, 0xf6000005);
-            break;
-        default:
-            VIASETREG(VIA_REG_HI_CONTROL, 0xf6000005);
             break;
     }
 
@@ -423,15 +428,16 @@ viaCursorARGBHide(ScrnInfoPtr pScrn)
         /* case VIA_CN750: */
         case VIA_P4M890:
         case VIA_P4M900:
+	case VIA_VX800:
             if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
                 hiControl = VIAGETREG(VIA_REG_PRIM_HI_CTRL);
                 /* Turn hardware icon cursor off. */
-                VIASETREG(VIA_REG_PRIM_HI_CTRL, hiControl & 0xFFFFFFFE);
+                VIASETREG(VIA_REG_PRIM_HI_CTRL, hiControl & 0xFFFFFFFA);
             }
             if (pVia->pBIOSInfo->SecondCRTC->IsActive) {
                 hiControl = VIAGETREG(VIA_REG_HI_CONTROL);
                 /* Turn hardware icon cursor off. */
-                VIASETREG(VIA_REG_HI_CONTROL, hiControl & 0xFFFFFFFE);
+                VIASETREG(VIA_REG_HI_CONTROL, hiControl & 0xFFFFFFFA);
             }
             break;
         default:
@@ -452,6 +458,7 @@ viaCursorARGBSetPosition(ScrnInfoPtr pScrn, int x, int y)
         /* case VIA_CN750: */
         case VIA_P4M890:
         case VIA_P4M900:
+        case VIA_VX800:
             if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
                 /* Set hardware icon position. */
                 VIASETREG(VIA_REG_PRIM_HI_POSSTART, ((x << 16) | (y & 0x07ff)));
@@ -545,7 +552,6 @@ viaCursorRecInit(ScrnInfoPtr pScrn)
             case VIA_CLE266:
             case VIA_KM400:
             case VIA_K8M800:
-            case VIA_K8M890:
                 cursor->isARGBSupported = FALSE;
                 cursor->isARGBEnabled = FALSE;
                 cursor->maxWidth = 32;

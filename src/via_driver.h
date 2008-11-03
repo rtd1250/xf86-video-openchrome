@@ -296,6 +296,7 @@ typedef struct _VIA {
     CARD32              lastMarkerRead;
     Bool                agpDMA;
     Bool                nPOT[VIA_NUM_TEXUNITS];
+    const unsigned     *TwodRegs;
 #ifdef VIA_HAVE_EXA
     ExaDriverPtr        exaDriverPtr;
     ExaOffscreenArea   *exa_scratch;
