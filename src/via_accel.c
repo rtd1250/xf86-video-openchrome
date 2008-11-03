@@ -1275,7 +1275,7 @@ viaInitXAA(ScreenPtr pScreen)
 
     if (pVia->Chipset != VIA_K8M800 &&
         pVia->Chipset != VIA_K8M890 &&
-        pVia->Chipset != VIA_P4M900) 
+        pVia->Chipset != VIA_P4M900)
         xaaptr->ImageWriteFlags |= NO_GXCOPY;
 
     xaaptr->SetupForImageWrite = viaSetupForImageWrite;

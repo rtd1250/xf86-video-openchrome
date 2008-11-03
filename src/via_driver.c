@@ -1223,7 +1223,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             } else {
                 from = X_DEFAULT;
                 xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                           "No memory-detection done.  Use VideoRAM option.\n");
+                           "No memory-detection done. Use VideoRAM option.\n");
             }
     }
 
