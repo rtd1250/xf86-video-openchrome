@@ -146,7 +146,6 @@ ViaFirstCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
             break;
     }
 
-    /* FIXME: check if this is really necessary here */
     switch (pVia->ChipId) {
         case VIA_K8M890:
         case VIA_CX700:
@@ -282,7 +281,6 @@ ViaFirstCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
     hwp->writeSeq(hwp, 0x1C, (temp >> 1) & 0xFF);
     ViaSeqMask(hwp, 0x1D, temp >> 9, 0x03);
 
-    /* FIXME: check if this is really necessary here */
     switch (pVia->ChipId) {
         case VIA_K8M890:
         case VIA_CX700:
@@ -405,6 +403,19 @@ ViaSecondCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
             break;
     }
 
+    switch (pVia->ChipId) {
+        case VIA_K8M890:
+        case VIA_CX700:
+        case VIA_P4M900:
+            break;
+        default:
+            ViaSeqMask(hwp, 0x16, 0x08, 0xBF);
+            ViaSeqMask(hwp, 0x17, 0x1F, 0xFF);
+            ViaSeqMask(hwp, 0x18, 0x4E, 0xFF);
+            ViaSeqMask(hwp, 0x1A, 0x08, 0xFD);
+            break;
+    }
+
     /* Crtc registers */
     /* horizontal total : 4096 */
     temp = mode->CrtcHTotal - 1;
@@ -473,6 +484,19 @@ ViaSecondCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
     /* vertical sync end : start + 32 */
     temp = mode->CrtcVSyncEnd;
     ViaCrtcMask(hwp, 0x5F, temp, 0x1F);
+
+    switch (pVia->ChipId) {
+        case VIA_K8M890:
+        case VIA_CX700:
+        case VIA_P4M900:
+            break;
+        default:
+            /* some leftovers */
+            hwp->writeCrtc(hwp, 0x08, 0x00);
+            ViaCrtcMask(hwp, 0x32, 0, 0xFF);  /* ? */
+            ViaCrtcMask(hwp, 0x33, 0, 0xC8);
+            break;
+    }
 
     ViaSecondCRTCHorizontalOffset(pScrn);
     ViaSecondCRTCHorizontalQWCount(pScrn, mode->CrtcHDisplay);

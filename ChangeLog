@@ -1,3 +1,11 @@
+2008-11-04  Jon Nettleton  <jon.nettleton@gmail.com>
+
+	* src/via_crtc.c: (ViaFirstCRTCSetMode), (ViaSecondCRTCSetMode):
+
+	Found needed register writes that are needed so VX800 doesn't
+	crash when CRT is not enabled.  I also removed NEEDS FIXING
+        comments from them as they are obviously needed.
+
 2008-11-03  Jon Nettleton  <jon.nettleton@gmail.com>
 
 	* src/via_accel.c: (viaSubsequentMono8x8PatternFillRect),
