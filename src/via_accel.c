@@ -77,7 +77,8 @@ enum VIA_2D_Regs {
 	MONOPAT0,
 	MONOPAT1,
 	COLORPAT,
-	MONOPATFGC
+	MONOPATFGC,
+	MONOPATBGC
 };
 
 /* register offsets for old 2D core */
@@ -104,7 +105,8 @@ static const unsigned via_2d_regs[] = {
     [MONOPAT0]          = VIA_REG_MONOPAT0,
     [MONOPAT1]          = VIA_REG_MONOPAT1,
     [COLORPAT]          = VIA_REG_COLORPAT,
-    [MONOPATFGC]        = VIA_REG_FGCOLOR
+    [MONOPATFGC]        = VIA_REG_FGCOLOR,
+    [MONOPATBGC]        = VIA_REG_BGCOLOR
 };
 
 /* register offsets for new 2D core (M1 in VT3353 == VX800) */
@@ -131,7 +133,8 @@ static const unsigned via_2d_regs_m1[] = {
     [MONOPAT0]          = VIA_REG_MONOPAT0_M1,
     [MONOPAT1]          = VIA_REG_MONOPAT1_M1,
     [COLORPAT]          = VIA_REG_COLORPAT_M1,
-    [MONOPATFGC]        = VIA_REG_MONOPATFGC_M1
+    [MONOPATFGC]        = VIA_REG_MONOPATFGC_M1,
+    [MONOPATBGC]        = VIA_REG_MONOPATBGC_M1
 };
 
 #define VIA_REG(pVia, name)	(pVia)->TwodRegs[name]
@@ -861,8 +864,8 @@ viaSubsequentMono8x8PatternFillRect(ScrnInfoPtr pScrn, int patOffx,
     OUT_RING_H1(VIA_REG(pVia, DSTPOS), ((y - sub) << 16) | (x & 0xFFFF));
     OUT_RING_H1(VIA_REG(pVia, DIMENSION), (((h - 1) << 16) | (w - 1)));
     OUT_RING_H1(VIA_REG(pVia, PATADDR), patOffset);
-    OUT_RING_H1(VIA_REG(pVia, FGCOLOR), tdc->fgColor);
-    OUT_RING_H1(VIA_REG(pVia, BGCOLOR), tdc->bgColor);
+    OUT_RING_H1(VIA_REG(pVia, MONOPATFGC), tdc->fgColor);
+    OUT_RING_H1(VIA_REG(pVia, MONOPATBGC), tdc->bgColor);
     OUT_RING_H1(VIA_REG(pVia, MONOPAT0), tdc->pattern0);
     OUT_RING_H1(VIA_REG(pVia, MONOPAT1), tdc->pattern1);
     OUT_RING_H1(VIA_REG(pVia, GECMD), tdc->cmd);
@@ -1032,7 +1035,7 @@ viaSetupForSolidLine(ScrnInfoPtr pScrn, int color, int rop,
     BEGIN_RING(6);
     OUT_RING_H1(VIA_REG(pVia, GEMODE), tdc->mode);
     OUT_RING_H1(VIA_REG(pVia, MONOPAT0), 0xFF);
-    OUT_RING_H1(VIA_REG(pVia, FGCOLOR), tdc->fgColor);
+    OUT_RING_H1(VIA_REG(pVia, MONOPATFGC), tdc->fgColor);
 }
 
 static void
@@ -1113,17 +1116,17 @@ viaSubsequentSolidHorVertLine(ScrnInfoPtr pScrn, int x, int y, int len, int dir)
     dstBase = pScrn->fbOffset + sub * pVia->Bpl;
 
     BEGIN_RING(10);
-    OUT_RING_H1(VIA_REG_DSTBASE, dstBase >> 3);
+    OUT_RING_H1(VIA_REG(pVia, DSTBASE), dstBase >> 3);
     viaPitchHelper(pVia, pVia->Bpl, 0);
 
     if (dir == DEGREES_0) {
-        OUT_RING_H1(VIA_REG_DSTPOS, ((y - sub) << 16) | (x & 0xFFFF));
-        OUT_RING_H1(VIA_REG_DIMENSION, (len - 1));
-        OUT_RING_H1(VIA_REG_GECMD, tdc->cmd | VIA_GEC_BLT);
+        OUT_RING_H1(VIA_REG(pVia, DSTPOS), ((y - sub) << 16) | (x & 0xFFFF));
+        OUT_RING_H1(VIA_REG(pVia, DIMENSION), (len - 1));
+        OUT_RING_H1(VIA_REG(pVia, GECMD), tdc->cmd | VIA_GEC_BLT);
     } else {
-        OUT_RING_H1(VIA_REG_DSTPOS, ((y - sub) << 16) | (x & 0xFFFF));
-        OUT_RING_H1(VIA_REG_DIMENSION, ((len - 1) << 16));
-        OUT_RING_H1(VIA_REG_GECMD, tdc->cmd | VIA_GEC_BLT);
+        OUT_RING_H1(VIA_REG(pVia, DSTPOS), ((y - sub) << 16) | (x & 0xFFFF));
+        OUT_RING_H1(VIA_REG(pVia, DIMENSION), ((len - 1) << 16));
+        OUT_RING_H1(VIA_REG(pVia, GECMD), tdc->cmd | VIA_GEC_BLT);
     }
     ADVANCE_RING;
 }
@@ -1166,10 +1169,10 @@ viaSetupForDashedLine(ScrnInfoPtr pScrn, int fg, int bg, int rop,
     tdc->dashed = TRUE;
 
     BEGIN_RING(8);
-    OUT_RING_H1(VIA_REG_GEMODE, tdc->mode);
-    OUT_RING_H1(VIA_REG_FGCOLOR, tdc->fgColor);
-    OUT_RING_H1(VIA_REG_BGCOLOR, tdc->bgColor);
-    OUT_RING_H1(VIA_REG_MONOPAT0, tdc->pattern0);
+    OUT_RING_H1(VIA_REG(pVia, GEMODE), tdc->mode);
+    OUT_RING_H1(VIA_REG(pVia, MONOPATFGC), tdc->fgColor);
+    OUT_RING_H1(VIA_REG(pVia, MONOPATBGC), tdc->bgColor);
+    OUT_RING_H1(VIA_REG(pVia, MONOPAT0), tdc->pattern0);
 }
 
 static void
@@ -1308,7 +1311,7 @@ viaAccelMarkSync(ScreenPtr pScreen)
 
     if (pVia->agpDMA) {
         BEGIN_RING(2);
-        OUT_RING_H1(VIA_REG_KEYCONTROL, 0x00);
+        OUT_RING_H1(VIA_REG(pVia, KEYCONTROL), 0x00);
         viaAccelSolidHelper(pVia, 0, 0, 1, 1, pVia->markerOffset,
                             VIA_GEM_32bpp, 4, pVia->curMarker,
                             (0xF0 << 24) | VIA_GEC_BLT | VIA_GEC_FIXCOLOR_PAT);

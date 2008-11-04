@@ -1,3 +1,14 @@
+2008-11-03  Jon Nettleton  <jon.nettleton@gmail.com>
+
+	* src/via_accel.c: (viaSubsequentMono8x8PatternFillRect),
+	(viaSetupForSolidLine), (viaSubsequentSolidHorVertLine),
+	(viaSetupForDashedLine), (viaAccelMarkSync):
+
+	A few more acceleration tweaks for the VX800.  
+	This should fix all the XAA rendering issues.
+	This should also allow 800x480 Panels to work without
+	custom modelines.
+
 2008-11-02  Jon Nettleton  <jon.nettleton@gmail.com>
 
 	* src/via_accel.c: (viaFlushPCI), (viaDisableVQ),
