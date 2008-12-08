@@ -318,7 +318,7 @@ ViaPanelCenterMode(DisplayModePtr centerMode, DisplayModePtr panelMode,
     centerMode->CrtcHBlankEnd += HDiff;
 
     centerMode->CrtcVSyncStart += VDiff;
-    centerMode->CrtcVSyncEnd += VDiff;;
+    centerMode->CrtcVSyncEnd += VDiff;
     centerMode->CrtcVBlankStart += VDiff;
     centerMode->CrtcVBlankEnd += VDiff;
 }
