@@ -918,8 +918,8 @@ viaStopVideo(ScrnInfoPtr pScrn, pointer data, Bool exit)
     DBG_DD(ErrorF(" via_video.c : viaStopVideo: exit=%d\n", exit));
 
     REGION_EMPTY(pScrn->pScreen, &pPriv->clip);
+    ViaOverlayHide(pScrn);
     if (exit) {
-        ViaOverlayHide(pScrn);
         ViaSwovSurfaceDestroy(pScrn, pPriv);
         if (pPriv->dmaBounceBuffer)
             xfree(pPriv->dmaBounceBuffer);
