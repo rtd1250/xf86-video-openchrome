@@ -70,7 +70,7 @@ XORG_DRIVER_CHECK_EXT(XF86DRI, xextproto x11)
 XORG_DRIVER_CHECK_EXT(DPMSExtension, xextproto)
 
 # Checks for pkg-config packages
-PKG_CHECK_MODULES(XORG, [xorg-server xproto xvmc fontsproto libdrm $REQUIRED_MODULES])
+PKG_CHECK_MODULES(XORG, [xorg-server xproto fontsproto libdrm $REQUIRED_MODULES])
 sdkdir=$(pkg-config --variable=sdkdir xorg-server)
 
 # Checks for libraries.
@@ -126,6 +126,7 @@ fi
 
 if test "x$XVMC" = xyes; then
 	AC_CHECK_HEADERS(pthread.h sys/ioctl.h sys/time.h time.h,,[XVMC="no"; break],)
+	PKG_CHECK_MODULES(XVMC, [x11 xext xvmc])
 fi
 
 AC_MSG_CHECKING([whether to build XvMC driver support])
