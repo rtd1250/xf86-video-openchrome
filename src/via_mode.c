@@ -1415,6 +1415,9 @@ ViaLCDPower(ScrnInfoPtr pScrn, Bool On)
     else
         ViaCrtcMask(hwp, 0x6A, 0x00, 0x08);
 
+    if (pBIOSInfo->LCDPower) 
+        pBIOSInfo->LCDPower(pScrn, On);
+
     /* Find Panel Size Index for PowerSeq Table */
     if (pVia->Chipset == VIA_CLE266) {
         if (pBIOSInfo->Panel->NativeModeIndex != VIA_PANEL_INVALID) {
