@@ -1284,7 +1284,11 @@ viaInitXAA(ScreenPtr pScreen)
     xaaptr->SetupForImageWrite = viaSetupForImageWrite;
     xaaptr->SubsequentImageWriteRect = viaSubsequentImageWriteRect;
     xaaptr->ImageWriteBase = pVia->BltBase;
-    xaaptr->ImageWriteRange = VIA_MMIO_BLTSIZE;
+
+    if (pVia->Chipset == VIA_VX800)
+        xaaptr->ImageWriteRange = VIA_MMIO_BLTSIZE;
+    else
+        xaaptr->ImageWriteRange = (64 * 1024);
 
     return XAAInit(pScreen, xaaptr);
 

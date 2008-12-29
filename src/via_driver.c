@@ -2343,8 +2343,7 @@ VIAMapMMIO(ScrnInfoPtr pScrn)
     err = pci_device_map_range(pVia->PciInfo,
                                pVia->MmioBase + VIA_MMIO_BLTBASE,
                                VIA_MMIO_BLTSIZE,
-                               (PCI_DEV_MAP_FLAG_WRITABLE
-                                | PCI_DEV_MAP_FLAG_WRITE_COMBINE),
+                               PCI_DEV_MAP_FLAG_WRITABLE,
                                (void **)&pVia->BltBase);
 
     if (err) {
@@ -2446,7 +2445,8 @@ VIAMapFB(ScrnInfoPtr pScrn)
 #ifdef XSERVER_LIBPCIACCESS
         err = pci_device_map_range(pVia->PciInfo, pVia->FrameBufferBase,
                                    pVia->videoRambytes,
-                                   PCI_DEV_MAP_FLAG_WRITABLE,
+                                   (PCI_DEV_MAP_FLAG_WRITABLE |
+                                    PCI_DEV_MAP_FLAG_WRITE_COMBINE),
                                    (void **)&pVia->FBBase);
         if (err) {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,

@@ -1,3 +1,12 @@
+2008-12-29  Jon Nettleton  <jon.nettleton@gmail.com>
+
+	* src/via_accel.c: (viaInitXAA):
+	* src/via_driver.c: (VIAMapMMIO), (VIAMapFB):
+
+	Finally tracked down the XAA libpciaccess bug.  Also
+	Realized I had not enabled write-combining on the main
+	framebuffer.  This should give a small speed boost.
+
 2008-12-26  Jon Nettleton <jon.nettleton@gmail.com>
 
 	* src/via_mode.h:
