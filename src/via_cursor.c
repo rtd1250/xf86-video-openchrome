@@ -551,12 +551,25 @@ viaCursorRecInit(ScrnInfoPtr pScrn)
         switch (pVia->Chipset) {
             case VIA_CLE266:
             case VIA_KM400:
-            case VIA_K8M800:
                 cursor->isARGBSupported = FALSE;
                 cursor->isARGBEnabled = FALSE;
                 cursor->maxWidth = 32;
                 cursor->maxHeight = 32;
                 cursor->size = ((cursor->maxWidth * cursor->maxHeight) / 8) * 2;
+                break;
+            case VIA_K8M800:
+            case VIA_PM800:
+            case VIA_VM800:
+            case VIA_P4M890:
+            case VIA_K8M890:
+            case VIA_P4M900:
+            case VIA_CX700:
+            case VIA_VX800:
+                cursor->isARGBSupported = TRUE;
+                cursor->isARGBEnabled = FALSE;
+                cursor->maxWidth = 64;
+                cursor->maxHeight = 64;
+                cursor->size = cursor->maxWidth * cursor->maxHeight * 4;
                 break;
             default:
                 cursor->isARGBSupported = TRUE;
