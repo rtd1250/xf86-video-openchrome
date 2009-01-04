@@ -73,6 +73,7 @@ via_host_bridge(void)
     return via_pci_device(&bridge_match);
 }
 
+struct pci_device *
 viaPciDeviceVga(void)
 {
     static const struct pci_slot_match bridge_match = {
@@ -953,6 +954,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 
 #ifdef XSERVER_LIBPCIACCESS
     struct pci_device *bridge = via_host_bridge();
+    uint8_t rev = 0 ;
 #endif
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAPreInit\n"));
@@ -1145,9 +1147,8 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     } else {
         /* Read PCI bus 0, dev 0, function 0, index 0xF6 to get chip revision */
 #ifdef XSERVER_LIBPCIACCESS
-        struct pci_device *bridge = via_host_bridge();
-
-        pci_device_cfg_read_u8(bridge, &pVia->ChipRev, 0xF6);
+	pci_device_cfg_read_u8(bridge, &rev, 0xF6);
+	pVia->ChipRev = rev ;
 #else
         pVia->ChipRev = pciReadByte(pciTag(0, 0, 0), 0xF6);
 #endif
