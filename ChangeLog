@@ -1,5 +1,13 @@
 2009-01-04  Jon Nettleton  <jon.nettleton@gmail.com>
 
+	* src/via_driver.c: (VIAMapMMIO), (VIAMapFB):
+
+	Moved pVia->FrameBufferBase setting to within
+	VIAMapFB where it was before being called without
+	being set.
+
+2009-01-04  Jon Nettleton  <jon.nettleton@gmail.com>
+
 	* src/via_driver.c: (VIAPreInit):
 
 	Patch submitted by Robert Bridge to clean up compiler

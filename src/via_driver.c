@@ -2300,18 +2300,13 @@ VIAMapMMIO(ScrnInfoPtr pScrn)
     VIAPtr pVia = VIAPTR(pScrn);
 
 #ifdef XSERVER_LIBPCIACCESS
+    pVia->MmioBase = pVia->PciInfo->regions[1].base_addr;
     int err;
+#else
+    pVia->MmioBase = pVia->PciInfo->memBase[1];
 #endif
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAMapMMIO\n"));
-
-#ifdef XSERVER_LIBPCIACCESS
-    pVia->FrameBufferBase = pVia->PciInfo->regions[0].base_addr;
-    pVia->MmioBase = pVia->PciInfo->regions[1].base_addr;
-#else
-    pVia->FrameBufferBase = pVia->PciInfo->memBase[0];
-    pVia->MmioBase = pVia->PciInfo->memBase[1];
-#endif
 
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                "mapping MMIO @ 0x%lx with size 0x%x\n",
@@ -2405,8 +2400,12 @@ static Bool
 VIAMapFB(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
+
 #ifdef XSERVER_LIBPCIACCESS
+    pVia->FrameBufferBase = pVia->PciInfo->regions[0].base_addr;
     int err;
+#else
+    pVia->FrameBufferBase = pVia->PciInfo->memBase[0];
 #endif
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAMapFB\n"));
