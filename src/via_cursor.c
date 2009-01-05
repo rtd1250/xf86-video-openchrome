@@ -36,37 +36,60 @@
 
 #include "via.h"
 #include "via_driver.h"
-#include "via_regs.h"
 #include "via_id.h"
-
-#ifdef ARGB_CURSOR
 #include "cursorstr.h"
-#endif
 
-static void viaCursorLoadImage(ScrnInfoPtr pScrn, unsigned char *src);
-static void viaCursorSetPosition(ScrnInfoPtr pScrn, int x, int y);
-static void viaCursorSetColors(ScrnInfoPtr pScrn, int bg, int fg);
-static Bool viaCursorHWUse(ScreenPtr screen, CursorPtr cursor);
-static void viaCursorHWHide(ScrnInfoPtr pScrn);
+void viaShowCursor(ScrnInfoPtr pScrn);
+void viaHideCursor(ScrnInfoPtr pScrn);
+static void viaSetCursorPosition(ScrnInfoPtr pScrn, int x, int y);
+static Bool viaUseHWCursor(ScreenPtr pScreen, CursorPtr pCurs);
+static Bool viaUseHWCursorARGB(ScreenPtr pScreen, CursorPtr pCurs);
+static void viaLoadCursorImage(ScrnInfoPtr pScrn, unsigned char *src);
+static void viaSetCursorColors(ScrnInfoPtr pScrn, int bg, int fg);
+static void viaLoadCursorARGB(ScrnInfoPtr pScrn, CursorPtr pCurs);
 
-#ifdef ARGB_CURSOR
-static void viaCursorARGBShow(ScrnInfoPtr pScrn);
-static void viaCursorARGBHide(ScrnInfoPtr pScrn);
-static void viaCursorARGBSetPosition(ScrnInfoPtr pScrn, int x, int y);
-static Bool viaCursorARGBUse(ScreenPtr pScreen, CursorPtr pCurs);
-static void viaCursorARGBLoad(ScrnInfoPtr pScrn, CursorPtr pCurs);
-#endif
+static CARD32 mono_cursor_color[] = {
+	0x00000000,
+	0x00000000,
+	0xffffffff,
+	0xff000000,
+};
 
-#ifdef ARGB_CURSOR
-static void
-viaCursorARGBInit(ScrnInfoPtr pScrn)
+Bool
+viaHWCursorInit(ScreenPtr pScreen)
 {
+    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
     VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+    xf86CursorInfoPtr infoPtr;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "viaCursorARGBInit\n"));
+	switch (pVia->Chipset) {
+		case VIA_CLE266:
+		case VIA_KM400:
+			/* FIXME Mono HW Cursors not working */
+			pVia->hwcursor = FALSE;
+			pVia->CursorARGBSupported = FALSE;
+			pVia->CursorMaxWidth = 32;
+			pVia->CursorMaxHeight = 32;
+			pVia->CursorSize = ((pVia->CursorMaxWidth * pVia->CursorMaxHeight) / 8) * 2;
+			break;
+		default:
+			pVia->CursorARGBSupported = TRUE;
+			pVia->CursorMaxWidth = 64;
+			pVia->CursorMaxHeight = 64;
+			pVia->CursorSize = pVia->CursorMaxWidth * (pVia->CursorMaxHeight + 1) * 4;
+			break;
+    }
 
-    unsigned long fbOffset = pScrn->fbOffset + pVia->cursor->fbCursorStart;
+    if (pVia->NoAccel) 
+    	viaCursorSetFB(pScrn);
+
+    pVia->cursorMap = pVia->FBBase + pVia->CursorStart;
+
+    if (pVia->cursorMap == NULL)
+		return FALSE;
+
+    pVia->cursorOffset = pScrn->fbOffset + pVia->CursorStart;
+    memset(pVia->cursorMap, 0x00, pVia->CursorSize);
 
     switch (pVia->Chipset) {
         case VIA_CX700:
@@ -74,298 +97,144 @@ viaCursorARGBInit(ScrnInfoPtr pScrn)
         case VIA_P4M890:
         case VIA_P4M900:
         case VIA_VX800:
-            if (pBIOSInfo->FirstCRTC->IsActive) {
-                VIASETREG(VIA_REG_PRIM_HI_FBOFFSET, fbOffset);
-                /* Set 0 as transparent color key. */
-                VIASETREG(VIA_REG_PRIM_HI_TRANSCOLOR, 0);
-                VIASETREG(VIA_REG_PRIM_HI_FIFO, 0x0D000D0F);
-                VIASETREG(VIA_REG_PRIM_HI_INVTCOLOR, 0X00FFFFFF);
-                VIASETREG(VIA_REG_V327_HI_INVTCOLOR, 0X00FFFFFF);
-            }
-            if (pBIOSInfo->SecondCRTC->IsActive) {
-                VIASETREG(VIA_REG_HI_FBOFFSET, fbOffset);
-                /* Set 0 as transparent color key. */
-                VIASETREG(VIA_REG_HI_TRANSPARENT_COLOR, 0);
-                VIASETREG(VIA_REG_HI_INVTCOLOR, 0X00FFFFFF);
-                VIASETREG(ALPHA_V3_PREFIFO_CONTROL, 0xE0000);
-                VIASETREG(ALPHA_V3_FIFO_CONTROL, 0xE0F0000);
-            }
-            break;
-        default:
-            VIASETREG(VIA_REG_HI_FBOFFSET, fbOffset);
-            VIASETREG(VIA_REG_HI_TRANSPARENT_COLOR, 0);
-            VIASETREG(VIA_REG_HI_INVTCOLOR, 0X00FFFFFF);
-            VIASETREG(ALPHA_V3_PREFIFO_CONTROL, 0xE0000);
-            VIASETREG(ALPHA_V3_FIFO_CONTROL, 0xE0F0000);
-            break;
+			if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
+				pVia->CursorRegControl  = VIA_REG_HI_CONTROL0;
+				pVia->CursorRegBase     = VIA_REG_HI_BASE0;
+				pVia->CursorRegPos      = VIA_REG_HI_POS0;
+				pVia->CursorRegOffset   = VIA_REG_HI_OFFSET0;
+				pVia->CursorRegFifo     = VIA_REG_HI_FIFO0;
+				pVia->CursorRegTransKey = VIA_REG_HI_TRANSKEY0;
+			}
+			if (pVia->pBIOSInfo->SecondCRTC->IsActive) {
+				pVia->CursorRegControl  = VIA_REG_HI_CONTROL1;
+				pVia->CursorRegBase     = VIA_REG_HI_BASE1;
+				pVia->CursorRegPos      = VIA_REG_HI_POS1;
+				pVia->CursorRegOffset   = VIA_REG_HI_OFFSET1;
+				pVia->CursorRegFifo     = VIA_REG_HI_FIFO1;
+				pVia->CursorRegTransKey = VIA_REG_HI_TRANSKEY1;
+			}
+			break;
+		default:
+			pVia->CursorRegControl = VIA_REG_ALPHA_CONTROL;
+			pVia->CursorRegBase = VIA_REG_ALPHA_BASE;
+			pVia->CursorRegPos = VIA_REG_ALPHA_POS;
+			pVia->CursorRegOffset = VIA_REG_ALPHA_OFFSET;
+			pVia->CursorRegFifo = VIA_REG_ALPHA_FIFO;
+			pVia->CursorRegTransKey = VIA_REG_ALPHA_TRANSKEY;
     }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAHWCursorInit\n"));
+    infoPtr = xf86CreateCursorInfoRec();
+    if (!infoPtr)
+        return FALSE;
+
+    pVia->CursorInfoRec = infoPtr;
+
+    infoPtr->MaxWidth = pVia->CursorMaxWidth;
+    infoPtr->MaxHeight = pVia->CursorMaxHeight;
+    infoPtr->Flags = (HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_1 |
+                      HARDWARE_CURSOR_AND_SOURCE_WITH_MASK |
+                      HARDWARE_CURSOR_TRUECOLOR_AT_8BPP |
+                      0);
+
+    infoPtr->SetCursorColors = viaSetCursorColors;
+    infoPtr->SetCursorPosition = viaSetCursorPosition;
+    infoPtr->LoadCursorImage = viaLoadCursorImage;
+    infoPtr->HideCursor = viaHideCursor;
+    infoPtr->ShowCursor = viaShowCursor;
+    infoPtr->UseHWCursor = viaUseHWCursor;
+
+    infoPtr->UseHWCursorARGB = viaUseHWCursorARGB;
+	if (pVia->CursorARGBSupported)
+    	infoPtr->LoadCursorARGB = viaLoadCursorARGB;
+
+    /* Set cursor location in frame buffer. */
+    VIASETREG(VIA_REG_CURSOR_MODE, pVia->cursorOffset);
+
+    pVia->CursorPipe = (pVia->pBIOSInfo->Panel->IsActive) ? 1 : 0;
+
+    /* Init HI_X0 */
+    VIASETREG(pVia->CursorRegControl, 0);
+    VIASETREG(pVia->CursorRegBase, pVia->cursorOffset);
+    VIASETREG(pVia->CursorRegTransKey, 0);
+
+    switch (pVia->Chipset) {
+        case VIA_CX700:
+        /* case VIA_CN750: */
+        case VIA_P4M890:
+        case VIA_P4M900:
+        case VIA_VX800:
+			if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
+				VIASETREG(VIA_REG_PRIM_HI_INVTCOLOR, 0x00FFFFFF);
+				VIASETREG(VIA_REG_V327_HI_INVTCOLOR, 0x00FFFFFF);
+				VIASETREG(pVia->CursorRegFifo, 0x0D000D0F);
+			}
+			if (pVia->pBIOSInfo->SecondCRTC->IsActive) {
+				VIASETREG(VIA_REG_HI_INVTCOLOR, 0X00FFFFFF);
+				VIASETREG(VIA_REG_ALPHA_PREFIFO, 0xE0000);
+				VIASETREG(pVia->CursorRegFifo, 0xE0F0000);
+
+				/* Just in case */
+				VIASETREG(VIA_REG_HI_BASE0, pVia->cursorOffset);
+			}
+			break;
+    	default:
+			VIASETREG(VIA_REG_HI_INVTCOLOR, 0X00FFFFFF);
+			VIASETREG(VIA_REG_ALPHA_PREFIFO, 0xE0000);
+			VIASETREG(pVia->CursorRegFifo, 0xE0F0000);
+	}
+
+    return xf86InitCursor(pScreen, infoPtr);
 }
-#endif
 
 void
 viaCursorSetFB(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
 
-    if (!pVia->cursor->fbCursorStart
-        && ((pVia->FBFreeEnd - pVia->FBFreeStart) > pVia->cursor->size)) {
-        pVia->cursor->fbCursorStart = pVia->FBFreeEnd - pVia->cursor->size;
-        pVia->FBFreeEnd -= pVia->cursor->size;
+    if ((pVia->FBFreeEnd - pVia->FBFreeStart) > pVia->CursorSize) {
+        pVia->CursorStart = pVia->FBFreeEnd - pVia->CursorSize;
+        pVia->FBFreeEnd = pVia->CursorStart;
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CursorStart: 0x%x\n", pVia->CursorStart);
     }
 }
 
-Bool
-viaCursorHWInit(ScreenPtr pScreen)
-{
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
-    VIAPtr pVia = VIAPTR(pScrn);
-    xf86CursorInfoPtr infoPtr;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIACursorHWInit\n"));
-
-    infoPtr = xf86CreateCursorInfoRec();
-    if (!infoPtr)
-        return FALSE;
-
-    pVia->cursor->info = infoPtr;
-
-    infoPtr->MaxWidth = pVia->cursor->maxWidth;
-    infoPtr->MaxHeight = pVia->cursor->maxHeight;
-    infoPtr->Flags = (HARDWARE_CURSOR_AND_SOURCE_WITH_MASK |
-                      /*HARDWARE_CURSOR_SWAP_SOURCE_AND_MASK | */
-                      HARDWARE_CURSOR_TRUECOLOR_AT_8BPP |
-                      HARDWARE_CURSOR_INVERT_MASK |
-                      HARDWARE_CURSOR_BIT_ORDER_MSBFIRST |
-                      0);
-
-    if (pVia->cursor->maxWidth == 64)
-        infoPtr->Flags |= HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_64;
-    else if (pVia->cursor->maxWidth == 32)
-        infoPtr->Flags |= HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_32;
-    else {
-        xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                   "VIACursorHWInit: unhandled width\n");
-        return FALSE;
-    }
-/*
-    if (pVia->cursor->isARGBSupported && pVia->cursor->isARGBEnabled)
-        infoPtr->Flags |= HARDWARE_CURSOR_ARGB;
-*/
-    infoPtr->SetCursorColors = viaCursorSetColors;
-    infoPtr->SetCursorPosition = viaCursorSetPosition;
-    infoPtr->LoadCursorImage = viaCursorLoadImage;
-    infoPtr->HideCursor = viaCursorHide;
-    infoPtr->ShowCursor = viaCursorShow;
-    infoPtr->UseHWCursor = viaCursorHWUse;
-
-#ifdef ARGB_CURSOR
-    if (pVia->cursor->isARGBSupported && pVia->cursor->isARGBEnabled) {
-        infoPtr->UseHWCursorARGB = viaCursorARGBUse;
-        infoPtr->LoadCursorARGB = viaCursorARGBLoad;
-    }
-#endif
-
-    viaCursorSetFB(pScrn);
-
-#ifdef ARGB_CURSOR
-    if (pVia->cursor->isARGBSupported && pVia->cursor->isARGBEnabled)
-        viaCursorARGBInit(pScrn);
-#endif
-
-    /* Set cursor location in frame buffer. */
-    VIASETREG(VIA_REG_CURSOR_MODE, pVia->cursor->fbCursorStart);
-    viaCursorHWHide(pScrn);
-
-    return xf86InitCursor(pScreen, infoPtr);
-}
-
-static void
-viaCursorHWShow(ScrnInfoPtr pScrn)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-    CARD32 mode;
-
-    mode = VIAGETREG(VIA_REG_CURSOR_MODE);
-    mode &= ~0x80000003;
-
-    /* Hardware cursor size */
-    if (pVia->cursor->maxWidth == 32)
-        mode |= 0x00000002 ;
-    
-    /* Enable cursor */
-    mode |= 0x00000001 ;
-    
-    if (pVia->pBIOSInfo->SecondCRTC->IsActive)
-        mode |= 0x80000000 ;
-    
-    /* Turn on hardware cursor. */
-    VIASETREG(VIA_REG_CURSOR_MODE, mode);
-    
-}
-
-static void
-viaCursorHWHide(ScrnInfoPtr pScrn)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-    CARD32 mode = VIAGETREG(VIA_REG_CURSOR_MODE);
-
-    /* Turn hardware cursor off. */
-    VIASETREG(VIA_REG_CURSOR_MODE, mode & 0xFFFFFFFE);
-}
-
-
-void
-viaCursorShow(ScrnInfoPtr pScrn)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-
-#ifdef ARGB_CURSOR
-    if (pVia->cursor->isARGBSupported && pVia->cursor->isARGBEnabled)
-        viaCursorARGBShow(pScrn);
-    else
-#endif
-        viaCursorHWShow(pScrn);
-}
-
-void
-viaCursorHide(ScrnInfoPtr pScrn)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-
-#ifdef ARGB_CURSOR
-    if (pVia->cursor->isARGBSupported && pVia->cursor->isARGBEnabled)
-        viaCursorARGBHide(pScrn);
-    else
-#endif
-        viaCursorHWHide(pScrn);
-}
-
-static void
-viaCursorLoadImage(ScrnInfoPtr pScrn, unsigned char *src)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-    int x, y, i;
-
-    viaAccelSync(pScrn);
-    CARD32 *dst = (CARD32 *) (pVia->FBBase + pVia->cursor->fbCursorStart);
-
-    memset(dst, 0x00, pVia->cursor->size);
-#ifdef ARGB_CURSOR
-    if (pVia->cursor->isARGBSupported && pVia->cursor->isARGBEnabled) {
-        viaCursorARGBHide(pScrn);
-        /* Convert monochrome to ARGB. */
-        int width = pVia->cursor->maxWidth / 8;
-
-        for (y = 0; y < (pVia->cursor->maxHeight / 8) * 2; y++) {
-            for (x = 0; x < width; x++) {
-                char t = *(src + width); /* is transparent? */
-                char fb = *src++; /* foreground or background ? */
-
-                for (i = 7; i >= 0; i--) {
-                    if (t & (1 << i))
-                        *dst++ = 0x00000000; /* transparent */
-                    else
-                        *dst++ = fb & (1 << i) ?
-                                0xFF000000 | pVia->cursor->foreground :
-                                0xFF000000 | pVia->cursor->background;
-                }
-            }
-            src += width;
-        }
-    } else
-#endif
-    {
-        viaCursorHWHide(pScrn);
-        /* Upload the cursor image to the frame buffer. */
-        memcpy(dst, src, pVia->cursor->size);
-    }
-    viaCursorShow(pScrn);
-}
-
-static void
-viaCursorHWSetPosition(ScrnInfoPtr pScrn, int x, int y, int xoff, int yoff)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    /* viaCursorHWHide(pScrn); */
-    VIASETREG(VIA_REG_CURSOR_ORG, ((xoff << 16) | (yoff & 0x003f)));
-    VIASETREG(VIA_REG_CURSOR_POS, ((x << 16) | (y & 0x07ff)));
-    /* viaCursorHWShow(pScrn); */
-}
-
-static void
-viaCursorSetPosition(ScrnInfoPtr pScrn, int x, int y)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-    unsigned char xoff, yoff;
-
-    if (x < 0) {
-        xoff = ((-x) & 0xFE);
-        x = 0;
-    } else {
-        xoff = 0;
-    }
-
-    if (y < 0) {
-        yoff = ((-y) & 0xFE);
-        y = 0;
-    } else {
-        yoff = 0;
-        /* LCD Expand Mode Cursor Y Position Re-Calculated */
-        if (pBIOSInfo->scaleY) {
-            y = (int)(((pBIOSInfo->panelY * y) + (pBIOSInfo->resY >> 1))
-                      / pBIOSInfo->resY);
-        }
-    }
-
-#ifdef ARGB_CURSOR
-    if (pVia->cursor->isARGBSupported && pVia->cursor->isARGBEnabled)
-        viaCursorARGBSetPosition(pScrn, x, y);
-    else
-#endif
-        viaCursorHWSetPosition(pScrn, x, y, xoff, yoff);
-}
-
-
-static void
-viaCursorSetColors(ScrnInfoPtr pScrn, int bg, int fg)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    pVia->cursor->foreground = fg;
-    pVia->cursor->background = bg;
-
-#ifdef ARGB_CURSOR
-    if (pVia->cursor->isARGBSupported && pVia->cursor->isARGBEnabled)
-        return;
-#endif
-
-    VIASETREG(VIA_REG_CURSOR_FG, fg);
-    VIASETREG(VIA_REG_CURSOR_BG, bg);
-}
 
 void
 viaCursorStore(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "viaCursorStore\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaCursorStore\n"));
 
-    if (pVia->cursor->image) {
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                   "viaCursorStore: stale image left.\n");
-        xfree(pVia->cursor->image);
+    if (pVia->CursorPipe) {
+		pVia->CursorControl1 = VIAGETREG(pVia->CursorRegControl);
+    } else {
+		pVia->CursorControl0 = VIAGETREG(pVia->CursorRegControl);
     }
 
-    pVia->cursor->image = xcalloc(1, pVia->cursor->size);
-    if (pVia->cursor->image)
-        memcpy(pVia->cursor->image, pVia->FBBase + pVia->cursor->fbCursorStart,
-               pVia->cursor->size);
+    pVia->CursorTransparentKey = VIAGETREG(pVia->CursorRegTransKey);
 
-    pVia->cursor->foreground = (CARD32) VIAGETREG(VIA_REG_CURSOR_FG);
-    pVia->cursor->background = (CARD32) VIAGETREG(VIA_REG_CURSOR_BG);
-    pVia->cursor->mode = (CARD32) VIAGETREG(VIA_REG_CURSOR_MODE);
+
+    switch (pVia->Chipset) {
+        case VIA_CX700:
+        /* case VIA_CN750: */
+        case VIA_P4M890:
+        case VIA_P4M900:
+        case VIA_VX800:
+			if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
+	    		pVia->CursorPrimHiInvtColor = VIAGETREG(VIA_REG_PRIM_HI_INVTCOLOR);
+	    		pVia->CursorV327HiInvtColor = VIAGETREG(VIA_REG_V327_HI_INVTCOLOR);
+			} 
+			if (pVia->pBIOSInfo->SecondCRTC->IsActive) {
+	    	/* TODO add saves here */
+			}
+			pVia->CursorFifo = VIAGETREG(pVia->CursorRegFifo);
+			break;
+		default:
+			/* TODO add saves here */
+			break;
+    }
 }
 
 void
@@ -373,236 +242,249 @@ viaCursorRestore(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "viaCursorRestore\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaCursorRestore\n"));
 
-    if (pVia->cursor->image) {
-        memcpy(pVia->FBBase + pVia->cursor->fbCursorStart, pVia->cursor->image,
-               pVia->cursor->size);
-        VIASETREG(VIA_REG_CURSOR_FG, pVia->cursor->foreground);
-        VIASETREG(VIA_REG_CURSOR_BG, pVia->cursor->background);
-        VIASETREG(VIA_REG_CURSOR_MODE, pVia->cursor->mode);
-        xfree(pVia->cursor->image);
-        pVia->cursor->image = NULL;
-    } else
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                   "viaCursorRestore: No cursor image stored.\n");
-}
-
-#ifdef ARGB_CURSOR
-
-static void
-viaCursorARGBShow(ScrnInfoPtr pScrn)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    switch (pVia->Chipset) {
-        case VIA_CX700:
-        /* case VIA_CN750: */
-        case VIA_P4M890:
-        case VIA_P4M900:
-	case VIA_VX800:
-            /* Turn on hardware icon cursor. */
-            if (pVia->pBIOSInfo->FirstCRTC->IsActive)
-                VIASETREG(VIA_REG_PRIM_HI_CTRL, 0x36000005);
-            if (pVia->pBIOSInfo->SecondCRTC->IsActive)
-                VIASETREG(VIA_REG_HI_CONTROL, 0xb6000005);
-            break;
-        default:
-            if (pVia->pBIOSInfo->FirstCRTC->IsActive)
-                VIASETREG(VIA_REG_PRIM_HI_CTRL, 0x76000005);
-            if (pVia->pBIOSInfo->SecondCRTC->IsActive)
-                VIASETREG(VIA_REG_HI_CONTROL, 0xf6000005);
-            break;
+    if (pVia->CursorPipe) {
+		VIASETREG(pVia->CursorRegControl, pVia->CursorControl1);
+    } else {
+		VIASETREG(pVia->CursorRegControl, pVia->CursorControl0);
     }
 
-}
+    VIASETREG(pVia->CursorRegBase, pVia->cursorOffset);
 
-static void
-viaCursorARGBHide(ScrnInfoPtr pScrn)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-    CARD32 hiControl;
+    VIASETREG(pVia->CursorRegTransKey, pVia->CursorTransparentKey);
 
-    switch (pVia->Chipset) {
-        case VIA_CX700:
-        /* case VIA_CN750: */
-        case VIA_P4M890:
-        case VIA_P4M900:
-	case VIA_VX800:
-            if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
-                hiControl = VIAGETREG(VIA_REG_PRIM_HI_CTRL);
-                /* Turn hardware icon cursor off. */
-                VIASETREG(VIA_REG_PRIM_HI_CTRL, hiControl & 0xFFFFFFFA);
-            }
-            if (pVia->pBIOSInfo->SecondCRTC->IsActive) {
-                hiControl = VIAGETREG(VIA_REG_HI_CONTROL);
-                /* Turn hardware icon cursor off. */
-                VIASETREG(VIA_REG_HI_CONTROL, hiControl & 0xFFFFFFFA);
-            }
-            break;
-        default:
-            hiControl = VIAGETREG(VIA_REG_HI_CONTROL);
-            /* Turn hardware icon cursor off. */
-            VIASETREG(VIA_REG_HI_CONTROL, hiControl & 0xFFFFFFFE);
-    }
-}
 
-static void
-viaCursorARGBSetPosition(ScrnInfoPtr pScrn, int x, int y)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    /* viaCursorARGBHide(pScrn); */
     switch (pVia->Chipset) {
         case VIA_CX700:
         /* case VIA_CN750: */
         case VIA_P4M890:
         case VIA_P4M900:
         case VIA_VX800:
-            if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
-                /* Set hardware icon position. */
-                VIASETREG(VIA_REG_PRIM_HI_POSSTART, ((x << 16) | (y & 0x07ff)));
-                VIASETREG(VIA_REG_PRIM_HI_CENTEROFFSET,
-                          ((0 << 16) | (0 & 0x07ff)));
-            }
-            if (pVia->pBIOSInfo->SecondCRTC->IsActive) {
-                /* Set hardware icon position. */
-                VIASETREG(VIA_REG_HI_POSSTART, ((x << 16) | (y & 0x07ff)));
-                VIASETREG(VIA_REG_HI_CENTEROFFSET, ((0 << 16) | (0 & 0x07ff)));
-            }
-            break;
-        default:
-            /* Set hardware icon position. */
-            VIASETREG(VIA_REG_HI_POSSTART, ((x << 16) | (y & 0x07ff)));
-            VIASETREG(VIA_REG_HI_CENTEROFFSET, ((0 << 16) | (0 & 0x07ff)));
-            break;
+			if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
+	    		VIASETREG(VIA_REG_PRIM_HI_INVTCOLOR, pVia->CursorPrimHiInvtColor);
+	    		VIASETREG(VIA_REG_V327_HI_INVTCOLOR, pVia->CursorV327HiInvtColor);
+			}
+			if (pVia->pBIOSInfo->SecondCRTC->IsActive) {
+	    		/* TODO add real restores here */
+	    		VIASETREG(VIA_REG_HI_INVTCOLOR, 0X00FFFFFF);
+	    		VIASETREG(VIA_REG_ALPHA_PREFIFO, 0xE0000);
+			}
+			VIASETREG(pVia->CursorRegFifo, pVia->CursorFifo);
+			break;
+		default:
+			/* TODO add real restores here */
+			VIASETREG(VIA_REG_ALPHA_PREFIFO, 0xE0000);
+			VIASETREG(pVia->CursorRegFifo, 0xE0F0000);
     }
-    /* viaCursorARGBShow(pScrn); */
 }
 
-static Bool
-viaCursorARGBUse(ScreenPtr pScreen, CursorPtr pCurs)
-{
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
-    VIAPtr pVia = VIAPTR(pScrn);
+/*
+ * ARGB Cursor
+ */
 
-    return (pVia->cursor->isHWCursorEnabled
-            && pVia->cursor->isARGBSupported
-            && pVia->cursor->isARGBEnabled
-            && pCurs->bits->width <= pVia->cursor->maxWidth
-            && pCurs->bits->height <= pVia->cursor->maxHeight);
-}
-
-static void
-viaCursorARGBLoad(ScrnInfoPtr pScrn, CursorPtr pCurs)
+void
+viaShowCursor(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-    CARD32 *dst = NULL;
-    CARD32 *image = pCurs->bits->argb;
-    int x, y, w, h;
+    CARD32 temp;
+    CARD32 control = pVia->CursorRegControl;
 
-    dst = (CARD32 *) (pVia->FBBase + pVia->cursor->fbCursorStart);
+    temp =
+	(1 << 30) |
+	(1 << 29) |
+	(1 << 28) |
+	(1 << 26) |
+	(1 << 25) |
+	(1 <<  2) |
+	(1 <<  0);
 
-    if (!image)
-        return;
+    if (pVia->CursorPipe)
+	temp |= (1 << 31);
 
-    w = pCurs->bits->width;
-    if (w > pVia->cursor->maxWidth)
-        w = pVia->cursor->maxWidth;
-
-    h = pCurs->bits->height;
-    if (h > pVia->cursor->maxHeight)
-        h = pVia->cursor->maxHeight;
-
-    memset(dst, 0, pVia->cursor->size);
-
-    for (y = 0; y < h; y++) {
-        for (x = 0; x < w; x++)
-            *dst++ = *image++;
-
-        /* Pad to the right with transparent. */
-        for (; x < pVia->cursor->maxWidth; x++)
-            *dst++ = 0;
-    }
-
-    /* Pad below with transparent. */
-    for (; y < pVia->cursor->maxHeight; y++) {
-        for (x = 0; x < pVia->cursor->maxWidth; x++)
-            *dst++ = 0;
-    }
-    viaCursorShow(pScrn);
-}
-
-#endif
-
-Bool
-viaCursorRecInit(ScrnInfoPtr pScrn)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    if (!pVia->cursor)
-        pVia->cursor =
-                (ViaCursorInfoPtr) xnfcalloc(sizeof(ViaCursorInfoRec), 1);
-
-    if (pVia->cursor) {
-        ViaCursorInfoPtr cursor = pVia->cursor;
-
-        switch (pVia->Chipset) {
-            case VIA_CLE266:
-            case VIA_KM400:
-                cursor->isARGBSupported = FALSE;
-                cursor->isARGBEnabled = FALSE;
-                cursor->maxWidth = 32;
-                cursor->maxHeight = 32;
-                cursor->size = ((cursor->maxWidth * cursor->maxHeight) / 8) * 2;
-                break;
-            case VIA_K8M800:
-            case VIA_PM800:
-            case VIA_VM800:
-            case VIA_P4M890:
-            case VIA_K8M890:
-            case VIA_P4M900:
-            case VIA_CX700:
-            case VIA_VX800:
-                cursor->isARGBSupported = TRUE;
-                cursor->isARGBEnabled = FALSE;
-                cursor->maxWidth = 64;
-                cursor->maxHeight = 64;
-                cursor->size = cursor->maxWidth * cursor->maxHeight * 4;
-                break;
-            default:
-                cursor->isARGBSupported = TRUE;
-                cursor->isARGBEnabled = TRUE;
-                cursor->maxWidth = 64;
-                cursor->maxHeight = 64;
-                cursor->size = cursor->maxWidth * cursor->maxHeight * 4;
-                break;
-        }
-    }
-
-    return pVia->cursor != NULL;
+    VIASETREG(control, temp);
 }
 
 void
-viaCursorRecDestroy(ScrnInfoPtr pScrn)
+viaHideCursor(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
+    CARD32 temp;
+    CARD32 control = pVia->CursorRegControl;
 
-    if (pVia->cursor)
-        xfree(pVia->cursor);
+    temp = VIAGETREG(control);
+    VIASETREG(control, temp & 0xFFFFFFFE);
+}
+
+static void
+viaSetCursorPosition(ScrnInfoPtr pScrn, int x, int y)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+    CARD32 temp;
+    CARD32 control = pVia->CursorRegControl;
+    CARD32 offset = pVia->CursorRegOffset;
+    CARD32 pos = pVia->CursorRegPos;
+    unsigned xoff, yoff;
+
+    if (x < 0) {
+	xoff = ((-x) & 0xFE);
+	x = 0;
+    } else {
+	xoff = 0;
+    }
+
+    if (y < 0) {
+	yoff = ((-y) & 0xFE);
+	y = 0;
+    } else {
+	yoff = 0;
+    }
+
+    temp = VIAGETREG(control);
+    VIASETREG(control, temp & 0xFFFFFFFE);
+
+    VIASETREG(pos,    ((x    << 16) | (y    & 0x07ff)));
+    VIASETREG(offset, ((xoff << 16) | (yoff & 0x07ff)));
+
+    VIASETREG(control, temp);
 }
 
 static Bool
-viaCursorHWUse(ScreenPtr pScreen, CursorPtr pCurs)
+viaUseHWCursorARGB(ScreenPtr pScreen, CursorPtr pCurs)
 {
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
     VIAPtr pVia = VIAPTR(pScrn);
 
-    return (pVia->cursor->isHWCursorEnabled
+    return (pVia->hwcursor
+            && pVia->CursorARGBSupported
+            && pCurs->bits->width <= pVia->CursorMaxWidth
+            && pCurs->bits->height <= pVia->CursorMaxHeight);
+}
+
+static Bool
+viaUseHWCursor(ScreenPtr pScreen, CursorPtr pCurs)
+{
+    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    return (pVia->hwcursor
             /* Can't enable HW cursor on both CRTCs at the same time. */
             && !(pVia->pBIOSInfo->FirstCRTC->IsActive
                  && pVia->pBIOSInfo->SecondCRTC->IsActive)
-            && pCurs->bits->width <= pVia->cursor->maxWidth
-            && pCurs->bits->height <= pVia->cursor->maxHeight);
+            && pCurs->bits->width <= pVia->CursorMaxWidth
+            && pCurs->bits->height <= pVia->CursorMaxHeight);
+}
+
+static void
+viaLoadCursorImage(ScrnInfoPtr pScrn, unsigned char *s)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+    CARD32 control = pVia->CursorRegControl;
+    CARD32 temp;
+    CARD32 *dst;
+    CARD8 *src;
+    CARD8 chunk;
+    int i, j;
+
+    temp = VIAGETREG(control);
+    VIASETREG(control, temp & 0xFFFFFFFE);
+
+    pVia->CursorARGB = FALSE;
+
+    dst = (CARD32*)(pVia->cursorMap);
+    src = (CARD8*)s;
+
+    if (pVia->CursorARGBSupported) {
+#define ARGB_PER_CHUNK	(8 * sizeof (chunk) / 2)
+		for (i = 0; i < (pVia->CursorMaxWidth * pVia->CursorMaxHeight / ARGB_PER_CHUNK); i++) {
+		chunk = *s++;
+		for (j = 0; j < ARGB_PER_CHUNK; j++, chunk >>= 2)
+			*dst++ = mono_cursor_color[chunk & 3];
+		}
+
+		pVia->CursorFG = mono_cursor_color[3];
+		pVia->CursorBG = mono_cursor_color[2];
+	} else {
+		memcpy(dst, src, pVia->CursorSize);
+	}
+
+    VIASETREG(control, temp);
+}
+
+static void
+viaSetCursorColors(ScrnInfoPtr pScrn, int bg, int fg)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+    CARD32 control = pVia->CursorRegControl;
+    CARD32 pixel;
+    CARD32 temp;
+    CARD32 *dst;
+    int i;
+
+    if (pVia->CursorFG)
+	return;
+
+    fg |= 0xff000000;
+    bg |= 0xff000000;
+
+    if (fg == pVia->CursorFG && bg == pVia->CursorBG)
+	return;
+
+    temp = VIAGETREG(control);
+    VIASETREG(control, temp & 0xFFFFFFFE);
+
+    dst = (CARD32*)pVia->cursorMap;
+    for (i = 0; i < pVia->CursorMaxWidth * pVia->CursorMaxHeight; i++, dst++)
+	if ((pixel = *dst))
+	    *dst = (pixel == pVia->CursorFG) ? fg : bg;
+
+    pVia->CursorFG = fg;
+    pVia->CursorBG = bg;
+
+    VIASETREG(control, temp);
+}
+
+static void
+viaLoadCursorARGB(ScrnInfoPtr pScrn, CursorPtr pCurs)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+    CARD32 control = pVia->CursorRegControl;
+    int x, y, w, h;
+    CARD32 *image;
+    CARD32 *dst;
+    CARD32 *src;
+    CARD32 temp;
+
+    temp = VIAGETREG(control);
+    VIASETREG(control, temp & 0xFFFFFFFE);
+
+    pVia->CursorARGB = TRUE;
+
+    dst = (CARD32*)pVia->cursorMap;
+    image = pCurs->bits->argb;
+
+    w = pCurs->bits->width;
+    if (w > pVia->CursorMaxWidth)
+	w = pVia->CursorMaxWidth;
+
+    h = pCurs->bits->height;
+    if (h > pVia->CursorMaxHeight)
+	h = pVia->CursorMaxHeight;
+
+    for (y = 0; y < h; y++) {
+
+	src = image;
+	image += pCurs->bits->width;
+
+	for (x = 0; x < w; x++)
+	    *dst++ = *src++;
+	for (; x < pVia->CursorMaxHeight; x++)
+	    *dst++ = 0;
+    }
+
+    for (; y < pVia->CursorMaxHeight; y++)
+	for (x = 0; x < pVia->CursorMaxWidth; x++)
+	    *dst++ = 0;
+
+    VIASETREG(control, temp);
 }

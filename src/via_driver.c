@@ -602,8 +602,6 @@ VIAFreeRec(ScrnInfoPtr pScrn)
             xfree(pBIOSInfo->Lvds);
     }
 
-    viaCursorRecDestroy(pScrn);
-
     if (VIAPTR(pScrn)->pVbe)
         vbeFree(VIAPTR(pScrn)->pVbe);
 
@@ -860,7 +858,7 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
     pVia->noComposite = FALSE;
     pVia->exaScratchSize = VIA_SCRATCH_SIZE / 1024;
 #endif
-    pVia->cursor->isHWCursorEnabled = TRUE;
+    pVia->hwcursor = TRUE;
     pVia->VQEnable = TRUE;
     pVia->DRIIrqEnable = TRUE;
     pVia->agpEnable = TRUE;
@@ -1159,11 +1157,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 
     xf86DrvMsg(pScrn->scrnIndex, from, "Chipset revision: %d\n", pVia->ChipRev);
 
-    if (!viaCursorRecInit(pScrn)) {
-        VIAFreeRec(pScrn);
-        return FALSE;
-    }
-
     xfree(pEnt);
 
     /* Detect the amount of installed RAM */
@@ -1325,13 +1318,13 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     /* Use a hardware cursor, unless on secondary or on shadow framebuffer. */
     from = X_DEFAULT;
     if (pVia->IsSecondary || pVia->shadowFB)
-        pVia->cursor->isHWCursorEnabled = FALSE;
+        pVia->hwcursor = FALSE;
     else if (xf86GetOptValBool(VIAOptions, OPTION_SWCURSOR,
-                               &pVia->cursor->isHWCursorEnabled)) {
-        pVia->cursor->isHWCursorEnabled = !pVia->cursor->isHWCursorEnabled;
+                               &pVia->hwcursor)) {
+        pVia->hwcursor = !pVia->hwcursor;
         from = X_CONFIG;
     }
-    if (pVia->cursor->isHWCursorEnabled)
+    if (pVia->hwcursor)
         xf86DrvMsg(pScrn->scrnIndex, from, "Using hardware two-color "
                    "cursors and software full-color cursors.\n");
     else
@@ -1852,7 +1845,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         xf86LoaderReqSymLists(xaaSymbols, NULL);
     }
 
-    if (pVia->cursor->isHWCursorEnabled) {
+    if (pVia->hwcursor) {
         if (!xf86LoadSubModule(pScrn, "ramdac")) {
             VIAFreeRec(pScrn);
             return FALSE;
@@ -1900,7 +1893,7 @@ VIAEnterVT(int scrnIndex, int flags)
     VIASaveScreen(pScrn->pScreen, SCREEN_SAVER_ON);
 
     /* A patch for APM suspend/resume, when HWCursor has garbage. */
-    if (pVia->cursor->isHWCursorEnabled)
+    if (pVia->hwcursor)
         viaCursorRestore(pScrn);
 
     /* Restore video status. */
@@ -1972,7 +1965,7 @@ VIALeaveVT(int scrnIndex, int flags)
     if (!pVia->IsSecondary)
         viaSaveVideo(pScrn);
 
-    if (pVia->cursor->isHWCursorEnabled)
+    if (pVia->hwcursor)
         viaCursorStore(pScrn);
 
     if (pVia->pVbe && pVia->vbeSR)
@@ -2782,8 +2775,9 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     miDCInitialize(pScreen, xf86GetPointerScreenFuncs());
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- SW cursor set up\n"));
 
-    if (pVia->cursor->isHWCursorEnabled) {
-        if (!viaCursorHWInit(pScreen)) {
+    if (pVia->hwcursor) {
+        if (!viaHWCursorInit(pScreen)) {
+			pVia->hwcursor = FALSE;
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                        "Hardware cursor initialization failed\n");
         }
@@ -3027,8 +3021,8 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
         if (!pVia->IsSecondary) {
             /* Turn off all video activities. */
             viaExitVideo(pScrn);
-            if (pVia->cursor->isHWCursorEnabled)
-                viaCursorHide(pScrn);
+            if (pVia->hwcursor)
+                viaHideCursor(pScrn);
         }
 
         if (pVia->VQEnable)
@@ -3040,10 +3034,6 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
 #endif
 
     viaExitAccel(pScreen);
-    if (pVia->cursor->info) {
-        xf86DestroyCursorInfoRec(pVia->cursor->info);
-        pVia->cursor->info = NULL;
-    }
     if (pVia->ShadowPtr) {
         xfree(pVia->ShadowPtr);
         pVia->ShadowPtr = NULL;

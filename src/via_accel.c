@@ -1278,7 +1278,8 @@ viaInitXAA(ScreenPtr pScreen)
 
     if (pVia->Chipset != VIA_K8M800 &&
         pVia->Chipset != VIA_K8M890 &&
-        pVia->Chipset != VIA_P4M900)
+        pVia->Chipset != VIA_P4M900 &&
+        pVia->Chipset != VIA_VX800)
         xaaptr->ImageWriteFlags |= NO_GXCOPY;
 
     xaaptr->SetupForImageWrite = viaSetupForImageWrite;
@@ -2421,7 +2422,7 @@ viaInitAccel(ScreenPtr pScreen)
 	pVia->FBFreeEnd -= VIA_VQ_SIZE;
     }
 
-    if (pVia->cursor->isHWCursorEnabled)
+    if (pVia->hwcursor)
         viaCursorSetFB(pScrn);
 
     viaInitialize2DEngine(pScrn);

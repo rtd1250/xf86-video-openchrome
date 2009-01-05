@@ -1,3 +1,20 @@
+2009-01-05  Jon Nettleton  <jon.nettleton@gmail.com>
+
+	* src/via_cursor.c: (viaHWCursorInit), (viaLoadCursorImage):
+
+	A couple more tweaks to fix mono hardware cursor on older
+	chipsets.
+
+2009-01-05  Jon Nettleton  <jon.nettleton@gmail.com>
+
+	* src/via_cursor.c: (viaHWCursorInit), (viaUseHWCursorARGB),
+	(viaUseHWCursor):
+	* src/via_driver.c: (VIAScreenInit):
+
+	Missed a couple of changes for the chipset specific
+	cursors.  Moved chipset detection to HWInit.  Removed
+	some extraneous debugging.
+
 2009-01-04  Gabriel Mansi  <gabriel-dot-mansi-at-gmail-dot-com>
 
 	* src/via.h:
@@ -9,6 +26,37 @@
 	* src/via_video.c: (DecideOverlaySupport):
 
 	Initial XVideo support for VX800.
+
+2009-01-04  Jon Nettleton  <jon.nettleton@gmail.com>
+
+	* src/via_cursor.c: (viaHWCursorInit), (viaCursorSetFB),
+	(viaUseHWCursorARGB), (viaUseHWCursor), (viaLoadCursorImage),
+	(viaSetCursorColors), (viaLoadCursorARGB):
+	* src/via_driver.h:
+
+	Okay I tried to cheat.  We need to have some chipset
+	specific intelligence.  I have added this back into
+	the initial test to check for HWCursor support.
+
+2009-01-04  Jon Nettleton <jon.nettleton@gmail.com>
+
+	* src/via_accel.c: (viaInitXAA), (viaInitAccel):
+	* src/via_crtc.c: (ViaSecondCRTCSetStartingAddress):
+	* src/via_cursor.c: (viaHWCursorInit), (viaCursorSetFB),
+	(viaCursorStore), (viaCursorRestore), (viaShowCursor),
+	(viaHideCursor), (viaSetCursorPosition), (viaUseHWCursorARGB),
+	(viaUseHWCursor), (viaLoadCursorImage), (viaSetCursorColors),
+	(viaLoadCursorARGB):
+	* src/via_dga.c: (VIADGASetMode):
+	* src/via_driver.c: (VIAFreeRec), (VIASetupDefaultOptions),
+	(VIAPreInit), (VIAEnterVT), (VIALeaveVT), (VIAScreenInit),
+	(VIACloseScreen):
+	* src/via_driver.h:
+	* src/via_regs.h:
+
+	This is a take at reworking HWCursor.  It works off the
+	ttm_branch and the work done in the randr_branch.  It only needs
+	marginal testing as HWCursor was already very broken.
 
 2009-01-04  Jon Nettleton  <jon.nettleton@gmail.com>
 
