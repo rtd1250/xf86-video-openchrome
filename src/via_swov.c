@@ -1271,7 +1271,8 @@ SetFIFO_V3(VIAPtr pVia, CARD8 depth, CARD8 prethreshold, CARD8 threshold)
 {
     if ((pVia->ChipId == PCI_CHIP_VT3314)
         || (pVia->ChipId == PCI_CHIP_VT3324)
-        || (pVia->ChipId == PCI_CHIP_VT3327)) {
+        || (pVia->ChipId == PCI_CHIP_VT3327
+	|| (pVia->ChipId == PCI_CHIP_VT3353))) {
         SaveVideoRegister(pVia, ALPHA_V3_FIFO_CONTROL,
                           (VIDInD(ALPHA_V3_FIFO_CONTROL) & ALPHA_FIFO_MASK)
                           | ((depth - 1) & 0xff) | ((threshold & 0xff) << 8));
@@ -2006,6 +2007,15 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
     if (haveChromaKey)
         compose = SetChromaKey(pVia, videoFlag, chromaKeyLow, chromaKeyHigh,
                                miniCtl, compose);
+
+    if (pVia->VideoEngine == VIDEO_ENGINE_CME) {
+        VIDOutD(HQV_SRC_DATA_OFFSET_CONTROL1,0);
+        VIDOutD(HQV_SRC_DATA_OFFSET_CONTROL3,((pUpdate->SrcRight - 1 ) << 16) | (pUpdate->SrcBottom - 1));
+        if (pVia->Chipset == VIA_VX800) {
+            VIDOutD(HQV_SRC_DATA_OFFSET_CONTROL2,0);
+            VIDOutD(HQV_SRC_DATA_OFFSET_CONTROL4,((pUpdate->SrcRight - 1 ) << 16) | (pUpdate->SrcBottom - 1));
+        }
+    }
 
     /* Set up video control */
     if (videoFlag & VIDEO_HQV_INUSE) {

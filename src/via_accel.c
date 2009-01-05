@@ -460,7 +460,7 @@ viaInitialize2DEngine(ScrnInfoPtr pScrn)
         VIASETREG(i, 0x0);
     }
 
-    if (pVia->Chipset != VIA_VX800) {
+    if (pVia->Chipset == VIA_VX800) {
         for (i = 0x44; i < 0x5c; i += 4) {
             VIASETREG(i, 0x0);
         }

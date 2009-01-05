@@ -1,3 +1,15 @@
+2009-01-04  Gabriel Mansi  <gabriel-dot-mansi-at-gmail-dot-com>
+
+	* src/via.h:
+	* src/via_accel.c: (viaInitialize2DEngine):
+	* src/via_crtc.c: (ViaFirstCRTCSetMode), (ViaSecondCRTCSetMode):
+	* src/via_driver.c: (ViaMMIOEnable), (ViaMMIODisable),
+	(VIAWriteMode):
+	* src/via_swov.c: (SetFIFO_V3), (Upd_Video):
+	* src/via_video.c: (DecideOverlaySupport):
+
+	Initial XVideo support for VX800.
+
 2009-01-04  Jon Nettleton  <jon.nettleton@gmail.com>
 
 	* src/via_driver.c: (VIAMapMMIO), (VIAMapFB):

@@ -2265,6 +2265,7 @@ ViaMMIOEnable(ScrnInfoPtr pScrn)
         case VIA_K8M890:
         case VIA_CX700:
         case VIA_P4M900:
+        case VIA_VX800:
             ViaSeqMask(hwp, 0x1A, 0x08, 0x08);
             break;
         default:
@@ -2286,6 +2287,7 @@ ViaMMIODisable(ScrnInfoPtr pScrn)
         case VIA_K8M890:
         case VIA_CX700:
         case VIA_P4M900:
+        case VIA_VX800:
             ViaSeqMask(VGAHWPTR(pScrn), 0x1A, 0x00, 0x08);
             break;
         default:
@@ -2976,7 +2978,7 @@ VIAWriteMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
          * to detect when the display is using the secondary head.
          * TODO: This should be enabled for other chipsets as well.
          */
-        if (pVia->Chipset == VIA_P4M900 && pVia->pBIOSInfo->Panel->IsActive) {
+        if ((pVia->Chipset == VIA_P4M900 || pVia->Chipset == VIA_VX800) && pVia->pBIOSInfo->Panel->IsActive) {
             /*
              * Since we are using virtual, we need to adjust
              * the offset to match the framebuffer alignment.

@@ -278,7 +278,8 @@ DecideOverlaySupport(ScrnInfoPtr pScrn)
         pVia->ChipId != PCI_CHIP_VT3327 && 
         pVia->ChipId != PCI_CHIP_VT3336 && 
         pVia->ChipId != PCI_CHIP_VT3364 && 
-        pVia->ChipId != PCI_CHIP_VT3324) {
+        pVia->ChipId != PCI_CHIP_VT3324 &&
+	pVia->ChipId != PCI_CHIP_VT3353) {
         CARD32 bandwidth = (mode->HDisplay >> 4) * (mode->VDisplay >> 5) *
             pScrn->bitsPerPixel * mode->VRefresh;
 
