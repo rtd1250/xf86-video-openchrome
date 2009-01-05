@@ -1,3 +1,10 @@
+2009-01-06  Jon Nettleton  <jon.nettleton@gmail.com>
+
+	* src/via_mode.c: (ViaModesMonitorFixup), (ViaModesAttachHelper):
+
+	Make sure that the monitor settings will handle our
+	internal Modes set for TV out and LCD Panels.
+
 2009-01-05  Jon Nettleton  <jon.nettleton@gmail.com>
 
 	* src/via_cursor.c: (viaHWCursorInit), (viaLoadCursorImage):

@@ -676,6 +676,53 @@ ViaPanelGetIndex(ScrnInfoPtr pScrn, DisplayModePtr mode)
 }
 
 /*
+ * adapted from nv and savage 
+ */
+static void
+ViaModesMonitorFixup(ScrnInfoPtr pScrn, MonPtr monitorp, DisplayModePtr mode)
+{
+	/* These are all modes that the driver sets up
+	 * so we can comfortably update the monitor
+	 * configuration to work with them.
+	 */
+
+	if (monitorp->hsync[0].lo == 0)
+		monitorp->hsync[0].lo = 31.50;
+	if (monitorp->hsync[0].hi == 0)
+		monitorp->hsync[0].hi = 37.90;
+	if (monitorp->vrefresh[0].lo == 0)
+		monitorp->vrefresh[0].lo = 50.00;
+	if (monitorp->vrefresh[0].hi == 0)
+		monitorp->vrefresh[0].hi = 70.00;
+
+	if (!mode->HSync)
+		mode->HSync = ((float) mode->Clock ) / ((float) mode->HTotal);
+	if (!mode->VRefresh)
+		mode->VRefresh = (1000.0 * ((float) mode->Clock)) /
+		   ((float) (mode->HTotal * mode->VTotal));
+
+	if (mode->HSync < monitorp->hsync[0].lo) {
+		monitorp->hsync[0].lo = mode->HSync;
+		DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModesMonitorFixup - Adjusted HSync.lo to %f\n", monitorp->hsync[0].lo));
+	}
+	if (mode->HSync > monitorp->hsync[0].hi) {
+		monitorp->hsync[0].hi = mode->HSync;
+		DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModesMonitorFixup - Adjusted HSync.hi to %f\n", monitorp->hsync[0].hi));
+	}
+	if (mode->VRefresh < monitorp->vrefresh[0].lo) {
+		monitorp->vrefresh[0].lo = mode->VRefresh;
+		DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModesMonitorFixup - Adjusted VRefresh.lo to %f\n", monitorp->vrefresh[0].lo));
+	}
+	if (mode->VRefresh > monitorp->vrefresh[0].hi) {
+		monitorp->vrefresh[0].hi = mode->VRefresh;
+		DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModesMonitorFixup - Adjusted VRefresh.hi to %f\n", monitorp->vrefresh[0].hi));
+	}
+
+	monitorp->nHsync = 1;
+	monitorp->nVrefresh = 1;
+}
+
+/*
  * Stolen from xf86Config.c's addDefaultModes
  */
 static void
@@ -697,6 +744,7 @@ ViaModesAttachHelper(ScrnInfoPtr pScrn, MonPtr monitorp, DisplayModePtr Modes)
             mode->prev = NULL;
         }
         last = mode;
+        ViaModesMonitorFixup(pScrn, monitorp, mode);
     }
     monitorp->Last = last;
 }
