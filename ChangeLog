@@ -1,3 +1,14 @@
+2009-01-07  Jon Nettleton <jon.nettleton@gmail.com>
+
+	* src/via_bios.h:
+	* src/via_crtc.c: (via_xf86crtc_resize), (ViaPreInitCRTCConfig):
+	* src/via_driver.c: (VIAPreInit):
+
+	Temporary hack to fix a bug with newer Xorg and DRI
+	that crashes if CRTC is not setup.  I am adding this
+	because I am working on this part of the code anyways
+	so it won't get lost in bit rot.
+
 2009-01-06  Jon Nettleton  <jon.nettleton@gmail.com>
 
 	* src/via_mode.c: (ViaModesMonitorFixup), (ViaModesAttachHelper):

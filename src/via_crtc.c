@@ -35,6 +35,8 @@
 
 #include "via_mode.h"
 
+#include <xorg/xf86Crtc.h>
+
 static void
 ViaCRTCSetGraphicsRegisters(ScrnInfoPtr pScrn)
 {
@@ -72,6 +74,26 @@ ViaCRTCSetAttributeRegisters(ScrnInfoPtr pScrn)
     hwp->writeAttr(hwp, 0x13, 0x00);
     hwp->writeAttr(hwp, 0x14, 0x00);
 }
+
+static Bool
+via_xf86crtc_resize (ScrnInfoPtr scrn, int width, int height)
+{
+    scrn->virtualX = width;
+    scrn->virtualY = height;
+    return TRUE;
+}
+
+static const
+xf86CrtcConfigFuncsRec via_xf86crtc_config_funcs = {
+    via_xf86crtc_resize
+};
+
+void 
+ViaPreInitCRTCConfig(ScrnInfoPtr pScrn)
+{
+     xf86CrtcConfigInit (pScrn, &via_xf86crtc_config_funcs);
+}
+
 
 void
 ViaCRTCInit(ScrnInfoPtr pScrn)

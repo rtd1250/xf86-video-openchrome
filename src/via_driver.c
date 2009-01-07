@@ -1665,6 +1665,9 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         return FALSE;
     }
 
+	/* Might not belong here temporary fix for bug fix */
+    ViaPreInitCRTCConfig(pScrn);
+
     if (!pVia->UseLegacyModeSwitch) {
         if (pBIOSInfo->Panel->IsActive)
             ViaPanelPreInit(pScrn);

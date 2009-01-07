@@ -227,6 +227,7 @@ void ViaModeFirstCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaModeSet(ScrnInfoPtr pScrn, DisplayModePtr mode);
 
 /* via_crtc.c */
+void ViaPreInitCRTCConfig(ScrnInfoPtr pScrn);
 void ViaCRTCInit(ScrnInfoPtr pScrn);
 void ViaFirstCRTCSetStartingAddress(ScrnInfoPtr pSCrn, int x, int y);
 void ViaFirstCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
