@@ -147,6 +147,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"MSI Fuzzy CN700/CN700T/CN700G",         VIA_VM800,   0x1462, 0x7199, VIA_DEVICE_CRT | VIA_DEVICE_TV},
     {"MSI PM8M3-V",                           VIA_VM800,   0x1462, 0x7211, VIA_DEVICE_CRT},
     {"MSI PM8PM",                             VIA_VM800,   0x1462, 0x7222, VIA_DEVICE_CRT},
+    {"Twinhead M6",                           VIA_VM800,   0x14FF, 0xA007, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"RoverBook Partner W500",                VIA_VM800,   0x1509, 0x4330, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Clevo/RoverBook Voyager V511L",         VIA_VM800,   0x1558, 0x0662, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Clevo M5xxS",                           VIA_VM800,   0x1558, 0x5406, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
