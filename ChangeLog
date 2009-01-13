@@ -1,3 +1,12 @@
+2009-01-14  Jon Nettleton  <jon.nettleton@gmail.com>
+
+	* src/via_accel.c: (viaFlushPCI):
+
+	Oops forgot to change registers for the vx800 chipset
+	when waiting for Idle in the engines.  I also added
+	back in waiting for the 3d engine to be idle.  I am
+	not sure if this was removed for a reason.
+
 2009-01-07  Jon Nettleton <jon.nettleton@gmail.com>
 
 	* src/via_bios.h:

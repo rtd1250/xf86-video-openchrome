@@ -191,16 +191,26 @@ viaFlushPCI(ViaCommandBuffer * buf)
                      * for an unacceptable amount of time in VIASETREG while
                      * other high priority interrupts may be pending.
                      */
-                    if (pVia->Chipset != VIA_P4M890 &&
-                        pVia->Chipset != VIA_K8M890 &&
-                        pVia->Chipset != VIA_P4M900 &&
-                        pVia->Chipset != VIA_VX800) {
-                        while (!(VIAGETREG(VIA_REG_STATUS) & VIA_VR_QUEUE_BUSY)
-                               && (loop++ < MAXLOOP)) ;
+					switch (pVia->Chipset) {
+					    case VIA_VX800:
+							while ((VIAGETREG(VIA_REG_STATUS) &
+							       (VIA_CMD_RGTR_BUSY_H5 | VIA_2D_ENG_BUSY_H5 |
+									VIA_3D_ENG_BUSY_H5 )) && (loop++ < MAXLOOP)) ;
+					    break;
+					    case VIA_K8M890:
+					    case VIA_P4M890:
+					    case VIA_P4M900:
+                    		while ((VIAGETREG(VIA_REG_STATUS) &
+                            	   (VIA_CMD_RGTR_BUSY | VIA_2D_ENG_BUSY | VIA_3D_ENG_BUSY))
+                            		&& (loop++ < MAXLOOP)) ;
+					    break;
+						default:
+                        	while (!(VIAGETREG(VIA_REG_STATUS) & VIA_VR_QUEUE_BUSY)
+                                   && (loop++ < MAXLOOP)) ;
+                    		while ((VIAGETREG(VIA_REG_STATUS) &
+                            	   (VIA_CMD_RGTR_BUSY | VIA_2D_ENG_BUSY | VIA_3D_ENG_BUSY))
+                                   && (loop++ < MAXLOOP)) ;
                     }
-                    while ((VIAGETREG(VIA_REG_STATUS) &
-                            (VIA_CMD_RGTR_BUSY | VIA_2D_ENG_BUSY))
-                           && (loop++ < MAXLOOP)) ;
                 }
                 offset = (*bp++ & 0x0FFFFFFF) << 2;
                 value = *bp++;
