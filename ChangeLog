@@ -1,3 +1,13 @@
+2009-01-14  Jon Nettleton  <jon.nettletno@gmail.com>
+
+	* src/via_accel.c: (viaFlushPCI):
+
+	remove the check for VIA_3D_ENG_BUSY in the idle loop.
+	This causes xorg to chew a bit more cpu with XAA enabled,
+	and it causes the entire X server to dump if EXA is enabled.
+	I should investigate further, but for now I will just remove
+	it.
+
 2009-01-14  Jon Nettleton  <jon.nettleton@gmail.com>
 
 	* src/via_accel.c: (viaFlushPCI):
