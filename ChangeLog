@@ -1,3 +1,13 @@
+2009-01-14  Jon Nettleton  <jon.nettleton@gmail.com>
+
+	* src/via_accel.c: (viaDisableVQ), (viaInitialize2DEngine),
+	(viaAccelSync):
+
+	According to VIA's code the P4M900 should have the same
+	acceleration initialization registers as the K8M890.  This
+	patch fixes this and gives about a 10x increase in the 
+	video benchmark numbers.
+
 2009-01-14  Jon Nettleton  <jon.nettletno@gmail.com>
 
 	* src/via_accel.c: (viaFlushPCI):
