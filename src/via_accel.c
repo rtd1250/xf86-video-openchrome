@@ -1394,7 +1394,6 @@ viaOrder(CARD32 val, CARD32 * shift)
 }
 
 
-#ifdef VIA_HAVE_EXA
 /*
  * Exa functions. It is assumed that EXA does not exceed the blitter limits.
  */
@@ -2266,7 +2265,6 @@ viaExaComposite(PixmapPtr pDst, int srcX, int srcY, int maskX, int maskY,
                   width, height);
 }
 
-#if (EXA_VERSION_MAJOR >= 2)
 
 static ExaDriverPtr
 viaInitExa(ScreenPtr pScreen)
@@ -2341,78 +2339,6 @@ viaInitExa(ScreenPtr pScreen)
     return pExa;
 }
 
-#else
-
-/*
- * Initialize EXA. Alignments are 2D engine constraints.
- */
-static ExaDriverPtr
-viaInitExa(ScreenPtr pScreen)
-{
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
-    VIAPtr pVia = VIAPTR(pScrn);
-    ExaDriverPtr pExa = (ExaDriverPtr) xnfcalloc(sizeof(ExaDriverRec), 1);
-
-    if (!pExa)
-        return NULL;
-
-    pExa->card.memoryBase = pVia->FBBase;
-    pExa->card.memorySize = pVia->FBFreeEnd;
-    pExa->card.offScreenBase = pScrn->virtualY * pVia->Bpl;
-    pExa->card.pixmapOffsetAlign = 32;
-    pExa->card.pixmapPitchAlign = 16;
-    pExa->card.flags = EXA_OFFSCREEN_PIXMAPS |
-            (pVia->nPOT[1] ? 0 : EXA_OFFSCREEN_ALIGN_POT);
-    pExa->card.maxX = 2047;
-    pExa->card.maxY = 2047;
-
-    pExa->accel.WaitMarker = viaAccelWaitMarker;
-    pExa->accel.MarkSync = viaAccelMarkSync;
-    pExa->accel.PrepareSolid = viaExaPrepareSolid;
-    pExa->accel.Solid = viaExaSolid;
-    pExa->accel.DoneSolid = viaExaDoneSolidCopy;
-    pExa->accel.PrepareCopy = viaExaPrepareCopy;
-    pExa->accel.Copy = viaExaCopy;
-    pExa->accel.DoneCopy = viaExaDoneSolidCopy;
-
-#ifdef XF86DRI
-    if (pVia->directRenderingEnabled) {
-#ifdef linux
-        if ((pVia->drmVerMajor > 2) ||
-            ((pVia->drmVerMajor == 2) && (pVia->drmVerMinor >= 7))) {
-            if (pVia->Chipset != VIA_K8M800)
-                pExa->accel.UploadToScreen = viaExaUploadToScreen;
-            pExa->accel.DownloadFromScreen = viaExaDownloadFromScreen;
-        }
-#endif /* linux */
-        if (pVia->Chipset == VIA_K8M800)
-            pExa->accel.UploadToScreen = viaExaTexUploadToScreen;
-    }
-#endif /* XF86DRI */
-
-    pExa->accel.UploadToScratch = viaExaUploadToScratch;
-
-    if (!pVia->noComposite) {
-        pExa->accel.CheckComposite = viaExaCheckComposite;
-        pExa->accel.PrepareComposite = viaExaPrepareComposite;
-        pExa->accel.Composite = viaExaComposite;
-        pExa->accel.DoneComposite = viaExaDoneSolidCopy;
-    } else {
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                   "[EXA] Disabling EXA accelerated composite.\n");
-    }
-
-    if (!exaDriverInit(pScreen, pExa)) {
-        xfree(pExa);
-        return NULL;
-    }
-
-    viaInit3DState(&pVia->v3d);
-    return pExa;
-}
-
-#endif /* EXA_VERSION_MAJOR */
-#endif /* VIA_HAVE_EXA */
 
 /*
  * Acceleration initializatuon function. Sets up offscreen memory disposition,
@@ -2463,7 +2389,6 @@ viaInitAccel(ScreenPtr pScreen)
     pVia->nPOT[0] = nPOTSupported;
     pVia->nPOT[1] = nPOTSupported;
 
-#ifdef VIA_HAVE_EXA
 #ifdef XF86DRI
     pVia->texAddr = NULL;
     pVia->dBounce = NULL;
@@ -2496,7 +2421,6 @@ viaInitAccel(ScreenPtr pScreen)
                    "[EXA] Enabled EXA acceleration.\n");
         return TRUE;
     }
-#endif /* VIA_HAVE_EXA */
 
     AvailFBArea.x1 = 0;
     AvailFBArea.y1 = 0;
@@ -2549,7 +2473,6 @@ viaExitAccel(ScreenPtr pScreen)
     viaAccelSync(pScrn);
     viaTearDownCBuffer(&pVia->cb);
 
-#ifdef VIA_HAVE_EXA
     if (pVia->useEXA) {
 #ifdef XF86DRI
         if (pVia->directRenderingEnabled) {
@@ -2580,7 +2503,6 @@ viaExitAccel(ScreenPtr pScreen)
         pVia->exaDriverPtr = NULL;
         return;
     }
-#endif /* VIA_HAVE_EXA */
     if (pVia->AccelInfoRec) {
         XAADestroyInfoRec(pVia->AccelInfoRec);
         pVia->AccelInfoRec = NULL;
@@ -2598,7 +2520,6 @@ viaFinishInitAccel(ScreenPtr pScreen)
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
     VIAPtr pVia = VIAPTR(pScrn);
 
-#ifdef VIA_HAVE_EXA
 #ifdef XF86DRI
     int size, ret;
 
@@ -2609,12 +2530,7 @@ viaFinishInitAccel(ScreenPtr pScreen)
         if (!pVia->IsPCI) {
 
             /* Allocate upload and scratch space. */
-#if (EXA_VERSION_MAJOR >= 2)
             if (pVia->exaDriverPtr->UploadToScreen == viaExaTexUploadToScreen) {
-#else
-            if (pVia->exaDriverPtr->accel.UploadToScreen ==
-                viaExaTexUploadToScreen) {
-#endif
                 size = VIA_AGP_UPL_SIZE * 2 + 32;
                 pVia->texAGPBuffer.context = 1;
                 pVia->texAGPBuffer.size = size;
@@ -2670,7 +2586,6 @@ viaFinishInitAccel(ScreenPtr pScreen)
             pVia->scratchAddr = (char *)pVia->FBBase + pVia->scratchOffset;
         }
     }
-#endif /* VIA_HAVE_EXA */
     if (Success != viaSetupCBuffer(pScrn, &pVia->cb, 0)) {
         pVia->NoAccel = TRUE;
         viaExitAccel(pScreen);

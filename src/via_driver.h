@@ -79,7 +79,6 @@
 #include "via_dri.h"
 #endif
 
-#ifdef VIA_HAVE_EXA
 #include "exa.h"
 #define VIA_AGP_UPL_SIZE    (1024*128)
 #define VIA_DMA_DL_SIZE     (1024*128)
@@ -93,7 +92,6 @@
 #define VIA_MIN_UPLOAD 4000
 #define VIA_MIN_TEX_UPLOAD 200
 #define VIA_MIN_DOWNLOAD 200
-#endif
 
 #define AGP_PAGE_SIZE 4096
 #define AGP_PAGES 8192
@@ -272,7 +270,6 @@ typedef struct _VIA {
     Bool                agpDMA;
     Bool                nPOT[VIA_NUM_TEXUNITS];
     const unsigned     *TwodRegs;
-#ifdef VIA_HAVE_EXA
     ExaDriverPtr        exaDriverPtr;
     ExaOffscreenArea   *exa_scratch;
     unsigned int        exa_scratch_next;
@@ -293,7 +290,6 @@ typedef struct _VIA {
     unsigned            texOffset;
     char *              texAddr;
     char *              dBounce;
-#endif
 #endif
 
     /* BIOS Info Ptr */
@@ -428,9 +424,7 @@ typedef struct
 } VIAEntRec, *VIAEntPtr;
 
 /* Prototypes. */
-#if defined(XF86DRI) || defined(VIA_HAVE_EXA)
 void VIAInitialize3DEngine(ScrnInfoPtr pScrn);
-#endif 
 
 /* In via_cursor.c. */
 Bool viaCursorHWInit(ScreenPtr pScreen);

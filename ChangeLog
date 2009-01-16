@@ -1,3 +1,20 @@
+2009-01-17  Jon Nettleton  <jon.nettleton@gmail.com>
+
+	* configure.ac:
+	* src/via_accel.c: (viaInitAccel), (viaExitAccel),
+	(viaFinishInitAccel):
+	* src/via_driver.c: (VIASetup), (VIASetupDefaultOptions),
+	(VIAPreInit), (VIAWriteMode), (VIAInitialize3DEngine):
+	* src/via_driver.h:
+	* src/via_memory.c: (viaExaFBSave), (VIAFreeLinear),
+	(viaOffScreenLinear), (VIAInitLinear):
+	* src/via_priv.h:
+
+	Patch submitted by Robert Bridge, originally started by
+	Xavier Bachelot, to remove old EXA support.  We are moving
+	forward with the driver and are no longer supporting the
+	old EXA initializations.	
+
 2009-01-14  Jon Nettleton  <jon.nettleton@gmail.com>
 
 	* src/via_accel.c: (viaDisableVQ), (viaInitialize2DEngine),

@@ -193,11 +193,9 @@ typedef enum
 #endif
     OPTION_VBEMODES,
     OPTION_NOACCEL,
-#ifdef VIA_HAVE_EXA
     OPTION_ACCELMETHOD,
     OPTION_EXA_NOCOMPOSITE,
     OPTION_EXA_SCRATCH_SIZE,
-#endif
     OPTION_SWCURSOR,
     OPTION_SHADOW_FB,
     OPTION_ROTATE,
@@ -231,11 +229,9 @@ static OptionInfoRec VIAOptions[] = {
 #endif
     {OPTION_VBEMODES,            "VBEModes",         OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_NOACCEL,             "NoAccel",          OPTV_BOOLEAN, {0}, FALSE},
-#ifdef VIA_HAVE_EXA
     {OPTION_ACCELMETHOD,         "AccelMethod",      OPTV_STRING,  {0}, FALSE},
     {OPTION_EXA_NOCOMPOSITE,     "ExaNoComposite",   OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_EXA_SCRATCH_SIZE,    "ExaScratchSize",   OPTV_INTEGER, {0}, FALSE},
-#endif
     {OPTION_SWCURSOR,            "SWCursor",         OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_SHADOW_FB,           "ShadowFB",         OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_ROTATE,              "Rotate",           OPTV_ANYSTR,  {0}, FALSE},
@@ -350,7 +346,6 @@ static const char *xaaSymbols[] = {
     NULL
 };
 
-#ifdef VIA_HAVE_EXA
 static const char *exaSymbols[] = {
     "exaGetVersion",
     "exaDriverInit",
@@ -360,14 +355,9 @@ static const char *exaSymbols[] = {
     "exaGetPixmapPitch",
     "exaGetPixmapOffset",
     "exaWaitSync",
-#if (EXA_VERSION_MAJOR >= 2)
     "exaDriverAlloc",
-#else
-    "exaGetVersion",
-#endif
     NULL
 };
-#endif
 
 static const char *shadowSymbols[] = {
     "ShadowFBInit",
@@ -490,9 +480,7 @@ VIASetup(pointer module, pointer opts, int *errmaj, int *errmin)
 #endif
                           ramdacSymbols,
                           xaaSymbols,
-#ifdef VIA_HAVE_EXA
                           exaSymbols,
-#endif
                           shadowSymbols,
                           vbeSymbols,
                           i2cSymbols,
@@ -854,10 +842,8 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
 
     pVia->shadowFB = FALSE;
     pVia->NoAccel = FALSE;
-#ifdef VIA_HAVE_EXA
     pVia->noComposite = FALSE;
     pVia->exaScratchSize = VIA_SCRATCH_SIZE / 1024;
-#endif
     pVia->hwcursor = TRUE;
     pVia->VQEnable = TRUE;
     pVia->DRIIrqEnable = TRUE;
@@ -1280,7 +1266,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
                        "Valid options are \"CW\" or \"CCW\".\n");
         }
     }
-#ifdef VIA_HAVE_EXA
     if (!pVia->NoAccel) {
         from = X_DEFAULT;
         if ((s = (char *)xf86GetOptValString(VIAOptions, OPTION_ACCELMETHOD))) {
@@ -1313,7 +1298,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
                        pVia->exaScratchSize);
         }
     }
-#endif /* VIA_HAVE_EXA */
 
     /* Use a hardware cursor, unless on secondary or on shadow framebuffer. */
     from = X_DEFAULT;
@@ -1816,9 +1800,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 #endif
 
     if (!pVia->NoAccel) {
-#ifdef VIA_HAVE_EXA
         if (pVia->useEXA) {
-#if (EXA_VERSION_MAJOR >= 2)
             XF86ModReqInfo req;
             int errmaj, errmin;
 
@@ -1831,16 +1813,8 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
                 VIAFreeRec(pScrn);
                 return FALSE;
             }
-#else
-
-            if (!xf86LoadSubModule(pScrn, "exa")) {
-                VIAFreeRec(pScrn);
-                return FALSE;
-            }
-#endif /* EXA_VERSION */
             xf86LoaderReqSymLists(exaSymbols, NULL);
         }
-#endif /* VIA_HAVE_EXA */
         if (!xf86LoadSubModule(pScrn, "xaa")) {
             VIAFreeRec(pScrn);
             return FALSE;
@@ -2987,9 +2961,7 @@ VIAWriteMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
     /* Enable the graphics engine. */
     if (!pVia->NoAccel) {
-#if defined(XF86DRI) || defined(VIA_HAVE_EXA)
         VIAInitialize3DEngine(pScrn);
-#endif
         viaInitialize2DEngine(pScrn);
     }
 
@@ -3207,7 +3179,6 @@ VIADPMS(ScrnInfoPtr pScrn, int mode, int flags)
 
 }
 
-#if defined(XF86DRI) || defined(VIA_HAVE_EXA)
 void
 VIAInitialize3DEngine(ScrnInfoPtr pScrn)
 {
@@ -3270,4 +3241,3 @@ VIAInitialize3DEngine(ScrnInfoPtr pScrn)
     VIASETREG(VIA_REG_TRANSPACE, 0x11000000);
     VIASETREG(VIA_REG_TRANSPACE, 0x20000000);
 }
-#endif
