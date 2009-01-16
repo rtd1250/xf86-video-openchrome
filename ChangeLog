@@ -1,5 +1,15 @@
 2009-01-17  Jon Nettleton  <jon.nettleton@gmail.com>
 
+	* libxvmc/viaLowLevel.c: (viaDMAInitTimeStamp):
+	* src/via_accel.c: (viaDisableVQ):
+	* src/via_video.c: (viaVideoFillPixmap):
+
+	viaLowLevel.c and via_accel.c are fixes by 
+	Bartosz Kosiorek.  The via_video.c is a syntax
+	fix by Robert Bridge.  Thanks for the bug fixes.
+
+2009-01-17  Jon Nettleton  <jon.nettleton@gmail.com>
+
 	* configure.ac:
 	* src/via_accel.c: (viaInitAccel), (viaExitAccel),
 	(viaFinishInitAccel):

@@ -412,10 +412,8 @@ viaDisableVQ(ScrnInfoPtr pScrn)
     VIAPtr pVia = VIAPTR(pScrn);
 
     switch (pVia->Chipset) {
-        case VIA_P4M890:
         case VIA_K8M890:
         case VIA_P4M900:
-        case VIA_VX800:
             VIASETREG(0x41c, 0x00100000);
             VIASETREG(0x420, 0x74301000);
             break;
