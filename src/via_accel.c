@@ -60,6 +60,7 @@ enum VIA_2D_Regs {
 	DSTPOS,
 	LINE_K1K2,
 	LINE_XY,
+	LINE_ERROR,
 	DIMENSION,
 	PATADDR,
 	FGCOLOR,
@@ -69,7 +70,6 @@ enum VIA_2D_Regs {
 	CLIPTL,
 	CLIPBR,
 	OFFSET,
-	LINE_ERROR,
 	KEYCONTROL,
 	SRCBASE,
 	DSTBASE,
@@ -90,6 +90,7 @@ static const unsigned via_2d_regs[] = {
     [DSTPOS]            = VIA_REG_DSTPOS,
     [LINE_K1K2]         = VIA_REG_LINE_K1K2,
     [LINE_XY]           = VIA_REG_LINE_XY,
+    [LINE_ERROR]        = VIA_REG_LINE_ERROR,
     [DIMENSION]         = VIA_REG_DIMENSION,
     [PATADDR]           = VIA_REG_PATADDR,
     [FGCOLOR]           = VIA_REG_FGCOLOR,
@@ -118,6 +119,7 @@ static const unsigned via_2d_regs_m1[] = {
     [DSTPOS]            = VIA_REG_DSTPOS_M1,
     [LINE_K1K2]         = VIA_REG_LINE_K1K2_M1,
     [LINE_XY]           = VIA_REG_LINE_XY_M1,
+    [LINE_ERROR]        = VIA_REG_LINE_ERROR_M1,
     [DIMENSION]         = VIA_REG_DIMENSION_M1,
     [PATADDR]           = VIA_REG_PATADDR_M1,
     [FGCOLOR]           = VIA_REG_FGCOLOR_M1,
@@ -1279,7 +1281,7 @@ viaInitXAA(ScreenPtr pScreen)
                                SCANLINE_PAD_DWORD |
                                BIT_ORDER_IN_BYTE_MSBFIRST |
                                LEFT_EDGE_CLIPPING | ROP_NEEDS_SOURCE | 0);
-                               //SYNC_AFTER_IMAGE_WRITE | 0);
+                               // SYNC_AFTER_IMAGE_WRITE | 0);
 
     /*
      * Most Unichromes are much faster using processor-to-framebuffer writes
@@ -2056,6 +2058,9 @@ viaExaCheckComposite(int op, PicturePtr pSrcPicture,
         !pMaskPicture->repeat &&
         pMaskPicture->pDrawable->width *
         pMaskPicture->pDrawable->height < VIA_MIN_COMPOSITE)
+        return FALSE;
+
+    if (pMaskPicture->repeat != RepeatNormal)
         return FALSE;
 
     if (pMaskPicture && pMaskPicture->componentAlpha) {
