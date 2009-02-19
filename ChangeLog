@@ -1,3 +1,9 @@
+2009-02-19  Gabriel Mansi  <gabriel-dot-mansi-at-gmail-dot-com>
+
+	* src/via_driver.c: (VIAScreenInit), (VIAWriteMode):
+
+	Initialize CRTC before a mode switch. Fix bug #260.
+
 2009-01-26  Jon Nettleton <jon.nettleton@gmail.com>
 
 	* src/via_accel.c: (viaInitXAA), (viaExaCheckComposite):

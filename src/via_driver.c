@@ -2670,9 +2670,6 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     } else {
         vgaHWBlankScreen(pScrn, FALSE);
 
-        if (!pVia->UseLegacyModeSwitch && !pVia->IsSecondary)
-            ViaCRTCInit(pScrn);
-
         if (!VIAWriteMode(pScrn, pScrn->currentMode)) {
             vgaHWBlankScreen(pScrn, TRUE);
             return FALSE;
@@ -2937,6 +2934,7 @@ VIAWriteMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
             else
                 ViaModeSecondaryLegacy(pScrn, mode);
         } else {
+            ViaCRTCInit(pScrn);
             ViaModeSet(pScrn, mode);
         }
 
