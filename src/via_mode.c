@@ -621,13 +621,14 @@ ViaPanelGetIndex(ScrnInfoPtr pScrn, DisplayModePtr mode)
         return FALSE;
     }
 
-    for (i = 0; ViaResolutionTable[i].Index != VIA_RES_INVALID; i++)
+    for (i = 0; ViaResolutionTable[i].Index != VIA_RES_INVALID; i++) {
         if (ViaResolutionTable[i].PanelIndex
             == pBIOSInfo->Panel->NativeModeIndex) {
             pBIOSInfo->panelX = ViaResolutionTable[i].X;
             pBIOSInfo->panelY = ViaResolutionTable[i].Y;
             break;
         }
+    }
 
     if (ViaResolutionTable[i].Index == VIA_RES_INVALID) {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaPanelGetIndex: Unable"
@@ -642,7 +643,7 @@ ViaPanelGetIndex(ScrnInfoPtr pScrn, DisplayModePtr mode)
         return FALSE;
     }
 
-    for (i = 0; i < VIA_BIOS_NUM_PANEL; i++)
+    for (i = 0; i < VIA_BIOS_NUM_PANEL; i++) {
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaPanelGetIndex:"
                          "Match Debug: %d == %d)\n", pBIOSInfo->Panel->NativeModeIndex,
                          lcdTable[i].fpSize));
@@ -669,6 +670,7 @@ ViaPanelGetIndex(ScrnInfoPtr pScrn, DisplayModePtr mode)
                        " to match given mode with this PanelSize.\n");
             return FALSE;
         }
+    }
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaPanelGetIndex: Unable"
                " to match PanelSize with an lcdTable entry.\n");
