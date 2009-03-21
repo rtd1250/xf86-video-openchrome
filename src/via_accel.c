@@ -467,7 +467,7 @@ viaInitialize2DEngine(ScrnInfoPtr pScrn)
     int i;
 
     /* Initialize the 2D engine registers to reset the 2D engine. */
-    for (i = 0x04; i < 0x40; i += 4) {
+    for (i = 0x04; i <= 0x40; i += 4) {
         VIASETREG(i, 0x0);
     }
 
