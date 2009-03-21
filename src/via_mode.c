@@ -292,6 +292,29 @@ ViaTVModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
     return MODE_OK;
 }
 
+
+static Bool
+ViaDFPDetect(ScrnInfoPtr pScrn)
+{
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDFPDetect\n"));
+
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+    xf86MonPtr          monPtr;
+
+    if (pVia->pI2CBus2)
+        monPtr = xf86DoEDID_DDC2(pScrn->scrnIndex, pVia->pI2CBus2);
+    
+    if (monPtr) {
+        xf86PrintEDID(monPtr);
+        xf86SetDDCproperties(pScrn, monPtr);
+        return TRUE;
+    } else {
+        return FALSE;
+    }
+}
+
+
 /*
  *
  */
@@ -305,7 +328,8 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
 
     pBIOSInfo->CrtPresent = FALSE;
     pBIOSInfo->PanelPresent = FALSE;
-
+    pBIOSInfo->DfpPresent = FALSE;
+    
     /* Panel */
     if (pBIOSInfo->ForcePanel) {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Enabling panel from config.\n");
@@ -344,6 +368,19 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
                        "This device is supposed to have a TV encoder, but "
                        "we are unable to detect it (support missing?).\n");
             pBIOSInfo->TVOutput = 0;
+        }
+    }
+    
+    if (pVia->Chipset == VIA_CX700) {
+        
+        if (ViaDFPDetect(pScrn)) {
+            pBIOSInfo->DfpPresent = TRUE;
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                       "DFP is connected.\n");
+        } else {
+            pBIOSInfo->DfpPresent = FALSE;
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                       "DFP is disconnected.\n");
         }
     }
 }
@@ -399,7 +436,8 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
     pBIOSInfo->Panel->IsActive = FALSE;
     pBIOSInfo->CrtActive = FALSE;
     pBIOSInfo->TVActive = FALSE;
-
+    pBIOSInfo->DfpActive = FALSE;
+    
     if (!pVia->ActiveDevice) {
         /* always enable the panel when present */
         if (pBIOSInfo->PanelPresent)
@@ -410,6 +448,11 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
         /* CRT can be used with everything when present */
         if (pBIOSInfo->CrtPresent)
             pBIOSInfo->CrtActive = TRUE;
+
+        /* DFP */
+        if (pBIOSInfo->DfpPresent)
+            pBIOSInfo->DfpActive = TRUE;
+        
     } else {
         if (pVia->ActiveDevice & VIA_DEVICE_LCD) {
             if (pBIOSInfo->PanelPresent)
@@ -434,14 +477,22 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
                 pBIOSInfo->TVActive = TRUE;
         }
 
+        if (pVia->ActiveDevice & VIA_DEVICE_DFP) {
+            pBIOSInfo->DfpPresent = TRUE;
+            pBIOSInfo->DfpActive = TRUE;
+        }
+
         if ((pVia->ActiveDevice & VIA_DEVICE_CRT)
-            || (!pBIOSInfo->Panel->IsActive && !pBIOSInfo->TVActive)) {
+            || (!pBIOSInfo->Panel->IsActive && !pBIOSInfo->TVActive
+                && !pBIOSInfo->DfpActive)) {
             pBIOSInfo->CrtPresent = TRUE;
             pBIOSInfo->CrtActive = TRUE;
         }
     }
     if (!pVia->UseLegacyModeSwitch) {
         if (pBIOSInfo->CrtActive)
+            pBIOSInfo->FirstCRTC->IsActive = TRUE ;
+        if (pBIOSInfo->DfpActive)
             pBIOSInfo->FirstCRTC->IsActive = TRUE ;
         if (pBIOSInfo->Panel->IsActive) {
             pVia->pBIOSInfo->SecondCRTC->IsActive = TRUE ;
@@ -460,6 +511,9 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
     if (pBIOSInfo->TVActive)
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                          "ViaOutputsSelect: TV.\n"));
+    if (pBIOSInfo->DfpActive)
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                         "ViaOutputsSelect: DFP.\n"));
 #endif
     return TRUE; /* !Secondary always has at least CRT */
 }
@@ -1491,6 +1545,28 @@ ViaLCDPower(ScrnInfoPtr pScrn, Bool On)
 }
 
 void
+ViaDFPPower(ScrnInfoPtr pScrn, Bool On)
+{
+#ifdef HAVE_DEBUG
+    if (On)
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDFPPower: On.\n");
+    else
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDFPPower: Off.\n");
+#endif
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+
+    /* Display Channel Select */
+    ViaCrtcMask(hwp, 0xD2, 0x30, 0x30);
+
+    /* Power on TMDS */
+    ViaCrtcMask(hwp, 0xD2, 0x00, 0x08);
+    
+}
+
+
+void
 ViaModeFirstCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModeFirstCRTC\n");
@@ -1578,9 +1654,18 @@ ViaModeSet(ScrnInfoPtr pScrn, DisplayModePtr mode)
     }
 
     if (pBIOSInfo->FirstCRTC->IsActive) {
-        /* CRT on FirstCRTC */
-        ViaDisplaySetStreamOnCRT(pScrn, TRUE);
-        ViaDisplayEnableCRT(pScrn);
+        if (pBIOSInfo->CrtActive) {
+            /* CRT on FirstCRTC */
+            ViaDisplaySetStreamOnCRT(pScrn, TRUE);
+            ViaDisplayEnableCRT(pScrn);
+        }
+
+        if (pBIOSInfo->DfpActive) {
+            /* DFP on FirstCrtc */
+            ViaDisplaySetStreamOnDFP(pScrn, TRUE);
+            ViaDFPPower(pScrn, TRUE);
+        }
+        
         ViaModeFirstCRTC(pScrn, mode);
     } else {
         ViaDisplayDisableCRT(pScrn);

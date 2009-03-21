@@ -1409,8 +1409,8 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             pVia->ActiveDevice |= VIA_DEVICE_CRT;
         if (strstr(s, "LCD"))
             pVia->ActiveDevice |= VIA_DEVICE_LCD;
-        if (strstr(s, "DFP"))  /* just treat this the same as LCD */
-            pVia->ActiveDevice |= VIA_DEVICE_LCD;
+        if (strstr(s, "DFP"))  
+            pVia->ActiveDevice |= VIA_DEVICE_DFP;
         if (strstr(s, "TV"))
             pVia->ActiveDevice |= VIA_DEVICE_TV;
     }
@@ -2101,6 +2101,10 @@ VIASave(ScrnInfoPtr pScrn)
 
         }
 
+        /* Save TMDS status */
+        if (pVia->Chipset == VIA_CX700)
+            Regs->CRD2 = hwp->readCrtc(hwp, 0xD2);
+        
         vgaHWProtect(pScrn, FALSE);
     }
 }
@@ -2213,6 +2217,10 @@ VIARestore(ScrnInfoPtr pScrn)
 
     }
 
+    /* Restore TMDS status */
+    if (pVia->Chipset == VIA_CX700)
+        hwp->writeCrtc(hwp, 0xD2, Regs->CRD2);
+    
     if (pBIOSInfo->Panel->IsActive)
         ViaLCDPower(pScrn, TRUE);
 
@@ -3144,6 +3152,9 @@ VIADPMS(ScrnInfoPtr pScrn, int mode, int flags)
                 if (pBIOSInfo->TVActive)
                     ViaTVPower(pScrn, TRUE);
 
+                if (pBIOSInfo->DfpActive)
+                    ViaDFPPower(pScrn, TRUE);
+
                 if (pBIOSInfo->Simultaneous->IsActive)
                     ViaDisplayEnableSimultaneous(pScrn);
 
@@ -3164,6 +3175,9 @@ VIADPMS(ScrnInfoPtr pScrn, int mode, int flags)
                 if (pBIOSInfo->TVActive)
                     ViaTVPower(pScrn, FALSE);
 
+                if (pBIOSInfo->DfpActive)
+                    ViaDFPPower(pScrn, FALSE);
+                
                 if (pBIOSInfo->Simultaneous->IsActive)
                     ViaDisplayDisableSimultaneous(pScrn);
 

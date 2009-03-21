@@ -1,3 +1,15 @@
+2009-03-21  Xavier Bachelot  <xavier@bachelot.org>
+
+	* src/via_bios.h:
+	* src/via_display.c: (ViaDisplaySetStreamOnDFP):
+	* src/via_driver.c: (VIAPreInit), (VIASave), (VIARestore),
+	(VIADPMS):
+	* src/via_driver.h:
+	* src/via_mode.c: (ViaDFPDetect), (ViaOutputsDetect),
+	(ViaOutputsSelect), (ViaDFPPower), (ViaModeSet):
+
+	CX700 integrated TMDS (Patch courtesy Tim Chen from VIA).
+
 2009-02-19  Gabriel Mansi  <gabriel-dot-mansi-at-gmail-dot-com>
 
 	* src/via_driver.c: (VIAScreenInit), (VIAWriteMode):

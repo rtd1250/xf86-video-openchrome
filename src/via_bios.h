@@ -162,6 +162,10 @@ typedef struct _VIABIOSINFO {
     int         panelX;
     int         panelY;
     int         resY;
+
+    /* DFP */
+    Bool        DfpPresent;
+    Bool        DfpActive;
     
     /* Integrated LVDS */
     ViaLVDSInfoPtr Lvds;
@@ -216,6 +220,7 @@ ModeStatus ViaValidMode(int scrnIndex, DisplayModePtr mode, Bool verbose, int fl
 void ViaModePrimaryLegacy(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaModeSecondaryLegacy(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaLCDPower(ScrnInfoPtr pScrn, Bool On);
+void ViaDFPPower(ScrnInfoPtr pScrn, Bool On);
 void ViaTVPower(ScrnInfoPtr pScrn, Bool On);
 void ViaTVSave(ScrnInfoPtr pScrn);
 void ViaTVRestore(ScrnInfoPtr pScrn);

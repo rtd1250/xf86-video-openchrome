@@ -124,6 +124,9 @@ typedef struct {
     CARD8   CR97, CR99, CR9B, CR9F, CRA0, CRA1, CRA2;
     CARD8   CRTCRegs[68];
 /*    CARD8   LCDRegs[0x40];*/
+
+    /* TMDS/LVDS Control */
+    CARD8   CRD2;
 } VIARegRec, *VIARegPtr;
 
 /*
