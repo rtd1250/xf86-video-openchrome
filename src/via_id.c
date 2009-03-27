@@ -140,6 +140,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"PCChips V21G",                          VIA_VM800,   0x1019, 0xAA51, VIA_DEVICE_CRT},
     {"Asustek P5VDC-MX",                      VIA_VM800,   0x1043, 0x3344, VIA_DEVICE_CRT},
     {"Asustek P5VDC-TVM",                     VIA_VM800,   0x1043, 0x81CE, VIA_DEVICE_CRT},
+    {"Foxconn P4M800P7MB-RS2H",               VIA_VM800,   0x105B, 0x0CF0, VIA_DEVICE_CRT},
     {"Gateway MX3210",                        VIA_VM800,   0x107B, 0x0216, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"VIA VT3344 (VM800) - EPIA EN",          VIA_VM800,   0x1106, 0x3344, VIA_DEVICE_CRT | VIA_DEVICE_TV},
     {"Gigabyte GA-8VM800M-775",               VIA_VM800,   0x1458, 0xD000, VIA_DEVICE_CRT},
