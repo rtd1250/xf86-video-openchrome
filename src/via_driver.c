@@ -2102,7 +2102,7 @@ VIASave(ScrnInfoPtr pScrn)
         }
 
         /* Save TMDS status */
-        if (pVia->Chipset == VIA_CX700)
+        if ((pVia->Chipset == VIA_CX700) || (pVia->Chipset == VIA_VX800))
             Regs->CRD2 = hwp->readCrtc(hwp, 0xD2);
         
         vgaHWProtect(pScrn, FALSE);
@@ -2218,7 +2218,7 @@ VIARestore(ScrnInfoPtr pScrn)
     }
 
     /* Restore TMDS status */
-    if (pVia->Chipset == VIA_CX700)
+    if ((pVia->Chipset == VIA_CX700) || (pVia->Chipset == VIA_VX800))
         hwp->writeCrtc(hwp, 0xD2, Regs->CRD2);
     
     if (pBIOSInfo->Panel->IsActive)

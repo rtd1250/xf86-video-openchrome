@@ -371,7 +371,7 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
         }
     }
     
-    if (pVia->Chipset == VIA_CX700) {
+    if ((pVia->Chipset == VIA_CX700) || (pVia->Chipset == VIA_VX800)) {
         
         if (ViaDFPDetect(pScrn)) {
             pBIOSInfo->DfpPresent = TRUE;
