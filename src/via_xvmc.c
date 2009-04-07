@@ -321,6 +321,7 @@ ViaInitXVMC(ScreenPtr pScreen)
 
     if ((pVia->Chipset == VIA_KM400) ||
         (pVia->Chipset == VIA_CX700) ||
+        (pVia->Chipset == VIA_VX800) ||
         (pVia->Chipset == VIA_K8M890) ||
         (pVia->Chipset == VIA_P4M900)) {
         xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
