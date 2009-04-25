@@ -89,7 +89,8 @@ ViaLVDSDFPPower(ScrnInfoPtr pScrn, Bool on)
         hwp->writeSeq(hwp, 0x2A, hwp->readSeq(hwp, 0x2A) | 0x0F);
     } else {
         /* Turn DFP High/Low pad off. */
-        hwp->writeSeq(hwp, 0x2A, hwp->readSeq(hwp, 0x2A) & 0x0F);
+        hwp->writeSeq(hwp, 0x2A, hwp->readSeq(hwp, 0x2A) & 0xF0);
+
     }
 }
 
