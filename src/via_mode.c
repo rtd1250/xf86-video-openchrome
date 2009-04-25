@@ -300,7 +300,7 @@ ViaDFPDetect(ScrnInfoPtr pScrn)
 
     VIAPtr pVia = VIAPTR(pScrn);
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-    xf86MonPtr          monPtr;
+    xf86MonPtr          monPtr = NULL;
 
     if (pVia->pI2CBus2)
         monPtr = xf86DoEDID_DDC2(pScrn->scrnIndex, pVia->pI2CBus2);
