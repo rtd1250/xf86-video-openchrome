@@ -1153,6 +1153,8 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     struct pci_device *vgaDevice = viaPciDeviceVga();
 #endif
 
+    hwp = VGAHWPTR(pScrn);
+
     switch (pVia->Chipset) {
         case VIA_CLE266:
         case VIA_KM400:
@@ -1546,7 +1548,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         VIAFreeRec(pScrn);
         return FALSE;
     }
-    hwp = VGAHWPTR(pScrn);
 
 #ifdef HAVE_DEBUG
     //pVia->PrintVGARegs = FALSE;
