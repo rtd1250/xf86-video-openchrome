@@ -2267,10 +2267,10 @@ ViaMMIODisable(ScrnInfoPtr pScrn)
         case VIA_CX700:
         case VIA_P4M900:
         case VIA_VX800:
-            ViaSeqMask(VGAHWPTR(pScrn), 0x1A, 0x00, 0x08);
+            ViaSeqMask(hwp, 0x1A, 0x00, 0x08);
             break;
         default:
-            ViaSeqMask(VGAHWPTR(pScrn), 0x1A, 0x00, 0x60);
+            ViaSeqMask(hwp, 0x1A, 0x00, 0x60);
             break;
     }
 }
