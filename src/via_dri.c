@@ -588,7 +588,16 @@ VIADRIScreenInit(ScreenPtr pScreen)
 
     pDRIInfo = pVia->pDRIInfo;
     pDRIInfo->drmDriverName = VIAKernelDriverName;
-    pDRIInfo->clientDriverName = VIAClientDriverName;
+    switch (pVia->Chipset) {
+        case VIA_K8M890:
+        case VIA_P4M900:
+        case VIA_VX800:
+            pDRIInfo->clientDriverName = "swrast";
+            break;
+        default:
+            pDRIInfo->clientDriverName = VIAClientDriverName;
+            break;
+    }
     pDRIInfo->busIdString = xalloc(64);
     sprintf(pDRIInfo->busIdString, "PCI:%d:%d:%d",
 #ifdef XSERVER_LIBPCIACCESS
