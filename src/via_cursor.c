@@ -290,19 +290,36 @@ viaShowCursor(ScrnInfoPtr pScrn)
     CARD32 temp;
     CARD32 control = pVia->CursorRegControl;
 
-    temp =
-	(1 << 30) |
-	(1 << 29) |
-	(1 << 28) |
-	(1 << 26) |
-	(1 << 25) |
-	(1 <<  2) |
-	(1 <<  0);
+    switch(pVia->Chipset) {
+        case VIA_CX700:
+        case VIA_P4M890:
+        case VIA_P4M900:
+        case VIA_VX800:
+             if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
+                 VIASETREG(VIA_REG_HI_CONTROL0, 0x36000005);
+             }
+  	     if (pVia->pBIOSInfo->SecondCRTC->IsActive) {
+                 VIASETREG(VIA_REG_HI_CONTROL1, 0xb6000005);
+             } 
+             break;
+        
+        default:
+            /* temp = 0x36000005 */
+	    temp =
+		(1 << 29) |
+		(1 << 28) |
+		(1 << 26) |
+		(1 << 25) |
+		(1 <<  2) |
+		(1 <<  0);
 
-    if (pVia->CursorPipe)
-	temp |= (1 << 31);
+            temp |= (1 << 30);
 
-    VIASETREG(control, temp);
+            /* Duoview */
+	    if (pVia->CursorPipe)
+		temp |= (1 << 31);
+            VIASETREG(control, temp);
+    }
 }
 
 void
@@ -313,7 +330,24 @@ viaHideCursor(ScrnInfoPtr pScrn)
     CARD32 control = pVia->CursorRegControl;
 
     temp = VIAGETREG(control);
-    VIASETREG(control, temp & 0xFFFFFFFE);
+    switch(pVia->Chipset) {
+        case VIA_CX700:
+        case VIA_P4M890:
+        case VIA_P4M900:
+        case VIA_VX800:
+             if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
+                 temp = VIAGETREG(VIA_REG_HI_CONTROL0);
+                 VIASETREG(VIA_REG_HI_CONTROL0, temp & 0xFFFFFFFA);
+             }
+  	     if (pVia->pBIOSInfo->SecondCRTC->IsActive) {
+                 temp = VIAGETREG(VIA_REG_HI_CONTROL1);
+                 VIASETREG(VIA_REG_HI_CONTROL1, temp & 0xFFFFFFFA);
+             } 
+             break;
+        
+        default:
+             VIASETREG(control, temp & 0xFFFFFFFA);
+    }
 }
 
 static void
@@ -340,13 +374,41 @@ viaSetCursorPosition(ScrnInfoPtr pScrn, int x, int y)
 	yoff = 0;
     }
 
-    temp = VIAGETREG(control);
-    VIASETREG(control, temp & 0xFFFFFFFE);
+    switch(pVia->Chipset) {
+        case VIA_CX700:
+        case VIA_P4M890:
+        case VIA_P4M900:
+        case VIA_VX800:
+             if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
+                 temp = VIAGETREG(VIA_REG_HI_CONTROL0);
+                 VIASETREG(VIA_REG_HI_CONTROL0, temp & 0xFFFFFFFE);
+                 
+                 VIASETREG(VIA_REG_HI_POS0,    ((x    << 16) | (y    & 0x07ff)));
+                 VIASETREG(VIA_REG_HI_OFFSET0, ((xoff << 16) | (yoff & 0x07ff)));
 
-    VIASETREG(pos,    ((x    << 16) | (y    & 0x07ff)));
-    VIASETREG(offset, ((xoff << 16) | (yoff & 0x07ff)));
+                 VIASETREG(VIA_REG_HI_CONTROL0, temp);
+             }
+  	     if (pVia->pBIOSInfo->SecondCRTC->IsActive) {
+                 temp = VIAGETREG(VIA_REG_HI_CONTROL1);
+                 VIASETREG(VIA_REG_HI_CONTROL1, temp & 0xFFFFFFFE);
 
-    VIASETREG(control, temp);
+                 VIASETREG(VIA_REG_HI_POS1,    ((x    << 16) | (y    & 0x07ff)));
+                 VIASETREG(VIA_REG_HI_OFFSET1, ((xoff << 16) | (yoff & 0x07ff)));
+
+                 VIASETREG(VIA_REG_HI_CONTROL1, temp);
+             } 
+             break;
+        
+        default:
+            temp = VIAGETREG(control);
+            VIASETREG(control, temp & 0xFFFFFFFE);
+
+            VIASETREG(pos,    ((x    << 16) | (y    & 0x07ff)));
+            VIASETREG(offset, ((xoff << 16) | (yoff & 0x07ff)));
+
+            VIASETREG(control, temp);
+    }
+
 }
 
 static Bool
@@ -397,18 +459,34 @@ viaLoadCursorImage(ScrnInfoPtr pScrn, unsigned char *s)
     if (pVia->CursorARGBSupported) {
 #define ARGB_PER_CHUNK	(8 * sizeof (chunk) / 2)
 		for (i = 0; i < (pVia->CursorMaxWidth * pVia->CursorMaxHeight / ARGB_PER_CHUNK); i++) {
-		chunk = *s++;
-		for (j = 0; j < ARGB_PER_CHUNK; j++, chunk >>= 2)
+		    chunk = *s++;
+		    for (j = 0; j < ARGB_PER_CHUNK; j++, chunk >>= 2)
 			*dst++ = mono_cursor_color[chunk & 3];
 		}
 
 		pVia->CursorFG = mono_cursor_color[3];
 		pVia->CursorBG = mono_cursor_color[2];
-	} else {
-		memcpy(dst, src, pVia->CursorSize);
-	}
-
-    VIASETREG(control, temp);
+    } else {
+	memcpy(dst, src, pVia->CursorSize);
+    }
+    switch(pVia->Chipset) {
+        case VIA_CX700:
+        case VIA_P4M890:
+        case VIA_P4M900:
+        case VIA_VX800:
+             if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
+                 temp = VIAGETREG(VIA_REG_HI_CONTROL0);
+                 VIASETREG(VIA_REG_HI_CONTROL0, temp & 0xFFFFFFFE);
+             }
+  	     if (pVia->pBIOSInfo->SecondCRTC->IsActive) {
+                 temp = VIAGETREG(VIA_REG_HI_CONTROL1);
+                 VIASETREG(VIA_REG_HI_CONTROL1, temp & 0xFFFFFFFE);
+             }
+             break;
+        
+        default:
+             VIASETREG(control, temp);
+    }
 }
 
 static void
@@ -441,7 +519,23 @@ viaSetCursorColors(ScrnInfoPtr pScrn, int bg, int fg)
     pVia->CursorFG = fg;
     pVia->CursorBG = bg;
 
-    VIASETREG(control, temp);
+    switch(pVia->Chipset) {
+        case VIA_CX700:
+        case VIA_P4M890:
+        case VIA_P4M900:
+        case VIA_VX800:
+             if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
+                 temp = VIAGETREG(VIA_REG_HI_CONTROL0);
+                 VIASETREG(VIA_REG_HI_CONTROL0, temp & 0xFFFFFFFE);
+             }
+  	     if (pVia->pBIOSInfo->SecondCRTC->IsActive) {
+                 temp = VIAGETREG(VIA_REG_HI_CONTROL1);
+                 VIASETREG(VIA_REG_HI_CONTROL1, temp & 0xFFFFFFFE);
+             }
+             break;        
+        default:
+             VIASETREG(control, temp);
+    }
 }
 
 static void
@@ -486,5 +580,22 @@ viaLoadCursorARGB(ScrnInfoPtr pScrn, CursorPtr pCurs)
 	for (x = 0; x < pVia->CursorMaxWidth; x++)
 	    *dst++ = 0;
 
-    VIASETREG(control, temp);
+    switch(pVia->Chipset) {
+        case VIA_CX700:
+        case VIA_P4M890:
+        case VIA_P4M900:
+        case VIA_VX800:
+             if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
+                 temp = VIAGETREG(VIA_REG_HI_CONTROL0);
+                 VIASETREG(VIA_REG_HI_CONTROL0, temp & 0xFFFFFFFE);
+             }
+  	     if (pVia->pBIOSInfo->SecondCRTC->IsActive) {
+                 temp = VIAGETREG(VIA_REG_HI_CONTROL1);
+                 VIASETREG(VIA_REG_HI_CONTROL1, temp & 0xFFFFFFFE);
+             }
+             break;
+        
+        default:
+             VIASETREG(control, temp);
+    }
 }
