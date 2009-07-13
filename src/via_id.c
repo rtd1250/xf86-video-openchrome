@@ -92,6 +92,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Shuttle FX21",                          VIA_K8M800,  0x1297, 0x3052, VIA_DEVICE_CRT},
     {"Shuttle FX83",                          VIA_K8M800,  0x1297, 0xF683, VIA_DEVICE_CRT | VIA_DEVICE_TV},
     {"Sharp Actius AL27",                     VIA_K8M800,  0x13BD, 0x1044, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
+    {"Sharp PC-AE30J",                        VIA_K8M800,  0x13BD, 0x104B, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Giga-byte GA-K8VM800M",                 VIA_K8M800,  0x1458, 0xD000, VIA_DEVICE_CRT},
     {"MSI K8M Neo-V",                         VIA_K8M800,  0x1462, 0x0320, VIA_DEVICE_CRT},
     {"MSI K8MM-V",                            VIA_K8M800,  0x1462, 0x7142, VIA_DEVICE_CRT},
