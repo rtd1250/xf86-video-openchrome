@@ -83,15 +83,10 @@ static void
 ViaLVDSDFPPower(ScrnInfoPtr pScrn, Bool on)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
 
-    if (on) {
-        /* Turn DFP High/Low pad on. */
-        hwp->writeSeq(hwp, 0x2A, hwp->readSeq(hwp, 0x2A) | 0x0F);
-    } else {
-        /* Turn DFP High/Low pad off. */
-        hwp->writeSeq(hwp, 0x2A, hwp->readSeq(hwp, 0x2A) & 0xF0);
-
-    }
+    /* Switch DFP High/Low pads on or off for channels active at EnterVT(). */
+    ViaSeqMask(hwp, 0x2A, on ? pVia->SavedReg.SR2A : 0, 0x0F);
 }
 
 static void
