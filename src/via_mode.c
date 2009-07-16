@@ -371,17 +371,20 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
         }
     }
     
-    if ((pVia->Chipset == VIA_CX700) || (pVia->Chipset == VIA_VX800)) {
-        
-        if (ViaDFPDetect(pScrn)) {
-            pBIOSInfo->DfpPresent = TRUE;
-            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                       "DFP is connected.\n");
-        } else {
-            pBIOSInfo->DfpPresent = FALSE;
-            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                       "DFP is disconnected.\n");
-        }
+    switch (pVia->Chipset) {
+        case VIA_CX700:
+        case VIA_VX800:
+        case VIA_VX855:
+            if (ViaDFPDetect(pScrn)) {
+                pBIOSInfo->DfpPresent = TRUE;
+                xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                           "DFP is connected.\n");
+            } else {
+                pBIOSInfo->DfpPresent = FALSE;
+                xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                           "DFP is disconnected.\n");
+            }
+            break;
     }
 }
 
@@ -496,8 +499,14 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
             pBIOSInfo->FirstCRTC->IsActive = TRUE ;
         if (pBIOSInfo->Panel->IsActive) {
             pVia->pBIOSInfo->SecondCRTC->IsActive = TRUE ;
-            if (pVia->Chipset == VIA_P4M900 || pVia->Chipset == VIA_CX700 || pVia->Chipset == VIA_VX800 )
-                pVia->pBIOSInfo->Lvds->IsActive = TRUE ;
+            switch (pVia->Chipset) {
+                case VIA_P4M900:
+                case VIA_CX700:
+                case VIA_VX800:
+                case VIA_VX855:
+                    pVia->pBIOSInfo->Lvds->IsActive = TRUE ;
+                    break;
+            }
         }
     }
 
@@ -1347,6 +1356,11 @@ ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode)
                          "ViaComputeDotClock %d : %04x : %04x\n",
                          mode->Clock, best1, best2));
         return best2;
+    } else if (pVia->Chipset == VIA_VX855) {
+        for (i = 0; ViaDotClocks[i].DotClock; i++)
+            if (ViaDotClocks[i].DotClock == mode->Clock &&
+                ViaDotClocks[i].Chrome9HCM)
+                return ViaDotClocks[i].Chrome9HCM;
     } else {
         for (i = 0; ViaDotClocks[i].DotClock; i++)
             if (ViaDotClocks[i].DotClock == mode->Clock)

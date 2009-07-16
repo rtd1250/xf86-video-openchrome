@@ -277,6 +277,7 @@ DecideOverlaySupport(ScrnInfoPtr pScrn)
         pVia->ChipId != PCI_CHIP_VT3314 && 
         pVia->ChipId != PCI_CHIP_VT3327 && 
         pVia->ChipId != PCI_CHIP_VT3336 && 
+        pVia->ChipId != PCI_CHIP_VT3409 && 
         pVia->ChipId != PCI_CHIP_VT3364 && 
         pVia->ChipId != PCI_CHIP_VT3324 &&
 	pVia->ChipId != PCI_CHIP_VT3353) {

@@ -282,6 +282,7 @@ VIAVidHWDiffInit(ScrnInfoPtr pScrn)
             HWDiff->dwNeedV1Prefetch = VID_HWDIFF_FALSE;
             break;
         case VIA_VX800:
+        case VIA_VX855:
             HWDiff->dwThreeHQVBuffer = VID_HWDIFF_TRUE;
             HWDiff->dwHQVFetchByteUnit = VID_HWDIFF_TRUE;
             HWDiff->dwSupportTwoColorKey = VID_HWDIFF_TRUE;
@@ -784,6 +785,7 @@ viaCalculateVideoColor(VIAPtr pVia, int hue, int saturation,
         case PCI_CHIP_VT3324:
         case PCI_CHIP_VT3327:
         case PCI_CHIP_VT3353:
+        case PCI_CHIP_VT3409:
             model = 0;
             break;
         case PCI_CHIP_CLE3122:
@@ -922,6 +924,7 @@ viaSetColorSpace(VIAPtr pVia, int hue, int saturation, int brightness,
         case PCI_CHIP_VT3324:
         case PCI_CHIP_VT3364:
         case PCI_CHIP_VT3353:
+        case PCI_CHIP_VT3409:
         case PCI_CHIP_CLE3122:
             VIDOutD(V1_ColorSpaceReg_2, col2);
             VIDOutD(V1_ColorSpaceReg_1, col1);
@@ -951,6 +954,7 @@ ViaInitVideoStatusFlag(VIAPtr pVia)
         case PCI_CHIP_VT3324:
         case PCI_CHIP_VT3364:
         case PCI_CHIP_VT3353:
+        case PCI_CHIP_VT3409:
             return (VIDEO_HQV_INUSE | SW_USE_HQV | VIDEO_1_INUSE
                     | VIDEO_ACTIVE | VIDEO_SHOW);
         case PCI_CHIP_CLE3122:
@@ -990,6 +994,8 @@ ViaSetVidCtl(VIAPtr pVia, unsigned int videoFlag)
             case PCI_CHIP_VT3364:
             case PCI_CHIP_VT3353:
                 return V3_ENABLE | VIDEO_EXPIRE_NUM_VT3336;
+            case PCI_CHIP_VT3409:
+                return V3_ENABLE | VIDEO_EXPIRE_NUM_VT3409;
             case PCI_CHIP_CLE3122:
                 if (CLE266_REV_IS_CX(pVia->ChipRev))
                     return V3_ENABLE | V3_EXPIRE_NUM_F;
@@ -1269,24 +1275,28 @@ SetFIFO_V1(VIAPtr pVia, CARD8 depth, CARD8 prethreshold, CARD8 threshold)
 static void
 SetFIFO_V3(VIAPtr pVia, CARD8 depth, CARD8 prethreshold, CARD8 threshold)
 {
-    if ((pVia->ChipId == PCI_CHIP_VT3314)
-        || (pVia->ChipId == PCI_CHIP_VT3324)
-        || (pVia->ChipId == PCI_CHIP_VT3327
-	|| (pVia->ChipId == PCI_CHIP_VT3353))) {
-        SaveVideoRegister(pVia, ALPHA_V3_FIFO_CONTROL,
-                          (VIDInD(ALPHA_V3_FIFO_CONTROL) & ALPHA_FIFO_MASK)
-                          | ((depth - 1) & 0xff) | ((threshold & 0xff) << 8));
-        SaveVideoRegister(pVia, ALPHA_V3_PREFIFO_CONTROL,
-                          (VIDInD(ALPHA_V3_PREFIFO_CONTROL)
-                           & ~V3_FIFO_MASK_3314) | (prethreshold & 0xff));
-    } else {
-        SaveVideoRegister(pVia, ALPHA_V3_FIFO_CONTROL,
-                          (VIDInD(ALPHA_V3_FIFO_CONTROL) & ALPHA_FIFO_MASK)
-                          | ((depth - 1) & 0xff) | ((threshold & 0xff) << 8));
-        SaveVideoRegister(pVia, ALPHA_V3_PREFIFO_CONTROL,
-                          (VIDInD(ALPHA_V3_PREFIFO_CONTROL) & ~V3_FIFO_MASK)
-                          | (prethreshold & 0x7f));
-    }
+    switch (pVia->ChipId) {
+        case PCI_CHIP_VT3314:
+        case PCI_CHIP_VT3324:
+        case PCI_CHIP_VT3327:
+        case PCI_CHIP_VT3353:
+        case PCI_CHIP_VT3409:
+            SaveVideoRegister(pVia, ALPHA_V3_FIFO_CONTROL,
+                              (VIDInD(ALPHA_V3_FIFO_CONTROL) & ALPHA_FIFO_MASK)
+                               | ((depth - 1) & 0xff) | ((threshold & 0xff) << 8));
+            SaveVideoRegister(pVia, ALPHA_V3_PREFIFO_CONTROL,
+                              (VIDInD(ALPHA_V3_PREFIFO_CONTROL)
+                              & ~V3_FIFO_MASK_3314) | (prethreshold & 0xff));
+            break;
+        default :
+            SaveVideoRegister(pVia, ALPHA_V3_FIFO_CONTROL,
+                              (VIDInD(ALPHA_V3_FIFO_CONTROL) & ALPHA_FIFO_MASK)
+                              | ((depth - 1) & 0xff) | ((threshold & 0xff) << 8));
+            SaveVideoRegister(pVia, ALPHA_V3_PREFIFO_CONTROL,
+                              (VIDInD(ALPHA_V3_PREFIFO_CONTROL) & ~V3_FIFO_MASK)
+                              | (prethreshold & 0x7f));
+            break;
+    } 
 }
 
 static void
@@ -1335,6 +1345,7 @@ SetFIFO_V3_64or32or32(VIAPtr pVia)
         case PCI_CHIP_VT3324:
         case PCI_CHIP_VT3364:
         case PCI_CHIP_VT3353:
+        case PCI_CHIP_VT3409:
             SetFIFO_V3(pVia, 225, 200, 250);
             break;
         case PCI_CHIP_VT3204:
@@ -1367,6 +1378,7 @@ SetFIFO_V3_64or32or16(VIAPtr pVia)
         case PCI_CHIP_VT3324:
         case PCI_CHIP_VT3364:
         case PCI_CHIP_VT3353:
+        case PCI_CHIP_VT3409:
             SetFIFO_V3(pVia, 225, 200, 250);
             break;
         case PCI_CHIP_VT3204:
@@ -2011,7 +2023,7 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
     if (pVia->VideoEngine == VIDEO_ENGINE_CME) {
         VIDOutD(HQV_SRC_DATA_OFFSET_CONTROL1,0);
         VIDOutD(HQV_SRC_DATA_OFFSET_CONTROL3,((pUpdate->SrcRight - 1 ) << 16) | (pUpdate->SrcBottom - 1));
-        if (pVia->Chipset == VIA_VX800) {
+        if (pVia->Chipset == VIA_VX800 || pVia->Chipset == VIA_VX855) {
             VIDOutD(HQV_SRC_DATA_OFFSET_CONTROL2,0);
             VIDOutD(HQV_SRC_DATA_OFFSET_CONTROL4,((pUpdate->SrcRight - 1 ) << 16) | (pUpdate->SrcBottom - 1));
         }

@@ -97,6 +97,7 @@ viaHWCursorInit(ScreenPtr pScreen)
         case VIA_P4M890:
         case VIA_P4M900:
         case VIA_VX800:
+        case VIA_VX855:
 			if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
 				pVia->CursorRegControl  = VIA_REG_HI_CONTROL0;
 				pVia->CursorRegBase     = VIA_REG_HI_BASE0;
@@ -164,6 +165,7 @@ viaHWCursorInit(ScreenPtr pScreen)
         case VIA_P4M890:
         case VIA_P4M900:
         case VIA_VX800:
+        case VIA_VX855:
 			if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
 				VIASETREG(VIA_REG_PRIM_HI_INVTCOLOR, 0x00FFFFFF);
 				VIASETREG(VIA_REG_V327_HI_INVTCOLOR, 0x00FFFFFF);
@@ -222,6 +224,7 @@ viaCursorStore(ScrnInfoPtr pScrn)
         case VIA_P4M890:
         case VIA_P4M900:
         case VIA_VX800:
+        case VIA_VX855:
 			if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
 	    		pVia->CursorPrimHiInvtColor = VIAGETREG(VIA_REG_PRIM_HI_INVTCOLOR);
 	    		pVia->CursorV327HiInvtColor = VIAGETREG(VIA_REG_V327_HI_INVTCOLOR);
@@ -261,6 +264,7 @@ viaCursorRestore(ScrnInfoPtr pScrn)
         case VIA_P4M890:
         case VIA_P4M900:
         case VIA_VX800:
+        case VIA_VX855:
 			if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
 	    		VIASETREG(VIA_REG_PRIM_HI_INVTCOLOR, pVia->CursorPrimHiInvtColor);
 	    		VIASETREG(VIA_REG_V327_HI_INVTCOLOR, pVia->CursorV327HiInvtColor);

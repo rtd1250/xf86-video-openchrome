@@ -195,6 +195,7 @@ viaFlushPCI(ViaCommandBuffer * buf)
                      */
 					switch (pVia->Chipset) {
 					    case VIA_VX800:
+					    case VIA_VX855:
 							while ((VIAGETREG(VIA_REG_STATUS) &
 							       (VIA_CMD_RGTR_BUSY_H5 | VIA_2D_ENG_BUSY_H5))
 									&& (loop++ < MAXLOOP)) ;
@@ -471,7 +472,7 @@ viaInitialize2DEngine(ScrnInfoPtr pScrn)
         VIASETREG(i, 0x0);
     }
 
-    if (pVia->Chipset == VIA_VX800) {
+    if (pVia->Chipset == VIA_VX800 || pVia->Chipset == VIA_VX855) {
         for (i = 0x44; i < 0x5c; i += 4) {
             VIASETREG(i, 0x0);
         }
@@ -480,6 +481,7 @@ viaInitialize2DEngine(ScrnInfoPtr pScrn)
     /* Make the VIA_REG() macro magic work */
     switch (pVia->Chipset) {
     case VIA_VX800:
+    case VIA_VX855:
         pVia->TwodRegs = via_2d_regs_m1;
         break;
     default:
@@ -527,6 +529,7 @@ viaAccelSync(ScrnInfoPtr pScrn)
 
     switch (pVia->Chipset) {
         case VIA_VX800:
+        case VIA_VX855:
             while ((VIAGETREG(VIA_REG_STATUS) &
                     (VIA_CMD_RGTR_BUSY_H5 | VIA_2D_ENG_BUSY_H5 | VIA_3D_ENG_BUSY_H5))
                    && (loop++ < MAXLOOP)) ;
@@ -587,7 +590,7 @@ viaPitchHelper(VIAPtr pVia, unsigned dstPitch, unsigned srcPitch)
     unsigned val = (dstPitch >> 3) << 16 | (srcPitch >> 3);
     RING_VARS;
 
-    if (pVia->Chipset != VIA_VX800) {
+    if (pVia->Chipset != VIA_VX800 && pVia->Chipset != VIA_VX855) {
         val |= VIA_PITCH_ENABLE;
     }
     OUT_RING_H1(VIA_REG(pVia, PITCH), val);
@@ -1289,17 +1292,23 @@ viaInitXAA(ScreenPtr pScreen)
      * test with x11perf -shmput500!
      */
 
-    if (pVia->Chipset != VIA_K8M800 &&
-        pVia->Chipset != VIA_K8M890 &&
-        pVia->Chipset != VIA_P4M900 &&
-        pVia->Chipset != VIA_VX800)
-        xaaptr->ImageWriteFlags |= NO_GXCOPY;
+    switch (pVia->Chipset) {
+        case VIA_K8M800:
+        case VIA_K8M890:
+        case VIA_P4M900:
+        case VIA_VX800:
+        case VIA_VX855:
+            break;
+        default:
+            xaaptr->ImageWriteFlags |= NO_GXCOPY;
+            break;
+    }
 
     xaaptr->SetupForImageWrite = viaSetupForImageWrite;
     xaaptr->SubsequentImageWriteRect = viaSubsequentImageWriteRect;
     xaaptr->ImageWriteBase = pVia->BltBase;
 
-    if (pVia->Chipset == VIA_VX800)
+    if (pVia->Chipset == VIA_VX800 || pVia->Chipset == VIA_VX855)
         xaaptr->ImageWriteRange = VIA_MMIO_BLTSIZE;
     else
         xaaptr->ImageWriteRange = (64 * 1024);

@@ -128,6 +128,7 @@ static const struct pci_id_match via_device_match[] = {
    VIA_DEVICE_MATCH (PCI_CHIP_VT3324, 0 ),
    VIA_DEVICE_MATCH (PCI_CHIP_VT3327, 0 ),
    VIA_DEVICE_MATCH (PCI_CHIP_VT3353, 0 ),
+   VIA_DEVICE_MATCH (PCI_CHIP_VT3409, 0 ),
     { 0, 0, 0 },
 };
 
@@ -164,6 +165,7 @@ static SymTabRec VIAChipsets[] = {
     {VIA_CX700,    "CX700/VX700"},
     {VIA_P4M890,   "P4M890"},
     {VIA_VX800,    "VX800"},
+    {VIA_VX855,    "VX855"},
     {-1,            NULL }
 };
 
@@ -179,6 +181,7 @@ static PciChipsets VIAPciChipsets[] = {
     {VIA_CX700,    PCI_CHIP_VT3324,    RES_SHARED_VGA},
     {VIA_P4M890,   PCI_CHIP_VT3327,    RES_SHARED_VGA},
     {VIA_VX800,    PCI_CHIP_VT3353,    RES_SHARED_VGA},
+    {VIA_VX855,    PCI_CHIP_VT3409,    RES_SHARED_VGA},
     {-1,           -1,                 RES_UNDEFINED}
 };
 
@@ -908,6 +911,7 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
             pVia->UseLegacyModeSwitch = FALSE;
             break;
         case VIA_VX800:
+        case VIA_VX855:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
             /* pVia->agpEnable = FALSE;
             pVia->dmaXV = FALSE;*/
@@ -1180,6 +1184,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         case VIA_P4M900:
         case VIA_CX700:
         case VIA_VX800:
+        case VIA_VX855:
 #ifdef XSERVER_LIBPCIACCESS
             pci_device_cfg_read_u8(vgaDevice, &videoRam, 0xA1);
 #else
@@ -1926,8 +1931,16 @@ VIALeaveVT(int scrnIndex, int flags)
     viaAccelSync(pScrn);
 
     /* A soft reset helps to avoid a 3D hang on VT switch. */
-    if (pVia->Chipset != VIA_K8M890 && pVia->Chipset != VIA_P4M900 && pVia->Chipset != VIA_VX800)
-        hwp->writeSeq(hwp, 0x1A, pVia->SavedReg.SR1A | 0x40);
+    switch (pVia->Chipset) {
+        case VIA_K8M890:
+        case VIA_P4M900:
+        case VIA_VX800:
+        case VIA_VX855:
+            break;
+        default:
+            hwp->writeSeq(hwp, 0x1A, pVia->SavedReg.SR1A | 0x40);
+            break;
+    }
 
 #ifdef XF86DRI
     if (pVia->directRenderingEnabled) {
@@ -2103,8 +2116,13 @@ VIASave(ScrnInfoPtr pScrn)
         }
 
         /* Save TMDS status */
-        if ((pVia->Chipset == VIA_CX700) || (pVia->Chipset == VIA_VX800))
-            Regs->CRD2 = hwp->readCrtc(hwp, 0xD2);
+        switch (pVia->Chipset) {
+            case VIA_CX700:
+            case VIA_VX800:
+            case VIA_VX855:
+                Regs->CRD2 = hwp->readCrtc(hwp, 0xD2);
+                break;
+        }
         
         vgaHWProtect(pScrn, FALSE);
     }
@@ -2219,8 +2237,13 @@ VIARestore(ScrnInfoPtr pScrn)
     }
 
     /* Restore TMDS status */
-    if ((pVia->Chipset == VIA_CX700) || (pVia->Chipset == VIA_VX800))
-        hwp->writeCrtc(hwp, 0xD2, Regs->CRD2);
+    switch (pVia->Chipset) {
+        case VIA_CX700:
+        case VIA_VX800:
+        case VIA_VX855:
+            hwp->writeCrtc(hwp, 0xD2, Regs->CRD2);
+            break;
+    }
     
     if (pBIOSInfo->Panel->IsActive)
         ViaLCDPower(pScrn, TRUE);
@@ -2245,6 +2268,7 @@ ViaMMIOEnable(ScrnInfoPtr pScrn)
         case VIA_CX700:
         case VIA_P4M900:
         case VIA_VX800:
+        case VIA_VX855:
             ViaSeqMask(hwp, 0x1A, 0x08, 0x08);
             break;
         default:
@@ -2267,6 +2291,7 @@ ViaMMIODisable(ScrnInfoPtr pScrn)
         case VIA_CX700:
         case VIA_P4M900:
         case VIA_VX800:
+        case VIA_VX855:
             ViaSeqMask(hwp, 0x1A, 0x00, 0x08);
             break;
         default:
@@ -2956,13 +2981,19 @@ VIAWriteMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
          * to detect when the display is using the secondary head.
          * TODO: This should be enabled for other chipsets as well.
          */
-        if ((pVia->Chipset == VIA_P4M900 || pVia->Chipset == VIA_VX800) && pVia->pBIOSInfo->Panel->IsActive) {
-            /*
-             * Since we are using virtual, we need to adjust
-             * the offset to match the framebuffer alignment.
-             */
-            if (pScrn->displayWidth != mode->CrtcHDisplay)
-                ViaSecondCRTCHorizontalOffset(pScrn);
+        if (pVia->pBIOSInfo->Panel->IsActive) {
+            switch (pVia->Chipset) {
+                case VIA_P4M900:
+                case VIA_VX800:
+                case VIA_VX855:
+                    /*
+                     * Since we are using virtual, we need to adjust
+                     * the offset to match the framebuffer alignment.
+                     */
+                    if (pScrn->displayWidth != mode->CrtcHDisplay)
+                        ViaSecondCRTCHorizontalOffset(pScrn);
+                    break;
+            }
         }
     }
 
@@ -2996,9 +3027,16 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
         viaAccelSync(pScrn);
 
         /* A soft reset avoids a 3D hang after X restart. */
-        if (pVia->Chipset != VIA_K8M890 && pVia->Chipset != VIA_P4M900 &&
-            pVia->Chipset != VIA_VX800)
-            hwp->writeSeq(hwp, 0x1A, pVia->SavedReg.SR1A | 0x40);
+        switch (pVia->Chipset) {
+            case VIA_K8M890:
+            case VIA_P4M900:
+            case VIA_VX800:
+            case VIA_VX855:
+                break;
+            default :
+                hwp->writeSeq(hwp, 0x1A, pVia->SavedReg.SR1A | 0x40);
+                break;
+        }
 
         if (!pVia->IsSecondary) {
             /* Turn off all video activities. */
