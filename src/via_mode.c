@@ -974,21 +974,35 @@ ViaSetUseExternalClock(vgaHWPtr hwp)
  *
  */
 static void
-ViaSetPrimaryDotclock(ScrnInfoPtr pScrn, CARD32 clock)
+ViaSetDotclock(ScrnInfoPtr pScrn, CARD32 clock, int base, int probase)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
 
     DEBUG(xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO,
-                     "ViaSetPrimaryDotclock to 0x%06x\n", (unsigned)clock));
+                     "ViaSetDotclock to 0x%06x\n", (unsigned)clock));
 
     if ((pVia->Chipset == VIA_CLE266) || (pVia->Chipset == VIA_KM400)) {
-        hwp->writeSeq(hwp, 0x46, clock >> 8);
-        hwp->writeSeq(hwp, 0x47, clock & 0xFF);
+        hwp->writeSeq(hwp, base, clock >> 8);
+        hwp->writeSeq(hwp, base+1, clock & 0xFF);
     } else {  /* unichrome pro */
-        hwp->writeSeq(hwp, 0x44, clock >> 16);
-        hwp->writeSeq(hwp, 0x45, (clock >> 8) & 0xFF);
-        hwp->writeSeq(hwp, 0x46, clock & 0xFF);
+        union pllparams pll;
+        int dtz, dr, dn, dm;
+        pll.packed = clock;
+        dtz = pll.params.dtz;
+        dr  = pll.params.dr;
+        dn  = pll.params.dn;
+        dm  = pll.params.dm;
+
+        /* The VX855 does not modify dm/dn, but earlier chipsets do. */
+        if (pVia->Chipset != VIA_VX855) {
+            dm -= 2;
+            dn -= 2;
+        }
+
+        hwp->writeSeq(hwp, probase, dm & 0xff);
+        hwp->writeSeq(hwp, probase+1, ((dm >> 8) & 0x03) | (dr << 2) | ((dtz & 1) << 7));
+        hwp->writeSeq(hwp, probase+2, (dn & 0x7f) | ((dtz & 2) << 6));
     }
 
     ViaSeqMask(hwp, 0x40, 0x02, 0x02);
@@ -999,25 +1013,28 @@ ViaSetPrimaryDotclock(ScrnInfoPtr pScrn, CARD32 clock)
  *
  */
 static void
+ViaSetPrimaryDotclock(ScrnInfoPtr pScrn, CARD32 clock)
+{
+    ViaSetDotclock(pScrn, clock, 0x46, 0x44);
+}
+
+/*
+ *
+ */
+static void
 ViaSetSecondaryDotclock(ScrnInfoPtr pScrn, CARD32 clock)
 {
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
+    ViaSetDotclock(pScrn, clock, 0x44, 0x4A);
+}
 
-    DEBUG(xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO,
-                     "ViaSetSecondaryDotclock to 0x%06x\n", (unsigned)clock));
-
-    if ((pVia->Chipset == VIA_CLE266) || (pVia->Chipset == VIA_KM400)) {
-        hwp->writeSeq(hwp, 0x44, clock >> 8);
-        hwp->writeSeq(hwp, 0x45, clock & 0xFF);
-    } else {  /* unichrome pro */
-        hwp->writeSeq(hwp, 0x4A, clock >> 16);
-        hwp->writeSeq(hwp, 0x4B, (clock >> 8) & 0xFF);
-        hwp->writeSeq(hwp, 0x4C, clock & 0xFF);
-    }
-
-    ViaSeqMask(hwp, 0x40, 0x04, 0x04);
-    ViaSeqMask(hwp, 0x40, 0x00, 0x04);
+/*
+ *
+ */
+static void
+ViaSetECKDotclock(ScrnInfoPtr pScrn, CARD32 clock)
+{
+    /* Does the non-pro chip have an ECK clock ? */  
+    ViaSetDotclock(pScrn, clock, 0, 0x47);
 }
 
 /*
@@ -1287,15 +1304,16 @@ ViaComputeProDotClock(unsigned clock)
 {
     double fvco, fout, fref, err, minErr;
     CARD32 dr = 0, dn, dm, maxdm, maxdn;
-    CARD32 factual, bestClock;
-
+    CARD32 factual;
+    union pllparams bestClock;
+    
     fref = 14.318e6;
     fout = (double)clock * 1.e3;
 
     factual = ~0;
-    maxdm = factual / 14318000U - 2;
+    maxdm = factual / 14318000U;
     minErr = 1.e10;
-    bestClock = 0U;
+    bestClock.packed = 0U;
 
     do {
         fvco = fout * (1 << dr);
@@ -1306,30 +1324,31 @@ ViaComputeProDotClock(unsigned clock)
     }
 
     if (clock < 30000)
-        maxdn = 6;
+        maxdn = 8;
     else if (clock < 45000)
-        maxdn = 5;
+        maxdn = 7;
     else if (clock < 170000)
-        maxdn = 4;
+        maxdn = 6;
     else
-        maxdn = 3;
+        maxdn = 5;
 
-    for (dn = 0; dn < maxdn; ++dn) {
-        for (dm = 0; dm < maxdm; ++dm) {
-            factual = 14318000U * (dm + 2);
-            factual /= (dn + 2) << dr;
+    for (dn = 2; dn < maxdn; ++dn) {
+        for (dm = 2; dm < maxdm; ++dm) {
+            factual = 14318000U * dm;
+            factual /= dn << dr;
             if ((err = fabs((double)factual / fout - 1.)) < 0.005) {
                 if (err < minErr) {
                     minErr = err;
-                    bestClock = ((dm & 0xff) << 16) |
-                            (((1 << 7) | (dr << 2) | ((dm & 0x300) >> 8)) << 8)
-                            | (dn & 0x7f);
+                    bestClock.params.dtz = 1;
+                    bestClock.params.dr = dr;
+                    bestClock.params.dn = dn;
+                    bestClock.params.dm = dm;
                 }
             }
         }
     }
 
-    return bestClock;
+    return bestClock.packed;
 }
 
 /*
@@ -1356,15 +1375,10 @@ ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode)
                          "ViaComputeDotClock %d : %04x : %04x\n",
                          mode->Clock, best1, best2));
         return best2;
-    } else if (pVia->Chipset == VIA_VX855) {
-        for (i = 0; ViaDotClocks[i].DotClock; i++)
-            if (ViaDotClocks[i].DotClock == mode->Clock &&
-                ViaDotClocks[i].Chrome9HCM)
-                return ViaDotClocks[i].Chrome9HCM;
     } else {
         for (i = 0; ViaDotClocks[i].DotClock; i++)
             if (ViaDotClocks[i].DotClock == mode->Clock)
-                return ViaDotClocks[i].UniChromePro;
+                return ViaDotClocks[i].UniChromePro.packed;
         return ViaComputeProDotClock(mode->Clock);
     }
 
