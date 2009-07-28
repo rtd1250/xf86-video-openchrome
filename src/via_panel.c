@@ -54,7 +54,8 @@ static ViaPanelModeRec ViaPanelNativeModes[] = {
     {1920, 1200},
     {1024, 600},
     {1440, 900},
-    {1280, 720}
+    {1280, 720},
+    {1200, 900}
 };
 
 static int

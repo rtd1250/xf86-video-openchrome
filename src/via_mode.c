@@ -1004,6 +1004,17 @@ ViaSetDotclock(ScrnInfoPtr pScrn, CARD32 clock, int base, int probase)
         hwp->writeSeq(hwp, probase+1, ((dm >> 8) & 0x03) | (dr << 2) | ((dtz & 1) << 7));
         hwp->writeSeq(hwp, probase+2, (dn & 0x7f) | ((dtz & 2) << 6));
     }
+}
+
+/*
+ *
+ */
+static void
+ViaSetPrimaryDotclock(ScrnInfoPtr pScrn, CARD32 clock)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    ViaSetDotclock(pScrn, clock, 0x46, 0x44);
 
     ViaSeqMask(hwp, 0x40, 0x02, 0x02);
     ViaSeqMask(hwp, 0x40, 0x00, 0x02);
@@ -1013,18 +1024,14 @@ ViaSetDotclock(ScrnInfoPtr pScrn, CARD32 clock, int base, int probase)
  *
  */
 static void
-ViaSetPrimaryDotclock(ScrnInfoPtr pScrn, CARD32 clock)
-{
-    ViaSetDotclock(pScrn, clock, 0x46, 0x44);
-}
-
-/*
- *
- */
-static void
 ViaSetSecondaryDotclock(ScrnInfoPtr pScrn, CARD32 clock)
 {
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
     ViaSetDotclock(pScrn, clock, 0x44, 0x4A);
+
+    ViaSeqMask(hwp, 0x40, 0x04, 0x04);
+    ViaSeqMask(hwp, 0x40, 0x00, 0x04);
 }
 
 /*

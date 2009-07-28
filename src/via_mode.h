@@ -70,7 +70,9 @@ static struct ViaDotClock {
     {  49500, 0xC353, /* 0xa48c04 */ { 3, 3, 5, 138 } },
     {  50000, 0xC354, /* 0x368c00 */ { 1, 3, 2,  56 } },
     {  56300, 0x4F76, /* 0x3d8c00 */ { 1, 3, 2,  63 } },
+    {  57275, 0x4E70, /* 0x3e8c00 */ { 1, 3, 6, 299 } },
     {  57284, 0x4E70, /* 0x3e8c00 */ { 1, 3, 2,  64 } },
+    {  57275,      0, /* 0x3e8c00 */ { 1, 3, 5, 157 } }, /* For XO 1.5 no need for a unichrome clock */
     {  64995, 0x0D3B, /* 0x6b8c01 */ { 1, 3, 3, 109 } },
     {  65000, 0x0D3B, /* 0x6b8c01 */ { 1, 3, 3, 109 } }, /* Slightly unstable on PM800 */
     {  65028, 0x866D, /* 0x6b8c01 */ { 1, 3, 3, 109 } },
@@ -135,6 +137,7 @@ static DisplayModeRec ViaPanelModes[] = {
     { MODEPREFIX("1152x864"),   81613, 1152, 1216, 1336, 1520, 0,  864,  864,  867,  895, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX },
     { MODEPREFIX("1280x768"),   81135, 1280, 1328, 1440, 1688, 0,  768,  770,  776,  802, 0, V_PHSYNC | V_NVSYNC, MODESUFFIX },
     { MODEPREFIX("1280x720"),   74600, 1280, 1341, 1474, 1688, 0,  720,  721,  724,  746, 0, V_NHSYNC | V_PVSYNC, MODESUFFIX },
+    { MODEPREFIX("1200x900"),   57275, 1200, 1208, 1216, 1240, 0,  900,  905,  908, 912, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX },
     { MODEPREFIX("1280x960"),  108280, 1280, 1376, 1488, 1800, 0,  960,  960,  963, 1000, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX },
     { MODEPREFIX("1280x1024"), 108280, 1280, 1328, 1440, 1688, 0, 1024, 1024, 1027, 1066, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX },
     { MODEPREFIX("1360x768"),   85500, 1360, 1392, 1712, 1744, 0,  768,  783,  791,  807, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX },
@@ -168,6 +171,7 @@ static DisplayModeRec ViaPanelModes[] = {
 #define VIA_RES_1280X720   19
 #define VIA_RES_1920X1080  20
 #define VIA_RES_1366X768   22
+#define VIA_RES_1200X900   23
 #define VIA_RES_INVALID  0xFF
 
 /*
@@ -199,6 +203,7 @@ static struct {
     {VIA_RES_856X480,   VIA_PANEL_INVALID,  856,  480},
     {VIA_RES_1024X576,  VIA_PANEL_INVALID, 1024,  576},
     {VIA_RES_800X480,   VIA_PANEL8X4,  	    800,  480},
+    {VIA_RES_1200X900,  VIA_PANEL12X9,     1200,  900},
     {VIA_RES_INVALID,   VIA_PANEL_INVALID,    0,    0}
 };
 
