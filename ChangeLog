@@ -1,3 +1,9 @@
+2009-07-28  Jon Nettleton <jon.nettleton@gmail.com>
+
+	Forgot to remove an old Dot Clock entry from the table.
+
+	* src/via_mode.h:
+
 2009-07-28  Jon Nettleton  <jon.nettleton@gmail.com>
 
 	XO 1.5 Panel patch contributed by Xavier Bachelot.
