@@ -592,6 +592,7 @@ VIADRIScreenInit(ScreenPtr pScreen)
         case VIA_K8M890:
         case VIA_P4M900:
         case VIA_VX800:
+        case VIA_VX855:
             pDRIInfo->clientDriverName = "swrast";
             break;
         default:
