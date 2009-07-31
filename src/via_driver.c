@@ -262,184 +262,7 @@ static OptionInfoRec VIAOptions[] = {
 };
 
 
-static const char *vgaHWSymbols[] = {
-    "vgaHWGetHWRec",
-    "vgaHWSetMmioFuncs",
-    "vgaHWSetStdFuncs",
-    "vgaHWGetIOBase",
-    "vgaHWSave",
-    "vgaHWProtect",
-    "vgaHWRestore",
-    "vgaHWMapMem",
-    "vgaHWUnmapMem",
-    "vgaHWInit",
-    "vgaHWSaveScreen",
-    "vgaHWLock",
-    "vgaHWUnlock",
-    "vgaHWFreeHWRec",
-    "vgaHWGetIndex",  /* Through VGAHWPTR() */
-    NULL
-};
-
-static const char *ramdacSymbols[] = {
-    "xf86InitCursor",
-    "xf86CreateCursorInfoRec",
-    "xf86DestroyCursorInfoRec",
-    NULL
-};
-
-static const char *vbeSymbols[] = {
-    "vbeDoEDID",
-    "VBEDPMSSet",
-    "VBEExtendedInit",
-    "vbeFree",
-    "VBEGetVBEInfo",
-    "VBEGetVBEMode",
-    "VBEGetModePool",
-    "VBEInit",
-    "VBEPrintModes",
-    "VBESaveRestore",
-    "VBESetDisplayStart",
-    "VBESetGetLogicalScanlineLength",
-    "VBESetLogicalScanline",
-    "VBESetModeNames",
-    "VBESetModeParameters",
-    "VBESetVBEMode",
-    "VBEValidateModes",
-    "xf86ExecX86int10",
-    "xf86Int10AllocPages",
-    "xf86Int10FreePages",
-    NULL
-};
-
-static const char *ddcSymbols[] = {
-    "xf86PrintEDID",
-    "xf86DoEDID_DDC2",
-    "xf86SetDDCproperties",
-    NULL
-};
-
-static const char *i2cSymbols[] = {
-    "xf86CreateI2CBusRec",
-    "xf86I2CBusInit",
-    "xf86CreateI2CDevRec",
-    "xf86I2CDevInit",
-    "xf86I2CWriteRead",
-    "xf86I2CProbeAddress",
-    "xf86DestroyI2CDevRec",
-    "xf86I2CReadByte",
-    "xf86I2CWriteByte",
-    NULL
-};
-
-static const char *xaaSymbols[] = {
-#ifdef X_HAVE_XAAGETROP
-    "XAAGetCopyROP",
-    "XAAGetCopyROP_PM",
-    "XAAGetPatternROP",
-#else
-    "XAACopyROP",
-    "XAACopyROP_PM",
-    "XAAPatternROP",
-#endif
-    "XAACreateInfoRec",
-    "XAADestroyInfoRec",
-    "XAAInit",
-    "XAAFillSolidRects",
-    NULL
-};
-
-static const char *exaSymbols[] = {
-    "exaGetVersion",
-    "exaDriverInit",
-    "exaDriverFini",
-    "exaOffscreenAlloc",
-    "exaOffscreenFree",
-    "exaGetPixmapPitch",
-    "exaGetPixmapOffset",
-    "exaWaitSync",
-    "exaDriverAlloc",
-    NULL
-};
-
-static const char *shadowSymbols[] = {
-    "ShadowFBInit",
-    NULL
-};
-
-#ifdef USE_FB
-static const char *fbSymbols[] = {
-    "fbScreenInit",
-    "fbPictureInit",
-    NULL
-};
-#else
-static const char *cfbSymbols[] = {
-    "cfbScreenInit",
-    "cfb16ScreenInit",
-    "cfb24ScreenInit",
-    "cfb24_32ScreenInit",
-    "cfb32ScreenInit",
-    "cfb16BresS",
-    "cfb24BresS",
-    NULL
-};
-#endif
-
 #ifdef XFree86LOADER
-#ifdef XF86DRI
-static const char *drmSymbols[] = {
-    "drmAddBufs",
-    "drmAddMap",
-    "drmAgpAcquire",
-    "drmAgpAlloc",
-    "drmAgpBase",
-    "drmAgpBind",
-    "drmAgpDeviceId",
-    "drmAgpEnable",
-    "drmAgpFree",
-    "drmAgpGetMode",
-    "drmAgpRelease",
-    "drmAgpVendorId",
-    "drmCtlInstHandler",
-    "drmCtlUninstHandler",
-    "drmCommandNone",
-    "drmCommandWrite",
-    "drmCommandWriteRead",
-    "drmFreeVersion",
-    "drmGetInterruptFromBusID",
-    "drmGetLibVersion",
-    "drmGetVersion",
-    "drmMap",
-    "drmMapBufs",
-    "drmUnmap",
-    "drmUnmapBufs",
-    "drmAgpUnbind",
-    "drmRmMap",
-    "drmCreateContext",
-    "drmAuthMagic",
-    "drmDestroyContext",
-    "drmSetContextFlags",
-    NULL
-};
-
-static const char *driSymbols[] = {
-    "DRICloseScreen",
-    "DRICreateInfoRec",
-    "DRIDestroyInfoRec",
-    "DRIFinishScreenInit",
-    "DRIGetSAREAPrivate",
-    "DRILock",
-    "DRIQueryVersion",
-    "DRIScreenInit",
-    "DRIUnlock",
-    "DRIOpenConnection",
-    "DRICloseConnection",
-    "GlxSetVisualConfigs",
-    NULL
-};
-#endif
-
 static MODULESETUPPROTO(VIASetup);
 
 static XF86ModuleVersionInfo VIAVersRec = {
@@ -475,24 +298,6 @@ VIASetup(pointer module, pointer opts, int *errmaj, int *errmin)
                      0
 #endif
                      );
-        LoaderRefSymLists(vgaHWSymbols,
-#ifdef USE_FB
-                          fbSymbols,
-#else
-                          cfbSymbols,
-#endif
-                          ramdacSymbols,
-                          xaaSymbols,
-                          exaSymbols,
-                          shadowSymbols,
-                          vbeSymbols,
-                          i2cSymbols,
-                          ddcSymbols,
-#ifdef XF86DRI
-                          drmSymbols,
-                          driSymbols,
-#endif
-                          NULL);
 
         return (pointer) 1;
     } else {
@@ -829,7 +634,6 @@ VIAProbeDDC(ScrnInfoPtr pScrn, int index)
     vbeInfoPtr pVbe;
 
     if (xf86LoadSubModule(pScrn, "vbe")) {
-        xf86LoaderReqSymLists(vbeSymbols, NULL);
         pVbe = VBEInit(NULL, index);
         ConfiguredMonitor = vbeDoEDID(pVbe, NULL);
         vbeFree(pVbe);
@@ -935,7 +739,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 
 #ifndef USE_FB
     char *mod = NULL;
-    const char *reqSym = NULL;
 #endif
     vgaHWPtr hwp;
     int i, bMemSize = 0;
@@ -956,7 +759,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     if (!xf86LoadSubModule(pScrn, "vgahw"))
         return FALSE;
 
-    xf86LoaderReqSymLists(vgaHWSymbols, NULL);
     if (!vgaHWGetHWRec(pScrn))
         return FALSE;
 
@@ -1629,7 +1431,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         VIAFreeRec(pScrn);
         return FALSE;
     } else {
-        xf86LoaderReqSymLists(i2cSymbols, NULL);
         ViaI2CInit(pScrn);
     }
 
@@ -1637,7 +1438,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         VIAFreeRec(pScrn);
         return FALSE;
     } else {
-        xf86LoaderReqSymLists(ddcSymbols, NULL);
 
         if (pVia->pI2CBus1) {
             pVia->DDC1 = xf86DoEDID_DDC2(pScrn->scrnIndex, pVia->pI2CBus1);
@@ -1679,7 +1479,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         /* VBE doesn't properly initialise int10 itself. */
         if (xf86LoadSubModule(pScrn, "int10")
             && xf86LoadSubModule(pScrn, "vbe")) {
-            xf86LoaderReqSymLists(vbeSymbols, NULL);
             pVia->pVbe = VBEExtendedInit(NULL, pVia->EntityIndex,
                                          SET_BIOS_SCRATCH |
                                          RESTORE_BIOS_SCRATCH);
@@ -1778,22 +1577,18 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         return FALSE;
     }
 
-    xf86LoaderReqSymLists(fbSymbols, NULL);
 
 #else
     /* Load bpp-specific modules. */
     switch (pScrn->bitsPerPixel) {
         case 8:
             mod = "cfb";
-            reqSym = "cfbScreenInit";
             break;
         case 16:
             mod = "cfb16";
-            reqSym = "cfb16ScreenInit";
             break;
         case 32:
             mod = "cfb32";
-            reqSym = "cfb32ScreenInit";
             break;
     }
 
@@ -1802,7 +1597,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         return FALSE;
     }
 
-    xf86LoaderReqSymbols(reqSym, NULL);
 #endif
 
     if (!pVia->NoAccel) {
@@ -1819,13 +1613,11 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
                 VIAFreeRec(pScrn);
                 return FALSE;
             }
-            xf86LoaderReqSymLists(exaSymbols, NULL);
         }
         if (!xf86LoadSubModule(pScrn, "xaa")) {
             VIAFreeRec(pScrn);
             return FALSE;
         }
-        xf86LoaderReqSymLists(xaaSymbols, NULL);
     }
 
     if (pVia->hwcursor) {
@@ -1833,7 +1625,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             VIAFreeRec(pScrn);
             return FALSE;
         }
-        xf86LoaderReqSymLists(ramdacSymbols, NULL);
     }
 
     if (pVia->shadowFB) {
@@ -1841,7 +1632,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             VIAFreeRec(pScrn);
             return FALSE;
         }
-        xf86LoaderReqSymLists(shadowSymbols, NULL);
     }
 
     VIAUnmapMem(pScrn);
