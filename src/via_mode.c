@@ -452,9 +452,12 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
         if (pBIOSInfo->CrtPresent)
             pBIOSInfo->CrtActive = TRUE;
 
+#if 0
+        # FIXME : DFP must be activated with the ActiveDevice option 
         /* DFP */
         if (pBIOSInfo->DfpPresent)
             pBIOSInfo->DfpActive = TRUE;
+#endif
         
     } else {
         if (pVia->ActiveDevice & VIA_DEVICE_LCD) {
