@@ -1063,20 +1063,26 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         if (!xf86NameCmp(s, "CW")) {
             pVia->shadowFB = TRUE;
             pVia->NoAccel = TRUE;
-            pVia->rotate = 1;
+            pVia->rotate = VIA_ROTATE_DEGREE_90;
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "Rotating screen "
                        "clockwise -- acceleration is disabled.\n");
         } else if (!xf86NameCmp(s, "CCW")) {
             pVia->shadowFB = TRUE;
             pVia->NoAccel = TRUE;
-            pVia->rotate = -1;
+            pVia->rotate = VIA_ROTATE_DEGREE_270;
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "Rotating screen "
                        "counterclockwise -- acceleration is disabled.\n");
+        } else if (!xf86NameCmp(s, "UD")) {
+            pVia->shadowFB = TRUE;
+            pVia->NoAccel = TRUE;
+            pVia->rotate = VIA_ROTATE_DEGREE_180;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "Rotating screen "
+                       "upside-down -- acceleration is disabled.\n");
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "\"%s\" is not a valid"
                        "value for Option \"Rotate\".\n", s);
             xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                       "Valid options are \"CW\" or \"CCW\".\n");
+                       "Valid options are \"CW\", \"CCW\" or  \"UD\".\n");
         }
     }
     if (!pVia->NoAccel) {
@@ -2698,7 +2704,7 @@ VIAInternalScreenInit(int scrnIndex, ScreenPtr pScreen)
 
     displayWidth = pScrn->displayWidth;
 
-    if (pVia->rotate) {
+    if ((pVia->rotate==VIA_ROTATE_DEGREE_90) || (pVia->rotate==VIA_ROTATE_DEGREE_270)) {
         height = pScrn->virtualX;
         width = pScrn->virtualY;
     } else {
@@ -2737,6 +2743,7 @@ VIAInternalScreenInit(int scrnIndex, ScreenPtr pScreen)
             return FALSE;
     }
 #endif
+    return TRUE;
 }
 
 static Bool
