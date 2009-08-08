@@ -303,6 +303,9 @@ typedef struct _VIA {
     char *              dBounce;
 #endif
 
+    /* Rotation */
+    Bool    RandRRotation;
+
     /* BIOS Info Ptr */
     VIABIOSInfoPtr      pBIOSInfo;
     struct ViaCardIdStruct* Id;

@@ -116,6 +116,10 @@ static void VIAUnmapMem(ScrnInfoPtr pScrn);
 
 static void VIALoadRgbLut(ScrnInfoPtr pScrn, int numColors, int *indices,
                           LOCO *colors, VisualPtr pVisual);
+/* RandR */
+static Bool VIADriverFunc(ScrnInfoPtr pScrnInfo, xorgDriverFuncOp op, pointer data);
+
+
 #ifdef XSERVER_LIBPCIACCESS
 
 #define VIA_DEVICE_MATCH(d,i) \
@@ -1041,6 +1045,37 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
                    "Setting amount of VideoRAM to %d kB\n", pScrn->videoRam);
 
+    /* When rotating, switch shadow framebuffer on and acceleration off. */
+    if ((s = xf86GetOptValString(VIAOptions, OPTION_ROTATE))) {
+        if (!xf86NameCmp(s, "CW")) {
+            pVia->shadowFB = TRUE;
+            pVia->NoAccel = TRUE;
+            pVia->RandRRotation = TRUE;
+            pVia->rotate = VIA_ROTATE_DEGREE_90;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "Rotating screen "
+                       "clockwise -- acceleration is disabled.\n");
+        } else if (!xf86NameCmp(s, "CCW")) {
+            pVia->shadowFB = TRUE;
+            pVia->NoAccel = TRUE;
+            pVia->RandRRotation = TRUE;
+            pVia->rotate = VIA_ROTATE_DEGREE_270;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "Rotating screen "
+                       "counterclockwise -- acceleration is disabled.\n");
+        } else if (!xf86NameCmp(s, "UD")) {
+            pVia->shadowFB = TRUE;
+            pVia->NoAccel = TRUE;
+            pVia->RandRRotation = TRUE;
+            pVia->rotate = VIA_ROTATE_DEGREE_180;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "Rotating screen "
+                       "upside-down -- acceleration is disabled.\n");
+        } else {
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "\"%s\" is not a valid"
+                       "value for Option \"Rotate\".\n", s);
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                       "Valid options are \"CW\", \"CCW\" or  \"UD\".\n");
+        }
+    }
+
     from = (xf86GetOptValBool(VIAOptions, OPTION_SHADOW_FB, &pVia->shadowFB)
             ? X_CONFIG : X_DEFAULT);
     xf86DrvMsg(pScrn->scrnIndex, from, "Shadow framebuffer is %s.\n",
@@ -1058,33 +1093,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     xf86DrvMsg(pScrn->scrnIndex, from, "Hardware acceleration is %s.\n",
                !pVia->NoAccel ? "enabled" : "disabled");
 
-    /* When rotating, switch shadow framebuffer on and acceleration off. */
-    if ((s = xf86GetOptValString(VIAOptions, OPTION_ROTATE))) {
-        if (!xf86NameCmp(s, "CW")) {
-            pVia->shadowFB = TRUE;
-            pVia->NoAccel = TRUE;
-            pVia->rotate = VIA_ROTATE_DEGREE_90;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "Rotating screen "
-                       "clockwise -- acceleration is disabled.\n");
-        } else if (!xf86NameCmp(s, "CCW")) {
-            pVia->shadowFB = TRUE;
-            pVia->NoAccel = TRUE;
-            pVia->rotate = VIA_ROTATE_DEGREE_270;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "Rotating screen "
-                       "counterclockwise -- acceleration is disabled.\n");
-        } else if (!xf86NameCmp(s, "UD")) {
-            pVia->shadowFB = TRUE;
-            pVia->NoAccel = TRUE;
-            pVia->rotate = VIA_ROTATE_DEGREE_180;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "Rotating screen "
-                       "upside-down -- acceleration is disabled.\n");
-        } else {
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "\"%s\" is not a valid"
-                       "value for Option \"Rotate\".\n", s);
-            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                       "Valid options are \"CW\", \"CCW\" or  \"UD\".\n");
-        }
-    }
     if (!pVia->NoAccel) {
         from = X_DEFAULT;
         if ((s = (char *)xf86GetOptValString(VIAOptions, OPTION_ACCELMETHOD))) {
@@ -2593,6 +2601,11 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 
     if (pVia->shadowFB)
         ViaShadowFBInit(pScrn, pScreen);
+    
+    if (pVia->RandRRotation)
+    {
+        pScrn->DriverFunc = VIADriverFunc;
+    }      
 
     if (!miCreateDefColormap(pScreen))
         return FALSE;
@@ -2697,7 +2710,7 @@ VIAInternalScreenInit(int scrnIndex, ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
     VIAPtr pVia = VIAPTR(pScrn);
-    int width, height, displayWidth;
+    int width, height, displayWidth, shadowHeight;
     unsigned char *FBStart;
 
     xf86DrvMsg(scrnIndex, X_INFO, "VIAInternalScreenInit\n");
@@ -2712,9 +2725,14 @@ VIAInternalScreenInit(int scrnIndex, ScreenPtr pScreen)
         height = pScrn->virtualY;
     }
 
+    if (pVia->RandRRotation)
+        shadowHeight = max(width, height);
+    else
+        shadowHeight = height;
+
     if (pVia->shadowFB) {
         pVia->ShadowPitch = BitmapBytePad(pScrn->bitsPerPixel * width);
-        pVia->ShadowPtr = xalloc(pVia->ShadowPitch * height);
+        pVia->ShadowPtr = xalloc(pVia->ShadowPitch * shadowHeight);
         displayWidth = pVia->ShadowPitch / (pScrn->bitsPerPixel >> 3);
         FBStart = pVia->ShadowPtr;
     } else {
@@ -2928,6 +2946,74 @@ VIAAdjustFrame(int scrnIndex, int x, int y, int flags)
 
     VIAVidAdjustFrame(pScrn, x, y);
 }
+
+
+static Bool
+VIARandRGetInfo(ScrnInfoPtr pScrn, Rotation *rotations)
+{
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIARandRGetInfo\n");
+    
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    /* to report what ability we can support. */
+    if(pVia->RandRRotation)
+       *rotations = RR_Rotate_0 | RR_Rotate_90 |RR_Rotate_180 | RR_Rotate_270;
+    else
+       *rotations = RR_Rotate_0;
+
+    return TRUE;
+}
+
+static Bool
+VIARandRSetConfig(ScrnInfoPtr pScrn, xorgRRConfig *config)
+{
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIARandRSetConfig\n");
+    VIAPtr pVia = VIAPTR(pScrn);
+    
+    switch(config->rotation) {
+        case RR_Rotate_0:            
+            pVia->rotate = VIA_ROTATE_DEGREE_0;
+            break;
+
+        case RR_Rotate_90:            
+            pVia->rotate = VIA_ROTATE_DEGREE_270;            
+            break;
+            
+        case RR_Rotate_180:            
+            pVia->rotate = VIA_ROTATE_DEGREE_180;            
+            break;
+
+        case RR_Rotate_270:            
+            pVia->rotate = VIA_ROTATE_DEGREE_90;
+            break;
+
+        default:
+            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                    "Unexpected rotation in VIARandRSetConfig!\n");
+            pVia->rotate = VIA_ROTATE_DEGREE_0;
+            return FALSE;
+    }
+    return TRUE;
+}
+
+static Bool
+VIADriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op, pointer data)
+{
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIADriverFunc!\n");
+    
+    switch(op) {
+    case RR_GET_INFO:          
+        return VIARandRGetInfo(pScrn, (Rotation*)data);
+    case RR_SET_CONFIG:          
+        return VIARandRSetConfig(pScrn, (xorgRRConfig*)data);
+    default:
+        return FALSE;
+    }
+
+    return FALSE;
+}
+
+
 
 static Bool
 VIASwitchMode(int scrnIndex, DisplayModePtr mode, int flags)
