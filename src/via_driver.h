@@ -105,14 +105,6 @@
 
 #define VIA_VQ_SIZE             (256 * 1024)
 
-
-/* Rotate Degree */
-#define VIA_ROTATE_DEGREE_0       0
-#define VIA_ROTATE_DEGREE_90      1
-#define VIA_ROTATE_DEGREE_180     2
-#define VIA_ROTATE_DEGREE_270     -1
-
-
 typedef struct {
     CARD8   SR08, SR0A, SR0F;
 

@@ -1051,21 +1051,21 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             pVia->shadowFB = TRUE;
             pVia->NoAccel = TRUE;
             pVia->RandRRotation = TRUE;
-            pVia->rotate = VIA_ROTATE_DEGREE_90;
+            pVia->rotate = RR_Rotate_270;
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "Rotating screen "
                        "clockwise -- acceleration is disabled.\n");
         } else if (!xf86NameCmp(s, "CCW")) {
             pVia->shadowFB = TRUE;
             pVia->NoAccel = TRUE;
             pVia->RandRRotation = TRUE;
-            pVia->rotate = VIA_ROTATE_DEGREE_270;
+            pVia->rotate = RR_Rotate_90;
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "Rotating screen "
                        "counterclockwise -- acceleration is disabled.\n");
         } else if (!xf86NameCmp(s, "UD")) {
             pVia->shadowFB = TRUE;
             pVia->NoAccel = TRUE;
             pVia->RandRRotation = TRUE;
-            pVia->rotate = VIA_ROTATE_DEGREE_180;
+            pVia->rotate = RR_Rotate_180;
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "Rotating screen "
                        "upside-down -- acceleration is disabled.\n");
         } else {
@@ -2717,7 +2717,7 @@ VIAInternalScreenInit(int scrnIndex, ScreenPtr pScreen)
 
     displayWidth = pScrn->displayWidth;
 
-    if ((pVia->rotate==VIA_ROTATE_DEGREE_90) || (pVia->rotate==VIA_ROTATE_DEGREE_270)) {
+    if ((pVia->rotate==RR_Rotate_90) || (pVia->rotate==RR_Rotate_270)) {
         height = pScrn->virtualX;
         width = pScrn->virtualY;
     } else {
@@ -2972,25 +2972,25 @@ VIARandRSetConfig(ScrnInfoPtr pScrn, xorgRRConfig *config)
     
     switch(config->rotation) {
         case RR_Rotate_0:            
-            pVia->rotate = VIA_ROTATE_DEGREE_0;
+            pVia->rotate = RR_Rotate_0;
             break;
 
         case RR_Rotate_90:            
-            pVia->rotate = VIA_ROTATE_DEGREE_270;            
+            pVia->rotate = RR_Rotate_90;
             break;
             
         case RR_Rotate_180:            
-            pVia->rotate = VIA_ROTATE_DEGREE_180;            
+            pVia->rotate = RR_Rotate_180;
             break;
 
         case RR_Rotate_270:            
-            pVia->rotate = VIA_ROTATE_DEGREE_90;
+            pVia->rotate = RR_Rotate_270;
             break;
 
         default:
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                    "Unexpected rotation in VIARandRSetConfig!\n");
-            pVia->rotate = VIA_ROTATE_DEGREE_0;
+                    "Unexpected rotation in VIARandRSetConfig\n");
+            pVia->rotate = RR_Rotate_0;
             return FALSE;
     }
     return TRUE;
@@ -2999,7 +2999,7 @@ VIARandRSetConfig(ScrnInfoPtr pScrn, xorgRRConfig *config)
 static Bool
 VIADriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op, pointer data)
 {
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIADriverFunc!\n");
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIADriverFunc\n");
     
     switch(op) {
     case RR_GET_INFO:          

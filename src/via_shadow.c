@@ -145,10 +145,10 @@ VIAPointerMoved(int index, int x, int y)
     VIAPtr pVia = VIAPTR(pScrn);
     int newX, newY;
 
-    if (pVia->rotate == VIA_ROTATE_DEGREE_90) {
+    if (pVia->rotate == RR_Rotate_90) {
         newX = pScrn->pScreen->height - y - 1;
         newY = x;
-    } else if (pVia->rotate == VIA_ROTATE_DEGREE_270) {
+    } else if (pVia->rotate == RR_Rotate_270) {
         newX = y;
         newY = pScrn->pScreen->width - x - 1;
     } else {
@@ -163,23 +163,29 @@ static void
 VIARefreshArea8(ScrnInfoPtr pScrn, int num, BoxPtr pbox)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    int count, width, height, y1, y2, dstPitch, srcPitch;
+    int count, width, height, y1, y2, dstPitch, srcPitch, tmpRot;
     CARD8 *dstPtr, *srcPtr, *src;
     CARD32 *dst;
 
-    if (pVia->rotate == VIA_ROTATE_DEGREE_0)
+    if (pVia->rotate == RR_Rotate_0)
     {
         VIARefreshArea(pScrn, num, pbox);
         return;
     }
 
-    if (pVia->rotate == VIA_ROTATE_DEGREE_180) {
+    if (pVia->rotate == RR_Rotate_180) {
         VIARefreshArea_UD(pScrn, num, pbox);
         return;
     }
 
+    if (pVia->rotate == RR_Rotate_90) {
+       tmpRot=1;
+    } else {
+       tmpRot=-1;       
+    }
+
     dstPitch = pScrn->displayWidth;
-    srcPitch = -pVia->rotate * pVia->ShadowPitch;
+    srcPitch = -tmpRot*pVia->ShadowPitch;
 
     while (num--) {
         width = pbox->x2 - pbox->x1;
@@ -187,7 +193,7 @@ VIARefreshArea8(ScrnInfoPtr pScrn, int num, BoxPtr pbox)
         y2 = (pbox->y2 + 3) & ~3;
         height = (y2 - y1) >> 2;  /* in dwords */
 
-        if (pVia->rotate == VIA_ROTATE_DEGREE_90) {
+        if (pVia->rotate == RR_Rotate_90) {
             dstPtr = (pVia->FBBase
                       + (pbox->x1 * dstPitch) + pScrn->virtualX - y2);
             srcPtr = pVia->ShadowPtr + ((1 - y2) * srcPitch) + pbox->x1;
@@ -209,7 +215,7 @@ VIARefreshArea8(ScrnInfoPtr pScrn, int num, BoxPtr pbox)
                 src += srcPitch * 4;
             }
 
-            srcPtr += pVia->rotate;
+            srcPtr += tmpRot;
             dstPtr += dstPitch;
         }
 
@@ -221,23 +227,29 @@ static void
 VIARefreshArea16(ScrnInfoPtr pScrn, int num, BoxPtr pbox)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    int count, width, height, y1, y2, dstPitch, srcPitch;
+    int count, width, height, y1, y2, dstPitch, srcPitch, tmpRot;
     CARD16 *dstPtr, *srcPtr, *src;
     CARD32 *dst;
 
-    if (pVia->rotate == VIA_ROTATE_DEGREE_0)
+    if (pVia->rotate == RR_Rotate_0)
     {
         VIARefreshArea(pScrn, num, pbox);
         return;
     }
 
-    if (pVia->rotate == VIA_ROTATE_DEGREE_180) {
+    if (pVia->rotate == RR_Rotate_180) {
         VIARefreshArea_UD(pScrn, num, pbox);
         return;
     }
 
+    if (pVia->rotate == RR_Rotate_90) {
+       tmpRot=1;
+    } else {
+       tmpRot=-1;       
+    }
+
     dstPitch = pScrn->displayWidth;
-    srcPitch = -pVia->rotate * pVia->ShadowPitch >> 1;
+    srcPitch = -tmpRot*pVia->ShadowPitch >> 1;
 
     while (num--) {
         width = pbox->x2 - pbox->x1;
@@ -245,7 +257,7 @@ VIARefreshArea16(ScrnInfoPtr pScrn, int num, BoxPtr pbox)
         y2 = (pbox->y2 + 1) & ~1;
         height = (y2 - y1) >> 1;  /* in dwords */
 
-        if (pVia->rotate == VIA_ROTATE_DEGREE_90) {
+        if (pVia->rotate == RR_Rotate_90) {
             dstPtr = ((CARD16*) pVia->FBBase
                       + (pbox->x1 * dstPitch) + pScrn->virtualX - y2);
             srcPtr = ((CARD16*) pVia->ShadowPtr
@@ -267,7 +279,7 @@ VIARefreshArea16(ScrnInfoPtr pScrn, int num, BoxPtr pbox)
                 src += srcPitch * 2;
             }
 
-            srcPtr += pVia->rotate;
+            srcPtr += tmpRot;
             dstPtr += dstPitch;
         }
 
@@ -281,24 +293,30 @@ void
 VIARefreshArea24(ScrnInfoPtr pScrn, int num, BoxPtr pbox)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    int count, width, height, y1, y2, dstPitch, srcPitch;
+    int count, width, height, y1, y2, dstPitch, srcPitch, tmpRot;
     CARD8 *dstPtr, *srcPtr, *src;
     CARD32 *dst;
 
-    if (pVia->rotate == VIA_ROTATE_DEGREE_0)
+    if (pVia->rotate == RR_Rotate_0)
     {
         VIARefreshArea(pScrn, num, pbox);
         return;
     }
 
 
-    if (pVia->rotate == VIA_ROTATE_DEGREE_180) {
+    if (pVia->rotate == RR_Rotate_180) {
         VIARefreshArea_UD(pScrn, num, pbox);
         return;
     }
 
+    if (pVia->rotate == RR_Rotate_90) {
+       tmpRot=1;
+    } else {
+       tmpRot=-1;       
+    }
+
     dstPitch = BitmapBytePad(pScrn->displayWidth * 24);
-    srcPitch = -pVia->rotate * pVia->ShadowPitch;
+    srcPitch = -tmpRot * pVia->ShadowPitch;
 
     while (num--) {
         width = pbox->x2 - pbox->x1;
@@ -306,7 +324,7 @@ VIARefreshArea24(ScrnInfoPtr pScrn, int num, BoxPtr pbox)
         y2 = (pbox->y2 + 3) & ~3;
         height = (y2 - y1) >> 2;  /* blocks of 3 dwords */
 
-        if (pVia->rotate == VIA_ROTATE_DEGREE_90) {
+        if (pVia->rotate == RR_Rotate_90) {
             dstPtr = (pVia->FBBase
                       + (pbox->x1 * dstPitch) + ((pScrn->virtualX - y2) * 3));
             srcPtr = pVia->ShadowPtr + ((1 - y2) * srcPitch) + (pbox->x1 * 3);
@@ -333,7 +351,7 @@ VIARefreshArea24(ScrnInfoPtr pScrn, int num, BoxPtr pbox)
                 src += srcPitch * 4;
             }
 
-            srcPtr += pVia->rotate * 3;
+            srcPtr += tmpRot * 3;
             dstPtr += dstPitch;
         }
 
@@ -346,28 +364,33 @@ static void
 VIARefreshArea32(ScrnInfoPtr pScrn, int num, BoxPtr pbox)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    int count, width, height, dstPitch, srcPitch;
+    int count, width, height, dstPitch, srcPitch, tmpRot;
     CARD32 *dstPtr, *srcPtr, *src, *dst;
 
-    if (pVia->rotate == VIA_ROTATE_DEGREE_0)
+    if (pVia->rotate == RR_Rotate_0)
     {
         VIARefreshArea(pScrn, num, pbox);
         return;
     }
 
-    if (pVia->rotate == VIA_ROTATE_DEGREE_180) {
+    if (pVia->rotate == RR_Rotate_180) {
         VIARefreshArea_UD(pScrn, num, pbox);
         return;
     }
 
+    if (pVia->rotate == RR_Rotate_90) {
+       tmpRot=1;
+    } else {
+       tmpRot=-1;       
+    }
     dstPitch = pScrn->displayWidth;
-    srcPitch = -pVia->rotate * pVia->ShadowPitch >> 2;
+    srcPitch = -tmpRot * pVia->ShadowPitch >> 2;
 
     while (num--) {
         width = pbox->x2 - pbox->x1;
         height = pbox->y2 - pbox->y1;
 
-        if (pVia->rotate == VIA_ROTATE_DEGREE_90) {
+        if (pVia->rotate == RR_Rotate_90) {
             dstPtr = ((CARD32*) pVia->FBBase
                       + (pbox->x1 * dstPitch) + pScrn->virtualX - pbox->y2);
             srcPtr = ((CARD32*) pVia->ShadowPtr
@@ -389,7 +412,7 @@ VIARefreshArea32(ScrnInfoPtr pScrn, int num, BoxPtr pbox)
                 src += srcPitch;
             }
 
-            srcPtr += pVia->rotate;
+            srcPtr += tmpRot;
             dstPtr += dstPitch;
         }
 
