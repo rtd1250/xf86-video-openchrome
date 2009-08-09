@@ -35,6 +35,7 @@
 #include "via_driver.h"
 #include "via_vgahw.h"
 #include "via_id.h"
+#include <unistd.h>
 
 
 static void

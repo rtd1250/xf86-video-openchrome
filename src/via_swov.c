@@ -46,6 +46,7 @@
 #include "via_id.h"
 
 #include <math.h>
+#include <unistd.h>
 
 /*
  * Warning: this file contains revision checks which are CLE266-specific.

@@ -2024,7 +2024,8 @@ viaExaUploadToScratch(PixmapPtr pSrc, PixmapPtr pDst)
         dstPitch = 8;
     if (dstPitch * h > pVia->exaScratchSize * 1024) {
         ErrorF("EXA UploadToScratch Failed %u %u %u %u\n",
-               dstPitch, h, dstPitch * h, pVia->exaScratchSize * 1024);
+               (unsigned int)dstPitch, h, (unsigned int)(dstPitch * h),
+               pVia->exaScratchSize * 1024);
         return FALSE;
     }
 

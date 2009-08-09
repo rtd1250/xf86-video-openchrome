@@ -39,6 +39,7 @@
 #include "via_driver.h"
 #include "via_vgahw.h"
 #include "via_id.h"
+#include <unistd.h>
 
 /*
  * Modetable nonsense.
@@ -299,7 +300,7 @@ ViaDFPDetect(ScrnInfoPtr pScrn)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDFPDetect\n"));
 
     VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+
     xf86MonPtr          monPtr = NULL;
 
     if (pVia->pI2CBus2)
@@ -1280,7 +1281,7 @@ VIASetLCDMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 static CARD32
 ViaComputeDotClock(unsigned clock)
 {
-    double fvco, fout, fref, err, minErr;
+    double fout, fref, err, minErr;
     CARD32 dr, dn, dm, maxdm, maxdn;
     CARD32 factual, best;
 
@@ -1383,7 +1384,8 @@ ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                          "ViaComputeDotClock %d : %04x : %04x\n",
-                         mode->Clock, best1, best2));
+                         mode->Clock, (unsigned int)best1, (unsigned int)best2));                         
+
         return best2;
     } else {
         for (i = 0; ViaDotClocks[i].DotClock; i++)
@@ -1592,8 +1594,6 @@ ViaDFPPower(ScrnInfoPtr pScrn, Bool On)
         xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDFPPower: Off.\n");
 #endif
     vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
     /* Display Channel Select */
     ViaCrtcMask(hwp, 0xD2, 0x30, 0x30);
