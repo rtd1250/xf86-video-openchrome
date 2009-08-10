@@ -31,6 +31,9 @@
 #include "shadowfb.h"
 #include "servermd.h"
 
+/* RandR support */
+#include "xf86RandR12.h"
+
 
 static void
 VIARefreshArea(ScrnInfoPtr pScrn, int num, BoxPtr pbox)

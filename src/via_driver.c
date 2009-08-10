@@ -52,6 +52,9 @@
 #include "via_vgahw.h"
 #include "via_id.h"
 
+/* RandR support */
+#include "xf86RandR12.h"
+
 /* Prototypes. */
 static void VIAIdentify(int flags);
 
@@ -2397,7 +2400,7 @@ VIALoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
     int i, index;
     int SR1A, SR1B, CR67, CR6A;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIALoadPalette\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIALoadPalette: numColors: %d\n", numColors));
 
     if (pScrn->bitsPerPixel != 8) {
 
@@ -2996,20 +2999,26 @@ VIARandRSetConfig(ScrnInfoPtr pScrn, xorgRRConfig *config)
     return TRUE;
 }
 
+/*
+ * The driverFunc. xorgDriverFuncOp specifies the action driver should
+ * perform. If requested option is not supported function should return
+ * FALSE. pointer can be used to pass arguments to the function or
+ * to return data to the caller.
+ */
+
 static Bool
 VIADriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op, pointer data)
 {
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIADriverFunc\n");
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIADriverFunc Operation: %d\n", op));
     
     switch(op) {
-    case RR_GET_INFO:          
-        return VIARandRGetInfo(pScrn, (Rotation*)data);
-    case RR_SET_CONFIG:          
-        return VIARandRSetConfig(pScrn, (xorgRRConfig*)data);
-    default:
-        return FALSE;
+        case RR_GET_INFO:          
+            return VIARandRGetInfo(pScrn, (Rotation*)data);
+        case RR_SET_CONFIG:          
+            return VIARandRSetConfig(pScrn, (xorgRRConfig*)data);
+        default:
+            return FALSE;
     }
-
     return FALSE;
 }
 

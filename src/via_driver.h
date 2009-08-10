@@ -229,7 +229,7 @@ typedef struct _VIA {
     Bool		hwcursor;
     Bool                NoAccel;
     Bool                shadowFB;
-    int                 rotate;
+    Rotation            rotate;
     Bool                vbeSR;
     int                 agpMem;
 
