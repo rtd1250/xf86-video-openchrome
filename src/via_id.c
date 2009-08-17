@@ -222,7 +222,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"VIA Epia M700",                         VIA_VX800,   0x1106, 0x1122, VIA_DEVICE_CRT},
     {"Samsung NC20",                          VIA_VX800,   0x144d, 0xc04e, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Quanta DreamBook Light IL1",            VIA_VX800,   0x152d, 0x0771, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
-    {"VIA OpenBook",                          VIA_VX800,   0x1170, 0x1122, VIA_DEVICE_CRT | VIA_DEVICE_LCD}, /* VIA OpenBook eNote VBE8910 */
+    {"VIA OpenBook",                          VIA_VX800,   0x1170, 0x0311, VIA_DEVICE_CRT | VIA_DEVICE_LCD}, /* VIA OpenBook eNote VBE8910 */
 
     /*** VX855 ***/
     {"VIA VT8562C",                           VIA_VX855,   0x1106, 0x5122, VIA_DEVICE_CRT},

@@ -1,3 +1,9 @@
+2009-08-17  Bartosz Kosiorek <gang65@poczta.onet.pl>
+
+	Added support of the VIA OpenBook
+
+	* src/via_id.c:
+
 2009-08-08  Bartosz Kosiorek <gang65@poczta.onet.pl>
 
 	Added support for screen rotate upside-down and remove "magic numbers"
