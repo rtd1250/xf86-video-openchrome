@@ -691,14 +691,20 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
             /* IRQ is not broken on KM400A, but testing (pVia->ChipRev < 0x80)
              * is not enough to make sure we have an older, broken KM400. */
             pVia->DRIIrqEnable = FALSE;
+            
+            /* The KM400 not working properly with new mode switch (See Ticket #301) */
+            pVia->UseLegacyModeSwitch = TRUE;
             break;
         case VIA_K8M800:
             pVia->DRIIrqEnable = FALSE;
+            pVia->UseLegacyModeSwitch = TRUE;
             break;
         case VIA_PM800:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
+            pVia->UseLegacyModeSwitch = TRUE;
             break;
         case VIA_VM800:
+            pVia->UseLegacyModeSwitch = TRUE;
             break;
         case VIA_K8M890:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
