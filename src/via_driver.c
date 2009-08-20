@@ -684,7 +684,7 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
     pVia->swov.maxHInterp = 600;
     pVia->useLegacyVBE = TRUE;
 
-    pVia->UseLegacyModeSwitch = TRUE;
+    pVia->UseLegacyModeSwitch = FALSE;
     
     switch (pVia->Chipset) {
         case VIA_KM400:
@@ -704,7 +704,6 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
             pVia->VideoEngine = VIDEO_ENGINE_CME;
             pVia->agpEnable = FALSE;
             pVia->dmaXV = FALSE;
-            pVia->UseLegacyModeSwitch = FALSE;
             break;
         case VIA_P4M900:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
@@ -712,25 +711,21 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
             pVia->useLegacyVBE = FALSE;
             /* FIXME: this needs to be tested */
             pVia->dmaXV = FALSE;
-            pVia->UseLegacyModeSwitch = FALSE;
             break;
         case VIA_CX700:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
             pVia->swov.maxWInterp = 1920;
             pVia->swov.maxHInterp = 1080;
-            pVia->UseLegacyModeSwitch = FALSE;
             break;
         case VIA_P4M890:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
             pVia->dmaXV = FALSE;
-            pVia->UseLegacyModeSwitch = FALSE;
             break;
         case VIA_VX800:
         case VIA_VX855:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
             /* pVia->agpEnable = FALSE;
             pVia->dmaXV = FALSE;*/
-            pVia->UseLegacyModeSwitch = FALSE;
             break;
     }
 

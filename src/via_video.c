@@ -374,8 +374,13 @@ DecideOverlaySupport(ScrnInfoPtr pScrn)
                 refresh = 60;
         } else {
             if (pBIOSInfo->Panel->IsActive) {
-                width = pBIOSInfo->Panel->NativeMode->Width;
-                height = pBIOSInfo->Panel->NativeMode->Height;
+                if (pVia->UseLegacyModeSwitch) {
+                    width = pBIOSInfo->panelX;
+                    height = pBIOSInfo->panelY;
+                } else {
+                    width = pBIOSInfo->Panel->NativeMode->Width;
+                    height = pBIOSInfo->Panel->NativeMode->Height;
+                }
                 if ((width == 1400) && (height == 1050)) {
                     width = 1280;
                     height = 1024;
