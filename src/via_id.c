@@ -271,7 +271,7 @@ ViaCheckCardId(ScrnInfoPtr pScrn)
 	if ((Id->Chip == pVia->Chipset) && 
            (Id->Vendor == SUBVENDOR_ID(pVia->PciInfo)) &&
            (Id->Device == SUBSYS_ID(pVia->PciInfo))) {
-	    xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "Detected %s. Card-Ids (%4X|%4X)\n", Id->String, DEVICE_ID(pVia->PciInfo), SUBVENDOR_ID(pVia->PciInfo));
+	    xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "Detected %s. Card-Ids (%4X|%4X)\n", Id->String, SUBVENDOR_ID(pVia->PciInfo), SUBSYS_ID(pVia->PciInfo));
 	    pVia->Id = Id;
 	    return;
 	}
