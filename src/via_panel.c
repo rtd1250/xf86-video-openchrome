@@ -64,6 +64,7 @@ ViaPanelLookUpModeIndex(int width, int height)
     int i, index = VIA_PANEL_INVALID;
     int length = sizeof(ViaPanelNativeModes) / sizeof(ViaPanelModeRec);
 
+
     for (i = 0; i < length; i++) {
         if (ViaPanelNativeModes[i].Width == width
             && ViaPanelNativeModes[i].Height == height) {
@@ -284,10 +285,13 @@ ViaPanelPreInit(ScrnInfoPtr pScrn)
 */
         if (ret) {
             panel->NativeModeIndex = ViaPanelLookUpModeIndex(width, height);
+            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaPanelLookUpModeIndex, Width %d, Height %d, NativeModeIndex%d\n", width, height, panel->NativeModeIndex));
             if (panel->NativeModeIndex != VIA_PANEL_INVALID) {
                 panel->NativeMode->Width = width;
                 panel->NativeMode->Height = height;
             }
+        } else {
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Unable to get panel size from EDID. Return code: %d\n", ret);
         }
     }
 
@@ -379,6 +383,7 @@ ViaPanelGetSizeFromEDID(ScrnInfoPtr pScrn, xf86MonPtr pMon,
 
 Bool
 ViaPanelGetSizeFromDDCv1(ScrnInfoPtr pScrn, int *width, int *height)
+
 {
     VIAPtr pVia = VIAPTR(pScrn);
     xf86MonPtr pMon;

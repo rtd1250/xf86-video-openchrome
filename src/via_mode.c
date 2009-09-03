@@ -842,7 +842,7 @@ ViaGetMemoryBandwidth(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaGetMemoryBandwidth\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaGetMemoryBandwidth. Memory type: %d\n", pVia->MemClk));
 
     switch (pVia->MemClk) {
         case VIA_MEM_SDR66:
@@ -883,7 +883,7 @@ ViaValidMode(int scrnIndex, DisplayModePtr mode, Bool verbose, int flags)
     if (pVia->pVbe)
         return MODE_OK;
 
-    DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "ViaValidMode: Validating %s (%d)\n",
+    DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "ViaValidMode: Validating %s (Clock: %d)\n",
                      mode->name, mode->Clock));
 
     if (mode->Flags & V_INTERLACE)
