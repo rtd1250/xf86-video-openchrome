@@ -1598,9 +1598,12 @@ ViaDFPPower(ScrnInfoPtr pScrn, Bool On)
     /* Display Channel Select */
     ViaCrtcMask(hwp, 0xD2, 0x30, 0x30);
 
-    /* Power on TMDS */
-    ViaCrtcMask(hwp, 0xD2, 0x00, 0x08);
-    
+    if (On)
+        /* Power on TMDS */
+        ViaCrtcMask(hwp, 0xD2, 0x00, 0x08);
+    else
+        /* Power off TMDS */
+        ViaCrtcMask(hwp, 0xD2, 0x08, 0x08);
 }
 
 
