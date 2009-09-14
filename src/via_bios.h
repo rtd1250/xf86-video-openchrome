@@ -160,8 +160,6 @@ typedef struct _VIABIOSINFO {
     Bool        SetDVI;
     /* LCD Simultaneous Expand Mode HWCursor Y Scale */
     Bool        scaleY;
-    int         panelX;
-    int         panelY;
     int         resY;
 
     /* DFP */

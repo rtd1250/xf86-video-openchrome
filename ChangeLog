@@ -1,3 +1,20 @@
+2009-09-14  Bartosz Kosiorek  <gang65@poczta.onet.pl>
+
+	Removed two old variables:
+	pBIOSInfo->panelX
+	pBIOSInfo->panelY
+	
+	and replaced it by:
+	pBIOSInfo->Panel->NativeMode->Width
+	pBIOSInfo->Panel->NativeMode->Height
+
+	* src/via_bios.h:
+	* src/via_driver.c: (VIASetupDefaultOptions):
+	* src/via_mode.c: (ViaPanelGetIndex), (VIASetLCDMode),
+	(ViaModePrimaryLegacy), (ViaModeSecondaryLegacy):
+	* src/via_swov.c: (SetVideoWindow):
+	* src/via_video.c: (DecideOverlaySupport):
+
 2009-09-10  Bartosz Kosiorek  <gang65@poczta.onet.pl>
 
 	Fix bug with DFP Power Off (ticket #317)

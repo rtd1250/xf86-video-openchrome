@@ -1653,9 +1653,9 @@ SetVideoWindow(ScrnInfoPtr pScrn, unsigned long videoFlag,
      */
     if (videoFlag & VIDEO_1_INUSE) {
         if (pBIOSInfo->SetDVI && pBIOSInfo->scaleY) {
-            top = (pUpdate->DstTop * pBIOSInfo->panelY
+            top = (pUpdate->DstTop * pBIOSInfo->Panel->NativeMode->Height
                    / pScrn->currentMode->VDisplay);
-            bottom = (pUpdate->DstBottom * pBIOSInfo->panelY
+            bottom = (pUpdate->DstBottom * pBIOSInfo->Panel->NativeMode->Height
                       / pScrn->currentMode->VDisplay);
         }
     }

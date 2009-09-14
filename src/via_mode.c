@@ -691,8 +691,8 @@ ViaPanelGetIndex(ScrnInfoPtr pScrn, DisplayModePtr mode)
     for (i = 0; ViaResolutionTable[i].Index != VIA_RES_INVALID; i++) {
         if (ViaResolutionTable[i].PanelIndex
             == pBIOSInfo->Panel->NativeModeIndex) {
-            pBIOSInfo->panelX = ViaResolutionTable[i].X;
-            pBIOSInfo->panelY = ViaResolutionTable[i].Y;
+            pBIOSInfo->Panel->NativeMode->Width = ViaResolutionTable[i].X;
+            pBIOSInfo->Panel->NativeMode->Height = ViaResolutionTable[i].Y;
             break;
         }
     }
@@ -703,8 +703,8 @@ ViaPanelGetIndex(ScrnInfoPtr pScrn, DisplayModePtr mode)
         return FALSE;
     }
 
-    if ((pBIOSInfo->panelX != mode->CrtcHDisplay)
-        || (pBIOSInfo->panelY != mode->CrtcVDisplay)) {
+    if ((pBIOSInfo->Panel->NativeMode->Width != mode->CrtcHDisplay)
+        || (pBIOSInfo->Panel->NativeMode->Height != mode->CrtcVDisplay)) {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaPanelGetIndex: Non-native"
                    " resolutions are broken.\n");
         return FALSE;
@@ -729,7 +729,7 @@ ViaPanelGetIndex(ScrnInfoPtr pScrn, DisplayModePtr mode)
                 pBIOSInfo->PanelIndex = i;
                 DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaPanelGetIndex:"
                                  "index: %d (%dx%d)\n", pBIOSInfo->PanelIndex,
-                                 pBIOSInfo->panelX, pBIOSInfo->panelY));
+                                 pBIOSInfo->Panel->NativeMode->Width, pBIOSInfo->Panel->NativeMode->Height));
                 return TRUE;
             }
 
@@ -1099,8 +1099,8 @@ VIASetLCDMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
         ViaVgahwWrite(hwp, 0x300 + port, offset, 0x301 + port, data);
     }
 
-    if ((mode->CrtcHDisplay != pBIOSInfo->panelX)
-        || (mode->CrtcVDisplay != pBIOSInfo->panelY)) {
+    if ((mode->CrtcHDisplay != pBIOSInfo->Panel->NativeMode->Width)
+        || (mode->CrtcVDisplay != pBIOSInfo->Panel->NativeMode->Height)) {
         VIALCDModeEntryPtr Main;
         VIALCDMPatchEntryPtr Patch1, Patch2;
         int numPatch1, numPatch2;
@@ -1196,7 +1196,7 @@ VIASetLCDMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
         for (i = 0; i < numPatch2; i++, Patch2++) {
             if (Patch2->Mode == modeNum) {
                 if (!pBIOSInfo->Center
-                    && (mode->CrtcHDisplay == pBIOSInfo->panelX))
+                    && (mode->CrtcHDisplay == pBIOSInfo->Panel->NativeMode->Width))
                     pBIOSInfo->scaleY = FALSE;
 
                 for (j = 0; j < Patch2->numEntry; j++) {
@@ -1407,7 +1407,7 @@ ViaModePrimaryLegacy(ScrnInfoPtr pScrn, DisplayModePtr mode)
     VIAPtr pVia = VIAPTR(pScrn);
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModePrimary\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModePrimaryLegacy\n"));
     DEBUG(ViaPrintMode(pScrn, mode));
 
     /* Turn off Screen */
@@ -1486,7 +1486,7 @@ ViaModeSecondaryLegacy(ScrnInfoPtr pScrn, DisplayModePtr mode)
     VIAPtr pVia = VIAPTR(pScrn);
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModeSecondary\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModeSecondaryLegacy\n"));
     DEBUG(ViaPrintMode(pScrn, mode));
 
     /* Turn off Screen */
