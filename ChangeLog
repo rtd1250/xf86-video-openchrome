@@ -1,3 +1,11 @@
+2009-09-15  Bartosz Kosiorek  <gang65@poczta.onet.pl>
+
+	Cursor support speedup
+
+	* src/via_cursor.c: (viaHWCursorInit), (viaCursorStore),
+	(viaCursorRestore), (viaShowCursor), (viaHideCursor),
+	(viaSetCursorPosition), (viaLoadCursorImage), (viaLoadCursorARGB):
+
 2009-09-14  Bartosz Kosiorek  <gang65@poczta.onet.pl>
 
 	Removed two old variables:

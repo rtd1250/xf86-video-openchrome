@@ -76,7 +76,7 @@ viaHWCursorInit(ScreenPtr pScreen)
 			pVia->CursorARGBSupported = TRUE;
 			pVia->CursorMaxWidth = 64;
 			pVia->CursorMaxHeight = 64;
-			pVia->CursorSize = pVia->CursorMaxWidth * (pVia->CursorMaxHeight + 1) * 4;
+			pVia->CursorSize = pVia->CursorMaxWidth * (pVia->CursorMaxHeight + 1) << 2;
 			break;
     }
 
@@ -225,18 +225,18 @@ viaCursorStore(ScrnInfoPtr pScrn)
         case VIA_P4M900:
         case VIA_VX800:
         case VIA_VX855:
-			if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
+		if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
 	    		pVia->CursorPrimHiInvtColor = VIAGETREG(VIA_REG_PRIM_HI_INVTCOLOR);
 	    		pVia->CursorV327HiInvtColor = VIAGETREG(VIA_REG_V327_HI_INVTCOLOR);
-			} 
-			if (pVia->pBIOSInfo->SecondCRTC->IsActive) {
+		} 
+		if (pVia->pBIOSInfo->SecondCRTC->IsActive) {
 	    	/* TODO add saves here */
-			}
-			pVia->CursorFifo = VIAGETREG(pVia->CursorRegFifo);
-			break;
-		default:
-			/* TODO add saves here */
-			break;
+		}
+		pVia->CursorFifo = VIAGETREG(pVia->CursorRegFifo);
+		break;
+	default:
+		/* TODO add saves here */
+		break;
     }
 }
 
@@ -265,21 +265,21 @@ viaCursorRestore(ScrnInfoPtr pScrn)
         case VIA_P4M900:
         case VIA_VX800:
         case VIA_VX855:
-			if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
+		if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
 	    		VIASETREG(VIA_REG_PRIM_HI_INVTCOLOR, pVia->CursorPrimHiInvtColor);
 	    		VIASETREG(VIA_REG_V327_HI_INVTCOLOR, pVia->CursorV327HiInvtColor);
-			}
-			if (pVia->pBIOSInfo->SecondCRTC->IsActive) {
-	    		/* TODO add real restores here */
+		}
+		if (pVia->pBIOSInfo->SecondCRTC->IsActive) {
+	   		/* TODO add real restores here */
 	    		VIASETREG(VIA_REG_HI_INVTCOLOR, 0X00FFFFFF);
 	    		VIASETREG(VIA_REG_ALPHA_PREFIFO, 0xE0000);
-			}
-			VIASETREG(pVia->CursorRegFifo, pVia->CursorFifo);
-			break;
-		default:
-			/* TODO add real restores here */
-			VIASETREG(VIA_REG_ALPHA_PREFIFO, 0xE0000);
-			VIASETREG(pVia->CursorRegFifo, 0xE0F0000);
+		}
+		VIASETREG(pVia->CursorRegFifo, pVia->CursorFifo);
+		break;
+	default:
+		/* TODO add real restores here */
+		VIASETREG(VIA_REG_ALPHA_PREFIFO, 0xE0000);
+		VIASETREG(pVia->CursorRegFifo, 0xE0F0000);
     }
 }
 
@@ -291,8 +291,6 @@ void
 viaShowCursor(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    CARD32 temp;
-    CARD32 control = pVia->CursorRegControl;
 
     switch(pVia->Chipset) {
         case VIA_CX700:
@@ -308,21 +306,22 @@ viaShowCursor(ScrnInfoPtr pScrn)
              break;
         
         default:
-            /* temp = 0x36000005 */
-	    temp =
+	    /*temp = 0x76000005;
+	      temp =
+                (1 << 30) |
 		(1 << 29) |
 		(1 << 28) |
 		(1 << 26) |
 		(1 << 25) |
 		(1 <<  2) |
 		(1 <<  0);
-
-            temp |= (1 << 30);
+            */
 
             /* Duoview */
 	    if (pVia->CursorPipe)
-		temp |= (1 << 31);
-            VIASETREG(control, temp);
+                VIASETREG(VIA_REG_ALPHA_CONTROL, 0xF6000005);
+            else
+                VIASETREG(VIA_REG_ALPHA_CONTROL, 0x76000005);
     }
 }
 
@@ -331,9 +330,7 @@ viaHideCursor(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     CARD32 temp;
-    CARD32 control = pVia->CursorRegControl;
 
-    temp = VIAGETREG(control);
     switch(pVia->Chipset) {
         case VIA_CX700:
         case VIA_P4M890:
@@ -350,7 +347,8 @@ viaHideCursor(ScrnInfoPtr pScrn)
              break;
         
         default:
-             VIASETREG(control, temp & 0xFFFFFFFA);
+             temp = VIAGETREG(VIA_REG_ALPHA_CONTROL);
+             VIASETREG(VIA_REG_ALPHA_CONTROL, temp & 0xFFFFFFFA);
     }
 }
 
@@ -358,10 +356,6 @@ static void
 viaSetCursorPosition(ScrnInfoPtr pScrn, int x, int y)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    CARD32 temp;
-    CARD32 control = pVia->CursorRegControl;
-    CARD32 offset = pVia->CursorRegOffset;
-    CARD32 pos = pVia->CursorRegPos;
     unsigned xoff, yoff;
 
     if (x < 0) {
@@ -383,34 +377,19 @@ viaSetCursorPosition(ScrnInfoPtr pScrn, int x, int y)
         case VIA_P4M890:
         case VIA_P4M900:
         case VIA_VX800:
-             if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
-                 temp = VIAGETREG(VIA_REG_HI_CONTROL0);
-                 VIASETREG(VIA_REG_HI_CONTROL0, temp & 0xFFFFFFFE);
-                 
+             if (pVia->pBIOSInfo->FirstCRTC->IsActive) {                
                  VIASETREG(VIA_REG_HI_POS0,    ((x    << 16) | (y    & 0x07ff)));
                  VIASETREG(VIA_REG_HI_OFFSET0, ((xoff << 16) | (yoff & 0x07ff)));
-
-                 VIASETREG(VIA_REG_HI_CONTROL0, temp);
              }
   	     if (pVia->pBIOSInfo->SecondCRTC->IsActive) {
-                 temp = VIAGETREG(VIA_REG_HI_CONTROL1);
-                 VIASETREG(VIA_REG_HI_CONTROL1, temp & 0xFFFFFFFE);
-
                  VIASETREG(VIA_REG_HI_POS1,    ((x    << 16) | (y    & 0x07ff)));
                  VIASETREG(VIA_REG_HI_OFFSET1, ((xoff << 16) | (yoff & 0x07ff)));
-
-                 VIASETREG(VIA_REG_HI_CONTROL1, temp);
              } 
              break;
         
         default:
-            temp = VIAGETREG(control);
-            VIASETREG(control, temp & 0xFFFFFFFE);
-
-            VIASETREG(pos,    ((x    << 16) | (y    & 0x07ff)));
-            VIASETREG(offset, ((xoff << 16) | (yoff & 0x07ff)));
-
-            VIASETREG(control, temp);
+            VIASETREG(VIA_REG_ALPHA_POS,    ((x    << 16) | (y    & 0x07ff)));
+            VIASETREG(VIA_REG_ALPHA_OFFSET, ((xoff << 16) | (yoff & 0x07ff)));
     }
 
 }
@@ -445,20 +424,14 @@ static void
 viaLoadCursorImage(ScrnInfoPtr pScrn, unsigned char *s)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    CARD32 control = pVia->CursorRegControl;
     CARD32 temp;
     CARD32 *dst;
-    CARD8 *src;
     CARD8 chunk;
     int i, j;
-
-    temp = VIAGETREG(control);
-    VIASETREG(control, temp & 0xFFFFFFFE);
 
     pVia->CursorARGB = FALSE;
 
     dst = (CARD32*)(pVia->cursorMap);
-    src = (CARD8*)s;
 
     if (pVia->CursorARGBSupported) {
 #define ARGB_PER_CHUNK	(8 * sizeof (chunk) / 2)
@@ -471,7 +444,7 @@ viaLoadCursorImage(ScrnInfoPtr pScrn, unsigned char *s)
 		pVia->CursorFG = mono_cursor_color[3];
 		pVia->CursorBG = mono_cursor_color[2];
     } else {
-	memcpy(dst, src, pVia->CursorSize);
+	memcpy(dst, (CARD8*)s, pVia->CursorSize);
     }
     switch(pVia->Chipset) {
         case VIA_CX700:
@@ -489,7 +462,8 @@ viaLoadCursorImage(ScrnInfoPtr pScrn, unsigned char *s)
              break;
         
         default:
-             VIASETREG(control, temp);
+             temp = VIAGETREG(VIA_REG_ALPHA_CONTROL);
+             VIASETREG(VIA_REG_ALPHA_CONTROL, temp);
     }
 }
 
@@ -546,60 +520,27 @@ static void
 viaLoadCursorARGB(ScrnInfoPtr pScrn, CursorPtr pCurs)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    CARD32 control = pVia->CursorRegControl;
     int x, y, w, h;
-    CARD32 *image;
-    CARD32 *dst;
-    CARD32 *src;
-    CARD32 temp;
-
-    temp = VIAGETREG(control);
-    VIASETREG(control, temp & 0xFFFFFFFE);
+    CARD32 *image = (CARD32*)pCurs->bits->argb;
+    CARD32 *dst = (CARD32*)pVia->cursorMap;
 
     pVia->CursorARGB = TRUE;
 
-    dst = (CARD32*)pVia->cursorMap;
-    image = pCurs->bits->argb;
-
     w = pCurs->bits->width;
-    if (w > pVia->CursorMaxWidth)
-	w = pVia->CursorMaxWidth;
-
     h = pCurs->bits->height;
-    if (h > pVia->CursorMaxHeight)
-	h = pVia->CursorMaxHeight;
 
     for (y = 0; y < h; y++) {
 
-	src = image;
-	image += pCurs->bits->width;
-
 	for (x = 0; x < w; x++)
-	    *dst++ = *src++;
+	    *dst++ = *image++;
+        /* pad to the right with transparent */
 	for (; x < pVia->CursorMaxHeight; x++)
 	    *dst++ = 0;
     }
 
+    /* pad below with transparent */
     for (; y < pVia->CursorMaxHeight; y++)
 	for (x = 0; x < pVia->CursorMaxWidth; x++)
 	    *dst++ = 0;
 
-    switch(pVia->Chipset) {
-        case VIA_CX700:
-        case VIA_P4M890:
-        case VIA_P4M900:
-        case VIA_VX800:
-             if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
-                 temp = VIAGETREG(VIA_REG_HI_CONTROL0);
-                 VIASETREG(VIA_REG_HI_CONTROL0, temp & 0xFFFFFFFE);
-             }
-  	     if (pVia->pBIOSInfo->SecondCRTC->IsActive) {
-                 temp = VIAGETREG(VIA_REG_HI_CONTROL1);
-                 VIASETREG(VIA_REG_HI_CONTROL1, temp & 0xFFFFFFFE);
-             }
-             break;
-        
-        default:
-             VIASETREG(control, temp);
-    }
 }
