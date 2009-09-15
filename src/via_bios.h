@@ -99,6 +99,13 @@
 #define	    VIA_DI_12BIT		    0x00
 #define	    VIA_DI_24BIT		    0x01
 
+/* Digital Port */
+#define     VIA_DI_PORT_NONE        0x0
+#define     VIA_DI_PORT_DVP0        0x1
+#define     VIA_DI_PORT_DVP1        0x2
+#define     VIA_DI_PORT_DFPLOW      0x4
+#define     VIA_DI_PORT_DFPHIGH     0x8
+
 typedef struct ViaPanelMode {
     int Width ;
     int Height ;
@@ -186,6 +193,7 @@ typedef struct _VIABIOSINFO {
     int         TVDeflicker;
     CARD8       TVRegs[0xFF];
     int         TVNumRegs;
+    int         TVDIPort;
 
     /* TV Callbacks */
     void (*TVSave) (ScrnInfoPtr pScrn);

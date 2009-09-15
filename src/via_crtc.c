@@ -304,7 +304,8 @@ ViaFirstCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
         temp += 0x03;
         temp &= ~0x03;
     }
-    hwp->writeSeq(hwp, 0x1C, (temp >> 1) & 0xFF);
+
+    hwp->writeSeq(hwp, 0x1C, ((temp >> 1)+1) & 0xFF);
     ViaSeqMask(hwp, 0x1D, temp >> 9, 0x03);
 
     switch (pVia->ChipId) {

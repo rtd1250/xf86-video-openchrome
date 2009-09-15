@@ -1,5 +1,19 @@
 2009-09-15  Bartosz Kosiorek  <gang65@poczta.onet.pl>
 
+	TV-out VT1625 chip support
+
+	* src/via_bios.h:
+	* src/via_crtc.c: (ViaFirstCRTCSetMode):
+	* src/via_display.c: (ViaDisplayEnableDVO), (ViaDisplayDisableDVO),
+	(ViaDisplaySetStreamOnDVO):
+	* src/via_driver.c: (VIASetupDefaultOptions), (VIAPreInit):
+	* src/via_mode.c: (ViaTVSetMode), (ViaOutputsSelect), (ViaModeSet):
+	* src/via_vt162x.c: (ViaSetTVClockSource), (VT1622ModeI2C),
+	(VT1622ModeCrtc):
+	* src/via_vt162x.h:
+
+2009-09-15  Bartosz Kosiorek  <gang65@poczta.onet.pl>
+
 	Cursor support speedup
 
 	* src/via_cursor.c: (viaHWCursorInit), (viaCursorStore),

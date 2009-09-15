@@ -251,6 +251,10 @@ ViaTVSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
     if (pBIOSInfo->TVModeCrtc)
         pBIOSInfo->TVModeCrtc(pScrn, mode);
+
+    /* TV reset. */
+    xf86I2CWriteByte(pBIOSInfo->TVI2CDev, 0x1D, 0x00);
+    xf86I2CWriteByte(pBIOSInfo->TVI2CDev, 0x1D, 0x80);
 }
 
 void
@@ -495,6 +499,8 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
             pBIOSInfo->CrtPresent = TRUE;
             pBIOSInfo->CrtActive = TRUE;
         }
+        if (pBIOSInfo->TVActive)
+            pBIOSInfo->FirstCRTC->IsActive = TRUE ;
     }
     if (!pVia->UseLegacyModeSwitch) {
         if (pBIOSInfo->CrtActive)
@@ -1708,6 +1714,13 @@ ViaModeSet(ScrnInfoPtr pScrn, DisplayModePtr mode)
             /* DFP on FirstCrtc */
             ViaDisplaySetStreamOnDFP(pScrn, TRUE);
             ViaDFPPower(pScrn, TRUE);
+        }
+
+        if (pBIOSInfo->TVActive) {
+            /* TV on FirstCrtc */
+            ViaDisplaySetStreamOnDVO(pScrn, pBIOSInfo->TVDIPort, TRUE);
+            ViaDisplayEnableDVO(pScrn, pBIOSInfo->TVDIPort);
+            ViaTVSetMode(pScrn, mode);
         }
         
         ViaModeFirstCRTC(pScrn, mode);

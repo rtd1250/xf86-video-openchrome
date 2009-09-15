@@ -222,6 +222,7 @@ typedef enum
     OPTION_TVDOTCRAWL,
     OPTION_TVTYPE,
     OPTION_TVOUTPUT,
+    OPTION_TVDIPORT,
     OPTION_DISABLEVQ,
     OPTION_DISABLEIRQ,
     OPTION_TVDEFLICKER,
@@ -260,6 +261,7 @@ static OptionInfoRec VIAOptions[] = {
     {OPTION_TVDEFLICKER,         "TVDeflicker",      OPTV_INTEGER, {0}, FALSE},
     {OPTION_TVTYPE,              "TVType",           OPTV_ANYSTR,  {0}, FALSE},
     {OPTION_TVOUTPUT,            "TVOutput",         OPTV_ANYSTR,  {0}, FALSE},
+    {OPTION_TVDIPORT,            "TVPort",           OPTV_ANYSTR,  {0}, FALSE},    
     {OPTION_DISABLEVQ,           "DisableVQ",        OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_DISABLEIRQ,          "DisableIRQ",       OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_AGP_DMA,             "EnableAGPDMA",     OPTV_BOOLEAN, {0}, FALSE},
@@ -655,6 +657,7 @@ static Bool
 VIASetupDefaultOptions(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
+    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIASetupDefaultOptions\n"));
 
@@ -685,10 +688,12 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
     pVia->useLegacyVBE = TRUE;
 
     pVia->UseLegacyModeSwitch = FALSE;
-    
+    pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP1; 
+
     switch (pVia->Chipset) {
         case VIA_CLE266:    
-            pVia->UseLegacyModeSwitch = TRUE;	
+            pVia->UseLegacyModeSwitch = TRUE;
+            pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP0; 
         case VIA_KM400:
             /* IRQ is not broken on KM400A, but testing (pVia->ChipRev < 0x80)
              * is not enough to make sure we have an older, broken KM400. */
@@ -696,6 +701,7 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
             
             /* The KM400 not working properly with new mode switch (See Ticket #301) */
             pVia->UseLegacyModeSwitch = TRUE;
+            pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP0; 
             break;
         case VIA_K8M800:
             pVia->DRIIrqEnable = FALSE;
@@ -719,6 +725,7 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
             pVia->useLegacyVBE = FALSE;
             /* FIXME: this needs to be tested */
             pVia->dmaXV = FALSE;
+            pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP0; 
             break;
         case VIA_CX700:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
@@ -1364,6 +1371,30 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     } else {
         xf86DrvMsg(pScrn->scrnIndex, X_DEFAULT,
                    "No default TV output signal type is set.\n");
+    }
+
+    /* TV DI Port */
+    if ((s = xf86GetOptValString(VIAOptions, OPTION_TVDIPORT))) {
+        if (!xf86NameCmp(s, "DVP0")) {
+            pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP0;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+                       "TV Output Port is DVP0.\n");
+        } else if (!xf86NameCmp(s, "DVP1")) {
+            pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP1;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+                       "TV Output Port is DVP1.\n");
+        } else if (!xf86NameCmp(s, "DFPHigh")) {
+            pBIOSInfo->TVDIPort = VIA_DI_PORT_DFPHIGH;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+                       "TV Output Port is DFPHigh.\n");
+        } else if (!xf86NameCmp(s, "DFPLow")) {
+            pBIOSInfo->TVDIPort = VIA_DI_PORT_DFPLOW;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+                       "TV Output Port is DFPLow.\n");
+        } 
+    } else {
+        xf86DrvMsg(pScrn->scrnIndex, X_DEFAULT,
+                   "No default TV output port is set.\n");
     }
 
     VIAVidHWDiffInit(pScrn);
