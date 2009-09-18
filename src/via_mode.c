@@ -1628,9 +1628,6 @@ ViaModeFirstCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode)
     pBIOSInfo->Clock = ViaModeDotClockTranslate(pScrn, mode);
     pBIOSInfo->ClockExternal = FALSE;
 
-    /* Enable MMIO & PCI burst (1 wait state) */
-    ViaSeqMask(hwp, 0x1A, 0x06, 0x06);
-
     ViaSetPrimaryFIFO(pScrn, mode);
 
     ViaSetPrimaryDotclock(pScrn, pBIOSInfo->Clock);
