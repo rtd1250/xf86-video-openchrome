@@ -29,7 +29,10 @@
 #include "config.h"
 #endif
 
+#ifndef XSERVER_LIBPCIACCESS
 #include "xf86RAC.h"
+#endif
+
 #include "shadowfb.h"
 
 #include "globals.h"
@@ -182,18 +185,18 @@ static SymTabRec VIAChipsets[] = {
 
 /* Mapping a PCI device ID to a chipset family identifier. */
 static PciChipsets VIAPciChipsets[] = {
-    {VIA_CLE266,   PCI_CHIP_CLE3122,   RES_SHARED_VGA},
-    {VIA_KM400,    PCI_CHIP_VT3205,    RES_SHARED_VGA},
-    {VIA_K8M800,   PCI_CHIP_VT3204,    RES_SHARED_VGA},
-    {VIA_PM800,    PCI_CHIP_VT3259,    RES_SHARED_VGA},
-    {VIA_VM800,    PCI_CHIP_VT3314,    RES_SHARED_VGA},
-    {VIA_K8M890,   PCI_CHIP_VT3336,    RES_SHARED_VGA},
-    {VIA_P4M900,   PCI_CHIP_VT3364,    RES_SHARED_VGA},
-    {VIA_CX700,    PCI_CHIP_VT3324,    RES_SHARED_VGA},
-    {VIA_P4M890,   PCI_CHIP_VT3327,    RES_SHARED_VGA},
-    {VIA_VX800,    PCI_CHIP_VT3353,    RES_SHARED_VGA},
-    {VIA_VX855,    PCI_CHIP_VT3409,    RES_SHARED_VGA},
-    {-1,           -1,                 RES_UNDEFINED}
+    {VIA_CLE266,   PCI_CHIP_CLE3122,   NULL},
+    {VIA_KM400,    PCI_CHIP_VT3205,    NULL},
+    {VIA_K8M800,   PCI_CHIP_VT3204,    NULL},
+    {VIA_PM800,    PCI_CHIP_VT3259,    NULL},
+    {VIA_VM800,    PCI_CHIP_VT3314,    NULL},
+    {VIA_K8M890,   PCI_CHIP_VT3336,    NULL},
+    {VIA_P4M900,   PCI_CHIP_VT3364,    NULL},
+    {VIA_CX700,    PCI_CHIP_VT3324,    NULL},
+    {VIA_P4M890,   PCI_CHIP_VT3327,    NULL},
+    {VIA_VX800,    PCI_CHIP_VT3353,    NULL},
+    {VIA_VX855,    PCI_CHIP_VT3409,    NULL},
+    {-1,           -1,                 NULL}
 };
 
 int gVIAEntityIndex = -1;
@@ -800,11 +803,13 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 
     pVia->IsSecondary = FALSE;
     pEnt = xf86GetEntityInfo(pScrn->entityList[0]);
+#ifndef XSERVER_LIBPCIACCESS
     if (pEnt->resources) {
         xfree(pEnt);
         VIAFreeRec(pScrn);
         return FALSE;
     }
+#endif
 
     pVia->EntityIndex = pEnt->index;
 
@@ -923,7 +928,9 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         pScrn->rgbBits = 6;
 
     pVia->PciInfo = xf86GetPciInfoForEntity(pEnt->index);
+#ifndef XSERVER_LIBPCIACCESS
     xf86RegisterResources(pEnt->index, NULL, ResNone);
+#endif
 
 #if 0
     xf86SetOperatingState(RES_SHARED_VGA, pEnt->index, ResUnusedOpr);
