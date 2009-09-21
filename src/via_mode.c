@@ -552,13 +552,14 @@ VIAGetPanelSize(ScrnInfoPtr pScrn)
     int height = 0;
     Bool ret;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAGetPanelSize\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAGetPanelSize (UseLegacyModeSwitch)\n"));
 
     ret = ViaPanelGetSizeFromDDCv1(pScrn, &width, &height);
     if (!ret)
         ret = ViaPanelGetSizeFromDDCv2(pScrn, &width);
 
     if (ret) {
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "EDID returned resolution %d x %d \n", width, height));
         switch (width) {
             case 640:
                 pBIOSInfo->Panel->NativeModeIndex = VIA_PANEL6X4;
@@ -587,6 +588,7 @@ VIAGetPanelSize(ScrnInfoPtr pScrn)
         }
     } else {
         pBIOSInfo->Panel->NativeModeIndex = hwp->readCrtc(hwp, 0x3F) >> 4;
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Unable to get information from EDID. Resolution from Scratchpad: %d \n", pBIOSInfo->Panel->NativeModeIndex));
         if (pBIOSInfo->Panel->NativeModeIndex == 0) {
             /* VIA_PANEL6X4 == 0, but that value equals unset */
             xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Unable to "
