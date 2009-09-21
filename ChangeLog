@@ -1,3 +1,12 @@
+2009-09-21  Bartosz Kosiorek  <gang65@poczta.onet.pl>
+
+	Fixed problem with backlite (Ticket #308)
+
+	* src/via_lvds.c: (ViaLVDSSoftwarePowerFirstSequence),
+	(ViaLVDSSoftwarePowerSecondSequence),
+	(ViaLVDSHardwarePowerFirstSequence),
+	(ViaLVDSHardwarePowerSecondSequence), (ViaLVDSPower):
+
 2009-09-15  Bartosz Kosiorek  <gang65@poczta.onet.pl>
 
 	TV-out VT1625 chip support
