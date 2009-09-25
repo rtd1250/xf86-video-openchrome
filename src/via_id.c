@@ -156,6 +156,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Clevo M5xxS",                           VIA_VM800,   0x1558, 0x5406, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Biostar P4M80-M4 / P4VMA-M",            VIA_VM800,   0x1565, 0x1202, VIA_DEVICE_CRT},
     {"Biostar P4M800 Pro-M7",                 VIA_VM800,   0x1565, 0x1206, VIA_DEVICE_CRT},
+    {"Packard Bell Lima (ASUS MBP5VDZ-NVM)",  VIA_VM800,   0x1631, 0xE018, VIA_DEVICE_CRT},
     {"Fujitsu/Siemens Amilo Pro V2030",       VIA_VM800,   0x1734, 0x109B, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Fujitsu/Siemens Amilo Pro V2035",       VIA_VM800,   0x1734, 0x10AE, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Fujitsu/Siemens Amilo Pro V2055",       VIA_VM800,   0x1734, 0x10CA, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
