@@ -1,3 +1,10 @@
+2009-09-26  Bartosz Kosiorek  <gang65@poczta.onet.pl>
+
+	Save/restore ECK Clock Synthesizer
+
+	* src/via_driver.c: (VIASave), (VIARestore):
+	* src/via_driver.h:
+
 2009-09-21  Bartosz Kosiorek  <gang65@poczta.onet.pl>
 
 	Fixed bug with panel autodetection using

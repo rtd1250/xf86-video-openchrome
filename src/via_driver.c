@@ -1921,23 +1921,30 @@ VIASave(ScrnInfoPtr pScrn)
 
         Regs->SR2E = hwp->readSeq(hwp, 0x2E);
 
+        /*=* Save VCK, LCDCK and ECK  *=*/
+        /* Primary Display (VCK) (description for Chipset >= K8M800): */
         Regs->SR44 = hwp->readSeq(hwp, 0x44);
         Regs->SR45 = hwp->readSeq(hwp, 0x45);
         Regs->SR46 = hwp->readSeq(hwp, 0x46);
+
+        /* ECK Clock Synthesizer (description for Chipset >= K8M800): */
         Regs->SR47 = hwp->readSeq(hwp, 0x47);
+        Regs->SR48 = hwp->readSeq(hwp, 0x48);
+        Regs->SR49 = hwp->readSeq(hwp, 0x49);
 
         switch (pVia->Chipset) {
             case VIA_CLE266:
             case VIA_KM400:
                 break;
             default:
+ 	        /* Secondary Display (LCDCK): */
                 Regs->SR4A = hwp->readSeq(hwp, 0x4A);
                 Regs->SR4B = hwp->readSeq(hwp, 0x4B);
                 Regs->SR4C = hwp->readSeq(hwp, 0x4C);
                 break;
         }
-                DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                                 "Non-Primary Adapter! saving VGA_SR_MODE only !!\n"));
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+              "Non-Primary Adapter! saving VGA_SR_MODE only !!\n"));
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Crtc...\n"));
 
         Regs->CR13 = hwp->readCrtc(hwp, 0x13);
@@ -2058,8 +2065,9 @@ VIARestore(ScrnInfoPtr pScrn)
     hwp->writeSeq(hwp, 0x46, Regs->SR46);
 
     /* ECK Clock Synthesizer: */
-    // FIXME the registers SR48 and SR49 also need to be restored
     hwp->writeSeq(hwp, 0x47, Regs->SR47);
+    hwp->writeSeq(hwp, 0x48, Regs->SR48);
+    hwp->writeSeq(hwp, 0x49, Regs->SR49);
 
     switch (pVia->Chipset) {
         case VIA_CLE266:
