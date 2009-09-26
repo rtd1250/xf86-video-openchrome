@@ -1883,11 +1883,15 @@ VIASave(ScrnInfoPtr pScrn)
 
         vgaHWProtect(pScrn, TRUE);
 
-        if (xf86IsPrimaryPci(pVia->PciInfo))
+        if (xf86IsPrimaryPci(pVia->PciInfo)) {
             vgaHWSave(pScrn, &hwp->SavedReg, VGA_SR_ALL);
-        else
+            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                  "Primary Adapter! saving VGA_SR_ALL !!\n"));
+        } else {
             vgaHWSave(pScrn, &hwp->SavedReg, VGA_SR_MODE);
-
+            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                  "Non-Primary Adapter! saving VGA_SR_MODE only !!\n"));
+        }
         /* Unlock and save extended registers. */
         hwp->writeSeq(hwp, 0x10, 0x01);
 
@@ -1932,7 +1936,8 @@ VIASave(ScrnInfoPtr pScrn)
                 Regs->SR4C = hwp->readSeq(hwp, 0x4C);
                 break;
         }
-
+                DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                                 "Non-Primary Adapter! saving VGA_SR_MODE only !!\n"));
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Crtc...\n"));
 
         Regs->CR13 = hwp->readCrtc(hwp, 0x13);
@@ -1999,10 +2004,15 @@ VIARestore(ScrnInfoPtr pScrn)
     /* Unlock extended registers. */
     hwp->writeSeq(hwp, 0x10, 0x01);
 
+    /*=* CR6A, CR6B, CR6C must be reset before restore
+         standard vga regs, or system will be hang. *=*/
+    /*=* TODO Check is reset IGA2 channel before disable IGA2 channel
+         is neccesery or it may cause some line garbage. *=*/
     hwp->writeCrtc(hwp, 0x6A, 0x00);
     hwp->writeCrtc(hwp, 0x6B, 0x00);
     hwp->writeCrtc(hwp, 0x6C, 0x00);
-
+    
+    /* Gamma must disable before restore pallette */
     ViaGammaDisable(pScrn);
 
     if (pBIOSInfo->TVI2CDev)
@@ -2040,10 +2050,15 @@ VIARestore(ScrnInfoPtr pScrn)
     hwp->writeSeq(hwp, 0x2B, Regs->SR2B);
 
     hwp->writeSeq(hwp, 0x2E, Regs->SR2E);
-
+    
+    /*=* restore VCK, LCDCK and ECK *=*/
+    /* Primary Display (VCK): */
     hwp->writeSeq(hwp, 0x44, Regs->SR44);
     hwp->writeSeq(hwp, 0x45, Regs->SR45);
     hwp->writeSeq(hwp, 0x46, Regs->SR46);
+
+    /* ECK Clock Synthesizer: */
+    // FIXME the registers SR48 and SR49 also need to be restored
     hwp->writeSeq(hwp, 0x47, Regs->SR47);
 
     switch (pVia->Chipset) {
@@ -2051,6 +2066,7 @@ VIARestore(ScrnInfoPtr pScrn)
         case VIA_KM400:
             break;
         default:
+ 	    /* Secondary Display (LCDCK): */
             hwp->writeSeq(hwp, 0x4A, Regs->SR4A);
             hwp->writeSeq(hwp, 0x4B, Regs->SR4B);
             hwp->writeSeq(hwp, 0x4C, Regs->SR4C);
@@ -2061,11 +2077,19 @@ VIARestore(ScrnInfoPtr pScrn)
     ViaSeqMask(hwp, 0x40, 0x06, 0x06);
     ViaSeqMask(hwp, 0x40, 0x00, 0x06);
 
+    /* Integrated LVDS Mode Select */ 
     hwp->writeCrtc(hwp, 0x13, Regs->CR13);
+
+    /*=* Restore CRTC controller extended regs: *=*/
+    /* Mode Control */
     hwp->writeCrtc(hwp, 0x32, Regs->CR32);
+    /* HSYNCH Adjuster */
     hwp->writeCrtc(hwp, 0x33, Regs->CR33);
+    /* Starting Address Overflow */
     hwp->writeCrtc(hwp, 0x34, Regs->CR34);
+    /* Extended Overflow */
     hwp->writeCrtc(hwp, 0x35, Regs->CR35);
+    /*Power Management 3 (Monitor Control) */
     hwp->writeCrtc(hwp, 0x36, Regs->CR36);
 
     hwp->writeCrtc(hwp, 0x48, Regs->CR48);
@@ -2076,11 +2100,12 @@ VIARestore(ScrnInfoPtr pScrn)
         hwp->writeCrtc(hwp, i + 0x50, Regs->CRTCRegs[i]);
 
     if (pVia->Chipset != VIA_CLE266 && pVia->Chipset != VIA_KM400) {
-
+        /* Scaling Initial values */
         hwp->writeCrtc(hwp, 0xA0, Regs->CRA0);
         hwp->writeCrtc(hwp, 0xA1, Regs->CRA1);
         hwp->writeCrtc(hwp, 0xA2, Regs->CRA2);
 
+        /* LVDS Channels Functions Selection */
         hwp->writeCrtc(hwp, 0x97, Regs->CR97);
         hwp->writeCrtc(hwp, 0x99, Regs->CR99);
         hwp->writeCrtc(hwp, 0x9B, Regs->CR9B);
@@ -2093,6 +2118,7 @@ VIARestore(ScrnInfoPtr pScrn)
         case VIA_CX700:
         case VIA_VX800:
         case VIA_VX855:
+            /* LVDS Control Register */
             hwp->writeCrtc(hwp, 0xD2, Regs->CRD2);
             break;
     }
@@ -2969,7 +2995,7 @@ VIAAdjustFrame(int scrnIndex, int x, int y, int flags)
     VIAPtr pVia = VIAPTR(pScrn);
     CARD32 Base;
 
-    DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIAAdjustFrame\n"));
+    DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIAAdjustFrame %dx%d\n", x, y));
 
     if (pVia->pVbe) {
         ViaVbeAdjustFrame(scrnIndex, x, y, flags);

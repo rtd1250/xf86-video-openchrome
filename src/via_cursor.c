@@ -297,6 +297,7 @@ viaShowCursor(ScrnInfoPtr pScrn)
         case VIA_P4M890:
         case VIA_P4M900:
         case VIA_VX800:
+        case VIA_VX855:
              if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
                  VIASETREG(VIA_REG_HI_CONTROL0, 0x36000005);
              }
@@ -336,6 +337,7 @@ viaHideCursor(ScrnInfoPtr pScrn)
         case VIA_P4M890:
         case VIA_P4M900:
         case VIA_VX800:
+        case VIA_VX855:
              if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
                  temp = VIAGETREG(VIA_REG_HI_CONTROL0);
                  VIASETREG(VIA_REG_HI_CONTROL0, temp & 0xFFFFFFFA);
@@ -377,6 +379,7 @@ viaSetCursorPosition(ScrnInfoPtr pScrn, int x, int y)
         case VIA_P4M890:
         case VIA_P4M900:
         case VIA_VX800:
+        case VIA_VX855:
              if (pVia->pBIOSInfo->FirstCRTC->IsActive) {                
                  VIASETREG(VIA_REG_HI_POS0,    ((x    << 16) | (y    & 0x07ff)));
                  VIASETREG(VIA_REG_HI_OFFSET0, ((xoff << 16) | (yoff & 0x07ff)));
@@ -451,6 +454,7 @@ viaLoadCursorImage(ScrnInfoPtr pScrn, unsigned char *s)
         case VIA_P4M890:
         case VIA_P4M900:
         case VIA_VX800:
+        case VIA_VX855:
              if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
                  temp = VIAGETREG(VIA_REG_HI_CONTROL0);
                  VIASETREG(VIA_REG_HI_CONTROL0, temp & 0xFFFFFFFE);
@@ -502,6 +506,7 @@ viaSetCursorColors(ScrnInfoPtr pScrn, int bg, int fg)
         case VIA_P4M890:
         case VIA_P4M900:
         case VIA_VX800:
+        case VIA_VX855:
              if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
                  temp = VIAGETREG(VIA_REG_HI_CONTROL0);
                  VIASETREG(VIA_REG_HI_CONTROL0, temp & 0xFFFFFFFE);
