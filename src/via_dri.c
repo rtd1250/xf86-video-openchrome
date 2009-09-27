@@ -891,10 +891,17 @@ VIADRIKernelInit(ScreenPtr pScreen, VIAPtr pVia)
     drmInfo.sarea_priv_offset = sizeof(XF86DRISAREARec);
     drmInfo.fb_offset = pVia->frameBufferHandle;
     drmInfo.mmio_offset = pVia->registerHandle;
-    if (pVia->IsPCI)
+
+    if (pVia->IsPCI) {
         drmInfo.agpAddr = (CARD32) NULL;
-    else
-        drmInfo.agpAddr = (CARD32) pVia->agpAddr;
+    } else {
+        /*For AMD64*/
+#ifndef __x86_64__
+	drmInfo.agpAddr = (CARD32)pVia->agpAddr;
+#else
+	drmInfo.agpAddr = (CARD64)pVia->agpAddr;
+#endif
+    }
 
     if ((drmCommandWrite(pVia->drmFD, DRM_VIA_MAP_INIT, &drmInfo,
                          sizeof(drm_via_init_t))) < 0)
