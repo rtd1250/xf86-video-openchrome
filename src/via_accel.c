@@ -2364,7 +2364,27 @@ viaInitAccel(ScreenPtr pScreen)
     VIAPtr pVia = VIAPTR(pScrn);
     BoxRec AvailFBArea;
     int maxY;
+    Bool ret;
     Bool nPOTSupported;
+
+
+    /*  HW Limitation are described here:
+     *
+     *  1. H2/H5/H6 2D source and destination:
+     *     Pitch: (1 << 14) - 1 = 16383
+     *     Dimension: (1 << 12) = 4096
+     *     X, Y position: (1 << 12) - 1 = 4095.
+     *
+     *  2. H2 3D engine Render target:
+     *     Pitch: (1 << 14) - 1 = 16383
+     *     Clip Rectangle: 0 - 2047
+     *
+     *  3. H5/H6 3D engine Render target:
+     *     Pitch: ((1 << 10) - 1)*32 = 32736
+     *     Clip Rectangle: Color Window, 12bits. As Spec saied: 0 - 2048
+     *                     Scissor is the same as color window.
+     * */
+
 
     pVia->VQStart = 0;
     if (((pVia->FBFreeEnd - pVia->FBFreeStart) >= VIA_VQ_SIZE)
@@ -2435,6 +2455,10 @@ viaInitAccel(ScreenPtr pScreen)
         return TRUE;
     }
 
+    /*
+     * Finally, we set up the memory space available to the pixmap
+     * cache.
+     */
     AvailFBArea.x1 = 0;
     AvailFBArea.y1 = 0;
     AvailFBArea.x2 = pScrn->displayWidth;
@@ -2457,10 +2481,25 @@ viaInitAccel(ScreenPtr pScreen)
     if (maxY > 4 * pScrn->virtualY)
         maxY = 4 * pScrn->virtualY;
 
+    /* Non-rotate */
+    AvailFBArea.y2 = maxY;
     pVia->FBFreeStart = (maxY + 1) * pVia->Bpl;
 
-    AvailFBArea.y2 = maxY;
-    xf86InitFBManager(pScreen, &AvailFBArea);
+    /*
+    *   Initialization of the XFree86 framebuffer manager is done via
+    *   Bool xf86InitFBManager(ScreenPtr pScreen, BoxPtr FullBox) 
+    *   FullBox represents the area of the framebuffer that the manager
+    *   is allowed to manage. This is typically a box with a width 
+    *   of pScrn->displayWidth and a height of as many lines as can be fit
+    *   within the total video memory
+    */
+    ret = xf86InitFBManager(pScreen, &AvailFBArea);
+    if (ret != TRUE) {
+    	xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "VIAInitAccel xf86InitFBManager init failed\n");
+    }
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+               "Frame Buffer From (%d,%d) To (%d,%d)\n",
+               AvailFBArea.x1, AvailFBArea.y1, AvailFBArea.x2, AvailFBArea.y2));
     VIAInitLinear(pScreen);
 
     pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart - pVia->Bpl);
