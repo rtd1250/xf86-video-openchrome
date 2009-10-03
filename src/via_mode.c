@@ -1630,6 +1630,20 @@ ViaModeFirstCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode)
     pBIOSInfo->Clock = ViaModeDotClockTranslate(pScrn, mode);
     pBIOSInfo->ClockExternal = FALSE;
 
+    /* Enable MMIO & PCI burst (1 wait state) */
+    switch (pVia->Chipset) {
+        case VIA_CLE266:
+        case VIA_KM400:
+        case VIA_K8M800:
+        case VIA_PM800:
+        case VIA_VM800:
+            ViaSeqMask(hwp, 0x1A, 0x06, 0x06);
+            break;
+        default:
+            ViaSeqMask(hwp, 0x1A, 0x0C, 0x0C);
+            break;
+    }
+
     ViaSetPrimaryFIFO(pScrn, mode);
 
     ViaSetPrimaryDotclock(pScrn, pBIOSInfo->Clock);
