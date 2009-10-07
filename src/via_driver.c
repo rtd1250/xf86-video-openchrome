@@ -29,10 +29,6 @@
 #include "config.h"
 #endif
 
-#ifndef XSERVER_LIBPCIACCESS
-#include "xf86RAC.h"
-#endif
-
 #include "shadowfb.h"
 
 #include "globals.h"
@@ -48,6 +44,10 @@
 #include "via_driver.h"
 #include "via_video.h"
 #include "via.h"
+
+#if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 6 
+#include "xf86RAC.h"
+#endif
 
 #ifdef XF86DRI
 #include "dri.h"
