@@ -674,7 +674,7 @@ viaVideoFillPixmap(ScrnInfoPtr pScrn,
 {
     int i;
 
-    ErrorF("pitch %lu, depth %d, x %d, y %d, w %d h %d, color 0x%08lx\n",
+    ErrorF("pitch %lu, depth %d, x %d, y %d, w %d, h %d, color 0x%08lx\n",
             pitch, depth, x, y, w, h, color);
 
     depth = (depth + 7) >> 3;
