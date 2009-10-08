@@ -1,4 +1,4 @@
-openchrome 0.2.904 (XX/10/2009)- NOT YET RELEASED
+openchrome 0.2.904 (09/10/2009)
 -------------------------------
 * New features :
 - Basic VX855 support.
@@ -64,7 +64,7 @@ openchrome 0.2.904 (XX/10/2009)- NOT YET RELEASED
   ECS P4M890T-M v2.0, Foxconn P4M800P7MB-RS2H, Haier A60-440256080BD,
   Lenovo S12, Mitac 8624 (w/ P4M890), MSI K8M Neo-V (broken pci id), 
   MSI P4M900M3-L, Packard Bell Lima (ASUS MBP5VDZ-NVM), Samsung NC20,
-  Twinhead M6, VIA Epia M700. VIA Openbook, Sharp PC-AE30J.
+  Twinhead H12V, Twinhead M6, VIA Epia M700. VIA Openbook, Sharp PC-AE30J.
 
 
 openchrome 0.2.903 (19/08/2008)
