@@ -683,13 +683,6 @@ ViaPanelGetIndex(ScrnInfoPtr pScrn, DisplayModePtr mode)
         }
     }
 
-    if ((mode->PrivSize != sizeof(struct ViaModePriv))
-        || (mode->Private != (void *)&ViaPanelPrivate)) {
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                   "ViaPanelGetIndex: Mode not supported by Panel.\n");
-        return FALSE;
-    }
-
     if (!ViaGetResolutionIndex(pScrn, mode)) {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Panel does not support this"
                    " resolution: %s\n", mode->name);
