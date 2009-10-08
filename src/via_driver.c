@@ -185,18 +185,18 @@ static SymTabRec VIAChipsets[] = {
 
 /* Mapping a PCI device ID to a chipset family identifier. */
 static PciChipsets VIAPciChipsets[] = {
-    {VIA_CLE266,   PCI_CHIP_CLE3122,   NULL},
-    {VIA_KM400,    PCI_CHIP_VT3205,    NULL},
-    {VIA_K8M800,   PCI_CHIP_VT3204,    NULL},
-    {VIA_PM800,    PCI_CHIP_VT3259,    NULL},
-    {VIA_VM800,    PCI_CHIP_VT3314,    NULL},
-    {VIA_K8M890,   PCI_CHIP_VT3336,    NULL},
-    {VIA_P4M900,   PCI_CHIP_VT3364,    NULL},
-    {VIA_CX700,    PCI_CHIP_VT3324,    NULL},
-    {VIA_P4M890,   PCI_CHIP_VT3327,    NULL},
-    {VIA_VX800,    PCI_CHIP_VT3353,    NULL},
-    {VIA_VX855,    PCI_CHIP_VT3409,    NULL},
-    {-1,           -1,                 NULL}
+    {VIA_CLE266,   PCI_CHIP_CLE3122,   VIA_RES_SHARED},
+    {VIA_KM400,    PCI_CHIP_VT3205,    VIA_RES_SHARED},
+    {VIA_K8M800,   PCI_CHIP_VT3204,    VIA_RES_SHARED},
+    {VIA_PM800,    PCI_CHIP_VT3259,    VIA_RES_SHARED},
+    {VIA_VM800,    PCI_CHIP_VT3314,    VIA_RES_SHARED},
+    {VIA_K8M890,   PCI_CHIP_VT3336,    VIA_RES_SHARED},
+    {VIA_P4M900,   PCI_CHIP_VT3364,    VIA_RES_SHARED},
+    {VIA_CX700,    PCI_CHIP_VT3324,    VIA_RES_SHARED},
+    {VIA_P4M890,   PCI_CHIP_VT3327,    VIA_RES_SHARED},
+    {VIA_VX800,    PCI_CHIP_VT3353,    VIA_RES_SHARED},
+    {VIA_VX855,    PCI_CHIP_VT3409,    VIA_RES_SHARED},
+    {-1,           -1,                 VIA_RES_UNDEF}
 };
 
 int gVIAEntityIndex = -1;

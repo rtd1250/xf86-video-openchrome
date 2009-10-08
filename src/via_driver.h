@@ -109,6 +109,14 @@
 
 #define VIA_VQ_SIZE             (256 * 1024)
 
+#if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 6 
+#define VIA_RES_SHARED RES_SHARED_VGA
+#define VIA_RES_UNDEF RES_UNDEFINED
+#else
+#define VIA_RES_SHARED NULL
+#define VIA_RES_UNDEF NULL
+#endif
+
 typedef struct {
     CARD8   SR08, SR0A, SR0F;
 
