@@ -185,6 +185,10 @@ Specifies which TV output to use.  The driver supports "S-Video",
 EPIA boards the composite-video port is shared with audio-out and
 is selected via a jumper.
 .TP
+.BI "Option \*qTVPort\*q  \*q" string \*q
+Specifies TV port.  The driver currently supports "DVP0", "DVP1", 
+"DFPHigh" and "DFPLow" ports.
+.TP
 .BI "Option \*qTVType\*q  \*q" string \*q
 Specifies TV output format.  The driver currently supports "NTSC" and
 "PAL" timings only.
