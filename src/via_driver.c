@@ -235,7 +235,8 @@ typedef enum
     OPTION_VBE_SAVERESTORE,
     OPTION_MAX_DRIMEM,
     OPTION_AGPMEM,
-    OPTION_DISABLE_XV_BW_CHECK
+    OPTION_DISABLE_XV_BW_CHECK,
+    OPTION_MODE_SWITCH_METHOD
 } VIAOpts;
 
 
@@ -272,6 +273,7 @@ static OptionInfoRec VIAOptions[] = {
     {OPTION_XV_DMA,              "NoXVDMA",          OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_VBE_SAVERESTORE,     "VbeSaveRestore",   OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_DISABLE_XV_BW_CHECK, "DisableXvBWCheck", OPTV_BOOLEAN, {0}, FALSE},
+    {OPTION_MODE_SWITCH_METHOD,  "ModeSwitchMethod", OPTV_ANYSTR,  {0}, FALSE},
     {OPTION_MAX_DRIMEM,          "MaxDRIMem",        OPTV_INTEGER, {0}, FALSE},
     {OPTION_AGPMEM,              "AGPMem",           OPTV_INTEGER, {0}, FALSE},
     {-1,                         NULL,               OPTV_NONE,    {0}, FALSE}
@@ -1064,6 +1066,38 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     if (xf86GetOptValInteger(VIAOptions, OPTION_VIDEORAM, &pScrn->videoRam))
         xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
                    "Setting amount of VideoRAM to %d kB\n", pScrn->videoRam);
+
+    if ((s = xf86GetOptValString(VIAOptions, OPTION_MODE_SWITCH_METHOD))) {
+        if (!xf86NameCmp(s, "legacy")) {
+            if (pVia->UseLegacyModeSwitch) {
+                xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+                           "Already using \"legacy\" as ModeSwitchMethod, "
+                           "did not force anything.\n");
+            }
+            else {
+                pVia->UseLegacyModeSwitch = TRUE;
+                xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+                           "Forced ModeSwitchMethod to \"legacy\".\n");
+            }
+        }
+        else if (!xf86NameCmp(s, "new")) {
+            if (pVia->UseLegacyModeSwitch) {
+                pVia->UseLegacyModeSwitch = FALSE;
+                xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+                           "Forced ModeSwitchMethod to \"new\".\n");
+            }
+            else {
+                xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+                           "Already using \"new\" as ModeSwitchMethod, "
+                           "did not force anything.\n");
+            }
+        } else {
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "\"%s\" is not a valid"
+                       "value for Option \"ModeSwitchMethod\".\n", s);
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                       "Valid options are \"legacy\" or \"new\".\n");
+        }
+    }
 
     /* When rotating, switch shadow framebuffer on and acceleration off. */
     if ((s = xf86GetOptValString(VIAOptions, OPTION_ROTATE))) {
