@@ -232,6 +232,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
 
     /*** VX855 ***/
     {"VIA VT8562C",                           VIA_VX855,   0x1106, 0x5122, VIA_DEVICE_CRT},
+    {"OLPC XO 1.5",                           VIA_VX855,   0x152D, 0x0833, VIA_DEVICE_LCD},
 
     /* keep this */
     {NULL,                                    VIA_UNKNOWN, 0x0000, 0x0000, VIA_DEVICE_NONE}
