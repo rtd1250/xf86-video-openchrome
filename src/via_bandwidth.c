@@ -401,20 +401,20 @@ ViaSetSecondaryFIFO(ScrnInfoPtr pScrn, DisplayModePtr mode)
             ViaCrtcMask(hwp, 0x94, 0x08, 0x7F); /* 32/4   = 8   = 0x08 */
             break;
         case VIA_K8M890:
-            /* depth location: {CR68,4,7},{CR94,7,7},{CR95,7,7} */
-            ViaCrtcMask(hwp, 0x68, 0xC0, 0xF0); /* 360/8-1 = 44  = 0x2C */
-            ViaCrtcMask(hwp, 0x94, 0x00, 0x80);
-            ViaCrtcMask(hwp, 0x95, 0x80, 0x80);
+            /* Display Queue Depth, location: {CR68,4,7},{CR94,7,7},{CR95,7,7} */
+            ViaCrtcMask(hwp, 0x68, 0xC0, 0xF0); /* 360/8-1 = 44  = 0x2C; 0x2C << 4 = 0xC0 */
+            ViaCrtcMask(hwp, 0x94, 0x00, 0x80); /* 0x2C << 3 = 0x00 */
+            ViaCrtcMask(hwp, 0x95, 0x80, 0x80); /* 0x2C << 2 = 0x80 */
 
-            /* location: {CR68,0,3},{CR95,4,6} */
+            /* Display Queue Read Threshold 1, location: {CR68,0,3},{CR95,4,6} */
             ViaCrtcMask(hwp, 0x68, 0x02, 0x0F); /* 328/4   = 82  = 0x52 */
             ViaCrtcMask(hwp, 0x95, 0x50, 0x70);
 
             /* location: {CR92,0,3},{CR95,0,2} */
             ViaCrtcMask(hwp, 0x92, 0x0A, 0x0F); /* 296/4   = 74  = 0x4A */
-            ViaCrtcMask(hwp, 0x95, 0x04, 0x07);
+            ViaCrtcMask(hwp, 0x95, 0x04, 0x07); /* 0x4A >> 4 = 0x04 */
 
-            /* location: {CR94,0,6} */
+            /* Display Expire Number Bits, location: {CR94,0,6} */
             ViaCrtcMask(hwp, 0x94, 0x1F, 0x7F); /* 124/4   = 31  = 0x1F */
             break;
         case VIA_P4M900:

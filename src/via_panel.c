@@ -171,12 +171,18 @@ ViaPanelScale(ScrnInfoPtr pScrn, int resWidth, int resHeight,
                      resWidth, resHeight, panelWidth, panelHeight));
 
     if (resWidth < panelWidth) {
-        /* FIXME: It is different for chipset < K8M800 */
-        horScalingFactor = ((resWidth - 1) * 4096) / (panelWidth - 1);
+        /* Load Horizontal Scaling Factor */
+        if (pVia->Chipset != VIA_CLE266 && pVia->Chipset != VIA_KM400) {
+            horScalingFactor = ((resWidth - 1) * 4096) / (panelWidth - 1);
+            
+            /* Horizontal scaling enabled */
+            cra2 = 0xC0;
+            cr9f = horScalingFactor & 0x0003;          /* HSCaleFactor[1:0] at CR9F[1:0] */
+	} else {
+            /* TODO: Need testing */
+            horScalingFactor = ((resWidth - 1) * 1024) / (panelWidth - 1);
+        }
 
-        /* Horizontal scaling enabled */
-        cra2 = 0xC0;
-        cr9f = horScalingFactor & 0x0003;          /* HSCaleFactor[1:0] at CR9F[1:0] */
         cr77 = (horScalingFactor & 0x03FC) >> 2;   /* HSCaleFactor[9:2] at CR77[7:0] */
         cr79 = (horScalingFactor & 0x0C00) >> 10;  /* HSCaleFactor[11:10] at CR79[5:4] */
         cr79 <<= 4;
@@ -184,11 +190,18 @@ ViaPanelScale(ScrnInfoPtr pScrn, int resWidth, int resHeight,
     }
 
     if (resHeight < panelHeight) {
-        verScalingFactor = ((resHeight - 1) * 2048) / (panelHeight - 1);
+        /* Load Vertical Scaling Factor */
+        if (pVia->Chipset != VIA_CLE266 && pVia->Chipset != VIA_KM400) {
+            verScalingFactor = ((resHeight - 1) * 2048) / (panelHeight - 1);
 
-        /* Vertical scaling enabled */
-        cra2 |= 0x08;
-        cr79 |= ((verScalingFactor & 0x0001) << 3);       /* VSCaleFactor[0] at CR79[3] */
+            /* Vertical scaling enabled */
+            cra2 |= 0x08;
+            cr79 |= ((verScalingFactor & 0x0001) << 3);       /* VSCaleFactor[0] at CR79[3] */
+        } else {
+            /* TODO: Need testing */
+            verScalingFactor = ((resHeight - 1) * 1024) / (panelHeight - 1);
+        }
+
         cr78 |= (verScalingFactor & 0x01FE) >> 1;         /* VSCaleFactor[8:1] at CR78[7:0] */
         cr79 |= ((verScalingFactor & 0x0600) >> 9) << 6;  /* VSCaleFactor[10:9] at CR79[7:6] */
         scaling = TRUE;
@@ -203,12 +216,18 @@ ViaPanelScale(ScrnInfoPtr pScrn, int resWidth, int resHeight,
         ViaCrtcMask(hwp, 0x77, cr77, 0xFF);
         ViaCrtcMask(hwp, 0x78, cr78, 0xFF);
         ViaCrtcMask(hwp, 0x79, cr79, 0xF8);
-        ViaCrtcMask(hwp, 0x9F, cr9f, 0x03);
+        if (pVia->Chipset != VIA_CLE266 && pVia->Chipset != VIA_KM400) {
+            ViaCrtcMask(hwp, 0x9F, cr9f, 0x03);
+        }
         ViaCrtcMask(hwp, 0x79, 0x03, 0x03);
-    } else
+    } else {
+        /*  Disable panel scale */
         ViaCrtcMask(hwp, 0x79, 0x00, 0x01);
-
-    ViaCrtcMask(hwp, 0xA2, cra2, 0xC8);
+    }
+    
+    if (pVia->Chipset != VIA_CLE266 && pVia->Chipset != VIA_KM400) {
+        ViaCrtcMask(hwp, 0xA2, cra2, 0xC8);
+    }
 
     /* Horizontal scaling selection: interpolation */
     // ViaCrtcMask(hwp, 0x79, 0x02, 0x02);
@@ -233,14 +252,14 @@ ViaPanelGetNativeDisplayMode(ScrnInfoPtr pScrn)
 
     if (panelMode->Width && panelMode->Height) {
 
-        /* TODO: fix refresh rate and check malloc */
+        /* TODO: fix refresh rate */
         DisplayModePtr p = malloc( sizeof(DisplayModeRec) ) ;
-        memset(p, 0, sizeof(DisplayModeRec));
-
-        float refresh = 60.0f ;
-
-        /* The following code is borrowed from xf86SetModeCrtc. */
         if (p) {
+            memset(p, 0, sizeof(DisplayModeRec));
+
+            float refresh = 60.0f ;
+
+            /* The following code is borrowed from xf86SetModeCrtc. */
             viaTimingCvt(p, panelMode->Width, panelMode->Height, refresh, FALSE, TRUE);
             p->CrtcHDisplay = p->HDisplay;
             p->CrtcHSyncStart = p->HSyncStart;
@@ -256,9 +275,13 @@ ViaPanelGetNativeDisplayMode(ScrnInfoPtr pScrn)
             p->CrtcVBlankEnd = max(p->CrtcVSyncEnd, p->CrtcVTotal);
             p->CrtcHBlankStart = min(p->CrtcHSyncStart, p->CrtcHDisplay);
             p->CrtcHBlankEnd = max(p->CrtcHSyncEnd, p->CrtcHTotal);
-
+            
+            pVia->pBIOSInfo->Panel->NativeDisplayMode = p;
+        } else {
+            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                     "Out of memory. Size: %d bytes\n", sizeof(DisplayModeRec));
         }
-        pVia->pBIOSInfo->Panel->NativeDisplayMode = p;
+        
     } else {
         xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
                    "Invalid panel dimension (%dx%d)\n", panelMode->Width,

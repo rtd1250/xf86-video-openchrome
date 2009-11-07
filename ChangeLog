@@ -1,3 +1,11 @@
+2009-11-07  Bartosz Kosiorek  <gang65@poczta.onet.pl>
+
+	Add more comments to ViaSetSecondaryFIFO, add panel scale support for 
+ 	CLE266 and KM400, fix bug with malloc.
+
+	* src/via_bandwidth.c: (ViaSetSecondaryFIFO):
+	* src/via_panel.c: (ViaPanelScale), (ViaPanelGetNativeDisplayMode):
+
 2009-09-26  Bartosz Kosiorek  <gang65@poczta.onet.pl>
 
 	Save/restore ECK Clock Synthesizer
