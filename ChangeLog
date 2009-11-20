@@ -1,3 +1,11 @@
+2009-11-20  Bartosz Kosiorek  <gang65@poczta.onet.pl>
+
+	Enabled new mode switch for PM800 chipset, 
+        to resolve many bugs with resolution detecting and changing
+        (eg. switching to console)
+
+	* src/via_driver.c: (VIASetupDefaultOptions), (VIAPreInit):
+
 2009-11-07  Bartosz Kosiorek  <gang65@poczta.onet.pl>
 
 	Add more comments to ViaSetSecondaryFIFO, add panel scale support for 

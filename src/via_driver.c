@@ -178,8 +178,8 @@ static SymTabRec VIAChipsets[] = {
     {VIA_P4M900,   "P4M900/VN896/CN896"},
     {VIA_CX700,    "CX700/VX700"},
     {VIA_P4M890,   "P4M890"},
-    {VIA_VX800,    "VX800"},
-    {VIA_VX855,    "VX855"},
+    {VIA_VX800,    "VX800/VX820"},
+    {VIA_VX855,    "VX855/VX875"},
     {-1,            NULL }
 };
 
@@ -713,8 +713,9 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
             pVia->UseLegacyModeSwitch = TRUE;
             break;
         case VIA_PM800:
+            /* Use new mode switch to resolve many resolution and display bugs (switch to console)*/
+            /* FIXME The video playing (XV) is not working correctly after turn on new mode switch */
             pVia->VideoEngine = VIDEO_ENGINE_CME;
-            pVia->UseLegacyModeSwitch = TRUE;
             break;
         case VIA_VM800:
             pVia->UseLegacyModeSwitch = TRUE;
@@ -1561,9 +1562,8 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 
     if (pBIOSInfo->Panel->IsActive &&
         ((pVia->Chipset == VIA_K8M800) ||
-         (pVia->Chipset == VIA_PM800) ||
          (pVia->Chipset == VIA_VM800))) {
-        xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Panel on K8M800, PM800 and "
+        xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Panel on K8M800 and "
                    "VM800 is currently not supported.\n");
         xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
                    "Using VBE to set modes to work around this.\n");
@@ -1621,7 +1621,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
          *
          * CLE266A: primary AdjustFrame can use only 24 bits, so we are limited
          * to 12x11 bits; 4080x2048 (~2:1), 3344x2508 (4:3), or 2896x2896 (1:1).
-         * Test CLE266Cx, KM400, KM400A, K8M800, PM800, CN400 please.
+         * TODO Test CLE266Cx, KM400, KM400A, K8M800, CN400 please.
          *
          * We should be able to limit the memory available for a mode to 32 MB,
          * but xf86ValidateModes (or miScanLineWidth) fails to catch this
@@ -1629,13 +1629,14 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
          */
 
         /* Select valid modes from those available. */
-        i = xf86ValidateModes(pScrn, pScrn->monitor->Modes,     /* availModes */
-                              pScrn->display->modes,    /* modeNames */
-                              clockRanges,      /* list of clock ranges */
+        i = xf86ValidateModes(pScrn, 
+			      pScrn->monitor->Modes,     /* List of modes available for the monitor */
+                              pScrn->display->modes,     /* List of mode names that the screen is requesting */
+                              clockRanges,               /* list of clock ranges */
                               NULL,     /* list of line pitches */
                               256,      /* minimum line pitch */
                               3344,     /* maximum line pitch */
-                              32 * 8,   /* pitch inc (bits) */
+                              16 * 8,   /* pitch increment (in bits), we just want 16 bytes alignment */
                               128,      /* min height */
                               2508,     /* max height */
                               pScrn->display->virtualX, /* virtual width */
@@ -1650,6 +1651,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             return FALSE;
         }
 
+        /* This function deletes modes in the modes field of the ScrnInfoRec that have been marked as invalid. */
         xf86PruneDriverModes(pScrn);
 
         if (i == 0 || pScrn->modes == NULL) {
@@ -1662,9 +1664,17 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     /* Set up screen parameters. */
     pVia->Bpp = pScrn->bitsPerPixel >> 3;
     pVia->Bpl = pScrn->displayWidth * pVia->Bpp;
+
+    /* This function fills in the Crtc fields for all the modes in the modes field of the ScrnInfoRec. */
     xf86SetCrtcForModes(pScrn, INTERLACE_HALVE_V);
+
+    /* Set the current mode to the first in the list */
     pScrn->currentMode = pScrn->modes;
+
+    /* Print the list of modes being used */    
     xf86PrintModes(pScrn);
+
+    /* Set display resolution */
     xf86SetDpi(pScrn, 0, 0);
 
 #ifdef USE_FB
