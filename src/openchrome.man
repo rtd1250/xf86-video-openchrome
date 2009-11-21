@@ -1,4 +1,3 @@
-.\" Shorthand for double quote that works everywhere,
 .\" also within other double quotes:
 .ds q \N'34'
 .TH OPENCHROME __drivermansuffix__ __vendorversion__
@@ -159,9 +158,16 @@ Specifies the size (width x height) of the LCD panel attached to the
 system.  The sizes 640x480, 800x600, 1024x768, 1280x1024, and 1400x1050
 are supported.
 .TP
+.BI "Option \*qRotationType\*q  \*q" string \*q
+Enabled rotation by using RandR. The driver only support unaccelerated
+RandR rotations "SWRandR". Hardware rotations "HWRandR" is currently 
+unimplemented.
+.TP
 .BI "Option \*qRotate\*q  \*q" string \*q
 Rotates the display either clockwise ("CW"), counterclockwise ("CCW") and
-upside-down ("UD"). Rotation is only supported unaccelerated.
+upside-down ("UD"). Rotation is only supported unaccelerated.  Adding 
+option "Rotate", enables RandR rotation feature.  The RandR allows 
+clients to dynamically change X screens.
 .TP
 .BI "Option \*qShadowFB\*q  \*q" boolean \*q
 Enables the use of a shadow frame buffer.  This is required when

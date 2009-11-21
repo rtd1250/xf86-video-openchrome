@@ -1,3 +1,11 @@
+2009-11-21  Bartosz Kosiorek  <gang65@poczta.onet.pl>
+
+	Add option to enable unaccelerated RandR rotation ("SWRandR").
+        The accelerated option "HWRandR" is currently not implemented.
+
+	* src/openchrome.man:
+	* src/via_driver.c: (VIAPreInit):
+
 2009-11-20  Bartosz Kosiorek  <gang65@poczta.onet.pl>
 
 	Enabled new mode switch for PM800 chipset, 

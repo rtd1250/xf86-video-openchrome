@@ -215,6 +215,7 @@ typedef enum
     OPTION_EXA_SCRATCH_SIZE,
     OPTION_SWCURSOR,
     OPTION_SHADOW_FB,
+    OPTION_ROTATION_TYPE,
     OPTION_ROTATE,
     OPTION_VIDEORAM,
     OPTION_ACTIVEDEVICE,
@@ -253,6 +254,7 @@ static OptionInfoRec VIAOptions[] = {
     {OPTION_EXA_SCRATCH_SIZE,    "ExaScratchSize",   OPTV_INTEGER, {0}, FALSE},
     {OPTION_SWCURSOR,            "SWCursor",         OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_SHADOW_FB,           "ShadowFB",         OPTV_BOOLEAN, {0}, FALSE},
+    {OPTION_ROTATION_TYPE,       "RotationType",     OPTV_ANYSTR,  {0}, FALSE},
     {OPTION_ROTATE,              "Rotate",           OPTV_ANYSTR,  {0}, FALSE},
     {OPTION_VIDEORAM,            "VideoRAM",         OPTV_INTEGER, {0}, FALSE},
     {OPTION_ACTIVEDEVICE,        "ActiveDevice",     OPTV_ANYSTR,  {0}, FALSE},
@@ -1099,6 +1101,31 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
                        "Valid options are \"legacy\" or \"new\".\n");
         }
     }
+
+    /* When rotating, switch shadow framebuffer on and acceleration off. */
+    if ((s = xf86GetOptValString(VIAOptions, OPTION_ROTATION_TYPE))) {
+        if (!xf86NameCmp(s, "SWRandR")) {
+            pVia->shadowFB = TRUE;
+            pVia->NoAccel = TRUE;
+            pVia->RandRRotation = TRUE;
+            pVia->rotate = RR_Rotate_0;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "Rotating screen "
+                       "RandR enabled, acceleration disabled\n");
+        } else if (!xf86NameCmp(s, "HWRandR")) {
+            pVia->shadowFB = TRUE;
+            pVia->NoAccel = TRUE;
+            pVia->RandRRotation = TRUE;
+            pVia->rotate = RR_Rotate_0;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "Hardware accelerated "
+                       "rotating screen is not implemented. Using SW RandR.\n");
+        } else {
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "\"%s\" is not a valid"
+                       "value for Option \"RotationType\".\n", s);
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                       "Valid options are \"SWRandR\" and \"HWRandR\".\n");
+        }
+    }
+
 
     /* When rotating, switch shadow framebuffer on and acceleration off. */
     if ((s = xf86GetOptValString(VIAOptions, OPTION_ROTATE))) {
