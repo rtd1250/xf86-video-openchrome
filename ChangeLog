@@ -1,3 +1,9 @@
+2009-12-04  Bartosz Kosiorek  <gang65@poczta.onet.pl>
+
+	Enable new mode switch for VM800 chipsets
+
+	* src/via_driver.c: (VIASetupDefaultOptions):
+
 2009-11-21  Bartosz Kosiorek  <gang65@poczta.onet.pl>
 
 	Add option to enable unaccelerated RandR rotation ("SWRandR").

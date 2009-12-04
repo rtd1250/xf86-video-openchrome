@@ -715,12 +715,14 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
             pVia->UseLegacyModeSwitch = TRUE;
             break;
         case VIA_PM800:
-            /* Use new mode switch to resolve many resolution and display bugs (switch to console)*/
+            /* Use new mode switch to resolve many resolution and display bugs (switch to console) */
             /* FIXME The video playing (XV) is not working correctly after turn on new mode switch */
             pVia->VideoEngine = VIDEO_ENGINE_CME;
             break;
         case VIA_VM800:
-            pVia->UseLegacyModeSwitch = TRUE;
+            /* New mode switch resolve bug with gamma set #282 */
+            /* and with Xv after hibernate #240                */
+            /* FIXME Add panel support for this chipset        */
             break;
         case VIA_K8M890:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
