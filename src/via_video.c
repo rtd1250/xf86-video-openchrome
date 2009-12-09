@@ -561,7 +561,7 @@ viaInitVideo(ScreenPtr pScreen)
     XF86VideoAdaptorPtr *adaptors, *newAdaptors;
     int num_adaptors, num_new;
 
-    DBG_DD(ErrorF(" via_video.c : viaInitVideo : \n"));
+    DBG_DD(ErrorF(" via_video.c : viaInitVideo, Screen[%d]\n", pScrn->scrnIndex));
 
     allAdaptors = NULL;
     newAdaptors = NULL;
@@ -1500,6 +1500,7 @@ viaQueryImageAttributes(ScrnInfoPtr pScrn,
 
     DBG_DD(ErrorF(" via_video.c : viaQueryImageAttributes : FourCC=0x%x, ",
             id));
+    DBG_DD(ErrorF(" via_video.c : Screen[%d],  w=%d, h=%d\n", pScrn->scrnIndex, *w, *h));
 
     if ((!w) || (!h))
         return 0;
