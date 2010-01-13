@@ -309,6 +309,7 @@ VIASetup(pointer module, pointer opts, int *errmaj, int *errmin)
 {
     static Bool setupDone = FALSE;
 
+    /* Only be loaded once */
     if (!setupDone) {
         setupDone = TRUE;
         xf86AddDriver(&VIA, module,
@@ -341,6 +342,7 @@ VIAGetRec(ScrnInfoPtr pScrn)
     if (pScrn->driverPrivate)
         return TRUE;
 
+    /* allocate VIARec */
     pScrn->driverPrivate = xnfcalloc(sizeof(VIARec), 1);
     VIAPtr pVia = ((VIARec *) (pScrn->driverPrivate));
 
@@ -654,6 +656,12 @@ VIAProbeDDC(ScrnInfoPtr pScrn, int index)
     vbeInfoPtr pVbe;
 
     if (xf86LoadSubModule(pScrn, "vbe")) {
+        /* FIXME This line should be replaced to:
+
+           pVbe = VBEExtendedInit(NULL, index, 0);
+
+           for XF86 version > 4.2.99
+        */
         pVbe = VBEInit(NULL, index);
         ConfiguredMonitor = vbeDoEDID(pVbe, NULL);
         vbeFree(pVbe);
@@ -666,7 +674,7 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
     VIAPtr pVia = VIAPTR(pScrn);
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIASetupDefaultOptions\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIASetupDefaultOptions - Setting up default chipset options.\n"));
 
     pVia->shadowFB = FALSE;
     pVia->NoAccel = FALSE;
@@ -690,6 +698,9 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
 #ifdef HAVE_DEBUG
     pVia->PrintVGARegs = FALSE;
 #endif
+
+    /* Disable vertical interpolation because the size of */
+    /* line buffer (limited to 800) is too small to do interpolation. */
     pVia->swov.maxWInterp = 800;
     pVia->swov.maxHInterp = 600;
     pVia->useLegacyVBE = TRUE;
@@ -1055,18 +1066,12 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         xf86DrvMsg(pScrn->scrnIndex, from,
                    "Probed amount of VideoRAM = %d kB\n", pScrn->videoRam);
 
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-               "Setting up default chipset options.\n");
     if (!VIASetupDefaultOptions(pScrn)) {
         VIAFreeRec(pScrn);
         return FALSE;
     }
 
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Reading config file...\n");
     xf86ProcessOptions(pScrn->scrnIndex, pScrn->options, VIAOptions);
-
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-               "Starting to parse config file options...\n");
 
     if (xf86GetOptValInteger(VIAOptions, OPTION_VIDEORAM, &pScrn->videoRam))
         xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
@@ -1528,6 +1533,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         }
     }
 
+    /* Initialize the colormap */
     Gamma zeros = { 0.0, 0.0, 0.0 };
     if (!xf86SetGamma(pScrn, zeros)) {
         VIAFreeRec(pScrn);

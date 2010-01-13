@@ -1,3 +1,4 @@
+.\" Shorthand for double quote that works everywhere,
 .\" also within other double quotes:
 .ds q \N'34'
 .TH OPENCHROME __drivermansuffix__ __vendorversion__
@@ -58,7 +59,7 @@ are supported:
 .BI "Option \*qAccelMethod\*q  \*q" string \*q
 The driver supports "XAA" and "EXA" acceleration methods.  The default
 method is XAA, since EXA is still experimental.  Contrary to XAA, EXA
-implements acceleration for screen uploads and downlads (if DRI is
+implements acceleration for screen uploads and downloads (if DRI is
 enabled) and for the Render/Composite extension.
 .TP
 .BI "Option \*qActiveDevice\*q  \*q" string \*q
@@ -80,7 +81,7 @@ EXA scratch area in AGP space, it will be allocated from VRAM.  If there is
 no room for DRI textures, they will be allocated from the DRI part of
 VRAM (see the option "MaxDRIMem").  The default amount of AGP is
 32768 kB.  Note that the AGP aperture set in the BIOS must be able
-to accomodate the amount of AGP memory specified here.  Otherwise no
+to accommodate the amount of AGP memory specified here.  Otherwise no
 AGP memory will be available.  It is safe to set a very large AGP
 aperture in the BIOS.
 .TP
