@@ -130,6 +130,7 @@ typedef struct {
     CARD8   SR4A, SR4B, SR4C;
 
     /*   extended CRTC registers */
+    CARD8   CR0C, CR0D;
     CARD8   CR13, CR30, CR31, CR32, CR33, CR34, CR35, CR36;
     CARD8   CR37, CR38, CR39, CR3A, CR40, CR41, CR42, CR43;
     CARD8   CR44, CR45, CR46, CR47, CR48, CR49, CR4A;

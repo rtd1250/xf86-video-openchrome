@@ -1,3 +1,13 @@
+2010-01-24  Bartosz Kosiorek  <gang65@poczta.onet.pl>
+
+	Fix starting address restore and save (initial 64-bit support)
+
+	* src/via_crtc.c: (ViaFirstCRTCSetMode),
+	(ViaFirstCRTCSetStartingAddress):
+	* src/via_dri.c: (VIADRIAgpInit):
+	* src/via_driver.c: (VIASave), (VIARestore):
+	* src/via_driver.h:
+
 2009-12-04  Bartosz Kosiorek  <gang65@poczta.onet.pl>
 
 	Enable new mode switch for VM800 chipsets

@@ -1980,7 +1980,9 @@ VIASave(ScrnInfoPtr pScrn)
         Regs->SR17 = hwp->readSeq(hwp, 0x17);
         Regs->SR18 = hwp->readSeq(hwp, 0x18);
         Regs->SR19 = hwp->readSeq(hwp, 0x19);
+        /* PCI Bus Control */
         Regs->SR1A = hwp->readSeq(hwp, 0x1A);
+
         Regs->SR1B = hwp->readSeq(hwp, 0x1B);
         Regs->SR1C = hwp->readSeq(hwp, 0x1C);
         Regs->SR1D = hwp->readSeq(hwp, 0x1D);
@@ -2030,11 +2032,24 @@ VIASave(ScrnInfoPtr pScrn)
 
         Regs->CR32 = hwp->readCrtc(hwp, 0x32);
         Regs->CR33 = hwp->readCrtc(hwp, 0x33);
-        Regs->CR34 = hwp->readCrtc(hwp, 0x34);
+
         Regs->CR35 = hwp->readCrtc(hwp, 0x35);
         Regs->CR36 = hwp->readCrtc(hwp, 0x36);
 
+
+
+        /* Starting Address */
+        /* Start Address High */
+        Regs->CR0C = hwp->readCrtc(hwp, 0x0C);
+        /* Start Address Low */
+        Regs->CR0D = hwp->readCrtc(hwp, 0x0D);
+        /* Starting Address Overflow Bits[28:24] */
         Regs->CR48 = hwp->readCrtc(hwp, 0x48);
+        /* CR34 are fire bits. Must be writed after CR0C CR0D CR48.  */
+        /* Starting Address Overflow Bits[23:16] */
+        Regs->CR34 = hwp->readCrtc(hwp, 0x34);
+
+
         Regs->CR49 = hwp->readCrtc(hwp, 0x49);
 
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "TVSave...\n"));
@@ -2172,14 +2187,23 @@ VIARestore(ScrnInfoPtr pScrn)
     hwp->writeCrtc(hwp, 0x32, Regs->CR32);
     /* HSYNCH Adjuster */
     hwp->writeCrtc(hwp, 0x33, Regs->CR33);
-    /* Starting Address Overflow */
-    hwp->writeCrtc(hwp, 0x34, Regs->CR34);
     /* Extended Overflow */
     hwp->writeCrtc(hwp, 0x35, Regs->CR35);
     /*Power Management 3 (Monitor Control) */
     hwp->writeCrtc(hwp, 0x36, Regs->CR36);
 
+    /* Starting Address */
+    /* Start Address High */
+    hwp->writeCrtc(hwp, 0x0C, Regs->CR0C);
+    /* Start Address Low */
+    hwp->writeCrtc(hwp, 0x0D, Regs->CR0D);
+    /* Starting Address Overflow Bits[28:24] */
     hwp->writeCrtc(hwp, 0x48, Regs->CR48);
+    /* CR34 are fire bits. Must be writed after CR0C CR0D CR48.  */
+    /* Starting Address Overflow Bits[23:16] */
+    hwp->writeCrtc(hwp, 0x34, Regs->CR34);
+    
+
     hwp->writeCrtc(hwp, 0x49, Regs->CR49);
 
     /* Restore LCD control registers. */
