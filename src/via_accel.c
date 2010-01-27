@@ -1210,7 +1210,8 @@ viaInitXAA(ScreenPtr pScreen)
 
     /* General acceleration flags. */
     xaaptr->Flags = (PIXMAP_CACHE |
-                     OFFSCREEN_PIXMAPS | LINEAR_FRAMEBUFFER |
+                     OFFSCREEN_PIXMAPS | 
+                     LINEAR_FRAMEBUFFER |
                      MICROSOFT_ZERO_LINE_BIAS | 0);
 
     if (pScrn->bitsPerPixel == 8)
@@ -1228,14 +1229,17 @@ viaInitXAA(ScreenPtr pScreen)
 
     xaaptr->Sync = viaAccelSync;
 
+    /* ScreenToScreen copies */
     xaaptr->SetupForScreenToScreenCopy = viaSetupForScreenToScreenCopy;
     xaaptr->SubsequentScreenToScreenCopy = viaSubsequentScreenToScreenCopy;
     xaaptr->ScreenToScreenCopyFlags = NO_PLANEMASK | ROP_NEEDS_SOURCE;
 
+    /* Solid filled rectangles */
     xaaptr->SetupForSolidFill = viaSetupForSolidFill;
     xaaptr->SubsequentSolidFillRect = viaSubsequentSolidFillRect;
     xaaptr->SolidFillFlags = NO_PLANEMASK | ROP_NEEDS_SOURCE;
 
+    /* Mono 8x8 pattern fills */
     xaaptr->SetupForMono8x8PatternFill = viaSetupForMono8x8PatternFill;
     xaaptr->SubsequentMono8x8PatternFillRect =
             viaSubsequentMono8x8PatternFillRect;
@@ -1244,6 +1248,7 @@ viaInitXAA(ScreenPtr pScreen)
                                        HARDWARE_PATTERN_PROGRAMMED_ORIGIN |
                                        BIT_ORDER_IN_BYTE_MSBFIRST | 0);
 
+    /* Color 8x8 pattern fills */
     xaaptr->SetupForColor8x8PatternFill = viaSetupForColor8x8PatternFill;
     xaaptr->SubsequentColor8x8PatternFillRect =
             viaSubsequentColor8x8PatternFillRect;
@@ -1252,12 +1257,14 @@ viaInitXAA(ScreenPtr pScreen)
                                         HARDWARE_PATTERN_PROGRAMMED_BITS |
                                         HARDWARE_PATTERN_PROGRAMMED_ORIGIN | 0);
 
+    /* Solid lines */
     xaaptr->SetupForSolidLine = viaSetupForSolidLine;
     xaaptr->SubsequentSolidTwoPointLine = viaSubsequentSolidTwoPointLine;
     xaaptr->SubsequentSolidHorVertLine = viaSubsequentSolidHorVertLine;
     xaaptr->SolidBresenhamLineErrorTermBits = 14;
     xaaptr->SolidLineFlags = NO_PLANEMASK | ROP_NEEDS_SOURCE;
 
+    /* Dashed line */
     xaaptr->SetupForDashedLine = viaSetupForDashedLine;
     xaaptr->SubsequentDashedTwoPointLine = viaSubsequentDashedTwoPointLine;
     xaaptr->DashPatternMaxLength = 8;
@@ -1266,35 +1273,42 @@ viaInitXAA(ScreenPtr pScreen)
                                LINE_PATTERN_POWER_OF_2_ONLY |
                                LINE_PATTERN_MSBFIRST_LSBJUSTIFIED | 0);
 
+    /* CPU to Screen color expansion */
     xaaptr->ScanlineCPUToScreenColorExpandFillFlags = NO_PLANEMASK |
-            CPU_TRANSFER_PAD_DWORD |
-            SCANLINE_PAD_DWORD |
-            BIT_ORDER_IN_BYTE_MSBFIRST |
-            LEFT_EDGE_CLIPPING | ROP_NEEDS_SOURCE | 0;
+           				 	CPU_TRANSFER_PAD_DWORD |
+						SCANLINE_PAD_DWORD |
+            					BIT_ORDER_IN_BYTE_MSBFIRST |
+            					LEFT_EDGE_CLIPPING | 
+            					ROP_NEEDS_SOURCE | 0;
 
     xaaptr->SetupForScanlineCPUToScreenColorExpandFill =
             viaSetupForCPUToScreenColorExpandFill;
     xaaptr->SubsequentScanlineCPUToScreenColorExpandFill =
             viaSubsequentScanlineCPUToScreenColorExpandFill;
     xaaptr->ColorExpandBase = pVia->BltBase;
-    xaaptr->ColorExpandRange = VIA_MMIO_BLTSIZE;
+    if (pVia->Chipset == VIA_VX800 || pVia->Chipset == VIA_VX855)
+        xaaptr->ColorExpandRange = VIA_MMIO_BLTSIZE;
+    else
+        xaaptr->ColorExpandRange = (64 * 1024);
 
+    /* ImageWrite */
     xaaptr->ImageWriteFlags = (NO_PLANEMASK |
                                CPU_TRANSFER_PAD_DWORD |
                                SCANLINE_PAD_DWORD |
                                BIT_ORDER_IN_BYTE_MSBFIRST |
-                               LEFT_EDGE_CLIPPING | ROP_NEEDS_SOURCE | 0);
+                               LEFT_EDGE_CLIPPING | 
+			       ROP_NEEDS_SOURCE | 0);
                                // SYNC_AFTER_IMAGE_WRITE | 0);
 
     /*
      * Most Unichromes are much faster using processor-to-framebuffer writes
      * than when using the 2D engine for this.
-     * test with x11perf -shmput500!
+     * test with "x11perf -shmput500"
+     * Example: K8M890 chipset; with GPU=86.3/sec; without GPU=132.0/sec
+     * TODO Check speed for other chipsets
      */
 
     switch (pVia->Chipset) {
-        case VIA_K8M800:
-        case VIA_K8M890:
         case VIA_P4M900:
         case VIA_VX800:
         case VIA_VX855:

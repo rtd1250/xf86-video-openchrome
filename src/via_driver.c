@@ -2024,8 +2024,6 @@ VIASave(ScrnInfoPtr pScrn)
                 Regs->SR4C = hwp->readSeq(hwp, 0x4C);
                 break;
         }
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-              "Non-Primary Adapter! saving VGA_SR_MODE only !!\n"));
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Crtc...\n"));
 
         Regs->CR13 = hwp->readCrtc(hwp, 0x13);
@@ -2056,21 +2054,26 @@ VIASave(ScrnInfoPtr pScrn)
         if (pBIOSInfo->TVI2CDev)
             ViaTVSave(pScrn);
 
-        /* Save LCD control registers. */
+        /* Save LCD control registers (from CR 0x50 to 0x93). */
         for (i = 0; i < 68; i++)
             Regs->CRTCRegs[i] = hwp->readCrtc(hwp, i + 0x50);
 
         if (pVia->Chipset != VIA_CLE266 && pVia->Chipset != VIA_KM400) {
-
-            Regs->CRA0 = hwp->readCrtc(hwp, 0xA0);
-            Regs->CRA1 = hwp->readCrtc(hwp, 0xA1);
-            Regs->CRA2 = hwp->readCrtc(hwp, 0xA2);
-
+            /* LVDS Channel 2 Function Select 0 / DVI Function Select */ 
             Regs->CR97 = hwp->readCrtc(hwp, 0x97);
+            /* LVDS Channel 1 Function Select 0 */
             Regs->CR99 = hwp->readCrtc(hwp, 0x99);
+            /* Digital Video Port 1 Function Select 0 */
             Regs->CR9B = hwp->readCrtc(hwp, 0x9B);
+            /* Power Now Control 4 */
             Regs->CR9F = hwp->readCrtc(hwp, 0x9F);
 
+            /* Horizontal Scaling Initial Value */
+            Regs->CRA0 = hwp->readCrtc(hwp, 0xA0);
+            /* Vertical Scaling Initial Value */
+            Regs->CRA1 = hwp->readCrtc(hwp, 0xA1);
+            /* Scaling Enable Bit */
+            Regs->CRA2 = hwp->readCrtc(hwp, 0xA2);
         }
 
         /* Save TMDS status */
@@ -2158,10 +2161,18 @@ VIARestore(ScrnInfoPtr pScrn)
     hwp->writeSeq(hwp, 0x45, Regs->SR45);
     hwp->writeSeq(hwp, 0x46, Regs->SR46);
 
+    /* Reset VCK PLL */
+    hwp->writeSeq(hwp, 0x40, hwp->readSeq(hwp, 0x40) | 0x02); /* Set SR40[1] to 1 */
+    hwp->writeSeq(hwp, 0x40, hwp->readSeq(hwp, 0x40) & 0xFD); /* Set SR40[1] to 0 */
+
     /* ECK Clock Synthesizer: */
     hwp->writeSeq(hwp, 0x47, Regs->SR47);
     hwp->writeSeq(hwp, 0x48, Regs->SR48);
     hwp->writeSeq(hwp, 0x49, Regs->SR49);
+
+    /* Reset ECK PLL */
+    hwp->writeSeq(hwp, 0x40, hwp->readSeq(hwp, 0x40) | 0x01); /* Set SR40[0] to 1 */
+    hwp->writeSeq(hwp, 0x40, hwp->readSeq(hwp, 0x40) & 0xFE); /* Set SR40[0] to 0 */
 
     switch (pVia->Chipset) {
         case VIA_CLE266:
@@ -2172,6 +2183,10 @@ VIARestore(ScrnInfoPtr pScrn)
             hwp->writeSeq(hwp, 0x4A, Regs->SR4A);
             hwp->writeSeq(hwp, 0x4B, Regs->SR4B);
             hwp->writeSeq(hwp, 0x4C, Regs->SR4C);
+
+            /* Reset LCK PLL */
+            hwp->writeSeq(hwp, 0x40, hwp->readSeq(hwp, 0x40) | 0x04); /* Set SR40[2] to 1 */
+            hwp->writeSeq(hwp, 0x40, hwp->readSeq(hwp, 0x40) & 0xFB); /* Set SR40[2] to 0 */
             break;
     }
 
