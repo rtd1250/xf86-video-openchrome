@@ -362,22 +362,22 @@ Bool
 ViaPanelGetSizeFromEDID(ScrnInfoPtr pScrn, xf86MonPtr pMon,
                         int *width, int *height)
 {
-    int i, max = 0, vsize;
+    int i, max_hsize = 0, vsize = 0;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAGetPanelSizeFromEDID\n"));
 
     /* !!! Why are we not checking VESA modes? */
 
     /* checking standard timings */
-    for (i = 0; i < 8; i++)
+    for (i = 0; i < STD_TIMINGS; i++)
         if ((pMon->timings2[i].hsize > 256)
-            && (pMon->timings2[i].hsize > max)) {
-            max = pMon->timings2[i].hsize;
+            && (pMon->timings2[i].hsize > max_hsize)) {
+            max_hsize = pMon->timings2[i].hsize;
             vsize = pMon->timings2[i].vsize;
         }
 
-    if (max != 0) {
-        *width = max;
+    if (max_hsize != 0) {
+        *width = max_hsize;
         *height = vsize;
         return TRUE;
     }
@@ -392,14 +392,14 @@ ViaPanelGetSizeFromEDID(ScrnInfoPtr pScrn, xf86MonPtr pMon,
             struct detailed_timings timing = pMon->det_mon[i].section.d_timings;
 
             /* ignore v_active for now */
-            if ((timing.clock > 15000000) && (timing.h_active > max)) {
-                max = timing.h_active;
+            if ((timing.clock > 15000000) && (timing.h_active > max_hsize)) {
+                max_hsize = timing.h_active;
                 vsize = timing.v_active;
             }
         }
 
-    if (max != 0) {
-        *width = max;
+    if (max_hsize != 0) {
+        *width = max_hsize;
         *height = vsize;
         return TRUE;
     }

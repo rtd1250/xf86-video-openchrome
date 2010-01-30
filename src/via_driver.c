@@ -459,7 +459,6 @@ via_pci_probe(DriverPtr driver, int entity_num,
 {
     ScrnInfoPtr scrn = NULL;
     EntityInfoPtr entity;
-    DevUnion *private;
 
     scrn = xf86ConfigPciEntity(scrn, 0, entity_num, VIAPciChipsets,
                                NULL, NULL, NULL, NULL, NULL);
@@ -2537,7 +2536,6 @@ static void
 VIALoadRgbLut(ScrnInfoPtr pScrn, int numColors, int *indices, LOCO *colors,
               VisualPtr pVisual)
 {
-    VIAPtr pVia = VIAPTR(pScrn);
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
     int i, j, index;
@@ -2964,7 +2962,6 @@ static Bool
 VIAWriteMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAWriteMode\n"));
 
@@ -3117,9 +3114,7 @@ static void
 VIAAdjustFrame(int scrnIndex, int x, int y, int flags)
 {
     ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
-    CARD32 Base;
 
     DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIAAdjustFrame %dx%d\n", x, y));
 
@@ -3257,7 +3252,6 @@ VIASwitchMode(int scrnIndex, DisplayModePtr mode, int flags)
 static void
 VIADPMS(ScrnInfoPtr pScrn, int mode, int flags)
 {
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
