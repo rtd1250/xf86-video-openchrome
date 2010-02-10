@@ -1,3 +1,12 @@
+2010-02-10  Bartosz Kosiorek  <gang65@poczta.onet.pl>
+
+	Fix bug with suspend and VT switch on VX800 and 64bit systems
+
+	* src/via_driver.h:
+	* src/via_video.c: (viaResetVideo), (viaSaveVideo),
+	(viaRestoreVideo), (viaExitVideo):
+	* src/via_video.h:
+
 2010-01-24  Bartosz Kosiorek  <gang65@poczta.onet.pl>
 
 	Fix starting address restore and save (initial 64-bit support)
