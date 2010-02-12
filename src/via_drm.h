@@ -16,13 +16,15 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL
- * THE AUTHOR(S) OR COPYRIGHT HOLDER(S) BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * VIA, S3 GRAPHICS, AND/OR ITS SUPPLIERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
  * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
 #ifndef _VIA_DRM_H_
 #define _VIA_DRM_H_
+
+#include "drm.h"
 
 /* WARNING: These defines must be the same as what the Xserver uses.
  * if you change them, you must change the defines in the Xserver.
@@ -31,16 +33,14 @@
 #ifndef _VIA_DEFINES_
 #define _VIA_DEFINES_
 
-#if !defined(__KERNEL__) && !defined(_KERNEL)
 #include "via_drmclient.h"
-#endif
 
-#define VIA_NR_SAREA_CLIPRECTS 		8
+#define VIA_NR_SAREA_CLIPRECTS		8
 #define VIA_NR_XVMC_PORTS               10
 #define VIA_NR_XVMC_LOCKS               5
 #define VIA_MAX_CACHELINE_SIZE          64
 #define XVMCLOCKPTR(saPriv,lockNo)					\
-	((volatile drm_hw_lock_t *)(((((unsigned long) (saPriv)->XvMCLockArea) + \
+	((__volatile__ struct drm_hw_lock *)(((((unsigned long) (saPriv)->XvMCLockArea) + \
 				      (VIA_MAX_CACHELINE_SIZE - 1)) &	\
 				     ~(VIA_MAX_CACHELINE_SIZE - 1)) +	\
 				    VIA_MAX_CACHELINE_SIZE*(lockNo)))
@@ -107,27 +107,26 @@
 #define VIA_BACK    0x2
 #define VIA_DEPTH   0x4
 #define VIA_STENCIL 0x8
-
 #define VIA_MEM_VIDEO   0	/* matches drm constant */
 #define VIA_MEM_AGP     1	/* matches drm constant */
-#define VIA_MEM_SYSTEM  2		
+#define VIA_MEM_SYSTEM  2
 #define VIA_MEM_MIXED   3
 #define VIA_MEM_UNKNOWN 4
 
 typedef struct {
-	uint32_t offset;
-	uint32_t size;
+	__u32 offset;
+	__u32 size;
 } drm_via_agp_t;
 
 typedef struct {
-	uint32_t offset;
-	uint32_t size;
+	__u32 offset;
+	__u32 size;
 } drm_via_fb_t;
 
 typedef struct {
-	uint32_t context;
-	uint32_t type;
-	uint32_t size;
+	__u32 context;
+	__u32 type;
+	__u32 size;
 	unsigned long index;
 	unsigned long offset;
 } drm_via_mem_t;
@@ -149,16 +148,16 @@ typedef struct _drm_via_futex {
 		VIA_FUTEX_WAIT = 0x00,
 		VIA_FUTEX_WAKE = 0X01
 	} func;
-	uint32_t ms;
-	uint32_t lock;
-	uint32_t val;
+	__u32 ms;
+	__u32 lock;
+	__u32 val;
 } drm_via_futex_t;
 
 typedef struct _drm_via_dma_init {
 	enum {
 		VIA_INIT_DMA = 0x01,
 		VIA_CLEANUP_DMA = 0x02,
-                VIA_DMA_INITIALIZED = 0x03
+		VIA_DMA_INITIALIZED = 0x03
 	} func;
 
 	unsigned long offset;
@@ -167,7 +166,7 @@ typedef struct _drm_via_dma_init {
 } drm_via_dma_init_t;
 
 typedef struct _drm_via_cmdbuffer {
-	char __user *buf;
+	char *buf;
 	unsigned long size;
 } drm_via_cmdbuffer_t;
 
@@ -183,7 +182,7 @@ typedef struct _drm_via_tex_region {
 typedef struct _drm_via_sarea {
 	unsigned int dirty;
 	unsigned int nbox;
-	drm_clip_rect_t boxes[VIA_NR_SAREA_CLIPRECTS];
+	struct drm_clip_rect boxes[VIA_NR_SAREA_CLIPRECTS];
 	drm_via_tex_region_t texList[VIA_NR_TEX_REGIONS + 1];
 	int texAge;		/* last time texture was uploaded */
 	int ctxOwner;		/* last context to upload state */
@@ -199,12 +198,11 @@ typedef struct _drm_via_sarea {
 
 	unsigned int XvMCDisplaying[VIA_NR_XVMC_PORTS];
 	unsigned int XvMCSubPicOn[VIA_NR_XVMC_PORTS];
-	unsigned int XvMCCtxNoGrabbed;	/* Last context to hold decoder */	
+	unsigned int XvMCCtxNoGrabbed;	/* Last context to hold decoder */
 
 	/* Used by the 3d driver only at this point, for pageflipping:
 	 */
-
-        unsigned int pfCurrentOffset;
+	unsigned int pfCurrentOffset;
 } drm_via_sarea_t;
 
 typedef struct _drm_via_cmdbuf_size {
@@ -213,7 +211,7 @@ typedef struct _drm_via_cmdbuf_size {
 		VIA_CMDBUF_LAG = 0x02
 	} func;
 	int wait;
-	uint32_t size;
+	__u32 size;
 } drm_via_cmdbuf_size_t;
 
 typedef enum {
@@ -225,19 +223,21 @@ typedef enum {
 
 #define VIA_IRQ_FLAGS_MASK 0xF0000000
 
-enum drm_via_irqs{drm_via_irq_hqv0 = 0,
-		  drm_via_irq_hqv1,
-		  drm_via_irq_dma0_dd,
-		  drm_via_irq_dma0_td,
-		  drm_via_irq_dma1_dd,
-		  drm_via_irq_dma1_td,
-                  drm_via_irq_num};
+enum drm_via_irqs {
+	drm_via_irq_hqv0 = 0,
+	drm_via_irq_hqv1,
+	drm_via_irq_dma0_dd,
+	drm_via_irq_dma0_td,
+	drm_via_irq_dma1_dd,
+	drm_via_irq_dma1_td,
+	drm_via_irq_num
+};
 
-struct drm_via_wait_irq_request{
+struct drm_via_wait_irq_request {
 	unsigned irq;
 	via_irq_seq_type_t type;
-	uint32_t sequence;
-	uint32_t signal;
+	__u32 sequence;
+	__u32 signal;
 };
 
 typedef union drm_via_irqwait {
@@ -245,26 +245,31 @@ typedef union drm_via_irqwait {
 	struct drm_wait_vblank_reply reply;
 } drm_via_irqwait_t;
 
-typedef struct drm_via_blitsync { 
-	uint32_t sync_handle;
+typedef struct drm_via_blitsync {
+	__u32 sync_handle;
 	unsigned engine;
 } drm_via_blitsync_t;
 
+/* - * Below,"flags" is currently unused but will be used for possible future
+ * extensions like kernel space bounce buffers for bad alignments and
+ * blit engine busy-wait polling for better latency in the absence of
+ * interrupts.
+ */
+
 typedef struct drm_via_dmablit {
-	uint32_t num_lines;          
-	uint32_t line_length;        
+	__u32 num_lines;
+	__u32 line_length;
 
-        uint32_t fb_addr;                
-	uint32_t fb_stride;              
+	__u32 fb_addr;
+	__u32 fb_stride;
 
-        unsigned char *mem_addr;        
-	uint32_t  mem_stride;        
-       
-	int bounce_buffer;
-        int to_fb;
+	unsigned char *mem_addr;
+	__u32 mem_stride;
 
-	drm_via_blitsync_t sync;   
+	__u32 flags;
+	int to_fb;
+
+	drm_via_blitsync_t sync;
 } drm_via_dmablit_t;
-
 
 #endif				/* _VIA_DRM_H_ */
