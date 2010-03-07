@@ -713,105 +713,6 @@ RegionsEqual(RegionPtr A, RegionPtr B)
     return TRUE;
 }
 
-static void
-viaVideoFillPixmap(ScrnInfoPtr pScrn,
-        char *base,
-        unsigned long pitch,
-        int depth,
-        int x, int y, int w, int h,
-        unsigned long color)
-{
-    int i;
-
-    ErrorF("pitch %lu, depth %d, x %d, y %d, w %d, h %d, color 0x%08lx\n",
-            pitch, depth, x, y, w, h, color);
-
-    depth = (depth + 7) >> 3;
-
-    base += y*pitch + x*depth;
-
-    switch(depth) {
-        case 4:
-        while(h--) {
-            register CARD32 *p = (CARD32 *)base;
-            for (i=0; i<w; ++i) {
-                *p++ = color;
-            }
-            base += pitch;
-        }
-        break;
-        case 2: {
-            register CARD16 col = color & 0x0000FFFF;
-            while(h--) {
-                register CARD16 *p = (CARD16 *)base;
-                for (i=0; i<w; ++i) {
-                    *p++ = col;
-                }
-                base += pitch;
-            }
-            break;
-        }
-        case 1: {
-            register CARD8 col = color & 0xFF;
-            while(h--) {
-                register CARD8 *p = (CARD8 *)base;
-                for (i=0; i<w; ++i) {
-                    *p++ = col;
-                }
-                base += pitch;
-            }
-            break;
-        }
-        default:
-        break;
-    }
-}
-    
-
-
-static int
-viaPaintColorkey(ScrnInfoPtr pScrn, viaPortPrivPtr pPriv, RegionPtr clipBoxes,
-    DrawablePtr pDraw)
-{
-
-    if (pDraw->type == DRAWABLE_WINDOW) {
-
-        VIAPtr pVia = VIAPTR(pScrn);
-        PixmapPtr pPix = (pScrn->pScreen->GetWindowPixmap)((WindowPtr) pDraw);
-        unsigned long pitch = pPix->devKind;
-        long offset = (long) pPix->devPrivate.ptr - (long) pVia->FBBase;
-        int x,y;
-        BoxPtr pBox;
-        int nBox;
-
-        REGION_TRANSLATE(pScrn->pScreen, clipBoxes, - pPix->screen_x,
-            - pPix->screen_y);
-
-        nBox = REGION_NUM_RECTS(clipBoxes);
-        pBox = REGION_RECTS(clipBoxes);
-
-        while(nBox--) {
-            if (pVia->NoAccel || offset < 0 ||
-                offset > pScrn->videoRam*1024) {
-                viaVideoFillPixmap(pScrn, pPix->devPrivate.ptr, pitch,
-                    pDraw->bitsPerPixel, pBox->x1, pBox->y1,
-                    pBox->x2 - pBox->x1, pBox->y2 - pBox->y1,
-                    pPriv->colorKey);
-            } else {
-                viaAccelFillPixmap(pScrn, offset, pitch,
-                    pDraw->bitsPerPixel, pBox->x1, pBox->y1,
-                    pBox->x2 - pBox->x1, pBox->y2 - pBox->y1,
-                    pPriv->colorKey);
-            }
-            pBox++;
-        }
-
-        DamageDamageRegion(pPix, clipBoxes);
-    }
-
-    return 0;
-}
-
 
 /*
  * This one gets called, for example, on panning.
@@ -832,10 +733,15 @@ viaReputImage(ScrnInfoPtr pScrn,
         REGION_COPY(pScrn->pScreen, &pPriv->clip, clipBoxes);
         if (pPriv->autoPaint) {
             if (pDraw->type == DRAWABLE_WINDOW) {
-                viaPaintColorkey(pScrn, pPriv, clipBoxes, pDraw);
+                /* TODO Replace xf86XVFillKeyHelper with xf86XVFillKeyHelperDrawable
+                   Currently resizing problem exist in VLC Media Player
+                   Example of implementation:
+                xf86XVFillKeyHelperDrawable(pDraw, pPriv->colorKey, clipBoxes);
+                DamageDamageRegion(pDraw, clipBoxes); */
+                
+                xf86XVFillKeyHelper(pScrn->pScreen, pPriv->colorKey, clipBoxes);
             } else {
-                xf86XVFillKeyHelper(pScrn->pScreen, pPriv->colorKey,
-                    clipBoxes);
+                xf86XVFillKeyHelper(pScrn->pScreen, pPriv->colorKey, clipBoxes);
             }
         }
     }
@@ -1347,7 +1253,7 @@ viaPutImage(ScrnInfoPtr pScrn,
     unsigned long retCode;
 
 # ifdef XV_DEBUG
-    ErrorF(" via_video.c : viaPutImage : called\n");
+    ErrorF(" via_video.c : viaPutImage : called,  Screen[%d]\n", pScrn->scrnIndex);
     ErrorF(" via_video.c : FourCC=0x%x width=%d height=%d sync=%d\n", id,
             width, height, sync);
     ErrorF
@@ -1456,12 +1362,11 @@ viaPutImage(ScrnInfoPtr pScrn,
 
             lpUpdateOverlay->dwFlags = DDOVER_KEYDEST;
 
-            if (pScrn->bitsPerPixel == 8)
-            lpUpdateOverlay->dwColorSpaceLowValue =
-            pPriv->colorKey & 0xff;
-            else
-            lpUpdateOverlay->dwColorSpaceLowValue = pPriv->colorKey;
-
+            if (pScrn->bitsPerPixel == 8) {
+                lpUpdateOverlay->dwColorSpaceLowValue = pPriv->colorKey & 0xff;
+            } else {
+                lpUpdateOverlay->dwColorSpaceLowValue = pPriv->colorKey;
+            }
             /* If use extend FIFO mode */
             if (pScrn->currentMode->HDisplay > 1024) {
                 dwUseExtendedFIFO = 1;
@@ -1509,12 +1414,19 @@ viaPutImage(ScrnInfoPtr pScrn,
                 REGION_COPY(pScrn->pScreen, &pPriv->clip, clipBoxes);
                 if (pPriv->autoPaint) {
                     if (pDraw->type == DRAWABLE_WINDOW) {
-                        viaPaintColorkey(pScrn, pPriv, clipBoxes, pDraw);
+                        /* TODO Replace xf86XVFillKeyHelper with xf86XVFillKeyHelperDrawable
+                           Currently resizing problem exists in VLC Media Player
+                           Example of implementation:
+                        xf86XVFillKeyHelperDrawable(pDraw, pPriv->colorKey, clipBoxes);
+                        DamageDamageRegion(pDraw, clipBoxes);
+                        */
+                        xf86XVFillKeyHelper(pScrn->pScreen, pPriv->colorKey, clipBoxes);
                     } else {
-                        xf86XVFillKeyHelper(pScrn->pScreen, pPriv->colorKey,
-                            clipBoxes);
+                        xf86XVFillKeyHelper(pScrn->pScreen, pPriv->colorKey, clipBoxes);
                     }
                 }
+            } else {
+                DBG_DD(ErrorF(" via_video.c : // No need to draw Colorkey!! \n"));
             }
             /*
              *  Update video overlay
