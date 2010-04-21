@@ -1,3 +1,10 @@
+2010-04-21  Bartosz Kosiorek  <gang65@poczta.onet.pl>
+
+	Replace RegionsEqual with REGION_EQUAL and use 
+        the xf86XVFillKeyHelperDrawable instead of xf86XVFillKeyHelper
+
+	* src/via_video.c: (viaReputImage), (viaPutImage):
+
 2010-03-07  Bartosz Kosiorek  <gang65@poczta.onet.pl>
 
 	Fix segfaults with EXA and XV (Ticket #359)

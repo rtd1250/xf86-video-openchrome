@@ -685,34 +685,6 @@ viaInitVideo(ScreenPtr pScreen)
     }
 }
 
-static Bool
-RegionsEqual(RegionPtr A, RegionPtr B)
-{
-    int *dataA, *dataB;
-    int num;
-
-    num = REGION_NUM_RECTS(A);
-    if (num != REGION_NUM_RECTS(B))
-        return FALSE;
-
-    if ((A->extents.x1 != B->extents.x1) ||
-        (A->extents.x2 != B->extents.x2) ||
-        (A->extents.y1 != B->extents.y1) || (A->extents.y2 != B->extents.y2))
-    return FALSE;
-
-    dataA = (int *)REGION_RECTS(A);
-    dataB = (int *)REGION_RECTS(B);
-
-    while (num--) {
-        if ((dataA[0] != dataB[0]) || (dataA[1] != dataB[1]))
-            return FALSE;
-        dataA += 2;
-        dataB += 2;
-    }
-
-    return TRUE;
-}
-
 
 /*
  * This one gets called, for example, on panning.
@@ -729,7 +701,7 @@ viaReputImage(ScrnInfoPtr pScrn,
     viaPortPrivPtr pPriv = (viaPortPrivPtr) data;
     VIAPtr pVia = VIAPTR(pScrn);
 
-    if (!RegionsEqual(&pPriv->clip, clipBoxes)) {
+    if (!REGION_EQUAL(pScrn->pScreen, &pPriv->clip, clipBoxes)) {
         REGION_COPY(pScrn->pScreen, &pPriv->clip, clipBoxes);
         if (pPriv->autoPaint) {
             if (pDraw->type == DRAWABLE_WINDOW) {
@@ -1392,7 +1364,7 @@ viaPutImage(ScrnInfoPtr pScrn,
                     && (pPriv->old_src_w == src_w) && (pPriv->old_src_h == src_h)
                     && (pVia->old_dwUseExtendedFIFO == dwUseExtendedFIFO)
                     && (pVia->VideoStatus & VIDEO_SWOV_ON) &&
-                    RegionsEqual(&pPriv->clip, clipBoxes)) {
+                    REGION_EQUAL(pScrn->pScreen, &pPriv->clip, clipBoxes)) {
                 viaXvError(pScrn, pPriv, xve_none);
                 return Success;
             }
@@ -1410,17 +1382,12 @@ viaPutImage(ScrnInfoPtr pScrn,
             pVia->VideoStatus |= VIDEO_SWOV_ON;
 
             /*  BitBlt: Draw the colorkey rectangle */
-            if (!RegionsEqual(&pPriv->clip, clipBoxes)) {
+            if (!REGION_EQUAL(pScrn->pScreen, &pPriv->clip, clipBoxes)) {
                 REGION_COPY(pScrn->pScreen, &pPriv->clip, clipBoxes);
                 if (pPriv->autoPaint) {
                     if (pDraw->type == DRAWABLE_WINDOW) {
-                        /* TODO Replace xf86XVFillKeyHelper with xf86XVFillKeyHelperDrawable
-                           Currently resizing problem exists in VLC Media Player
-                           Example of implementation:
                         xf86XVFillKeyHelperDrawable(pDraw, pPriv->colorKey, clipBoxes);
                         DamageDamageRegion(pDraw, clipBoxes);
-                        */
-                        xf86XVFillKeyHelper(pScrn->pScreen, pPriv->colorKey, clipBoxes);
                     } else {
                         xf86XVFillKeyHelper(pScrn->pScreen, pPriv->colorKey, clipBoxes);
                     }
