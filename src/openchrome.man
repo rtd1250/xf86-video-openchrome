@@ -65,10 +65,12 @@ enabled) and for the Render/Composite extension.
 .BI "Option \*qActiveDevice\*q  \*q" string \*q
 Specifies the active device combination.  Any string containing "CRT",
 "LCD", "DFP", "TV" should be possible. "CRT" represents anything that
-is connected to the VGA port, "LCD" and "DFP" are for laptop panels
-(not TFT screens attached to the VGA port), "TV" is self-explanatory.
+is connected to the VGA port, "LCD" is for laptop panels (not TFT screens
+attached to the VGA port), "DFP" is for screens connected to the DVI port,
+"TV" is self-explanatory.
 The default is to use what is detected.  The driver is currently unable
-to use LCD and TV simultaneously, and will favour the LCD.
+to use LCD and TV simultaneously, and will favour the LCD.  The DVI port is
+not properly probed and needs to be enabled with this option.
 .TP
 .BI "Option \*qAGPMem\*q  \*q" integer \*q
 Sets the amount of AGP memory that is allocated at X server startup.
