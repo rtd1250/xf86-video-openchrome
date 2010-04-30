@@ -133,10 +133,10 @@ as possible to the EXA pixmap storage area.
 .TP
 .BI "Option \*qMigrationHeuristic\*q  \*q" string \*q
 Sets the heuristic for EXA pixmap migration.  This is an EXA core
-option, and on Xorg server versions after 1.1.0 this defaults to
-"smart".  The openchrome driver performs best with "greedy", so you
+option, and starting from __xservername__ server version 1.3.0 this defaults to
+"always".  The openchrome driver performs best with "greedy", so you
 should really add this option to your configuration file.  The third
-possibility is "always", which might become more useful in the future.
+possibility is "smart".
 .TP
 .BI "Option \*qNoAccel\*q  \*q" boolean \*q
 Disables the use of hardware acceleration.  Acceleration is enabled
@@ -243,6 +243,6 @@ overscan).  These modes are made available by the driver; modelines
 provided in __xconfigfile__ will be ignored.
 
 .SH "SEE ALSO"
-__xservername__(__appmansuffix__), __xconfigfile__(__filemansuffix__), Xserver(__appmansuffix__), X(__miscmansuffix__)
+__xservername__(__appmansuffix__), __xconfigfile__(__filemansuffix__), Xserver(__appmansuffix__), X(__miscmansuffix__), EXA(__filemansuffix__), Xv(__filemansuffix__)
 .SH AUTHORS
 Authors include: ...

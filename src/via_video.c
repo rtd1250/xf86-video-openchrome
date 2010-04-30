@@ -1365,6 +1365,7 @@ viaPutImage(ScrnInfoPtr pScrn,
                     && (pVia->old_dwUseExtendedFIFO == dwUseExtendedFIFO)
                     && (pVia->VideoStatus & VIDEO_SWOV_ON) &&
                     REGION_EQUAL(pScrn->pScreen, &pPriv->clip, clipBoxes)) {
+                DBG_DD(ErrorF(" via_video.c : don't do UpdateOverlay! \n"));
                 viaXvError(pScrn, pPriv, xve_none);
                 return Success;
             }

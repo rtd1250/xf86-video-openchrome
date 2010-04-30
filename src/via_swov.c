@@ -1762,16 +1762,16 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
 
     /* 
      * FIXME:
-     * Enable video on secondary 
+     * Enable video on secondary (change Panel to SecondCRTC?)
      */
     if ((pVia->VideoEngine == VIDEO_ENGINE_CME
          || pVia->Chipset == VIA_VM800)
         && pVia->pBIOSInfo->Panel->IsActive) {
 
         /* V1_ON_SND_DISPLAY */
-        vidCtl |= 0x80000000;
+        vidCtl |= V1_ON_SND_DISPLAY;
         /* SECOND_DISPLAY_COLOR_KEY_ENABLE */
-        compose |= 0x00010000 | 0x1;
+        compose |= SECOND_DISPLAY_COLOR_KEY_ENABLE | 0x1;
     }
 
     viaOverlayGetV1V3Format(pVia, (videoFlag & VIDEO_1_INUSE) ? 1 : 3,
