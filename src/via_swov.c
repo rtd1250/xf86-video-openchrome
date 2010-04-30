@@ -1488,6 +1488,7 @@ SetColorKey(VIAPtr pVia, unsigned long videoFlag,
 
     if (videoFlag & VIDEO_1_INUSE) {
         SaveVideoRegister(pVia, V_COLOR_KEY, keyLow);
+        SaveVideoRegister(pVia, SND_COLOR_KEY, keyLow);
     } else {
         if (pVia->HWDiff.dwSupportTwoColorKey)    /*CLE_C0 */
             SaveVideoRegister(pVia, V3_COLOR_KEY, keyLow);
