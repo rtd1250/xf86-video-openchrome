@@ -1,5 +1,16 @@
 2010-05-04  Jon Nettleton <jon.nettleton@gmail.com>
 
+	Put timeouts on our while statements.  These codepaths
+	should be interrupted by a hardware state change, but
+	if something goes wrong they loop forevere.  Let's try
+	and behave a little by putting a timeout on these loops.
+
+	* src/via_swov.c: (viaWaitHQVFlip), (viaWaitHQVFlipClear),
+	(viaWaitHQVDone):
+	* src/via_video.c: (Flip):
+
+2010-05-04  Jon Nettleton <jon.nettleton@gmail.com>
+
 	Add XVideo support for the VX855 Chipset.
 	To support this chipset I have added HWDiff->HQVCmeRegs
 	that allows handling differing register values, and

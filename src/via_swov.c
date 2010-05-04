@@ -113,6 +113,7 @@ viaWaitHQVFlip(VIAPtr pVia)
 {
     unsigned long proReg = 0;
     CARD32 volatile *pdwState;
+    unsigned count = 50000;
 
     if (pVia->ChipId == PCI_CHIP_VT3259
         && !(pVia->swov.gdwVideoFlagSW & VIDEO_1_INUSE))
@@ -121,10 +122,9 @@ viaWaitHQVFlip(VIAPtr pVia)
     pdwState = (CARD32 volatile *)(pVia->VidMapBase + (HQV_CONTROL + proReg));
 
     if (pVia->VideoEngine == VIDEO_ENGINE_CME) {
-        // while (*pdwState & (HQV_SUBPIC_FLIP | HQV_SW_FLIP)) ;
-	while (*pdwState & HQV_SUBPIC_FLIP);
+		while (--count && (*pdwState & HQV_SUBPIC_FLIP));
     } else {
-        while (!(*pdwState & HQV_FLIP_STATUS)) ;
+        while (--count && !(*pdwState & HQV_FLIP_STATUS)) ;
     }
 }
 
@@ -134,8 +134,9 @@ viaWaitHQVFlipClear(VIAPtr pVia, unsigned long dwData)
     CARD32 volatile *pdwState =
             (CARD32 volatile *)(pVia->VidMapBase + HQV_CONTROL);
     *pdwState = dwData;
+    unsigned count = 50000;
 
-    while ((*pdwState & HQV_FLIP_STATUS)) {
+    while (--count && (*pdwState & HQV_FLIP_STATUS)) {
         VIDOutD(HQV_CONTROL, *pdwState | HQV_FLIP_STATUS);
     }
 }
@@ -151,6 +152,7 @@ viaWaitHQVDone(VIAPtr pVia)
 {
     CARD32 volatile *pdwState;
     unsigned long proReg = 0;
+    unsigned count = 50000;
 
     if (pVia->ChipId == PCI_CHIP_VT3259
         && !(pVia->swov.gdwVideoFlagSW & VIDEO_1_INUSE))
@@ -158,7 +160,7 @@ viaWaitHQVDone(VIAPtr pVia)
 
     pdwState = (CARD32 volatile *)(pVia->VidMapBase + (HQV_CONTROL + proReg));
     if (pVia->swov.MPEG_ON) {
-        while ((*pdwState & HQV_SW_FLIP)) ;
+        while (--count && (*pdwState & HQV_SW_FLIP)) ;
     }
 }
 
