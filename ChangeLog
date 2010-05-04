@@ -1,3 +1,16 @@
+2010-05-04  Jon Nettleton  <jon.nettleton@gmail.com>
+
+	Improve 2d performance on chipsets that don't have
+	AGP/PCIe support yet.
+
+	* src/via_accel.c: (viaSetupForScreenToScreenCopy),
+	(viaSetupForSolidFill), (viaSetupForMono8x8PatternFill),
+	(viaSetupForColor8x8PatternFill),
+	(viaSetupForCPUToScreenColorExpandFill),
+	(viaSubsequentScanlineCPUToScreenColorExpandFill),
+	(viaSetupForImageWrite), (viaSubsequentImageWriteRect),
+	(viaSetupForSolidLine), (viaSetupForDashedLine), (viaInitXAA):
+
 2010-05-04  Jon Nettleton <jon.nettleton@gmail.com>
 
 	Put timeouts on our while statements.  These codepaths
