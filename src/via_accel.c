@@ -417,6 +417,8 @@ viaDisableVQ(ScrnInfoPtr pScrn)
     switch (pVia->Chipset) {
         case VIA_K8M890:
         case VIA_P4M900:
+        case VIA_VX800:
+        case VIA_VX855:
             VIASETREG(0x41c, 0x00100000);
             VIASETREG(0x420, 0x74301000);
             break;
@@ -492,6 +494,8 @@ viaInitialize2DEngine(ScrnInfoPtr pScrn)
     switch (pVia->Chipset) {
         case VIA_K8M890:
         case VIA_P4M900:
+        case VIA_VX800:
+        case VIA_VX855:
             viaInitPCIe(pVia);
             break;
         default:
@@ -503,6 +507,8 @@ viaInitialize2DEngine(ScrnInfoPtr pScrn)
         switch (pVia->Chipset) {
             case VIA_K8M890:
             case VIA_P4M900:
+            case VIA_VX800:
+            case VIA_VX855:
                 viaEnablePCIeVQ(pVia);
                 break;
             default:

@@ -1,3 +1,9 @@
+2010-05-04  Jon Nettleton <jon.nettleton@gmail.com>
+
+	Re-enable the Virtual Queue for the VX800/VX855 chipsets.
+
+	* src/via_accel.c: (viaDisableVQ), (viaInitialize2DEngine):
+
 2010-05-04  Jon Nettleton  <jon.nettleton@gmail.com>
 
 	Disable certain hardware clipping options for the VX855.
