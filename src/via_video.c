@@ -1448,7 +1448,6 @@ viaQueryImageAttributes(ScrnInfoPtr pScrn,
 
     switch (id) {
         case FOURCC_YV12: /*Planar format : YV12 -4:2:0 */
-        case FOURCC_I420:
             *h = (*h + 1) & ~1;
             size = *w;
             if (pVia->useDmaBlit)

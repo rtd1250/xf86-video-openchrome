@@ -1280,10 +1280,9 @@ ViaSwovSurfaceCreate(ScrnInfoPtr pScrn, viaPortPrivPtr pPriv,
             break;
 
         case FOURCC_YV12:
-        case FOURCC_I420:
             retCode = CreateSurface(pScrn, FourCC, Width, Height, TRUE);
             if (retCode == Success)
-                retCode = AddHQVSurface(pScrn, numbuf, FourCC);
+                retCode = AddHQVSurface(pScrn, numbuf, FOURCC_YV12);
             break;
 
         case FOURCC_XVMC:
