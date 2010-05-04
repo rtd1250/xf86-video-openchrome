@@ -1,3 +1,11 @@
+2010-05-04  Jon Nettleton  <jon.nettleton@gmail.com>
+
+	Disable certain hardware clipping options for the VX855.
+	These cause the 2d engine to become unstable when in
+	16-bit mode.
+
+	* src/via_accel.c: (viaInitXAA):
+
 2010-05-04  Jon Nettleton <jon.nettleton@gmail.com>
 
 	Add an undocumented option which allows certain I2C buses
