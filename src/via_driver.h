@@ -286,6 +286,7 @@ typedef struct _VIA {
     Bool                agpDMA;
     Bool                nPOT[VIA_NUM_TEXUNITS];
     const unsigned     *TwodRegs;
+    const unsigned     *HqvCmeRegs;
     ExaDriverPtr        exaDriverPtr;
     ExaOffscreenArea   *exa_scratch;
     unsigned int        exa_scratch_next;

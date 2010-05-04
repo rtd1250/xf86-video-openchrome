@@ -1,3 +1,20 @@
+2010-05-04  Jon Nettleton <jon.nettleton@gmail.com>
+
+	Add XVideo support for the VX855 Chipset.
+	To support this chipset I have added HWDiff->HQVCmeRegs
+	that allows handling differing register values, and
+	HWDiff->dwNewScaleCtl which allows selection of a
+	new Video scaling engine needed for the VX800/VX855
+	chipsets.
+
+	* src/via.h:
+	* src/via_bandwidth.c: (ViaSetSecondaryFIFO):
+	* src/via_driver.h:
+	* src/via_swov.c: (SaveVideoRegister), (VIAVidHWDiffInit),
+	(viaOverlayHQVCalcZoomWidth), (viaOverlayHQVCalcZoomHeight),
+	(ViaSwovSurfaceCreate), (SetHQVFetch), (Upd_Video):
+	* src/via_swov.h:
+
 2010-04-21  Bartosz Kosiorek  <gang65@poczta.onet.pl>
 
 	Replace RegionsEqual with REGION_EQUAL and use 

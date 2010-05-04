@@ -73,6 +73,8 @@ typedef struct __VIAHWDiff
     /*unsigned long dwV3FIFOPatch; *//* For CLE V3 FIFO Bug (srcWidth <= 8) */
     unsigned long dwSupportTwoColorKey;	/* Support two color key */
     /* unsigned long dwCxColorSpace; *//* CLE_Cx ColorSpace */
+    unsigned dwNewScaleCtl; /* Use new HQV scale engine code */
+    const unsigned *HQVCmeRegs; /* Which set of CME regs to use for newer chipsets */
 } VIAHWDiff;
 
 void VIAVidHWDiffInit(ScrnInfoPtr pScrn);

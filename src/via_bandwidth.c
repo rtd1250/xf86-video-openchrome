@@ -462,6 +462,21 @@ ViaSetSecondaryFIFO(ScrnInfoPtr pScrn, DisplayModePtr mode)
                 ViaCrtcMask(hwp, 0x94, 0x20, 0x7F);
             break;
         case VIA_VX855:
+            /* {CR68,4,7},{CR94,7,7},{CR95,7,7} : 200/8-1 = 0x7c */
+            ViaCrtcMask(hwp, 0x68, 0xF0, 0xF0); 
+            ViaCrtcMask(hwp, 0x94, 0x00, 0x80);
+            ViaCrtcMask(hwp, 0x95, 0x00, 0x80);
+            /* {CR68,0,3},{CR95,4,6} : 160/4 = 0x28 */
+            ViaCrtcMask(hwp, 0x68, 0x00, 0x0F);
+            ViaCrtcMask(hwp, 0x95, 0x10, 0x70);
+            /* {CR92,0,3},{CR95,0,2} : 160/4 = 0x28 */
+            ViaCrtcMask(hwp, 0x92, 0x00, 0x08);
+            ViaCrtcMask(hwp, 0x95, 0x01, 0x07);
+            /* {CR94,0,6} : 320/4 = 0x50 */
+            if ((mode->HDisplay >= 1400) && (pScrn->bitsPerPixel == 32))
+                ViaCrtcMask(hwp, 0x94, 0x08, 0x7F);
+            else
+                ViaCrtcMask(hwp, 0x94, 0x08, 0x7F);
             break;
         default:
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "ViaSetSecondaryFIFO: "
