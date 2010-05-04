@@ -762,8 +762,8 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
         case VIA_VX800:
         case VIA_VX855:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
-            /* pVia->agpEnable = FALSE;
-            pVia->dmaXV = FALSE;*/
+            pVia->agpEnable = FALSE;
+            pVia->dmaXV = FALSE;
             break;
     }
 
