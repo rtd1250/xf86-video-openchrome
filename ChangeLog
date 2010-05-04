@@ -1,3 +1,15 @@
+2010-05-04  Jon Nettleton <jon.nettleton@gmail.com>
+
+	Add an undocumented option which allows certain I2C buses
+	to be probed at startup.  This allows workarounds for custom
+	chipset makers that have used the VX855 I2C buses for other
+	purposes.
+
+	* src/via_bios.h:
+	* src/via_driver.c: (VIASetupDefaultOptions), (VIAPreInit):
+	* src/via_driver.h:
+	* src/via_i2c.c:
+
 2010-05-04  Jon Nettleton  <jon.nettleton@gmail.com>
 
 	Improve 2d performance on chipsets that don't have

@@ -414,6 +414,8 @@ typedef struct _VIA {
     void                *cursorMap;
     CARD32              cursorOffset;
 
+    CARD8               I2CDevices;	/* Option */
+
 #ifdef HAVE_DEBUG
     Bool                disableXvBWCheck;
     Bool                DumpVGAROM;

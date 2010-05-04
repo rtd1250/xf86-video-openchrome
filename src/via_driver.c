@@ -219,6 +219,7 @@ typedef enum
     OPTION_ROTATE,
     OPTION_VIDEORAM,
     OPTION_ACTIVEDEVICE,
+    OPTION_I2CDEVICES,
     OPTION_BUSWIDTH,
     OPTION_CENTER,
     OPTION_PANELSIZE,
@@ -278,6 +279,7 @@ static OptionInfoRec VIAOptions[] = {
     {OPTION_MODE_SWITCH_METHOD,  "ModeSwitchMethod", OPTV_ANYSTR,  {0}, FALSE},
     {OPTION_MAX_DRIMEM,          "MaxDRIMem",        OPTV_INTEGER, {0}, FALSE},
     {OPTION_AGPMEM,              "AGPMem",           OPTV_INTEGER, {0}, FALSE},
+    {OPTION_I2CDEVICES,          "I2CDevices",       OPTV_ANYSTR,  {0}, FALSE},
     {-1,                         NULL,               OPTV_NONE,    {0}, FALSE}
 };
 
@@ -693,6 +695,7 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
     pVia->maxDriSize = 0;
     pVia->agpMem = AGP_SIZE / 1024;
     pVia->ActiveDevice = 0x00;
+    pVia->I2CDevices = 0x00;
     pVia->VideoEngine = VIDEO_ENGINE_CLE;
 #ifdef HAVE_DEBUG
     pVia->PrintVGARegs = FALSE;
@@ -1557,6 +1560,17 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     }
 
     pVia->videoRambytes = pScrn->videoRam << 10;
+
+    /* I2CDevices Option for I2C Initialization */
+    //pVia->I2CDevices = 0x00;
+    if ((s = xf86GetOptValString(VIAOptions, OPTION_I2CDEVICES))) {
+        if (strstr(s, "Bus1"))
+            pVia->I2CDevices |= VIA_I2C_BUS1;
+        if (strstr(s, "Bus2"))
+            pVia->I2CDevices |= VIA_I2C_BUS2;
+        if (strstr(s, "Bus3"))  
+            pVia->I2CDevices |= VIA_I2C_BUS3;
+    }
 
     if (!xf86LoadSubModule(pScrn, "i2c")) {
         VIAFreeRec(pScrn);
