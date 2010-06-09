@@ -267,10 +267,6 @@ VIADRIAgpInit(ScreenPtr pScreen, VIAPtr pVia)
     pVIADRI = pDRIInfo->devPrivate;
     pVia->agpSize = 0;
 
-/* For AMD64 */
-#ifdef __x86_64__
-    return FALSE;
-#endif
 
     if (drmAgpAcquire(pVia->drmFD) < 0) {
         xf86DrvMsg(pScreen->myNum, X_ERROR, "[drm] drmAgpAcquire failed %d\n",

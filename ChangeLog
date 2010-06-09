@@ -1,3 +1,9 @@
+2010-06-09  Bartosz Kosiorek  <gang65@poczta.onet.pl>
+
+	Fix freeze on 64bit system for K8M800 chipset
+
+	* src/via_dri.c: (VIADRIAgpInit):
+
 2010-05-04  Jon Nettleton <jon.nettleton@gmail.com>
 
 	Re-enable the Virtual Queue for the VX800/VX855 chipsets.
