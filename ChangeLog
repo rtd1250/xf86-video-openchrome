@@ -1,3 +1,10 @@
+2010-06-24  Jon Nettleton  <jon.nettleton@gmail.com>
+
+	PM800 also uses the CME Engine.  Setup the hqv_cme_regs
+	for it.
+
+	* src/via_swov.c: (VIAVidHWDiffInit):
+
 2010-06-09  Bartosz Kosiorek  <gang65@poczta.onet.pl>
 
 	Fix freeze on 64bit system for K8M800 chipset

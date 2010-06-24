@@ -281,6 +281,7 @@ VIAVidHWDiffInit(ScrnInfoPtr pScrn)
             HWDiff->dwHQVDisablePatch = VID_HWDIFF_FALSE;
             HWDiff->dwNeedV1Prefetch = VID_HWDIFF_FALSE;
             HWDiff->dwNewScaleCtl = VID_HWDIFF_FALSE;
+            HWDiff->HQVCmeRegs = hqv_cme_regs;
             break;
         case VIA_VM800:
         case VIA_P4M900:
