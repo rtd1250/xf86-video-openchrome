@@ -138,7 +138,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Haier A60-440256080BD",                 VIA_VM800,   0x1019, 0x0F79, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"PCChips P23G",                          VIA_VM800,   0x1019, 0x1623, VIA_DEVICE_CRT},
     {"ECS P4M800PRO-M",                       VIA_VM800,   0x1019, 0x2122, VIA_DEVICE_CRT},
-    {"ECS P4M800PRO-M2 (V2.0)"                VIA_VM800,   0x1019, 0x2123, VIA_DEVICE_CRT},
+    {"ECS P4M800PRO-M2 (V2.0)",               VIA_VM800,   0x1019, 0x2123, VIA_DEVICE_CRT},
     {"ECS C7VCM",                             VIA_VM800,   0x1019, 0xAA2D, VIA_DEVICE_CRT},
     {"PCChips V21G",                          VIA_VM800,   0x1019, 0xAA51, VIA_DEVICE_CRT},
     {"Asustek P5VDC-MX",                      VIA_VM800,   0x1043, 0x3344, VIA_DEVICE_CRT},
