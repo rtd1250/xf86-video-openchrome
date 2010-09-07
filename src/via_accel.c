@@ -2372,7 +2372,7 @@ viaInitExa(ScreenPtr pScreen)
 
 
 /*
- * Acceleration initializatuon function. Sets up offscreen memory disposition,
+ * Acceleration initialization function. Sets up offscreen memory disposition,
  * and initializes engines and acceleration method.
  */
 Bool

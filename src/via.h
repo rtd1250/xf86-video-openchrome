@@ -34,7 +34,7 @@
 
 /* Video Engines */
 #define VIDEO_ENGINE_UNK	0 /* Unknown video engine */
-#define VIDEO_ENGINE_CLE	1 /* CLE First generaion video engine */
+#define VIDEO_ENGINE_CLE	1 /* CLE First generation video engine */
 #define VIDEO_ENGINE_CME	2 /* CME Second generation video engine */
 
 /* Video status flag */

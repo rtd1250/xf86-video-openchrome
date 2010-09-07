@@ -53,7 +53,7 @@ typedef struct __VIAHWDiff
 {
     unsigned long dwThreeHQVBuffer;    /* Use Three HQV Buffers */
     /* unsigned long dwV3SrcHeightSetting; *//* Set Video Source Width and Height */
-    /* unsigned long dwSupportExtendFIFO; *//* Support Extand FIFO */
+    /* unsigned long dwSupportExtendFIFO; *//* Support Extend FIFO */
     unsigned long dwHQVFetchByteUnit;  /* HQV Fetch Count unit is byte */
     unsigned long dwHQVInitPatch;      /* Initialize HQV Engine 2 times */
     /*unsigned long dwSupportV3Gamma; *//* Support V3 Gamma */

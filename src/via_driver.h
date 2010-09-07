@@ -143,7 +143,7 @@ typedef struct {
 } VIARegRec, *VIARegPtr;
 
 /*
- * varables that need to be shared among different screens.
+ * variables that need to be shared among different screens.
  */
 typedef struct {
     Bool b3DRegsInitialized;
@@ -437,7 +437,7 @@ typedef struct
     Bool HasSecondary;
     Bool BypassSecondary;
     /*These two registers are used to make sure the CRTC2 is
-      retored before CRTC_EXT, otherwise it could lead to blank screen.*/
+      restored before CRTC_EXT, otherwise it could lead to blank screen.*/
     Bool IsSecondaryRestored;
     Bool RestorePrimary;
 

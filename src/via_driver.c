@@ -657,7 +657,7 @@ VIAProbeDDC(ScrnInfoPtr pScrn, int index)
     vbeInfoPtr pVbe;
 
     if (xf86LoadSubModule(pScrn, "vbe")) {
-        /* FIXME This line should be replaced to:
+        /* FIXME This line should be replaced with:
 
            pVbe = VBEExtendedInit(NULL, index, 0);
 
@@ -2056,7 +2056,7 @@ VIASave(ScrnInfoPtr pScrn)
         Regs->CR0D = hwp->readCrtc(hwp, 0x0D);
         /* Starting Address Overflow Bits[28:24] */
         Regs->CR48 = hwp->readCrtc(hwp, 0x48);
-        /* CR34 are fire bits. Must be writed after CR0C CR0D CR48.  */
+        /* CR34 are fire bits. Must be written after CR0C CR0D CR48.  */
         /* Starting Address Overflow Bits[23:16] */
         Regs->CR34 = hwp->readCrtc(hwp, 0x34);
 
@@ -2121,15 +2121,15 @@ VIARestore(ScrnInfoPtr pScrn)
     /* Unlock extended registers. */
     hwp->writeSeq(hwp, 0x10, 0x01);
 
-    /*=* CR6A, CR6B, CR6C must be reset before restore
-         standard vga regs, or system will be hang. *=*/
+    /*=* CR6A, CR6B, CR6C must be reset before restoring
+         standard vga regs, or system will hang. *=*/
     /*=* TODO Check is reset IGA2 channel before disable IGA2 channel
-         is neccesery or it may cause some line garbage. *=*/
+         is necessary or it may cause some line garbage. *=*/
     hwp->writeCrtc(hwp, 0x6A, 0x00);
     hwp->writeCrtc(hwp, 0x6B, 0x00);
     hwp->writeCrtc(hwp, 0x6C, 0x00);
     
-    /* Gamma must disable before restore pallette */
+    /* Gamma must be disabled before restoring palette */
     ViaGammaDisable(pScrn);
 
     if (pBIOSInfo->TVI2CDev)
@@ -2227,7 +2227,7 @@ VIARestore(ScrnInfoPtr pScrn)
     hwp->writeCrtc(hwp, 0x0D, Regs->CR0D);
     /* Starting Address Overflow Bits[28:24] */
     hwp->writeCrtc(hwp, 0x48, Regs->CR48);
-    /* CR34 are fire bits. Must be writed after CR0C CR0D CR48.  */
+    /* CR34 are fire bits. Must be written after CR0C CR0D CR48.  */
     /* Starting Address Overflow Bits[23:16] */
     hwp->writeCrtc(hwp, 0x34, Regs->CR34);
     

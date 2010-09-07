@@ -270,7 +270,7 @@ static XF86ImagePtr Via_subpicture_list[2] = {
 /* 
  * Filling in the device dependent adaptor record. 
  * This is named "VIA Video Overlay" because this code falls under the
- * XV extenstion, the name must match or it won't be used.
+ * XV extension, the name must match or it won't be used.
  *
  * For surface and subpicture, see above.
  * The function pointers point to functions below.

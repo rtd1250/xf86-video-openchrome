@@ -1078,7 +1078,7 @@ VIASetLCDMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
             pBIOSInfo->Clock = Table.InitTb.LCDClk_12Bit;
         else {
             pBIOSInfo->Clock = Table.InitTb.VClk_12Bit;
-            /* for some reason still to be defined this is neccessary */
+            /* for some reason still to be defined this is necessary */
             ViaSetSecondaryDotclock(pScrn, Table.InitTb.LCDClk_12Bit);
         }
     } else {

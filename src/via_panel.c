@@ -356,7 +356,7 @@ ViaPanelCenterMode(DisplayModePtr centerMode, DisplayModePtr panelMode,
 
 
 /*
- * Try to interprete EDID ourselves.
+ * Try to interpret EDID ourselves.
  */
 Bool
 ViaPanelGetSizeFromEDID(ScrnInfoPtr pScrn, xf86MonPtr pMon,

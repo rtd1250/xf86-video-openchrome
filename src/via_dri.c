@@ -187,7 +187,7 @@ VIADRIRingBufferInit(ScrnInfoPtr pScrn)
             return FALSE;
 
         /*
-         * Info frome code-snippet on DRI-DEVEL list; Erdi Chen.
+         * Info from code-snippet on DRI-DEVEL list; Erdi Chen.
          */
 
         switch (pVia->ChipId) {

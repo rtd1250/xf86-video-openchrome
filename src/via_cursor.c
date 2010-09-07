@@ -324,7 +324,7 @@ viaShowCursor(ScrnInfoPtr pScrn)
             /* Duoview */
 	    if (pVia->CursorPipe) {
                 /* Mono Cursor Display Path [bit31]: Secondary */
-                /* FIXME For CLE266 nad KM400 try to enable 32x32 cursor size [bit1] */
+                /* FIXME For CLE266 and KM400 try to enable 32x32 cursor size [bit1] */
                 VIASETREG(VIA_REG_ALPHA_CONTROL, 0xF6000005);
             } else {
                 /* Mono Cursor Display Path [bit31]: Primary */
@@ -500,7 +500,7 @@ viaLoadCursorImage(ScrnInfoPtr pScrn, unsigned char *src)
 
 /*
     Set the cursor foreground and background colors.  In 8bpp, fg and
-    bg are indicies into the current colormap unless the 
+    bg are indices into the current colormap unless the 
     HARDWARE_CURSOR_TRUECOLOR_AT_8BPP flag is set.  In that case
     and in all other bpps the fg and bg are in 8-8-8 RGB format.
 */
