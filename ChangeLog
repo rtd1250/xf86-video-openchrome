@@ -1,3 +1,9 @@
+2010-10-24  Bartosz Kosiorek  <gang65@poczta.onet.pl>
+
+	Siragon ML-6200 laptop support
+
+	* src/via_id.c:
+
 2010-06-24  Jon Nettleton  <jon.nettleton@gmail.com>
 
 	PM800 also uses the CME Engine.  Setup the hqv_cme_regs
