@@ -406,36 +406,36 @@ VIAFreeRec(ScrnInfoPtr pScrn)
 
         if (pBIOSInfo->Panel) {
             if (pBIOSInfo->Panel->NativeMode)
-                xfree(pBIOSInfo->Panel->NativeMode);
+                free(pBIOSInfo->Panel->NativeMode);
             if (pBIOSInfo->Panel->CenteredMode)
-                xfree(pBIOSInfo->Panel->CenteredMode);
-            xfree(pBIOSInfo->Panel);
+                free(pBIOSInfo->Panel->CenteredMode);
+            free(pBIOSInfo->Panel);
         }
 
         if (pBIOSInfo->FirstCRTC)
-            xfree(pBIOSInfo->FirstCRTC);
+            free(pBIOSInfo->FirstCRTC);
         if (pBIOSInfo->SecondCRTC)
-            xfree(pBIOSInfo->SecondCRTC);
+            free(pBIOSInfo->SecondCRTC);
         if (pBIOSInfo->Simultaneous)
-            xfree(pBIOSInfo->Simultaneous);
+            free(pBIOSInfo->Simultaneous);
         if (pBIOSInfo->Lvds)
-            xfree(pBIOSInfo->Lvds);
+            free(pBIOSInfo->Lvds);
     }
 
     if (VIAPTR(pScrn)->pVbe)
         vbeFree(VIAPTR(pScrn)->pVbe);
 
     if (pVia->VideoRegs)
-        xfree(pVia->VideoRegs);
+        free(pVia->VideoRegs);
 
     if (((VIARec *) (pScrn->driverPrivate))->pBIOSInfo->TVI2CDev)
         xf86DestroyI2CDevRec((((VIARec *) (pScrn->driverPrivate))->pBIOSInfo->
                               TVI2CDev), TRUE);
-    xfree(((VIARec *) (pScrn->driverPrivate))->pBIOSInfo);
+    free(((VIARec *) (pScrn->driverPrivate))->pBIOSInfo);
 
     VIAUnmapMem(pScrn);
 
-    xfree(pScrn->driverPrivate);
+    free(pScrn->driverPrivate);
     pScrn->driverPrivate = NULL;
 } /* VIAFreeRec */
 
@@ -518,7 +518,7 @@ VIAProbe(DriverPtr drv, int flags)
                                     numDevSections,
                                     drv,
                                     &usedChips);
-    xfree(devSections);
+    free(devSections);
 
     if (numUsed <= 0)
         return FALSE;
@@ -593,11 +593,11 @@ VIAProbe(DriverPtr drv, int flags)
                 }
                 instance++;
             }
-            xfree(pEnt);
+            free(pEnt);
         }
     }
 
-    xfree(usedChips);
+    free(usedChips);
 
     return foundScreen;
 
@@ -825,7 +825,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     pEnt = xf86GetEntityInfo(pScrn->entityList[0]);
 #ifndef XSERVER_LIBPCIACCESS
     if (pEnt->resources) {
-        xfree(pEnt);
+        free(pEnt);
         VIAFreeRec(pScrn);
         return FALSE;
     }
@@ -843,7 +843,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             pPriv = xf86GetEntityPrivate(pScrn->entityList[0], gVIAEntityIndex);
             pVIAEnt = pPriv->ptr;
             if (pVIAEnt->BypassSecondary) {
-                xfree(pEnt);
+                free(pEnt);
                 VIAFreeRec(pScrn);
                 return FALSE;
             }
@@ -884,7 +884,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
      */
 
     if (!xf86SetDepthBpp(pScrn, 0, 0, 0, Support32bppFb)) {
-        xfree(pEnt);
+        free(pEnt);
         VIAFreeRec(pScrn);
         return FALSE;
     } else {
@@ -899,7 +899,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
                 xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                            "Given depth (%d) is not supported by this driver\n",
                            pScrn->depth);
-                xfree(pEnt);
+                free(pEnt);
                 VIAFreeRec(pScrn);
                 return FALSE;
         }
@@ -915,7 +915,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         rgb zeros = { 0, 0, 0 };
 
         if (!xf86SetWeight(pScrn, zeros, zeros)) {
-            xfree(pEnt);
+            free(pEnt);
             VIAFreeRec(pScrn);
             return FALSE;
         } else {
@@ -932,7 +932,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Given default visual"
                        " (%s) is not supported at depth %d.\n",
                        xf86GetVisualName(pScrn->defaultVisual), pScrn->depth);
-            xfree(pEnt);
+            free(pEnt);
             VIAFreeRec(pScrn);
             return FALSE;
         }
@@ -997,7 +997,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 
     xf86DrvMsg(pScrn->scrnIndex, from, "Chipset revision: %d\n", pVia->ChipRev);
 
-    xfree(pEnt);
+    free(pEnt);
 
     /* Detect the amount of installed RAM */
     from = X_PROBED;
@@ -3081,11 +3081,11 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
 
     viaExitAccel(pScreen);
     if (pVia->ShadowPtr) {
-        xfree(pVia->ShadowPtr);
+        free(pVia->ShadowPtr);
         pVia->ShadowPtr = NULL;
     }
     if (pVia->DGAModes) {
-        xfree(pVia->DGAModes);
+        free(pVia->DGAModes);
         pVia->DGAModes = NULL;
     }
 

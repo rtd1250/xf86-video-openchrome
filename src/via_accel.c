@@ -287,7 +287,7 @@ viaSetupCBuffer(ScrnInfoPtr pScrn, ViaCommandBuffer * buf, unsigned size)
 
     buf->pScrn = pScrn;
     buf->bufSize = ((size == 0) ? VIA_DMASIZE : size) >> 2;
-    buf->buf = (CARD32 *) xcalloc(buf->bufSize, sizeof(CARD32));
+    buf->buf = (CARD32 *) calloc(buf->bufSize, sizeof(CARD32));
     if (!buf->buf)
         return BadAlloc;
     buf->waitFlags = 0;
@@ -312,7 +312,7 @@ void
 viaTearDownCBuffer(ViaCommandBuffer * buf)
 {
     if (buf && buf->buf)
-        xfree(buf->buf);
+        free(buf->buf);
     buf->buf = NULL;
 }
 
@@ -2362,7 +2362,7 @@ viaInitExa(ScreenPtr pScreen)
     }
 
     if (!exaDriverInit(pScreen, pExa)) {
-        xfree(pExa);
+        free(pExa);
         return NULL;
     }
 
@@ -2560,7 +2560,7 @@ viaExitAccel(ScreenPtr pScreen)
             }
         }
         if (pVia->dBounce)
-            xfree(pVia->dBounce);
+            free(pVia->dBounce);
 #endif /* XF86DRI */
         if (pVia->scratchAddr) {
             exaOffscreenFree(pScreen, pVia->scratchFBBuffer);
@@ -2569,7 +2569,7 @@ viaExitAccel(ScreenPtr pScreen)
         if (pVia->exaDriverPtr) {
             exaDriverFini(pScreen);
         }
-        xfree(pVia->exaDriverPtr);
+        free(pVia->exaDriverPtr);
         pVia->exaDriverPtr = NULL;
         return;
     }
@@ -2595,7 +2595,7 @@ viaFinishInitAccel(ScreenPtr pScreen)
 
     if (pVia->directRenderingEnabled && pVia->useEXA) {
 
-        pVia->dBounce = xcalloc(VIA_DMA_DL_SIZE * 2, 1);
+        pVia->dBounce = calloc(VIA_DMA_DL_SIZE * 2, 1);
 
         if (!pVia->IsPCI) {
 

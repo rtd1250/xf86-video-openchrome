@@ -230,7 +230,7 @@ ViaVbeSetMode(ScrnInfoPtr pScrn, DisplayModePtr pMode)
                 /* Some cards do not like setting the clock. */
                 xf86ErrorF("...but worked OK without customized "
                            "refresh and dotclock.\n");
-                xfree(data->block);
+                free(data->block);
                 data->block = NULL;
                 data->mode &= ~(1 << 11);
             } else {

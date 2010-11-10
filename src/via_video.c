@@ -591,15 +591,15 @@ viaExitVideo(ScrnInfoPtr pScrn)
                             (viaPortPrivPtr) curAdapt->pPortPrivates->ptr + j,
                             TRUE);
                     }
-                    xfree(curAdapt->pPortPrivates->ptr);
+                    free(curAdapt->pPortPrivates->ptr);
                 }
-                xfree(curAdapt->pPortPrivates);
+                free(curAdapt->pPortPrivates);
             }
-            xfree(curAdapt);
+            free(curAdapt);
         }
     }
     if (allAdaptors)
-        xfree(allAdaptors);
+        free(allAdaptors);
 }
 
 void
@@ -858,7 +858,7 @@ viaStopVideo(ScrnInfoPtr pScrn, pointer data, Bool exit)
     if (exit) {
         ViaSwovSurfaceDestroy(pScrn, pPriv);
         if (pPriv->dmaBounceBuffer)
-            xfree(pPriv->dmaBounceBuffer);
+            free(pPriv->dmaBounceBuffer);
         pPriv->dmaBounceBuffer = 0;
         pPriv->dmaBounceStride = 0;
         pPriv->dmaBounceLines = 0;
@@ -1106,7 +1106,7 @@ viaDmaBlitImage(VIAPtr pVia,
             pPort->dmaBounceStride != bounceStride ||
             pPort->dmaBounceLines != bounceLines) {
             if (pPort->dmaBounceBuffer) {
-                xfree(pPort->dmaBounceBuffer);
+                free(pPort->dmaBounceBuffer);
                 pPort->dmaBounceBuffer = 0;
             }
             size = bounceStride * bounceLines + 16;

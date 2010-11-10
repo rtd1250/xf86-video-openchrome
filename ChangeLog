@@ -1,3 +1,28 @@
+2010-11-10  Bartosz Kosiorek  <gang65@poczta.onet.pl>
+
+    Replace the deprecated functions 
+    xalloc/xrealloc/xfree/xcalloc with 
+    malloc/realloc/free/calloc.
+    Refer to "/xserver/include/os.h"
+
+	* src/via_accel.c: (viaSetupCBuffer), (viaTearDownCBuffer),
+	(viaInitExa), (viaExitAccel), (viaFinishInitAccel):
+	* src/via_dga.c: (VIASetupDGAMode):
+	* src/via_dri.c: (VIAInitVisualConfigs), (VIADRIScreenInit),
+	(VIADRICloseScreen):
+	* src/via_driver.c: (VIAFreeRec), (VIAProbe), (VIAPreInit),
+	(VIACloseScreen):
+	* src/via_memcpy.c: (viaVidCopyInit):
+	* src/via_swov.c: (Upd_Video):
+	* src/via_vbe.c: (ViaVbeSetMode):
+	* src/via_video.c: (viaExitVideo), (viaStopVideo),
+	(viaDmaBlitImage):
+	* src/via_xvmc.c: (cleanupViaXvMC), (ViaCleanupXVMC),
+	(ViaXvMCCreateContext), (ViaXvMCCreateSurface),
+	(ViaXvMCCreateSubpicture), (ViaXvMCDestroyContext),
+	(ViaXvMCDestroySurface), (ViaXvMCDestroySubpicture),
+	(viaXvMCInitXv):
+
 2010-10-24  Bartosz Kosiorek  <gang65@poczta.onet.pl>
 
 	Siragon ML-6200 laptop support

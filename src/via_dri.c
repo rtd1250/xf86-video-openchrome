@@ -432,17 +432,17 @@ VIAInitVisualConfigs(ScreenPtr pScreen)
     if (pScrn->bitsPerPixel == 16 || pScrn->bitsPerPixel == 32) {
         numConfigs = 12;
         if (!(pConfigs = (__GLXvisualConfig *)
-                         xcalloc(sizeof(__GLXvisualConfig), numConfigs)))
+                         calloc(sizeof(__GLXvisualConfig), numConfigs)))
             return FALSE;
         if (!(pVIAConfigs = (VIAConfigPrivPtr)
-                            xcalloc(sizeof(VIAConfigPrivRec), numConfigs))) {
-            xfree(pConfigs);
+                            calloc(sizeof(VIAConfigPrivRec), numConfigs))) {
+            free(pConfigs);
             return FALSE;
         }
         if (!(pVIAConfigPtrs = (VIAConfigPrivPtr *)
-                               xcalloc(sizeof(VIAConfigPrivPtr), numConfigs))) {
-            xfree(pConfigs);
-            xfree(pVIAConfigs);
+                               calloc(sizeof(VIAConfigPrivPtr), numConfigs))) {
+            free(pConfigs);
+            free(pVIAConfigs);
             return FALSE;
         }
         for (i = 0; i < numConfigs; i++)
@@ -600,7 +600,7 @@ VIADRIScreenInit(ScreenPtr pScreen)
             pDRIInfo->clientDriverName = VIAClientDriverName;
             break;
     }
-    pDRIInfo->busIdString = xalloc(64);
+    pDRIInfo->busIdString = malloc(64);
     sprintf(pDRIInfo->busIdString, "PCI:%d:%d:%d",
 #ifdef XSERVER_LIBPCIACCESS
             ((pVia->PciInfo->domain << 8) | pVia->PciInfo->bus),
@@ -647,7 +647,7 @@ VIADRIScreenInit(ScreenPtr pScreen)
     pDRIInfo->SAREASize = SAREA_MAX;
 #endif
 
-    if (!(pVIADRI = (VIADRIPtr) xcalloc(sizeof(VIADRIRec), 1))) {
+    if (!(pVIADRI = (VIADRIPtr) calloc(sizeof(VIADRIRec), 1))) {
         DRIDestroyInfoRec(pVia->pDRIInfo);
         pVia->pDRIInfo = NULL;
         return FALSE;
@@ -666,7 +666,7 @@ VIADRIScreenInit(ScreenPtr pScreen)
     if (!DRIScreenInit(pScreen, pDRIInfo, &pVia->drmFD)) {
         xf86DrvMsg(pScreen->myNum, X_ERROR,
                    "[dri] DRIScreenInit failed.  Disabling DRI.\n");
-        xfree(pDRIInfo->devPrivate);
+        free(pDRIInfo->devPrivate);
         pDRIInfo->devPrivate = NULL;
         DRIDestroyInfoRec(pVia->pDRIInfo);
         pVia->pDRIInfo = NULL;
@@ -749,7 +749,7 @@ VIADRICloseScreen(ScreenPtr pScreen)
     if (pVia->pDRIInfo) {
         if ((pVIADRI = (VIADRIPtr) pVia->pDRIInfo->devPrivate)) {
             VIADRIIrqExit(pScrn, pVIADRI);
-            xfree(pVIADRI);
+            free(pVIADRI);
             pVia->pDRIInfo->devPrivate = NULL;
         }
         DRIDestroyInfoRec(pVia->pDRIInfo);
@@ -757,11 +757,11 @@ VIADRICloseScreen(ScreenPtr pScreen)
     }
 
     if (pVia->pVisualConfigs) {
-        xfree(pVia->pVisualConfigs);
+        free(pVia->pVisualConfigs);
         pVia->pVisualConfigs = NULL;
     }
     if (pVia->pVisualConfigsPriv) {
-        xfree(pVia->pVisualConfigsPriv);
+        free(pVia->pVisualConfigsPriv);
         pVia->pVisualConfigsPriv = NULL;
     }
 }

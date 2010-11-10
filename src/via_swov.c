@@ -1820,7 +1820,7 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
     unsigned long dwOffset = 0, fetch = 0, tmp = 0;
     unsigned long proReg = 0;
 
-    DBG_DD(ErrorF("videoflag=%p\n", videoFlag));
+    DBG_DD(ErrorF("videoflag=%ld\n", videoFlag));
 
     if (pVia->ChipId == PCI_CHIP_VT3259 && !(videoFlag & VIDEO_1_INUSE))
         proReg = PRO_HQV1_OFFSET;
