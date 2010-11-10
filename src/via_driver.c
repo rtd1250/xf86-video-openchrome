@@ -2940,7 +2940,7 @@ VIAInternalScreenInit(int scrnIndex, ScreenPtr pScreen)
 
     if (pVia->shadowFB) {
         pVia->ShadowPitch = BitmapBytePad(pScrn->bitsPerPixel * width);
-        pVia->ShadowPtr = xalloc(pVia->ShadowPitch * shadowHeight);
+        pVia->ShadowPtr = malloc(pVia->ShadowPitch * shadowHeight);
         displayWidth = pVia->ShadowPitch / (pScrn->bitsPerPixel >> 3);
         FBStart = pVia->ShadowPtr;
     } else {

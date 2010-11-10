@@ -660,7 +660,7 @@ viaInitVideo(ScreenPtr pScreen)
 
     DBG_DD(ErrorF(" via_video.c : num_adaptors : %d\n", num_adaptors));
     if (newAdaptors) {
-        allAdaptors = xalloc((num_adaptors + num_new) *
+        allAdaptors = malloc((num_adaptors + num_new) *
                 sizeof(XF86VideoAdaptorPtr *));
         if (allAdaptors) {
             if (num_adaptors)

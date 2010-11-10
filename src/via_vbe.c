@@ -322,7 +322,7 @@ ViaVbeSaveRestore(ScrnInfoPtr pScrn, vbeSaveRestoreFunction function)
                 && (function == MODE_SAVE)) {
                 /* Do not rely on the memory not being touched. */
                 if (pVia->vbeMode.pstate == NULL)
-                    pVia->vbeMode.pstate = xalloc(pVia->vbeMode.stateSize);
+                    pVia->vbeMode.pstate = malloc(pVia->vbeMode.stateSize);
                 memcpy(pVia->vbeMode.pstate, pVia->vbeMode.state,
                        pVia->vbeMode.stateSize);
             }
