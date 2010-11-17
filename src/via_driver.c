@@ -174,10 +174,10 @@ static SymTabRec VIAChipsets[] = {
     {VIA_K8M800,   "K8M800/K8N800"},
     {VIA_PM800,    "PM800/PM880/CN400"},
     {VIA_VM800,    "VM800/P4M800Pro/VN800/CN700"},
-    {VIA_K8M890,   "K8M890/K8N890"},
-    {VIA_P4M900,   "P4M900/VN896/CN896"},
     {VIA_CX700,    "CX700/VX700"},
+    {VIA_K8M890,   "K8M890/K8N890"},
     {VIA_P4M890,   "P4M890"},
+    {VIA_P4M900,   "P4M900/VN896/CN896"},
     {VIA_VX800,    "VX800/VX820"},
     {VIA_VX855,    "VX855/VX875"},
     {-1,            NULL }
@@ -190,10 +190,10 @@ static PciChipsets VIAPciChipsets[] = {
     {VIA_K8M800,   PCI_CHIP_VT3204,    VIA_RES_SHARED},
     {VIA_PM800,    PCI_CHIP_VT3259,    VIA_RES_SHARED},
     {VIA_VM800,    PCI_CHIP_VT3314,    VIA_RES_SHARED},
-    {VIA_K8M890,   PCI_CHIP_VT3336,    VIA_RES_SHARED},
-    {VIA_P4M900,   PCI_CHIP_VT3364,    VIA_RES_SHARED},
     {VIA_CX700,    PCI_CHIP_VT3324,    VIA_RES_SHARED},
+    {VIA_K8M890,   PCI_CHIP_VT3336,    VIA_RES_SHARED},
     {VIA_P4M890,   PCI_CHIP_VT3327,    VIA_RES_SHARED},
+    {VIA_P4M900,   PCI_CHIP_VT3364,    VIA_RES_SHARED},
     {VIA_VX800,    PCI_CHIP_VT3353,    VIA_RES_SHARED},
     {VIA_VX855,    PCI_CHIP_VT3409,    VIA_RES_SHARED},
     {-1,           -1,                 VIA_RES_UNDEF}
@@ -737,9 +737,18 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
             /* and with Xv after hibernate #240                */
             /* FIXME Add panel support for this chipset        */
             break;
+        case VIA_CX700:
+            pVia->VideoEngine = VIDEO_ENGINE_CME;
+            pVia->swov.maxWInterp = 1920;
+            pVia->swov.maxHInterp = 1080;
+            break;
         case VIA_K8M890:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
             pVia->agpEnable = FALSE;
+            pVia->dmaXV = FALSE;
+            break;
+        case VIA_P4M890:
+            pVia->VideoEngine = VIDEO_ENGINE_CME;
             pVia->dmaXV = FALSE;
             break;
         case VIA_P4M900:
@@ -750,15 +759,7 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
             pVia->dmaXV = FALSE;
             pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP0; 
             break;
-        case VIA_CX700:
-            pVia->VideoEngine = VIDEO_ENGINE_CME;
-            pVia->swov.maxWInterp = 1920;
-            pVia->swov.maxHInterp = 1080;
-            break;
-        case VIA_P4M890:
-            pVia->VideoEngine = VIDEO_ENGINE_CME;
-            pVia->dmaXV = FALSE;
-            break;
+
         case VIA_VX800:
         case VIA_VX855:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
@@ -1641,6 +1642,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         }
 
     } else {
+        int max_pitch, max_height;
         /* Add own modes. */
         ViaModesAttach(pScrn, pScrn->monitor);
 
@@ -1656,6 +1658,26 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         clockRanges->clockIndex = -1;
         clockRanges->interlaceAllowed = TRUE;
         clockRanges->doubleScanAllowed = FALSE;
+
+        switch (pVia->Chipset) {
+            case VIA_CLE266:
+            case VIA_KM400:
+            case VIA_K8M800:
+            case VIA_PM800:
+            case VIA_VM800:
+                max_pitch = 3344;
+                max_height = 2508;
+            case VIA_CX700:
+            case VIA_K8M890:
+            case VIA_P4M890:
+            case VIA_P4M900:
+                max_pitch = 8192/(pScrn->bitsPerPixel >> 3)-1;
+                max_height = max_pitch;
+                break;
+            default:
+                max_pitch = 16384/(pScrn->bitsPerPixel >> 3)-1;
+                max_height = max_pitch;        
+        }
 
         /*
          * xf86ValidateModes will check that the mode HTotal and VTotal values
@@ -1683,10 +1705,10 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
                               clockRanges,               /* list of clock ranges */
                               NULL,     /* list of line pitches */
                               256,      /* minimum line pitch */
-                              3344,     /* maximum line pitch */
+                              max_pitch,     /* maximum line pitch */
                               16 * 8,   /* pitch increment (in bits), we just want 16 bytes alignment */
-                              128,      /* min height */
-                              2508,     /* max height */
+                              128,      /* min virtual height */
+                              max_height,     /* maximum virtual height */
                               pScrn->display->virtualX, /* virtual width */
                               pScrn->display->virtualY, /* virtual height */
                               pVia->videoRambytes,      /* apertureSize */
