@@ -1065,9 +1065,16 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             }
     }
 
-    if (from == X_PROBED)
+    if (from == X_PROBED) {
         xf86DrvMsg(pScrn->scrnIndex, from,
                    "Probed amount of VideoRAM = %d kB\n", pScrn->videoRam);
+
+        if (pScrn->videoRam < 16384) {
+            xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                       "Memory size detection failed: using 16 MB.\n");
+            pScrn->videoRam = 16 << 10;
+        }
+    }
 
     if (!VIASetupDefaultOptions(pScrn)) {
         VIAFreeRec(pScrn);
