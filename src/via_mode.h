@@ -34,6 +34,7 @@
 #define VIA_BW_DDR200   394000000
 #define VIA_BW_DDR400   553000000 /* > 1920x1200@60Hz@32bpp */
 #define VIA_BW_DDR667   922000000
+#define VIA_BW_DDR1066  922000000
 
 union pllparams {
     struct {

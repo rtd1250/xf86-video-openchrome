@@ -325,10 +325,11 @@ ViaInitXVMC(ScreenPtr pScreen)
 
     if ((pVia->Chipset == VIA_KM400) ||
         (pVia->Chipset == VIA_CX700) ||
+        (pVia->Chipset == VIA_K8M890) ||
+        (pVia->Chipset == VIA_P4M900) ||
         (pVia->Chipset == VIA_VX800) ||
         (pVia->Chipset == VIA_VX855) ||
-        (pVia->Chipset == VIA_K8M890) ||
-        (pVia->Chipset == VIA_P4M900)) {
+        (pVia->Chipset == VIA_VX900)) {
         xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
                    "[XvMC] XvMC is not supported on this chipset.\n");
         return;

@@ -143,6 +143,7 @@ static const struct pci_id_match via_device_match[] = {
    VIA_DEVICE_MATCH (PCI_CHIP_VT3327, 0 ),
    VIA_DEVICE_MATCH (PCI_CHIP_VT3353, 0 ),
    VIA_DEVICE_MATCH (PCI_CHIP_VT3409, 0 ),
+   VIA_DEVICE_MATCH (PCI_CHIP_VT3410, 0 ),
     { 0, 0, 0 },
 };
 
@@ -180,6 +181,7 @@ static SymTabRec VIAChipsets[] = {
     {VIA_P4M900,   "P4M900/VN896/CN896"},
     {VIA_VX800,    "VX800/VX820"},
     {VIA_VX855,    "VX855/VX875"},
+    {VIA_VX900,    "VX900"},
     {-1,            NULL }
 };
 
@@ -196,6 +198,7 @@ static PciChipsets VIAPciChipsets[] = {
     {VIA_P4M900,   PCI_CHIP_VT3364,    VIA_RES_SHARED},
     {VIA_VX800,    PCI_CHIP_VT3353,    VIA_RES_SHARED},
     {VIA_VX855,    PCI_CHIP_VT3409,    VIA_RES_SHARED},
+    {VIA_VX900,    PCI_CHIP_VT3410,    VIA_RES_SHARED},
     {-1,           -1,                 VIA_RES_UNDEF}
 };
 
@@ -760,6 +763,7 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
 
         case VIA_VX800:
         case VIA_VX855:
+        case VIA_VX900:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
             pVia->agpEnable = FALSE;
             pVia->dmaXV = FALSE;
@@ -865,6 +869,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             pVIAEnt->HasSecondary = FALSE;
             pVIAEnt->RestorePrimary = FALSE;
             pVIAEnt->IsSecondaryRestored = FALSE;
+           
         }
     } else {
         pVia->sharedData = xnfcalloc(sizeof(ViaSharedRec), 1);
@@ -1034,6 +1039,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         case VIA_CX700:
         case VIA_VX800:
         case VIA_VX855:
+        case VIA_VX900:
 #ifdef XSERVER_LIBPCIACCESS
             pci_device_cfg_read_u8(vgaDevice, &videoRam, 0xA1);
 #else
@@ -1591,10 +1597,13 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     } else {
 
         if (pVia->pI2CBus1) {
-            pVia->DDC1 = xf86DoEDID_DDC2(pScrn->scrnIndex, pVia->pI2CBus1);
+            pVia->DDC1 = xf86DoEEDID(pScrn->scrnIndex, pVia->pI2CBus1, TRUE);
             if (pVia->DDC1) {
                 xf86PrintEDID(pVia->DDC1);
                 xf86SetDDCproperties(pScrn, pVia->DDC1);
+                DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                    "DDC pI2CBus1 detected a %s\n", DIGITAL(pVia->DDC1->features.input_type) ?
+                    "DFP" : "CRT"));
             }
         }
     }
@@ -1897,6 +1906,7 @@ VIALeaveVT(int scrnIndex, int flags)
         case VIA_P4M900:
         case VIA_VX800:
         case VIA_VX855:
+        case VIA_VX900:
             break;
         default:
             hwp->writeSeq(hwp, 0x1A, pVia->SavedReg.SR1A | 0x40);
@@ -2054,6 +2064,9 @@ VIASave(ScrnInfoPtr pScrn)
                 Regs->SR4C = hwp->readSeq(hwp, 0x4C);
                 break;
         }
+
+        /* Save Preemptive Arbiter Control Register */
+        Regs->SR4C = hwp->readSeq(hwp, 0x4D);
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Crtc...\n"));
 
         Regs->CR13 = hwp->readCrtc(hwp, 0x13);
@@ -2111,6 +2124,7 @@ VIASave(ScrnInfoPtr pScrn)
             case VIA_CX700:
             case VIA_VX800:
             case VIA_VX855:
+            case VIA_VX900:
                 Regs->CRD2 = hwp->readCrtc(hwp, 0xD2);
                 break;
         }
@@ -2220,6 +2234,15 @@ VIARestore(ScrnInfoPtr pScrn)
             break;
     }
 
+    /* Restore Preemptive Arbiter Control Register
+     * VX800 and VX855 should restore this register too,
+     * but I don't do that for I don't want to affect any
+     * chips now.
+     */
+    if (pVia->Chipset == VIA_VX900) {
+        hwp->writeSeq(hwp, 0x4D, Regs->SR4D);
+    }
+
     /* Reset dotclocks. */
     ViaSeqMask(hwp, 0x40, 0x06, 0x06);
     ViaSeqMask(hwp, 0x40, 0x00, 0x06);
@@ -2274,6 +2297,7 @@ VIARestore(ScrnInfoPtr pScrn)
         case VIA_CX700:
         case VIA_VX800:
         case VIA_VX855:
+        case VIA_VX900:
             /* LVDS Control Register */
             hwp->writeCrtc(hwp, 0xD2, Regs->CRD2);
             break;
@@ -2303,6 +2327,7 @@ ViaMMIOEnable(ScrnInfoPtr pScrn)
         case VIA_P4M900:
         case VIA_VX800:
         case VIA_VX855:
+        case VIA_VX900:
             ViaSeqMask(hwp, 0x1A, 0x08, 0x08);
             break;
         default:
@@ -2326,6 +2351,7 @@ ViaMMIODisable(ScrnInfoPtr pScrn)
         case VIA_P4M900:
         case VIA_VX800:
         case VIA_VX855:
+        case VIA_VX900:
             ViaSeqMask(hwp, 0x1A, 0x00, 0x08);
             break;
         default:
@@ -2442,10 +2468,18 @@ VIAMapFB(ScrnInfoPtr pScrn)
     VIAPtr pVia = VIAPTR(pScrn);
 
 #ifdef XSERVER_LIBPCIACCESS
-    pVia->FrameBufferBase = pVia->PciInfo->regions[0].base_addr;
+    if (pVia->Chipset == VIA_VX900) {
+        pVia->FrameBufferBase = pVia->PciInfo->regions[2].base_addr;
+    } else {
+        pVia->FrameBufferBase = pVia->PciInfo->regions[0].base_addr;
+    }
     int err;
 #else
-    pVia->FrameBufferBase = pVia->PciInfo->memBase[0];
+    if (pVia->Chipset == VIA_VX900) {
+        pVia->FrameBufferBase = pVia->PciInfo->memBase[2];
+    } else {
+        pVia->FrameBufferBase = pVia->PciInfo->memBase[0];
+    }
 #endif
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAMapFB\n"));
@@ -3029,6 +3063,7 @@ VIAWriteMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
                 case VIA_P4M900:
                 case VIA_VX800:
                 case VIA_VX855:
+                case VIA_VX900:
                     /*
                      * Since we are using virtual, we need to adjust
                      * the offset to match the framebuffer alignment.
@@ -3075,6 +3110,7 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
             case VIA_P4M900:
             case VIA_VX800:
             case VIA_VX855:
+            case VIA_VX900:
                 break;
             default :
                 hwp->writeSeq(hwp, 0x1A, pVia->SavedReg.SR1A | 0x40);

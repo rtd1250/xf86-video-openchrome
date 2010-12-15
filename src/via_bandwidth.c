@@ -263,6 +263,14 @@ ViaSetPrimaryFIFO(ScrnInfoPtr pScrn, DisplayModePtr mode)
             hwp->writeSeq(hwp, 0x18, 0x90); /* 320/4   = 80   = 0x50 */
             hwp->writeSeq(hwp, 0x22, 0x28); /* 160/4   = 40   = 0x28 */
             break;
+        case VIA_VX900:
+            hwp->writeSeq(hwp, 0x17, 0xC7); /* 400/2-1 = 199  = 0xC7 */
+            /* Formula for {SR16,0,5},{SR16,7,7} is: (0x50 & 0x3F) | ((0x50 & 0x40) << 1) = 0x90 */
+            hwp->writeSeq(hwp, 0x16, 0x90); /* 320/4   = 80   = 0x50 */
+            /* Formula for {SR18,0,5},{SR18,7,7} is: (0x50 & 0x3F) | ((0x50 & 0x40) << 1) = 0x90 */
+            hwp->writeSeq(hwp, 0x18, 0x90); /* 320/4   = 80   = 0x50 */
+            hwp->writeSeq(hwp, 0x22, 0x28); /* 160/4   = 40   = 0x28 */
+            break;
         default:
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "ViaSetPrimaryFIFO: "
                        "Chipset %d not implemented\n", pVia->Chipset);
@@ -473,6 +481,23 @@ ViaSetSecondaryFIFO(ScrnInfoPtr pScrn, DisplayModePtr mode)
             /* {CR92,0,3},{CR95,0,2} : 160/4 = 0x28 */
             ViaCrtcMask(hwp, 0x92, 0x08, 0x08); /* (0x28 & 0x0F) = 0x08 */
             ViaCrtcMask(hwp, 0x95, 0x02, 0x07); /* ((0x28 & 0x70) >> 4)) = 0x02 */
+            /* {CR94,0,6} : 320/4 = 0x50 */
+            if ((mode->HDisplay >= 1400) && (pScrn->bitsPerPixel == 32))
+                ViaCrtcMask(hwp, 0x94, 0x08, 0x7F);
+            else
+                ViaCrtcMask(hwp, 0x94, 0x08, 0x7F);
+            break;
+        case VIA_VX900:
+            /* {CR68,4,7},{CR94,7,7},{CR95,7,7} : 192/8-1 = 23 = 0x17 */
+            ViaCrtcMask(hwp, 0x68, 0x70, 0xF0); /* ((0x17 & 0x0F) << 4)) = 0x70 */
+            ViaCrtcMask(hwp, 0x94, 0x80, 0x80); /* ((0x17 & 0x10) << 3)) = 0x80 */
+            ViaCrtcMask(hwp, 0x95, 0x00, 0x80); /* ((0x17 & 0x20) << 2)) = 0x00 */
+            /* {CR68,0,3},{CR95,4,6} : 160/4 = 0x28 */
+            ViaCrtcMask(hwp, 0x68, 0x08, 0x0F); /* (0x28 & 0x0F) = 0x08 */
+            ViaCrtcMask(hwp, 0x95, 0x20, 0x70); /* (0x28 & 0x70) = 0x20 */
+            /* {CR92,0,3},{CR95,0,2} : 160/4 = 0x28 */
+            ViaCrtcMask(hwp, 0x92, 0x08, 0x08); /* (0x28 & 0x0F) = 0x08 */
+            ViaCrtcMask(hwp, 0x95, 0x02, 0x07); /* ((0x28 & 0x70) >> 4)) = 0x2 */
             /* {CR94,0,6} : 320/4 = 0x50 */
             if ((mode->HDisplay >= 1400) && (pScrn->bitsPerPixel == 32))
                 ViaCrtcMask(hwp, 0x94, 0x08, 0x7F);
