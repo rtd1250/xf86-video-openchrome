@@ -1,3 +1,10 @@
+2010-12-15  Bartosz Kosiorek  <gang65@poczta.onet.pl>
+
+	Enable the new mode switch and panel support on K8M800 and VM800 chipsets
+
+	* src/via_driver.c: (VIASetupDefaultOptions), (VIAPreInit):
+	* src/via_mode.c: (ViaModeSet):
+
 2010-11-10  Bartosz Kosiorek  <gang65@poczta.onet.pl>
 
     Replace the deprecated functions 

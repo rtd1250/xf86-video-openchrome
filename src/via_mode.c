@@ -1734,6 +1734,13 @@ ViaModeSet(ScrnInfoPtr pScrn, DisplayModePtr mode)
         ViaDisplayDisableCRT(pScrn);
     }
 
+    // Enable panel support on K8M800 and VM800 chipset
+    // See: https://bugs.launchpad.net/openchrome/+bug/186103
+    if (pBIOSInfo->Panel->IsActive &&
+       ((pVia->Chipset == VIA_K8M800) || 
+        (pVia->Chipset == VIA_VM800)))
+        ViaModeFirstCRTC(pScrn, mode);
+
     if (pBIOSInfo->Simultaneous->IsActive) {
         ViaDisplayEnableSimultaneous(pScrn);
     } else {

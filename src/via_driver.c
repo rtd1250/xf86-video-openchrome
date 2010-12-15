@@ -725,7 +725,6 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
             break;
         case VIA_K8M800:
             pVia->DRIIrqEnable = FALSE;
-            pVia->UseLegacyModeSwitch = TRUE;
             break;
         case VIA_PM800:
             /* Use new mode switch to resolve many resolution and display bugs (switch to console) */
@@ -735,7 +734,6 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
         case VIA_VM800:
             /* New mode switch resolve bug with gamma set #282 */
             /* and with Xv after hibernate #240                */
-            /* FIXME Add panel support for this chipset        */
             break;
         case VIA_CX700:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
@@ -1614,16 +1612,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     if (!pVia->UseLegacyModeSwitch) {
         if (pBIOSInfo->Panel->IsActive)
             ViaPanelPreInit(pScrn);
-    }
-
-    if (pBIOSInfo->Panel->IsActive &&
-        ((pVia->Chipset == VIA_K8M800) ||
-         (pVia->Chipset == VIA_VM800))) {
-        xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Panel on K8M800 and "
-                   "VM800 is currently not supported.\n");
-        xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                   "Using VBE to set modes to work around this.\n");
-        pVia->useVBEModes = TRUE;
     }
 
     pVia->pVbe = NULL;
