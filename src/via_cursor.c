@@ -73,6 +73,7 @@ viaHWCursorInit(ScreenPtr pScreen)
 			pVia->CursorSize = ((pVia->CursorMaxWidth * pVia->CursorMaxHeight) / 8) * 2;
 			break;
 		case VIA_VX900:
+			/* FIXME : ARGB cursor should work */
 			pVia->CursorARGBSupported = FALSE;
 			pVia->CursorMaxWidth = 64;
 			pVia->CursorMaxHeight = 64;

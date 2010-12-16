@@ -1252,7 +1252,7 @@ viaInitXAA(ScreenPtr pScreen)
                              HARDWARE_CLIP_COLOR_8x8_FILL |
                              HARDWARE_CLIP_SCREEN_TO_SCREEN_COLOR_EXPAND | 0);
 
-    if (pVia->Chipset != VIA_VX855 || pVia->Chipset != VIA_VX900)
+    if (pVia->Chipset != VIA_VX855 && pVia->Chipset != VIA_VX900)
     	xaaptr->ClippingFlags |= (HARDWARE_CLIP_SOLID_FILL |
                                   HARDWARE_CLIP_SOLID_LINE |
                                   HARDWARE_CLIP_DASHED_LINE);
