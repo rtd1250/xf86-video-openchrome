@@ -2066,7 +2066,7 @@ VIASave(ScrnInfoPtr pScrn)
         }
 
         /* Save Preemptive Arbiter Control Register */
-        Regs->SR4C = hwp->readSeq(hwp, 0x4D);
+        Regs->SR4D = hwp->readSeq(hwp, 0x4D);
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Crtc...\n"));
 
         Regs->CR13 = hwp->readCrtc(hwp, 0x13);
