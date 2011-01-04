@@ -357,7 +357,6 @@ ViaI2CScan(I2CBusPtr Bus)
 }
 #endif /* HAVE_DEBUG */
 
-
 void
 ViaI2CInit(ScrnInfoPtr pScrn)
 {
@@ -386,4 +385,22 @@ ViaI2CInit(ScrnInfoPtr pScrn)
             ViaI2CScan(pVia->pI2CBus3);
     }
 #endif
+}
+
+static void
+VIAProbeDDC(ScrnInfoPtr pScrn, int index)
+{
+    vbeInfoPtr pVbe;
+
+    if (xf86LoadSubModule(pScrn, "vbe")) {
+        /* FIXME This line should be replaced with:
+
+           pVbe = VBEExtendedInit(NULL, index, 0);
+
+           for XF86 version > 4.2.99
+        */
+        pVbe = VBEInit(NULL, index);
+        ConfiguredMonitor = vbeDoEDID(pVbe, NULL);
+        vbeFree(pVbe);
+    }
 }

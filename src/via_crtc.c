@@ -94,6 +94,178 @@ ViaPreInitCRTCConfig(ScrnInfoPtr pScrn)
      xf86CrtcConfigInit (pScrn, &via_xf86crtc_config_funcs);
 }
 
+void
+VIALoadRgbLut(ScrnInfoPtr pScrn, int numColors, int *indices, LOCO *colors,
+              VisualPtr pVisual)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    int i, j, index;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIALoadRgbLut\n"));
+
+    hwp->enablePalette(hwp);
+    hwp->writeDacMask(hwp, 0xFF);
+
+    /* We need the same palette contents for both 16 and 24 bits, but X doesn't
+     * play: X's colormap handling is hopelessly intertwined with almost every
+     * X subsystem.  So we just space out RGB values over the 256*3. */
+
+    switch (pScrn->bitsPerPixel) {
+        case 16:
+            for (i = 0; i < numColors; i++) {
+                index = indices[i];
+                hwp->writeDacWriteAddr(hwp, index * 4);
+                for (j = 0; j < 4; j++) {
+                    hwp->writeDacData(hwp, colors[index / 2].red);
+                    hwp->writeDacData(hwp, colors[index].green);
+                    hwp->writeDacData(hwp, colors[index / 2].blue);
+                }
+            }
+            break;
+        case 8:
+        case 24:
+        case 32:
+            for (i = 0; i < numColors; i++) {
+                index = indices[i];
+                hwp->writeDacWriteAddr(hwp, index);
+                hwp->writeDacData(hwp, colors[index].red);
+                hwp->writeDacData(hwp, colors[index].green);
+                hwp->writeDacData(hwp, colors[index].blue);
+            }
+            break;
+        default:
+            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                       "Unsupported bitdepth: %d\n", pScrn->bitsPerPixel);
+            break;
+    }
+    hwp->disablePalette(hwp);
+}
+
+void
+VIALoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
+               LOCO *colors, VisualPtr pVisual)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+
+    int i, index;
+    int SR1A, SR1B, CR67, CR6A;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIALoadPalette: numColors: %d\n", numColors));
+
+    if (pScrn->bitsPerPixel != 8) {
+
+        if (pBIOSInfo->FirstCRTC->IsActive) {
+
+            switch (pVia->Chipset) {
+                case VIA_CLE266:
+                case VIA_KM400:
+                    ViaSeqMask(hwp, 0x16, 0x80, 0x80);
+                    break;
+                default:
+                    ViaCrtcMask(hwp, 0x33, 0x80, 0x80);
+                    break;
+            }
+
+            ViaSeqMask(hwp, 0x1A, 0x00, 0x01);
+            VIALoadRgbLut(pScrn, numColors, indices, colors, pVisual);
+        }
+
+        /* If secondary is enabled, adjust its palette too. */
+        if (pBIOSInfo->SecondCRTC->IsActive) {
+            if (!(pVia->Chipset == VIA_CLE266
+                  && CLE266_REV_IS_AX(pVia->ChipRev))) {
+                ViaSeqMask(hwp, 0x1A, 0x01, 0x01);
+                ViaCrtcMask(hwp, 0x6A, 0x02, 0x02);
+                switch (pVia->Chipset) {
+                    case VIA_CLE266:
+                    case VIA_KM400:
+                    case VIA_K8M800:
+                    case VIA_PM800:
+                        break;
+                    default:
+                        ViaCrtcMask(hwp, 0x6A, 0x20, 0x20);
+                        break;
+                }
+                VIALoadRgbLut(pScrn, numColors, indices, colors, pVisual);
+            }
+        }
+
+    } else {
+
+        SR1A = hwp->readSeq(hwp, 0x1A);
+        SR1B = hwp->readSeq(hwp, 0x1B);
+        CR67 = hwp->readCrtc(hwp, 0x67);
+        CR6A = hwp->readCrtc(hwp, 0x6A);
+
+        if (pBIOSInfo->SecondCRTC->IsActive) {
+            ViaSeqMask(hwp, 0x1A, 0x01, 0x01);
+            ViaSeqMask(hwp, 0x1B, 0x80, 0x80);
+            ViaCrtcMask(hwp, 0x67, 0x00, 0xC0);
+            ViaCrtcMask(hwp, 0x6A, 0xC0, 0xC0);
+        }
+
+        for (i = 0; i < numColors; i++) {
+            index = indices[i];
+            hwp->writeDacWriteAddr(hwp, index);
+            hwp->writeDacData(hwp, colors[index].red);
+            hwp->writeDacData(hwp, colors[index].green);
+            hwp->writeDacData(hwp, colors[index].blue);
+        }
+
+        if (pBIOSInfo->SecondCRTC->IsActive) {
+            hwp->writeSeq(hwp, 0x1A, SR1A);
+            hwp->writeSeq(hwp, 0x1B, SR1B);
+            hwp->writeCrtc(hwp, 0x67, CR67);
+            hwp->writeCrtc(hwp, 0x6A, CR6A);
+
+            /* Screen 0 palette was changed by mode setting of Screen 1,
+             * so load it again. */
+            for (i = 0; i < numColors; i++) {
+                index = indices[i];
+                hwp->writeDacWriteAddr(hwp, index);
+                hwp->writeDacData(hwp, colors[index].red);
+                hwp->writeDacData(hwp, colors[index].green);
+                hwp->writeDacData(hwp, colors[index].blue);
+            }
+        }
+    }
+}
+
+static void
+ViaGammaDisable(ScrnInfoPtr pScrn)
+{
+
+    VIAPtr pVia = VIAPTR(pScrn);
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    switch (pVia->Chipset) {
+        case VIA_CLE266:
+        case VIA_KM400:
+            ViaSeqMask(hwp, 0x16, 0x00, 0x80);
+            break;
+        default:
+            ViaCrtcMask(hwp, 0x33, 0x00, 0x80);
+            break;
+    }
+
+    /* Disable gamma on secondary */
+    /* This is needed or the hardware will lockup */
+    ViaSeqMask(hwp, 0x1A, 0x00, 0x01);
+    ViaCrtcMask(hwp, 0x6A, 0x00, 0x02);
+    switch (pVia->Chipset) {
+        case VIA_CLE266:
+        case VIA_KM400:
+        case VIA_K8M800:
+        case VIA_PM800:
+            break;
+        default:
+            ViaCrtcMask(hwp, 0x6A, 0x00, 0x20);
+            break;
+    }
+}
 
 void
 ViaCRTCInit(ScrnInfoPtr pScrn)

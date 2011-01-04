@@ -61,6 +61,111 @@ static ViaPanelModeRec ViaPanelNativeModes[] = {
     {800, 480}     /* 0x13 General 8x4 panel use this setting */
 };
 
+Bool
+VIAGetRec(ScrnInfoPtr pScrn)
+{
+    Bool ret;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAGetRec\n"));
+
+    ret = FALSE;
+    if (pScrn->driverPrivate)
+        return TRUE;
+
+    /* allocate VIARec */
+    pScrn->driverPrivate = xnfcalloc(sizeof(VIARec), 1);
+    VIAPtr pVia = ((VIARec *) (pScrn->driverPrivate));
+
+    if (pVia) {
+
+        pVia->pBIOSInfo = xnfcalloc(sizeof(VIABIOSInfoRec), 1);
+        VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+
+        if (pBIOSInfo) {
+            pBIOSInfo->scrnIndex = pScrn->scrnIndex;
+            pBIOSInfo->TVI2CDev = NULL;
+
+            pBIOSInfo->Panel =
+                    (ViaPanelInfoPtr) xnfcalloc(sizeof(ViaPanelInfoRec), 1);
+            if (pBIOSInfo->Panel) {
+                pBIOSInfo->Panel->NativeModeIndex = VIA_PANEL_INVALID;
+                pBIOSInfo->Panel->NativeMode =
+                        (ViaPanelModePtr) xnfcalloc(sizeof(ViaPanelModeRec), 1);
+                pBIOSInfo->Panel->CenteredMode =
+                        (DisplayModePtr) xnfcalloc(sizeof(DisplayModeRec), 1);
+                pBIOSInfo->Lvds =
+                        (ViaLVDSInfoPtr) xnfcalloc(sizeof(ViaLVDSInfoRec), 1);
+                pBIOSInfo->FirstCRTC =
+                        (ViaCRTCInfoPtr) xnfcalloc(sizeof(ViaCRTCInfoRec), 1);
+                pBIOSInfo->SecondCRTC =
+                        (ViaCRTCInfoPtr) xnfcalloc(sizeof(ViaCRTCInfoRec), 1);
+                pBIOSInfo->Simultaneous =
+                        (ViaSimultaneousInfoPtr)
+                        xnfcalloc(sizeof(ViaSimultaneousInfoRec), 1);
+                ret = pBIOSInfo->Panel->NativeMode
+                        && pBIOSInfo->Panel->CenteredMode && pBIOSInfo->Lvds
+                        && pBIOSInfo->FirstCRTC && pBIOSInfo->SecondCRTC
+                        && pBIOSInfo->Simultaneous;
+            }
+            pVia->VideoRegs =
+                    (video_via_regs *) xnfcalloc(sizeof(video_via_regs), 1);
+            if (!pVia->VideoRegs)
+                ret = FALSE;
+        }
+    }
+
+    return ret;
+
+} /* VIAGetRec */
+
+static void
+VIAFreeRec(ScrnInfoPtr pScrn)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAFreeRec\n"));
+    if (!pScrn->driverPrivate)
+        return;
+
+    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+
+    if (pBIOSInfo) {
+
+        if (pBIOSInfo->Panel) {
+            if (pBIOSInfo->Panel->NativeMode)
+                free(pBIOSInfo->Panel->NativeMode);
+            if (pBIOSInfo->Panel->CenteredMode)
+                free(pBIOSInfo->Panel->CenteredMode);
+            free(pBIOSInfo->Panel);
+        }
+
+        if (pBIOSInfo->FirstCRTC)
+            free(pBIOSInfo->FirstCRTC);
+        if (pBIOSInfo->SecondCRTC)
+            free(pBIOSInfo->SecondCRTC);
+        if (pBIOSInfo->Simultaneous)
+            free(pBIOSInfo->Simultaneous);
+        if (pBIOSInfo->Lvds)
+            free(pBIOSInfo->Lvds);
+    }
+
+    if (VIAPTR(pScrn)->pVbe)
+        vbeFree(VIAPTR(pScrn)->pVbe);
+
+    if (pVia->VideoRegs)
+        free(pVia->VideoRegs);
+
+    if (((VIARec *) (pScrn->driverPrivate))->pBIOSInfo->TVI2CDev)
+        xf86DestroyI2CDevRec((((VIARec *) (pScrn->driverPrivate))->pBIOSInfo->
+                              TVI2CDev), TRUE);
+    free(((VIARec *) (pScrn->driverPrivate))->pBIOSInfo);
+
+    VIAUnmapMem(pScrn);
+
+    free(pScrn->driverPrivate);
+    pScrn->driverPrivate = NULL;
+} /* VIAFreeRec */
+ 
 static int
 ViaPanelLookUpModeIndex(int width, int height)
 {
