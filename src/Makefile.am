@@ -66,6 +66,7 @@ openchrome_drv_la_SOURCES = \
          via_swov.h \
          via_timing.c \
          via_timing.h \
+         via_ums.c \
          via_vbe.c \
          via_vgahw.c \
          via_vgahw.h \
