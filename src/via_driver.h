@@ -448,6 +448,10 @@ typedef struct
 /* Prototypes. */
 void VIAInitialize3DEngine(ScrnInfoPtr pScrn);
 
+/* In via_ums.c */
+Bool VIAMapMem(ScrnInfoPtr pScrn);
+void VIAUnmapMem(ScrnInfoPtr pScrn);
+
 /* In via_cursor.c. */
 Bool viaCursorHWInit(ScreenPtr pScreen);
 void viaCursorShow(ScrnInfoPtr);

@@ -113,7 +113,6 @@ static const OptionInfoRec *VIAAvailableOptions(int chipid, int busid);
 
 static Bool VIAMapMMIO(ScrnInfoPtr pScrn);
 static Bool VIAMapFB(ScrnInfoPtr pScrn);
-static void VIAUnmapMem(ScrnInfoPtr pScrn);
 
 static void VIALoadRgbLut(ScrnInfoPtr pScrn, int numColors, int *indices,
                           LOCO *colors, VisualPtr pVisual);
@@ -2249,8 +2248,7 @@ VIAMapFB(ScrnInfoPtr pScrn)
     return TRUE;
 }
 
-
-static void
+void
 VIAUnmapMem(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
