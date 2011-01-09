@@ -475,6 +475,9 @@ ViaVgahwPrint(vgaHWPtr hwp)
 {
     int i;
 
+    if (!hwp)
+	return;
+
     xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO, "VGA Sequence registers:\n");
     for (i = 0x00; i < 0x80; i++)
         xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO,

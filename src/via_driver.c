@@ -1233,9 +1233,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     VIAVidHWDiffInit(pScrn);
 
 #ifdef HAVE_DEBUG
-    {
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
     //pVia->PrintVGARegs = FALSE;
     from = xf86GetOptValBool(VIAOptions, OPTION_PRINTVGAREGS,
                              &pVia->PrintVGARegs)
@@ -1250,7 +1247,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             ? X_CONFIG : X_DEFAULT;
     xf86DrvMsg(pScrn->scrnIndex, from, "Will %sscan I2C buses.\n",
                pVia->I2CScan ? "" : "not ");
-    }
 #endif /* HAVE_DEBUG */
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
