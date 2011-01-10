@@ -1340,65 +1340,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     return TRUE;
 }
 
-/*
-static void
-ViaMMIODisable(ScrnInfoPtr pScrn)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    switch (pVia->Chipset) {
-        case VIA_K8M890:
-        case VIA_CX700:
-        case VIA_P4M900:
-        case VIA_VX800:
-        case VIA_VX855:
-        case VIA_VX900:
-            ViaSeqMask(hwp, 0x1A, 0x00, 0x08);
-            break;
-        default:
-            ViaSeqMask(hwp, 0x1A, 0x00, 0x60);
-            break;
-    }
-}
-
-void
-VIAUnmapMem(ScrnInfoPtr pScrn)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAUnmapMem\n"));
-
-    ViaMMIODisable(pScrn);
-
-#ifdef XSERVER_LIBPCIACCESS
-    if (pVia->MapBase)
-        pci_device_unmap_range(pVia->PciInfo, (pointer) pVia->MapBase,
-                               VIA_MMIO_REGSIZE);
-
-    if (pVia->BltBase)
-        pci_device_unmap_range(pVia->PciInfo, (pointer) pVia->BltBase,
-                               VIA_MMIO_BLTSIZE);
-
-    if (pVia->FBBase)
-        pci_device_unmap_range(pVia->PciInfo, (pointer) pVia->FBBase,
-                               pVia->videoRambytes);
-#else
-    if (pVia->MapBase)
-        xf86UnMapVidMem(pScrn->scrnIndex, (pointer) pVia->MapBase,
-                        VIA_MMIO_REGSIZE);
-
-    if (pVia->BltBase)
-        xf86UnMapVidMem(pScrn->scrnIndex, (pointer) pVia->BltBase,
-                        VIA_MMIO_BLTSIZE);
-
-    if (pVia->FBBase)
-        xf86UnMapVidMem(pScrn->scrnIndex, (pointer) pVia->FBBase,
-                        pVia->videoRambytes);
-#endif
-}
-*/
-
 static Bool
 VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 {
