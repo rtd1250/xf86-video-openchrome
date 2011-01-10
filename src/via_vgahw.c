@@ -128,7 +128,7 @@ ViaGrMask(vgaHWPtr hwp, CARD8 index, CARD8 value, CARD8 mask)
 }
 
 void
-VIASave(ScrnInfoPtr pScrn, int gVIAEntityIndex)
+VIASave(ScrnInfoPtr pScrn)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
@@ -232,8 +232,6 @@ VIASave(ScrnInfoPtr pScrn, int gVIAEntityIndex)
         Regs->CR35 = hwp->readCrtc(hwp, 0x35);
         Regs->CR36 = hwp->readCrtc(hwp, 0x36);
 
-
-
         /* Starting Address */
         /* Start Address High */
         Regs->CR0C = hwp->readCrtc(hwp, 0x0C);
@@ -244,7 +242,6 @@ VIASave(ScrnInfoPtr pScrn, int gVIAEntityIndex)
         /* CR34 are fire bits. Must be written after CR0C CR0D CR48.  */
         /* Starting Address Overflow Bits[23:16] */
         Regs->CR34 = hwp->readCrtc(hwp, 0x34);
-
 
         Regs->CR49 = hwp->readCrtc(hwp, 0x49);
 
@@ -283,7 +280,6 @@ VIASave(ScrnInfoPtr pScrn, int gVIAEntityIndex)
                 Regs->CRD2 = hwp->readCrtc(hwp, 0xD2);
                 break;
         }
-
         vgaHWProtect(pScrn, FALSE);
     }
 }

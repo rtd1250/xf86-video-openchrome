@@ -117,6 +117,8 @@
 #define VIA_RES_UNDEF NULL
 #endif
 
+static int gVIAEntityIndex = -1;
+
 typedef struct {
     CARD8   SR08, SR0A, SR0F;
 
