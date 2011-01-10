@@ -101,7 +101,6 @@ static Bool VIASaveScreen(ScreenPtr pScreen, int mode);
 static Bool VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc,
                           char **argv);
 static int VIAInternalScreenInit(int scrnIndex, ScreenPtr pScreen);
-static void VIADPMS(ScrnInfoPtr pScrn, int mode, int flags);
 static const OptionInfoRec *VIAAvailableOptions(int chipid, int busid);
 */
 //static Bool VIAMapMMIO(ScrnInfoPtr pScrn);
@@ -1379,70 +1378,6 @@ static Bool
 VIASaveScreen(ScreenPtr pScreen, int mode)
 {
     return vgaHWSaveScreen(pScreen, mode);
-}
-
-static void
-VIADPMS(ScrnInfoPtr pScrn, int mode, int flags)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-
-    if (pVia->pVbe) {
-        ViaVbeDPMS(pScrn, mode, flags);
-    } else {
-
-        switch (mode) {
-            case DPMSModeOn:
-
-                if (pBIOSInfo->Lvds->IsActive)
-                    ViaLVDSPower(pScrn, TRUE);
-
-                if (pBIOSInfo->CrtActive)
-                    ViaDisplayEnableCRT(pScrn);
-
-                if (pBIOSInfo->Panel->IsActive)
-                    ViaLCDPower(pScrn, TRUE);
-
-                if (pBIOSInfo->TVActive)
-                    ViaTVPower(pScrn, TRUE);
-
-                if (pBIOSInfo->DfpActive)
-                    ViaDFPPower(pScrn, TRUE);
-
-                if (pBIOSInfo->Simultaneous->IsActive)
-                    ViaDisplayEnableSimultaneous(pScrn);
-
-                break;
-            case DPMSModeStandby:
-            case DPMSModeSuspend:
-            case DPMSModeOff:
-
-                if (pBIOSInfo->Lvds->IsActive)
-                    ViaLVDSPower(pScrn, FALSE);
-
-                if (pBIOSInfo->CrtActive)
-                    ViaDisplayDisableCRT(pScrn);
-
-                if (pBIOSInfo->Panel->IsActive)
-                    ViaLCDPower(pScrn, FALSE);
-
-                if (pBIOSInfo->TVActive)
-                    ViaTVPower(pScrn, FALSE);
-
-                if (pBIOSInfo->DfpActive)
-                    ViaDFPPower(pScrn, FALSE);
-                
-                if (pBIOSInfo->Simultaneous->IsActive)
-                    ViaDisplayDisableSimultaneous(pScrn);
-
-                break;
-            default:
-                xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Invalid DPMS mode %d\n",
-                           mode);
-                break;
-        }
-    }
-
 }
 
 void

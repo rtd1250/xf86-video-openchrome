@@ -56,7 +56,7 @@ static CARD32 mono_cursor_color[] = {
 };
 
 Bool
-viaHWCursorInit(ScreenPtr pScreen)
+UMSHWCursorInit(ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
     VIAPtr pVia = VIAPTR(pScrn);

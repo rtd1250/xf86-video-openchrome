@@ -106,11 +106,11 @@ static Bool VIASaveScreen(ScreenPtr pScreen, int mode);
 static Bool VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc,
                           char **argv);
 static int VIAInternalScreenInit(int scrnIndex, ScreenPtr pScreen);
-static void VIADPMS(ScrnInfoPtr pScrn, int mode, int flags);
 static const OptionInfoRec *VIAAvailableOptions(int chipid, int busid);
 
 Bool UMSPreInit(ScrnInfoPtr pScrn, int gVIAEntityIndex);
 Bool UMSCrtcInit(ScrnInfoPtr pScrn);
+void UMSDPMS(ScrnInfoPtr pScrn, int mode, int flags);
 
 static Bool VIAMapFB(ScrnInfoPtr pScrn);
 
@@ -1618,7 +1618,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- SW cursor set up\n"));
 
     if (pVia->hwcursor) {
-        if (!viaHWCursorInit(pScreen)) {
+        if (!UMSHWCursorInit(pScreen)) {
 			pVia->hwcursor = FALSE;
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                        "Hardware cursor initialization failed\n");
@@ -1628,8 +1628,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     if (pVia->shadowFB)
         ViaShadowFBInit(pScrn, pScreen);
     
-    if (pVia->RandRRotation)
-    {
+    if (pVia->RandRRotation) {
         pScrn->DriverFunc = VIADriverFunc;
     }      
 
@@ -1648,7 +1647,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     pScreen->SaveScreen = VIASaveScreen;
     pScreen->CloseScreen = VIACloseScreen;
 
-    xf86DPMSInit(pScreen, VIADPMS, 0);
+    xf86DPMSInit(pScreen, UMSDPMS, 0);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- DPMS set up\n"));
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Color maps etc. set up\n"));
@@ -2000,7 +1999,7 @@ VIADriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op, pointer data)
     return FALSE;
 }
 
-static void
+/*static void
 VIADPMS(ScrnInfoPtr pScrn, int mode, int flags)
 {
     VIAPtr pVia = VIAPTR(pScrn);
@@ -2062,7 +2061,7 @@ VIADPMS(ScrnInfoPtr pScrn, int mode, int flags)
         }
     }
 
-}
+}*/
 
 void
 VIAInitialize3DEngine(ScrnInfoPtr pScrn)
