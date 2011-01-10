@@ -421,8 +421,6 @@ VIARestore(ScrnInfoPtr pScrn)
     /* CR34 are fire bits. Must be written after CR0C CR0D CR48.  */
     /* Starting Address Overflow Bits[23:16] */
     hwp->writeCrtc(hwp, 0x34, Regs->CR34);
-
-
     hwp->writeCrtc(hwp, 0x49, Regs->CR49);
 
     /* Restore LCD control registers. */

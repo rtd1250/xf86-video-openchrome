@@ -234,7 +234,7 @@ VIALoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
     }
 }
 
-static void
+void
 ViaGammaDisable(ScrnInfoPtr pScrn)
 {
 
