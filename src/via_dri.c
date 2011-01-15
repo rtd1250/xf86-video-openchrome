@@ -544,7 +544,7 @@ VIAInitVisualConfigs(ScreenPtr pScreen)
 }
 
 Bool
-VIADRIScreenInit(ScreenPtr pScreen)
+UMSDRIScreenInit(ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
     VIAPtr pVia = VIAPTR(pScrn);
@@ -563,7 +563,7 @@ VIADRIScreenInit(ScreenPtr pScreen)
         return FALSE;
     if (!xf86LoaderCheckSymbol("DRIQueryVersion")) {
         xf86DrvMsg(pScreen->myNum, X_ERROR,
-                   "[dri] VIADRIScreenInit failed (libdri.a is too old).\n");
+                   "[dri] UMSDRIScreenInit failed (libdri.a is too old).\n");
         return FALSE;
     }
 
@@ -574,7 +574,7 @@ VIADRIScreenInit(ScreenPtr pScreen)
         DRIQueryVersion(&major, &minor, &patch);
         if (major != DRIINFO_MAJOR_VERSION || minor < DRIINFO_MINOR_VERSION) {
             xf86DrvMsg(pScreen->myNum, X_ERROR,
-                       "[dri] VIADRIScreenInit failed -- version mismatch.\n"
+                       "[dri] UMSDRIScreenInit failed -- version mismatch.\n"
                        "[dri] libdri is %d.%d.%d, but %d.%d.x is needed.\n"
                        "[dri] Disabling DRI.\n",
                        major, minor, patch,

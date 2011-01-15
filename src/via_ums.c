@@ -199,13 +199,6 @@ UMSAccelSetup(ScrnInfoPtr pScrn)
     ScreenPtr pScreen = pScrn->pScreen;
     VIAPtr pVia = VIAPTR(pScrn);
 
-#ifdef XF86DRI
-    pVia->directRenderingEnabled = VIADRIScreenInit(pScreen);
-#endif
-    if (!pVia->NoAccel) {
-        viaInitAccel(pScreen);
-    }
-
     if (pVia->hwcursor) {
         if (!UMSHWCursorInit(pScreen)) {
                         pVia->hwcursor = FALSE;

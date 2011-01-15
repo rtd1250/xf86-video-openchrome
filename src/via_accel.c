@@ -2396,7 +2396,7 @@ viaInitExa(ScreenPtr pScreen)
  * and initializes engines and acceleration method.
  */
 Bool
-viaInitAccel(ScreenPtr pScreen)
+UMSInitAccel(ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
     VIAPtr pVia = VIAPTR(pScrn);

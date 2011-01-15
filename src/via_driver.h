@@ -465,7 +465,7 @@ void viaCursorRecDestroy(ScrnInfoPtr pScrn);
 void viaCursorSetFB(ScrnInfoPtr pScrn);
 
 /* In via_accel.c. */
-Bool viaInitAccel(ScreenPtr);
+Bool UMSInitAccel(ScreenPtr);
 void viaInitialize2DEngine(ScrnInfoPtr);
 void viaAccelSync(ScrnInfoPtr);
 void viaDisableVQ(ScrnInfoPtr);
@@ -525,7 +525,7 @@ unsigned long viaXvMCPutImageSize(ScrnInfoPtr pScrn);
 void ViaI2CInit(ScrnInfoPtr pScrn);
 
 #ifdef XF86DRI
-Bool VIADRIScreenInit(ScreenPtr pScreen);
+Bool UMSDRIScreenInit(ScreenPtr pScreen);
 void VIADRICloseScreen(ScreenPtr pScreen);
 Bool VIADRIFinishScreenInit(ScreenPtr pScreen);
 void VIADRIRingBufferCleanup(ScrnInfoPtr pScrn);

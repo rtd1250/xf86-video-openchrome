@@ -1369,6 +1369,10 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
             return FALSE;
     }
 
+#ifdef XF86DRI
+    pVia->directRenderingEnabled = UMSDRIScreenInit(pScreen);
+#endif
+
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Visuals set up\n"));
 
     if (!VIAInternalScreenInit(scrnIndex, pScreen))
@@ -1396,6 +1400,11 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     /* Must be after RGB ordering is fixed. */
     fbPictureInit(pScreen, 0, 0);
 #endif
+ 
+    if (!pVia->NoAccel) {
+	if (!UMSInitAccel(pScreen))
+	    return FALSE;
+    }
 
     miInitializeBackingStore(pScreen);
     xf86SetBackingStore(pScreen);
