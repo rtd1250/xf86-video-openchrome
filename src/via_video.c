@@ -519,6 +519,7 @@ viaRestoreVideo(ScrnInfoPtr pScrn)
     viaVidEng->alphafb_addr    = localVidEng->alphafb_addr;
     viaVidEng->chroma_low      = localVidEng->chroma_low;
     viaVidEng->chroma_up       = localVidEng->chroma_up;
+    viaVidEng->interruptflag   = localVidEng->interruptflag;
 
     if (pVia->ChipId != PCI_CHIP_VT3314)
     {
