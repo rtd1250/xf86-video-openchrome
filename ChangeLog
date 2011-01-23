@@ -1,3 +1,10 @@
+2011-01-23  Bartosz Kosiorek  <gang65@poczta.onet.pl>
+
+	Enable hardware cursor for VX900
+
+	* src/via_cursor.c: (viaHWCursorInit):
+	* src/via_mode.c: (ViaModeSet):
+
 2010-12-16  Bartosz Kosiorek  <gang65@poczta.onet.pl>
 
 	Merge vx900_branch - initial VX900 support

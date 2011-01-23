@@ -1747,9 +1747,10 @@ ViaModeSet(ScrnInfoPtr pScrn, DisplayModePtr mode)
     if (pBIOSInfo->Panel->IsActive &&
        ((pVia->Chipset == VIA_VM800) ||
         (pVia->Chipset == VIA_K8M800) || 
-        (pVia->Chipset == VIA_VX900) ))
+        (pVia->Chipset == VIA_VX900) )) {
+        pBIOSInfo->FirstCRTC->IsActive=TRUE;
         ViaModeFirstCRTC(pScrn, mode);
-
+    }
     if (pBIOSInfo->Simultaneous->IsActive) {
         ViaDisplayEnableSimultaneous(pScrn);
     } else {
