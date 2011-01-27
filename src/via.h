@@ -260,7 +260,7 @@
 #define V1_EXPIRE_NUM_A         0x000a0000
 #define V1_EXPIRE_NUM_F         0x000f0000 /* jason */
 #define V1_FIFO_EXTENDED        0x00200000
-#define V1_ON_CRT               0x00000000
+#define V1_ON_PRI               0x00000000
 #define V1_ON_SND_DISPLAY       0x80000000
 #define V1_FIFO_32V1_32V2       0x00000000
 #define V1_FIFO_48V1_32V2       0x00200000

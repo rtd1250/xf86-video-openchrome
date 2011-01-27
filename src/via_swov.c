@@ -1885,9 +1885,9 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
      */
     if ((pVia->VideoEngine == VIDEO_ENGINE_CME
          || pVia->Chipset == VIA_VM800)
-        && pVia->pBIOSInfo->Panel->IsActive) {
+        &&  (pBIOSInfo->SecondCRTC->IsActive==TRUE)) {
 
-        /* V1_ON_SND_DISPLAY */
+        /* VAL_VIDEO_ON_SND_DISPLAY */
         vidCtl |= V1_ON_SND_DISPLAY;
         /* SECOND_DISPLAY_COLOR_KEY_ENABLE */
         compose |= SECOND_DISPLAY_COLOR_KEY_ENABLE | 0x1;
