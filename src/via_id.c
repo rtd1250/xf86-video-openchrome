@@ -188,7 +188,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Mitac 8515",                            VIA_P4M900,  0x1071, 0x8515, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Medion Notebook MD96483",               VIA_P4M900,  0x1071, 0x8615, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Mitac 8624",                            VIA_P4M900,  0x1071, 0x8624, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
-    {"VIA VT3364 (P4M900)",                   VIA_P4M900,  0x1106, 0x3371, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
+    {"VIA VB8001 Mini-ITX Board (P4M900)",    VIA_P4M900,  0x1106, 0x3371, VIA_DEVICE_CRT},
     {"Gigabyte GA-VM900M",                    VIA_P4M900,  0x1458, 0xD000, VIA_DEVICE_CRT},
     {"MSI VR321",                             VIA_P4M900,  0x1462, 0x3355, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"MSI P4M900M / P4M900M2-F/L",            VIA_P4M900,  0x1462, 0x7255, VIA_DEVICE_CRT},
