@@ -1015,6 +1015,12 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 
     switch (pVia->Chipset) {
         case VIA_CLE266:
+#ifdef XSERVER_LIBPCIACCESS
+            pci_device_cfg_read_u8(bridge, &videoRam, 0xE1);
+#else
+            videoRam = pciReadByte(pciTag(0, 0, 0), 0xE1) & 0x70;
+#endif
+            pScrn->videoRam = (1 << ((videoRam & 0x70) >> 4)) << 10;
         case VIA_KM400:
 #ifdef XSERVER_LIBPCIACCESS
             pci_device_cfg_read_u8(bridge, &videoRam, 0xE1);
@@ -1022,6 +1028,12 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             videoRam = pciReadByte(pciTag(0, 0, 0), 0xE1) & 0x70;
 #endif
             pScrn->videoRam = (1 << ((videoRam & 0x70) >> 4)) << 10;
+            /* Workaround for #177 (VRAM probing fail on P4M800) */
+            if (pScrn->videoRam < 16384) {
+                xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                           "Memory size detection failed: using 16 MB.\n");
+                pScrn->videoRam = 16 << 10;
+            }
             break;
         case VIA_PM800:
         case VIA_VM800:
@@ -1072,12 +1084,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     if (from == X_PROBED) {
         xf86DrvMsg(pScrn->scrnIndex, from,
                    "Probed amount of VideoRAM = %d kB\n", pScrn->videoRam);
-
-        if (pScrn->videoRam < 16384) {
-            xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                       "Memory size detection failed: using 16 MB.\n");
-            pScrn->videoRam = 16 << 10;
-        }
     }
 
     if (!VIASetupDefaultOptions(pScrn)) {
