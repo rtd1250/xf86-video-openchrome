@@ -307,11 +307,8 @@ ViaPanelPreInit(ScrnInfoPtr pScrn)
         int width, height;
         Bool ret;
 
-        ret = ViaPanelGetSizeFromDDC(pScrn, &width, &height);
-/*
-        if (!ret)
-            ret = ViaPanelGetSizeFromDDCv2(pScrn, &width);
-*/
+        ret = ViaPanelGetSizeFromDDCv1(pScrn, &width, &height);
+
         if (ret) {
             panel->NativeModeIndex = ViaPanelLookUpModeIndex(width, height);
             DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaPanelLookUpModeIndex, Width %d, Height %d, NativeModeIndex%d\n", width, height, panel->NativeModeIndex));
@@ -411,7 +408,7 @@ ViaPanelGetSizeFromEDID(ScrnInfoPtr pScrn, xf86MonPtr pMon,
 }
 
 Bool
-ViaPanelGetSizeFromDDC(ScrnInfoPtr pScrn, int *width, int *height)
+ViaPanelGetSizeFromDDCv1(ScrnInfoPtr pScrn, int *width, int *height)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     xf86MonPtr pMon;
