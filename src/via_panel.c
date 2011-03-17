@@ -45,17 +45,17 @@ static ViaPanelModeRec ViaPanelNativeModes[] = {
     {1280, 768},
     {1280, 1024},
     {1400, 1050},
-    {1440, 900},    /* 0x6 Resolution 1440x900 */
+    {1600, 1200},   /* 0x6 */
     {1280, 800},    /* 0x7 Resolution 1280x800 (Samsung NC20) */
     {800, 480},     /* 0x8 For Quanta 800x480 */
     {1024, 600},    /* 0x9 Resolution 1024x600 (for HP 2133) */
     {1366, 768},    /* 0xA Resolution 1366x768 */
-    {1600, 1200},   /* 0xB Resolution 1600x1200 */
-    {1680, 1050},
-    {1920, 1200},   /* 0xD Resolution 1920x1200 */
-    {640, 240},     /* 0xE Resolution 640x240 */
-    {480, 640},     /* 0xF Resolution 480x640 */
-    {1280, 768},   /* 0x10 For Panasonic 1280x768 18bit Dual-Channel Panel */
+    {1920, 1080},
+    {1920, 1200},
+    {1280, 1024},   /* 0xD */
+    {1440, 900},    /* 0xE */
+    {1280, 720},    /* 0xF 480x640 */
+    {1200, 900},   /* 0x10 For OLPC 1.5 */
     {1360, 768},   /* 0x11 Resolution 1360X768 */
     {1024, 768},   /* 0x12 Resolution 1024x768 */
     {800, 480}     /* 0x13 General 8x4 panel use this setting */
