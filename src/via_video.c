@@ -694,72 +694,6 @@ viaInitVideo(ScreenPtr pScreen)
     }
 }
 
-
-/*
- * This one gets called, for example, on panning.
- */
-
-static int
-viaReputImage(ScrnInfoPtr pScrn,
-        short drw_x, short drw_y, RegionPtr clipBoxes, pointer data,
-        DrawablePtr pDraw)
-{
-
-    DDUPDATEOVERLAY UpdateOverlay_Video;
-    LPDDUPDATEOVERLAY lpUpdateOverlay = &UpdateOverlay_Video;
-    viaPortPrivPtr pPriv = (viaPortPrivPtr) data;
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    if (!REGION_EQUAL(pScrn->pScreen, &pPriv->clip, clipBoxes)) {
-        REGION_COPY(pScrn->pScreen, &pPriv->clip, clipBoxes);
-        if (pPriv->autoPaint) {
-            if (pDraw->type == DRAWABLE_WINDOW) {
-                /* TODO Replace xf86XVFillKeyHelper with xf86XVFillKeyHelperDrawable
-                   Currently resizing problem exist in VLC Media Player
-                   Example of implementation:
-                xf86XVFillKeyHelperDrawable(pDraw, pPriv->colorKey, clipBoxes);
-                DamageDamageRegion(pDraw, clipBoxes); */
-                
-                xf86XVFillKeyHelper(pScrn->pScreen, pPriv->colorKey, clipBoxes);
-            } else {
-                xf86XVFillKeyHelper(pScrn->pScreen, pPriv->colorKey, clipBoxes);
-            }
-        }
-    }
-
-    if (drw_x == pPriv->old_drw_x &&
-        drw_y == pPriv->old_drw_y &&
-        pVia->swov.oldPanningX == pVia->swov.panning_x &&
-        pVia->swov.oldPanningY == pVia->swov.panning_y) {
-        viaXvError(pScrn, pPriv, xve_none);
-        return Success;
-    }
-
-    lpUpdateOverlay->SrcLeft = pPriv->old_src_x;
-    lpUpdateOverlay->SrcTop = pPriv->old_src_y;
-    lpUpdateOverlay->SrcRight = pPriv->old_src_x + pPriv->old_src_w;
-    lpUpdateOverlay->SrcBottom = pPriv->old_src_y + pPriv->old_src_h;
-
-    lpUpdateOverlay->DstLeft = drw_x;
-    lpUpdateOverlay->DstTop = drw_y;
-    lpUpdateOverlay->DstRight = drw_x + pPriv->old_drw_w;
-    lpUpdateOverlay->DstBottom = drw_y + pPriv->old_drw_h;
-    pPriv->old_drw_x = drw_x;
-    pPriv->old_drw_y = drw_y;
-
-    lpUpdateOverlay->dwFlags = DDOVER_KEYDEST;
-
-    if (pScrn->bitsPerPixel == 8)
-        lpUpdateOverlay->dwColorSpaceLowValue = pPriv->colorKey & 0xff;
-    else
-        lpUpdateOverlay->dwColorSpaceLowValue = pPriv->colorKey;
-
-    VIAVidUpdateOverlay(pScrn, lpUpdateOverlay);
-
-    viaXvError(pScrn, pPriv, xve_none);
-    return Success;
-}
-
 static unsigned
 viaSetupAdaptors(ScreenPtr pScreen, XF86VideoAdaptorPtr ** adaptors)
 {
@@ -820,7 +754,7 @@ viaSetupAdaptors(ScreenPtr pScreen, XF86VideoAdaptorPtr ** adaptors)
         viaAdaptPtr[i]->GetPortAttribute = viaGetPortAttribute;
         viaAdaptPtr[i]->SetPortAttribute = viaSetPortAttribute;
         viaAdaptPtr[i]->PutImage = viaPutImage;
-        viaAdaptPtr[i]->ReputImage = viaReputImage;
+        viaAdaptPtr[i]->ReputImage = NULL;
         viaAdaptPtr[i]->QueryImageAttributes = viaQueryImageAttributes;
         for (j = 0; j < numPorts; ++j) {
             viaPortPriv[j].dmaBounceBuffer = NULL;
