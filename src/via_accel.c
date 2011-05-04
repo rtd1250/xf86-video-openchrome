@@ -602,7 +602,7 @@ viaDisableClipping(ScrnInfoPtr pScrn)
 
 /*
  * This is a small helper to wrap around a PITCH register write
- * to deal with the sublte differences of M1 and old 2D engine
+ * to deal with the subtle differences of M1 and old 2D engine
  */
 static void
 viaPitchHelper(VIAPtr pVia, unsigned dstPitch, unsigned srcPitch)
@@ -1252,7 +1252,9 @@ viaInitXAA(ScreenPtr pScreen)
                              HARDWARE_CLIP_COLOR_8x8_FILL |
                              HARDWARE_CLIP_SCREEN_TO_SCREEN_COLOR_EXPAND | 0);
 
-    if (pVia->Chipset != VIA_VX855 && pVia->Chipset != VIA_VX900)
+    if (pVia->Chipset != VIA_VX800 &&
+        pVia->Chipset != VIA_VX855 && 
+        pVia->Chipset != VIA_VX900)
     	xaaptr->ClippingFlags |= (HARDWARE_CLIP_SOLID_FILL |
                                   HARDWARE_CLIP_SOLID_LINE |
                                   HARDWARE_CLIP_DASHED_LINE);

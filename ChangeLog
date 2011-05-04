@@ -1,3 +1,9 @@
+2011-05-04  Bartosz Kosiorek  <gang65@poczta.onet.pl>
+
+	Fix XAA displaying issues
+
+	* src/via_accel.c: (viaInitXAA):
+
 2011-01-23  Bartosz Kosiorek  <gang65@poczta.onet.pl>
 
 	Enable hardware cursor for VX900
