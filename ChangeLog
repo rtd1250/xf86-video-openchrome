@@ -1,3 +1,9 @@
+2011-05-08  Bartosz Kosiorek  <gang65@poczta.onet.pl>
+
+	Fix cursor garbage after suspend/resume for Xserver 1.10 (#405)
+
+	* src/via_video.c: (viaRestoreVideo):
+
 2011-05-04  Bartosz Kosiorek  <gang65@poczta.onet.pl>
 
 	Fix XAA displaying issues

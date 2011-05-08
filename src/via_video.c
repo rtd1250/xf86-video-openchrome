@@ -536,9 +536,25 @@ viaRestoreVideo(ScrnInfoPtr pScrn)
         viaVidEng->video1y_addr0   = localVidEng->video1y_addr0;
         viaVidEng->video1_fifo     = localVidEng->video1_fifo;
         viaVidEng->video1y_addr3   = localVidEng->video1y_addr3;
-        viaVidEng->v1_source_w_h   = localVidEng->v1_source_w_h ;
+        viaVidEng->v1_source_w_h   = localVidEng->v1_source_w_h;
         viaVidEng->video1_CSC1     = localVidEng->video1_CSC1;
         viaVidEng->video1_CSC2     = localVidEng->video1_CSC2;
+
+        /* Fix cursor garbage after suspend for VX855 and VX900 (#405) */
+        /* 0x2E4 T Signature Data Result 1 */
+        viaVidEng->video1u_addr1         = localVidEng->video1u_addr1; 
+        /* 0x2E8 HI for Primary Display FIFO Control Signal */
+        viaVidEng->video1u_addr2         = localVidEng->video1u_addr2;
+        /* 0x2EC HI for Primary Display FIFO Transparent color */
+        viaVidEng->video1u_addr3         = localVidEng->video1u_addr3;
+        /* 0x2F0 HI for Primary Display Control Signal */
+        viaVidEng->video1v_addr0         = localVidEng->video1v_addr0;
+        /* 0x2F4 HI for Primary Display Frame Buffer Starting Address */
+        viaVidEng->video1v_addr1         = localVidEng->video1v_addr1;
+        /* 0x2F8 HI for Primary Display Horizontal and Vertical Start */
+        viaVidEng->video1v_addr2         = localVidEng->video1v_addr2;
+        /* 0x2FC HI for Primary Display Center Offset */
+        viaVidEng->video1v_addr3         = localVidEng->video1v_addr3;
     }
     viaVidEng->snd_color_key   = localVidEng->snd_color_key;
     viaVidEng->v3alpha_prefifo = localVidEng->v3alpha_prefifo;
@@ -559,10 +575,11 @@ viaRestoreVideo(ScrnInfoPtr pScrn)
     viaVidEng->video3_CSC2     = localVidEng->video3_CSC2;    
     viaVidEng->compose         = localVidEng->compose;
     
-    viaVidEng->video1_ctl = pVia->dwV1;
     viaVidEng->video3_ctl = pVia->dwV3;
-    if (pVia->ChipId != PCI_CHIP_VT3314)
+    if (pVia->ChipId != PCI_CHIP_VT3314) {
+        viaVidEng->video1_ctl = pVia->dwV1;
         viaVidEng->compose = V1_COMMAND_FIRE;
+    }
     viaVidEng->compose = V3_COMMAND_FIRE;
 }
 
