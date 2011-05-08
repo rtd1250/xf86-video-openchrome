@@ -117,14 +117,10 @@ static int viaSetPortAttribute(ScrnInfoPtr, Atom, INT32, pointer);
 static int viaPutImage(ScrnInfoPtr, short, short, short, short, short, short,
     short, short, int, unsigned char *, short, short, Bool,
     RegionPtr, pointer, DrawablePtr);
-static void nv12Blit(unsigned char *dst,
-    const unsigned char *src1,
-    const unsigned char *src2,
-    unsigned srcPitch, unsigned dstPitch, unsigned width, unsigned height);
-static void UVBlit(unsigned char *dst,
-    const unsigned char *src1,
-    const unsigned char *src2,
-    unsigned srcPitch, unsigned dstPitch, unsigned width, unsigned height);
+static void nv12Blit(unsigned char *nv12Chroma,
+    const unsigned char *uBuffer,
+    const unsigned char *vBuffer,
+    unsigned width, unsigned srcPitch, unsigned dstPitch, unsigned lines);
 
 static Atom xvBrightness, xvContrast, xvColorKey, xvHue, xvSaturation,
     xvAutoPaint;
@@ -162,12 +158,11 @@ static XF86AttributeRec AttributesG[NUM_ATTRIBUTES_G] = {
     {XvSettable | XvGettable, 0, 1, "XV_AUTOPAINT_COLORKEY"}
 };
 
-#define NUM_IMAGES_G 7
+#define NUM_IMAGES_G 6
 
 static XF86ImageRec ImagesG[NUM_IMAGES_G] = {
     XVIMAGE_YUY2,
     XVIMAGE_YV12,
-    XVIMAGE_I420,
     {
         /*
          * Below, a dummy picture type that is used in XvPutImage only to do
@@ -968,7 +963,6 @@ Flip(VIAPtr pVia, viaPortPrivPtr pPriv, int fourcc,
                 proReg) & ~HQV_FLIP_ODD) | HQV_SW_FLIP | HQV_FLIP_STATUS);
             break;
         case FOURCC_YV12:
-        case FOURCC_I420:
         default:
             while ((VIDInD(HQV_CONTROL + proReg) & HQV_SW_FLIP)
                     && --count);
@@ -990,7 +984,22 @@ Flip(VIAPtr pVia, viaPortPrivPtr pPriv, int fourcc,
     }
 }
 
+/*
+ * Slow and dirty. NV12 blit.
+ */
 
+static void
+nv12cp(unsigned char *dst,
+    const unsigned char *src, int dstPitch, int w, int h, int yuv422)
+{
+    /* 
+     * Blit luma component as a fake YUY2 assembler blit. 
+     */
+
+    (*viaFastVidCpy) (dst, src, dstPitch, w >> 1, h, TRUE);
+    nv12Blit(dst + dstPitch * h, src + w * h + (w >> 1) * (h >> 1),
+            src + w * h, w >> 1, w >> 1, dstPitch, h >> 1);
+}
 
 #ifdef XF86DRI
 
@@ -1014,7 +1023,7 @@ viaDmaBlitImage(VIAPtr pVia,
 
     bounceBuffer = ((unsigned long)src & 15);
     nv12Conversion = (pVia->VideoEngine == VIDEO_ENGINE_CME && 
-        (id == FOURCC_YV12 || id == FOURCC_I420));
+        id == FOURCC_YV12);
 
     switch (id) {
         case FOURCC_YUY2:
@@ -1029,7 +1038,6 @@ viaDmaBlitImage(VIAPtr pVia,
             break;
 
         case FOURCC_YV12:
-        case FOURCC_I420:
         default:
             bounceStride = ALIGN_TO(width, 16);
             bounceLines = height;
@@ -1045,9 +1053,8 @@ viaDmaBlitImage(VIAPtr pVia,
                 pPort->dmaBounceBuffer = 0;
             }
             size = bounceStride * bounceLines + 16;
-            if (id == FOURCC_YV12 || id == FOURCC_I420) {
+            if (FOURCC_YV12 == id)
                 size += ALIGN_TO(bounceStride >> 1, 16) * bounceLines;
-            }
             pPort->dmaBounceBuffer = (unsigned char *)malloc(size);
             pPort->dmaBounceLines = bounceLines;
             pPort->dmaBounceStride = bounceStride;
@@ -1086,22 +1093,14 @@ viaDmaBlitImage(VIAPtr pVia,
 
     lumaSync = blit.sync;
 
-    if (id == FOURCC_YV12 || id == FOURCC_I420) {
+    if (id == FOURCC_YV12) {
         unsigned tmp = ALIGN_TO(width >> 1, 16);
 
         if (nv12Conversion) {
-            if (id == FOURCC_YV12) {
-                nv12Blit(bounceBase + bounceStride * height,
-                    src + bounceStride * height + tmp * (height >> 1),
-                    src + bounceStride * height, 
-                    tmp, bounceStride, width >> 1, height >> 1);
-            } else if (id == FOURCC_I420) {
-                /* TODO Check if this code will work properly with FOURCC_I420 */
-                nv12Blit(bounceBase + bounceStride * height,
-                    src + bounceStride * height, 
-                    src + bounceStride * height + tmp * (height >> 1),
-                    tmp, bounceStride, width >> 1, height >> 1);
-            }
+            nv12Blit(bounceBase + bounceStride * height,
+                src + bounceStride * height + tmp * (height >> 1),
+                src + bounceStride * height, width >> 1, tmp,
+                bounceStride, height >> 1);
         } else if (bounceBuffer) {
             (*viaFastVidCpy) (base + bounceStride * height,
                     src + bounceStride * height, tmp, tmp >> 1, height, 1);
@@ -1228,45 +1227,13 @@ viaPutImage(ScrnInfoPtr pScrn,
                     switch (id) {
                         case FOURCC_YV12:
                             if (pVia->VideoEngine == VIDEO_ENGINE_CME) {
-                                int srcYSize  = width * height;
-                                /* Copy Y component */
-                                (*viaFastVidCpy) (pVia->swov.SWDevice.
-                                    lpSWOverlaySurface[pVia->dwFrameNum & 1], 
-                                    buf, dstPitch, width >> 1, height, TRUE);
-
-                                /* Copy U and V component */
-                                nv12Blit(pVia->swov.SWDevice.lpSWOverlaySurface[pVia->dwFrameNum & 1] + dstPitch * height, 
-                                    buf + srcYSize + (srcYSize >> 2), /* Size of UV component is 1/4 of Y */
-                                    buf + srcYSize, 
-                                    width >> 1, dstPitch, width >> 1, height >> 1);
+                                nv12cp(pVia->swov.SWDevice.
+                                    lpSWOverlaySurface[pVia->dwFrameNum & 1],
+                                    buf, dstPitch, width, height, 0);
                             } else {
                                 (*viaFastVidCpy)(pVia->swov.SWDevice.
                                     lpSWOverlaySurface[pVia->dwFrameNum & 1],
                                     buf, dstPitch, width, height, 0);
-                            }
-                            break;
-                        case FOURCC_I420:
-                            if (pVia->VideoEngine == VIDEO_ENGINE_CME) {
-                                int srcYSize  = width * height;
-
-                                (*viaFastVidCpy) (pVia->swov.SWDevice.
-                                   lpSWOverlaySurface[pVia->dwFrameNum & 1], 
-                                   buf, dstPitch, width >> 1, height, TRUE);
-
-                                nv12Blit(pVia->swov.SWDevice.lpSWOverlaySurface[pVia->dwFrameNum & 1] + dstPitch*height, 
-                                   buf + srcYSize, 
-                                   buf + srcYSize + (srcYSize >> 2), /* UV component is 1/4 of Y */
-                                   width >> 1, dstPitch, width >> 1, height >> 1);
-                            } else {
-                                int srcYSize  = width * height;
-                                (*viaFastVidCpy)(pVia->swov.SWDevice.
-                                    lpSWOverlaySurface[pVia->dwFrameNum & 1],
-                                    buf, dstPitch, width, height, 0);
-
-                                nv12Blit(pVia->swov.SWDevice.lpSWOverlaySurface[pVia->dwFrameNum & 1] + dstPitch * height, 
-                                    buf + srcYSize + (srcYSize >> 2), 
-                                    buf + srcYSize, 
-                                    width >> 1, dstPitch, width, height >> 1);
                             }
                             break;
                         case FOURCC_RV32:
