@@ -2202,6 +2202,13 @@ viaExaPrepareComposite(int op, PicturePtr pSrcPicture,
     Bool isAGP;
     unsigned long offset;
 
+    /* Workaround: EXA crash with new libcairo2 on a VIA VX800 (#298) */
+    /* TODO Add real source only pictures */
+    if (!pSrc) { 
+ 	    ErrorF("pSrc is NULL\n"); 
+ 	    return FALSE; 
+ 	} 
+
     v3d->setDestination(v3d, exaGetPixmapOffset(pDst),
                         exaGetPixmapPitch(pDst), pDstPicture->format);
     v3d->setCompositeOperator(v3d, op);
