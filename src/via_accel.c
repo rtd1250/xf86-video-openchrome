@@ -252,7 +252,7 @@ viaFlushDRIEnabled(ViaCommandBuffer * cb)
     }
 
     tmpSize = cb->pos * sizeof(CARD32);
-    if (pVia->agpDMA || (pVia->directRenderingEnabled && cb->has3dState)) {
+    if (pVia->agpDMA || (pVia->directRenderingType && cb->has3dState)) {
         cb->mode = 0;
         cb->has3dState = FALSE;
         while (tmpSize > 0) {
@@ -299,7 +299,7 @@ viaSetupCBuffer(ScrnInfoPtr pScrn, ViaCommandBuffer * buf, unsigned size)
     buf->has3dState = FALSE;
     buf->flushFunc = viaFlushPCI;
 #ifdef XF86DRI
-    if (pVia->directRenderingEnabled) {
+    if (pVia->directRenderingType) {
         buf->flushFunc = viaFlushDRIEnabled;
     }
 #endif
@@ -1420,7 +1420,7 @@ viaCheckUpload(ScrnInfoPtr pScrn, Via3DState * v3d)
     pVia->lastToUpload = v3d;
 
 #ifdef XF86DRI
-    if (pVia->directRenderingEnabled) {
+    if (pVia->directRenderingType) {
         volatile drm_via_sarea_t *saPriv = (drm_via_sarea_t *)
                 DRIGetSAREAPrivate(pScrn->pScreen);
         int myContext = DRIGetContext(pScrn->pScreen);
@@ -1840,7 +1840,7 @@ viaExaDownloadFromScreen(PixmapPtr pSrc, int x, int y, int w, int h,
         return TRUE;
     }
 
-    if (!pVia->directRenderingEnabled)
+    if (!pVia->directRenderingType)
         return FALSE;
 
     if ((srcPitch & 3) || (srcOffset & 3)) {
@@ -2011,7 +2011,7 @@ viaExaUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
         return TRUE;
     }
 
-    if (!pVia->directRenderingEnabled)
+    if (!pVia->directRenderingType)
         return FALSE;
 
     if (((unsigned long)src & 15) || (src_pitch & 15))
@@ -2168,7 +2168,7 @@ viaIsAGP(VIAPtr pVia, PixmapPtr pPix, unsigned long *offset)
 #ifdef XF86DRI
     unsigned long offs;
 
-    if (pVia->directRenderingEnabled && !pVia->IsPCI) {
+    if (pVia->directRenderingType && !pVia->IsPCI) {
         offs = ((unsigned long)pPix->devPrivate.ptr
                 - (unsigned long)pVia->agpMappedAddr);
 
@@ -2359,7 +2359,7 @@ viaInitExa(ScreenPtr pScreen)
     pExa->DoneCopy = viaExaDoneSolidCopy;
 
 #ifdef XF86DRI
-    if (pVia->directRenderingEnabled) {
+    if (pVia->directRenderingType) {
 #ifdef linux
         if ((pVia->drmVerMajor > 2) ||
             ((pVia->drmVerMajor == 2) && (pVia->drmVerMinor >= 7))) {
@@ -2462,7 +2462,7 @@ UMSInitAccel(ScreenPtr pScreen)
 
     nPOTSupported = TRUE;
 #ifdef XF86DRI
-    nPOTSupported = ((!pVia->directRenderingEnabled) ||
+    nPOTSupported = ((!pVia->directRenderingType) ||
                      (pVia->drmVerMajor > 2) ||
                      ((pVia->drmVerMajor == 2) && (pVia->drmVerMinor >= 11)));
 #endif
@@ -2517,7 +2517,7 @@ UMSInitAccel(ScreenPtr pScreen)
      */
 
 #ifdef XF86DRI
-    if (pVia->directRenderingEnabled) {
+    if (pVia->directRenderingType) {
         pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart) / 2;
         maxY = pScrn->virtualY + (pVia->driSize / pVia->Bpl);
     } else
@@ -2574,7 +2574,7 @@ viaExitAccel(ScreenPtr pScreen)
 
     if (pVia->useEXA) {
 #ifdef XF86DRI
-        if (pVia->directRenderingEnabled) {
+        if (pVia->directRenderingType) {
             if (pVia->texAddr) {
                 drmCommandWrite(pVia->drmFD, DRM_VIA_FREEMEM,
                                 &pVia->texAGPBuffer, sizeof(drm_via_mem_t));
@@ -2622,7 +2622,7 @@ viaFinishInitAccel(ScreenPtr pScreen)
 #ifdef XF86DRI
     int size, ret;
 
-    if (pVia->directRenderingEnabled && pVia->useEXA) {
+    if (pVia->directRenderingType && pVia->useEXA) {
 
         pVia->dBounce = calloc(VIA_DMA_DL_SIZE * 2, 1);
 

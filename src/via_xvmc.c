@@ -335,7 +335,7 @@ ViaInitXVMC(ScreenPtr pScreen)
         return;
     }
 
-    if (!pVia->directRenderingEnabled) {
+    if (!pVia->directRenderingType) {
         xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
                    "[XvMC] Cannot use XvMC without DRI!\n");
         return;

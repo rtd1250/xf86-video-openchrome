@@ -151,6 +151,13 @@ typedef struct {
     Bool b3DRegsInitialized;
 } ViaSharedRec, *ViaSharedPtr;
 
+
+enum dri_type {
+	DRI_NONE,
+	DRI_DRI1,
+	DRI_DRI2
+};
+
 #ifdef XF86DRI
 
 #define VIA_XVMC_MAX_BUFFERS 2
@@ -339,8 +346,8 @@ typedef struct _VIA {
     Bool                HasSecondary;
     Bool                SAMM;
 
+	enum dri_type	directRenderingType;
 #ifdef XF86DRI
-    Bool		directRenderingEnabled;
     Bool                XvMCEnabled;
     DRIInfoPtr		pDRIInfo;
     int 		drmFD;
@@ -525,7 +532,7 @@ unsigned long viaXvMCPutImageSize(ScrnInfoPtr pScrn);
 void ViaI2CInit(ScrnInfoPtr pScrn);
 
 #ifdef XF86DRI
-Bool UMSDRIScreenInit(ScreenPtr pScreen);
+enum dri_type UMSDRIScreenInit(ScreenPtr pScreen);
 void VIADRICloseScreen(ScreenPtr pScreen);
 Bool VIADRIFinishScreenInit(ScreenPtr pScreen);
 void VIADRIRingBufferCleanup(ScrnInfoPtr pScrn);

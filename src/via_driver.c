@@ -1370,7 +1370,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     }
 
 #ifdef XF86DRI
-    pVia->directRenderingEnabled = UMSDRIScreenInit(pScreen);
+    pVia->directRenderingType = UMSDRIScreenInit(pScreen);
 #endif
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Visuals set up\n"));

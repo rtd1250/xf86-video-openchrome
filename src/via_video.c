@@ -644,7 +644,7 @@ viaInitVideo(ScreenPtr pScreen)
 
     pVia->useDmaBlit = FALSE;
 #ifdef XF86DRI
-    pVia->useDmaBlit = pVia->directRenderingEnabled &&
+    pVia->useDmaBlit = pVia->directRenderingType &&
     ((pVia->Chipset == VIA_CLE266) ||
         (pVia->Chipset == VIA_KM400) ||
         (pVia->Chipset == VIA_K8M800) ||

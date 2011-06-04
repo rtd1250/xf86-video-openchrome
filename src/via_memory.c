@@ -135,7 +135,7 @@ VIAAllocLinear(VIAMemPtr mem, ScrnInfoPtr pScrn, unsigned long size)
     if (mem->pool)
         ErrorF("VIA Double Alloc.\n");
 
-    if (pVia->directRenderingEnabled) {
+    if (pVia->directRenderingType) {
         mem->pScrn = pScrn;
         mem->drm_fd = pVia->drmFD;
         mem->drm.context = DRIGetContext(pScrn->pScreen);

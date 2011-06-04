@@ -66,7 +66,7 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
     /* Is the display currently visible? */
     if (pScrn->vtSema) {
 #ifdef XF86DRI
-        if (pVia->directRenderingEnabled)
+        if (pVia->directRenderingType)
             DRILock(screenInfo.screens[scrnIndex], 0);
 #endif
         /* Wait for hardware engine to idle before exiting graphical mode. */
@@ -96,7 +96,7 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
             viaDisableVQ(pScrn);
     }
 #ifdef XF86DRI
-    if (pVia->directRenderingEnabled)
+    if (pVia->directRenderingType)
         VIADRICloseScreen(pScreen);
 #endif
 
@@ -221,10 +221,10 @@ UMSAccelSetup(ScrnInfoPtr pScrn)
 
     pVia->agpDMA = FALSE;
 #ifdef XF86DRI
-    if (pVia->directRenderingEnabled)
-        pVia->directRenderingEnabled = VIADRIFinishScreenInit(pScreen);
+    if (pVia->directRenderingType)
+        pVia->directRenderingType = VIADRIFinishScreenInit(pScreen);
 
-    if (pVia->directRenderingEnabled) {
+    if (pVia->directRenderingType) {
         VIADRIPtr pVIADRI = pVia->pDRIInfo->devPrivate;
 
         xf86DrvMsg(pScrn->scrnIndex, X_INFO, "direct rendering enabled\n");
@@ -239,14 +239,14 @@ UMSAccelSetup(ScrnInfoPtr pScrn)
     } else {
         viaFinishInitAccel(pScreen);
 #ifdef XF86DRI
-        if (pVia->directRenderingEnabled)
+        if (pVia->directRenderingType)
             DRILock(screenInfo.screens[pScrn->scrnIndex], 0);
 #endif
         viaAccelFillRect(pScrn, pScrn->frameX0, pScrn->frameY0,
                          pScrn->displayWidth, pScrn->virtualY, 0x00000000);
         viaAccelSyncMarker(pScrn);
 #ifdef XF86DRI
-        if (pVia->directRenderingEnabled)
+        if (pVia->directRenderingType)
             DRIUnlock(screenInfo.screens[pScrn->scrnIndex]);
 #endif
     }
@@ -975,14 +975,14 @@ UMSSwitchMode(int scrnIndex, DisplayModePtr mode, int flags)
     DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "UMSSwitchMode\n"));
 
 #ifdef XF86DRI
-    if (pVia->directRenderingEnabled)
+    if (pVia->directRenderingType)
         DRILock(screenInfo.screens[scrnIndex], 0);
 #endif
 
     viaAccelSync(pScrn);
 
 #ifdef XF86DRI
-    if (pVia->directRenderingEnabled)
+    if (pVia->directRenderingType)
         VIADRIRingBufferCleanup(pScrn);
 #endif
 
@@ -992,7 +992,7 @@ UMSSwitchMode(int scrnIndex, DisplayModePtr mode, int flags)
     ret = VIAWriteMode(pScrn, mode);
 
 #ifdef XF86DRI
-    if (pVia->directRenderingEnabled) {
+    if (pVia->directRenderingType) {
         kickVblank(pScrn);
         VIADRIRingBufferInit(pScrn);
         DRIUnlock(screenInfo.screens[scrnIndex]);
@@ -1063,7 +1063,7 @@ UMSEnterVT(int scrnIndex, int flags)
         viaRestoreVideo(pScrn);
 
 #ifdef XF86DRI
-    if (pVia->directRenderingEnabled) {
+    if (pVia->directRenderingType) {
         kickVblank(pScrn);
         VIADRIRingBufferInit(pScrn);
         viaDRIOffscreenRestore(pScrn);
@@ -1079,7 +1079,7 @@ UMSEnterVT(int scrnIndex, int flags)
     }
 
 #ifdef XF86DRI
-    if (pVia->directRenderingEnabled) {
+    if (pVia->directRenderingType) {
         DRIUnlock(screenInfo.screens[scrnIndex]);
     }
 #endif
@@ -1097,7 +1097,7 @@ UMSLeaveVT(int scrnIndex, int flags)
     DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "UMSLeaveVT\n"));
 
 #ifdef XF86DRI
-    if (pVia->directRenderingEnabled) {
+    if (pVia->directRenderingType) {
         volatile drm_via_sarea_t *saPriv = (drm_via_sarea_t *)
                 DRIGetSAREAPrivate(pScrn->pScreen);
 
@@ -1122,7 +1122,7 @@ UMSLeaveVT(int scrnIndex, int flags)
     }
 
 #ifdef XF86DRI
-    if (pVia->directRenderingEnabled) {
+    if (pVia->directRenderingType) {
         VIADRIRingBufferCleanup(pScrn);
         viaDRIOffscreenSave(pScrn);
     }
