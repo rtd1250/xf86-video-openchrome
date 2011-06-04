@@ -72,13 +72,6 @@ UMSHWCursorInit(ScreenPtr pScreen)
 			pVia->CursorMaxHeight = 32;
 			pVia->CursorSize = ((pVia->CursorMaxWidth * pVia->CursorMaxHeight) / 8) * 2;
 			break;
-		case VIA_VX900:
-			/* FIXME : ARGB cursor should work */
-			pVia->CursorARGBSupported = FALSE;
-			pVia->CursorMaxWidth = 64;
-			pVia->CursorMaxHeight = 64;
-			pVia->CursorSize = pVia->CursorMaxWidth * (pVia->CursorMaxHeight + 1) << 2;
-			break;
 		default:
 			pVia->CursorARGBSupported = TRUE;
 			pVia->CursorMaxWidth = 64;

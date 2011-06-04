@@ -594,23 +594,28 @@ UMSDRIScreenInit(ScreenPtr pScreen)
         case VIA_P4M900:
         case VIA_VX800:
         case VIA_VX855:
+        case VIA_VX900:
             pDRIInfo->clientDriverName = "swrast";
             break;
         default:
             pDRIInfo->clientDriverName = VIAClientDriverName;
             break;
     }
-    pDRIInfo->busIdString = malloc(64);
-    sprintf(pDRIInfo->busIdString, "PCI:%d:%d:%d",
+    if (xf86LoaderCheckSymbol("DRICreatePCIBusID")) {
+        pDRIInfo->busIdString = DRICreatePCIBusID(pVia->PciInfo);
+    } else {
+        pDRIInfo->busIdString = malloc(64);
+        sprintf(pDRIInfo->busIdString, "PCI:%d:%d:%d",
 #ifdef XSERVER_LIBPCIACCESS
-            ((pVia->PciInfo->domain << 8) | pVia->PciInfo->bus),
-            pVia->PciInfo->dev, pVia->PciInfo->func
+                ((pVia->PciInfo->domain << 8) | pVia->PciInfo->bus),
+                pVia->PciInfo->dev, pVia->PciInfo->func
 #else
-            ((pciConfigPtr)pVia->PciInfo->thisCard)->busnum,
-            ((pciConfigPtr)pVia->PciInfo->thisCard)->devnum,
-            ((pciConfigPtr)pVia->PciInfo->thisCard)->funcnum
+                ((pciConfigPtr)pVia->PciInfo->thisCard)->busnum,
+                ((pciConfigPtr)pVia->PciInfo->thisCard)->devnum,
+                ((pciConfigPtr)pVia->PciInfo->thisCard)->funcnum
 #endif
-           );
+               );
+    }
     pDRIInfo->ddxDriverMajorVersion = VIA_DRIDDX_VERSION_MAJOR;
     pDRIInfo->ddxDriverMinorVersion = VIA_DRIDDX_VERSION_MINOR;
     pDRIInfo->ddxDriverPatchVersion = VIA_DRIDDX_VERSION_PATCH;

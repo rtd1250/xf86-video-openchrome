@@ -1,3 +1,28 @@
+2011-05-10  Bartosz Kosiorek  <gang65@poczta.onet.pl>
+
+	Workaround EXA crash with new libcairo2 (#298)
+
+	* src/via_accel.c: (viaExaPrepareComposite):
+
+2011-05-08  Bartosz Kosiorek  <gang65@poczta.onet.pl>
+
+	Fix cursor garbage after suspend/resume for Xserver 1.10 (#405)
+
+	* src/via_video.c: (viaRestoreVideo):
+
+2011-05-04  Bartosz Kosiorek  <gang65@poczta.onet.pl>
+
+	Fix XAA displaying issues
+
+	* src/via_accel.c: (viaInitXAA):
+
+2011-01-23  Bartosz Kosiorek  <gang65@poczta.onet.pl>
+
+	Enable hardware cursor for VX900
+
+	* src/via_cursor.c: (viaHWCursorInit):
+	* src/via_mode.c: (ViaModeSet):
+
 2010-12-16  Bartosz Kosiorek  <gang65@poczta.onet.pl>
 
 	Merge vx900_branch - initial VX900 support

@@ -519,6 +519,7 @@ viaRestoreVideo(ScrnInfoPtr pScrn)
     viaVidEng->alphafb_addr    = localVidEng->alphafb_addr;
     viaVidEng->chroma_low      = localVidEng->chroma_low;
     viaVidEng->chroma_up       = localVidEng->chroma_up;
+    viaVidEng->interruptflag   = localVidEng->interruptflag;
 
     if (pVia->ChipId != PCI_CHIP_VT3314)
     {
@@ -535,9 +536,25 @@ viaRestoreVideo(ScrnInfoPtr pScrn)
         viaVidEng->video1y_addr0   = localVidEng->video1y_addr0;
         viaVidEng->video1_fifo     = localVidEng->video1_fifo;
         viaVidEng->video1y_addr3   = localVidEng->video1y_addr3;
-        viaVidEng->v1_source_w_h   = localVidEng->v1_source_w_h ;
+        viaVidEng->v1_source_w_h   = localVidEng->v1_source_w_h;
         viaVidEng->video1_CSC1     = localVidEng->video1_CSC1;
         viaVidEng->video1_CSC2     = localVidEng->video1_CSC2;
+
+        /* Fix cursor garbage after suspend for VX855 and VX900 (#405) */
+        /* 0x2E4 T Signature Data Result 1 */
+        viaVidEng->video1u_addr1         = localVidEng->video1u_addr1; 
+        /* 0x2E8 HI for Primary Display FIFO Control Signal */
+        viaVidEng->video1u_addr2         = localVidEng->video1u_addr2;
+        /* 0x2EC HI for Primary Display FIFO Transparent color */
+        viaVidEng->video1u_addr3         = localVidEng->video1u_addr3;
+        /* 0x2F0 HI for Primary Display Control Signal */
+        viaVidEng->video1v_addr0         = localVidEng->video1v_addr0;
+        /* 0x2F4 HI for Primary Display Frame Buffer Starting Address */
+        viaVidEng->video1v_addr1         = localVidEng->video1v_addr1;
+        /* 0x2F8 HI for Primary Display Horizontal and Vertical Start */
+        viaVidEng->video1v_addr2         = localVidEng->video1v_addr2;
+        /* 0x2FC HI for Primary Display Center Offset */
+        viaVidEng->video1v_addr3         = localVidEng->video1v_addr3;
     }
     viaVidEng->snd_color_key   = localVidEng->snd_color_key;
     viaVidEng->v3alpha_prefifo = localVidEng->v3alpha_prefifo;
@@ -558,10 +575,11 @@ viaRestoreVideo(ScrnInfoPtr pScrn)
     viaVidEng->video3_CSC2     = localVidEng->video3_CSC2;    
     viaVidEng->compose         = localVidEng->compose;
     
-    viaVidEng->video1_ctl = pVia->dwV1;
     viaVidEng->video3_ctl = pVia->dwV3;
-    if (pVia->ChipId != PCI_CHIP_VT3314)
+    if (pVia->ChipId != PCI_CHIP_VT3314) {
+        viaVidEng->video1_ctl = pVia->dwV1;
         viaVidEng->compose = V1_COMMAND_FIRE;
+    }
     viaVidEng->compose = V3_COMMAND_FIRE;
 }
 
@@ -693,72 +711,6 @@ viaInitVideo(ScreenPtr pScreen)
     }
 }
 
-
-/*
- * This one gets called, for example, on panning.
- */
-
-static int
-viaReputImage(ScrnInfoPtr pScrn,
-        short drw_x, short drw_y, RegionPtr clipBoxes, pointer data,
-        DrawablePtr pDraw)
-{
-
-    DDUPDATEOVERLAY UpdateOverlay_Video;
-    LPDDUPDATEOVERLAY lpUpdateOverlay = &UpdateOverlay_Video;
-    viaPortPrivPtr pPriv = (viaPortPrivPtr) data;
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    if (!REGION_EQUAL(pScrn->pScreen, &pPriv->clip, clipBoxes)) {
-        REGION_COPY(pScrn->pScreen, &pPriv->clip, clipBoxes);
-        if (pPriv->autoPaint) {
-            if (pDraw->type == DRAWABLE_WINDOW) {
-                /* TODO Replace xf86XVFillKeyHelper with xf86XVFillKeyHelperDrawable
-                   Currently resizing problem exist in VLC Media Player
-                   Example of implementation:
-                xf86XVFillKeyHelperDrawable(pDraw, pPriv->colorKey, clipBoxes);
-                DamageDamageRegion(pDraw, clipBoxes); */
-                
-                xf86XVFillKeyHelper(pScrn->pScreen, pPriv->colorKey, clipBoxes);
-            } else {
-                xf86XVFillKeyHelper(pScrn->pScreen, pPriv->colorKey, clipBoxes);
-            }
-        }
-    }
-
-    if (drw_x == pPriv->old_drw_x &&
-        drw_y == pPriv->old_drw_y &&
-        pVia->swov.oldPanningX == pVia->swov.panning_x &&
-        pVia->swov.oldPanningY == pVia->swov.panning_y) {
-        viaXvError(pScrn, pPriv, xve_none);
-        return Success;
-    }
-
-    lpUpdateOverlay->SrcLeft = pPriv->old_src_x;
-    lpUpdateOverlay->SrcTop = pPriv->old_src_y;
-    lpUpdateOverlay->SrcRight = pPriv->old_src_x + pPriv->old_src_w;
-    lpUpdateOverlay->SrcBottom = pPriv->old_src_y + pPriv->old_src_h;
-
-    lpUpdateOverlay->DstLeft = drw_x;
-    lpUpdateOverlay->DstTop = drw_y;
-    lpUpdateOverlay->DstRight = drw_x + pPriv->old_drw_w;
-    lpUpdateOverlay->DstBottom = drw_y + pPriv->old_drw_h;
-    pPriv->old_drw_x = drw_x;
-    pPriv->old_drw_y = drw_y;
-
-    lpUpdateOverlay->dwFlags = DDOVER_KEYDEST;
-
-    if (pScrn->bitsPerPixel == 8)
-        lpUpdateOverlay->dwColorSpaceLowValue = pPriv->colorKey & 0xff;
-    else
-        lpUpdateOverlay->dwColorSpaceLowValue = pPriv->colorKey;
-
-    VIAVidUpdateOverlay(pScrn, lpUpdateOverlay);
-
-    viaXvError(pScrn, pPriv, xve_none);
-    return Success;
-}
-
 static unsigned
 viaSetupAdaptors(ScreenPtr pScreen, XF86VideoAdaptorPtr ** adaptors)
 {
@@ -819,7 +771,7 @@ viaSetupAdaptors(ScreenPtr pScreen, XF86VideoAdaptorPtr ** adaptors)
         viaAdaptPtr[i]->GetPortAttribute = viaGetPortAttribute;
         viaAdaptPtr[i]->SetPortAttribute = viaSetPortAttribute;
         viaAdaptPtr[i]->PutImage = viaPutImage;
-        viaAdaptPtr[i]->ReputImage = viaReputImage;
+        viaAdaptPtr[i]->ReputImage = NULL;
         viaAdaptPtr[i]->QueryImageAttributes = viaQueryImageAttributes;
         for (j = 0; j < numPorts; ++j) {
             viaPortPriv[j].dmaBounceBuffer = NULL;
