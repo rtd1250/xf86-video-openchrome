@@ -151,7 +151,6 @@ typedef struct {
     Bool b3DRegsInitialized;
 } ViaSharedRec, *ViaSharedPtr;
 
-
 enum dri_type {
 	DRI_NONE,
 	DRI_DRI1,
@@ -164,7 +163,6 @@ enum dri_type {
 #define VIA_XVMC_MAX_CONTEXTS 4
 #define VIA_XVMC_MAX_SURFACES 20
 
-    
 typedef struct {
     VIAMem memory_ref;
     unsigned long offsets[VIA_XVMC_MAX_BUFFERS];
@@ -532,7 +530,7 @@ unsigned long viaXvMCPutImageSize(ScrnInfoPtr pScrn);
 void ViaI2CInit(ScrnInfoPtr pScrn);
 
 #ifdef XF86DRI
-enum dri_type UMSDRIScreenInit(ScreenPtr pScreen);
+Bool VIADRI1ScreenInit(ScreenPtr pScreen, char *busid);
 void VIADRICloseScreen(ScreenPtr pScreen);
 Bool VIADRIFinishScreenInit(ScreenPtr pScreen);
 void VIADRIRingBufferCleanup(ScrnInfoPtr pScrn);

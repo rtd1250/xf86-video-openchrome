@@ -543,11 +543,10 @@ VIAInitVisualConfigs(ScreenPtr pScreen)
     return TRUE;
 }
 
-enum dri_type
-UMSDRIScreenInit(ScreenPtr pScreen)
+Bool
+VIADRI1ScreenInit(ScreenPtr pScreen, char *busId)
 {
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
-    enum dri_type version = DRI_NONE;
     VIAPtr pVia = VIAPTR(pScrn);
     DRIInfoPtr pDRIInfo;
     VIADRIPtr pVIADRI;
@@ -559,13 +558,13 @@ UMSDRIScreenInit(ScreenPtr pScreen)
     /* Check that the GLX, DRI, and DRM modules have been loaded by testing
      * for canonical symbols in each module. */
     if (!xf86LoaderCheckSymbol("GlxSetVisualConfigs"))
-        return version;
+        return FALSE;
     if (!xf86LoaderCheckSymbol("drmAvailable"))
-        return version;
+        return FALSE;
     if (!xf86LoaderCheckSymbol("DRIQueryVersion")) {
         xf86DrvMsg(pScreen->myNum, X_ERROR,
-                   "[dri] UMSDRIScreenInit failed (libdri.a is too old).\n");
-        return version;
+                   "[dri] VIADRI1ScreenInit failed (libdri.a is too old).\n");
+        return FALSE;
     }
 
     /* Check the DRI version. */
@@ -575,18 +574,18 @@ UMSDRIScreenInit(ScreenPtr pScreen)
         DRIQueryVersion(&major, &minor, &patch);
         if (major != DRIINFO_MAJOR_VERSION || minor < DRIINFO_MINOR_VERSION) {
             xf86DrvMsg(pScreen->myNum, X_ERROR,
-                       "[dri] UMSDRIScreenInit failed -- version mismatch.\n"
+                       "[dri] VIADRI1ScreenInit failed -- FALSE mismatch.\n"
                        "[dri] libdri is %d.%d.%d, but %d.%d.x is needed.\n"
                        "[dri] Disabling DRI.\n",
                        major, minor, patch,
                        DRIINFO_MAJOR_VERSION, DRIINFO_MINOR_VERSION);
-            return version;
+            return FALSE;
         }
     }
 
     pVia->pDRIInfo = DRICreateInfoRec();
     if (!pVia->pDRIInfo)
-        return version;
+        return FALSE;
 
     pDRIInfo = pVia->pDRIInfo;
     pDRIInfo->drmDriverName = VIAKernelDriverName;
@@ -602,21 +601,7 @@ UMSDRIScreenInit(ScreenPtr pScreen)
             pDRIInfo->clientDriverName = VIAClientDriverName;
             break;
     }
-    if (xf86LoaderCheckSymbol("DRICreatePCIBusID")) {
-        pDRIInfo->busIdString = DRICreatePCIBusID(pVia->PciInfo);
-    } else {
-        pDRIInfo->busIdString = malloc(64);
-        sprintf(pDRIInfo->busIdString, "PCI:%d:%d:%d",
-#ifdef XSERVER_LIBPCIACCESS
-                ((pVia->PciInfo->domain << 8) | pVia->PciInfo->bus),
-                pVia->PciInfo->dev, pVia->PciInfo->func
-#else
-                ((pciConfigPtr)pVia->PciInfo->thisCard)->busnum,
-                ((pciConfigPtr)pVia->PciInfo->thisCard)->devnum,
-                ((pciConfigPtr)pVia->PciInfo->thisCard)->funcnum
-#endif
-               );
-    }
+    pDRIInfo->busIdString = busId;
     pDRIInfo->ddxDriverMajorVersion = VIA_DRIDDX_VERSION_MAJOR;
     pDRIInfo->ddxDriverMinorVersion = VIA_DRIDDX_VERSION_MINOR;
     pDRIInfo->ddxDriverPatchVersion = VIA_DRIDDX_VERSION_PATCH;
@@ -648,7 +633,7 @@ UMSDRIScreenInit(ScreenPtr pScreen)
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Data does not fit in SAREA\n");
         DRIDestroyInfoRec(pVia->pDRIInfo);
         pVia->pDRIInfo = NULL;
-        return version;
+        return FALSE;
     }
     pDRIInfo->SAREASize = SAREA_MAX;
 #endif
@@ -656,7 +641,7 @@ UMSDRIScreenInit(ScreenPtr pScreen)
     if (!(pVIADRI = (VIADRIPtr) calloc(sizeof(VIADRIRec), 1))) {
         DRIDestroyInfoRec(pVia->pDRIInfo);
         pVia->pDRIInfo = NULL;
-        return version;
+        return FALSE;
     }
     pDRIInfo->devPrivate = pVIADRI;
     pDRIInfo->devPrivateSize = sizeof(VIADRIRec);
@@ -677,12 +662,12 @@ UMSDRIScreenInit(ScreenPtr pScreen)
         DRIDestroyInfoRec(pVia->pDRIInfo);
         pVia->pDRIInfo = NULL;
         pVia->drmFD = -1;
-        return version;
+        return FALSE;
     }
 
     if (NULL == (drmVer = drmGetVersion(pVia->drmFD))) {
         VIADRICloseScreen(pScreen);
-        return version;
+        return FALSE;
     }
     pVia->drmVerMajor = drmVer->version_major;
     pVia->drmVerMinor = drmVer->version_minor;
@@ -703,13 +688,13 @@ UMSDRIScreenInit(ScreenPtr pScreen)
                    drmExpected.major, drmExpected.minor, drmCompat.major);
         drmFreeVersion(drmVer);
         VIADRICloseScreen(pScreen);
-        return version;
+        return FALSE;
     }
     drmFreeVersion(drmVer);
 
     if (!(VIAInitVisualConfigs(pScreen))) {
         VIADRICloseScreen(pScreen);
-        return version;
+        return FALSE;
     }
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[dri] visual configs initialized.\n");
 
@@ -717,7 +702,7 @@ UMSDRIScreenInit(ScreenPtr pScreen)
      * Add additional mappings here. */
     if (!VIADRIMapInit(pScreen, pVia)) {
         VIADRICloseScreen(pScreen);
-        return version;
+        return FALSE;
     }
     pVIADRI->regs.size = VIA_MMIO_REGSIZE;
     pVIADRI->regs.handle = pVia->registerHandle;
@@ -728,7 +713,7 @@ UMSDRIScreenInit(ScreenPtr pScreen)
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[dri] mmio mapped.\n");
 
-    return DRI_DRI1;
+    return TRUE;
 }
 
 void

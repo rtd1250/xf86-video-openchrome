@@ -1345,6 +1345,9 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 {
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
     VIAPtr pVia = VIAPTR(pScrn);
+#ifdef XF86DRI
+    char *busId;
+#endif
 
     pScrn->pScreen = pScreen;
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAScreenInit\n"));
@@ -1369,8 +1372,26 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
             return FALSE;
     }
 
+    pVia->directRenderingType = DRI_NONE;
 #ifdef XF86DRI
-    pVia->directRenderingType = UMSDRIScreenInit(pScreen);
+    if (xf86LoaderCheckSymbol("DRICreatePCIBusID")) {
+        busId = DRICreatePCIBusID(pVia->PciInfo);
+    } else {
+        busId = malloc(64);
+        sprintf(busId, "PCI:%d:%d:%d",
+#ifdef XSERVER_LIBPCIACCESS
+                ((pVia->PciInfo->domain << 8) | pVia->PciInfo->bus),
+                pVia->PciInfo->dev, pVia->PciInfo->func
+#else
+                ((pciConfigPtr)pVia->PciInfo->thisCard)->busnum,
+                ((pciConfigPtr)pVia->PciInfo->thisCard)->devnum,
+                ((pciConfigPtr)pVia->PciInfo->thisCard)->funcnum
+#endif
+               );
+    }
+
+    if (VIADRI1ScreenInit(pScreen, busId))
+	pVia->directRenderingType = DRI_DRI1;
 #endif
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Visuals set up\n"));
