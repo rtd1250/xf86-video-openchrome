@@ -28,7 +28,6 @@ NULL:=#
 libums_la_SOURCES = \
 	via_id.c \
 	via_vgahw.c \
-	via_crtc.c \
 	via_display.c \
 	via_lvds.c \
 	via_panel.c \
