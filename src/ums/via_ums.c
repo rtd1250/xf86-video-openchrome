@@ -30,6 +30,8 @@
 #include "via_id.h"
 
 void VIAUnmapMem(ScrnInfoPtr pScrn);
+ModeStatus UMSValidMode(int scrnIndex, DisplayModePtr mode,
+			Bool verbose, int flags);
 void UMSDPMS(ScrnInfoPtr pScrn, int mode, int flags);
 void VIASave(ScrnInfoPtr pScrn);
 
@@ -969,6 +971,7 @@ UMSFreeScreen(int scrnIndex, int flags)
 void
 UMSInit(ScrnInfoPtr scrn)
 {
+    scrn->ValidMode = UMSValidMode;
     scrn->SwitchMode = UMSSwitchMode;
     scrn->AdjustFrame = UMSAdjustFrame;
     scrn->EnterVT = UMSEnterVT;

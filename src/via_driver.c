@@ -363,8 +363,6 @@ via_pci_probe(DriverPtr driver, int entity_num,
 
         scrn->PreInit = VIAPreInit;
         scrn->ScreenInit = VIAScreenInit;
-        scrn->ValidMode = ViaValidMode;
-
 	UMSInit(scrn);
 
         xf86Msg(X_NOTICE,
@@ -431,7 +429,6 @@ VIAProbe(DriverPtr drv, int flags)
                 pScrn->Probe = VIAProbe;
                 pScrn->PreInit = VIAPreInit;
                 pScrn->ScreenInit = VIAScreenInit;
-                pScrn->ValidMode = ViaValidMode;
                 foundScreen = TRUE;
 	        UMSFreeScreen(pScrn);
             }

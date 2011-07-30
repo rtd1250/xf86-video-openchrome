@@ -881,7 +881,7 @@ ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode);
  *
  */
 ModeStatus
-ViaValidMode(int scrnIndex, DisplayModePtr mode, Bool verbose, int flags)
+UMSValidMode(int scrnIndex, DisplayModePtr mode, Bool verbose, int flags)
 {
     ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
     VIAPtr pVia = VIAPTR(pScrn);
@@ -892,7 +892,7 @@ ViaValidMode(int scrnIndex, DisplayModePtr mode, Bool verbose, int flags)
     if (pVia->pVbe)
         return MODE_OK;
 
-    DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "ViaValidMode: Validating %s (Clock: %d)\n",
+    DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "UMSValidMode: Validating %s (Clock: %d)\n",
                      mode->name, mode->Clock));
 
     if (mode->Flags & V_INTERLACE)
