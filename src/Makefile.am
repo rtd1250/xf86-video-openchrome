@@ -18,8 +18,6 @@
 #  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 #  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-SUBDIRS = xvmc ums 
-
 # this is obnoxious:
 # -module lets us name the module exactly how we want
 # -avoid-version prevents gratuitous .0.0.0 version numbers on the end
@@ -40,23 +38,42 @@ openchrome_drv_la_SOURCES = \
          via_3d.h \
          via_3d_reg.h \
          via_accel.c \
+         via_bandwidth.c \
          via_bios.h \
+         via_ch7xxx.c \
+         via_ch7xxx.h \
+         via_cursor.c \
+         via_crtc.c \
          via_dga.c \
+         via_display.c \
          via_dmabuffer.h \
          via_driver.c \
          via_driver.h \
+         via_i2c.c \
+         via_id.c \
          via_id.h \
+         via_lvds.c \
          via_memcpy.c \
          via_memcpy.h \
          via_memory.c \
+         via_mode.c \
+         via_mode.h \
+         via_panel.c \
          via_priv.h \
          via_regs.h \
          via_shadow.c \
          via_swov.c \
          via_swov.h \
+         via_timing.c \
+         via_timing.h \
+         via_ums.c \
+         via_vbe.c \
+         via_vgahw.c \
          via_vgahw.h \
          via_video.c \
          via_video.h \
+         via_vt162x.c \
+         via_vt162x.h \
          via_xvpriv.h
 
 if DRI

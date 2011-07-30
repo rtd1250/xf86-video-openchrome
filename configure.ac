@@ -176,8 +176,7 @@ XORG_RELEASE_VERSION
 
 AC_OUTPUT([
 	Makefile
-	src/xvmc/Makefile
-	src/ums/Makefile
-	src/Makefile
+	libxvmc/Makefile
 	man/Makefile
+	src/Makefile
 ])
