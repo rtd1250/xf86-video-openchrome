@@ -254,8 +254,6 @@ void ViaSecondCRTCSetStartingAddress(ScrnInfoPtr pScrn, int x, int y);
 void ViaSecondCRTCHorizontalOffset(ScrnInfoPtr pScrn);
 void ViaSecondCRTCHorizontalQWCount(ScrnInfoPtr pScrn, int width);
 void ViaSecondCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
-void VIALoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
-		    LOCO *colors, VisualPtr pVisual);
 ModeStatus ViaFirstCRTCModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode);
 ModeStatus ViaSecondCRTCModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaShadowCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);

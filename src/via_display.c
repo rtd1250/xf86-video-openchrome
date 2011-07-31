@@ -285,18 +285,10 @@ xf86CrtcConfigFuncsRec via_xf86crtc_config_funcs = {
 };
 
 void
-ViaPreInitCRTCConfig(ScrnInfoPtr pScrn)
-{
-     xf86CrtcConfigInit (pScrn, &via_xf86crtc_config_funcs);
-}
-
-void
-VIALoadRgbLut(ScrnInfoPtr pScrn, int numColors, int *indices, LOCO *colors,
-              VisualPtr pVisual)
+VIALoadRgbLut(ScrnInfoPtr pScrn, int start, int numColors, LOCO *colors)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    int i, j, index;
+    int i, j;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIALoadRgbLut\n"));
 
@@ -309,25 +301,23 @@ VIALoadRgbLut(ScrnInfoPtr pScrn, int numColors, int *indices, LOCO *colors,
 
     switch (pScrn->bitsPerPixel) {
         case 16:
-            for (i = 0; i < numColors; i++) {
-                index = indices[i];
-                hwp->writeDacWriteAddr(hwp, index * 4);
+            for (i = start; i < numColors; i++) {
+                hwp->writeDacWriteAddr(hwp, i * 4);
                 for (j = 0; j < 4; j++) {
-                    hwp->writeDacData(hwp, colors[index / 2].red);
-                    hwp->writeDacData(hwp, colors[index].green);
-                    hwp->writeDacData(hwp, colors[index / 2].blue);
+                    hwp->writeDacData(hwp, colors[i / 2].red);
+                    hwp->writeDacData(hwp, colors[i].green);
+                    hwp->writeDacData(hwp, colors[i / 2].blue);
                 }
             }
             break;
         case 8:
         case 24:
         case 32:
-            for (i = 0; i < numColors; i++) {
-                index = indices[i];
-                hwp->writeDacWriteAddr(hwp, index);
-                hwp->writeDacData(hwp, colors[index].red);
-                hwp->writeDacData(hwp, colors[index].green);
-                hwp->writeDacData(hwp, colors[index].blue);
+            for (i = start; i < numColors; i++) {
+                hwp->writeDacWriteAddr(hwp, i);
+                hwp->writeDacData(hwp, colors[i].red);
+                hwp->writeDacData(hwp, colors[i].green);
+                hwp->writeDacData(hwp, colors[i].blue);
             }
             break;
         default:
@@ -338,18 +328,23 @@ VIALoadRgbLut(ScrnInfoPtr pScrn, int numColors, int *indices, LOCO *colors,
     hwp->disablePalette(hwp);
 }
 
-void
-VIALoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
-               LOCO *colors, VisualPtr pVisual)
+static void
+via_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
+					int size)
 {
+	ScrnInfoPtr pScrn = crtc->scrn;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-
-    int i, index;
     int SR1A, SR1B, CR67, CR6A;
+    LOCO colors[size];
+    int i, index;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIALoadPalette: numColors: %d\n", numColors));
+    for (i = 0; i < size; i++) {
+		colors[i].red = red[i] >> 8;
+		colors[i].green = green[i] >> 8;
+		colors[i].blue = blue[i] >> 8;
+	}
 
     if (pScrn->bitsPerPixel != 8) {
 
@@ -366,7 +361,7 @@ VIALoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
             }
 
             ViaSeqMask(hwp, 0x1A, 0x00, 0x01);
-            VIALoadRgbLut(pScrn, numColors, indices, colors, pVisual);
+            VIALoadRgbLut(pScrn, 0, size, colors);
         }
 
         /* If secondary is enabled, adjust its palette too. */
@@ -385,7 +380,7 @@ VIALoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
                         ViaCrtcMask(hwp, 0x6A, 0x20, 0x20);
                         break;
                 }
-                VIALoadRgbLut(pScrn, numColors, indices, colors, pVisual);
+                VIALoadRgbLut(pScrn, 0, size, colors);
             }
         }
 
@@ -403,12 +398,11 @@ VIALoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
             ViaCrtcMask(hwp, 0x6A, 0xC0, 0xC0);
         }
 
-        for (i = 0; i < numColors; i++) {
-            index = indices[i];
-            hwp->writeDacWriteAddr(hwp, index);
-            hwp->writeDacData(hwp, colors[index].red);
-            hwp->writeDacData(hwp, colors[index].green);
-            hwp->writeDacData(hwp, colors[index].blue);
+        for (i = 0; i < size; i++) {
+            hwp->writeDacWriteAddr(hwp, i);
+            hwp->writeDacData(hwp, colors[i].red);
+            hwp->writeDacData(hwp, colors[i].green);
+            hwp->writeDacData(hwp, colors[i].blue);
         }
 
         if (pBIOSInfo->SecondCRTC->IsActive) {
@@ -419,12 +413,11 @@ VIALoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
 
             /* Screen 0 palette was changed by mode setting of Screen 1,
              * so load it again. */
-            for (i = 0; i < numColors; i++) {
-                index = indices[i];
-                hwp->writeDacWriteAddr(hwp, index);
-                hwp->writeDacData(hwp, colors[index].red);
-                hwp->writeDacData(hwp, colors[index].green);
-                hwp->writeDacData(hwp, colors[index].blue);
+            for (i = 0; i < size; i++) {
+                hwp->writeDacWriteAddr(hwp, i);
+                hwp->writeDacData(hwp, colors[i].red);
+                hwp->writeDacData(hwp, colors[i].green);
+                hwp->writeDacData(hwp, colors[i].blue);
             }
         }
     }
@@ -1687,11 +1680,6 @@ via_crtc_commit (xf86CrtcPtr crtc)
 {
 }
 
-static void
-via_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue, int size)
-{
-}
-
 static void *
 via_crtc_shadow_allocate (xf86CrtcPtr crtc, int width, int height)
 {
@@ -1815,25 +1803,24 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
         }
     }
 
-/*
+    /* Might not belong here temporary fix for bug fix */
+    xf86CrtcConfigInit(pScrn, &via_xf86crtc_config_funcs);
+
     for (i = 0; i < 2; i++) {
         crtc = xf86CrtcCreate(pScrn, &via_crtc_funcs);
 
-        if (crtc == NULL) {
+        if (!crtc) {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "xf86CrtcCreate failed.\n");
             return FALSE;
         }
     }
-*/
+
     ViaOutputsDetect(pScrn);
     if (!ViaOutputsSelect(pScrn)) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "No outputs possible.\n");
         VIAFreeRec(pScrn);
         return FALSE;
     }
-
-    /* Might not belong here temporary fix for bug fix */
-    ViaPreInitCRTCConfig(pScrn);
 
     if (!pVia->UseLegacyModeSwitch) {
         if (pBIOSInfo->Panel->IsActive)

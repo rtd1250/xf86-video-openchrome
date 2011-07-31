@@ -48,6 +48,7 @@
 #if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 6 
 #include "xf86RAC.h"
 #endif
+#include "xf86Crtc.h"
 
 #ifdef XF86DRI
 #include "dri.h"
@@ -1351,6 +1352,62 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     return TRUE;
 }
 
+static void
+LoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
+		LOCO * colors, VisualPtr pVisual)
+{
+	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
+	CARD16 lut_r[256], lut_g[256], lut_b[256];
+	int i, j, k, index;
+
+	for (k = 0; k < xf86_config->num_crtc; k++) {
+		xf86CrtcPtr crtc = xf86_config->crtc[k]; 
+
+		switch (pScrn->depth) {
+		case 15:
+			for (i = 0; i < numColors; i++) {
+				index = indices[i];
+				for (j = 0; j < 8; j++) {
+					lut_r[index * 8 + j] = colors[index].red << 8;
+					lut_g[index * 8 + j] = colors[index].green << 8;
+					lut_b[index * 8 + j] = colors[index].blue << 8;
+				}
+			}
+			break;
+		case 16:
+			for (i = 0; i < numColors; i++) {
+				index = indices[i];
+
+				if (index <= 31) {
+					for (j = 0; j < 8; j++) {
+						lut_r[index * 8 + j] = colors[index].red << 8;
+						lut_b[index * 8 + j] = colors[index].blue << 8;
+					}
+				}
+
+				for (j = 0; j < 4; j++)
+					lut_g[index * 4 + j] = colors[index].green << 8;
+			}
+			break;
+		default:
+			for (i = 0; i < numColors; i++) {
+				index = indices[i];
+				lut_r[index] = colors[index].red << 8;
+				lut_g[index] = colors[index].green << 8;
+				lut_b[index] = colors[index].blue << 8;
+			}
+			break;
+		}
+
+		/* Make the change through RandR */
+#ifdef RANDR_12_INTERFACE
+		RRCrtcGammaSet(crtc->randr_crtc, lut_r, lut_g, lut_b);
+#else /*RANDR_12_INTERFACE*/
+		crtc->funcs->gamma_set(crtc, lut_r, lut_g, lut_b, 256);
+#endif
+	}
+}
+
 static Bool
 VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 {
@@ -1494,7 +1551,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
         return FALSE;
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Def Color map set up\n"));
 
-    if (!xf86HandleColormaps(pScreen, 256, 8, VIALoadPalette, NULL,
+    if (!xf86HandleColormaps(pScreen, 256, 8, LoadPalette, NULL,
                              CMAP_RELOAD_ON_MODE_SWITCH
                              | CMAP_PALETTED_TRUECOLOR))
         return FALSE;
