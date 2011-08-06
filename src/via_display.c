@@ -1696,26 +1696,41 @@ via_crtc_shadow_destroy(xf86CrtcPtr crtc, PixmapPtr rotate_pixmap, void *data)
 static void
 via_crtc_set_cursor_colors (xf86CrtcPtr crtc, int bg, int fg)
 {
+    ScrnInfoPtr pScrn = crtc->scrn;
+
+    viaSetCursorColors(pScrn, bg, fg);
 }
 
 static void
 via_crtc_set_cursor_position (xf86CrtcPtr crtc, int x, int y)
 {
+    ScrnInfoPtr pScrn = crtc->scrn;
+
+    viaSetCursorPosition(pScrn, x, y);
 }
 
 static void
 via_crtc_show_cursor (xf86CrtcPtr crtc)
 {
+    ScrnInfoPtr pScrn = crtc->scrn;
+
+    viaShowCursor(pScrn);
 }
 
 static void
 via_crtc_hide_cursor (xf86CrtcPtr crtc)
 {
+    ScrnInfoPtr pScrn = crtc->scrn;
+
+    viaHideCursor(pScrn);
 }
 
 static void
 via_crtc_load_cursor_argb (xf86CrtcPtr crtc, CARD32 *image)
 {
+    ScrnInfoPtr pScrn = crtc->scrn;
+
+    viaLoadCursorImage(pScrn, (unsigned char *)image);
 }
 
 static const xf86CrtcFuncsRec via_crtc_funcs = {
