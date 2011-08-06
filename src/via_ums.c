@@ -24,13 +24,13 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "xf86Crtc.h"
 
 #include "globals.h"
 #include "via_driver.h"
 #include "via_id.h"
 
 void VIAUnmapMem(ScrnInfoPtr pScrn);
-void UMSDPMS(ScrnInfoPtr pScrn, int mode, int flags);
 void VIASave(ScrnInfoPtr pScrn);
 
 #ifdef XF86DRI
@@ -216,12 +216,12 @@ UMSAccelSetup(ScrnInfoPtr pScrn)
     pScreen->SaveScreen = VIASaveScreen;
     pScreen->CloseScreen = VIACloseScreen;
 
-    xf86DPMSInit(pScreen, UMSDPMS, 0);
+    xf86DPMSInit(pScreen, xf86DPMSSet, 0);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- DPMS set up\n"));
 
     pVia->agpDMA = FALSE;
 #ifdef XF86DRI
-    if (pVia->directRenderingType)
+    if (pVia->directRenderingType) 
         pVia->directRenderingType = VIADRIFinishScreenInit(pScreen);
 
     if (pVia->directRenderingType) {

@@ -222,7 +222,7 @@ void ViaVbeAdjustFrame(int scrnIndex, int x, int y, int flags);
 Bool ViaVbeSetMode(ScrnInfoPtr pScrn, DisplayModePtr pMode);
 Bool ViaVbeSaveRestore(ScrnInfoPtr pScrn, vbeSaveRestoreFunction function);
 Bool ViaVbeModePreInit(ScrnInfoPtr pScrn);
-void ViaVbeDPMS(ScrnInfoPtr pScrn, int mode, int flags);
+void ViaVbeDPMS(ScrnInfoPtr pScrn, int mode);
 void ViaVbeDoDPMS(ScrnInfoPtr pScrn, int mode);
 
 /* via_mode.c */

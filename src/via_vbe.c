@@ -440,7 +440,7 @@ ViaVbeDoDPMS(ScrnInfoPtr pScrn, int mode)
 }
 
 void
-ViaVbeDPMS(ScrnInfoPtr pScrn, int mode, int flags)
+ViaVbeDPMS(ScrnInfoPtr pScrn, int mode)
 {
     if (!pScrn->vtSema)
         return;
