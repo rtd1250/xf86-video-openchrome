@@ -1462,28 +1462,22 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     }
 
 	pVia->drmFD = drmOpen("via", busId);
-	if (pVia->drmFD == -1) {
-		xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-					"[drm] Failed to open DRM device for %s: %s\n",
-					busId, strerror(errno));
-		return FALSE;
-	}
+	if (pVia->drmFD != -1) {
+		if (NULL == (drmVer = drmGetVersion(pVia->drmFD))) {
+			xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Could not get DRM"
+						" driver version\n");
+		} else {
+			pVia->drmVerMajor = drmVer->version_major;
+			pVia->drmVerMinor = drmVer->version_minor;
+			pVia->drmVerPL = drmVer->version_patchlevel;
+			drmFreeVersion(drmVer);
 
-	if (NULL == (drmVer = drmGetVersion(pVia->drmFD))) {
-		xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Could not get DRM"
-					" driver version\n");
-	} else {
-		pVia->drmVerMajor = drmVer->version_major;
-		pVia->drmVerMinor = drmVer->version_minor;
-		pVia->drmVerPL = drmVer->version_patchlevel;
-		drmFreeVersion(drmVer);
+			if ((pVia->drmVerMajor < drmExpected.major) ||
+				(pVia->drmVerMajor > drmCompat.major) ||
+			   ((pVia->drmVerMajor == drmExpected.major) &&
+				(pVia->drmVerMinor < drmExpected.minor))) {
 
-		if ((pVia->drmVerMajor < drmExpected.major) ||
-			(pVia->drmVerMajor > drmCompat.major) ||
-		   ((pVia->drmVerMajor == drmExpected.major) &&
-			(pVia->drmVerMinor < drmExpected.minor))) {
-
-			xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+				xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
 						"[dri] Kernel drm is not compatible with this driver.\n"
 						"[dri] Kernel drm version is %d.%d.%d, "
 						"and I can work with versions %d.%d.x - %d.x.x.\n"
@@ -1491,18 +1485,23 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 						"Disabling DRI.\n", pVia->drmVerMajor, pVia->drmVerMinor,
 						pVia->drmVerPL, drmExpected.major, drmExpected.minor,
 						drmCompat.major);
-		} else {
-			/* DRI2 or DRI1 support */
-			if (pVia->drmVerMajor < drmCompat.major) {
-				drmClose(pVia->drmFD);
-				if (VIADRI1ScreenInit(pScreen, busId)) {
-					DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "DRI 1 api supported\n"));
-					pVia->directRenderingType = DRI_DRI1;
-				}
 			} else {
-				DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "DRI 2 api not supported yet\n"));
+				/* DRI2 or DRI1 support */
+				if (pVia->drmVerMajor < drmCompat.major) {
+					drmClose(pVia->drmFD);
+					if (VIADRI1ScreenInit(pScreen, busId)) {
+						DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "DRI 1 api supported\n"));
+						pVia->directRenderingType = DRI_DRI1;
+					}
+				} else {
+					DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "DRI 2 api not supported yet\n"));
+				}
 			}
 		}
+	} else {
+		xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+					"[drm] Failed to open DRM device for %s: %s\n",
+					busId, strerror(errno));
 	}
 #endif
 
