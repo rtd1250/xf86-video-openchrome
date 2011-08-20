@@ -42,7 +42,7 @@
 
 
 void
-ViaVbeAdjustFrame(int scrnIndex, int x, int y, int flags)
+ViaVbeAdjustFrame(int scrnIndex, int x, int y)
 {
     VIAPtr pVia = VIAPTR(xf86Screens[scrnIndex]);
 

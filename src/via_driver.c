@@ -335,6 +335,29 @@ VIAAvailableOptions(int chipid, int busid)
     return VIAOptions;
 }
 
+static Bool
+VIASwitchMode(int scrnIndex, DisplayModePtr mode, int flags)
+{
+    ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
+
+    return xf86SetSingleMode(pScrn, mode, RR_Rotate_0);
+}
+
+static void
+VIAAdjustFrame(int scrnIndex, int x, int y, int flags)
+{
+    ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
+    xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
+    int i;
+
+    DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIAAdjustFrame %dx%d\n", x, y));
+
+    for (i = 0; i < xf86_config->num_crtc; i++) {
+        xf86CrtcPtr crtc = xf86_config->crtc[i];
+
+        xf86CrtcSetOrigin(crtc, x, y);
+    }
+}
 
 static void
 VIAIdentify(int flags)
@@ -365,7 +388,8 @@ via_pci_probe(DriverPtr driver, int entity_num,
         scrn->PreInit = VIAPreInit;
         scrn->ScreenInit = VIAScreenInit;
         scrn->ValidMode = ViaValidMode;
-
+        scrn->SwitchMode = VIASwitchMode;
+        scrn->AdjustFrame = VIAAdjustFrame;
 	UMSInit(scrn);
 
         xf86Msg(X_NOTICE,

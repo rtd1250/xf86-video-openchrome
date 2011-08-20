@@ -1639,14 +1639,43 @@ via_crtc_dpms(xf86CrtcPtr crtc, int mode)
 }
 
 static Bool
-via_crtc_lock (xf86CrtcPtr crtc)
+via_crtc_lock(xf86CrtcPtr crtc)
 {
-        return FALSE;
+    ScrnInfoPtr pScrn = crtc->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+    Bool ret = FALSE;
+
+#ifdef XF86DRI
+    if (pVia->directRenderingType)
+        DRILock(screenInfo.screens[pScrn->scrnIndex], 0);
+#endif
+
+    viaAccelSync(pScrn);
+
+#ifdef XF86DRI
+    if (pVia->directRenderingType)
+        VIADRIRingBufferCleanup(pScrn);
+#endif
+
+    if (pVia->VQEnable)
+        viaDisableVQ(pScrn);
+
+    return ret;
 }
 
 static void
-via_crtc_unlock (xf86CrtcPtr crtc)
+via_crtc_unlock(xf86CrtcPtr crtc)
 {
+#ifdef XF86DRI
+    ScrnInfoPtr pScrn = crtc->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    if (pVia->directRenderingType) {
+        kickVblank(pScrn);
+        VIADRIRingBufferInit(pScrn);
+        DRIUnlock(screenInfo.screens[pScrn->scrnIndex]);
+    }
+#endif
 }
 
 static Bool
@@ -1674,6 +1703,33 @@ via_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 static void
 via_crtc_commit (xf86CrtcPtr crtc)
 {
+}
+
+static void
+via_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
+{
+    ScrnInfoPtr pScrn = crtc->scrn;
+    int scrnIndex = pScrn->scrnIndex;
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    if (pVia->pVbe) {
+        ViaVbeAdjustFrame(scrnIndex, x, y);
+    } else {
+        if (pVia->UseLegacyModeSwitch) {
+            if (!pVia->IsSecondary)
+                ViaFirstCRTCSetStartingAddress(pScrn, x, y);
+            else
+                ViaSecondCRTCSetStartingAddress(pScrn, x, y);
+        } else {
+            if (pVia->pBIOSInfo->FirstCRTC->IsActive)
+                ViaFirstCRTCSetStartingAddress(pScrn, x, y);
+
+            if (pVia->pBIOSInfo->SecondCRTC->IsActive)
+                ViaSecondCRTCSetStartingAddress(pScrn, x, y);
+        }
+    }
+
+    VIAVidAdjustFrame(pScrn, x, y);
 }
 
 static void *
@@ -1734,25 +1790,26 @@ via_crtc_load_cursor_argb (xf86CrtcPtr crtc, CARD32 *image)
 }
 
 static const xf86CrtcFuncsRec via_crtc_funcs = {
-    .dpms = via_crtc_dpms,
-    .save = NULL,
-    .restore = NULL,
-    .lock = via_crtc_lock,
-    .unlock = via_crtc_unlock,
-    .mode_fixup = via_crtc_mode_fixup,
-    .prepare = via_crtc_prepare,
-    .mode_set = via_crtc_mode_set,
-    .commit = via_crtc_commit,
-    .gamma_set = via_crtc_gamma_set,
-    .shadow_create = via_crtc_shadow_create,
-    .shadow_allocate = via_crtc_shadow_allocate,
-    .shadow_destroy = via_crtc_shadow_destroy,
-    .set_cursor_colors = via_crtc_set_cursor_colors,
+    .dpms		 = via_crtc_dpms,
+    .save		 = NULL,
+    .restore		 = NULL,
+    .lock		 = via_crtc_lock,
+    .unlock		 = via_crtc_unlock,
+    .mode_fixup		 = via_crtc_mode_fixup,
+    .prepare		 = via_crtc_prepare,
+    .mode_set		 = via_crtc_mode_set,
+    .commit		 = via_crtc_commit,
+    .gamma_set		 = via_crtc_gamma_set,
+    .shadow_create 	 = via_crtc_shadow_create,
+    .shadow_allocate	 = via_crtc_shadow_allocate,
+    .shadow_destroy	 = via_crtc_shadow_destroy,
+    .set_cursor_colors	 = via_crtc_set_cursor_colors,
     .set_cursor_position = via_crtc_set_cursor_position,
-    .show_cursor = via_crtc_show_cursor,
-    .hide_cursor = via_crtc_hide_cursor,
-    .load_cursor_argb = via_crtc_load_cursor_argb,
-    .destroy = NULL,
+    .show_cursor	 = via_crtc_show_cursor,
+    .hide_cursor	 = via_crtc_hide_cursor,
+    .load_cursor_argb	 = via_crtc_load_cursor_argb,
+    .set_origin		 = via_crtc_set_origin,
+    .destroy		 = NULL,
 };
 
 Bool

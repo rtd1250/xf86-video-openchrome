@@ -771,70 +771,6 @@ UMSPreInit(ScrnInfoPtr pScrn)
 }
 
 static Bool
-UMSSwitchMode(int scrnIndex, DisplayModePtr mode, int flags)
-{
-    ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
-    VIAPtr pVia = VIAPTR(pScrn);
-    Bool ret;
-
-    DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "UMSSwitchMode\n"));
-
-#ifdef XF86DRI
-    if (pVia->directRenderingType)
-        DRILock(screenInfo.screens[scrnIndex], 0);
-#endif
-
-    viaAccelSync(pScrn);
-
-#ifdef XF86DRI
-    if (pVia->directRenderingType)
-        VIADRIRingBufferCleanup(pScrn);
-#endif
-
-    if (pVia->VQEnable)
-        viaDisableVQ(pScrn);
-
-    ret = VIAWriteMode(pScrn, mode);
-
-#ifdef XF86DRI
-    if (pVia->directRenderingType) {
-        kickVblank(pScrn);
-        VIADRIRingBufferInit(pScrn);
-        DRIUnlock(screenInfo.screens[scrnIndex]);
-    }
-#endif
-    return ret;
-}
-
-static void
-UMSAdjustFrame(int scrnIndex, int x, int y, int flags)
-{
-    ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "UMSAdjustFrame %dx%d\n", x, y));
-
-    if (pVia->pVbe) {
-        ViaVbeAdjustFrame(scrnIndex, x, y, flags);
-    } else {
-        if (pVia->UseLegacyModeSwitch) {
-            if (!pVia->IsSecondary)
-                ViaFirstCRTCSetStartingAddress(pScrn, x, y);
-            else
-                ViaSecondCRTCSetStartingAddress(pScrn, x, y);
-        } else {
-            if (pVia->pBIOSInfo->FirstCRTC->IsActive)
-                ViaFirstCRTCSetStartingAddress(pScrn, x, y);
-
-            if (pVia->pBIOSInfo->SecondCRTC->IsActive)
-                ViaSecondCRTCSetStartingAddress(pScrn, x, y);
-        }
-    }
-
-    VIAVidAdjustFrame(pScrn, x, y);
-}
-
-static Bool
 UMSEnterVT(int scrnIndex, int flags)
 {
     ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
@@ -969,8 +905,6 @@ UMSFreeScreen(int scrnIndex, int flags)
 void
 UMSInit(ScrnInfoPtr scrn)
 {
-    scrn->SwitchMode = UMSSwitchMode;
-    scrn->AdjustFrame = UMSAdjustFrame;
     scrn->EnterVT = UMSEnterVT;
     scrn->LeaveVT = UMSLeaveVT;
     scrn->FreeScreen = UMSFreeScreen;

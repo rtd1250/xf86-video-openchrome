@@ -50,21 +50,7 @@
 static void
 ViaPrintMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Name: %s\n", mode->name);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Clock: %d\n", mode->Clock);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VRefresh: %f\n", mode->VRefresh);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "HSync: %f\n", mode->HSync);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "HDisplay: %d\n", mode->HDisplay);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "HSyncStart: %d\n", mode->HSyncStart);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "HSyncEnd: %d\n", mode->HSyncEnd);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "HTotal: %d\n", mode->HTotal);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "HSkew: %d\n", mode->HSkew);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VDisplay: %d\n", mode->VDisplay);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VSyncStart: %d\n", mode->VSyncStart);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VSyncEnd: %d\n", mode->VSyncEnd);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VTotal: %d\n", mode->VTotal);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VScan: %d\n", mode->VScan);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Flags: %d\n", mode->Flags);
+    xf86PrintModeline(pScrn->scrnIndex, mode);    
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcHDisplay: 0x%x\n",
                mode->CrtcHDisplay);
@@ -321,7 +307,6 @@ ViaDFPDetect(ScrnInfoPtr pScrn)
         return FALSE;
     }
 }
-
 
 /*
  *
@@ -1614,7 +1599,6 @@ ViaDFPPower(ScrnInfoPtr pScrn, Bool On)
         /* Power off TMDS */
         ViaCrtcMask(hwp, 0xD2, 0x08, 0x08);
 }
-
 
 void
 ViaModeFirstCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode)
