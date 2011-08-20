@@ -1487,7 +1487,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 						drmCompat.major);
 			} else {
 				/* DRI2 or DRI1 support */
-				if (pVia->drmVerMajor < drmCompat.major) {
+				if (pVia->drmVerMajor <= drmCompat.major) {
 					drmClose(pVia->drmFD);
 					if (VIADRI1ScreenInit(pScreen, busId)) {
 						DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "DRI 1 api supported\n"));
