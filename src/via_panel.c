@@ -36,7 +36,6 @@
 #include "via_driver.h"
 #include "via_vgahw.h"
 #include "via_id.h"
-#include "via_timing.h"
 
 static ViaPanelModeRec ViaPanelNativeModes[] = {
     {640, 480},
@@ -359,16 +358,10 @@ ViaPanelGetNativeDisplayMode(ScrnInfoPtr pScrn)
                      "ViaPanelGetNativeDisplayMode\n"));
 
     if (panelMode->Width && panelMode->Height) {
-
         /* TODO: fix refresh rate */
-        DisplayModePtr p = malloc( sizeof(DisplayModeRec) ) ;
+        DisplayModePtr p = xf86CVTMode(panelMode->Width, panelMode->Height,
+										60.0f, TRUE, FALSE);
         if (p) {
-            memset(p, 0, sizeof(DisplayModeRec));
-
-            float refresh = 60.0f ;
-
-            /* The following code is borrowed from xf86SetModeCrtc. */
-            viaTimingCvt(p, panelMode->Width, panelMode->Height, refresh, FALSE, TRUE);
             p->CrtcHDisplay = p->HDisplay;
             p->CrtcHSyncStart = p->HSyncStart;
             p->CrtcHSyncEnd = p->HSyncEnd;
@@ -383,13 +376,12 @@ ViaPanelGetNativeDisplayMode(ScrnInfoPtr pScrn)
             p->CrtcVBlankEnd = max(p->CrtcVSyncEnd, p->CrtcVTotal);
             p->CrtcHBlankStart = min(p->CrtcHSyncStart, p->CrtcHDisplay);
             p->CrtcHBlankEnd = max(p->CrtcHSyncEnd, p->CrtcHTotal);
-            
+
             pVia->pBIOSInfo->Panel->NativeDisplayMode = p;
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                      "Out of memory. Size: %d bytes\n", sizeof(DisplayModeRec));
         }
-        
     } else {
         xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
                    "Invalid panel dimension (%dx%d)\n", panelMode->Width,
