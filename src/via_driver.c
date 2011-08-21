@@ -45,7 +45,7 @@
 #include "via_video.h"
 #include "via.h"
 
-#if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 6 
+#if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 6
 #include "xf86RAC.h"
 #endif
 #include "xf86Crtc.h"
@@ -265,7 +265,7 @@ static OptionInfoRec VIAOptions[] = {
     {OPTION_TVDEFLICKER,         "TVDeflicker",      OPTV_INTEGER, {0}, FALSE},
     {OPTION_TVTYPE,              "TVType",           OPTV_ANYSTR,  {0}, FALSE},
     {OPTION_TVOUTPUT,            "TVOutput",         OPTV_ANYSTR,  {0}, FALSE},
-    {OPTION_TVDIPORT,            "TVPort",           OPTV_ANYSTR,  {0}, FALSE},    
+    {OPTION_TVDIPORT,            "TVPort",           OPTV_ANYSTR,  {0}, FALSE}, 
     {OPTION_DISABLEVQ,           "DisableVQ",        OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_DISABLEIRQ,          "DisableIRQ",       OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_AGP_DMA,             "EnableAGPDMA",     OPTV_BOOLEAN, {0}, FALSE},
@@ -390,7 +390,7 @@ via_pci_probe(DriverPtr driver, int entity_num,
         scrn->ValidMode = ViaValidMode;
         scrn->SwitchMode = VIASwitchMode;
         scrn->AdjustFrame = VIAAdjustFrame;
-	UMSInit(scrn);
+		UMSInit(scrn);
 
         xf86Msg(X_NOTICE,
                 "VIA Technologies does not support this driver in any way.\n");
@@ -458,7 +458,7 @@ VIAProbe(DriverPtr drv, int flags)
                 pScrn->ScreenInit = VIAScreenInit;
                 pScrn->ValidMode = ViaValidMode;
                 foundScreen = TRUE;
-	        UMSFreeScreen(pScrn);
+				UMSFreeScreen(pScrn);
             }
 #if 0
             xf86ConfigActivePciEntity(pScrn,
@@ -576,20 +576,20 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
     pVia->useLegacyVBE = TRUE;
 
     pVia->UseLegacyModeSwitch = FALSE;
-    pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP1; 
+    pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP1;
 
     switch (pVia->Chipset) {
-        case VIA_CLE266:    
+        case VIA_CLE266:
             pVia->UseLegacyModeSwitch = TRUE;
-            pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP0; 
+            pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP0;
         case VIA_KM400:
             /* IRQ is not broken on KM400A, but testing (pVia->ChipRev < 0x80)
              * is not enough to make sure we have an older, broken KM400. */
             pVia->DRIIrqEnable = FALSE;
-            
+
             /* The KM400 not working properly with new mode switch (See Ticket #301) */
             pVia->UseLegacyModeSwitch = TRUE;
-            pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP0; 
+            pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP0;
             break;
         case VIA_K8M800:
             pVia->DRIIrqEnable = FALSE;
@@ -623,7 +623,7 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
             pVia->useLegacyVBE = FALSE;
             /* FIXME: this needs to be tested */
             pVia->dmaXV = FALSE;
-            pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP0; 
+            pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP0;
             break;
 
         case VIA_VX800:
@@ -713,7 +713,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             pVIAEnt->HasSecondary = FALSE;
             pVIAEnt->RestorePrimary = FALSE;
             pVIAEnt->IsSecondaryRestored = FALSE;
-           
         }
     } else {
         pVia->sharedData = xnfcalloc(sizeof(ViaSharedRec), 1);
@@ -1107,7 +1106,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             pVia->ActiveDevice |= VIA_DEVICE_CRT;
         if (strstr(s, "LCD"))
             pVia->ActiveDevice |= VIA_DEVICE_LCD;
-        if (strstr(s, "DFP"))  
+        if (strstr(s, "DFP"))
             pVia->ActiveDevice |= VIA_DEVICE_DFP;
         if (strstr(s, "TV"))
             pVia->ActiveDevice |= VIA_DEVICE_TV;
@@ -1250,7 +1249,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             pBIOSInfo->TVDIPort = VIA_DI_PORT_DFPLOW;
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
                        "TV Output Port is DFPLow.\n");
-        } 
+        }
     } else {
         xf86DrvMsg(pScrn->scrnIndex, X_DEFAULT,
                    "No default TV output port is set.\n");
@@ -1287,7 +1286,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             pVia->I2CDevices |= VIA_I2C_BUS1;
         if (strstr(s, "Bus2"))
             pVia->I2CDevices |= VIA_I2C_BUS2;
-        if (strstr(s, "Bus3"))  
+        if (strstr(s, "Bus3"))
             pVia->I2CDevices |= VIA_I2C_BUS3;
     }
 
@@ -1314,7 +1313,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     /* Set the current mode to the first in the list */
     pScrn->currentMode = pScrn->modes;
 
-    /* Print the list of modes being used */    
+    /* Print the list of modes being used */
     xf86PrintModes(pScrn);
 
     /* Set display resolution */
@@ -1385,7 +1384,7 @@ LoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
 	int i, j, k, index;
 
 	for (k = 0; k < xf86_config->num_crtc; k++) {
-		xf86CrtcPtr crtc = xf86_config->crtc[k]; 
+		xf86CrtcPtr crtc = xf86_config->crtc[k];
 
 		switch (pScrn->depth) {
 		case 15:
@@ -1436,17 +1435,27 @@ static Bool
 VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 {
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
 #ifdef XF86DRI
     drmVersionPtr drmVer;
     char *busId;
 #endif
+	int i;
 
     pScrn->pScreen = pScreen;
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAScreenInit\n"));
 
     if (!UMSResourceManagement(pScrn))
-    	return FALSE;
+		return FALSE;
+
+	/* need to point to new screen on server regeneration */
+	for (i = 0; i < xf86_config->num_crtc; i++)
+		xf86_config->crtc[i]->scrn = pScrn;
+
+	for (i = 0; i < xf86_config->num_output; i++)
+		xf86_config->output[i]->scrn = pScrn;
+
 
     miClearVisualTypes();
 
@@ -1554,11 +1563,9 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     /* Must be after RGB ordering is fixed. */
     fbPictureInit(pScreen, 0, 0);
 #endif
- 
-    if (!pVia->NoAccel) {
-	if (!UMSInitAccel(pScreen))
+
+    if (!pVia->NoAccel && !UMSInitAccel(pScreen))
 	    return FALSE;
-    }
 
     miInitializeBackingStore(pScreen);
     xf86SetBackingStore(pScreen);
@@ -1694,7 +1701,6 @@ static Bool
 VIARandRGetInfo(ScrnInfoPtr pScrn, Rotation *rotations)
 {
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIARandRGetInfo\n");
-    
     VIAPtr pVia = VIAPTR(pScrn);
 
     /* to report what ability we can support. */
@@ -1711,21 +1717,21 @@ VIARandRSetConfig(ScrnInfoPtr pScrn, xorgRRConfig *config)
 {
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIARandRSetConfig\n");
     VIAPtr pVia = VIAPTR(pScrn);
-    
+
     switch(config->rotation) {
-        case RR_Rotate_0:            
+        case RR_Rotate_0:
             pVia->rotate = RR_Rotate_0;
             break;
 
-        case RR_Rotate_90:            
+        case RR_Rotate_90:
             pVia->rotate = RR_Rotate_90;
             break;
-            
-        case RR_Rotate_180:            
+
+        case RR_Rotate_180:
             pVia->rotate = RR_Rotate_180;
             break;
 
-        case RR_Rotate_270:            
+        case RR_Rotate_270:
             pVia->rotate = RR_Rotate_270;
             break;
 
@@ -1748,11 +1754,11 @@ static Bool
 VIADriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op, pointer data)
 {
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIADriverFunc Operation: %d\n", op));
-    
+
     switch(op) {
-        case RR_GET_INFO:          
+        case RR_GET_INFO:
             return VIARandRGetInfo(pScrn, (Rotation*)data);
-        case RR_SET_CONFIG:          
+        case RR_SET_CONFIG:
             return VIARandRSetConfig(pScrn, (xorgRRConfig*)data);
         default:
             return FALSE;
