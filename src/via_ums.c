@@ -201,17 +201,8 @@ UMSAccelSetup(ScrnInfoPtr pScrn)
         }
     }
 
-    if (pVia->shadowFB)
-        ViaShadowFBInit(pScrn, pScreen);
-    else
-        VIADGAInit(pScreen);
-
     pVia->CloseScreen = pScreen->CloseScreen;
-    pScreen->SaveScreen = xf86SaveScreen;
     pScreen->CloseScreen = VIACloseScreen;
-
-    xf86DPMSInit(pScreen, xf86DPMSSet, 0);
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- DPMS set up\n"));
 
     pVia->agpDMA = FALSE;
 #ifdef XF86DRI
@@ -678,7 +669,7 @@ UMSPreInit(ScrnInfoPtr pScrn)
 	    /* Workaround for #177 (VRAM probing fail on P4M800) */
 	    if (pScrn->videoRam < 16384) {
 		xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                	   "Memory size detection failed: using 16 MB.\n");
+					"Memory size detection failed: using 16 MB.\n");
 		pScrn->videoRam = 16 << 10;
             }
             break;

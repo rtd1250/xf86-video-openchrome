@@ -1577,6 +1577,16 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     miDCInitialize(pScreen, xf86GetPointerScreenFuncs());
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- SW cursor set up\n"));
 
+	if (pVia->shadowFB)
+		ViaShadowFBInit(pScrn, pScreen);
+	else
+		VIADGAInit(pScreen);
+
+	pScreen->SaveScreen = xf86SaveScreen;
+
+	xf86DPMSInit(pScreen, xf86DPMSSet, 0);
+	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- DPMS set up\n"));
+
     if (!miCreateDefColormap(pScreen))
         return FALSE;
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Def Color map set up\n"));
