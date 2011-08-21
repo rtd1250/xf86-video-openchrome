@@ -124,12 +124,6 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
     return (*pScreen->CloseScreen) (scrnIndex, pScreen);
 }
 
-static Bool
-VIASaveScreen(ScreenPtr pScreen, int mode)
-{
-    return vgaHWSaveScreen(pScreen, mode);
-}
-
 void
 VIAInitialize3DEngine(ScrnInfoPtr pScrn)
 {
@@ -209,11 +203,11 @@ UMSAccelSetup(ScrnInfoPtr pScrn)
 
     if (pVia->shadowFB)
         ViaShadowFBInit(pScrn, pScreen);
-    else 
+    else
         VIADGAInit(pScreen);
- 
+
     pVia->CloseScreen = pScreen->CloseScreen;
-    pScreen->SaveScreen = VIASaveScreen;
+    pScreen->SaveScreen = xf86SaveScreen;
     pScreen->CloseScreen = VIACloseScreen;
 
     xf86DPMSInit(pScreen, xf86DPMSSet, 0);
@@ -221,7 +215,7 @@ UMSAccelSetup(ScrnInfoPtr pScrn)
 
     pVia->agpDMA = FALSE;
 #ifdef XF86DRI
-    if (pVia->directRenderingType) 
+    if (pVia->directRenderingType)
         pVia->directRenderingType = VIADRIFinishScreenInit(pScreen);
 
     if (pVia->directRenderingType) {
@@ -626,13 +620,13 @@ UMSResourceManagement(ScrnInfoPtr pScrn)
     pVia->FirstInit = FALSE;
 
     /* Darken the screen for aesthetic reasons and set the viewport. */
-    VIASaveScreen(pScreen, SCREEN_SAVER_ON);
+    xf86SaveScreen(pScreen, SCREEN_SAVER_ON);
     pScrn->AdjustFrame(pScrn->scrnIndex, pScrn->frameX0, pScrn->frameY0, 0);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Blanked\n"));
     return TRUE;
 }
- 
+
 Bool
 UMSPreInit(ScrnInfoPtr pScrn)
 {
@@ -793,7 +787,7 @@ UMSEnterVT(int scrnIndex, int flags)
     }
     vgaHWUnlock(hwp);
 
-    VIASaveScreen(pScrn->pScreen, SCREEN_SAVER_ON);
+	xf86SaveScreen(pScrn->pScreen, SCREEN_SAVER_ON);
 
     /* A patch for APM suspend/resume, when HWCursor has garbage. */
     if (pVia->hwcursor)

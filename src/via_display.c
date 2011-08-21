@@ -209,7 +209,7 @@ ViaDisplaySetStreamOnDVO(ScrnInfoPtr pScrn, int port, Bool primary)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     int regNum;
-    
+
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDisplaySetStreamOnDVO, port: %d\n", port));
 
     switch (port) {
@@ -1635,6 +1635,7 @@ via_crtc_dpms(xf86CrtcPtr crtc, int mode)
                            mode);
                 break;
         }
+		vgaHWSaveScreen(pScrn->pScreen, mode);
     }
 }
 
@@ -1790,26 +1791,26 @@ via_crtc_load_cursor_argb (xf86CrtcPtr crtc, CARD32 *image)
 }
 
 static const xf86CrtcFuncsRec via_crtc_funcs = {
-    .dpms		 = via_crtc_dpms,
-    .save		 = NULL,
-    .restore		 = NULL,
-    .lock		 = via_crtc_lock,
-    .unlock		 = via_crtc_unlock,
-    .mode_fixup		 = via_crtc_mode_fixup,
-    .prepare		 = via_crtc_prepare,
-    .mode_set		 = via_crtc_mode_set,
-    .commit		 = via_crtc_commit,
-    .gamma_set		 = via_crtc_gamma_set,
-    .shadow_create 	 = via_crtc_shadow_create,
-    .shadow_allocate	 = via_crtc_shadow_allocate,
-    .shadow_destroy	 = via_crtc_shadow_destroy,
-    .set_cursor_colors	 = via_crtc_set_cursor_colors,
-    .set_cursor_position = via_crtc_set_cursor_position,
-    .show_cursor	 = via_crtc_show_cursor,
-    .hide_cursor	 = via_crtc_hide_cursor,
-    .load_cursor_argb	 = via_crtc_load_cursor_argb,
-    .set_origin		 = via_crtc_set_origin,
-    .destroy		 = NULL,
+	.dpms				 = via_crtc_dpms,
+	.save				 = NULL,
+	.restore			 = NULL,
+	.lock				 = via_crtc_lock,
+	.unlock				 = via_crtc_unlock,
+	.mode_fixup			 = via_crtc_mode_fixup,
+	.prepare			 = via_crtc_prepare,
+	.mode_set			 = via_crtc_mode_set,
+	.commit				 = via_crtc_commit,
+	.gamma_set			 = via_crtc_gamma_set,
+	.shadow_create		 = via_crtc_shadow_create,
+	.shadow_allocate	 = via_crtc_shadow_allocate,
+	.shadow_destroy		 = via_crtc_shadow_destroy,
+	.set_cursor_colors	 = via_crtc_set_cursor_colors,
+	.set_cursor_position = via_crtc_set_cursor_position,
+	.show_cursor		 = via_crtc_show_cursor,
+	.hide_cursor		 = via_crtc_hide_cursor,
+	.load_cursor_argb	 = via_crtc_load_cursor_argb,
+	.set_origin			 = via_crtc_set_origin,
+	.destroy			 = NULL,
 };
 
 Bool
