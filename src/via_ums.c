@@ -63,43 +63,6 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
 
     DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIACloseScreen\n"));
 
-    /* Is the display currently visible? */
-    if (pScrn->vtSema) {
-#ifdef XF86DRI
-        if (pVia->directRenderingType)
-            DRILock(screenInfo.screens[scrnIndex], 0);
-#endif
-        /* Wait for hardware engine to idle before exiting graphical mode. */
-        viaAccelSync(pScrn);
-
-        /* A soft reset avoids a 3D hang after X restart. */
-        switch (pVia->Chipset) {
-            case VIA_K8M890:
-            case VIA_P4M900:
-            case VIA_VX800:
-            case VIA_VX855:
-            case VIA_VX900:
-                break;
-            default :
-                hwp->writeSeq(hwp, 0x1A, pVia->SavedReg.SR1A | 0x40);
-                break;
-        }
-
-        if (!pVia->IsSecondary) {
-            /* Turn off all video activities. */
-            viaExitVideo(pScrn);
-            if (pVia->hwcursor)
-                viaHideCursor(pScrn);
-        }
-
-        if (pVia->VQEnable)
-            viaDisableVQ(pScrn);
-    }
-#ifdef XF86DRI
-    if (pVia->directRenderingType)
-        VIADRICloseScreen(pScreen);
-#endif
-
     viaExitAccel(pScreen);
     if (pVia->ShadowPtr) {
         free(pVia->ShadowPtr);
@@ -110,15 +73,15 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
         pVia->DGAModes = NULL;
     }
 
-    if (pScrn->vtSema) {
-        if (pVia->pVbe && pVia->vbeSR)
-            ViaVbeSaveRestore(pScrn, MODE_RESTORE);
-        else
-            VIARestore(pScrn);
+    /* Is the display currently visible? */
+    if (pScrn->vtSema)
+		pScrn->LeaveVT(scrnIndex, 0);
 
-        vgaHWLock(hwp);
-        VIAUnmapMem(pScrn);
-    }
+#ifdef XF86DRI
+    if (pVia->directRenderingType)
+        VIADRICloseScreen(pScreen);
+#endif
+
     pScrn->vtSema = FALSE;
     pScreen->CloseScreen = pVia->CloseScreen;
     return (*pScreen->CloseScreen) (scrnIndex, pScreen);
@@ -870,6 +833,8 @@ UMSLeaveVT(int scrnIndex, int flags)
         VIARestore(pScrn);
 
     vgaHWLock(hwp);
+
+	VIAUnmapMem(pScrn);
 }
 
 /*
