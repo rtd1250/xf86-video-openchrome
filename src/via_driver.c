@@ -1432,6 +1432,38 @@ LoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
 }
 
 static Bool
+VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
+{
+	ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
+	VIAPtr pVia = VIAPTR(pScrn);
+
+	DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIACloseScreen\n"));
+
+	viaExitAccel(pScreen);
+	if (pVia->ShadowPtr) {
+		free(pVia->ShadowPtr);
+		pVia->ShadowPtr = NULL;
+	}
+	if (pVia->DGAModes) {
+		free(pVia->DGAModes);
+		pVia->DGAModes = NULL;
+	}
+
+	/* Is the display currently visible? */
+	if (pScrn->vtSema)
+		pScrn->LeaveVT(scrnIndex, 0);
+
+#ifdef XF86DRI
+	if (pVia->directRenderingType)
+		VIADRICloseScreen(pScreen);
+#endif
+
+	pScrn->vtSema = FALSE;
+	pScreen->CloseScreen = pVia->CloseScreen;
+	return (*pScreen->CloseScreen) (scrnIndex, pScreen);
+}
+
+static Bool
 VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 {
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
@@ -1582,7 +1614,12 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 	else
 		VIADGAInit(pScreen);
 
+	pVia->CloseScreen = pScreen->CloseScreen;
+	pScreen->CloseScreen = VIACloseScreen;
 	pScreen->SaveScreen = xf86SaveScreen;
+
+	/*if (!xf86CrtcScreenInit(pScreen))
+		return FALSE;*/
 
 	xf86DPMSInit(pScreen, xf86DPMSSet, 0);
 	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- DPMS set up\n"));

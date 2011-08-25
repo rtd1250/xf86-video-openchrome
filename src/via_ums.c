@@ -54,39 +54,6 @@ kickVblank(ScrnInfoPtr pScrn)
 }
 #endif
 
-static Bool
-VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
-{
-    ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIACloseScreen\n"));
-
-    viaExitAccel(pScreen);
-    if (pVia->ShadowPtr) {
-        free(pVia->ShadowPtr);
-        pVia->ShadowPtr = NULL;
-    }
-    if (pVia->DGAModes) {
-        free(pVia->DGAModes);
-        pVia->DGAModes = NULL;
-    }
-
-    /* Is the display currently visible? */
-    if (pScrn->vtSema)
-		pScrn->LeaveVT(scrnIndex, 0);
-
-#ifdef XF86DRI
-    if (pVia->directRenderingType)
-        VIADRICloseScreen(pScreen);
-#endif
-
-    pScrn->vtSema = FALSE;
-    pScreen->CloseScreen = pVia->CloseScreen;
-    return (*pScreen->CloseScreen) (scrnIndex, pScreen);
-}
-
 void
 VIAInitialize3DEngine(ScrnInfoPtr pScrn)
 {
@@ -163,9 +130,6 @@ UMSAccelSetup(ScrnInfoPtr pScrn)
                        "Hardware cursor initialization failed\n");
         }
     }
-
-    pVia->CloseScreen = pScreen->CloseScreen;
-    pScreen->CloseScreen = VIACloseScreen;
 
     pVia->agpDMA = FALSE;
 #ifdef XF86DRI
