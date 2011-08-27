@@ -50,7 +50,7 @@
 static void
 ViaPrintMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
-    xf86PrintModeline(pScrn->scrnIndex, mode);    
+    xf86PrintModeline(pScrn->scrnIndex, mode);
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcHDisplay: 0x%x\n",
                mode->CrtcHDisplay);
@@ -295,7 +295,7 @@ ViaDFPDetect(ScrnInfoPtr pScrn)
 
     if (pVia->pI2CBus2)
         monPtr = xf86DoEEDID(pScrn->scrnIndex, pVia->pI2CBus2, TRUE);
-    
+
     if (monPtr) {
         xf86PrintEDID(monPtr);
         xf86SetDDCproperties(pScrn, monPtr);
@@ -322,7 +322,7 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
     pBIOSInfo->CrtPresent = FALSE;
     pBIOSInfo->PanelPresent = FALSE;
     pBIOSInfo->DfpPresent = FALSE;
-    
+
     /* Panel */
     if (pBIOSInfo->ForcePanel) {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Enabling panel from config.\n");
@@ -363,7 +363,7 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
             pBIOSInfo->TVOutput = 0;
         }
     }
-    
+
     switch (pVia->Chipset) {
         case VIA_CX700:
         case VIA_VX800:
@@ -434,7 +434,7 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
     pBIOSInfo->CrtActive = FALSE;
     pBIOSInfo->TVActive = FALSE;
     pBIOSInfo->DfpActive = FALSE;
-    
+
     if (!pVia->ActiveDevice) {
         /* always enable the panel when present */
         if (pBIOSInfo->PanelPresent)
@@ -447,12 +447,12 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
             pBIOSInfo->CrtActive = TRUE;
 
 #if 0
-        # FIXME : DFP must be activated with the ActiveDevice option 
+        # FIXME : DFP must be activated with the ActiveDevice option
         /* DFP */
         if (pBIOSInfo->DfpPresent)
             pBIOSInfo->DfpActive = TRUE;
 #endif
-        
+
     } else {
         if (pVia->ActiveDevice & VIA_DEVICE_LCD) {
             if (pBIOSInfo->PanelPresent)
@@ -555,10 +555,10 @@ VIAGetPanelSize(ScrnInfoPtr pScrn)
                 pBIOSInfo->Panel->NativeModeIndex = VIA_PANEL6X4;
                 break;
             case 800:
-		if (height == 480)
-               	    pBIOSInfo->Panel->NativeModeIndex = VIA_PANEL8X4;
-		else
-               	    pBIOSInfo->Panel->NativeModeIndex = VIA_PANEL8X6;
+				if (height == 480)
+					pBIOSInfo->Panel->NativeModeIndex = VIA_PANEL8X4;
+				else
+					pBIOSInfo->Panel->NativeModeIndex = VIA_PANEL8X6;
                 break;
             case 1024:
                 pBIOSInfo->Panel->NativeModeIndex = VIA_PANEL10X7;
@@ -1038,7 +1038,7 @@ ViaSetSecondaryDotclock(ScrnInfoPtr pScrn, CARD32 clock)
 static void
 ViaSetECKDotclock(ScrnInfoPtr pScrn, CARD32 clock)
 {
-    /* Does the non-pro chip have an ECK clock ? */  
+    /* Does the non-pro chip have an ECK clock ? */
     ViaSetDotclock(pScrn, clock, 0, 0x47);
 }
 
@@ -1311,7 +1311,7 @@ ViaComputeProDotClock(unsigned clock)
     CARD32 dr = 0, dn, dm, maxdm, maxdn;
     CARD32 factual;
     union pllparams bestClock;
-    
+
     fref = 14.318e6;
     fout = (double)clock * 1.e3;
 
@@ -1378,7 +1378,7 @@ ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                          "ViaComputeDotClock %d : %04x : %04x\n",
-                         mode->Clock, (unsigned int)best1, (unsigned int)best2));                         
+                         mode->Clock, (unsigned int)best1, (unsigned int)best2));
 
         return best2;
     } else {
@@ -1553,7 +1553,7 @@ ViaLCDPower(ScrnInfoPtr pScrn, Bool On)
     else
         ViaCrtcMask(hwp, 0x6A, 0x00, 0x08);
 
-    if (pBIOSInfo->LCDPower) 
+    if (pBIOSInfo->LCDPower)
         pBIOSInfo->LCDPower(pScrn, On);
 
     /* Find Panel Size Index for PowerSeq Table */
@@ -1700,7 +1700,7 @@ ViaModeSet(ScrnInfoPtr pScrn, DisplayModePtr mode)
         ViaModeSecondCRTC(pScrn, mode);
         ViaSecondDisplayChannelEnable(pScrn);
     }
-    
+
     if (pBIOSInfo->FirstCRTC->IsActive) {
         if (pBIOSInfo->CrtActive) {
             /* CRT on FirstCRTC */
@@ -1720,7 +1720,7 @@ ViaModeSet(ScrnInfoPtr pScrn, DisplayModePtr mode)
             ViaDisplayEnableDVO(pScrn, pBIOSInfo->TVDIPort);
             ViaTVSetMode(pScrn, mode);
         }
-        
+
         ViaModeFirstCRTC(pScrn, mode);
     } else {
         ViaDisplayDisableCRT(pScrn);
@@ -1730,7 +1730,7 @@ ViaModeSet(ScrnInfoPtr pScrn, DisplayModePtr mode)
     // See: https://bugs.launchpad.net/openchrome/+bug/186103
     if (pBIOSInfo->Panel->IsActive &&
        ((pVia->Chipset == VIA_VM800) ||
-        (pVia->Chipset == VIA_K8M800) || 
+        (pVia->Chipset == VIA_K8M800) ||
         (pVia->Chipset == VIA_VX900) )) {
         pBIOSInfo->FirstCRTC->IsActive=TRUE;
         ViaModeFirstCRTC(pScrn, mode);
