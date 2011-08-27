@@ -32,8 +32,6 @@
 #include "via_vgahw.h"
 #include "via_id.h"
 
-#include "xf86Crtc.h"
-#include "xf86RandR12.h"
 #include "cursorstr.h"
 
 /*
@@ -1590,9 +1588,6 @@ via_crtc_dpms(xf86CrtcPtr crtc, int mode)
                 if (pBIOSInfo->Lvds->IsActive)
                     ViaLVDSPower(pScrn, TRUE);
 
-                if (pBIOSInfo->CrtActive)
-                    ViaDisplayEnableCRT(pScrn);
-
                 if (pBIOSInfo->Panel->IsActive)
                     ViaLCDPower(pScrn, TRUE);
 
@@ -1614,9 +1609,6 @@ via_crtc_dpms(xf86CrtcPtr crtc, int mode)
                 if (pBIOSInfo->Lvds->IsActive)
                     ViaLVDSPower(pScrn, FALSE);
 
-                if (pBIOSInfo->CrtActive)
-                    ViaDisplayDisableCRT(pScrn);
-
                 if (pBIOSInfo->Panel->IsActive)
                     ViaLCDPower(pScrn, FALSE);
 
@@ -1635,6 +1627,11 @@ via_crtc_dpms(xf86CrtcPtr crtc, int mode)
                            mode);
                 break;
         }
+
+		if (pBIOSInfo->analog &&
+			pBIOSInfo->analog->status == XF86OutputStatusConnected)
+			pBIOSInfo->analog->funcs->dpms(pBIOSInfo->analog, mode);
+
 		vgaHWSaveScreen(pScrn->pScreen, mode);
     }
 }
@@ -1858,18 +1855,6 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
     if (!xf86LoadSubModule(pScrn, "ddc")) {
         VIAFreeRec(pScrn);
         return FALSE;
-    } else {
-
-        if (pVia->pI2CBus1) {
-            pVia->DDC1 = xf86DoEEDID(pScrn->scrnIndex, pVia->pI2CBus1, TRUE);
-            if (pVia->DDC1) {
-                xf86PrintEDID(pVia->DDC1);
-                xf86SetDDCproperties(pScrn, pVia->DDC1);
-                DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                    "DDC pI2CBus1 detected a %s\n", DIGITAL(pVia->DDC1->features.input_type) ?
-                    "DFP" : "CRT"));
-            }
-        }
     }
 
     /* Might not belong here temporary fix for bug fix */
@@ -1890,7 +1875,6 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
         VIAFreeRec(pScrn);
         return FALSE;
     }
-
     if (!pVia->UseLegacyModeSwitch) {
         if (pBIOSInfo->Panel->IsActive)
             ViaPanelPreInit(pScrn);
@@ -1910,6 +1894,8 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
             xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "VBE initialisation failed."
                        " Using builtin code to set modes.\n");
     }
+
+	xf86InitialConfiguration(pScrn, TRUE);
 
     if (pVia->pVbe) {
 

@@ -37,7 +37,7 @@
 #include "vgaHW.h"
 #include "xf86.h"
 
-#if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 6 
+#if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 6
 #include "xf86Resources.h"
 #endif
 
@@ -59,6 +59,8 @@
 #include "cfb32.h"
 #endif
 
+#include "xf86Crtc.h"
+#include "xf86RandR12.h"
 #include "xf86cmap.h"
 #include "vbe.h"
 #include "xaa.h"
@@ -109,7 +111,7 @@
 
 #define VIA_VQ_SIZE             (256 * 1024)
 
-#if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 6 
+#if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 6
 #define VIA_RES_SHARED RES_SHARED_VGA
 #define VIA_RES_UNDEF RES_UNDEFINED
 #else
@@ -333,8 +335,8 @@ typedef struct _VIA {
     int			DGAOldDepth;
 
     /* I2C & DDC */
-    I2CBusPtr           pI2CBus1;    
-    I2CBusPtr           pI2CBus2;    
+    I2CBusPtr           pI2CBus1;
+    I2CBusPtr           pI2CBus2;
     I2CBusPtr           pI2CBus3;
     xf86MonPtr          DDC1;
     xf86MonPtr          DDC2;
@@ -344,22 +346,22 @@ typedef struct _VIA {
     Bool                HasSecondary;
     Bool                SAMM;
 
-	enum dri_type	directRenderingType;
+	enum dri_type		directRenderingType;
 #ifdef XF86DRI
     Bool                XvMCEnabled;
-    DRIInfoPtr		pDRIInfo;
-    int 		drmFD;
-    int 		numVisualConfigs;
-    __GLXvisualConfig* 	pVisualConfigs;
-    VIAConfigPrivPtr 	pVisualConfigsPriv;
-    drm_handle_t 	agpHandle;
-    drm_handle_t 	registerHandle;
+    DRIInfoPtr			pDRIInfo;
+    int					drmFD;
+    int					numVisualConfigs;
+    __GLXvisualConfig*	pVisualConfigs;
+    VIAConfigPrivPtr	pVisualConfigsPriv;
+    drm_handle_t		agpHandle;
+    drm_handle_t		registerHandle;
     drm_handle_t        frameBufferHandle;
-    unsigned long 	agpAddr;
+    unsigned long		agpAddr;
     drmAddress          agpMappedAddr;
-    unsigned char 	*agpBase;
-    unsigned int 	agpSize;
-    Bool 		IsPCI;
+    unsigned char		*agpBase;
+    unsigned int		agpSize;
+    Bool				IsPCI;
     ViaXvMC             xvmc;
     int                 drmVerMajor;
     int                 drmVerMinor;
@@ -367,7 +369,7 @@ typedef struct _VIA {
     VIAMem              driOffScreenMem;
     void *              driOffScreenSave;
 #endif
-    Bool		DRIIrqEnable;
+    Bool				DRIIrqEnable;
     Bool                agpEnable;
     Bool                dma2d;
     Bool                dmaXV;
@@ -397,8 +399,8 @@ typedef struct _VIA {
     CARD32              CursorFifo;
     CARD32              CursorTransparentKey;
     CARD32              CursorPrimHiInvtColor;
-    CARD32              CursorV327HiInvtColor; 
-    
+    CARD32              CursorV327HiInvtColor;
+
     /* Video */
     int                 VideoEngine;
     swovRec		swov;
@@ -412,7 +414,7 @@ typedef struct _VIA {
     unsigned long	VidRegCursor; /* Write cursor for VidRegBuffer. */
 
     unsigned long	old_dwUseExtendedFIFO;
-    
+
     ViaSharedPtr	sharedData;
     Bool                useDmaBlit;
 
@@ -430,7 +432,7 @@ typedef struct _VIA {
     Bool                PrintTVRegs;
     Bool                I2CScan;
 #endif /* HAVE_DEBUG */
-    
+
     Bool                UseLegacyModeSwitch ;
     video_via_regs*     VideoRegs ;
 } VIARec, *VIAPtr;
@@ -515,15 +517,12 @@ void VIAInitLinear(ScreenPtr pScreen);
 
 #ifdef XF86DRI
 /* Basic init and exit functions */
-void ViaInitXVMC(ScreenPtr pScreen);    
+void ViaInitXVMC(ScreenPtr pScreen);
 void ViaCleanupXVMC(ScrnInfoPtr pScrn, XF86VideoAdaptorPtr *XvAdaptors, int XvAdaptorCount);
 int viaXvMCInitXv(ScrnInfoPtr pScrn, XF86VideoAdaptorPtr XvAdapt);
 
 /* Returns the size of the fake Xv Image used as XvMC command buffer to the X server*/
 unsigned long viaXvMCPutImageSize(ScrnInfoPtr pScrn);
-
-
-
 #endif
 
 /* via_i2c.c */

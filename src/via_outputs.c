@@ -283,15 +283,12 @@ ViaTVModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
     return MODE_OK;
 }
 
-
 static Bool
 ViaDFPDetect(ScrnInfoPtr pScrn)
 {
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDFPDetect\n"));
-
+	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDFPDetect\n"));
     VIAPtr pVia = VIAPTR(pScrn);
-
-    xf86MonPtr          monPtr = NULL;
+    xf86MonPtr monPtr = NULL;
 
     if (pVia->pI2CBus2)
         monPtr = xf86DoEEDID(pScrn->scrnIndex, pVia->pI2CBus2, TRUE);
@@ -301,11 +298,143 @@ ViaDFPDetect(ScrnInfoPtr pScrn)
         xf86SetDDCproperties(pScrn, monPtr);
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                    "DDC pI2CBus2 detected a %s\n", DIGITAL(monPtr->features.input_type) ?
-                   "DFP" : "CRT"));
+                   "DFP" : "VGA"));
         return TRUE;
     } else {
         return FALSE;
     }
+}
+
+static void
+via_analog_create_resources(xf86OutputPtr output)
+{
+}
+
+static Bool
+via_analog_set_property(xf86OutputPtr output, Atom property,
+						RRPropertyValuePtr value)
+{
+	return FALSE;
+}
+
+static Bool
+via_analog_get_property(xf86OutputPtr output, Atom property)
+{
+	return FALSE;
+}
+
+static void
+via_analog_dpms(xf86OutputPtr output, int mode)
+{
+	ScrnInfoPtr pScrn = output->scrn;
+
+	switch (mode) {
+	case DPMSModeOn:
+		ViaDisplayEnableCRT(pScrn);
+		break;
+
+	case DPMSModeStandby:
+	case DPMSModeSuspend:
+	case DPMSModeOff:
+		ViaDisplayDisableCRT(pScrn);
+		break;
+	}
+}
+
+static void
+via_analog_save(xf86OutputPtr output)
+{
+}
+
+static void
+via_analog_restore(xf86OutputPtr output)
+{
+}
+
+static int
+via_analog_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
+{
+	return 0;
+}
+
+static Bool
+via_analog_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
+						DisplayModePtr adjusted_mode)
+{
+	return TRUE;
+}
+
+static void
+via_analog_prepare(xf86OutputPtr output)
+{
+}
+
+static void
+via_analog_commit(xf86OutputPtr output)
+{
+}
+
+static void
+via_analog_mode_set(xf86OutputPtr output, DisplayModePtr mode,
+					DisplayModePtr adjusted_mode)
+{
+}
+
+static xf86OutputStatus
+via_analog_detect(xf86OutputPtr output)
+{
+	xf86OutputStatus status = XF86OutputStatusDisconnected;
+	ScrnInfoPtr pScrn = output->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+	xf86MonPtr mon;
+
+	mon = xf86OutputGetEDID(output, pVia->pI2CBus1);
+	if (mon && !DIGITAL(mon->features.input_type)) {
+		xf86OutputSetEDID(output, mon);
+		DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "DDC pI2CBus1 detected a CRT\n"));
+		status = XF86OutputStatusConnected;
+	}
+	return status;
+}
+
+static void
+via_analog_destroy(xf86OutputPtr output)
+{
+}
+
+static const xf86OutputFuncsRec via_analog_funcs = {
+	.create_resources	= via_analog_create_resources,
+	.set_property		= via_analog_set_property,
+	.get_property		= via_analog_get_property,
+	.dpms				= via_analog_dpms,
+	.save				= via_analog_save,
+	.restore			= via_analog_restore,
+	.mode_valid			= via_analog_mode_valid,
+	.mode_fixup			= via_analog_mode_fixup,
+	.prepare			= via_analog_prepare,
+	.commit				= via_analog_commit,
+	.mode_set			= via_analog_mode_set,
+	.detect				= via_analog_detect,
+	.get_modes			= xf86OutputGetEDIDModes,
+	.destroy			= via_analog_destroy,
+};
+
+void
+via_analog_init(ScrnInfoPtr pScrn)
+{
+	VIAPtr pVia = VIAPTR(pScrn);
+	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+	xf86OutputPtr output = NULL;
+
+	if (pVia->pI2CBus1) {
+		output = xf86OutputCreate(pScrn, &via_analog_funcs, "VGA");
+	/* If any of the unichromes support this, add CRT detection here */
+	} else if (!pBIOSInfo->PanelPresent) {
+		/* Make sure that at least CRT is enabled. */
+		if (!pVia->Id || (pVia->Id->Outputs & VIA_DEVICE_CRT))
+			output = xf86OutputCreate(pScrn, &via_analog_funcs, "VGA");
+	}
+	pBIOSInfo->analog = output;
 }
 
 /*
@@ -319,7 +448,7 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaOutputsDetect\n"));
 
-    pBIOSInfo->CrtPresent = FALSE;
+    pBIOSInfo->analog = NULL;
     pBIOSInfo->PanelPresent = FALSE;
     pBIOSInfo->DfpPresent = FALSE;
 
@@ -334,14 +463,7 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
     }
 
     /* Crt */
-    if (pVia->DDC1)
-        pBIOSInfo->CrtPresent = TRUE;
-    /* If any of the unichromes support this, add CRT detection here */
-    else if (!pBIOSInfo->PanelPresent) {
-        /* Make sure that at least CRT is enabled. */
-        if (!pVia->Id || (pVia->Id->Outputs & VIA_DEVICE_CRT))
-            pBIOSInfo->CrtPresent = TRUE;
-    }
+	via_analog_init(pScrn);
 
     /*
      * FIXME: xf86I2CProbeAddress(pVia->pI2CBus3, 0x40)
@@ -431,7 +553,7 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
                      VIAGetActiveDisplay(pScrn)));
 
     pBIOSInfo->Panel->IsActive = FALSE;
-    pBIOSInfo->CrtActive = FALSE;
+	pBIOSInfo->analog->status = XF86OutputStatusDisconnected;
     pBIOSInfo->TVActive = FALSE;
     pBIOSInfo->DfpActive = FALSE;
 
@@ -442,9 +564,9 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
         else if (pBIOSInfo->TVOutput != TVOUTPUT_NONE)  /* cable is attached! */
             pBIOSInfo->TVActive = TRUE;
 
-        /* CRT can be used with everything when present */
-        if (pBIOSInfo->CrtPresent)
-            pBIOSInfo->CrtActive = TRUE;
+		/* CRT can be used with everything when present */
+		if (pBIOSInfo->analog)
+			pBIOSInfo->analog->status = XF86OutputStatusConnected;
 
 #if 0
         # FIXME : DFP must be activated with the ActiveDevice option
@@ -485,14 +607,16 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
         if ((pVia->ActiveDevice & VIA_DEVICE_CRT)
             || (!pBIOSInfo->Panel->IsActive && !pBIOSInfo->TVActive
                 && !pBIOSInfo->DfpActive)) {
-            pBIOSInfo->CrtPresent = TRUE;
-            pBIOSInfo->CrtActive = TRUE;
-        }
+			if (!pBIOSInfo->analog) {
+				via_analog_init(pScrn);
+				pBIOSInfo->analog->status = XF86OutputStatusConnected;
+			}
+		}
         if (pBIOSInfo->TVActive)
-            pBIOSInfo->FirstCRTC->IsActive = TRUE ;
+            pBIOSInfo->FirstCRTC->IsActive = TRUE;
     }
     if (!pVia->UseLegacyModeSwitch) {
-        if (pBIOSInfo->CrtActive)
+        if (pBIOSInfo->analog->status == XF86OutputStatusConnected)
             pBIOSInfo->FirstCRTC->IsActive = TRUE ;
         if (pBIOSInfo->DfpActive)
             pBIOSInfo->FirstCRTC->IsActive = TRUE ;
@@ -511,7 +635,7 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
     }
 
 #ifdef HAVE_DEBUG
-    if (pBIOSInfo->CrtActive)
+	if (pBIOSInfo->analog->status == XF86OutputStatusConnected)
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                          "ViaOutputsSelect: CRT.\n"));
     if (pBIOSInfo->Panel->IsActive)
@@ -1421,7 +1545,7 @@ ViaModePrimaryLegacy(ScrnInfoPtr pScrn, DisplayModePtr mode)
     /* Enable MMIO & PCI burst (1 wait state) */
     ViaSeqMask(hwp, 0x1A, 0x06, 0x06);
 
-    if (!pBIOSInfo->CrtActive)
+	if (pBIOSInfo->analog->status == XF86OutputStatusConnected)
         ViaCrtcMask(hwp, 0x36, 0x30, 0x30);
     else
         ViaSeqMask(hwp, 0x16, 0x00, 0x40);
@@ -1702,7 +1826,7 @@ ViaModeSet(ScrnInfoPtr pScrn, DisplayModePtr mode)
     }
 
     if (pBIOSInfo->FirstCRTC->IsActive) {
-        if (pBIOSInfo->CrtActive) {
+		if (pBIOSInfo->analog->status == XF86OutputStatusConnected) {
             /* CRT on FirstCRTC */
             ViaDisplaySetStreamOnCRT(pScrn, TRUE);
             ViaDisplayEnableCRT(pScrn);

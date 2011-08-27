@@ -93,7 +93,8 @@ ViaVbeGetActiveDevices(ScrnInfoPtr pScrn)
     activeDevices = 0;
 
     /* Set Active Device and translate BIOS byte definition. */
-    if (pBIOSInfo->CrtActive)
+	if (pBIOSInfo->analog &&
+		pBIOSInfo->analog->status == XF86OutputStatusConnected)
         activeDevices = 0x01;
     if (pBIOSInfo->Panel->IsActive)
         activeDevices |= 0x02;

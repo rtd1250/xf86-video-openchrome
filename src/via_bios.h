@@ -64,7 +64,7 @@
 #define  VIA_VT1621   1 /* TV2PLUS */
 #define  VIA_VT1622   2 /* TV3 */
 #define  VIA_VT1623   3 /* also VT1622A */
-#define  VIA_VT1625   4 
+#define  VIA_VT1625   4
 #define  VIA_CH7011   5
 #define  VIA_CH7019A  6
 #define  VIA_CH7019B  7
@@ -156,8 +156,7 @@ typedef struct ViaSimultaneousInfo {
 typedef struct _VIABIOSINFO {
     int         scrnIndex;
 
-    Bool        CrtPresent;
-    Bool        CrtActive;
+	xf86OutputPtr analog;
 
     CARD16      ResolutionIndex;
     CARD32      Clock; /* register value for the dotclock */
@@ -179,10 +178,10 @@ typedef struct _VIABIOSINFO {
     /* DFP */
     Bool        DfpPresent;
     Bool        DfpActive;
-    
+
     /* Integrated LVDS */
     ViaLVDSInfoPtr Lvds;
-    
+
     /* CRTCs */
     ViaCRTCInfoPtr FirstCRTC ;
     ViaCRTCInfoPtr SecondCRTC ;
@@ -225,9 +224,10 @@ Bool ViaVbeModePreInit(ScrnInfoPtr pScrn);
 void ViaVbeDPMS(ScrnInfoPtr pScrn, int mode);
 void ViaVbeDoDPMS(ScrnInfoPtr pScrn, int mode);
 
-/* via_mode.c */
+/* via_output.c */
 void ViaOutputsDetect(ScrnInfoPtr pScrn);
 Bool ViaOutputsSelect(ScrnInfoPtr pScrn);
+void via_analog_init(ScrnInfoPtr pScrn);
 void ViaModesAttach(ScrnInfoPtr pScrn, MonPtr monitorp);
 CARD32 ViaGetMemoryBandwidth(ScrnInfoPtr pScrn);
 ModeStatus ViaValidMode(int scrnIndex, DisplayModePtr mode, Bool verbose, int flags);
@@ -245,7 +245,7 @@ void ViaModeSecondCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaModeFirstCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaModeSet(ScrnInfoPtr pScrn, DisplayModePtr mode);
 
-/* via_crtc.c */
+/* via_display.c */
 void ViaPreInitCRTCConfig(ScrnInfoPtr pScrn);
 void ViaCRTCInit(ScrnInfoPtr pScrn);
 void ViaFirstCRTCSetStartingAddress(ScrnInfoPtr pSCrn, int x, int y);
