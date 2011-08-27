@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2007 The Openchrome Project [openchrome.org]
  * Copyright 1998-2007 VIA Technologies, Inc. All Rights Reserved.
  * Copyright 2001-2007 S3 Graphics, Inc. All Rights Reserved.
@@ -38,15 +38,15 @@
 #include <unistd.h>
 
 /*
-        1. Formula: 
-            2^13 X 0.0698uSec [1/14.318MHz] = 8192 X 0.0698uSec =572.1uSec
-            Timer = Counter x 572 uSec
-        2. Note:
-            0.0698 uSec is too small to compute for hardware. So we multiply a 
-            reference value(2^13) to make it big enough to compute for hardware.
-        3. Note:
-            The meaning of the TD0~TD3 are count of the clock. 
-            TD(sec) = (sec)/(per clock) x (count of clocks)
+	1. Formula:
+		2^13 X 0.0698uSec [1/14.318MHz] = 8192 X 0.0698uSec =572.1uSec
+		Timer = Counter x 572 uSec
+	2. Note:
+		0.0698 uSec is too small to compute for hardware. So we multiply a
+		reference value(2^13) to make it big enough to compute for hardware.
+	3. Note:
+		The meaning of the TD0~TD3 are count of the clock.
+		TD(sec) = (sec)/(per clock) x (count of clocks)
 */
 
 #define TD0 200
@@ -70,7 +70,7 @@ ViaLVDSSoftwarePowerFirstSequence(ScrnInfoPtr pScrn, Bool on)
         /* VDD ON*/
         hwp->writeCrtc(hwp, 0x91, hwp->readCrtc(hwp, 0x91) | 0x10);
         usleep(TD1);
-        
+
         /* DATA ON */
         hwp->writeCrtc(hwp, 0x91, hwp->readCrtc(hwp, 0x91) | 0x08);
         usleep(TD2);
@@ -78,7 +78,7 @@ ViaLVDSSoftwarePowerFirstSequence(ScrnInfoPtr pScrn, Bool on)
         /* VEE ON (unused on vt3353)*/
         hwp->writeCrtc(hwp, 0x91, hwp->readCrtc(hwp, 0x91) | 0x04);
         usleep(TD3);
-        
+
         /* Back-Light ON */
         hwp->writeCrtc(hwp, 0x91, hwp->readCrtc(hwp, 0x91) | 0x02);
     } else {
@@ -108,11 +108,11 @@ ViaLVDSSoftwarePowerSecondSequence(ScrnInfoPtr pScrn, Bool on)
     if (on) {
         /* Secondary power hardware power sequence enable 0:off 1: on */
         hwp->writeCrtc(hwp, 0xD4, hwp->readCrtc(hwp, 0xD4) & 0xFD);
-        
+
         /* Software control power sequence ON */
         hwp->writeCrtc(hwp, 0xD3, hwp->readCrtc(hwp, 0xD3) | 0x01);
         usleep(TD0);
-        
+
         /* VDD ON*/
         hwp->writeCrtc(hwp, 0xD3, hwp->readCrtc(hwp, 0xD3) | 0x10);
         usleep(TD1);
@@ -142,7 +142,7 @@ ViaLVDSSoftwarePowerSecondSequence(ScrnInfoPtr pScrn, Bool on)
         /* Delay TD1 msec. */
         usleep(TD1);
 
-        /* VDD OFF */    
+        /* VDD OFF */
         hwp->writeCrtc(hwp, 0xD3, hwp->readCrtc(hwp, 0xD3) & 0xEF);
     }
 }
@@ -223,10 +223,10 @@ ViaLVDSPower(ScrnInfoPtr pScrn, Bool on)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaLVDSPower %d\n", on));
     VIAPtr pVia = VIAPTR(pScrn);
 
-    /* 
+    /*
      * VX800, CX700 have HW issue, so we'd better use SW power sequence
      * Fix Ticket #308
-     */ 
+     */
     switch (pVia->Chipset) {
         case VIA_VX800:
         case VIA_CX700:
@@ -240,4 +240,156 @@ ViaLVDSPower(ScrnInfoPtr pScrn, Bool on)
 
     ViaLVDSDFPPower(pScrn, on);
     ViaLVDSPowerChannel(pScrn, on);
+}
+
+static void
+via_lvds_create_resources(xf86OutputPtr output)
+{
+}
+
+static Bool
+via_lvds_set_property(xf86OutputPtr output, Atom property,
+						RRPropertyValuePtr value)
+{
+	return FALSE;
+}
+
+static Bool
+via_lvds_get_property(xf86OutputPtr output, Atom property)
+{
+	return FALSE;
+}
+
+static void
+via_lvds_dpms(xf86OutputPtr output, int mode)
+{
+	ScrnInfoPtr pScrn = output->scrn;
+	VIAPtr pVia = VIAPTR(pScrn);
+
+	switch (mode) {
+	case DPMSModeOn:
+		switch (pVia->Chipset) {
+		case VIA_P4M900:
+		case VIA_CX700:
+		case VIA_VX800:
+		case VIA_VX855:
+		case VIA_VX900:
+			ViaLVDSPower(pScrn, TRUE);
+			break;
+		}
+		ViaLCDPower(pScrn, TRUE);
+		break;
+
+	case DPMSModeStandby:
+	case DPMSModeSuspend:
+	case DPMSModeOff:
+		switch (pVia->Chipset) {
+		case VIA_P4M900:
+		case VIA_CX700:
+		case VIA_VX800:
+		case VIA_VX855:
+		case VIA_VX900:
+			ViaLVDSPower(pScrn, FALSE);
+			break;
+		}
+		ViaLCDPower(pScrn, FALSE);
+		break;
+	}
+}
+
+static void
+via_lvds_save(xf86OutputPtr output)
+{
+}
+
+static void
+via_lvds_restore(xf86OutputPtr output)
+{
+}
+
+static int
+via_lvds_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
+{
+	return 0;
+}
+
+static Bool
+via_lvds_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
+					DisplayModePtr adjusted_mode)
+{
+	return TRUE;
+}
+
+static void
+via_lvds_prepare(xf86OutputPtr output)
+{
+}
+
+static void
+via_lvds_commit(xf86OutputPtr output)
+{
+}
+
+static void
+via_lvds_mode_set(xf86OutputPtr  output, DisplayModePtr mode,
+					DisplayModePtr adjusted_mode)
+{
+}
+
+static xf86OutputStatus
+via_lvds_detect(xf86OutputPtr output)
+{
+	xf86OutputStatus status = XF86OutputStatusDisconnected;
+	ScrnInfoPtr pScrn = output->scrn;
+	VIAPtr pVia = VIAPTR(pScrn);
+
+	if (!pVia->UseLegacyModeSwitch)
+		status = ViaPanelPreInit(pScrn);
+	return status;
+}
+
+static DisplayModePtr
+via_lvds_get_modes(xf86OutputPtr output)
+{
+	return NULL;
+}
+
+static void
+via_lvds_destroy(xf86OutputPtr output)
+{
+}
+
+static const xf86OutputFuncsRec via_lvds_funcs = {
+	.create_resources	= via_lvds_create_resources,
+	.set_property		= via_lvds_set_property,
+	.get_property		= via_lvds_get_property,
+	.dpms				= via_lvds_dpms,
+	.save				= via_lvds_save,
+	.restore			= via_lvds_restore,
+	.mode_valid			= via_lvds_mode_valid,
+	.mode_fixup			= via_lvds_mode_fixup,
+	.prepare			= via_lvds_prepare,
+	.commit				= via_lvds_commit,
+	.mode_set			= via_lvds_mode_set,
+	.detect				= via_lvds_detect,
+	.get_modes			= via_lvds_get_modes,
+	.destroy			= via_lvds_destroy,
+};
+
+void
+via_lvds_init(ScrnInfoPtr pScrn)
+{
+	VIAPtr pVia = VIAPTR(pScrn);
+	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+	xf86OutputPtr output = NULL;
+
+	if (pBIOSInfo->ForcePanel) {
+		xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Enabling panel from config.\n");
+		output = xf86OutputCreate(pScrn, &via_lvds_funcs, "LVDS");
+	} else if (pVia->Id && (pVia->Id->Outputs & VIA_DEVICE_LCD)) {
+		xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+				"Enabling panel from PCI-subsystem ID information.\n");
+		output = xf86OutputCreate(pScrn, &via_lvds_funcs, "LVDS");
+	}
+	pBIOSInfo->lvds = output;
 }

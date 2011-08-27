@@ -139,10 +139,6 @@ typedef struct ViaPanelInfo {
     Bool            Scale;
 } ViaPanelInfoRec, *ViaPanelInfoPtr ;
 
-typedef struct ViaLVDSInfo {
-    Bool IsActive ;
-} ViaLVDSInfoRec, *ViaLVDSInfoPtr ;
-
 typedef struct ViaCRTCInfo {
     Bool IsActive ;
     /* TODO: add CRTC constraints here */
@@ -157,6 +153,7 @@ typedef struct _VIABIOSINFO {
     int         scrnIndex;
 
 	xf86OutputPtr analog;
+	xf86OutputPtr lvds;
 
     CARD16      ResolutionIndex;
     CARD32      Clock; /* register value for the dotclock */
@@ -165,7 +162,6 @@ typedef struct _VIABIOSINFO {
 
     /* Panel/LCD entries */
     ViaPanelInfoPtr Panel ;
-    Bool        PanelPresent;
     Bool        ForcePanel;
     int         PanelIndex;
     Bool        Center;
@@ -178,9 +174,6 @@ typedef struct _VIABIOSINFO {
     /* DFP */
     Bool        DfpPresent;
     Bool        DfpActive;
-
-    /* Integrated LVDS */
-    ViaLVDSInfoPtr Lvds;
 
     /* CRTCs */
     ViaCRTCInfoPtr FirstCRTC ;
@@ -263,12 +256,14 @@ void ViaPanelScale(ScrnInfoPtr pScrn, int resWidth, int resHeight, int panelWidt
 void ViaPanelScaleDisable(ScrnInfoPtr pScrn);
 void ViaPanelGetNativeModeFromScratchPad(ScrnInfoPtr pScrn);
 void ViaPanelGetNativeModeFromOption(ScrnInfoPtr pScrn, char* name);
-void ViaPanelPreInit(ScrnInfoPtr pScrn);
+xf86OutputStatus ViaPanelPreInit(ScrnInfoPtr pScrn);
 void ViaPanelCenterMode(DisplayModePtr centerMode, DisplayModePtr panelMode, DisplayModePtr mode);
 Bool ViaPanelGetSizeFromDDCv1(ScrnInfoPtr pScrn, int* width, int* height);
 Bool ViaPanelGetSizeFromDDCv2(ScrnInfoPtr pScrn, int* width);
 Bool ViaPanelGetSizeFromEDID(ScrnInfoPtr pScrn, xf86MonPtr pMon, int* width, int* height);
+
 /* via_lvds.c */
+void via_lvds_init(ScrnInfoPtr pScrn);
 void ViaLVDSPower(ScrnInfoPtr pScrn, Bool on);
 
 /* in via_bandwidth.c */

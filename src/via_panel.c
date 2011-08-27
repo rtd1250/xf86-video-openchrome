@@ -92,8 +92,6 @@ VIAGetRec(ScrnInfoPtr pScrn)
                         (ViaPanelModePtr) xnfcalloc(sizeof(ViaPanelModeRec), 1);
                 pBIOSInfo->Panel->CenteredMode =
                         (DisplayModePtr) xnfcalloc(sizeof(DisplayModeRec), 1);
-                pBIOSInfo->Lvds =
-                        (ViaLVDSInfoPtr) xnfcalloc(sizeof(ViaLVDSInfoRec), 1);
                 pBIOSInfo->FirstCRTC =
                         (ViaCRTCInfoPtr) xnfcalloc(sizeof(ViaCRTCInfoRec), 1);
                 pBIOSInfo->SecondCRTC =
@@ -102,7 +100,7 @@ VIAGetRec(ScrnInfoPtr pScrn)
                         (ViaSimultaneousInfoPtr)
                         xnfcalloc(sizeof(ViaSimultaneousInfoRec), 1);
                 ret = pBIOSInfo->Panel->NativeMode
-                        && pBIOSInfo->Panel->CenteredMode && pBIOSInfo->Lvds
+                        && pBIOSInfo->Panel->CenteredMode
                         && pBIOSInfo->FirstCRTC && pBIOSInfo->SecondCRTC
                         && pBIOSInfo->Simultaneous;
             }
@@ -144,8 +142,6 @@ VIAFreeRec(ScrnInfoPtr pScrn)
             free(pBIOSInfo->SecondCRTC);
         if (pBIOSInfo->Simultaneous)
             free(pBIOSInfo->Simultaneous);
-        if (pBIOSInfo->Lvds)
-            free(pBIOSInfo->Lvds);
     }
 
     if (VIAPTR(pScrn)->pVbe)
@@ -389,43 +385,43 @@ ViaPanelGetNativeDisplayMode(ScrnInfoPtr pScrn)
     }
 }
 
-void
+xf86OutputStatus
 ViaPanelPreInit(ScrnInfoPtr pScrn)
 {
-    VIAPtr pVia = VIAPTR(pScrn);
+	xf86OutputStatus status = XF86OutputStatusDisconnected;
+	VIAPtr pVia = VIAPTR(pScrn);
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaPanelPreInit\n"));
-
     ViaPanelInfoPtr panel = pBIOSInfo->Panel;
 
-    /* First try to get the mode from EDID. */
-    if (panel->NativeModeIndex == VIA_PANEL_INVALID) {
-        int width, height;
-        Bool ret;
+    if (!pVia->UseLegacyModeSwitch) {
+        /* First try to get the mode from EDID. */
+        if (panel->NativeModeIndex == VIA_PANEL_INVALID) {
+            int width, height;
+            Bool ret;
 
-        ret = ViaPanelGetSizeFromDDCv1(pScrn, &width, &height);
-
-        if (ret) {
-            panel->NativeModeIndex = ViaPanelLookUpModeIndex(width, height);
-            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaPanelLookUpModeIndex, Width %d, Height %d, NativeModeIndex%d\n", width, height, panel->NativeModeIndex));
-            if (panel->NativeModeIndex != VIA_PANEL_INVALID) {
-                panel->NativeMode->Width = width;
-                panel->NativeMode->Height = height;
+            ret = ViaPanelGetSizeFromDDCv1(pScrn, &width, &height);
+            if (ret) {
+                panel->NativeModeIndex = ViaPanelLookUpModeIndex(width, height);                DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaPanelLookUpModeIndex, Width %d, Height %d, NativeModeIndex%d\n", width, height, panel->NativeModeIndex));
+                if (panel->NativeModeIndex != VIA_PANEL_INVALID) {
+                    panel->NativeMode->Width = width;
+                    panel->NativeMode->Height = height;
+                    status = XF86OutputStatusConnected;
+                }
+            } else {
+                xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Unable to get panel size from EDID. Return code: %d\n", ret);
             }
-        } else {
-            xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Unable to get panel size from EDID. Return code: %d\n", ret);
         }
-    }
 
-    if (panel->NativeModeIndex == VIA_PANEL_INVALID)
-        ViaPanelGetNativeModeFromScratchPad(pScrn);
+        if (panel->NativeModeIndex == VIA_PANEL_INVALID)
+            ViaPanelGetNativeModeFromScratchPad(pScrn);
 
-    if (panel->NativeModeIndex != VIA_PANEL_INVALID)
-        ViaPanelGetNativeDisplayMode(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "NativeModeIndex: %d\n", panel->NativeModeIndex )) ;
-
+        if (panel->NativeModeIndex != VIA_PANEL_INVALID) {
+            ViaPanelGetNativeDisplayMode(pScrn);
+            status = XF86OutputStatusConnected;
+        }
+		DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "NativeModeIndex: %d\n", panel->NativeModeIndex )) ;
+	}
+	return status;
 }
 
 void
@@ -450,7 +446,6 @@ ViaPanelCenterMode(DisplayModePtr centerMode, DisplayModePtr panelMode,
     centerMode->CrtcVBlankStart += VDiff;
     centerMode->CrtcVBlankEnd += VDiff;
 }
-
 
 /*
  * Try to interpret EDID ourselves.

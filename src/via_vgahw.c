@@ -451,7 +451,7 @@ VIARestore(ScrnInfoPtr pScrn)
             break;
     }
 
-    if (pBIOSInfo->Panel->IsActive)
+	if (pBIOSInfo->lvds->status == XF86OutputStatusConnected)
         ViaLCDPower(pScrn, TRUE);
 
     ViaDisablePrimaryFIFO(pScrn);

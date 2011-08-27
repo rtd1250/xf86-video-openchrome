@@ -200,26 +200,26 @@ VIAWriteMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
          * to detect when the display is using the secondary head.
          * TODO: This should be enabled for other chipsets as well.
          */
-        if (pVia->pBIOSInfo->Panel->IsActive) {
-            switch (pVia->Chipset) {
-                case VIA_P4M900:
-                case VIA_VX800:
-                case VIA_VX855:
-                case VIA_VX900:
-                    /*
-                     * Since we are using virtual, we need to adjust
-                     * the offset to match the framebuffer alignment.
-                     */
-                    if (pScrn->displayWidth != mode->CrtcHDisplay)
-                        ViaSecondCRTCHorizontalOffset(pScrn);
-                    break;
-            }
-        }
-    }
+		if (pVia->pBIOSInfo->lvds->status == XF86OutputStatusConnected) {
+			switch (pVia->Chipset) {
+			case VIA_P4M900:
+			case VIA_VX800:
+			case VIA_VX855:
+			case VIA_VX900:
+				/*
+				 * Since we are using virtual, we need to adjust
+				 * the offset to match the framebuffer alignment.
+				 */
+				if (pScrn->displayWidth != mode->CrtcHDisplay)
+					ViaSecondCRTCHorizontalOffset(pScrn);
+				break;
+			}
+		}
+	}
 
-    /* Enable the graphics engine. */
-    if (!pVia->NoAccel)
-        VIAInitialize3DEngine(pScrn);
+	/* Enable the graphics engine. */
+	if (!pVia->NoAccel)
+		VIAInitialize3DEngine(pScrn);
 
     pScrn->AdjustFrame(pScrn->scrnIndex, pScrn->frameX0, pScrn->frameY0, 0);
     return TRUE;

@@ -369,23 +369,22 @@ DecideOverlaySupport(ScrnInfoPtr pScrn)
                 memEfficiency = (float)SINGLE_3205_133;
                 break;
         }
-    
+
         width = mode->HDisplay;
         height = mode->VDisplay;
         refresh = mode->VRefresh;
-    
-        /* 
-         * FIXME: If VBE modes assume a high refresh (100) for now 
+
+        /*
+         * FIXME: If VBE modes assume a high refresh (100) for now
          */
-    
         if (pVia->pVbe) {
             refresh = 100;
-            if (pBIOSInfo->Panel->IsActive)
+            if (pBIOSInfo->lvds->status == XF86OutputStatusConnected)
                 refresh = 70;
             if (pBIOSInfo->TVActive)
                 refresh = 60;
         } else {
-            if (pBIOSInfo->Panel->IsActive) {
+			if (pBIOSInfo->lvds->status == XF86OutputStatusConnected) {
                 width = pBIOSInfo->Panel->NativeMode->Width;
                 height = pBIOSInfo->Panel->NativeMode->Height;
                 if ((width == 1400) && (height == 1050)) {

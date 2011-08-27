@@ -1839,7 +1839,8 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
                   pUpdate->DstTop, pUpdate->DstBottom));
 
     dstWidth = pUpdate->DstRight - pUpdate->DstLeft;
-    if (pBIOSInfo->Panel->IsActive && pBIOSInfo->Panel->Scale) {
+	if (pBIOSInfo->lvds->status == XF86OutputStatusConnected &&
+		pBIOSInfo->Panel->Scale) {
         /* FIXME: We need to determine if the panel is using V1 or V3 */
         float hfactor = (float)pBIOSInfo->Panel->NativeMode->Width
                         / pScrn->currentMode->HDisplay;
@@ -1861,13 +1862,13 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
         vidCtl |= V1_PREFETCH_ON_3336;
     }
 
-    /* 
+    /*
      * FIXME:
      * Enable video on secondary (change Panel to SecondCRTC?)
      */
-    if ((pVia->VideoEngine == VIDEO_ENGINE_CME
-         || pVia->Chipset == VIA_VM800)
-        && pVia->pBIOSInfo->Panel->IsActive) {
+    if ((pVia->VideoEngine == VIDEO_ENGINE_CME ||
+		 pVia->Chipset == VIA_VM800) &&
+        (pBIOSInfo->lvds->status == XF86OutputStatusConnected)) {
 
         /* V1_ON_SND_DISPLAY */
         vidCtl |= V1_ON_SND_DISPLAY;

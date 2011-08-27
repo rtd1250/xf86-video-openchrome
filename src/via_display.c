@@ -74,7 +74,7 @@ ViaDisplayInit(ScrnInfoPtr pScrn)
     VIAPtr pVia = VIAPTR(pScrn);
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDisplayPreInit\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDisplayInit\n"));
 
     ViaSecondDisplayChannelDisable(pScrn);
     ViaCrtcMask(hwp, 0x6A, 0x00, 0x3D);
@@ -1534,7 +1534,7 @@ UMSHWCursorInit(ScreenPtr pScreen)
     /* Set cursor location in frame buffer. */
     VIASETREG(VIA_REG_CURSOR_MODE, pVia->cursorOffset);
 
-    pVia->CursorPipe = (pVia->pBIOSInfo->Panel->IsActive) ? 1 : 0;
+    pVia->CursorPipe = (pVia->pBIOSInfo->lvds->status == XF86OutputStatusConnected) ? 1 : 0;
 
     /* Init HI_X0 */
     VIASETREG(pVia->CursorRegControl, 0);
@@ -1585,12 +1585,6 @@ via_crtc_dpms(xf86CrtcPtr crtc, int mode)
 
         switch (mode) {
             case DPMSModeOn:
-                if (pBIOSInfo->Lvds->IsActive)
-                    ViaLVDSPower(pScrn, TRUE);
-
-                if (pBIOSInfo->Panel->IsActive)
-                    ViaLCDPower(pScrn, TRUE);
-
                 if (pBIOSInfo->TVActive)
                     ViaTVPower(pScrn, TRUE);
 
@@ -1605,13 +1599,6 @@ via_crtc_dpms(xf86CrtcPtr crtc, int mode)
             case DPMSModeStandby:
             case DPMSModeSuspend:
             case DPMSModeOff:
-
-                if (pBIOSInfo->Lvds->IsActive)
-                    ViaLVDSPower(pScrn, FALSE);
-
-                if (pBIOSInfo->Panel->IsActive)
-                    ViaLCDPower(pScrn, FALSE);
-
                 if (pBIOSInfo->TVActive)
                     ViaTVPower(pScrn, FALSE);
 
@@ -1631,6 +1618,10 @@ via_crtc_dpms(xf86CrtcPtr crtc, int mode)
 		if (pBIOSInfo->analog &&
 			pBIOSInfo->analog->status == XF86OutputStatusConnected)
 			pBIOSInfo->analog->funcs->dpms(pBIOSInfo->analog, mode);
+
+		if (pBIOSInfo->lvds &&
+			pBIOSInfo->lvds->status == XF86OutputStatusConnected)
+			pBIOSInfo->lvds->funcs->dpms(pBIOSInfo->lvds, mode);
 
 		vgaHWSaveScreen(pScrn->pScreen, mode);
     }
@@ -1874,10 +1865,6 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "No outputs possible.\n");
         VIAFreeRec(pScrn);
         return FALSE;
-    }
-    if (!pVia->UseLegacyModeSwitch) {
-        if (pBIOSInfo->Panel->IsActive)
-            ViaPanelPreInit(pScrn);
     }
 
     pVia->pVbe = NULL;
