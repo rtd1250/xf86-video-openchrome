@@ -200,7 +200,7 @@ VIAWriteMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
          * to detect when the display is using the secondary head.
          * TODO: This should be enabled for other chipsets as well.
          */
-		if (pVia->pBIOSInfo->lvds->status == XF86OutputStatusConnected) {
+		if (pVia->pBIOSInfo->lvds && pVia->pBIOSInfo->lvds->status == XF86OutputStatusConnected) {
 			switch (pVia->Chipset) {
 			case VIA_P4M900:
 			case VIA_VX800:

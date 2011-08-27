@@ -96,7 +96,8 @@ ViaVbeGetActiveDevices(ScrnInfoPtr pScrn)
 	if (pBIOSInfo->analog &&
 		pBIOSInfo->analog->status == XF86OutputStatusConnected)
         activeDevices = 0x01;
-	if (pBIOSInfo->lvds->status == XF86OutputStatusConnected)
+	if (pBIOSInfo->lvds &&
+		pBIOSInfo->lvds->status == XF86OutputStatusConnected)
         activeDevices |= 0x02;
     if (pBIOSInfo->TVActive)
         activeDevices |= 0x04;
@@ -241,7 +242,7 @@ ViaVbeSetMode(ScrnInfoPtr pScrn, DisplayModePtr pMode)
             }
         }
     } else {
-        if (pBIOSInfo->lvds->status == XF86OutputStatusConnected &&
+        if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected &&
 			!pVia->useLegacyVBE) {
             /*
              * FIXME: Should we always set the panel expansion?
@@ -434,7 +435,7 @@ ViaVbeDoDPMS(ScrnInfoPtr pScrn, int mode)
     VIAPtr pVia = VIAPTR(pScrn);
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
-	if (pBIOSInfo->lvds->status == XF86OutputStatusConnected)
+	if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected)
         ViaVbePanelPower(pVia->pVbe, (mode == DPMSModeOn));
 
     VBEDPMSSet(pVia->pVbe, mode);

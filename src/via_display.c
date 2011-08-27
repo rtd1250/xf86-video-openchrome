@@ -1534,7 +1534,8 @@ UMSHWCursorInit(ScreenPtr pScreen)
     /* Set cursor location in frame buffer. */
     VIASETREG(VIA_REG_CURSOR_MODE, pVia->cursorOffset);
 
-    pVia->CursorPipe = (pVia->pBIOSInfo->lvds->status == XF86OutputStatusConnected) ? 1 : 0;
+	if (pVia->pBIOSInfo->lvds)
+		pVia->CursorPipe = (pVia->pBIOSInfo->lvds->status == XF86OutputStatusConnected) ? 1 : 0;
 
     /* Init HI_X0 */
     VIASETREG(pVia->CursorRegControl, 0);

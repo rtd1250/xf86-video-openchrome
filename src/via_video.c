@@ -379,12 +379,12 @@ DecideOverlaySupport(ScrnInfoPtr pScrn)
          */
         if (pVia->pVbe) {
             refresh = 100;
-            if (pBIOSInfo->lvds->status == XF86OutputStatusConnected)
+            if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected)
                 refresh = 70;
             if (pBIOSInfo->TVActive)
                 refresh = 60;
         } else {
-			if (pBIOSInfo->lvds->status == XF86OutputStatusConnected) {
+			if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected) {
                 width = pBIOSInfo->Panel->NativeMode->Width;
                 height = pBIOSInfo->Panel->NativeMode->Height;
                 if ((width == 1400) && (height == 1050)) {

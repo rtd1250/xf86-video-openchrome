@@ -545,8 +545,10 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
                      " Initialised register: 0x%02x\n",
                      VIAGetActiveDisplay(pScrn)));
 
-    pBIOSInfo->lvds->status = XF86OutputStatusDisconnected;
-	pBIOSInfo->analog->status = XF86OutputStatusDisconnected;
+	if (pBIOSInfo->lvds)
+		pBIOSInfo->lvds->status = XF86OutputStatusDisconnected;
+	if (pBIOSInfo->analog)
+		pBIOSInfo->analog->status = XF86OutputStatusDisconnected;
     pBIOSInfo->TVActive = FALSE;
     pBIOSInfo->DfpActive = FALSE;
 
@@ -567,7 +569,6 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
         if (pBIOSInfo->DfpPresent)
             pBIOSInfo->DfpActive = TRUE;
 #endif
-
     } else {
         if (pVia->ActiveDevice & VIA_DEVICE_LCD) {
             if (pBIOSInfo->lvds)
@@ -584,7 +585,7 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
             else if (pBIOSInfo->TVOutput == TVOUTPUT_NONE)
                 xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Unable to activate"
                            " TV encoder: no cable attached.\n");
-            else if (pBIOSInfo->lvds->status == XF86OutputStatusConnected)
+            else if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected)
                 xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Unable to activate"
                            " TV encoder and panel simultaneously. Not using"
                            " TV encoder.\n");
@@ -598,7 +599,7 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
         }
 
 		if ((pVia->ActiveDevice & VIA_DEVICE_CRT) ||
-			((!pBIOSInfo->lvds->status == XF86OutputStatusConnected) &&
+			((!pBIOSInfo->lvds || !pBIOSInfo->lvds->status == XF86OutputStatusConnected) &&
 			  !pBIOSInfo->TVActive && !pBIOSInfo->DfpActive)) {
 			if (!pBIOSInfo->analog) {
 				via_analog_init(pScrn);
@@ -608,20 +609,21 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
         if (pBIOSInfo->TVActive)
             pBIOSInfo->FirstCRTC->IsActive = TRUE;
     }
+
     if (!pVia->UseLegacyModeSwitch) {
-        if (pBIOSInfo->analog->status == XF86OutputStatusConnected)
+        if (pBIOSInfo->analog && pBIOSInfo->analog->status == XF86OutputStatusConnected)
             pBIOSInfo->FirstCRTC->IsActive = TRUE;
         if (pBIOSInfo->DfpActive)
             pBIOSInfo->FirstCRTC->IsActive = TRUE;
-		if (pBIOSInfo->lvds->status == XF86OutputStatusConnected)
+		if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected)
             pVia->pBIOSInfo->SecondCRTC->IsActive = TRUE;
     }
 
 #ifdef HAVE_DEBUG
-	if (pBIOSInfo->analog->status == XF86OutputStatusConnected)
+	if (pBIOSInfo->analog && pBIOSInfo->analog->status == XF86OutputStatusConnected)
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                          "ViaOutputsSelect: CRT.\n"));
-	if (pBIOSInfo->lvds->status == XF86OutputStatusConnected)
+	if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected)
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                          "ViaOutputsSelect: Panel.\n"));
     if (pBIOSInfo->TVActive)
@@ -926,7 +928,7 @@ ViaModesAttach(ScrnInfoPtr pScrn, MonPtr monitorp)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModesAttach\n"));
 
-	if (pBIOSInfo->lvds->status == XF86OutputStatusConnected)
+	if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected)
         ViaModesAttachHelper(pScrn, monitorp, ViaPanelModes);
     if (pBIOSInfo->TVActive && pBIOSInfo->TVModes)
         ViaModesAttachHelper(pScrn, monitorp, pBIOSInfo->TVModes);
@@ -1009,7 +1011,7 @@ ViaValidMode(int scrnIndex, DisplayModePtr mode, Bool verbose, int flags)
                 return ret;
             }
         } else {
-			if ((pBIOSInfo->lvds->status == XF86OutputStatusConnected) &&
+			if ((pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected) &&
 				!ViaPanelGetIndex(pScrn, mode))
 				return MODE_BAD;
             else if (!ViaModeDotClockTranslate(pScrn, mode))
@@ -1030,7 +1032,7 @@ ViaValidMode(int scrnIndex, DisplayModePtr mode, Bool verbose, int flags)
                 return ret;
         }
 
-		if (pBIOSInfo->lvds->status == XF86OutputStatusConnected) {
+		if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected) {
             ViaPanelModePtr nativeMode = pBIOSInfo->Panel->NativeMode;
 
             if (nativeMode->Width < mode->HDisplay
@@ -1534,7 +1536,7 @@ ViaModePrimaryLegacy(ScrnInfoPtr pScrn, DisplayModePtr mode)
     else
         ViaSeqMask(hwp, 0x16, 0x00, 0x40);
 
-	if ((pBIOSInfo->lvds->status == XF86OutputStatusConnected) &&
+	if ((pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected) &&
 		 ViaPanelGetIndex(pScrn, mode)) {
         VIASetLCDMode(pScrn, mode);
         ViaLCDPower(pScrn, TRUE);
@@ -1604,7 +1606,7 @@ ViaModeSecondaryLegacy(ScrnInfoPtr pScrn, DisplayModePtr mode)
     if (!(pVia->Chipset == VIA_CLE266 && pVia->ChipRev == 0x02))
         ViaCrtcMask(hwp, 0x6C, 0x00, 0x1E);
 
-	if ((pBIOSInfo->lvds->status == XF86OutputStatusConnected) &&
+	if ((pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected) &&
         (pBIOSInfo->PanelIndex != VIA_BIOS_NUM_PANEL)) {
         pBIOSInfo->SetDVI = TRUE;
         VIASetLCDMode(pScrn, mode);
@@ -1762,7 +1764,7 @@ ViaModeSecondCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModeSecondCRTC\n"));
 
-	if (pBIOSInfo->lvds->status == XF86OutputStatusConnected) {
+	if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected) {
         if (nativeDisplayMode) {
             ViaPanelScale(pScrn, mode->HDisplay, mode->VDisplay,
                           nativeDisplayMode->HDisplay,
@@ -1837,7 +1839,7 @@ ViaModeSet(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
     // Enable panel support on VM800, K8M800 and VX900 chipset
     // See: https://bugs.launchpad.net/openchrome/+bug/186103
-	if ((pBIOSInfo->lvds->status == XF86OutputStatusConnected) &&
+	if ((pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected) &&
        ((pVia->Chipset == VIA_VM800) ||
         (pVia->Chipset == VIA_K8M800) ||
         (pVia->Chipset == VIA_VX900) )) {
