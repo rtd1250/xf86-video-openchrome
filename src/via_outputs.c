@@ -306,6 +306,130 @@ ViaDFPDetect(ScrnInfoPtr pScrn)
 }
 
 static void
+via_dp_create_resources(xf86OutputPtr output)
+{
+}
+
+static Bool
+via_dp_set_property(xf86OutputPtr output, Atom property,
+						RRPropertyValuePtr value)
+{
+	return FALSE;
+}
+
+static Bool
+via_dp_get_property(xf86OutputPtr output, Atom property)
+{
+	return FALSE;
+}
+
+static void
+via_dp_dpms(xf86OutputPtr output, int mode)
+{
+	ScrnInfoPtr pScrn = output->scrn;
+
+	switch (mode) {
+	case DPMSModeOn:
+		break;
+
+	case DPMSModeStandby:
+	case DPMSModeSuspend:
+	case DPMSModeOff:
+		break;
+	}
+}
+
+static void
+via_dp_save(xf86OutputPtr output)
+{
+}
+
+static void
+via_dp_restore(xf86OutputPtr output)
+{
+}
+
+static int
+via_dp_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
+{
+	return 0;
+}
+
+static Bool
+via_dp_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
+						DisplayModePtr adjusted_mode)
+{
+	return TRUE;
+}
+
+static void
+via_dp_prepare(xf86OutputPtr output)
+{
+}
+
+static void
+via_dp_commit(xf86OutputPtr output)
+{
+}
+
+static void
+via_dp_mode_set(xf86OutputPtr output, DisplayModePtr mode,
+				DisplayModePtr adjusted_mode)
+{
+}
+
+static xf86OutputStatus
+via_dp_detect(xf86OutputPtr output)
+{
+	xf86OutputStatus status = XF86OutputStatusDisconnected;
+	ScrnInfoPtr pScrn = output->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+	xf86MonPtr mon;
+
+	mon = xf86OutputGetEDID(output, pVia->pI2CBus2);
+	if (mon && DIGITAL(mon->features.input_type)) {
+		xf86OutputSetEDID(output, mon);
+		DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "DDC pI2CBus2 detected a DP\n"));
+		status = XF86OutputStatusConnected;
+	}
+	return status;
+}
+
+static void
+via_dp_destroy(xf86OutputPtr output)
+{
+}
+
+static const xf86OutputFuncsRec via_dp_funcs = {
+	.create_resources	= via_dp_create_resources,
+	.set_property		= via_dp_set_property,
+	.get_property		= via_dp_get_property,
+	.dpms				= via_dp_dpms,
+	.save				= via_dp_save,
+	.restore			= via_dp_restore,
+	.mode_valid			= via_dp_mode_valid,
+	.mode_fixup			= via_dp_mode_fixup,
+	.prepare			= via_dp_prepare,
+	.commit				= via_dp_commit,
+	.mode_set			= via_dp_mode_set,
+	.detect				= via_dp_detect,
+	.get_modes			= xf86OutputGetEDIDModes,
+	.destroy			= via_dp_destroy,
+};
+
+void
+via_dp_init(ScrnInfoPtr pScrn)
+{
+	VIAPtr pVia = VIAPTR(pScrn);
+	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+	xf86OutputPtr output = NULL;
+
+	if (pVia->pI2CBus2)
+		output = xf86OutputCreate(pScrn, &via_dp_funcs, "DP");
+	pBIOSInfo->dp = output;
+}
+
+static void
 via_analog_create_resources(xf86OutputPtr output)
 {
 }
@@ -385,7 +509,7 @@ via_analog_detect(xf86OutputPtr output)
 {
 	xf86OutputStatus status = XF86OutputStatusDisconnected;
 	ScrnInfoPtr pScrn = output->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
+	VIAPtr pVia = VIAPTR(pScrn);
 	xf86MonPtr mon;
 
 	mon = xf86OutputGetEDID(output, pVia->pI2CBus1);
@@ -450,7 +574,7 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
 
     pBIOSInfo->analog = NULL;
     pBIOSInfo->lvds = NULL;
-    pBIOSInfo->DfpPresent = FALSE;
+    pBIOSInfo->dp = NULL;
 
 	/* LVDS */
 	via_lvds_init(pScrn);
@@ -484,15 +608,7 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
         case VIA_VX800:
         case VIA_VX855:
         case VIA_VX900:
-            if (ViaDFPDetect(pScrn)) {
-                pBIOSInfo->DfpPresent = TRUE;
-                xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                           "DFP is connected.\n");
-            } else {
-                pBIOSInfo->DfpPresent = FALSE;
-                xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                           "DFP is disconnected.\n");
-            }
+			via_dp_init(pScrn);
             break;
     }
 }
@@ -550,7 +666,8 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
 	if (pBIOSInfo->analog)
 		pBIOSInfo->analog->status = XF86OutputStatusDisconnected;
     pBIOSInfo->TVActive = FALSE;
-    pBIOSInfo->DfpActive = FALSE;
+	if (pBIOSInfo->dp)
+		pBIOSInfo->dp->status = XF86OutputStatusDisconnected;
 
     if (!pVia->ActiveDevice) {
         /* always enable the panel when present */
@@ -563,12 +680,6 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
 		if (pBIOSInfo->analog)
 			pBIOSInfo->analog->status = XF86OutputStatusConnected;
 
-#if 0
-        # FIXME : DFP must be activated with the ActiveDevice option
-        /* DFP */
-        if (pBIOSInfo->DfpPresent)
-            pBIOSInfo->DfpActive = TRUE;
-#endif
     } else {
         if (pVia->ActiveDevice & VIA_DEVICE_LCD) {
             if (pBIOSInfo->lvds)
@@ -593,14 +704,13 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
                 pBIOSInfo->TVActive = TRUE;
         }
 
-        if (pVia->ActiveDevice & VIA_DEVICE_DFP) {
-            pBIOSInfo->DfpPresent = TRUE;
-            pBIOSInfo->DfpActive = TRUE;
-        }
+        if (pBIOSInfo->dp && pVia->ActiveDevice & VIA_DEVICE_DFP)
+            pBIOSInfo->dp->status = XF86OutputStatusConnected;
 
 		if ((pVia->ActiveDevice & VIA_DEVICE_CRT) ||
-			((!pBIOSInfo->lvds || !pBIOSInfo->lvds->status == XF86OutputStatusConnected) &&
-			  !pBIOSInfo->TVActive && !pBIOSInfo->DfpActive)) {
+			(!pBIOSInfo->lvds || !pBIOSInfo->lvds->status == XF86OutputStatusConnected) &&
+			(!pBIOSInfo->dp || !pBIOSInfo->dp->status == XF86OutputStatusConnected) &&
+			  !pBIOSInfo->TVActive) {
 			if (!pBIOSInfo->analog) {
 				via_analog_init(pScrn);
 				pBIOSInfo->analog->status = XF86OutputStatusConnected;
@@ -613,7 +723,7 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
     if (!pVia->UseLegacyModeSwitch) {
         if (pBIOSInfo->analog && pBIOSInfo->analog->status == XF86OutputStatusConnected)
             pBIOSInfo->FirstCRTC->IsActive = TRUE;
-        if (pBIOSInfo->DfpActive)
+        if (pBIOSInfo->dp && pBIOSInfo->dp->status == XF86OutputStatusConnected)
             pBIOSInfo->FirstCRTC->IsActive = TRUE;
 		if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected)
             pVia->pBIOSInfo->SecondCRTC->IsActive = TRUE;
@@ -629,7 +739,7 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
     if (pBIOSInfo->TVActive)
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                          "ViaOutputsSelect: TV.\n"));
-    if (pBIOSInfo->DfpActive)
+    if (pBIOSInfo->dp && pBIOSInfo->dp->status == XF86OutputStatusConnected)
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                          "ViaOutputsSelect: DFP.\n"));
 #endif
@@ -1819,7 +1929,7 @@ ViaModeSet(ScrnInfoPtr pScrn, DisplayModePtr mode)
             ViaDisplayEnableCRT(pScrn);
         }
 
-        if (pBIOSInfo->DfpActive) {
+		if (pBIOSInfo->dp && pBIOSInfo->dp->status == XF86OutputStatusConnected) {
             /* DFP on FirstCrtc */
             ViaDisplaySetStreamOnDFP(pScrn, TRUE);
             ViaDFPPower(pScrn, TRUE);

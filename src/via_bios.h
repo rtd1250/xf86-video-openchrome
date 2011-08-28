@@ -154,6 +154,7 @@ typedef struct _VIABIOSINFO {
 
 	xf86OutputPtr analog;
 	xf86OutputPtr lvds;
+	xf86OutputPtr dp;
 
     CARD16      ResolutionIndex;
     CARD32      Clock; /* register value for the dotclock */
@@ -170,10 +171,6 @@ typedef struct _VIABIOSINFO {
     /* LCD Simultaneous Expand Mode HWCursor Y Scale */
     Bool        scaleY;
     int         resY;
-
-    /* DFP */
-    Bool        DfpPresent;
-    Bool        DfpActive;
 
     /* CRTCs */
     ViaCRTCInfoPtr FirstCRTC ;

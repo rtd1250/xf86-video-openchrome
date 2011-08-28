@@ -1589,7 +1589,7 @@ via_crtc_dpms(xf86CrtcPtr crtc, int mode)
                 if (pBIOSInfo->TVActive)
                     ViaTVPower(pScrn, TRUE);
 
-                if (pBIOSInfo->DfpActive)
+                if (pBIOSInfo->dp && pBIOSInfo->dp->status == XF86OutputStatusConnected)
                     ViaDFPPower(pScrn, TRUE);
 
                 if (pBIOSInfo->Simultaneous->IsActive)
@@ -1603,7 +1603,7 @@ via_crtc_dpms(xf86CrtcPtr crtc, int mode)
                 if (pBIOSInfo->TVActive)
                     ViaTVPower(pScrn, FALSE);
 
-                if (pBIOSInfo->DfpActive)
+                if (pBIOSInfo->dp && pBIOSInfo->dp->status == XF86OutputStatusConnected)
                     ViaDFPPower(pScrn, FALSE);
 
                 if (pBIOSInfo->Simultaneous->IsActive)

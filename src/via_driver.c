@@ -1618,8 +1618,8 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 	pScreen->CloseScreen = VIACloseScreen;
 	pScreen->SaveScreen = xf86SaveScreen;
 
-	/*if (!xf86CrtcScreenInit(pScreen))
-		return FALSE;*/
+	if (!xf86CrtcScreenInit(pScreen))
+		return FALSE;
 
 	xf86DPMSInit(pScreen, xf86DPMSSet, 0);
 	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- DPMS set up\n"));
