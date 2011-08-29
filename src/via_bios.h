@@ -154,6 +154,7 @@ typedef struct _VIABIOSINFO {
 
 	xf86OutputPtr analog;
 	xf86OutputPtr lvds;
+	xf86OutputPtr tv;
 	xf86OutputPtr dp;
 
     CARD16      ResolutionIndex;
@@ -182,7 +183,6 @@ typedef struct _VIABIOSINFO {
     /* TV entries */
     int         TVEncoder;
     int         TVOutput;
-    Bool        TVActive;
     I2CDevPtr   TVI2CDev;
     int         TVType;
     Bool        TVDotCrawl;

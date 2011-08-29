@@ -137,8 +137,7 @@ struct CH7xxxTableRec {
     CARD16  DotCrawlNTSC[VIA_BIOS_NUM_TV_OTHER];
 };
 
-
-static struct CH7xxxTableRec 
+static struct CH7xxxTableRec
 CH7011Table[] = {
     { "640x480", 640,  480, TVTYPE_NTSC,
       { 0X6A, /* 0x00		Mode 17 */
@@ -222,7 +221,7 @@ CH7011Table[] = {
         0X15, /* 0x06 VP */
         0X66, /* 0x07 BL	Default 0x83 */
         0X3,  /* 0x08 CE	Default 0x03 */
-        0X88, 
+        0X88,
         0X59,
         0X2E,
         0X19,
@@ -575,7 +574,7 @@ CH7019Table[] = {
       { 0X47, 0X7F, 0X7F, 0X47, 0X9A, 0X23, 0X95, 0X1E, 0X70, 0XDF, 0XDF, 0X70, 0X51, 0XA, 0X11, 0X5D, 0, 0, 0, 0, 0, 0XA0, 0X40, 0X81, 0, 0, 0X80, 0X20, 0X90, 0, 0, 0 },
       { 0X3284, 0, 0, 0, 0, 0, 0, 0 },
     },
-        
+
     { "800x600", 800,  600, TVTYPE_NTSC,
       { 0XCF, 0X7F, 0X76, 0X8F, 0X59, 0X3C, 0X15, 0X83, 0X3, 0X88, 0X59, 0X2E, 0X19, 0X8B, 0X3A, 0X63,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0X48, 0X40, 0XD2, 0X80,
@@ -602,7 +601,7 @@ CH7019Table[] = {
       { 0XBF, 0X1F, 0X1F, 0XBF, 0XDB, 0X33, 0X38, 0X8E, 0XED, 0X57, 0X57, 0XED, 0X52, 0X12, 0X74, 0X4D, 0, 0, 0, 0, 0, 0XC8, 0X90, 0X81, 0, 0, 0X80, 0X20, 0X90, 0, 0, 0 },
       { 0X3A84, 0, 0, 0, 0, 0, 0, 0 },
     },
-        
+
     { "1024x768", 1024,  768, TVTYPE_NTSC,
       { 0XEE, 0X7F, 0X7E, 0X87, 0X49, 0X32, 0X9, 0X83, 0X3, 0X88, 0X47, 0X4D, 0X1B, 0XE4, 0X89, 0X51,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0X48, 0X40, 0XD2, 0X80,

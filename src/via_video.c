@@ -381,7 +381,7 @@ DecideOverlaySupport(ScrnInfoPtr pScrn)
             refresh = 100;
             if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected)
                 refresh = 70;
-            if (pBIOSInfo->TVActive)
+            if (pBIOSInfo->tv && pBIOSInfo->tv->status == XF86OutputStatusConnected)
                 refresh = 60;
         } else {
 			if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected) {
@@ -392,7 +392,7 @@ DecideOverlaySupport(ScrnInfoPtr pScrn)
                     height = 1024;
                     refresh = 60;
                 }
-            } else if (pBIOSInfo->TVActive) {
+            } else if (pBIOSInfo->tv) {
                 bTV = 1;
             }
         }

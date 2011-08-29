@@ -99,7 +99,8 @@ ViaVbeGetActiveDevices(ScrnInfoPtr pScrn)
 	if (pBIOSInfo->lvds &&
 		pBIOSInfo->lvds->status == XF86OutputStatusConnected)
         activeDevices |= 0x02;
-    if (pBIOSInfo->TVActive)
+    if (pBIOSInfo->tv &&
+		pBIOSInfo->tv->status == XF86OutputStatusConnected)
         activeDevices |= 0x04;
 
     /* TODO: Add others devices. */

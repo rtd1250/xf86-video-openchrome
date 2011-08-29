@@ -1586,31 +1586,18 @@ via_crtc_dpms(xf86CrtcPtr crtc, int mode)
 
         switch (mode) {
             case DPMSModeOn:
-                if (pBIOSInfo->TVActive)
-                    ViaTVPower(pScrn, TRUE);
-
-                if (pBIOSInfo->dp && pBIOSInfo->dp->status == XF86OutputStatusConnected)
-                    ViaDFPPower(pScrn, TRUE);
-
                 if (pBIOSInfo->Simultaneous->IsActive)
                     ViaDisplayEnableSimultaneous(pScrn);
-
                 break;
 
             case DPMSModeStandby:
             case DPMSModeSuspend:
             case DPMSModeOff:
-                if (pBIOSInfo->TVActive)
-                    ViaTVPower(pScrn, FALSE);
-
-                if (pBIOSInfo->dp && pBIOSInfo->dp->status == XF86OutputStatusConnected)
-                    ViaDFPPower(pScrn, FALSE);
-
                 if (pBIOSInfo->Simultaneous->IsActive)
                     ViaDisplayDisableSimultaneous(pScrn);
-
                 break;
-            default:
+
+			default:
                 xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Invalid DPMS mode %d\n",
                            mode);
                 break;
@@ -1623,6 +1610,10 @@ via_crtc_dpms(xf86CrtcPtr crtc, int mode)
 		if (pBIOSInfo->lvds &&
 			pBIOSInfo->lvds->status == XF86OutputStatusConnected)
 			pBIOSInfo->lvds->funcs->dpms(pBIOSInfo->lvds, mode);
+
+		if (pBIOSInfo->dp &&
+			pBIOSInfo->dp->status == XF86OutputStatusConnected)
+			pBIOSInfo->dp->funcs->dpms(pBIOSInfo->dp, mode);
 
 		vgaHWSaveScreen(pScrn->pScreen, mode);
     }
