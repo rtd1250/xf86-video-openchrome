@@ -645,7 +645,13 @@ via_analog_init(ScrnInfoPtr pScrn)
 		if (!pVia->Id || (pVia->Id->Outputs & VIA_DEVICE_CRT))
 			output = xf86OutputCreate(pScrn, &via_analog_funcs, "VGA");
 	}
-	pBIOSInfo->analog = output;
+	if (output) {
+		//output->possible_crtcs = 0x1;
+		output->possible_clones = 0;
+		output->interlaceAllowed = TRUE;
+		output->doubleScanAllowed = FALSE;
+		pBIOSInfo->analog = output;
+	}
 }
 
 /*

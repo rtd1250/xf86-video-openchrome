@@ -1603,18 +1603,6 @@ via_crtc_dpms(xf86CrtcPtr crtc, int mode)
                 break;
         }
 
-		if (pBIOSInfo->analog &&
-			pBIOSInfo->analog->status == XF86OutputStatusConnected)
-			pBIOSInfo->analog->funcs->dpms(pBIOSInfo->analog, mode);
-
-		if (pBIOSInfo->lvds &&
-			pBIOSInfo->lvds->status == XF86OutputStatusConnected)
-			pBIOSInfo->lvds->funcs->dpms(pBIOSInfo->lvds, mode);
-
-		if (pBIOSInfo->dp &&
-			pBIOSInfo->dp->status == XF86OutputStatusConnected)
-			pBIOSInfo->dp->funcs->dpms(pBIOSInfo->dp, mode);
-
 		vgaHWSaveScreen(pScrn->pScreen, mode);
     }
 }
@@ -1655,7 +1643,7 @@ via_crtc_lock(xf86CrtcPtr crtc)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
-    Bool ret = FALSE;
+    Bool ret = TRUE;
 
 #ifdef XF86DRI
     if (pVia->directRenderingType)
@@ -1704,21 +1692,62 @@ via_crtc_prepare (xf86CrtcPtr crtc)
 
 static void
 via_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
-                                        DisplayModePtr adjusted_mode,
-                                        int x, int y)
+					DisplayModePtr adjusted_mode,
+					int x, int y)
 {
 	ScrnInfoPtr pScrn = crtc->scrn;
 	VIAPtr pVia = VIAPTR(pScrn);
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "via_crtc_mode_set\n"));
+	pVia->OverlaySupported = FALSE;
+	pScrn->vtSema = TRUE;
 
-	if (pVia->pVbe) {
-		ViaVbeSetMode(pScrn, adjusted_mode);
+	if (!pVia->pVbe) {
+
+		if (!vgaHWInit(pScrn, adjusted_mode))
+			return;
+
+		if (pVia->UseLegacyModeSwitch) {
+			if (!pVia->IsSecondary)
+				ViaModePrimaryLegacy(pScrn, adjusted_mode);
+			else
+				ViaModeSecondaryLegacy(pScrn, adjusted_mode);
+		} else {
+			ViaCRTCInit(pScrn);
+			ViaModeSet(pScrn, adjusted_mode);
+		}
+
 	} else {
-		VIAWriteMode(pScrn, adjusted_mode);
+
+		if (!ViaVbeSetMode(pScrn, adjusted_mode))
+			return;
+
+		/*
+		 * FIXME: pVia->IsSecondary is not working here.  We should be able
+		 * to detect when the display is using the secondary head.
+		 * TODO: This should be enabled for other chipsets as well.
+		 */
+		if (pVia->pBIOSInfo->lvds && pVia->pBIOSInfo->lvds->status == XF86OutputStatusConnected) {
+			switch (pVia->Chipset) {
+			case VIA_P4M900:
+			case VIA_VX800:
+			case VIA_VX855:
+			case VIA_VX900:
+				/*
+				 * Since we are using virtual, we need to adjust
+				 * the offset to match the framebuffer alignment.
+				 */
+				if (pScrn->displayWidth != adjusted_mode->CrtcHDisplay)
+					ViaSecondCRTCHorizontalOffset(pScrn);
+				break;
+			}
+		}
 	}
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "via_crtc_mode_set 2\n"));
+	/* Enable the graphics engine. */
+	if (!pVia->NoAccel)
+		VIAInitialize3DEngine(pScrn);
+
+	pScrn->AdjustFrame(pScrn->scrnIndex, pScrn->frameX0, pScrn->frameY0, 0);
 }
 
 static void
@@ -1837,11 +1866,11 @@ Bool
 UMSCrtcInit(ScrnInfoPtr pScrn)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
+	int max_pitch, max_height, i;
     VIAPtr pVia = VIAPTR(pScrn);
     ClockRangePtr clockRanges;
     VIABIOSInfoPtr pBIOSInfo;
     xf86CrtcPtr crtc;
-    int i;
 
     /* Read memory bandwidth from registers. */
     pVia->MemClk = hwp->readCrtc(hwp, 0x3D) >> 4;
@@ -1868,6 +1897,13 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
         }
     }
 
+    if (pVia->hwcursor) {
+        if (!xf86LoadSubModule(pScrn, "ramdac")) {
+            VIAFreeRec(pScrn);
+            return FALSE;
+        }
+    }
+
     if (!xf86LoadSubModule(pScrn, "i2c")) {
         VIAFreeRec(pScrn);
         return FALSE;
@@ -1876,25 +1912,6 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
     }
 
     if (!xf86LoadSubModule(pScrn, "ddc")) {
-        VIAFreeRec(pScrn);
-        return FALSE;
-    }
-
-    /* Might not belong here temporary fix for bug fix */
-    xf86CrtcConfigInit(pScrn, &via_xf86crtc_config_funcs);
-
-    for (i = 0; i < 2; i++) {
-        crtc = xf86CrtcCreate(pScrn, &via_crtc_funcs);
-
-        if (!crtc) {
-            xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "xf86CrtcCreate failed.\n");
-            return FALSE;
-        }
-    }
-
-    ViaOutputsDetect(pScrn);
-    if (!ViaOutputsSelect(pScrn)) {
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "No outputs possible.\n");
         VIAFreeRec(pScrn);
         return FALSE;
     }
@@ -1914,6 +1931,51 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
                        " Using builtin code to set modes.\n");
     }
 
+    /* Might not belong here temporary fix for bug fix */
+    xf86CrtcConfigInit(pScrn, &via_xf86crtc_config_funcs);
+
+	for (i = 0; i < 2; i++) {
+		crtc = xf86CrtcCreate(pScrn, &via_crtc_funcs);
+
+		if (!crtc) {
+			xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "xf86CrtcCreate failed.\n");
+			return FALSE;
+		}
+	}
+
+	switch (pVia->Chipset) {
+	case VIA_CLE266:
+	case VIA_KM400:
+	case VIA_K8M800:
+	case VIA_PM800:
+	case VIA_VM800:
+		max_pitch = 3344;
+		max_height = 2508;
+		break;
+
+	case VIA_CX700:
+	case VIA_K8M890:
+	case VIA_P4M890:
+	case VIA_P4M900:
+		max_pitch = 8192/(pScrn->bitsPerPixel >> 3)-1;
+		max_height = max_pitch;
+		break;
+
+	default:
+		max_pitch = 16384/(pScrn->bitsPerPixel >> 3)-1;
+		max_height = max_pitch;
+		break;
+	}
+
+	xf86CrtcSetSizeRange(pScrn, 320, 200, max_pitch, max_height);
+
+	ViaOutputsDetect(pScrn);
+	if (!ViaOutputsSelect(pScrn)) {
+		xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "No outputs possible.\n");
+		VIAFreeRec(pScrn);
+		return FALSE;
+	}
+
 	xf86InitialConfiguration(pScrn, TRUE);
 
     if (pVia->pVbe) {
@@ -1924,7 +1986,6 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
         }
 
     } else {
-        int max_pitch, max_height;
         /* Add own modes. */
         ViaModesAttach(pScrn, pScrn->monitor);
 
@@ -1940,26 +2001,6 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
         clockRanges->clockIndex = -1;
         clockRanges->interlaceAllowed = TRUE;
         clockRanges->doubleScanAllowed = FALSE;
-
-        switch (pVia->Chipset) {
-            case VIA_CLE266:
-            case VIA_KM400:
-            case VIA_K8M800:
-            case VIA_PM800:
-            case VIA_VM800:
-                max_pitch = 3344;
-                max_height = 2508;
-            case VIA_CX700:
-            case VIA_K8M890:
-            case VIA_P4M890:
-            case VIA_P4M900:
-                max_pitch = 8192/(pScrn->bitsPerPixel >> 3)-1;
-                max_height = max_pitch;
-                break;
-            default:
-                max_pitch = 16384/(pScrn->bitsPerPixel >> 3)-1;
-                max_height = max_pitch;
-        }
 
         /*
          * xf86ValidateModes will check that the mode HTotal and VTotal values
@@ -2011,13 +2052,5 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
             return FALSE;
         }
     }
-
-    if (pVia->hwcursor) {
-        if (!xf86LoadSubModule(pScrn, "ramdac")) {
-            VIAFreeRec(pScrn);
-            return FALSE;
-        }
-    }
-
     return TRUE;
 }

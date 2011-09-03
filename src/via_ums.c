@@ -180,66 +180,6 @@ UMSAccelSetup(ScrnInfoPtr pScrn)
 	}
 }
 
-Bool
-VIAWriteMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAWriteMode\n"));
-
-    pVia->OverlaySupported = FALSE;
-
-    pScrn->vtSema = TRUE;
-
-    if (!pVia->pVbe) {
-
-        if (!vgaHWInit(pScrn, mode))
-            return FALSE;
-
-        if (pVia->UseLegacyModeSwitch) {
-            if (!pVia->IsSecondary)
-                ViaModePrimaryLegacy(pScrn, mode);
-            else
-                ViaModeSecondaryLegacy(pScrn, mode);
-        } else {
-            ViaCRTCInit(pScrn);
-            ViaModeSet(pScrn, mode);
-        }
-
-    } else {
-
-        if (!ViaVbeSetMode(pScrn, mode))
-            return FALSE;
-        /*
-         * FIXME: pVia->IsSecondary is not working here.  We should be able
-         * to detect when the display is using the secondary head.
-         * TODO: This should be enabled for other chipsets as well.
-         */
-		if (pVia->pBIOSInfo->lvds && pVia->pBIOSInfo->lvds->status == XF86OutputStatusConnected) {
-			switch (pVia->Chipset) {
-			case VIA_P4M900:
-			case VIA_VX800:
-			case VIA_VX855:
-			case VIA_VX900:
-				/*
-				 * Since we are using virtual, we need to adjust
-				 * the offset to match the framebuffer alignment.
-				 */
-				if (pScrn->displayWidth != mode->CrtcHDisplay)
-					ViaSecondCRTCHorizontalOffset(pScrn);
-				break;
-			}
-		}
-	}
-
-	/* Enable the graphics engine. */
-	if (!pVia->NoAccel)
-		VIAInitialize3DEngine(pScrn);
-
-    pScrn->AdjustFrame(pScrn->scrnIndex, pScrn->frameX0, pScrn->frameY0, 0);
-    return TRUE;
-}
-
 static void
 ViaMMIODisable(ScrnInfoPtr pScrn)
 {
@@ -688,10 +628,8 @@ UMSEnterVT(int scrnIndex, int flags)
 
 		crtc->funcs->save(crtc);
 
-		crtc->funcs->mode_set(crtc, pScrn->currentMode,
-							pScrn->currentMode, 0, 0);
+		xf86CrtcSetMode(crtc, pScrn->currentMode, pVia->rotate, 0, 0);
 	}
-
 	xf86SaveScreen(pScrn->pScreen, SCREEN_SAVER_ON);
 
     /* A patch for APM suspend/resume, when HWCursor has garbage. */
