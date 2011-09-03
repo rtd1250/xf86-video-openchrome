@@ -1488,7 +1488,30 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     if (!UMSResourceManagement(pScrn))
 		return FALSE;
 
-    miClearVisualTypes();
+	for (i = 0; i < xf86_config->num_crtc; i++) {
+		xf86CrtcPtr crtc = xf86_config->crtc[i];
+
+		crtc->funcs->save(crtc);
+	}
+
+	pVia->FirstInit = TRUE;
+
+	for (i = 0; i < xf86_config->num_crtc; i++) {
+		xf86CrtcPtr crtc = xf86_config->crtc[i];
+
+		crtc->funcs->dpms(crtc, DPMSModeOn);
+
+		crtc->funcs->mode_set(crtc, pScrn->currentMode,
+								pScrn->currentMode, 0, 0);
+	}
+	pVia->FirstInit = FALSE;
+
+	/* Darken the screen for aesthetic reasons and set the viewport. */
+	xf86SaveScreen(pScreen, SCREEN_SAVER_ON);
+	pScrn->AdjustFrame(pScrn->scrnIndex, pScrn->frameX0, pScrn->frameY0, 0);
+	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Blanked\n"));
+
+	miClearVisualTypes();
 
     if (pScrn->bitsPerPixel > 8 && !pVia->IsSecondary) {
         if (!miSetVisualTypes(pScrn->depth, TrueColorMask,
