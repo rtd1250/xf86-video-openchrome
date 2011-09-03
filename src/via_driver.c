@@ -1478,9 +1478,6 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     pScrn->pScreen = pScreen;
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAScreenInit\n"));
 
-    if (!UMSResourceManagement(pScrn))
-		return FALSE;
-
 	/* need to point to new screen on server regeneration */
 	for (i = 0; i < xf86_config->num_crtc; i++)
 		xf86_config->crtc[i]->scrn = pScrn;
@@ -1488,6 +1485,8 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 	for (i = 0; i < xf86_config->num_output; i++)
 		xf86_config->output[i]->scrn = pScrn;
 
+    if (!UMSResourceManagement(pScrn))
+		return FALSE;
 
     miClearVisualTypes();
 
@@ -1643,7 +1642,6 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     UMSAccelSetup(pScrn);
 
     if (pVia->NoAccel) {
-
         /*
          * This is only for Xv in Noaccel path, and since Xv is in some
          * sense accelerated, it might be a better idea to disable it

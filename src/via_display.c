@@ -1619,6 +1619,37 @@ via_crtc_dpms(xf86CrtcPtr crtc, int mode)
     }
 }
 
+static void
+via_crtc_save(xf86CrtcPtr crtc)
+{
+	ScrnInfoPtr pScrn = crtc->scrn;
+	vgaHWPtr hwp = VGAHWPTR(pScrn);
+	VIAPtr pVia = VIAPTR(pScrn);
+
+	if (pVia->pVbe && pVia->vbeSR) {
+		ViaVbeSaveRestore(pScrn, MODE_SAVE);
+	} else {
+		VIASave(pScrn);
+	}
+
+	vgaHWUnlock(hwp);
+}
+
+static void
+via_crtc_restore(xf86CrtcPtr crtc)
+{
+	ScrnInfoPtr pScrn = crtc->scrn;
+	vgaHWPtr hwp = VGAHWPTR(pScrn);
+	VIAPtr pVia = VIAPTR(pScrn);
+
+	if (pVia->pVbe && pVia->vbeSR)
+		ViaVbeSaveRestore(pScrn, MODE_RESTORE);
+	else
+		VIARestore(pScrn);
+
+	vgaHWLock(hwp);
+}
+
 static Bool
 via_crtc_lock(xf86CrtcPtr crtc)
 {
@@ -1676,9 +1707,18 @@ via_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
                                         DisplayModePtr adjusted_mode,
                                         int x, int y)
 {
-    ScrnInfoPtr pScrn = crtc->scrn;
+	ScrnInfoPtr pScrn = crtc->scrn;
+	VIAPtr pVia = VIAPTR(pScrn);
 
-    VIAWriteMode(pScrn, adjusted_mode);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "via_crtc_mode_set\n"));
+
+	if (pVia->pVbe) {
+		ViaVbeSetMode(pScrn, adjusted_mode);
+	} else {
+		VIAWriteMode(pScrn, adjusted_mode);
+	}
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "via_crtc_mode_set 2\n"));
 }
 
 static void
@@ -1772,8 +1812,8 @@ via_crtc_load_cursor_argb (xf86CrtcPtr crtc, CARD32 *image)
 
 static const xf86CrtcFuncsRec via_crtc_funcs = {
 	.dpms				 = via_crtc_dpms,
-	.save				 = NULL,
-	.restore			 = NULL,
+	.save				 = via_crtc_save,
+	.restore			 = via_crtc_restore,
 	.lock				 = via_crtc_lock,
 	.unlock				 = via_crtc_unlock,
 	.mode_fixup			 = via_crtc_mode_fixup,

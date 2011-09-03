@@ -31,7 +31,6 @@
 #include "via_id.h"
 
 void VIAUnmapMem(ScrnInfoPtr pScrn);
-void VIASave(ScrnInfoPtr pScrn);
 
 #ifdef XF86DRI
 static void
@@ -165,7 +164,7 @@ UMSAccelSetup(ScrnInfoPtr pScrn)
     vgaHWBlankScreen(pScrn, TRUE);
 }
 
-static Bool
+Bool
 VIAWriteMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
     VIAPtr pVia = VIAPTR(pScrn);
@@ -509,31 +508,28 @@ Bool
 UMSResourceManagement(ScrnInfoPtr pScrn)
 {
     ScreenPtr pScreen = pScrn->pScreen;
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
+	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
+	int i;
 
     if (!VIAMapFB(pScrn))
         return FALSE;
 
-    if (pVia->pVbe && pVia->vbeSR) {
-        ViaVbeSaveRestore(pScrn, MODE_SAVE);
-    } else {
-        VIASave(pScrn);
-    }
-    vgaHWUnlock(hwp);
+	for (i = 0; i < xf86_config->num_crtc; i++) {
+		xf86CrtcPtr crtc = xf86_config->crtc[i];
+
+		crtc->funcs->save(crtc);
+	}
 
     pVia->FirstInit = TRUE;
-    vgaHWBlankScreen(pScrn, FALSE);
-    if (pVia->pVbe) {
-        if (!ViaVbeSetMode(pScrn, pScrn->currentMode)) {
-            vgaHWBlankScreen(pScrn, TRUE);
-            return FALSE;
-        }
-    } else {
-        if (!VIAWriteMode(pScrn, pScrn->currentMode)) {
-            vgaHWBlankScreen(pScrn, TRUE);
-            return FALSE;
-        }
+
+	for (i = 0; i < xf86_config->num_crtc; i++) {
+		xf86CrtcPtr crtc = xf86_config->crtc[i];
+
+		crtc->funcs->dpms(crtc, DPMSModeOn);
+
+		crtc->funcs->mode_set(crtc, pScrn->currentMode,
+							pScrn->currentMode, 0, 0);
     }
     pVia->FirstInit = FALSE;
 
@@ -685,25 +681,24 @@ UMSPreInit(ScrnInfoPtr pScrn)
 static Bool
 UMSEnterVT(int scrnIndex, int flags)
 {
-    ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
-    VIAPtr pVia = VIAPTR(pScrn);
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    Bool ret;
+	ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
+	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
+	VIAPtr pVia = VIAPTR(pScrn);
+	vgaHWPtr hwp = VGAHWPTR(pScrn);
+	Bool ret;
+	int i;
 
     /* FIXME: Rebind AGP memory here. */
     DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "UMSEnterVT\n"));
 
-    if (pVia->pVbe) {
-        if (pVia->vbeSR)
-            ViaVbeSaveRestore(pScrn, MODE_SAVE);
-        else
-            VIASave(pScrn);
-        ret = ViaVbeSetMode(pScrn, pScrn->currentMode);
-    } else {
-        VIASave(pScrn);
-        ret = VIAWriteMode(pScrn, pScrn->currentMode);
-    }
-    vgaHWUnlock(hwp);
+	for (i = 0; i < xf86_config->num_crtc; i++) {
+		xf86CrtcPtr crtc = xf86_config->crtc[i];
+
+		crtc->funcs->save(crtc);
+
+		crtc->funcs->mode_set(crtc, pScrn->currentMode,
+							pScrn->currentMode, 0, 0);
+	}
 
 	xf86SaveScreen(pScrn->pScreen, SCREEN_SAVER_ON);
 
@@ -743,11 +738,13 @@ UMSEnterVT(int scrnIndex, int flags)
 static void
 UMSLeaveVT(int scrnIndex, int flags)
 {
-    ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
+	ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
+	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
+	vgaHWPtr hwp = VGAHWPTR(pScrn);
+	VIAPtr pVia = VIAPTR(pScrn);
+	int i;
 
-    DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "UMSLeaveVT\n"));
+	DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "UMSLeaveVT\n"));
 
 #ifdef XF86DRI
     if (pVia->directRenderingType) {
@@ -791,12 +788,11 @@ UMSLeaveVT(int scrnIndex, int flags)
     if (pVia->hwcursor)
         viaCursorStore(pScrn);
 
-    if (pVia->pVbe && pVia->vbeSR)
-        ViaVbeSaveRestore(pScrn, MODE_RESTORE);
-    else
-        VIARestore(pScrn);
+	for (i = 0; i < xf86_config->num_crtc; i++) {
+		xf86CrtcPtr crtc = xf86_config->crtc[i];
 
-    vgaHWLock(hwp);
+		crtc->funcs->restore(crtc);
+	}
 
 	VIAUnmapMem(pScrn);
 }
