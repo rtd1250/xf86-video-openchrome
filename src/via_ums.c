@@ -145,23 +145,39 @@ UMSAccelSetup(ScrnInfoPtr pScrn)
     }
 #endif
 
-    if (pVia->NoAccel) {
-        memset(pVia->FBBase, 0x00, pVia->videoRambytes);
-    } else {
-        viaFinishInitAccel(pScreen);
+	if (pVia->NoAccel) {
+		memset(pVia->FBBase, 0x00, pVia->videoRambytes);
+
+		/*
+		 * This is only for Xv in Noaccel path, and since Xv is in some
+		 * sense accelerated, it might be a better idea to disable it
+		 * altogether.
+		 */
+		BoxRec AvailFBArea;
+
+		AvailFBArea.x1 = 0;
+		AvailFBArea.y1 = 0;
+		AvailFBArea.x2 = pScrn->displayWidth;
+		AvailFBArea.y2 = pScrn->virtualY + 1;
+		pVia->FBFreeStart = (AvailFBArea.y2 + 1) * pVia->Bpl;
+		xf86InitFBManager(pScreen, &AvailFBArea);
+		VIAInitLinear(pScreen);
+		pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart - pVia->Bpl);
+
+	} else {
+		viaFinishInitAccel(pScreen);
 #ifdef XF86DRI
-        if (pVia->directRenderingType)
-            DRILock(screenInfo.screens[pScrn->scrnIndex], 0);
+		if (pVia->directRenderingType)
+			DRILock(screenInfo.screens[pScrn->scrnIndex], 0);
 #endif
-        viaAccelFillRect(pScrn, pScrn->frameX0, pScrn->frameY0,
-                         pScrn->displayWidth, pScrn->virtualY, 0x00000000);
-        viaAccelSyncMarker(pScrn);
+		viaAccelFillRect(pScrn, pScrn->frameX0, pScrn->frameY0,
+						pScrn->displayWidth, pScrn->virtualY, 0x00000000);
+		viaAccelSyncMarker(pScrn);
 #ifdef XF86DRI
-        if (pVia->directRenderingType)
-            DRIUnlock(screenInfo.screens[pScrn->scrnIndex]);
+		if (pVia->directRenderingType)
+			DRIUnlock(screenInfo.screens[pScrn->scrnIndex]);
 #endif
-    }
-    vgaHWBlankScreen(pScrn, TRUE);
+	}
 }
 
 Bool
