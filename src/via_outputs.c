@@ -517,7 +517,7 @@ via_dp_init(ScrnInfoPtr pScrn)
 	if (pVia->pI2CBus2)
 		output = xf86OutputCreate(pScrn, &via_dp_funcs, "DP");
 	if (output) {
-		output->crtc = xf86_config->crtc[0];
+		//output->crtc = xf86_config->crtc[0];
 		//output->possible_crtcs = 0x1;
 		output->possible_clones = 0;
 		output->interlaceAllowed = TRUE;
