@@ -33,13 +33,14 @@
 #include "via_id.h"
 
 static void
-ViaSetTVClockSource(ScrnInfoPtr pScrn)
+ViaSetTVClockSource(xf86CrtcPtr crtc)
 {
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaSetTVClockSource\n"));
+	ScrnInfoPtr pScrn = crtc->scrn;
+	VIAPtr pVia = VIAPTR(pScrn);
+	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+	vgaHWPtr hwp = VGAHWPTR(pScrn);
 
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
+	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaSetTVClockSource\n"));
 
     switch(pBIOSInfo->TVEncoder) {
         case VIA_VT1625:
@@ -603,12 +604,13 @@ VT1621ModeI2C(ScrnInfoPtr pScrn, DisplayModePtr mode)
 }
 
 static void
-VT1621ModeCrtc(ScrnInfoPtr pScrn, DisplayModePtr mode)
+VT1621ModeCrtc(xf86CrtcPtr crtc, DisplayModePtr mode)
 {
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-    struct VT1621TableRec Table = VT1621Table[VT1621ModeIndex(pScrn, mode)];
+	ScrnInfoPtr pScrn = crtc->scrn;
+	vgaHWPtr hwp = VGAHWPTR(pScrn);
+	VIAPtr pVia = VIAPTR(pScrn);
+	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+	struct VT1621TableRec Table = VT1621Table[VT1621ModeIndex(pScrn, mode)];
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1621ModeCrtc\n"));
 
@@ -736,12 +738,13 @@ VT1622ModeI2C(ScrnInfoPtr pScrn, DisplayModePtr mode)
  * Also suited for VT1622A, VT1623, VT1625.
  */
 static void
-VT1622ModeCrtc(ScrnInfoPtr pScrn, DisplayModePtr mode)
+VT1622ModeCrtc(xf86CrtcPtr crtc, DisplayModePtr mode)
 {
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-    struct VT162XTableRec Table;
+	ScrnInfoPtr pScrn = crtc->scrn;
+	vgaHWPtr hwp = VGAHWPTR(pScrn);
+	VIAPtr pVia = VIAPTR(pScrn);
+	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+	struct VT162XTableRec Table;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1622ModeCrtc\n"));
 
@@ -786,7 +789,7 @@ VT1622ModeCrtc(ScrnInfoPtr pScrn, DisplayModePtr mode)
     }
     pBIOSInfo->ClockExternal = TRUE;
     ViaCrtcMask(hwp, 0x6A, 0x40, 0x40);
-    ViaSetTVClockSource(pScrn);
+    ViaSetTVClockSource(crtc);
 }
 
 

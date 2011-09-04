@@ -1708,12 +1708,12 @@ via_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 
 		if (pVia->UseLegacyModeSwitch) {
 			if (!pVia->IsSecondary)
-				ViaModePrimaryLegacy(pScrn, adjusted_mode);
+				ViaModePrimaryLegacy(crtc, adjusted_mode);
 			else
-				ViaModeSecondaryLegacy(pScrn, adjusted_mode);
+				ViaModeSecondaryLegacy(crtc, adjusted_mode);
 		} else {
 			ViaCRTCInit(pScrn);
-			ViaModeSet(pScrn, adjusted_mode);
+			ViaModeSet(crtc, adjusted_mode);
 		}
 
 	} else {

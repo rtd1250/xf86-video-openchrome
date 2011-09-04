@@ -115,15 +115,16 @@ ViaTVDACSense(ScrnInfoPtr pScrn)
 }
 
 static void
-ViaTVSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
+ViaTVSetMode(xf86CrtcPtr crtc, DisplayModePtr mode)
 {
+	ScrnInfoPtr pScrn = crtc->scrn;
     VIABIOSInfoPtr pBIOSInfo = VIAPTR(pScrn)->pBIOSInfo;
 
     if (pBIOSInfo->TVModeI2C)
         pBIOSInfo->TVModeI2C(pScrn, mode);
 
     if (pBIOSInfo->TVModeCrtc)
-        pBIOSInfo->TVModeCrtc(pScrn, mode);
+        pBIOSInfo->TVModeCrtc(crtc, mode);
 
     /* TV reset. */
     xf86I2CWriteByte(pBIOSInfo->TVI2CDev, 0x1D, 0x00);
@@ -249,9 +250,7 @@ static void
 via_tv_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 				DisplayModePtr adjusted_mode)
 {
-	ScrnInfoPtr pScrn = output->scrn;
-
-	ViaTVSetMode(pScrn, adjusted_mode);
+	ViaTVSetMode(output->crtc, adjusted_mode);
 }
 
 static xf86OutputStatus
@@ -293,8 +292,9 @@ static const xf86OutputFuncsRec via_tv_funcs = {
 static Bool
 via_tv_init(ScrnInfoPtr pScrn)
 {
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
+	VIAPtr pVia = VIAPTR(pScrn);
+	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 	xf86OutputPtr output = NULL;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "via_tv_init\n"));
@@ -378,8 +378,10 @@ via_tv_init(ScrnInfoPtr pScrn)
     }
 
 	output = xf86OutputCreate(pScrn, &via_tv_funcs, "TV");
-	pBIOSInfo->tv = output;
-
+	if (output) {
+		output->crtc = xf86_config->crtc[0];
+		pBIOSInfo->tv = output;
+	}
     /* Save now */
     pBIOSInfo->TVSave(pScrn);
 
@@ -507,13 +509,21 @@ static const xf86OutputFuncsRec via_dp_funcs = {
 void
 via_dp_init(ScrnInfoPtr pScrn)
 {
+	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
 	VIAPtr pVia = VIAPTR(pScrn);
 	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 	xf86OutputPtr output = NULL;
 
 	if (pVia->pI2CBus2)
 		output = xf86OutputCreate(pScrn, &via_dp_funcs, "DP");
-	pBIOSInfo->dp = output;
+	if (output) {
+		output->crtc = xf86_config->crtc[0];
+		//output->possible_crtcs = 0x1;
+		output->possible_clones = 0;
+		output->interlaceAllowed = TRUE;
+		output->doubleScanAllowed = FALSE;
+		pBIOSInfo->dp = output;
+	}
 }
 
 static void
@@ -633,6 +643,7 @@ static const xf86OutputFuncsRec via_analog_funcs = {
 void
 via_analog_init(ScrnInfoPtr pScrn)
 {
+	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
 	VIAPtr pVia = VIAPTR(pScrn);
 	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 	xf86OutputPtr output = NULL;
@@ -646,6 +657,7 @@ via_analog_init(ScrnInfoPtr pScrn)
 			output = xf86OutputCreate(pScrn, &via_analog_funcs, "VGA");
 	}
 	if (output) {
+		output->crtc = xf86_config->crtc[0];
 		//output->possible_crtcs = 0x1;
 		output->possible_clones = 0;
 		output->interlaceAllowed = TRUE;
@@ -685,10 +697,7 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
                    "Will not try to detect TV encoder.\n");
     } else {
         /* TV encoder */
-        if (via_tv_init(pScrn)) {
-            if (!pBIOSInfo->TVOutput)  /* Config might've set this already */
-                ViaTVDACSense(pScrn);
-        } else if (pVia->Id && (pVia->Id->Outputs & VIA_DEVICE_TV)) {
+        if (!via_tv_init(pScrn) && (pVia->Id && (pVia->Id->Outputs & VIA_DEVICE_TV))) {
             xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
                        "This device is supposed to have a TV encoder, but "
                        "we are unable to detect it (support missing?).\n");
@@ -1181,11 +1190,12 @@ ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode);
 ModeStatus
 ViaValidMode(int scrnIndex, DisplayModePtr mode, Bool verbose, int flags)
 {
-    ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-    ModeStatus ret;
-    CARD32 temp;
+	ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
+	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
+	VIAPtr pVia = VIAPTR(pScrn);
+	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+	ModeStatus ret;
+	CARD32 temp;
 
     if (pVia->pVbe)
         return MODE_OK;
@@ -1709,11 +1719,12 @@ ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode)
  *
  */
 void
-ViaModePrimaryLegacy(ScrnInfoPtr pScrn, DisplayModePtr mode)
+ViaModePrimaryLegacy(xf86CrtcPtr crtc, DisplayModePtr mode)
 {
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+	ScrnInfoPtr pScrn = crtc->scrn;
+	vgaHWPtr hwp = VGAHWPTR(pScrn);
+	VIAPtr pVia = VIAPTR(pScrn);
+	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModePrimaryLegacy\n"));
     DEBUG(ViaPrintMode(pScrn, mode));
@@ -1758,7 +1769,7 @@ ViaModePrimaryLegacy(ScrnInfoPtr pScrn, DisplayModePtr mode)
             ViaSetPrimaryDotclock(pScrn, 0x871C);
         ViaSetUseExternalClock(hwp);
 
-        ViaTVSetMode(pScrn, mode);
+        ViaTVSetMode(crtc, mode);
     } else
         ViaTVPower(pScrn, FALSE);
 
@@ -1789,11 +1800,12 @@ ViaModePrimaryLegacy(ScrnInfoPtr pScrn, DisplayModePtr mode)
  *
  */
 void
-ViaModeSecondaryLegacy(ScrnInfoPtr pScrn, DisplayModePtr mode)
+ViaModeSecondaryLegacy(xf86CrtcPtr crtc, DisplayModePtr mode)
 {
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+	ScrnInfoPtr pScrn = crtc->scrn;
+	vgaHWPtr hwp = VGAHWPTR(pScrn);
+	VIAPtr pVia = VIAPTR(pScrn);
+	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModeSecondaryLegacy\n"));
     DEBUG(ViaPrintMode(pScrn, mode));
@@ -1804,7 +1816,7 @@ ViaModeSecondaryLegacy(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaSecondCRTCSetMode(pScrn, mode);
 
 	if (pBIOSInfo->tv && pBIOSInfo->tv->status == XF86OutputStatusConnected)
-        ViaTVSetMode(pScrn, mode);
+        ViaTVSetMode(crtc, mode);
 
     /* CLE266A2 apparently doesn't like this */
     if (!(pVia->Chipset == VIA_CLE266 && pVia->ChipRev == 0x02))
@@ -2002,10 +2014,11 @@ ViaModeSecondCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode)
 }
 
 void
-ViaModeSet(ScrnInfoPtr pScrn, DisplayModePtr mode)
+ViaModeSet(xf86CrtcPtr crtc, DisplayModePtr mode)
 {
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+	ScrnInfoPtr pScrn = crtc->scrn;
+	VIAPtr pVia = VIAPTR(pScrn);
+	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModeSet\n"));
 
@@ -2033,7 +2046,7 @@ ViaModeSet(ScrnInfoPtr pScrn, DisplayModePtr mode)
             /* TV on FirstCrtc */
             ViaDisplaySetStreamOnDVO(pScrn, pBIOSInfo->TVDIPort, TRUE);
             ViaDisplayEnableDVO(pScrn, pBIOSInfo->TVDIPort);
-            ViaTVSetMode(pScrn, mode);
+            ViaTVSetMode(crtc, mode);
         }
 
         ViaModeFirstCRTC(pScrn, mode);
@@ -2041,15 +2054,6 @@ ViaModeSet(ScrnInfoPtr pScrn, DisplayModePtr mode)
         ViaDisplayDisableCRT(pScrn);
     }
 
-    // Enable panel support on VM800, K8M800 and VX900 chipset
-    // See: https://bugs.launchpad.net/openchrome/+bug/186103
-	if ((pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected) &&
-       ((pVia->Chipset == VIA_VM800) ||
-        (pVia->Chipset == VIA_K8M800) ||
-        (pVia->Chipset == VIA_VX900) )) {
-        pBIOSInfo->FirstCRTC->IsActive=TRUE;
-        ViaModeFirstCRTC(pScrn, mode);
-    }
     if (pBIOSInfo->Simultaneous->IsActive) {
         ViaDisplayEnableSimultaneous(pScrn);
     } else {

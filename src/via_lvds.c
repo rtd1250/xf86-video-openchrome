@@ -379,6 +379,7 @@ static const xf86OutputFuncsRec via_lvds_funcs = {
 void
 via_lvds_init(ScrnInfoPtr pScrn)
 {
+	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
 	VIAPtr pVia = VIAPTR(pScrn);
 	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 	xf86OutputPtr output = NULL;
@@ -391,5 +392,11 @@ via_lvds_init(ScrnInfoPtr pScrn)
 				"Enabling panel from PCI-subsystem ID information.\n");
 		output = xf86OutputCreate(pScrn, &via_lvds_funcs, "LVDS");
 	}
-	pBIOSInfo->lvds = output;
+	if (output)  {
+			output->crtc = xf86_config->crtc[1];
+			//output->possible_crtcs = 0x2;
+			output->possible_clones = 0;
+			output->interlaceAllowed = FALSE;
+			pBIOSInfo->lvds = output;
+	}
 }

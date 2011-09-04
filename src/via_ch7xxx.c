@@ -402,13 +402,14 @@ CH7xxxModeI2C(ScrnInfoPtr pScrn, DisplayModePtr mode)
 }
 
 static void
-CH7xxxModeCrtc(ScrnInfoPtr pScrn, DisplayModePtr mode)
+CH7xxxModeCrtc(xf86CrtcPtr crtc, DisplayModePtr mode)
 {
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia =  VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-    CARD8  *CRTC, *Misc;
-    int  i, j;
+	ScrnInfoPtr pScrn = crtc->scrn;
+	vgaHWPtr hwp = VGAHWPTR(pScrn);
+	VIAPtr pVia =  VIAPTR(pScrn);
+	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+	CARD8  *CRTC, *Misc;
+	int  i, j;
 
     VIABIOSTVMASKTableRec Mask;
     struct CH7xxxTableRec Table;

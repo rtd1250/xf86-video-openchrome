@@ -197,7 +197,7 @@ typedef struct _VIABIOSINFO {
     Bool (*TVDACSense) (ScrnInfoPtr pScrn);
     ModeStatus (*TVModeValid) (ScrnInfoPtr pScrn, DisplayModePtr mode);
     void (*TVModeI2C) (ScrnInfoPtr pScrn, DisplayModePtr mode);
-    void (*TVModeCrtc) (ScrnInfoPtr pScrn, DisplayModePtr mode);
+    void (*TVModeCrtc) (xf86CrtcPtr crtc, DisplayModePtr mode);
     void (*TVPower) (ScrnInfoPtr pScrn, Bool On);
     void (*LCDPower) (ScrnInfoPtr pScrn, Bool On);
     DisplayModePtr TVModes;
@@ -221,8 +221,8 @@ void via_analog_init(ScrnInfoPtr pScrn);
 void ViaModesAttach(ScrnInfoPtr pScrn, MonPtr monitorp);
 CARD32 ViaGetMemoryBandwidth(ScrnInfoPtr pScrn);
 ModeStatus ViaValidMode(int scrnIndex, DisplayModePtr mode, Bool verbose, int flags);
-void ViaModePrimaryLegacy(ScrnInfoPtr pScrn, DisplayModePtr mode);
-void ViaModeSecondaryLegacy(ScrnInfoPtr pScrn, DisplayModePtr mode);
+void ViaModePrimaryLegacy(xf86CrtcPtr crtc, DisplayModePtr mode);
+void ViaModeSecondaryLegacy(xf86CrtcPtr crtc, DisplayModePtr mode);
 void ViaLCDPower(ScrnInfoPtr pScrn, Bool On);
 void ViaDFPPower(ScrnInfoPtr pScrn, Bool On);
 void ViaTVPower(ScrnInfoPtr pScrn, Bool On);
@@ -233,7 +233,7 @@ void ViaTVPrintRegs(ScrnInfoPtr pScrn);
 #endif
 void ViaModeSecondCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaModeFirstCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode);
-void ViaModeSet(ScrnInfoPtr pScrn, DisplayModePtr mode);
+void ViaModeSet(xf86CrtcPtr crtc, DisplayModePtr mode);
 
 /* via_display.c */
 void ViaPreInitCRTCConfig(ScrnInfoPtr pScrn);
