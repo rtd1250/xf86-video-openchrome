@@ -1602,8 +1602,7 @@ via_crtc_dpms(xf86CrtcPtr crtc, int mode)
                            mode);
                 break;
         }
-
-		vgaHWSaveScreen(pScrn->pScreen, mode);
+		//vgaHWSaveScreen(pScrn->pScreen, mode);
     }
 }
 
@@ -1976,7 +1975,8 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
 		return FALSE;
 	}
 
-	xf86InitialConfiguration(pScrn, TRUE);
+	if (!xf86InitialConfiguration(pScrn, TRUE))
+		return FALSE;
 
     if (pVia->pVbe) {
 

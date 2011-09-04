@@ -393,8 +393,7 @@ via_lvds_init(ScrnInfoPtr pScrn)
 		output = xf86OutputCreate(pScrn, &via_lvds_funcs, "LVDS");
 	}
 	if (output)  {
-			output->crtc = xf86_config->crtc[1];
-			//output->possible_crtcs = 0x2;
+			output->possible_crtcs = 0x2;
 			output->possible_clones = 0;
 			output->interlaceAllowed = FALSE;
 			pBIOSInfo->lvds = output;
