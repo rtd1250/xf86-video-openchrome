@@ -334,6 +334,29 @@ static void
 via_lvds_mode_set(xf86OutputPtr  output, DisplayModePtr mode,
 					DisplayModePtr adjusted_mode)
 {
+	ScrnInfoPtr pScrn = output->scrn;
+	VIAPtr pVia = VIAPTR(pScrn);
+
+	/*
+	 * FIXME: pVia->IsSecondary is not working here.  We should be able
+	 * to detect when the display is using the secondary head.
+	 * TODO: This should be enabled for other chipsets as well.
+	 */
+	if (pVia->pVbe) {
+		switch (pVia->Chipset) {
+		case VIA_P4M900:
+		case VIA_VX800:
+		case VIA_VX855:
+		case VIA_VX900:
+			/*
+			 * Since we are using virtual, we need to adjust
+			 * the offset to match the framebuffer alignment.
+			 */
+			if (pScrn->displayWidth != adjusted_mode->CrtcHDisplay)
+				ViaSecondCRTCHorizontalOffset(pScrn);
+			break;
+		}
+	}
 }
 
 static xf86OutputStatus

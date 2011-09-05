@@ -250,6 +250,14 @@ static void
 via_tv_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 				DisplayModePtr adjusted_mode)
 {
+	ScrnInfoPtr pScrn = output->scrn;
+	VIAPtr pVia = VIAPTR(pScrn);
+	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+
+	/* TV on FirstCrtc */
+	ViaDisplaySetStreamOnDVO(pScrn, pBIOSInfo->TVDIPort, TRUE);
+	ViaDisplayEnableDVO(pScrn, pBIOSInfo->TVDIPort);
+
 	ViaTVSetMode(output->crtc, adjusted_mode);
 }
 
@@ -462,6 +470,11 @@ static void
 via_dp_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 				DisplayModePtr adjusted_mode)
 {
+	ScrnInfoPtr pScrn = output->scrn;
+
+	/* DFP on FirstCrtc */
+	ViaDisplaySetStreamOnDFP(pScrn, TRUE);
+	ViaDFPPower(pScrn, TRUE);
 }
 
 static xf86OutputStatus
@@ -595,6 +608,11 @@ static void
 via_analog_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 					DisplayModePtr adjusted_mode)
 {
+	ScrnInfoPtr pScrn = output->scrn;
+
+	/* CRT on FirstCRTC */
+	ViaDisplaySetStreamOnCRT(pScrn, TRUE);
+	ViaDisplayEnableCRT(pScrn);
 }
 
 static xf86OutputStatus
@@ -610,7 +628,8 @@ via_analog_detect(xf86OutputPtr output)
 		xf86OutputSetEDID(output, mon);
 		DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "DDC pI2CBus1 detected a CRT\n"));
 		status = XF86OutputStatusConnected;
-	}
+	} else
+		ViaDisplayDisableCRT(pScrn);
 	return status;
 }
 
@@ -1053,7 +1072,7 @@ ViaPanelGetIndex(ScrnInfoPtr pScrn, DisplayModePtr mode)
 }
 
 /*
- * adapted from nv and savage 
+ * adapted from nv and savage
  */
 static void
 ViaModesMonitorFixup(ScrnInfoPtr pScrn, MonPtr monitorp, DisplayModePtr mode)
@@ -2017,37 +2036,13 @@ ViaModeSet(xf86CrtcPtr crtc, DisplayModePtr mode)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModeSet\n"));
 
-    ViaPrintMode(pScrn, mode);
-
     if (pBIOSInfo->SecondCRTC->IsActive) {
         ViaModeSecondCRTC(pScrn, mode);
         ViaSecondDisplayChannelEnable(pScrn);
     }
 
-    if (pBIOSInfo->FirstCRTC->IsActive) {
-		if (pBIOSInfo->analog->status == XF86OutputStatusConnected) {
-            /* CRT on FirstCRTC */
-            ViaDisplaySetStreamOnCRT(pScrn, TRUE);
-            ViaDisplayEnableCRT(pScrn);
-        }
-
-		if (pBIOSInfo->dp && pBIOSInfo->dp->status == XF86OutputStatusConnected) {
-            /* DFP on FirstCrtc */
-            ViaDisplaySetStreamOnDFP(pScrn, TRUE);
-            ViaDFPPower(pScrn, TRUE);
-        }
-
-		if (pBIOSInfo->tv && pBIOSInfo->tv->status == XF86OutputStatusConnected) {
-            /* TV on FirstCrtc */
-            ViaDisplaySetStreamOnDVO(pScrn, pBIOSInfo->TVDIPort, TRUE);
-            ViaDisplayEnableDVO(pScrn, pBIOSInfo->TVDIPort);
-            ViaTVSetMode(crtc, mode);
-        }
-
+    if (pBIOSInfo->FirstCRTC->IsActive)
         ViaModeFirstCRTC(pScrn, mode);
-    } else {
-        ViaDisplayDisableCRT(pScrn);
-    }
 
     if (pBIOSInfo->Simultaneous->IsActive) {
         ViaDisplayEnableSimultaneous(pScrn);

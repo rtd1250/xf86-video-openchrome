@@ -1508,8 +1508,6 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 	/* Enable the graphics engine. */
 	if (!pVia->NoAccel)
 		VIAInitialize3DEngine(pScrn);
-
-	pScrn->AdjustFrame(pScrn->scrnIndex, pScrn->frameX0, pScrn->frameY0, 0);
 }
 
 static void
@@ -1926,8 +1924,10 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 	pVia->OverlaySupported = FALSE;
 	pScrn->vtSema = TRUE;
 
-	if (!pVia->pVbe) {
-
+	if (pVia->pVbe) {
+		if (!ViaVbeSetMode(pScrn, adjusted_mode))
+			return;
+	} else {
 		if (!vgaHWInit(pScrn, adjusted_mode))
 			return;
 
@@ -1940,39 +1940,7 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 			ViaCRTCInit(pScrn);
 			ViaModeSet(crtc, adjusted_mode);
 		}
-
-	} else {
-
-		if (!ViaVbeSetMode(pScrn, adjusted_mode))
-			return;
-
-		/*
-		 * FIXME: pVia->IsSecondary is not working here.  We should be able
-		 * to detect when the display is using the secondary head.
-		 * TODO: This should be enabled for other chipsets as well.
-		 */
-		if (pVia->pBIOSInfo->lvds && pVia->pBIOSInfo->lvds->status == XF86OutputStatusConnected) {
-			switch (pVia->Chipset) {
-			case VIA_P4M900:
-			case VIA_VX800:
-			case VIA_VX855:
-			case VIA_VX900:
-				/*
-				 * Since we are using virtual, we need to adjust
-				 * the offset to match the framebuffer alignment.
-				 */
-				if (pScrn->displayWidth != adjusted_mode->CrtcHDisplay)
-					ViaSecondCRTCHorizontalOffset(pScrn);
-				break;
-			}
-		}
 	}
-
-	/* Enable the graphics engine. */
-	if (!pVia->NoAccel)
-		VIAInitialize3DEngine(pScrn);
-
-	pScrn->AdjustFrame(pScrn->scrnIndex, pScrn->frameX0, pScrn->frameY0, 0);
 }
 
 static void
