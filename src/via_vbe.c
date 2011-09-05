@@ -243,18 +243,6 @@ ViaVbeSetMode(ScrnInfoPtr pScrn, DisplayModePtr pMode)
             }
         }
     } else {
-        if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected &&
-			!pVia->useLegacyVBE) {
-            /*
-             * FIXME: Should we always set the panel expansion?
-             * Does it depend on the resolution?
-             */
-            if (!ViaVbeSetPanelMode(pScrn, !pBIOSInfo->Center)) {
-                xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                           "Unable to set the panel mode.\n");
-            }
-        }
-
         data->mode &= ~(1 << 11);
         if (VBESetVBEMode(pVia->pVbe, data->mode, NULL) == FALSE) {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Set VBE Mode failed.\n");
@@ -399,7 +387,7 @@ ViaVbeModePreInit(ScrnInfoPtr pScrn)
     return TRUE;
 }
 
-static int
+int
 ViaVbePanelPower(vbeInfoPtr pVbe, int mode)
 {
     pVbe->pInt10->num = 0x10;
@@ -412,7 +400,7 @@ ViaVbePanelPower(vbeInfoPtr pVbe, int mode)
 }
 
 #if 0
-/* 
+/*
  * FIXME: This might be useful in the future. Otherwise feel free to remove. 
  * If mode=1, it sets the panel in a low-power, low-performance state;
  * if mode=0, then high performance.
@@ -431,22 +419,11 @@ ViaVbePanelLowPower(vbeInfoPtr pVbe, int mode)
 #endif
 
 void
-ViaVbeDoDPMS(ScrnInfoPtr pScrn, int mode)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-
-	if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected)
-        ViaVbePanelPower(pVia->pVbe, (mode == DPMSModeOn));
-
-    VBEDPMSSet(pVia->pVbe, mode);
-}
-
-void
 ViaVbeDPMS(ScrnInfoPtr pScrn, int mode)
 {
-    if (!pScrn->vtSema)
-        return;
+    VIAPtr pVia = VIAPTR(pScrn);
 
-    ViaVbeDoDPMS(pScrn, mode);
+	if (!pScrn->vtSema)
+		return;
+	VBEDPMSSet(pVia->pVbe, mode);
 }

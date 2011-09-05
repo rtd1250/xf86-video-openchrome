@@ -213,6 +213,7 @@ Bool ViaVbeSaveRestore(ScrnInfoPtr pScrn, vbeSaveRestoreFunction function);
 Bool ViaVbeModePreInit(ScrnInfoPtr pScrn);
 void ViaVbeDPMS(ScrnInfoPtr pScrn, int mode);
 void ViaVbeDoDPMS(ScrnInfoPtr pScrn, int mode);
+int ViaVbePanelPower(vbeInfoPtr pVbe, int mode);
 
 /* via_output.c */
 void ViaOutputsDetect(ScrnInfoPtr pScrn);

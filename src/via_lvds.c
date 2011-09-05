@@ -266,34 +266,38 @@ via_lvds_dpms(xf86OutputPtr output, int mode)
 	ScrnInfoPtr pScrn = output->scrn;
 	VIAPtr pVia = VIAPTR(pScrn);
 
-	switch (mode) {
-	case DPMSModeOn:
-		switch (pVia->Chipset) {
-		case VIA_P4M900:
-		case VIA_CX700:
-		case VIA_VX800:
-		case VIA_VX855:
-		case VIA_VX900:
-			ViaLVDSPower(pScrn, TRUE);
+	if (pVia->pVbe) {
+		ViaVbePanelPower(pVia->pVbe, (mode == DPMSModeOn));
+	} else {
+		switch (mode) {
+		case DPMSModeOn:
+			switch (pVia->Chipset) {
+			case VIA_P4M900:
+			case VIA_CX700:
+			case VIA_VX800:
+			case VIA_VX855:
+			case VIA_VX900:
+				ViaLVDSPower(pScrn, TRUE);
+				break;
+			}
+			ViaLCDPower(pScrn, TRUE);
 			break;
-		}
-		ViaLCDPower(pScrn, TRUE);
-		break;
 
-	case DPMSModeStandby:
-	case DPMSModeSuspend:
-	case DPMSModeOff:
-		switch (pVia->Chipset) {
-		case VIA_P4M900:
-		case VIA_CX700:
-		case VIA_VX800:
-		case VIA_VX855:
-		case VIA_VX900:
-			ViaLVDSPower(pScrn, FALSE);
+		case DPMSModeStandby:
+		case DPMSModeSuspend:
+		case DPMSModeOff:
+			switch (pVia->Chipset) {
+			case VIA_P4M900:
+			case VIA_CX700:
+			case VIA_VX800:
+			case VIA_VX855:
+			case VIA_VX900:
+				ViaLVDSPower(pScrn, FALSE);
+				break;
+			}
+			ViaLCDPower(pScrn, FALSE);
 			break;
 		}
-		ViaLCDPower(pScrn, FALSE);
-		break;
 	}
 }
 
@@ -343,6 +347,19 @@ via_lvds_mode_set(xf86OutputPtr  output, DisplayModePtr mode,
 	 * TODO: This should be enabled for other chipsets as well.
 	 */
 	if (pVia->pVbe) {
+		if (!pVia->useLegacyVBE) {
+			VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+
+			/*
+			 * FIXME: Should we always set the panel expansion?
+			 * Does it depend on the resolution?
+			 */
+			if (!ViaVbeSetPanelMode(pScrn, !pBIOSInfo->Center)) {
+				xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+							"Unable to set the panel mode.\n");
+			}
+		}
+
 		switch (pVia->Chipset) {
 		case VIA_P4M900:
 		case VIA_VX800:
