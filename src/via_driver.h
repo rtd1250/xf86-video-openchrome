@@ -220,7 +220,6 @@ typedef struct{
 
 typedef struct _VIA {
     VIARegRec           SavedReg;
-    xf86CursorInfoPtr   CursorInfoRec;
     int                 Bpp, Bpl;
 
     Bool                FirstInit;
@@ -376,9 +375,6 @@ typedef struct _VIA {
 
     CARD8               ActiveDevice;	/* Option */
 
-    unsigned char       *CursorImage;
-    CARD32              CursorFG;
-    CARD32              CursorBG;
     Bool                CursorARGB;
     Bool                CursorARGBSupported;
     CARD8               CursorPipe;
