@@ -1136,7 +1136,9 @@ viaLoadCursorImage(ScrnInfoPtr pScrn, unsigned char *src)
 		xf86CrtcPtr crtc = xf86_config->crtc[c];
 
 		if (crtc->enabled)
-			crtc->funcs->load_cursor_argb(crtc, (CARD32 *) src);
+		{
+			crtc->funcs->load_cursor_image(crtc, src);
+		}
 	}
 }
 
@@ -1756,7 +1758,7 @@ static CARD32 mono_cursor_color[] = {
 };
 
 static void
-iga1_crtc_load_cursor_argb (xf86CrtcPtr crtc, CARD32 *src)
+iga1_crtc_load_cursor_image(xf86CrtcPtr crtc, CARD8 *src)
 {
 	ScrnInfoPtr pScrn = crtc->scrn;
 	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
@@ -1781,7 +1783,7 @@ iga1_crtc_load_cursor_argb (xf86CrtcPtr crtc, CARD32 *src)
 		xf86_config->cursor_bg = mono_cursor_color[2];
 
 	} else {
-		memcpy(dst, (CARD8*)src, pVia->CursorSize);
+		memcpy(dst, src, pVia->CursorSize);
 	}
 
 	switch(pVia->Chipset) {
@@ -1820,7 +1822,7 @@ static const xf86CrtcFuncsRec iga1_crtc_funcs = {
 	.set_cursor_position = iga1_crtc_set_cursor_position,
 	.show_cursor		 = iga1_crtc_show_cursor,
 	.hide_cursor		 = iga1_crtc_hide_cursor,
-	.load_cursor_argb	 = iga1_crtc_load_cursor_argb,
+	.load_cursor_image	 = iga1_crtc_load_cursor_image,
 	.set_origin			 = iga1_crtc_set_origin,
 	.destroy			 = NULL,
 };
@@ -2204,7 +2206,7 @@ iga2_crtc_hide_cursor(xf86CrtcPtr crtc)
 }
 
 static void
-iga2_crtc_load_cursor_argb (xf86CrtcPtr crtc, CARD32 *src)
+iga2_crtc_load_cursor_image(xf86CrtcPtr crtc, CARD8 *src)
 {
 	ScrnInfoPtr pScrn = crtc->scrn;
 	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
@@ -2229,7 +2231,7 @@ iga2_crtc_load_cursor_argb (xf86CrtcPtr crtc, CARD32 *src)
 		xf86_config->cursor_bg = mono_cursor_color[2];
 
 	} else {
-		memcpy(dst, (CARD8*)src, pVia->CursorSize);
+		memcpy(dst, src, pVia->CursorSize);
 	}
 
 	switch(pVia->Chipset) {
@@ -2267,7 +2269,7 @@ static const xf86CrtcFuncsRec iga2_crtc_funcs = {
 	.set_cursor_position = iga2_crtc_set_cursor_position,
 	.show_cursor		 = iga2_crtc_show_cursor,
 	.hide_cursor		 = iga2_crtc_hide_cursor,
-	.load_cursor_argb	 = iga2_crtc_load_cursor_argb,
+	.load_cursor_image	 = iga2_crtc_load_cursor_image,
 	.set_origin			 = iga2_crtc_set_origin,
 	.destroy			 = NULL,
 };
