@@ -375,12 +375,7 @@ typedef struct _VIA {
 
     CARD8               ActiveDevice;	/* Option */
 
-    Bool                CursorARGB;
-    Bool                CursorARGBSupported;
-    CARD8               CursorPipe;
     int                 CursorStart;
-	int					CursorMaxWidth;
-	int					CursorMaxHeight;
 	int					CursorSize;
 
     CARD32              CursorRegControl;
@@ -458,13 +453,6 @@ Bool VIAMapMem(ScrnInfoPtr pScrn);
 void VIAUnmapMem(ScrnInfoPtr pScrn);
 
 /* In via_cursor.c. */
-Bool viaCursorHWInit(ScreenPtr pScreen);
-void viaCursorShow(ScrnInfoPtr);
-void viaCursorHide(ScrnInfoPtr);
-void viaCursorStore(ScrnInfoPtr pScrn);
-void viaCursorRestore(ScrnInfoPtr pScrn);
-Bool viaCursorRecInit(ScrnInfoPtr pScrn);
-void viaCursorRecDestroy(ScrnInfoPtr pScrn);
 void viaCursorSetFB(ScrnInfoPtr pScrn);
 
 /* In via_accel.c. */

@@ -633,8 +633,7 @@ UMSEnterVT(int scrnIndex, int flags)
 	xf86SaveScreen(pScrn->pScreen, SCREEN_SAVER_ON);
 
     /* A patch for APM suspend/resume, when HWCursor has garbage. */
-    if (pVia->hwcursor)
-        viaCursorRestore(pScrn);
+	xf86_reload_cursors(pScrn->pScreen);
 
     /* Restore video status. */
     if (!pVia->IsSecondary)
@@ -714,9 +713,6 @@ UMSLeaveVT(int scrnIndex, int flags)
     /* Save video status and turn off all video activities. */
     if (!pVia->IsSecondary)
         viaSaveVideo(pScrn);
-
-    if (pVia->hwcursor)
-        viaCursorStore(pScrn);
 
 	for (i = 0; i < xf86_config->num_crtc; i++) {
 		xf86CrtcPtr crtc = xf86_config->crtc[i];

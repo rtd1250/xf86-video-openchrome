@@ -2441,8 +2441,8 @@ UMSInitAccel(ScreenPtr pScreen)
 	pVia->FBFreeEnd -= VIA_VQ_SIZE;
     }
 
-    if (pVia->hwcursor)
-        viaCursorSetFB(pScrn);
+    /*if (pVia->hwcursor)
+        viaCursorSetFB(pScrn);*/
 
     viaInitialize2DEngine(pScrn);
 

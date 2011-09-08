@@ -247,9 +247,6 @@ VIADGASetMode(ScrnInfoPtr pScrn, DGAModePtr pMode)
         pScrn->depth = pVia->DGAOldDepth;
 
         pScrn->SwitchMode(index, pScrn->currentMode, 0);
-        if (pVia->hwcursor)
-            viaShowCursor(pScrn);
-
         pVia->DGAactive = FALSE;
     }
     else {
@@ -259,9 +256,6 @@ VIADGASetMode(ScrnInfoPtr pScrn, DGAModePtr pMode)
         ErrorF(" want  bitsPerPixel %d,  want  depth %d\n",
                pMode->bitsPerPixel, pMode->depth);
 #endif
-
-        if (pVia->hwcursor)
-            viaHideCursor(pScrn);
 
         if (!pVia->DGAactive) {  /* save the old parameters */
             pVia->DGAOldDisplayWidth = pScrn->displayWidth;
