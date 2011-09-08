@@ -452,9 +452,6 @@ void VIAInitialize3DEngine(ScrnInfoPtr pScrn);
 Bool VIAMapMem(ScrnInfoPtr pScrn);
 void VIAUnmapMem(ScrnInfoPtr pScrn);
 
-/* In via_cursor.c. */
-void viaCursorSetFB(ScrnInfoPtr pScrn);
-
 /* In via_accel.c. */
 Bool UMSInitAccel(ScreenPtr);
 void viaInitialize2DEngine(ScrnInfoPtr);
@@ -467,9 +464,9 @@ void viaAccelSyncMarker(ScrnInfoPtr);
 void viaFinishInitAccel(ScreenPtr);
 void viaAccelWaitMarker(ScreenPtr, int);
 int viaAccelMarkSync(ScreenPtr);
-void viaAccelFillPixmap(ScrnInfoPtr, unsigned long, unsigned long, 
+void viaAccelFillPixmap(ScrnInfoPtr, unsigned long, unsigned long,
 			int, int, int, int, int, unsigned long);
-void viaAccelTextureBlit(ScrnInfoPtr, unsigned long, unsigned, unsigned, 
+void viaAccelTextureBlit(ScrnInfoPtr, unsigned long, unsigned, unsigned,
 			 unsigned, unsigned, unsigned, unsigned,
 			 unsigned long, unsigned, unsigned,
 			 unsigned, unsigned, int);

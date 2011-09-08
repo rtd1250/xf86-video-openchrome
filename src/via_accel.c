@@ -2431,18 +2431,13 @@ UMSInitAccel(ScreenPtr pScreen)
      *     Clip Rectangle: Color Window, 12bits. As Spec saied: 0 - 2048
      *                     Scissor is the same as color window.
      * */
-
-
     pVia->VQStart = 0;
-    if (((pVia->FBFreeEnd - pVia->FBFreeStart) >= VIA_VQ_SIZE)
-	&& pVia->VQEnable) {
-	pVia->VQStart = pVia->FBFreeEnd - VIA_VQ_SIZE;
-	pVia->VQEnd = pVia->VQStart + VIA_VQ_SIZE - 1;
-	pVia->FBFreeEnd -= VIA_VQ_SIZE;
+    if (((pVia->FBFreeEnd - pVia->FBFreeStart) >= VIA_VQ_SIZE) &&
+		  pVia->VQEnable) {
+		pVia->VQStart = pVia->FBFreeEnd - VIA_VQ_SIZE;
+		pVia->VQEnd = pVia->VQStart + VIA_VQ_SIZE - 1;
+		pVia->FBFreeEnd -= VIA_VQ_SIZE;
     }
-
-    /*if (pVia->hwcursor)
-        viaCursorSetFB(pScrn);*/
 
     viaInitialize2DEngine(pScrn);
 
