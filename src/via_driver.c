@@ -580,6 +580,7 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
 
     switch (pVia->Chipset) {
         case VIA_CLE266:
+            pVia->UseLegacyModeSwitch = TRUE;
             pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP0;
 			/* FIXME Mono HW Cursors not working */
 			pVia->hwcursor = FALSE;
