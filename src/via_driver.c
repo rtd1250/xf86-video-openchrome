@@ -1434,6 +1434,20 @@ LoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
 }
 
 static Bool
+VIACreateScreenResources(ScreenPtr pScreen)
+{
+	ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+	VIAPtr pVia = VIAPTR(pScrn);
+
+	pScreen->CreateScreenResources = pVia->CreateScreenResources;
+	if (!(*pScreen->CreateScreenResources)(pScreen))
+		return FALSE;
+	pScreen->CreateScreenResources = VIACreateScreenResources;
+
+	return TRUE;
+}
+
+static Bool
 VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
 {
 	ScrnInfoPtr pScrn = xf86Screens[scrnIndex];

@@ -254,6 +254,7 @@ typedef struct _VIA {
     Bool                vbeSR;
     int                 agpMem;
 
+	CreateScreenResourcesProcPtr CreateScreenResources;
     CloseScreenProcPtr  CloseScreen;
 #ifdef XSERVER_LIBPCIACCESS
     struct pci_device *PciInfo;
