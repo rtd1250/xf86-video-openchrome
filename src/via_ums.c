@@ -627,9 +627,10 @@ UMSEnterVT(int scrnIndex, int flags)
 		xf86CrtcPtr crtc = xf86_config->crtc[i];
 
 		crtc->funcs->save(crtc);
-
-		xf86CrtcSetMode(crtc, pScrn->currentMode, pVia->rotate, 0, 0);
 	}
+
+	if (!xf86SetDesiredModes(pScrn))
+		return FALSE;
 	xf86SaveScreen(pScrn->pScreen, SCREEN_SAVER_ON);
 
     /* A patch for APM suspend/resume, when HWCursor has garbage. */
