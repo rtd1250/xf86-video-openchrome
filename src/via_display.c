@@ -2095,9 +2095,6 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
         }
 
     } else {
-        /* Add own modes. */
-        ViaModesAttach(pScrn, pScrn->monitor);
-
         /*
          * Set up ClockRanges, which describe what clock ranges are
          * available, and what sort of modes they can be used for.

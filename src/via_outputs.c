@@ -272,6 +272,15 @@ via_tv_detect(xf86OutputPtr output)
 	return status;
 }
 
+static DisplayModePtr
+via_tv_get_modes(xf86OutputPtr output)
+{
+	ScrnInfoPtr pScrn = output->scrn;
+	VIAPtr pVia = VIAPTR(pScrn);
+
+	return pVia->pBIOSInfo->TVModes;
+}
+
 static void
 via_tv_destroy(xf86OutputPtr output)
 {
@@ -290,7 +299,7 @@ static const xf86OutputFuncsRec via_tv_funcs = {
 	.commit				= via_tv_commit,
 	.mode_set			= via_tv_mode_set,
 	.detect				= via_tv_detect,
-	.get_modes			= xf86OutputGetEDIDModes,
+	.get_modes			= via_tv_get_modes,
 	.destroy			= via_tv_destroy,
 };
 
@@ -1116,49 +1125,6 @@ ViaModesMonitorFixup(ScrnInfoPtr pScrn, MonPtr monitorp, DisplayModePtr mode)
 
 	monitorp->nHsync = 1;
 	monitorp->nVrefresh = 1;
-}
-
-/*
- * Stolen from xf86Config.c's addDefaultModes
- */
-static void
-ViaModesAttachHelper(ScrnInfoPtr pScrn, MonPtr monitorp, DisplayModePtr Modes)
-{
-    DisplayModePtr mode;
-    DisplayModePtr last = monitorp->Last;
-    int i;
-
-    for (i = 0; Modes[i].name; i++) {
-        mode = xnfalloc(sizeof(DisplayModeRec));
-        memcpy(mode, &Modes[i], sizeof(DisplayModeRec));
-        mode->name = xnfstrdup(Modes[i].name);
-        if (last) {
-            mode->prev = last;
-            last->next = mode;
-        } else {  /* this is the first mode */
-            monitorp->Modes = mode;
-            mode->prev = NULL;
-        }
-        last = mode;
-        ViaModesMonitorFixup(pScrn, monitorp, mode);
-    }
-    monitorp->Last = last;
-}
-
-/*
- *
- */
-void
-ViaModesAttach(ScrnInfoPtr pScrn, MonPtr monitorp)
-{
-    VIABIOSInfoPtr pBIOSInfo = VIAPTR(pScrn)->pBIOSInfo;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModesAttach\n"));
-
-	if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected)
-        ViaModesAttachHelper(pScrn, monitorp, ViaPanelModes);
-    if (pBIOSInfo->tv && pBIOSInfo->tv->status == XF86OutputStatusConnected)
-        ViaModesAttachHelper(pScrn, monitorp, pBIOSInfo->TVModes);
 }
 
 /*

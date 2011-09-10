@@ -219,7 +219,6 @@ int ViaVbePanelPower(vbeInfoPtr pVbe, int mode);
 void ViaOutputsDetect(ScrnInfoPtr pScrn);
 Bool ViaOutputsSelect(ScrnInfoPtr pScrn);
 void via_analog_init(ScrnInfoPtr pScrn);
-void ViaModesAttach(ScrnInfoPtr pScrn, MonPtr monitorp);
 CARD32 ViaGetMemoryBandwidth(ScrnInfoPtr pScrn);
 ModeStatus ViaValidMode(int scrnIndex, DisplayModePtr mode, Bool verbose, int flags);
 void ViaModePrimaryLegacy(xf86CrtcPtr crtc, DisplayModePtr mode);
@@ -254,6 +253,7 @@ void ViaPanelScale(ScrnInfoPtr pScrn, int resWidth, int resHeight, int panelWidt
 void ViaPanelScaleDisable(ScrnInfoPtr pScrn);
 void ViaPanelGetNativeModeFromScratchPad(ScrnInfoPtr pScrn);
 void ViaPanelGetNativeModeFromOption(ScrnInfoPtr pScrn, char* name);
+void ViaPanelGetNativeDisplayMode(ScrnInfoPtr pScrn);
 xf86OutputStatus ViaPanelPreInit(ScrnInfoPtr pScrn);
 void ViaPanelCenterMode(DisplayModePtr centerMode, DisplayModePtr panelMode, DisplayModePtr mode);
 Bool ViaPanelGetSizeFromDDCv1(ScrnInfoPtr pScrn, int* width, int* height);

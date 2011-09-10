@@ -344,7 +344,7 @@ ViaPanelScale(ScrnInfoPtr pScrn, int resWidth, int resHeight,
 /*
  * Generates a display mode for the native panel resolution,  using CVT.
  */
-static void
+void
 ViaPanelGetNativeDisplayMode(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);

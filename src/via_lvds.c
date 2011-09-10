@@ -391,7 +391,11 @@ via_lvds_detect(xf86OutputPtr output)
 static DisplayModePtr
 via_lvds_get_modes(xf86OutputPtr output)
 {
-	return NULL;
+	ScrnInfoPtr pScrn = output->scrn;
+	VIAPtr pVia = VIAPTR(pScrn);
+
+	ViaPanelGetNativeDisplayMode(pScrn);
+	return pVia->pBIOSInfo->Panel->NativeDisplayMode;
 }
 
 static void
