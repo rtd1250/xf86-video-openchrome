@@ -173,6 +173,10 @@ typedef struct _VIABIOSINFO {
     Bool        scaleY;
     int         resY;
 
+    /* CRTCs */
+    ViaCRTCInfoPtr FirstCRTC ;
+    ViaCRTCInfoPtr SecondCRTC ;
+
     /* Simultaneous */
     ViaSimultaneousInfoPtr Simultaneous ;
 

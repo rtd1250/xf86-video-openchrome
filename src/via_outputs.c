@@ -842,6 +842,17 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
 				pBIOSInfo->analog->status = XF86OutputStatusConnected;
 			}
 		}
+		if (pBIOSInfo->tv && pBIOSInfo->tv->status == XF86OutputStatusConnected)
+            pBIOSInfo->FirstCRTC->IsActive = TRUE;
+    }
+
+    if (!pVia->UseLegacyModeSwitch) {
+        if (pBIOSInfo->analog && pBIOSInfo->analog->status == XF86OutputStatusConnected)
+            pBIOSInfo->FirstCRTC->IsActive = TRUE;
+        if (pBIOSInfo->dp && pBIOSInfo->dp->status == XF86OutputStatusConnected)
+            pBIOSInfo->FirstCRTC->IsActive = TRUE;
+		if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected)
+            pVia->pBIOSInfo->SecondCRTC->IsActive = TRUE;
     }
 
 #ifdef HAVE_DEBUG
@@ -1202,16 +1213,14 @@ ViaValidMode(int scrnIndex, DisplayModePtr mode, Bool verbose, int flags)
         }
 
     } else {
-		xf86CrtcPtr crtc = xf86_config->crtc[0];
 
-		if (xf86CrtcInUse(crtc)) {
+        if (pBIOSInfo->FirstCRTC->IsActive) {
             ret = ViaFirstCRTCModeValid(pScrn, mode);
             if (ret != MODE_OK)
                 return ret;
         }
 
-		crtc = xf86_config->crtc[1];
-		if (xf86CrtcInUse(crtc)) {
+        if (pBIOSInfo->SecondCRTC->IsActive) {
             ret = ViaSecondCRTCModeValid(pScrn, mode);
             if (ret != MODE_OK)
                 return ret;
@@ -1994,12 +2003,12 @@ ViaModeSet(xf86CrtcPtr crtc, DisplayModePtr mode)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModeSet\n"));
 
-    if (iga->index) {
+    if (pBIOSInfo->SecondCRTC->IsActive) {
         ViaModeSecondCRTC(pScrn, mode);
         ViaSecondDisplayChannelEnable(pScrn);
     }
 
-    if (!iga->index)
+    if (pBIOSInfo->FirstCRTC->IsActive)
         ViaModeFirstCRTC(pScrn, mode);
 
     if (pBIOSInfo->Simultaneous->IsActive) {

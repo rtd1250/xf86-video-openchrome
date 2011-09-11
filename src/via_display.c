@@ -2032,6 +2032,7 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
 	}
 	iga1_rec->index = 0;
 	iga1->driver_private = iga1_rec;
+	pVia->pBIOSInfo->FirstCRTC = iga1_rec;
 
 	iga2_rec = (ViaCRTCInfoPtr) xnfcalloc(sizeof(ViaCRTCInfoPtr), 1);
 	if (!iga2_rec) {
@@ -2049,6 +2050,7 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
 	}
 	iga2_rec->index = 1;
 	iga2->driver_private = iga2_rec;
+	pVia->pBIOSInfo->SecondCRTC = iga2_rec;
 
 	switch (pVia->Chipset) {
 	case VIA_CLE266:
