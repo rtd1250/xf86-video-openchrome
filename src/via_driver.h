@@ -247,7 +247,7 @@ typedef struct _VIA {
 
     /* Here are all the Options */
     Bool                VQEnable;
-    Bool		hwcursor;
+    Bool				hwcursor;
     Bool                NoAccel;
     Bool                shadowFB;
     Rotation            rotate;
@@ -376,22 +376,10 @@ typedef struct _VIA {
 
     CARD8               ActiveDevice;	/* Option */
 
+    void                *cursorMap;
+    CARD32              cursorOffset;
     int                 CursorStart;
 	int					CursorSize;
-
-    CARD32              CursorRegControl;
-    CARD32              CursorRegBase;
-    CARD32              CursorRegPos;
-    CARD32              CursorRegOffset;
-    CARD32              CursorRegFifo;
-    CARD32              CursorRegTransKey;
-
-    CARD32              CursorControl0;
-    CARD32              CursorControl1;
-    CARD32              CursorFifo;
-    CARD32              CursorTransparentKey;
-    CARD32              CursorPrimHiInvtColor;
-    CARD32              CursorV327HiInvtColor;
 
     /* Video */
     int                 VideoEngine;
@@ -412,8 +400,6 @@ typedef struct _VIA {
 
     void                *displayMap;
     CARD32              displayOffset;
-    void                *cursorMap;
-    CARD32              cursorOffset;
 
     CARD8               I2CDevices;	/* Option */
 

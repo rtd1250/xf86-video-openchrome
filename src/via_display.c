@@ -32,8 +32,6 @@
 #include "via_vgahw.h"
 #include "via_id.h"
 
-#include "cursorstr.h"
-
 /*
  * Enables the second display channel.
  */
@@ -975,6 +973,7 @@ UMSHWCursorInit(ScreenPtr pScreen)
 		break;
 	}
 
+	/* Set cursor location in frame buffer. */
 	viaCursorSetFB(pScrn);
 	pVia->cursorMap = pVia->FBBase + pVia->CursorStart;
 	if (pVia->cursorMap == NULL)
@@ -983,50 +982,9 @@ UMSHWCursorInit(ScreenPtr pScreen)
 	pVia->cursorOffset = pScrn->fbOffset + pVia->CursorStart;
 	memset(pVia->cursorMap, 0x00, pVia->CursorSize);
 
-	switch (pVia->Chipset) {
-	case VIA_CX700:
-	/* case VIA_CN750: */
-	case VIA_P4M890:
-	case VIA_P4M900:
-	case VIA_VX800:
-	case VIA_VX855:
-	case VIA_VX900:
-		if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
-			pVia->CursorRegControl	= VIA_REG_HI_CONTROL0;
-			pVia->CursorRegBase		= VIA_REG_HI_BASE0;
-			pVia->CursorRegPos		= VIA_REG_HI_POS0;
-			pVia->CursorRegOffset	= VIA_REG_HI_OFFSET0;
-			pVia->CursorRegFifo		= VIA_REG_HI_FIFO0;
-			pVia->CursorRegTransKey	= VIA_REG_HI_TRANSKEY0;
-		}
-
-		if (pVia->pBIOSInfo->SecondCRTC->IsActive) {
-			pVia->CursorRegControl	= VIA_REG_HI_CONTROL1;
-			pVia->CursorRegBase		= VIA_REG_HI_BASE1;
-			pVia->CursorRegPos		= VIA_REG_HI_POS1;
-			pVia->CursorRegOffset	= VIA_REG_HI_OFFSET1;
-			pVia->CursorRegFifo		= VIA_REG_HI_FIFO1;
-			pVia->CursorRegTransKey	= VIA_REG_HI_TRANSKEY1;
-		}
-		break;
-
-	default:
-		pVia->CursorRegControl = VIA_REG_ALPHA_CONTROL;
-		pVia->CursorRegBase = VIA_REG_ALPHA_BASE;
-		pVia->CursorRegPos = VIA_REG_ALPHA_POS;
-		pVia->CursorRegOffset = VIA_REG_ALPHA_OFFSET;
-		pVia->CursorRegFifo = VIA_REG_ALPHA_FIFO;
-		pVia->CursorRegTransKey = VIA_REG_ALPHA_TRANSKEY;
-	}
-
-	/* Set cursor location in frame buffer. */
 	VIASETREG(VIA_REG_CURSOR_MODE, pVia->cursorOffset);
 
 	/* Init HI_X0 */
-	VIASETREG(pVia->CursorRegControl, 0);
-	VIASETREG(pVia->CursorRegBase, pVia->cursorOffset);
-	VIASETREG(pVia->CursorRegTransKey, 0);
-
 	switch (pVia->Chipset) {
 	case VIA_CX700:
 	/* case VIA_CN750: */
@@ -1036,14 +994,23 @@ UMSHWCursorInit(ScreenPtr pScreen)
 	case VIA_VX855:
 	case VIA_VX900:
 		if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
+			VIASETREG(VIA_REG_HI_CONTROL0, 0);
+			VIASETREG(VIA_REG_HI_BASE0, pVia->cursorOffset);
+			VIASETREG(VIA_REG_HI_TRANSKEY0, 0);
+
 			VIASETREG(VIA_REG_PRIM_HI_INVTCOLOR, 0x00FFFFFF);
 			VIASETREG(VIA_REG_V327_HI_INVTCOLOR, 0x00FFFFFF);
-			VIASETREG(pVia->CursorRegFifo, 0x0D000D0F);
+			VIASETREG(VIA_REG_HI_FIFO0, 0x0D000D0F);
 		}
+
 		if (pVia->pBIOSInfo->SecondCRTC->IsActive) {
+			VIASETREG(VIA_REG_HI_CONTROL1, 0);
+			VIASETREG(VIA_REG_HI_BASE1, pVia->cursorOffset);
+			VIASETREG(VIA_REG_HI_TRANSKEY1, 0);
+
 			VIASETREG(VIA_REG_HI_INVTCOLOR, 0X00FFFFFF);
 			VIASETREG(VIA_REG_ALPHA_PREFIFO, 0xE0000);
-			VIASETREG(pVia->CursorRegFifo, 0xE0F0000);
+			VIASETREG(VIA_REG_HI_FIFO1, 0xE0F0000);
 
 			/* Just in case */
 			VIASETREG(VIA_REG_HI_BASE0, pVia->cursorOffset);
@@ -1051,11 +1018,15 @@ UMSHWCursorInit(ScreenPtr pScreen)
 		break;
 
 	default:
+		VIASETREG(VIA_REG_ALPHA_CONTROL, 0);
+		VIASETREG(VIA_REG_ALPHA_BASE, pVia->cursorOffset);
+		VIASETREG(VIA_REG_ALPHA_TRANSKEY, 0);
+
 		VIASETREG(VIA_REG_HI_INVTCOLOR, 0X00FFFFFF);
 		VIASETREG(VIA_REG_ALPHA_PREFIFO, 0xE0000);
-		VIASETREG(pVia->CursorRegFifo, 0xE0F0000);
+		VIASETREG(VIA_REG_ALPHA_FIFO, 0xE0F0000);
+		break;
 	}
-
 	return xf86_cursors_init(pScreen, max_width, max_height, flags);
 }
 

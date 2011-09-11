@@ -140,9 +140,9 @@ typedef struct ViaPanelInfo {
 } ViaPanelInfoRec, *ViaPanelInfoPtr ;
 
 typedef struct ViaCRTCInfo {
-    Bool IsActive ;
-    /* TODO: add CRTC constraints here */
-} ViaCRTCInfoRec, *ViaCRTCInfoPtr ;
+	Bool	IsActive;
+	CARD8	index;
+} ViaCRTCInfoRec, *ViaCRTCInfoPtr;
 
 typedef struct ViaSimultaneousInfo {
     Bool IsActive ;
