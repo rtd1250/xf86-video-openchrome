@@ -35,6 +35,7 @@
 static void
 ViaSetTVClockSource(xf86CrtcPtr crtc)
 {
+	ViaCRTCInfoPtr iga = crtc->driver_private;
 	ScrnInfoPtr pScrn = crtc->scrn;
 	VIAPtr pVia = VIAPTR(pScrn);
 	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
@@ -49,7 +50,8 @@ ViaSetTVClockSource(xf86CrtcPtr crtc)
                 case VIA_CX700:
                 case VIA_VX800:
                 case VIA_VX855:
-                    if (pBIOSInfo->FirstCRTC->IsActive) {
+					/* IGA1 */
+                    if (!iga->index) {
                         if(pBIOSInfo->TVDIPort == VIA_DI_PORT_DVP1)
                             ViaCrtcMask(hwp, 0x6C, 0xB0, 0xF0);
                         else if(pBIOSInfo->TVDIPort == VIA_DI_PORT_DVP0)
@@ -63,7 +65,7 @@ ViaSetTVClockSource(xf86CrtcPtr crtc)
                     }
                     break;
                 default:
-                    if (pBIOSInfo->FirstCRTC->IsActive)
+                    if (!iga->index)
                         ViaCrtcMask(hwp, 0x6C, 0x21, 0x21);
                     else
                         ViaCrtcMask(hwp, 0x6C, 0xA1, 0xA1);
@@ -71,10 +73,10 @@ ViaSetTVClockSource(xf86CrtcPtr crtc)
             }
             break;
         default:
-            if (pBIOSInfo->FirstCRTC->IsActive)
-                ViaCrtcMask(hwp, 0x6C, 0x50, 0xF0);
-            else
-                ViaCrtcMask(hwp, 0x6C, 0x05, 0x0F);
+			if (!iga->index)
+				ViaCrtcMask(hwp, 0x6C, 0x50, 0xF0);
+			else
+				ViaCrtcMask(hwp, 0x6C, 0x05, 0x0F);
             break;
     }
 

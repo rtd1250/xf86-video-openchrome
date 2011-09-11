@@ -950,12 +950,14 @@ UMSHWCursorInit(ScreenPtr pScreen)
 {
 	ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
 	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
-	xf86CursorInfoPtr cursor_info;
-	int max_height, max_width;
 	int flags = (HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_1 |
 				 HARDWARE_CURSOR_AND_SOURCE_WITH_MASK |
 				 HARDWARE_CURSOR_TRUECOLOR_AT_8BPP);
-    VIAPtr pVia = VIAPTR(pScrn);
+	xf86CursorInfoPtr cursor_info;
+	int max_height, max_width, i;
+	VIAPtr pVia = VIAPTR(pScrn);
+	ViaCRTCInfoPtr iga;
+	xf86CrtcPtr crtc;
 
 	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAHWCursorInit\n"));
 
@@ -972,6 +974,9 @@ UMSHWCursorInit(ScreenPtr pScreen)
 		pVia->CursorSize = max_width * (max_height + 1) << 2;
 		break;
 	}
+
+	crtc = xf86_config->crtc[i];
+	iga = crtc->driver_private;
 
 	/* Set cursor location in frame buffer. */
 	viaCursorSetFB(pScrn);
@@ -993,7 +998,7 @@ UMSHWCursorInit(ScreenPtr pScreen)
 	case VIA_VX800:
 	case VIA_VX855:
 	case VIA_VX900:
-		if (pVia->pBIOSInfo->FirstCRTC->IsActive) {
+		if (!iga->index) {
 			VIASETREG(VIA_REG_HI_CONTROL0, 0);
 			VIASETREG(VIA_REG_HI_BASE0, pVia->cursorOffset);
 			VIASETREG(VIA_REG_HI_TRANSKEY0, 0);
@@ -1001,9 +1006,7 @@ UMSHWCursorInit(ScreenPtr pScreen)
 			VIASETREG(VIA_REG_PRIM_HI_INVTCOLOR, 0x00FFFFFF);
 			VIASETREG(VIA_REG_V327_HI_INVTCOLOR, 0x00FFFFFF);
 			VIASETREG(VIA_REG_HI_FIFO0, 0x0D000D0F);
-		}
-
-		if (pVia->pBIOSInfo->SecondCRTC->IsActive) {
+		} else {
 			VIASETREG(VIA_REG_HI_CONTROL1, 0);
 			VIASETREG(VIA_REG_HI_BASE1, pVia->cursorOffset);
 			VIASETREG(VIA_REG_HI_TRANSKEY1, 0);
@@ -1011,9 +1014,6 @@ UMSHWCursorInit(ScreenPtr pScreen)
 			VIASETREG(VIA_REG_HI_INVTCOLOR, 0X00FFFFFF);
 			VIASETREG(VIA_REG_ALPHA_PREFIFO, 0xE0000);
 			VIASETREG(VIA_REG_HI_FIFO1, 0xE0F0000);
-
-			/* Just in case */
-			VIASETREG(VIA_REG_HI_BASE0, pVia->cursorOffset);
 		}
 		break;
 
@@ -1477,6 +1477,13 @@ iga1_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
 	memcpy(dst, image, pVia->CursorSize);
 }
 
+static void
+iga_crtc_destroy(xf86CrtcPtr crtc)
+{
+	if (crtc->driver_private)
+		free(crtc->driver_private);
+}
+
 static const xf86CrtcFuncsRec iga1_crtc_funcs = {
 	.dpms				 = iga1_crtc_dpms,
 	.save				 = iga1_crtc_save,
@@ -1498,9 +1505,8 @@ static const xf86CrtcFuncsRec iga1_crtc_funcs = {
 	.load_cursor_image	 = iga1_crtc_load_cursor_image,
 	.load_cursor_argb	 = iga1_crtc_load_cursor_argb,
 	.set_origin			 = iga1_crtc_set_origin,
-	.destroy			 = NULL,
+	.destroy			 = iga_crtc_destroy,
 };
-
 
 static void
 iga2_crtc_dpms(xf86CrtcPtr crtc, int mode)
@@ -1909,6 +1915,7 @@ iga2_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
 {
 	ScrnInfoPtr pScrn = crtc->scrn;
 	VIAPtr pVia = VIAPTR(pScrn);
+
 	CARD32 *dst = (CARD32*)(pVia->cursorMap);
 
 	memcpy(dst, image, pVia->CursorSize);
@@ -1935,18 +1942,19 @@ static const xf86CrtcFuncsRec iga2_crtc_funcs = {
 	.load_cursor_image	 = iga2_crtc_load_cursor_image,
 	.load_cursor_argb	 = iga2_crtc_load_cursor_argb,
 	.set_origin			 = iga2_crtc_set_origin,
-	.destroy			 = NULL,
+	.destroy			 = iga_crtc_destroy,
 };
 
 Bool
 UMSCrtcInit(ScrnInfoPtr pScrn)
 {
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
+	ViaCRTCInfoPtr iga1_rec = NULL, iga2_rec = NULL;
+	vgaHWPtr hwp = VGAHWPTR(pScrn);
 	int max_pitch, max_height, i;
-    VIAPtr pVia = VIAPTR(pScrn);
-    ClockRangePtr clockRanges;
-    VIABIOSInfoPtr pBIOSInfo;
-    xf86CrtcPtr iga1, iga2;
+	VIAPtr pVia = VIAPTR(pScrn);
+	ClockRangePtr clockRanges;
+	VIABIOSInfoPtr pBIOSInfo;
+	xf86CrtcPtr iga1, iga2;
 
     /* Read memory bandwidth from registers. */
     pVia->MemClk = hwp->readCrtc(hwp, 0x3D) >> 4;
@@ -2010,17 +2018,37 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
     /* Might not belong here temporary fix for bug fix */
     xf86CrtcConfigInit(pScrn, &via_xf86crtc_config_funcs);
 
+	iga1_rec = (ViaCRTCInfoPtr) xnfcalloc(sizeof(ViaCRTCInfoPtr), 1);
+	if (!iga1_rec) {
+		xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "IGA1 Rec allocation failed.\n");
+		return FALSE;
+	}
+
 	iga1 = xf86CrtcCreate(pScrn, &iga1_crtc_funcs);
 	if (!iga1) {
 		xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "xf86CrtcCreate failed.\n");
+		free(iga1_rec);
+		return FALSE;
+	}
+	iga1_rec->index = 0;
+	iga1->driver_private = iga1_rec;
+
+	iga2_rec = (ViaCRTCInfoPtr) xnfcalloc(sizeof(ViaCRTCInfoPtr), 1);
+	if (!iga2_rec) {
+		xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "IGA1 Rec allocation failed.\n");
+		xf86CrtcDestroy(iga1);
 		return FALSE;
 	}
 
 	iga2 = xf86CrtcCreate(pScrn, &iga2_crtc_funcs);
 	if (!iga2) {
 		xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "xf86CrtcCreate failed.\n");
+		xf86CrtcDestroy(iga1);
+		free(iga2_rec);
 		return FALSE;
 	}
+	iga2_rec->index = 1;
+	iga2->driver_private = iga2_rec;
 
 	switch (pVia->Chipset) {
 	case VIA_CLE266:

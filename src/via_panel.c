@@ -92,16 +92,11 @@ VIAGetRec(ScrnInfoPtr pScrn)
                         (ViaPanelModePtr) xnfcalloc(sizeof(ViaPanelModeRec), 1);
                 pBIOSInfo->Panel->CenteredMode =
                         (DisplayModePtr) xnfcalloc(sizeof(DisplayModeRec), 1);
-                pBIOSInfo->FirstCRTC =
-                        (ViaCRTCInfoPtr) xnfcalloc(sizeof(ViaCRTCInfoRec), 1);
-                pBIOSInfo->SecondCRTC =
-                        (ViaCRTCInfoPtr) xnfcalloc(sizeof(ViaCRTCInfoRec), 1);
                 pBIOSInfo->Simultaneous =
                         (ViaSimultaneousInfoPtr)
                         xnfcalloc(sizeof(ViaSimultaneousInfoRec), 1);
                 ret = pBIOSInfo->Panel->NativeMode
                         && pBIOSInfo->Panel->CenteredMode
-                        && pBIOSInfo->FirstCRTC && pBIOSInfo->SecondCRTC
                         && pBIOSInfo->Simultaneous;
             }
             pVia->VideoRegs =
@@ -135,11 +130,6 @@ VIAFreeRec(ScrnInfoPtr pScrn)
                 free(pBIOSInfo->Panel->CenteredMode);
             free(pBIOSInfo->Panel);
         }
-
-        if (pBIOSInfo->FirstCRTC)
-            free(pBIOSInfo->FirstCRTC);
-        if (pBIOSInfo->SecondCRTC)
-            free(pBIOSInfo->SecondCRTC);
         if (pBIOSInfo->Simultaneous)
             free(pBIOSInfo->Simultaneous);
     }
