@@ -233,7 +233,6 @@ void ViaTVPrintRegs(ScrnInfoPtr pScrn);
 #endif
 void ViaModeSecondCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaModeFirstCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode);
-void ViaModeSet(xf86CrtcPtr crtc, DisplayModePtr mode);
 
 /* via_display.c */
 void ViaPreInitCRTCConfig(ScrnInfoPtr pScrn);

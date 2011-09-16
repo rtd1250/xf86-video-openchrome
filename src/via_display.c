@@ -1163,40 +1163,21 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 			return;
 
 		if (pVia->UseLegacyModeSwitch) {
-			if (!pVia->IsSecondary)
-				ViaModePrimaryLegacy(crtc, adjusted_mode);
-			else
-				ViaModeSecondaryLegacy(crtc, adjusted_mode);
+			ViaModePrimaryLegacy(crtc, adjusted_mode);
 		} else {
 			ViaCRTCInit(pScrn);
-			ViaModeSet(crtc, adjusted_mode);
+			ViaModeFirstCRTC(pScrn, mode);
+
+			if (pVia->pBIOSInfo->Simultaneous->IsActive)
+				ViaDisplayEnableSimultaneous(pScrn);
+			else
+				ViaDisplayDisableSimultaneous(pScrn);
 		}
 
 	} else {
 
 		if (!ViaVbeSetMode(pScrn, adjusted_mode))
 			return;
-
-		/*
-		 * FIXME: pVia->IsSecondary is not working here.  We should be able
-		 * to detect when the display is using the secondary head.
-		 * TODO: This should be enabled for other chipsets as well.
-		 */
-		if (pVia->pBIOSInfo->lvds && pVia->pBIOSInfo->lvds->status == XF86OutputStatusConnected) {
-			switch (pVia->Chipset) {
-			case VIA_P4M900:
-			case VIA_VX800:
-			case VIA_VX855:
-			case VIA_VX900:
-				/*
-				 * Since we are using virtual, we need to adjust
-				 * the offset to match the framebuffer alignment.
-				 */
-				if (pScrn->displayWidth != adjusted_mode->CrtcHDisplay)
-					ViaSecondCRTCHorizontalOffset(pScrn);
-				break;
-			}
-		}
 	}
 
 	/* Enable the graphics engine. */
@@ -1614,13 +1595,20 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 			return;
 
 		if (pVia->UseLegacyModeSwitch) {
-			if (!pVia->IsSecondary)
-				ViaModePrimaryLegacy(crtc, adjusted_mode);
-			else
 				ViaModeSecondaryLegacy(crtc, adjusted_mode);
 		} else {
 			ViaCRTCInit(pScrn);
-			ViaModeSet(crtc, adjusted_mode);
+			ViaModeSecondCRTC(pScrn, adjusted_mode);
+			ViaSecondDisplayChannelEnable(pScrn);
+
+			/* Yes we have to run this otherwise the 2nd CRTC
+			 * is not set properly. Will cleanup the code later */
+			ViaModeFirstCRTC(pScrn, adjusted_mode);
+
+			if (pVia->pBIOSInfo->Simultaneous->IsActive)
+				ViaDisplayEnableSimultaneous(pScrn);
+			else
+				ViaDisplayDisableSimultaneous(pScrn);
 		}
 	}
 }

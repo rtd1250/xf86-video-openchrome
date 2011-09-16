@@ -1992,28 +1992,3 @@ ViaModeSecondCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
     hwp->disablePalette(hwp);
 }
-
-void
-ViaModeSet(xf86CrtcPtr crtc, DisplayModePtr mode)
-{
-	ViaCRTCInfoPtr iga = crtc->driver_private;
-	ScrnInfoPtr pScrn = crtc->scrn;
-	VIAPtr pVia = VIAPTR(pScrn);
-	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModeSet\n"));
-
-    if (pBIOSInfo->SecondCRTC->IsActive) {
-        ViaModeSecondCRTC(pScrn, mode);
-        ViaSecondDisplayChannelEnable(pScrn);
-    }
-
-    if (pBIOSInfo->FirstCRTC->IsActive)
-        ViaModeFirstCRTC(pScrn, mode);
-
-    if (pBIOSInfo->Simultaneous->IsActive) {
-        ViaDisplayEnableSimultaneous(pScrn);
-    } else {
-        ViaDisplayDisableSimultaneous(pScrn);
-    }
-}
