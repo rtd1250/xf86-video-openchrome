@@ -220,7 +220,7 @@ void ViaOutputsDetect(ScrnInfoPtr pScrn);
 Bool ViaOutputsSelect(ScrnInfoPtr pScrn);
 void via_analog_init(ScrnInfoPtr pScrn);
 CARD32 ViaGetMemoryBandwidth(ScrnInfoPtr pScrn);
-ModeStatus ViaValidMode(int scrnIndex, DisplayModePtr mode, Bool verbose, int flags);
+CARD32 ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaModePrimaryLegacy(xf86CrtcPtr crtc, DisplayModePtr mode);
 void ViaModeSecondaryLegacy(xf86CrtcPtr crtc, DisplayModePtr mode);
 void ViaLCDPower(ScrnInfoPtr pScrn, Bool On);
@@ -243,8 +243,6 @@ void ViaSecondCRTCSetStartingAddress(ScrnInfoPtr pScrn, int x, int y);
 void ViaSecondCRTCHorizontalOffset(ScrnInfoPtr pScrn);
 void ViaSecondCRTCHorizontalQWCount(ScrnInfoPtr pScrn, int width);
 void ViaSecondCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
-ModeStatus ViaFirstCRTCModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode);
-ModeStatus ViaSecondCRTCModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaShadowCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
 
 /* via_panel.c */

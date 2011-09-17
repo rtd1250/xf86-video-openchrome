@@ -804,7 +804,7 @@ ViaSecondCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 /*
  * Checks for limitations imposed by the available VGA timing registers.
  */
-ModeStatus
+static ModeStatus
 ViaFirstCRTCModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaFirstCRTCModeValid\n"));
@@ -848,7 +848,7 @@ ViaFirstCRTCModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
     return MODE_OK;
 }
 
-ModeStatus
+static ModeStatus
 ViaSecondCRTCModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaSecondCRTCModeValid\n"));
@@ -1138,7 +1138,25 @@ static Bool
 iga1_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
                         DisplayModePtr adjusted_mode)
 {
-    return TRUE;
+	ScrnInfoPtr pScrn = crtc->scrn;
+	VIAPtr pVia = VIAPTR(pScrn);
+	CARD32 temp;
+
+	if (pVia->pVbe)
+		return TRUE;
+
+	if (ViaFirstCRTCModeValid(pScrn, mode) != MODE_OK)
+		return FALSE;
+
+	temp = mode->CrtcHDisplay * mode->CrtcVDisplay * mode->VRefresh
+			* (pScrn->bitsPerPixel >> 3);
+	if (pVia->pBIOSInfo->Bandwidth < temp) {
+		xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+					"Required bandwidth is not available. (%u > %u)\n",
+					(unsigned)temp, (unsigned)pVia->pBIOSInfo->Bandwidth);
+		return FALSE;
+	}
+	return TRUE;
 }
 
 static void
@@ -1568,7 +1586,25 @@ static Bool
 iga2_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
                         DisplayModePtr adjusted_mode)
 {
-    return TRUE;
+	ScrnInfoPtr pScrn = crtc->scrn;
+	VIAPtr pVia = VIAPTR(pScrn);
+	CARD32 temp;
+
+	if (pVia->pVbe)
+		return TRUE;
+
+	if (ViaSecondCRTCModeValid(pScrn, mode) != MODE_OK)
+		return FALSE;
+
+	temp = mode->CrtcHDisplay * mode->CrtcVDisplay * mode->VRefresh
+			* (pScrn->bitsPerPixel >> 3);
+	if (pVia->pBIOSInfo->Bandwidth < temp) {
+		xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+					"Required bandwidth is not available. (%u > %u)\n",
+					(unsigned)temp, (unsigned)pVia->pBIOSInfo->Bandwidth);
+		return FALSE;
+	}
+	return TRUE;
 }
 
 static void

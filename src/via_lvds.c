@@ -314,7 +314,23 @@ via_lvds_restore(xf86OutputPtr output)
 static int
 via_lvds_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
 {
-	return 0;
+	ScrnInfoPtr pScrn = output->scrn;
+	VIAPtr pVia = VIAPTR(pScrn);
+
+	if (pVia->UseLegacyModeSwitch) {
+		if (!ViaPanelGetIndex(pScrn, pMode))
+			return MODE_BAD;
+	} else {
+		ViaPanelModePtr nativeMode = pVia->pBIOSInfo->Panel->NativeMode;
+
+		if (nativeMode->Width < pMode->HDisplay ||
+			nativeMode->Height < pMode->VDisplay)
+			return MODE_PANEL;
+
+		if (!ViaModeDotClockTranslate(pScrn, pMode))
+			return MODE_NOCLOCK;
+	}
+	return MODE_OK;
 }
 
 static Bool

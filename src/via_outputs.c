@@ -158,19 +158,6 @@ ViaTVPrintRegs(ScrnInfoPtr pScrn)
 }
 #endif /* HAVE_DEBUG */
 
-/*
- *
- */
-static ModeStatus
-ViaTVModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
-{
-    VIABIOSInfoPtr pBIOSInfo = VIAPTR(pScrn)->pBIOSInfo;
-
-    if (pBIOSInfo->TVModeValid)
-        return pBIOSInfo->TVModeValid(pScrn, mode);
-    return MODE_OK;
-}
-
 static void
 via_tv_create_resources(xf86OutputPtr output)
 {
@@ -226,7 +213,26 @@ via_tv_restore(xf86OutputPtr output)
 static int
 via_tv_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
 {
-	return 0;
+	ScrnInfoPtr pScrn = output->scrn;
+	VIAPtr pVia = VIAPTR(pScrn);
+	int ret = MODE_OK;
+
+    if (pVia->UseLegacyModeSwitch) {
+		VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+
+		if (pBIOSInfo->TVModeValid) {
+			ret = pBIOSInfo->TVModeValid(pScrn, pMode);
+			if (ret != MODE_OK) {
+				xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+							"Mode \"%s\" is not supported by TV encoder.\n",
+							pMode->name);
+			}
+		}
+	} else {
+        if (!ViaModeDotClockTranslate(pScrn, pMode))
+            return MODE_NOCLOCK;
+    }
+	return ret;
 }
 
 static Bool
@@ -455,7 +461,11 @@ via_dp_restore(xf86OutputPtr output)
 static int
 via_dp_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
 {
-	return 0;
+	ScrnInfoPtr pScrn = output->scrn;
+
+	if (!ViaModeDotClockTranslate(pScrn, pMode))
+		return MODE_NOCLOCK;
+	return MODE_OK;
 }
 
 static Bool
@@ -593,7 +603,11 @@ via_analog_restore(xf86OutputPtr output)
 static int
 via_analog_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
 {
-	return 0;
+	ScrnInfoPtr pScrn = output->scrn;
+
+	if (!ViaModeDotClockTranslate(pScrn, pMode))
+			return MODE_NOCLOCK;
+	return MODE_OK;
 }
 
 static Bool
@@ -1161,95 +1175,6 @@ ViaGetMemoryBandwidth(ScrnInfoPtr pScrn)
     }
 }
 
-static CARD32
-ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode);
-
-/*
- *
- */
-ModeStatus
-ViaValidMode(int scrnIndex, DisplayModePtr mode, Bool verbose, int flags)
-{
-	ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
-	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
-	VIAPtr pVia = VIAPTR(pScrn);
-	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-	ModeStatus ret;
-	CARD32 temp;
-
-    if (pVia->pVbe)
-        return MODE_OK;
-
-    DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "ViaValidMode: Validating %s (Clock: %d)\n",
-                     mode->name, mode->Clock));
-
-    if (mode->Flags & V_INTERLACE)
-        return MODE_NO_INTERLACE;
-
-    if (pVia->UseLegacyModeSwitch) {
-
-        if (pVia->IsSecondary)
-            ret = ViaSecondCRTCModeValid(pScrn, mode);
-        else
-            ret = ViaFirstCRTCModeValid(pScrn, mode);
-
-        if (ret != MODE_OK)
-            return ret;
-
-		if (pBIOSInfo->tv && pBIOSInfo->tv->status == XF86OutputStatusConnected) {
-            ret = ViaTVModeValid(pScrn, mode);
-            if (ret != MODE_OK) {
-                xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                           "Mode \"%s\" is not supported by TV encoder.\n",
-                           mode->name);
-                return ret;
-            }
-        } else {
-			if ((pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected) &&
-				!ViaPanelGetIndex(pScrn, mode))
-				return MODE_BAD;
-            else if (!ViaModeDotClockTranslate(pScrn, mode))
-                return MODE_NOCLOCK;
-        }
-
-    } else {
-
-        if (pBIOSInfo->FirstCRTC->IsActive) {
-            ret = ViaFirstCRTCModeValid(pScrn, mode);
-            if (ret != MODE_OK)
-                return ret;
-        }
-
-        if (pBIOSInfo->SecondCRTC->IsActive) {
-            ret = ViaSecondCRTCModeValid(pScrn, mode);
-            if (ret != MODE_OK)
-                return ret;
-        }
-
-		if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected) {
-            ViaPanelModePtr nativeMode = pBIOSInfo->Panel->NativeMode;
-
-            if (nativeMode->Width < mode->HDisplay
-                || nativeMode->Height < mode->VDisplay)
-                return MODE_PANEL;
-        }
-
-        if (!ViaModeDotClockTranslate(pScrn, mode))
-            return MODE_NOCLOCK;
-    }
-
-    temp = mode->CrtcHDisplay * mode->CrtcVDisplay * mode->VRefresh
-            * (pScrn->bitsPerPixel >> 3);
-    if (pBIOSInfo->Bandwidth < temp) {
-        xf86DrvMsg(scrnIndex, X_INFO,
-                   "Required bandwidth is not available. (%u > %u)\n",
-                   (unsigned)temp, (unsigned)pBIOSInfo->Bandwidth);
-        return MODE_CLOCK_HIGH; /* since there is no MODE_BANDWIDTH */
-    }
-
-    return MODE_OK;
-}
-
 /*
  *
  * Some very common abstractions.
@@ -1663,7 +1588,7 @@ ViaComputeProDotClock(unsigned clock)
 /*
  *
  */
-static CARD32
+CARD32
 ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
     VIAPtr pVia = VIAPTR(pScrn);
