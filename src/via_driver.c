@@ -120,9 +120,6 @@ Bool UMSPreInit(ScrnInfoPtr pScrn);
 Bool UMSCrtcInit(ScrnInfoPtr pScrn);
 void UMSAccelSetup(ScrnInfoPtr pScrn);
 
-/* RandR */
-static Bool VIADriverFunc(ScrnInfoPtr pScrnInfo, xorgDriverFuncOp op, pointer data);
-
 #ifdef XSERVER_LIBPCIACCESS
 
 #define VIA_DEVICE_MATCH(d,i) \
@@ -1665,9 +1662,6 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Palette loaded\n"));
 
-    if (pVia->RandRRotation)
-        pScrn->DriverFunc = VIADriverFunc;
-
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Color maps etc. set up\n"));
 
 	UMSAccelSetup(pScrn);
@@ -1752,73 +1746,4 @@ VIAInternalScreenInit(int scrnIndex, ScreenPtr pScreen)
     }
 #endif
     return TRUE;
-}
-
-static Bool
-VIARandRGetInfo(ScrnInfoPtr pScrn, Rotation *rotations)
-{
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIARandRGetInfo\n");
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    /* to report what ability we can support. */
-    if(pVia->RandRRotation)
-       *rotations = RR_Rotate_0 | RR_Rotate_90 |RR_Rotate_180 | RR_Rotate_270;
-    else
-       *rotations = RR_Rotate_0;
-
-    return TRUE;
-}
-
-static Bool
-VIARandRSetConfig(ScrnInfoPtr pScrn, xorgRRConfig *config)
-{
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIARandRSetConfig\n");
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    switch(config->rotation) {
-        case RR_Rotate_0:
-            pVia->rotate = RR_Rotate_0;
-            break;
-
-        case RR_Rotate_90:
-            pVia->rotate = RR_Rotate_90;
-            break;
-
-        case RR_Rotate_180:
-            pVia->rotate = RR_Rotate_180;
-            break;
-
-        case RR_Rotate_270:
-            pVia->rotate = RR_Rotate_270;
-            break;
-
-        default:
-            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                    "Unexpected rotation in VIARandRSetConfig\n");
-            pVia->rotate = RR_Rotate_0;
-            return FALSE;
-    }
-    return TRUE;
-}
-
-/*
- * The driverFunc. xorgDriverFuncOp specifies the action driver should
- * perform. If requested option is not supported function should return
- * FALSE. pointer can be used to pass arguments to the function or
- * to return data to the caller.
- */
-static Bool
-VIADriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op, pointer data)
-{
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIADriverFunc Operation: %d\n", op));
-
-    switch(op) {
-        case RR_GET_INFO:
-            return VIARandRGetInfo(pScrn, (Rotation*)data);
-        case RR_SET_CONFIG:
-            return VIARandRSetConfig(pScrn, (xorgRRConfig*)data);
-        default:
-            return FALSE;
-    }
-    return FALSE;
 }
