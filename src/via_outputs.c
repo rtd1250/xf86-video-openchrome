@@ -690,13 +690,7 @@ via_analog_init(ScrnInfoPtr pScrn)
 
 	if (pVia->pI2CBus1) {
 		output = xf86OutputCreate(pScrn, &via_analog_funcs, "VGA");
-	/* If any of the unichromes support this, add CRT detection here */
-	} else if (!pBIOSInfo->lvds) {
-		/* Make sure that at least CRT is enabled. */
-		if (!pVia->Id || (pVia->Id->Outputs & VIA_DEVICE_CRT))
-			output = xf86OutputCreate(pScrn, &via_analog_funcs, "VGA");
-	}
-	if (output) {
+
 		output->possible_crtcs = 0x1;
 		output->possible_clones = 0;
 		output->interlaceAllowed = TRUE;
@@ -1546,7 +1540,7 @@ ViaModePrimaryLegacy(xf86CrtcPtr crtc, DisplayModePtr mode)
     } else if (pBIOSInfo->lvds)
         ViaLCDPower(pScrn, FALSE);
 
-		if ((pBIOSInfo->tv && pBIOSInfo->tv->status == XF86OutputStatusConnected)) {
+	if ((pBIOSInfo->tv && pBIOSInfo->tv->status == XF86OutputStatusConnected)) {
         /* Quick 'n dirty workaround for non-primary case until TVCrtcMode
          * is removed -- copy from clock handling code below */
         if ((pVia->Chipset == VIA_CLE266) && CLE266_REV_IS_AX(pVia->ChipRev))
