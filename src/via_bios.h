@@ -140,7 +140,6 @@ typedef struct ViaPanelInfo {
 } ViaPanelInfoRec, *ViaPanelInfoPtr ;
 
 typedef struct ViaCRTCInfo {
-	Bool	IsActive;
 	CARD8	index;
 } ViaCRTCInfoRec, *ViaCRTCInfoPtr;
 
@@ -172,10 +171,6 @@ typedef struct _VIABIOSINFO {
     /* LCD Simultaneous Expand Mode HWCursor Y Scale */
     Bool        scaleY;
     int         resY;
-
-    /* CRTCs */
-    ViaCRTCInfoPtr FirstCRTC ;
-    ViaCRTCInfoPtr SecondCRTC ;
 
     /* Simultaneous */
     ViaSimultaneousInfoPtr Simultaneous ;

@@ -809,18 +809,7 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
 	if (pBIOSInfo->dp)
 		pBIOSInfo->dp->status = XF86OutputStatusDisconnected;
 
-    if (!pVia->ActiveDevice) {
-        /* always enable the panel when present */
-        if (pBIOSInfo->lvds)
-            pBIOSInfo->lvds->status = XF86OutputStatusConnected;
-        else if (pBIOSInfo->TVOutput != TVOUTPUT_NONE)  /* cable is attached! */
-			pBIOSInfo->tv->status = XF86OutputStatusConnected;
-
-		/* CRT can be used with everything when present */
-		if (pBIOSInfo->analog)
-			pBIOSInfo->analog->status = XF86OutputStatusConnected;
-
-    } else {
+    if (pVia->ActiveDevice) {
         if (pVia->ActiveDevice & VIA_DEVICE_LCD) {
             if (pBIOSInfo->lvds)
                 pBIOSInfo->lvds->status = XF86OutputStatusConnected;
@@ -856,17 +845,6 @@ ViaOutputsSelect(ScrnInfoPtr pScrn)
 				pBIOSInfo->analog->status = XF86OutputStatusConnected;
 			}
 		}
-		if (pBIOSInfo->tv && pBIOSInfo->tv->status == XF86OutputStatusConnected)
-            pBIOSInfo->FirstCRTC->IsActive = TRUE;
-    }
-
-    if (!pVia->UseLegacyModeSwitch) {
-        if (pBIOSInfo->analog && pBIOSInfo->analog->status == XF86OutputStatusConnected)
-            pBIOSInfo->FirstCRTC->IsActive = TRUE;
-        if (pBIOSInfo->dp && pBIOSInfo->dp->status == XF86OutputStatusConnected)
-            pBIOSInfo->FirstCRTC->IsActive = TRUE;
-		if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected)
-            pVia->pBIOSInfo->SecondCRTC->IsActive = TRUE;
     }
 
 #ifdef HAVE_DEBUG

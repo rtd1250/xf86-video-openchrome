@@ -85,26 +85,22 @@ ViaVbeGetRefreshRateIndex(int maxRefresh)
 static int
 ViaVbeGetActiveDevices(ScrnInfoPtr pScrn)
 {
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-
-    int activeDevices;
-
-    activeDevices = 0;
-
-    /* Set Active Device and translate BIOS byte definition. */
-	if (pBIOSInfo->analog &&
-		pBIOSInfo->analog->status == XF86OutputStatusConnected)
-        activeDevices = 0x01;
-	if (pBIOSInfo->lvds &&
-		pBIOSInfo->lvds->status == XF86OutputStatusConnected)
-        activeDevices |= 0x02;
-    if (pBIOSInfo->tv &&
-		pBIOSInfo->tv->status == XF86OutputStatusConnected)
-        activeDevices |= 0x04;
+	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
+    int activeDevices = 0, i;
 
     /* TODO: Add others devices. */
+	for (i = 0; i < xf86_config->num_output; i++) {
+		xf86OutputPtr output = xf86_config->output[i];
 
+		if (output->status == XF86OutputStatusConnected) {
+			if (!strncmp(output->name, "VGA", 3))
+				activeDevices = 0x01;
+			else if (!strncmp(output->name, "LVDS", 4))
+				activeDevices |= 0x02;
+			else if (!strncmp(output->name, "TV", 2))
+				activeDevices |= 0x04;
+		}
+	}
     return activeDevices;
 }
 
