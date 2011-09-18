@@ -722,6 +722,8 @@ UMSLeaveVT(int scrnIndex, int flags)
 	}
 
 	VIAUnmapMem(pScrn);
+
+	pScrn->vtSema = FALSE;
 }
 
 /*

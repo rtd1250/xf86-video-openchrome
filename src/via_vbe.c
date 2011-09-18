@@ -255,8 +255,6 @@ ViaVbeSetMode(ScrnInfoPtr pScrn, DisplayModePtr pMode)
     if (data->data->XResolution != pScrn->displayWidth)
         VBESetLogicalScanline(pVia->pVbe, pScrn->displayWidth);
 
-    pScrn->vtSema = TRUE;
-
     return (TRUE);
 }
 

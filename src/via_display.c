@@ -1173,7 +1173,6 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 	VIAPtr pVia = VIAPTR(pScrn);
 
 	pVia->OverlaySupported = FALSE;
-	pScrn->vtSema = TRUE;
 
 	if (!pVia->pVbe) {
 
@@ -1621,7 +1620,6 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 	VIAPtr pVia = VIAPTR(pScrn);
 
 	pVia->OverlaySupported = FALSE;
-	pScrn->vtSema = TRUE;
 
 	if (pVia->pVbe) {
 		if (!ViaVbeSetMode(pScrn, adjusted_mode))

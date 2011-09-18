@@ -1505,11 +1505,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 		crtc->funcs->save(crtc);
 	}
 
-	pVia->FirstInit = TRUE;
-
 	xf86SetDesiredModes(pScrn);
-
-	pVia->FirstInit = FALSE;
 
 	/* Darken the screen for aesthetic reasons and set the viewport. */
 	xf86SaveScreen(pScreen, SCREEN_SAVER_ON);
@@ -1641,6 +1637,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 	else
 		VIADGAInit(pScreen);
 
+	pScrn->vtSema = TRUE;
 	pVia->CloseScreen = pScreen->CloseScreen;
 	pScreen->CloseScreen = VIACloseScreen;
 	pScreen->SaveScreen = xf86SaveScreen;

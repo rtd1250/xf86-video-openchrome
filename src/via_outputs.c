@@ -118,17 +118,18 @@ static void
 ViaTVSetMode(xf86CrtcPtr crtc, DisplayModePtr mode)
 {
 	ScrnInfoPtr pScrn = crtc->scrn;
-    VIABIOSInfoPtr pBIOSInfo = VIAPTR(pScrn)->pBIOSInfo;
+	VIAPtr pVia = VIAPTR(pScrn);
+	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
-    if (pBIOSInfo->TVModeI2C)
-        pBIOSInfo->TVModeI2C(pScrn, mode);
+	if (pBIOSInfo->TVModeI2C)
+		pBIOSInfo->TVModeI2C(pScrn, mode);
 
-    if (pBIOSInfo->TVModeCrtc)
-        pBIOSInfo->TVModeCrtc(crtc, mode);
+	if (pBIOSInfo->TVModeCrtc)
+		pBIOSInfo->TVModeCrtc(crtc, mode);
 
-    /* TV reset. */
-    xf86I2CWriteByte(pBIOSInfo->TVI2CDev, 0x1D, 0x00);
-    xf86I2CWriteByte(pBIOSInfo->TVI2CDev, 0x1D, 0x80);
+	/* TV reset. */
+	xf86I2CWriteByte(pBIOSInfo->TVI2CDev, 0x1D, 0x00);
+	xf86I2CWriteByte(pBIOSInfo->TVI2CDev, 0x1D, 0x80);
 }
 
 void
@@ -265,6 +266,8 @@ via_tv_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 	ViaDisplayEnableDVO(pScrn, pBIOSInfo->TVDIPort);
 
 	ViaTVSetMode(output->crtc, adjusted_mode);
+
+	pVia->FirstInit = FALSE;
 }
 
 static xf86OutputStatus
@@ -401,6 +404,7 @@ via_tv_init(ScrnInfoPtr pScrn)
     }
 
 	output = xf86OutputCreate(pScrn, &via_tv_funcs, "TV");
+	pVia->FirstInit = TRUE;
 	pBIOSInfo->tv = output;
     /* Save now */
     pBIOSInfo->TVSave(pScrn);
