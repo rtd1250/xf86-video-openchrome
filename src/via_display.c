@@ -1091,6 +1091,19 @@ iga1_crtc_restore(xf86CrtcPtr crtc)
 	else
 		VIARestore(pScrn);
 
+	/* A soft reset helps to avoid a 3D hang on VT switch. */
+	switch (pVia->Chipset) {
+	case VIA_K8M890:
+	case VIA_P4M900:
+	case VIA_VX800:
+	case VIA_VX855:
+	case VIA_VX900:
+		break;
+
+	default:
+		hwp->writeSeq(hwp, 0x1A, pVia->SavedReg.SR1A | 0x40);
+		break;
+	}
 	vgaHWLock(hwp);
 }
 

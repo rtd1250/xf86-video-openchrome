@@ -53,7 +53,6 @@
 #ifdef XF86DRI
 #include "dri.h"
 #endif
-#include "via_vgahw.h"
 #include "via_id.h"
 
 /* RandR support */
@@ -356,6 +355,117 @@ VIAAdjustFrame(int scrnIndex, int x, int y, int flags)
     }
 }
 
+static Bool
+VIAEnterVT(int scrnIndex, int flags)
+{
+	ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
+	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
+	VIAPtr pVia = VIAPTR(pScrn);
+	Bool ret;
+	int i;
+
+	DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIAEnterVT\n"));
+
+	for (i = 0; i < xf86_config->num_crtc; i++) {
+		xf86CrtcPtr crtc = xf86_config->crtc[i];
+
+		if (crtc->funcs->save)
+			crtc->funcs->save(crtc);
+	}
+
+	for (i = 0; i < xf86_config->num_output; i++) {
+		xf86OutputPtr output = xf86_config->output[i];
+
+		if (output->funcs->save)
+			output->funcs->save(output);
+	}
+
+	if (!xf86SetDesiredModes(pScrn))
+		return FALSE;
+
+	xf86SaveScreen(pScrn->pScreen, SCREEN_SAVER_ON);
+	xf86_reload_cursors(pScrn->pScreen);
+
+	/* Restore video status. */
+	if (!pVia->IsSecondary)
+		viaRestoreVideo(pScrn);
+
+#ifdef XF86DRI
+	if (pVia->directRenderingType) {
+		kickVblank(pScrn);
+		VIADRIRingBufferInit(pScrn);
+		viaDRIOffscreenRestore(pScrn);
+	}
+#endif
+	if (pVia->NoAccel) {
+		memset(pVia->FBBase, 0x00, pVia->Bpl * pScrn->virtualY);
+	} else {
+		viaAccelFillRect(pScrn, 0, 0, pScrn->displayWidth, pScrn->virtualY,
+						0x00000000);
+		viaAccelSyncMarker(pScrn);
+	}
+
+#ifdef XF86DRI
+	if (pVia->directRenderingType)
+		DRIUnlock(screenInfo.screens[scrnIndex]);
+#endif
+	return ret;
+}
+
+static void
+VIALeaveVT(int scrnIndex, int flags)
+{
+	ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
+	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
+	VIAPtr pVia = VIAPTR(pScrn);
+	int i;
+
+	DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIALeaveVT\n"));
+
+#ifdef XF86DRI
+	if (pVia->directRenderingType) {
+		volatile drm_via_sarea_t *saPriv = (drm_via_sarea_t *) DRIGetSAREAPrivate(pScrn->pScreen);
+
+		DRILock(screenInfo.screens[scrnIndex], 0);
+		saPriv->ctxOwner = ~0;
+	}
+#endif
+
+	viaAccelSync(pScrn);
+
+#ifdef XF86DRI
+	if (pVia->directRenderingType) {
+		VIADRIRingBufferCleanup(pScrn);
+		viaDRIOffscreenSave(pScrn);
+	}
+#endif
+
+	if (pVia->VQEnable)
+		viaDisableVQ(pScrn);
+
+	/* Save video status and turn off all video activities. */
+	if (!pVia->IsSecondary)
+		viaSaveVideo(pScrn);
+
+	for (i = 0; i < xf86_config->num_output; i++) {
+		xf86OutputPtr output = xf86_config->output[i];
+
+		if (output->funcs->restore)
+			output->funcs->restore(output);
+	}
+
+	for (i = 0; i < xf86_config->num_crtc; i++) {
+		xf86CrtcPtr crtc = xf86_config->crtc[i];
+
+		if (crtc->funcs->restore)
+			crtc->funcs->restore(crtc);
+	}
+
+	VIAUnmapMem(pScrn);
+
+	pScrn->vtSema = FALSE;
+}
+
 static void
 VIAIdentify(int flags)
 {
@@ -386,6 +496,8 @@ via_pci_probe(DriverPtr driver, int entity_num,
         scrn->ScreenInit = VIAScreenInit;
         scrn->SwitchMode = VIASwitchMode;
         scrn->AdjustFrame = VIAAdjustFrame;
+		scrn->EnterVT = VIAEnterVT;
+		scrn->LeaveVT = VIALeaveVT;
 		UMSInit(scrn);
 
         xf86Msg(X_NOTICE,
