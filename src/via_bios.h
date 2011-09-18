@@ -212,7 +212,6 @@ int ViaVbePanelPower(vbeInfoPtr pVbe, int mode);
 
 /* via_output.c */
 void ViaOutputsDetect(ScrnInfoPtr pScrn);
-Bool ViaOutputsSelect(ScrnInfoPtr pScrn);
 void via_analog_init(ScrnInfoPtr pScrn);
 CARD32 ViaGetMemoryBandwidth(ScrnInfoPtr pScrn);
 CARD32 ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode);

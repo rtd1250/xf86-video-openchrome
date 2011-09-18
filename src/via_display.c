@@ -2114,11 +2114,6 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
 	xf86CrtcSetSizeRange(pScrn, 320, 200, max_pitch, max_height);
 
 	ViaOutputsDetect(pScrn);
-	if (!ViaOutputsSelect(pScrn)) {
-		xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "No outputs possible.\n");
-		VIAFreeRec(pScrn);
-		return FALSE;
-	}
 
 	if (!xf86InitialConfiguration(pScrn, TRUE))
 		return FALSE;
