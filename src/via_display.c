@@ -2035,20 +2035,22 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
         return FALSE;
     }
 
-    pVia->pVbe = NULL;
-    if (pVia->useVBEModes) {
-        /* VBE doesn't properly initialise int10 itself. */
-        if (xf86LoadSubModule(pScrn, "int10")
-            && xf86LoadSubModule(pScrn, "vbe")) {
-            pVia->pVbe = VBEExtendedInit(NULL, pVia->EntityIndex,
-                                         SET_BIOS_SCRATCH |
-                                         RESTORE_BIOS_SCRATCH);
-        }
+	pVia->pVbe = NULL;
+	if (pVia->useVBEModes) {
+		/* VBE doesn't properly initialise int10 itself. */
+		if (xf86LoadSubModule(pScrn, "int10") &&
+			xf86LoadSubModule(pScrn, "vbe")) {
+			pVia->pVbe = VBEExtendedInit(NULL, pVia->EntityIndex,
+										SET_BIOS_SCRATCH |
+										RESTORE_BIOS_SCRATCH);
+		}
 
-        if (!pVia->pVbe)
-            xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "VBE initialisation failed."
-                       " Using builtin code to set modes.\n");
-    }
+		if (!pVia->pVbe)
+			xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "VBE initialisation failed."
+						" Using builtin code to set modes.\n");
+		else
+			ConfiguredMonitor = vbeDoEDID(pVia->pVbe, NULL);
+	}
 
     /* Might not belong here temporary fix for bug fix */
     xf86CrtcConfigInit(pScrn, &via_xf86crtc_config_funcs);

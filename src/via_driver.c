@@ -880,10 +880,8 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     xf86DrvMsg(pScrn->scrnIndex, from, "Chipset revision: %d\n", pVia->ChipRev);
 
     /* Now handle the Display */
-    if (flags & PROBE_DETECT) {
-        VIAProbeDDC(pScrn, pVia->EntityIndex);
+    if (flags & PROBE_DETECT)
         return TRUE;
-    }
 
     pScrn->monitor = pScrn->confScreen->monitor;
 

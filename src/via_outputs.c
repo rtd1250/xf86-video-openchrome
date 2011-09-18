@@ -323,8 +323,6 @@ via_tv_init(ScrnInfoPtr pScrn)
 	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 	xf86OutputPtr output = NULL;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "via_tv_init\n"));
-
     /* preset some pBIOSInfo TV related values -- move up */
     pBIOSInfo->TVEncoder = VIA_NONETV;
     pBIOSInfo->TVI2CDev = NULL;
@@ -722,9 +720,6 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
     pBIOSInfo->lvds = NULL;
     pBIOSInfo->dp = NULL;
 
-	/* LVDS */
-	via_lvds_init(pScrn);
-
     /* VGA */
 	via_analog_init(pScrn);
 
@@ -733,18 +728,11 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
      * disables the panel on P4M900
      * See via_tv_detect.
      */
-    if (pVia->Chipset == VIA_P4M900 && pBIOSInfo->lvds) {
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                   "Will not try to detect TV encoder.\n");
-    } else {
-        /* TV encoder */
-        if (!via_tv_init(pScrn) && (pVia->Id && (pVia->Id->Outputs & VIA_DEVICE_TV))) {
-            xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                       "This device is supposed to have a TV encoder, but "
-                       "we are unable to detect it (support missing?).\n");
-            pBIOSInfo->TVOutput = 0;
-        }
-    }
+	/* TV encoder */
+	via_tv_init(pScrn);
+
+	/* LVDS */
+	via_lvds_init(pScrn);
 
     switch (pVia->Chipset) {
         case VIA_CX700:
