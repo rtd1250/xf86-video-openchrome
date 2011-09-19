@@ -466,6 +466,25 @@ VIALeaveVT(int scrnIndex, int flags)
 	pScrn->vtSema = FALSE;
 }
 
+/*
+ * This only gets called when a screen is being deleted.  It does not
+ * get called routinely at the end of a server generation.
+ */
+static void
+VIAFreeScreen(int scrnIndex, int flags)
+{
+	ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
+	VIAPtr pVia = VIAPTR(pScrn);
+
+	DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIAFreeScreen\n"));
+
+	VIAFreeRec(xf86Screens[scrnIndex]);
+
+	if (!pVia->KMS && xf86LoaderCheckSymbol("vgaHWFreeHWRec"))
+		vgaHWFreeHWRec(xf86Screens[scrnIndex]);
+}
+
+
 static void
 VIAIdentify(int flags)
 {
@@ -498,7 +517,7 @@ via_pci_probe(DriverPtr driver, int entity_num,
         scrn->AdjustFrame = VIAAdjustFrame;
 		scrn->EnterVT = VIAEnterVT;
 		scrn->LeaveVT = VIALeaveVT;
-		UMSInit(scrn);
+		scrn->FreeScreen = VIAFreeScreen;
 
         xf86Msg(X_NOTICE,
                 "VIA Technologies does not support this driver in any way.\n");
@@ -558,14 +577,18 @@ VIAProbe(DriverPtr drv, int flags)
 
             if ((pScrn = xf86ConfigPciEntity(pScrn, 0, usedChips[i],
                                              VIAPciChipsets, 0, 0, 0, 0, 0))) {
-                pScrn->driverVersion = VIA_VERSION;
-                pScrn->driverName = DRIVER_NAME;
-                pScrn->name = "CHROME";
-                pScrn->Probe = VIAProbe;
-                pScrn->PreInit = VIAPreInit;
-                pScrn->ScreenInit = VIAScreenInit;
-                foundScreen = TRUE;
-				UMSFreeScreen(pScrn);
+				pScrn->driverVersion = VIA_VERSION;
+				pScrn->driverName = DRIVER_NAME;
+				pScrn->name = "CHROME";
+				pScrn->Probe = VIAProbe;
+				pScrn->PreInit = VIAPreInit;
+				pScrn->ScreenInit = VIAScreenInit;
+				pScrn->SwitchMode = VIASwitchMode;
+				pScrn->AdjustFrame = VIAAdjustFrame;
+				pScrn->EnterVT = VIAEnterVT;
+				pScrn->LeaveVT = VIALeaveVT;
+				pScrn->FreeScreen = VIAFreeScreen;
+				foundScreen = TRUE;
             }
 #if 0
             xf86ConfigActivePciEntity(pScrn,
@@ -758,7 +781,10 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 #ifndef USE_FB
     char *mod = NULL;
 #endif
-
+#ifdef XF86DRI
+	char *busId = NULL;
+	drmVersionPtr drmVer;
+#endif
 #ifdef XSERVER_LIBPCIACCESS
     struct pci_device *bridge = via_host_bridge();
     uint8_t rev = 0 ;
@@ -865,21 +891,78 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     } else {
         /* Read PCI bus 0, dev 0, function 0, index 0xF6 to get chip revision */
 #ifdef XSERVER_LIBPCIACCESS
-	pci_device_cfg_read_u8(bridge, &rev, 0xF6);
-	pVia->ChipRev = rev ;
+		pci_device_cfg_read_u8(bridge, &rev, 0xF6);
+		pVia->ChipRev = rev;
 #else
         pVia->ChipRev = pciReadByte(pciTag(0, 0, 0), 0xF6);
 #endif
     }
     free(pEnt);
+    xf86DrvMsg(pScrn->scrnIndex, from, "Chipset revision: %d\n", pVia->ChipRev);
+
+    pVia->directRenderingType = DRI_NONE;
+	pVia->KMS = FALSE;
+#ifdef XF86DRI
+	busId = DRICreatePCIBusID(pVia->PciInfo);
+	pVia->drmFD = drmOpen("via", busId);
+	if (pVia->drmFD != -1) {
+		if (!drmCheckModesettingSupported(busId)) {
+			xf86DrvMsg(-1, X_ERROR, "[drm] KMS supported\n");
+			pVia->KMS = TRUE;
+		} else
+			xf86DrvMsg(-1, X_ERROR, "[drm] KMS not enabled\n");
+
+		drmVer = drmGetVersion(pVia->drmFD);
+		if (drmVer) {
+			pVia->drmVerMajor = drmVer->version_major;
+			pVia->drmVerMinor = drmVer->version_minor;
+			pVia->drmVerPL = drmVer->version_patchlevel;
+			drmFreeVersion(drmVer);
+
+			xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+						"[drm] via interface version: %d.%d.%d\n",
+						pVia->drmVerMajor, pVia->drmVerMinor, pVia->drmVerPL);
+
+			/* DRI2 or DRI1 support */
+			if ((pVia->drmVerMajor < drmExpected.major) ||
+			    (pVia->drmVerMajor > drmCompat.major) ||
+			   ((pVia->drmVerMajor == drmExpected.major) &&
+				(pVia->drmVerMinor < drmExpected.minor))) {
+				xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+						"[drm] Kernel drm is not compatible with this driver.\n"
+						"[drm] Kernel drm version is %d.%d.%d, "
+						"and I can work with versions %d.%d.x - %d.x.x.\n"
+						"[drm] Update either this 2D driver or your kernel DRM. "
+						"Disabling DRI.\n", pVia->drmVerMajor, pVia->drmVerMinor,
+						pVia->drmVerPL, drmExpected.major, drmExpected.minor,
+						drmCompat.major);
+			} else {
+				/* DRI2 or DRI1 support */
+				if (pVia->drmVerMajor <= drmCompat.major) {
+					xf86DrvMsg(pScrn->scrnIndex, X_INFO, "DRI 1 api supported\n");
+					pVia->directRenderingType = DRI_DRI1;
+				} else {
+					xf86DrvMsg(pScrn->scrnIndex, X_INFO, "DRI 2 api not supported yet\n");
+				}
+				drmClose(pVia->drmFD);
+			}
+		} else {
+			xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Could not get DRM driver version\n");
+		}
+	} else {
+		xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+					"[drm] Failed to open DRM device for %s: %s\n",
+					busId, strerror(errno));
+	}
+	free(busId);
+#endif
 
     if (!UMSPreInit(pScrn)) {
         VIAFreeRec(pScrn);
         return FALSE;
     }
-    xf86DrvMsg(pScrn->scrnIndex, from, "Chipset revision: %d\n", pVia->ChipRev);
 
-    /* Now handle the Display */
+	/* Now handle the Display */
     if (flags & PROBE_DETECT)
         return TRUE;
 
@@ -1590,10 +1673,6 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
 	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
-#ifdef XF86DRI
-    drmVersionPtr drmVer;
-    char *busId;
-#endif
 	int i;
 
     pScrn->pScreen = pScreen;
@@ -1641,65 +1720,15 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Visuals set up\n"));
 
-    pVia->directRenderingType = DRI_NONE;
 #ifdef XF86DRI
-    if (xf86LoaderCheckSymbol("DRICreatePCIBusID")) {
-        busId = DRICreatePCIBusID(pVia->PciInfo);
-    } else {
-        busId = malloc(64);
-        sprintf(busId, "PCI:%d:%d:%d",
-#ifdef XSERVER_LIBPCIACCESS
-                ((pVia->PciInfo->domain << 8) | pVia->PciInfo->bus),
-                pVia->PciInfo->dev, pVia->PciInfo->func
-#else
-                ((pciConfigPtr)pVia->PciInfo->thisCard)->busnum,
-                ((pciConfigPtr)pVia->PciInfo->thisCard)->devnum,
-                ((pciConfigPtr)pVia->PciInfo->thisCard)->funcnum
-#endif
-               );
-    }
-
-	pVia->drmFD = drmOpen("via", busId);
 	if (pVia->drmFD != -1) {
-		if (NULL == (drmVer = drmGetVersion(pVia->drmFD))) {
-			xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Could not get DRM"
-						" driver version\n");
-		} else {
-			pVia->drmVerMajor = drmVer->version_major;
-			pVia->drmVerMinor = drmVer->version_minor;
-			pVia->drmVerPL = drmVer->version_patchlevel;
-			drmFreeVersion(drmVer);
-
-			if ((pVia->drmVerMajor < drmExpected.major) ||
-				(pVia->drmVerMajor > drmCompat.major) ||
-			   ((pVia->drmVerMajor == drmExpected.major) &&
-				(pVia->drmVerMinor < drmExpected.minor))) {
-
-				xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-						"[dri] Kernel drm is not compatible with this driver.\n"
-						"[dri] Kernel drm version is %d.%d.%d, "
-						"and I can work with versions %d.%d.x - %d.x.x.\n"
-						"[dri] Update either this 2D driver or your kernel DRM. "
-						"Disabling DRI.\n", pVia->drmVerMajor, pVia->drmVerMinor,
-						pVia->drmVerPL, drmExpected.major, drmExpected.minor,
-						drmCompat.major);
-			} else {
-				/* DRI2 or DRI1 support */
-				if (pVia->drmVerMajor <= drmCompat.major) {
-					drmClose(pVia->drmFD);
-					if (VIADRI1ScreenInit(pScreen, busId)) {
-						DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "DRI 1 api supported\n"));
-						pVia->directRenderingType = DRI_DRI1;
-					}
-				} else {
-					DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "DRI 2 api not supported yet\n"));
-				}
-			}
+		if (pVia->directRenderingType == DRI_DRI1) {
+			/* DRI2 or DRI1 support */
+			if (VIADRI1ScreenInit(pScreen, DRICreatePCIBusID(pVia->PciInfo)))
+				DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "DRI1 ScreenInit\n"));
+			else
+				pVia->directRenderingType = DRI_NONE;
 		}
-	} else {
-		xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-					"[drm] Failed to open DRM device for %s: %s\n",
-					busId, strerror(errno));
 	}
 #endif
 

@@ -222,6 +222,7 @@ typedef struct _VIA {
     VIARegRec           SavedReg;
     int                 Bpp, Bpl;
 
+	Bool				KMS;
     Bool                FirstInit;
     unsigned long       videoRambytes;
     int                 videoRamKbytes;

@@ -609,24 +609,3 @@ UMSPreInit(ScrnInfoPtr pScrn)
         return FALSE;
     return TRUE;
 }
-
-/*
- * This only gets called when a screen is being deleted.  It does not
- * get called routinely at the end of a server generation.
- */
-static void
-UMSFreeScreen(int scrnIndex, int flags)
-{
-    DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "UMSFreeScreen\n"));
-
-    VIAFreeRec(xf86Screens[scrnIndex]);
-
-    if (xf86LoaderCheckSymbol("vgaHWFreeHWRec"))
-        vgaHWFreeHWRec(xf86Screens[scrnIndex]);
-}
-
-void
-UMSInit(ScrnInfoPtr scrn)
-{
-	scrn->FreeScreen = UMSFreeScreen;
-}

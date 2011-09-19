@@ -1110,41 +1110,12 @@ iga1_crtc_restore(xf86CrtcPtr crtc)
 static Bool
 iga1_crtc_lock(xf86CrtcPtr crtc)
 {
-    ScrnInfoPtr pScrn = crtc->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
-    Bool ret = TRUE;
-
-#ifdef XF86DRI
-    if (pVia->directRenderingType)
-        DRILock(screenInfo.screens[pScrn->scrnIndex], 0);
-#endif
-
-    viaAccelSync(pScrn);
-
-#ifdef XF86DRI
-    if (pVia->directRenderingType)
-        VIADRIRingBufferCleanup(pScrn);
-#endif
-
-    if (pVia->VQEnable)
-        viaDisableVQ(pScrn);
-
-    return ret;
+    return FALSE;
 }
 
 static void
 iga1_crtc_unlock(xf86CrtcPtr crtc)
 {
-#ifdef XF86DRI
-    ScrnInfoPtr pScrn = crtc->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    if (pVia->directRenderingType) {
-        kickVblank(pScrn);
-        VIADRIRingBufferInit(pScrn);
-        DRIUnlock(screenInfo.screens[pScrn->scrnIndex]);
-    }
-#endif
 }
 
 static Bool

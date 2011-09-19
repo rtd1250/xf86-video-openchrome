@@ -550,7 +550,6 @@ VIADRI1ScreenInit(ScreenPtr pScreen, char *busId)
     VIAPtr pVia = VIAPTR(pScrn);
     DRIInfoPtr pDRIInfo;
     VIADRIPtr pVIADRI;
-    drmVersionPtr drmVer;
 
     /* If symbols or version check fails, we still want this to be NULL. */
     pVia->pDRIInfo = NULL;
@@ -664,33 +663,6 @@ VIADRI1ScreenInit(ScreenPtr pScreen, char *busId)
         pVia->drmFD = -1;
         return FALSE;
     }
-
-    if (NULL == (drmVer = drmGetVersion(pVia->drmFD))) {
-        VIADRICloseScreen(pScreen);
-        return FALSE;
-    }
-    pVia->drmVerMajor = drmVer->version_major;
-    pVia->drmVerMinor = drmVer->version_minor;
-    pVia->drmVerPL = drmVer->version_patchlevel;
-
-    if ((drmVer->version_major < drmExpected.major) ||
-        (drmVer->version_major > drmCompat.major) ||
-        ((drmVer->version_major == drmExpected.major) &&
-         (drmVer->version_minor < drmExpected.minor))) {
-        xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                   "[dri] Kernel drm is not compatible with this driver.\n"
-                   "[dri] Kernel drm version is %d.%d.%d, "
-                   "and I can work with versions %d.%d.x - %d.x.x.\n"
-                   "[dri] Update either this 2D driver or your kernel DRM. "
-                   "Disabling DRI.\n",
-                   drmVer->version_major, drmVer->version_minor,
-                   drmVer->version_patchlevel,
-                   drmExpected.major, drmExpected.minor, drmCompat.major);
-        drmFreeVersion(drmVer);
-        VIADRICloseScreen(pScreen);
-        return FALSE;
-    }
-    drmFreeVersion(drmVer);
 
     if (!(VIAInitVisualConfigs(pScreen))) {
         VIADRICloseScreen(pScreen);
