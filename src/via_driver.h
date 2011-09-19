@@ -326,15 +326,6 @@ typedef struct _VIA {
     VIABIOSInfoPtr      pBIOSInfo;
     struct ViaCardIdStruct* Id;
 
-    /* Support for DGA */
-    int                 numDGAModes;
-    DGAModePtr          DGAModes;
-    Bool                DGAactive;
-    int                 DGAViewportStatus;
-    int			DGAOldDisplayWidth;
-    int			DGAOldBitsPerPixel;
-    int			DGAOldDepth;
-
     /* I2C & DDC */
     I2CBusPtr           pI2CBus1;
     I2CBusPtr           pI2CBus2;
@@ -463,9 +454,6 @@ void viaAccelTextureBlit(ScrnInfoPtr, unsigned long, unsigned, unsigned,
 
 /* In via_shadow.c */
 void ViaShadowFBInit(ScrnInfoPtr pScrn, ScreenPtr pScreen);
-
-/* In via_dga.c */
-Bool VIADGAInit(ScreenPtr);
 
 /*In via_video.c*/
 void viaInitVideo(ScreenPtr pScreen);

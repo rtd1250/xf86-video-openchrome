@@ -1648,10 +1648,6 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
 		free(pVia->ShadowPtr);
 		pVia->ShadowPtr = NULL;
 	}
-	if (pVia->DGAModes) {
-		free(pVia->DGAModes);
-		pVia->DGAModes = NULL;
-	}
 
 	/* Is the display currently visible? */
 	if (pScrn->vtSema)
@@ -1773,8 +1769,6 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 
 	if (pVia->shadowFB)
 		ViaShadowFBInit(pScrn, pScreen);
-	else
-		VIADGAInit(pScreen);
 
 	pScrn->vtSema = TRUE;
 	pVia->CloseScreen = pScreen->CloseScreen;
