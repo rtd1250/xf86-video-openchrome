@@ -49,15 +49,7 @@
 #include "mipointer.h"
 #include "micmap.h"
 #include "fourcc.h"
-
-#define USE_FB
-#ifdef USE_FB
 #include "fb.h"
-#else
-#include "cfb.h"
-#include "cfb16.h"
-#include "cfb32.h"
-#endif
 
 #include "xf86Crtc.h"
 #include "xf86RandR12.h"
@@ -279,8 +271,6 @@ typedef struct _VIA {
 
     /* Support for shadowFB and rotation */
     unsigned char*      ShadowPtr;
-    int                 ShadowPitch;
-    void                (*PointerMoved)(int index, int x, int y);
 
     /* Support for XAA acceleration */
     XAAInfoRecPtr       AccelInfoRec;
@@ -449,11 +439,6 @@ void viaAccelTextureBlit(ScrnInfoPtr, unsigned long, unsigned, unsigned,
 			 unsigned, unsigned, unsigned, unsigned,
 			 unsigned long, unsigned, unsigned,
 			 unsigned, unsigned, int);
-
-
-
-/* In via_shadow.c */
-void ViaShadowFBInit(ScrnInfoPtr pScrn, ScreenPtr pScreen);
 
 /*In via_video.c*/
 void viaInitVideo(ScreenPtr pScreen);

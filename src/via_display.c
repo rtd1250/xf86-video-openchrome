@@ -268,11 +268,38 @@ ViaCRTCSetAttributeRegisters(ScrnInfoPtr pScrn)
 }
 
 static Bool
-via_xf86crtc_resize (ScrnInfoPtr scrn, int width, int height)
+via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
 {
+	ScreenPtr screen = screenInfo.screens[scrn->scrnIndex];
+	PixmapPtr ppix = screen->GetScreenPixmap(screen);
+	int old_width, old_height, old_pitch, pitch;
+	VIAPtr pVia = VIAPTR(scrn);
+	void *shadow = NULL;
+
+	if (scrn->virtualX == width && scrn->virtualY == height)
+		return TRUE;
+
+	old_width = scrn->virtualX;
+	old_height = scrn->virtualY;
     scrn->virtualX = width;
     scrn->virtualY = height;
-    return TRUE;
+
+	if (pVia->shadowFB) {
+		pitch = BitmapBytePad(scrn->bitsPerPixel * width);
+		shadow = malloc(height * pitch);
+		if (!shadow)
+			goto fail;
+		free(pVia->ShadowPtr);
+		pVia->ShadowPtr = shadow;
+		screen->ModifyPixmapHeader(ppix, width, height, -1, -1, pitch,
+									pVia->ShadowPtr);
+	}
+	return xf86SetDesiredModes(scrn);
+
+fail:
+	scrn->virtualY = old_height;
+	scrn->virtualX = old_width;
+	return FALSE;
 }
 
 static const
@@ -327,7 +354,6 @@ VIALoadRgbLut(ScrnInfoPtr pScrn, int start, int numColors, LOCO *colors)
 void
 ViaGammaDisable(ScrnInfoPtr pScrn)
 {
-
     VIAPtr pVia = VIAPTR(pScrn);
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 

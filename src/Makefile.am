@@ -58,7 +58,6 @@ openchrome_drv_la_SOURCES = \
          via_panel.c \
          via_priv.h \
          via_regs.h \
-         via_shadow.c \
          via_swov.c \
          via_swov.h \
          via_ums.c \

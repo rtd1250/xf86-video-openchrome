@@ -29,7 +29,7 @@
 #include "config.h"
 #endif
 
-#include "shadowfb.h"
+#include "shadow.h"
 
 #include "globals.h"
 #ifdef HAVE_XEXTPROTO_71
@@ -112,7 +112,6 @@ static Bool VIASetupDefaultOptions(ScrnInfoPtr pScrn);
 static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags);
 static Bool VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc,
                           char **argv);
-static int VIAInternalScreenInit(int scrnIndex, ScreenPtr pScreen);
 static const OptionInfoRec *VIAAvailableOptions(int chipid, int busid);
 
 Bool UMSPreInit(ScrnInfoPtr pScrn);
@@ -777,10 +776,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     VIAPtr pVia;
     VIABIOSInfoPtr pBIOSInfo;
     MessageType from = X_DEFAULT;
-    char *s = NULL;
-#ifndef USE_FB
-    char *mod = NULL;
-#endif
+    char *mod = NULL, *s = NULL;
 #ifdef XF86DRI
 	char *busId = NULL;
 	drmVersionPtr drmVer;
@@ -1509,31 +1505,10 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     /* Set display resolution */
     xf86SetDpi(pScrn, 0, 0);
 
-#ifdef USE_FB
     if (xf86LoadSubModule(pScrn, "fb") == NULL) {
         VIAFreeRec(pScrn);
         return FALSE;
     }
-#else
-    /* Load bpp-specific modules. */
-    switch (pScrn->bitsPerPixel) {
-        case 8:
-            mod = "cfb";
-            break;
-        case 16:
-            mod = "cfb16";
-            break;
-        case 32:
-            mod = "cfb32";
-            break;
-    }
-
-    if (mod && xf86LoadSubModule(pScrn, mod) == NULL) {
-        VIAFreeRec(pScrn);
-        return FALSE;
-    }
-
-#endif
 
     if (!pVia->NoAccel) {
         if (pVia->useEXA) {
@@ -1557,7 +1532,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     }
 
     if (pVia->shadowFB) {
-        if (!xf86LoadSubModule(pScrn, "shadowfb")) {
+        if (!xf86LoadSubModule(pScrn, "shadow")) {
             VIAFreeRec(pScrn);
             return FALSE;
         }
@@ -1621,6 +1596,19 @@ LoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
 	}
 }
 
+static void *
+viaShadowWindow(ScreenPtr screen, CARD32 row, CARD32 offset, int mode,
+				CARD32 *size, void *closure)
+{
+	ScrnInfoPtr pScrn = xf86Screens[screen->myNum];
+	VIAPtr pVia = VIAPTR(pScrn);
+	int stride;
+
+	stride = (pScrn->displayWidth * pScrn->bitsPerPixel) / 8;
+	*size = stride;
+	return ((uint8_t *)pVia->FBBase + row * stride + offset);
+}
+
 static Bool
 VIACreateScreenResources(ScreenPtr pScreen)
 {
@@ -1632,6 +1620,13 @@ VIACreateScreenResources(ScreenPtr pScreen)
 		return FALSE;
 	pScreen->CreateScreenResources = VIACreateScreenResources;
 
+	if (pVia->shadowFB) {
+		PixmapPtr pixmap = pScreen->GetScreenPixmap(pScreen);
+
+		if (!shadowAdd(pScreen, pixmap, shadowUpdatePackedWeak(),
+						viaShadowWindow, 0, NULL))
+			return FALSE;
+	}
 	return TRUE;
 }
 
@@ -1666,9 +1661,10 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
 static Bool
 VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+	ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
 	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
+	VIAPtr pVia = VIAPTR(pScrn);
+	void *FBStart = NULL;
 	int i;
 
     pScrn->pScreen = pScreen;
@@ -1728,8 +1724,21 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 	}
 #endif
 
-    if (!VIAInternalScreenInit(scrnIndex, pScreen))
-        return FALSE;
+	if (pVia->shadowFB) {
+		int pitch = BitmapBytePad(pScrn->bitsPerPixel * pScrn->displayWidth);
+		pVia->ShadowPtr = malloc(pitch * pScrn->virtualY);
+		FBStart = pVia->ShadowPtr;
+	}
+
+	if (!FBStart) {
+		pVia->shadowFB = FALSE;
+		FBStart = pVia->FBBase;
+	}
+
+	if (!fbScreenInit(pScreen, FBStart, pScrn->virtualX, pScrn->virtualY,
+						pScrn->xDpi, pScrn->yDpi, pScrn->displayWidth,
+						pScrn->bitsPerPixel))
+		return FALSE;
 
     xf86SetBlackWhitePixels(pScreen);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- B & W\n"));
@@ -1749,10 +1758,8 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
             }
         }
     }
-#ifdef USE_FB
     /* Must be after RGB ordering is fixed. */
     fbPictureInit(pScreen, 0, 0);
-#endif
 
     if (!pVia->NoAccel && !UMSInitAccel(pScreen))
 	    return FALSE;
@@ -1766,9 +1773,6 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 
     miDCInitialize(pScreen, xf86GetPointerScreenFuncs());
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- SW cursor set up\n"));
-
-	if (pVia->shadowFB)
-		ViaShadowFBInit(pScrn, pScreen);
 
 	pScrn->vtSema = TRUE;
 	pVia->CloseScreen = pScreen->CloseScreen;
@@ -1824,56 +1828,19 @@ VIAInternalScreenInit(int scrnIndex, ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
     VIAPtr pVia = VIAPTR(pScrn);
-    int width, height, displayWidth, shadowHeight;
-    unsigned char *FBStart;
+	void *FBStart;
 
     xf86DrvMsg(scrnIndex, X_INFO, "VIAInternalScreenInit\n");
 
-    displayWidth = pScrn->displayWidth;
-
-    if ((pVia->rotate==RR_Rotate_90) || (pVia->rotate==RR_Rotate_270)) {
-        height = pScrn->virtualX;
-        width = pScrn->virtualY;
-    } else {
-        width = pScrn->virtualX;
-        height = pScrn->virtualY;
-    }
-
-    if (pVia->RandRRotation)
-        shadowHeight = max(width, height);
-    else
-        shadowHeight = height;
-
     if (pVia->shadowFB) {
-        pVia->ShadowPitch = BitmapBytePad(pScrn->bitsPerPixel * width);
-        pVia->ShadowPtr = malloc(pVia->ShadowPitch * shadowHeight);
-        displayWidth = pVia->ShadowPitch / (pScrn->bitsPerPixel >> 3);
+        int pitch = BitmapBytePad(pScrn->bitsPerPixel * pScrn->displayWidth);
+        pVia->ShadowPtr = malloc(pitch * pScrn->virtualY);
         FBStart = pVia->ShadowPtr;
     } else {
         pVia->ShadowPtr = NULL;
         FBStart = pVia->FBBase;
     }
-
-#ifdef USE_FB
-    return fbScreenInit(pScreen, FBStart, width, height,
-                        pScrn->xDpi, pScrn->yDpi, displayWidth,
+    return fbScreenInit(pScreen, FBStart, pScrn->virtualX, pScrn->virtualY,
+                        pScrn->xDpi, pScrn->yDpi, pScrn->displayWidth,
                         pScrn->bitsPerPixel);
-#else
-    switch (pScrn->bitsPerPixel) {
-        case 8:
-            return cfbScreenInit(pScreen, FBStart, width, height, pScrn->xDpi,
-                                 pScrn->yDpi, displayWidth);
-        case 16:
-            return cfb16ScreenInit(pScreen, FBStart, width, height, pScrn->xDpi,
-                                   pScrn->yDpi, displayWidth);
-        case 32:
-            return cfb32ScreenInit(pScreen, FBStart, width, height, pScrn->xDpi,
-                                   pScrn->yDpi, displayWidth);
-        default:
-            xf86DrvMsg(scrnIndex, X_ERROR, "Internal error: invalid bpp (%d) "
-                       "in VIAInternalScreenInit\n", pScrn->bitsPerPixel);
-            return FALSE;
-    }
-#endif
-    return TRUE;
 }
