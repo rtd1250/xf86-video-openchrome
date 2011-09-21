@@ -1822,25 +1822,3 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Done\n"));
     return TRUE;
 }
-
-static int
-VIAInternalScreenInit(int scrnIndex, ScreenPtr pScreen)
-{
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
-    VIAPtr pVia = VIAPTR(pScrn);
-	void *FBStart;
-
-    xf86DrvMsg(scrnIndex, X_INFO, "VIAInternalScreenInit\n");
-
-    if (pVia->shadowFB) {
-        int pitch = BitmapBytePad(pScrn->bitsPerPixel * pScrn->displayWidth);
-        pVia->ShadowPtr = malloc(pitch * pScrn->virtualY);
-        FBStart = pVia->ShadowPtr;
-    } else {
-        pVia->ShadowPtr = NULL;
-        FBStart = pVia->FBBase;
-    }
-    return fbScreenInit(pScreen, FBStart, pScrn->virtualX, pScrn->virtualY,
-                        pScrn->xDpi, pScrn->yDpi, pScrn->displayWidth,
-                        pScrn->bitsPerPixel);
-}
