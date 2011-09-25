@@ -260,7 +260,7 @@ static OptionInfoRec VIAOptions[] = {
     {OPTION_TVDEFLICKER,         "TVDeflicker",      OPTV_INTEGER, {0}, FALSE},
     {OPTION_TVTYPE,              "TVType",           OPTV_ANYSTR,  {0}, FALSE},
     {OPTION_TVOUTPUT,            "TVOutput",         OPTV_ANYSTR,  {0}, FALSE},
-    {OPTION_TVDIPORT,            "TVPort",           OPTV_ANYSTR,  {0}, FALSE}, 
+    {OPTION_TVDIPORT,            "TVPort",           OPTV_ANYSTR,  {0}, FALSE},
     {OPTION_DISABLEVQ,           "DisableVQ",        OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_DISABLEIRQ,          "DisableIRQ",       OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_AGP_DMA,             "EnableAGPDMA",     OPTV_BOOLEAN, {0}, FALSE},
@@ -1773,6 +1773,14 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 
     miDCInitialize(pScreen, xf86GetPointerScreenFuncs());
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- SW cursor set up\n"));
+
+	if (pVia->hwcursor) {
+		if (!UMSHWCursorInit(pScreen)) {
+			pVia->hwcursor = FALSE;
+			xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+						"Hardware cursor initialization failed\n");
+		}
+	}
 
 	pScrn->vtSema = TRUE;
 	pVia->CloseScreen = pScreen->CloseScreen;
