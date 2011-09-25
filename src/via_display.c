@@ -279,6 +279,8 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
 	if (scrn->virtualX == width && scrn->virtualY == height)
 		return TRUE;
 
+    DEBUG(xf86DrvMsg(scrn->scrnIndex, X_INFO, "xf86crtc_resize\n"));
+
 	old_width = scrn->virtualX;
 	old_height = scrn->virtualY;
     scrn->virtualX = width;

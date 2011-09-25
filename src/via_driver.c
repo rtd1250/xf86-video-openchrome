@@ -379,6 +379,12 @@ VIAEnterVT(int scrnIndex, int flags)
 			output->funcs->save(output);
 	}
 
+	if (!drmSetMaster(pVia->drmFD)) {
+		xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+					"drmSetMaster failed: %s\n",
+					strerror(errno));
+	}
+
 	if (!xf86SetDesiredModes(pScrn))
 		return FALSE;
 
@@ -396,12 +402,12 @@ VIAEnterVT(int scrnIndex, int flags)
 		viaDRIOffscreenRestore(pScrn);
 	}
 #endif
-	if (pVia->NoAccel) {
-		memset(pVia->FBBase, 0x00, pVia->Bpl * pScrn->virtualY);
-	} else {
+	if (!pVia->NoAccel) {
 		viaAccelFillRect(pScrn, 0, 0, pScrn->displayWidth, pScrn->virtualY,
 						0x00000000);
 		viaAccelSyncMarker(pScrn);
+	} else {
+		memset(pVia->FBBase, 0x00, pVia->Bpl * pScrn->virtualY);
 	}
 
 #ifdef XF86DRI
@@ -439,6 +445,12 @@ VIALeaveVT(int scrnIndex, int flags)
 	}
 #endif
 
+	if (!drmDropMaster(pVia->drmFD)) {
+		xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+					"drmDropMaster failed: %s\n",
+					strerror(errno));
+	}
+
 	if (pVia->VQEnable)
 		viaDisableVQ(pScrn);
 
@@ -459,9 +471,6 @@ VIALeaveVT(int scrnIndex, int flags)
 		if (crtc->funcs->restore)
 			crtc->funcs->restore(crtc);
 	}
-
-	VIAUnmapMem(pScrn);
-
 	pScrn->vtSema = FALSE;
 }
 
@@ -1642,6 +1651,10 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
 	if (pScrn->vtSema)
 		pScrn->LeaveVT(scrnIndex, 0);
 
+	VIAUnmapMem(pScrn);
+
+	xf86_cursors_fini(pScreen);
+
 #ifdef XF86DRI
 	if (pVia->directRenderingType)
 		VIADRICloseScreen(pScreen);
@@ -1664,8 +1677,20 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     pScrn->pScreen = pScreen;
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAScreenInit\n"));
 
-    if (!UMSResourceManagement(pScrn))
+	if (!UMSResourceManagement(pScrn))
 		return FALSE;
+
+#ifdef XF86DRI
+	if (pVia->drmFD != -1) {
+		if (pVia->directRenderingType == DRI_DRI1) {
+			/* DRI2 or DRI1 support */
+			if (VIADRI1ScreenInit(pScreen, DRICreatePCIBusID(pVia->PciInfo)))
+				DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "DRI1 ScreenInit\n"));
+			else
+				pVia->directRenderingType = DRI_NONE;
+		}
+	}
+#endif
 
 	for (i = 0; i < xf86_config->num_crtc; i++) {
 		xf86CrtcPtr crtc = xf86_config->crtc[i];
@@ -1698,18 +1723,6 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Visuals set up\n"));
-
-#ifdef XF86DRI
-	if (pVia->drmFD != -1) {
-		if (pVia->directRenderingType == DRI_DRI1) {
-			/* DRI2 or DRI1 support */
-			if (VIADRI1ScreenInit(pScreen, DRICreatePCIBusID(pVia->PciInfo)))
-				DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "DRI1 ScreenInit\n"));
-			else
-				pVia->directRenderingType = DRI_NONE;
-		}
-	}
-#endif
 
 	if (pVia->shadowFB) {
 		int pitch = BitmapBytePad(pScrn->bitsPerPixel * pScrn->displayWidth);
@@ -1748,8 +1761,8 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     /* Must be after RGB ordering is fixed. */
     fbPictureInit(pScreen, 0, 0);
 
-    if (!pVia->NoAccel && !UMSAccelInit(pScreen))
-	    return FALSE;
+	if (!pVia->NoAccel && !UMSAccelInit(pScreen))
+		return FALSE;
 
     miInitializeBackingStore(pScreen);
     xf86SetBackingStore(pScreen);

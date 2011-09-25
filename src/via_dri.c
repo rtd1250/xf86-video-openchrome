@@ -105,6 +105,86 @@ static void VIADRIMoveBuffers(WindowPtr pParent, DDXPointRec ptOldOrg,
                               RegionPtr prgnSrc, CARD32 index);
 
 
+void
+VIAInitialize3DEngine(ScrnInfoPtr pScrn)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+    int i;
+
+    VIASETREG(VIA_REG_TRANSET, 0x00010000);
+    for (i = 0; i <= 0x7D; i++)
+        VIASETREG(VIA_REG_TRANSPACE, (CARD32) i << 24);
+
+    VIASETREG(VIA_REG_TRANSET, 0x00020000);
+    for (i = 0; i <= 0x94; i++)
+        VIASETREG(VIA_REG_TRANSPACE, (CARD32) i << 24);
+    VIASETREG(VIA_REG_TRANSPACE, 0x82400000);
+
+    VIASETREG(VIA_REG_TRANSET, 0x01020000);
+    for (i = 0; i <= 0x94; i++)
+        VIASETREG(VIA_REG_TRANSPACE, (CARD32) i << 24);
+    VIASETREG(VIA_REG_TRANSPACE, 0x82400000);
+
+    VIASETREG(VIA_REG_TRANSET, 0xfe020000);
+    for (i = 0; i <= 0x03; i++)
+        VIASETREG(VIA_REG_TRANSPACE, (CARD32) i << 24);
+
+    VIASETREG(VIA_REG_TRANSET, 0x00030000);
+    for (i = 0; i <= 0xff; i++)
+        VIASETREG(VIA_REG_TRANSPACE, 0);
+
+    VIASETREG(VIA_REG_TRANSET, 0x00100000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x00333004);
+    VIASETREG(VIA_REG_TRANSPACE, 0x10000002);
+    VIASETREG(VIA_REG_TRANSPACE, 0x60000000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x61000000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x62000000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x63000000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x64000000);
+
+    VIASETREG(VIA_REG_TRANSET, 0x00fe0000);
+    if (pVia->Chipset == VIA_CLE266 && pVia->ChipRev >= 3)
+        VIASETREG(VIA_REG_TRANSPACE, 0x40008c0f);
+    else
+        VIASETREG(VIA_REG_TRANSPACE, 0x4000800f);
+    VIASETREG(VIA_REG_TRANSPACE, 0x44000000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x45080C04);
+    VIASETREG(VIA_REG_TRANSPACE, 0x46800408);
+    VIASETREG(VIA_REG_TRANSPACE, 0x50000000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x51000000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x52000000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x53000000);
+
+    VIASETREG(VIA_REG_TRANSET, 0x00fe0000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x08000001);
+    VIASETREG(VIA_REG_TRANSPACE, 0x0A000183);
+    VIASETREG(VIA_REG_TRANSPACE, 0x0B00019F);
+    VIASETREG(VIA_REG_TRANSPACE, 0x0C00018B);
+    VIASETREG(VIA_REG_TRANSPACE, 0x0D00019B);
+    VIASETREG(VIA_REG_TRANSPACE, 0x0E000000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x0F000000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x10000000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x11000000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x20000000);
+}
+
+void
+kickVblank(ScrnInfoPtr pScrn)
+{
+	/*
+	 * Switching mode will clear registers that make vblank
+	 * interrupts happen. If the driver thinks interrupts
+	 * are enabled, make sure vblank interrupts go through.
+	 * registers are not documented in VIA docs.
+	 */
+	VIAPtr pVia = VIAPTR(pScrn);
+	vgaHWPtr hwp = VGAHWPTR(pScrn);
+	VIADRIPtr pVIADRI = pVia->pDRIInfo->devPrivate;
+
+	if (pVIADRI->irqEnabled)
+        hwp->writeCrtc(hwp, 0x11, hwp->readCrtc(hwp, 0x11) | 0x30);
+}
+
 static void
 VIADRIIrqInit(ScrnInfoPtr pScrn, VIADRIPtr pVIADRI)
 {
@@ -938,7 +1018,6 @@ viaDRIFBMemcpy(int fd, unsigned long fbOffset, unsigned char *addr,
     } while (size > 0);
     return 0;
 }
-
 
 void
 viaDRIOffscreenSave(ScrnInfoPtr pScrn)

@@ -2551,10 +2551,7 @@ UMSAccelInit(ScreenPtr pScreen)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                      "Using %d lines for offscreen memory.\n",
                      AvailFBArea.y2 - pScrn->virtualY));
-
-	if (!pVia->useEXA)
-		return viaInitXAA(pScreen);
-	return TRUE;
+	return viaInitXAA(pScreen);
 }
 
 /*
