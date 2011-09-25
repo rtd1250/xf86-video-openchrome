@@ -463,13 +463,6 @@ VIAMapFB(ScrnInfoPtr pScrn)
 Bool
 UMSResourceManagement(ScrnInfoPtr pScrn)
 {
-    ScreenPtr pScreen = pScrn->pScreen;
-	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-	int i;
-
-    if (!VIAMapFB(pScrn))
-        return FALSE;
     return TRUE;
 }
 
@@ -606,6 +599,9 @@ UMSPreInit(ScrnInfoPtr pScrn)
 
     /* Detect the amount of installed RAM */
     if (!VIAMapMMIO(pScrn))
+        return FALSE;
+
+    if (!VIAMapFB(pScrn))
         return FALSE;
     return TRUE;
 }

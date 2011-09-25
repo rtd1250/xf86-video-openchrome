@@ -204,16 +204,16 @@ viaFlushPCI(ViaCommandBuffer * buf)
 					    case VIA_K8M890:
 					    case VIA_P4M890:
 					    case VIA_P4M900:
-                    		while ((VIAGETREG(VIA_REG_STATUS) &
-                            	   (VIA_CMD_RGTR_BUSY | VIA_2D_ENG_BUSY))
-                            		&& (loop++ < MAXLOOP)) ;
+							while ((VIAGETREG(VIA_REG_STATUS) &
+									(VIA_CMD_RGTR_BUSY | VIA_2D_ENG_BUSY))
+									&& (loop++ < MAXLOOP)) ;
 					    break;
 						default:
-                        	while (!(VIAGETREG(VIA_REG_STATUS) & VIA_VR_QUEUE_BUSY)
+							while (!(VIAGETREG(VIA_REG_STATUS) & VIA_VR_QUEUE_BUSY)
                                    && (loop++ < MAXLOOP)) ;
-                    		while ((VIAGETREG(VIA_REG_STATUS) &
-                            	   (VIA_CMD_RGTR_BUSY | VIA_2D_ENG_BUSY))
-                                   && (loop++ < MAXLOOP)) ;
+							while ((VIAGETREG(VIA_REG_STATUS) &
+									(VIA_CMD_RGTR_BUSY | VIA_2D_ENG_BUSY))
+									&& (loop++ < MAXLOOP)) ;
                     }
                 }
                 offset = (*bp++ & 0x0FFFFFFF) << 2;
@@ -462,7 +462,7 @@ viaAccelSetMode(int bpp, ViaTwodContext * tdc)
 
 /*
  * Initialize the 2D engine and set the 2D context mode to the
- * current screen depth. Also enable the virtual queue. 
+ * current screen depth. Also enable the virtual queue.
  */
 void
 viaInitialize2DEngine(ScrnInfoPtr pScrn)
@@ -476,7 +476,7 @@ viaInitialize2DEngine(ScrnInfoPtr pScrn)
         VIASETREG(i, 0x0);
     }
 
-    if (pVia->Chipset == VIA_VX800 || 
+    if (pVia->Chipset == VIA_VX800 ||
         pVia->Chipset == VIA_VX855 ||
         pVia->Chipset == VIA_VX900) {
         for (i = 0x44; i <= 0x5c; i += 4) {
@@ -611,7 +611,7 @@ viaPitchHelper(VIAPtr pVia, unsigned dstPitch, unsigned srcPitch)
     RING_VARS;
 
     if (pVia->Chipset != VIA_VX800 &&
-        pVia->Chipset != VIA_VX855 && 
+        pVia->Chipset != VIA_VX855 &&
         pVia->Chipset != VIA_VX900) {
         val |= VIA_PITCH_ENABLE;
     }
@@ -644,7 +644,7 @@ viaAccelClippingHelper(VIAPtr pVia, int refY)
 }
 
 /*
- * Emit a solid blit operation to the command buffer. 
+ * Emit a solid blit operation to the command buffer.
  */
 static void
 viaAccelSolidHelper(VIAPtr pVia, int x, int y, int w, int h,
@@ -758,7 +758,7 @@ viaAccelCopyHelper(VIAPtr pVia, int xs, int ys, int xd, int yd,
  * XAA functions. Note that the blitter limit of 2047 lines has been worked
  * around by adding min(y1, y2, clipping y) * stride to the offset (which is
  * recommended by VIA docs).  The y values (including clipping) must be
- * subtracted accordingly. 
+ * subtracted accordingly.
  */
 static void
 viaSetupForScreenToScreenCopy(ScrnInfoPtr pScrn, int xdir, int ydir, int rop,
@@ -1129,9 +1129,9 @@ viaSubsequentSolidTwoPointLine(ScrnInfoPtr pScrn, int x1, int y1,
     viaPitchHelper(pVia, pVia->Bpl, 0);
 
     /*
-     * major = 2*dmaj, minor = 2*dmin, err = -dmaj - ((bias >> octant) & 1) 
-     * K1 = 2*dmin K2 = 2*(dmin - dmax) 
-     * Error Term = (StartX<EndX) ? (2*dmin - dmax - 1) : (2*(dmin - dmax)) 
+     * major = 2*dmaj, minor = 2*dmin, err = -dmaj - ((bias >> octant) & 1)
+     * K1 = 2*dmin K2 = 2*(dmin - dmax)
+     * Error Term = (StartX<EndX) ? (2*dmin - dmax - 1) : (2*(dmin - dmax))
      */
 
     OUT_RING_H1(VIA_REG(pVia, LINE_K1K2),
@@ -1238,7 +1238,7 @@ viaInitXAA(ScreenPtr pScreen)
 
     /* General acceleration flags. */
     xaaptr->Flags = (PIXMAP_CACHE |
-                     OFFSCREEN_PIXMAPS | 
+                     OFFSCREEN_PIXMAPS |
                      LINEAR_FRAMEBUFFER |
                      MICROSOFT_ZERO_LINE_BIAS | 0);
 
@@ -1253,9 +1253,9 @@ viaInitXAA(ScreenPtr pScreen)
                              HARDWARE_CLIP_SCREEN_TO_SCREEN_COLOR_EXPAND | 0);
 
     if (pVia->Chipset != VIA_VX800 &&
-        pVia->Chipset != VIA_VX855 && 
+        pVia->Chipset != VIA_VX855 &&
         pVia->Chipset != VIA_VX900)
-    	xaaptr->ClippingFlags |= (HARDWARE_CLIP_SOLID_FILL |
+		xaaptr->ClippingFlags |= (HARDWARE_CLIP_SOLID_FILL |
                                   HARDWARE_CLIP_SOLID_LINE |
                                   HARDWARE_CLIP_DASHED_LINE);
 
@@ -1307,11 +1307,11 @@ viaInitXAA(ScreenPtr pScreen)
 
     /* CPU to Screen color expansion */
     xaaptr->ScanlineCPUToScreenColorExpandFillFlags = NO_PLANEMASK |
-           				 	CPU_TRANSFER_PAD_DWORD |
+						CPU_TRANSFER_PAD_DWORD |
 						SCANLINE_PAD_DWORD |
-            					BIT_ORDER_IN_BYTE_MSBFIRST |
-            					LEFT_EDGE_CLIPPING | 
-            					ROP_NEEDS_SOURCE | 0;
+						BIT_ORDER_IN_BYTE_MSBFIRST |
+						LEFT_EDGE_CLIPPING |
+						ROP_NEEDS_SOURCE | 0;
 
     xaaptr->SetupForScanlineCPUToScreenColorExpandFill =
             viaSetupForCPUToScreenColorExpandFill;
@@ -1327,12 +1327,12 @@ viaInitXAA(ScreenPtr pScreen)
 
     /* ImageWrite */
     xaaptr->ImageWriteFlags = (NO_PLANEMASK |
-                               CPU_TRANSFER_PAD_DWORD |
-                               SCANLINE_PAD_DWORD |
-                               BIT_ORDER_IN_BYTE_MSBFIRST |
-                               LEFT_EDGE_CLIPPING | 
-			       ROP_NEEDS_SOURCE |
-                               NO_GXCOPY | 0);
+								CPU_TRANSFER_PAD_DWORD |
+								SCANLINE_PAD_DWORD |
+								BIT_ORDER_IN_BYTE_MSBFIRST |
+								LEFT_EDGE_CLIPPING |
+								ROP_NEEDS_SOURCE |
+								NO_GXCOPY | 0);
 
     /*
      * Most Unichromes are much faster using processor-to-framebuffer writes
@@ -2204,10 +2204,10 @@ viaExaPrepareComposite(int op, PicturePtr pSrcPicture,
 
     /* Workaround: EXA crash with new libcairo2 on a VIA VX800 (#298) */
     /* TODO Add real source only pictures */
-    if (!pSrc) { 
- 	    ErrorF("pSrc is NULL\n"); 
- 	    return FALSE; 
- 	} 
+    if (!pSrc) {
+	    ErrorF("pSrc is NULL\n");
+	    return FALSE;
+	}
 
     v3d->setDestination(v3d, exaGetPixmapOffset(pDst),
                         exaGetPixmapPitch(pDst), pDstPicture->format);
@@ -2405,7 +2405,7 @@ viaInitExa(ScreenPtr pScreen)
  * and initializes engines and acceleration method.
  */
 Bool
-UMSInitAccel(ScreenPtr pScreen)
+UMSAccelInit(ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
     VIAPtr pVia = VIAPTR(pScrn);
@@ -2451,7 +2451,7 @@ UMSInitAccel(ScreenPtr pScreen)
 
     /*
      * nPOT textures. DRM versions below 2.11.0 don't allow them.
-     * Also some CLE266 hardware may not allow nPOT textures for 
+     * Also some CLE266 hardware may not allow nPOT textures for
      * texture engine 1. We need to figure that out.
      */
 
@@ -2506,9 +2506,9 @@ UMSInitAccel(ScreenPtr pScreen)
     AvailFBArea.x2 = pScrn->displayWidth;
 
     /*
-     * Memory distribution for XAA is tricky. We'd like to make the 
+     * Memory distribution for XAA is tricky. We'd like to make the
      * pixmap cache no larger than 3 x visible screen size, otherwise
-     * XAA may get slow for some undetermined reason. 
+     * XAA may get slow for some undetermined reason.
      */
 
 #ifdef XF86DRI
@@ -2529,15 +2529,15 @@ UMSInitAccel(ScreenPtr pScreen)
 
     /*
     *   Initialization of the XFree86 framebuffer manager is done via
-    *   Bool xf86InitFBManager(ScreenPtr pScreen, BoxPtr FullBox) 
+    *   Bool xf86InitFBManager(ScreenPtr pScreen, BoxPtr FullBox)
     *   FullBox represents the area of the framebuffer that the manager
-    *   is allowed to manage. This is typically a box with a width 
+    *   is allowed to manage. This is typically a box with a width
     *   of pScrn->displayWidth and a height of as many lines as can be fit
     *   within the total video memory
     */
     ret = xf86InitFBManager(pScreen, &AvailFBArea);
     if (ret != TRUE) {
-    	xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "VIAInitAccel xf86InitFBManager init failed\n");
+		xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "VIAInitAccel xf86InitFBManager init failed\n");
     }
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                "Frame Buffer From (%d,%d) To (%d,%d)\n",
@@ -2552,7 +2552,9 @@ UMSInitAccel(ScreenPtr pScreen)
                      "Using %d lines for offscreen memory.\n",
                      AvailFBArea.y2 - pScrn->virtualY));
 
-    return viaInitXAA(pScreen);
+	if (!pVia->useEXA)
+		return viaInitXAA(pScreen);
+	return TRUE;
 }
 
 /*
@@ -2606,7 +2608,7 @@ viaExitAccel(ScreenPtr pScreen)
 /*
  * Allocate a command buffer and  buffers for accelerated upload, download,
  * and EXA scratch area. The scratch area resides primarily in AGP memory,
- * but reverts to FB if AGP is not available. 
+ * but reverts to FB if AGP is not available.
  */
 void
 viaFinishInitAccel(ScreenPtr pScreen)

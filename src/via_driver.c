@@ -1493,14 +1493,8 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     pVia->Bpp = pScrn->bitsPerPixel >> 3;
     pVia->Bpl = pScrn->displayWidth * pVia->Bpp;
 
-    /* This function fills in the Crtc fields for all the modes in the modes field of the ScrnInfoRec. */
-    xf86SetCrtcForModes(pScrn, INTERLACE_HALVE_V);
-
     /* Set the current mode to the first in the list */
     pScrn->currentMode = pScrn->modes;
-
-    /* Print the list of modes being used */
-    xf86PrintModes(pScrn);
 
     /* Set display resolution */
     xf86SetDpi(pScrn, 0, 0);
@@ -1670,13 +1664,6 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     pScrn->pScreen = pScreen;
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAScreenInit\n"));
 
-	/* need to point to new screen on server regeneration */
-	for (i = 0; i < xf86_config->num_crtc; i++)
-		xf86_config->crtc[i]->scrn = pScrn;
-
-	for (i = 0; i < xf86_config->num_output; i++)
-		xf86_config->output[i]->scrn = pScrn;
-
     if (!UMSResourceManagement(pScrn))
 		return FALSE;
 
@@ -1761,7 +1748,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     /* Must be after RGB ordering is fixed. */
     fbPictureInit(pScreen, 0, 0);
 
-    if (!pVia->NoAccel && !UMSInitAccel(pScreen))
+    if (!pVia->NoAccel && !UMSAccelInit(pScreen))
 	    return FALSE;
 
     miInitializeBackingStore(pScreen);

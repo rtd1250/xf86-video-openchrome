@@ -422,7 +422,7 @@ Bool VIAMapMem(ScrnInfoPtr pScrn);
 void VIAUnmapMem(ScrnInfoPtr pScrn);
 
 /* In via_accel.c. */
-Bool UMSInitAccel(ScreenPtr);
+Bool UMSAccelInit(ScreenPtr);
 void viaInitialize2DEngine(ScrnInfoPtr);
 void viaAccelSync(ScrnInfoPtr);
 void viaDisableVQ(ScrnInfoPtr);
