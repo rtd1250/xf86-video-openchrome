@@ -2537,7 +2537,7 @@ UMSAccelInit(ScreenPtr pScreen)
     */
     ret = xf86InitFBManager(pScreen, &AvailFBArea);
     if (ret != TRUE) {
-		xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "VIAInitAccel xf86InitFBManager init failed\n");
+		xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "UMSAccelInit xf86InitFBManager init failed\n");
     }
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                "Frame Buffer From (%d,%d) To (%d,%d)\n",
