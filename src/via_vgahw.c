@@ -451,9 +451,6 @@ VIARestore(ScrnInfoPtr pScrn)
             break;
     }
 
-	if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected)
-        ViaLCDPower(pScrn, TRUE);
-
     ViaDisablePrimaryFIFO(pScrn);
 
     /* Reset clock. */

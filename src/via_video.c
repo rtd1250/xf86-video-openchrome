@@ -319,8 +319,7 @@ DecideOverlaySupport(ScrnInfoPtr pScrn)
         VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
         unsigned width, height, refresh, dClock;
         float mClock, memEfficiency, needBandWidth, totalBandWidth;
-        int bTV = 0;
-    
+
         switch (pVia->MemClk) {
             case VIA_MEM_SDR100:
                 mClock = 50;           /*HW base on 128 bit */
@@ -373,48 +372,13 @@ DecideOverlaySupport(ScrnInfoPtr pScrn)
         width = mode->HDisplay;
         height = mode->VDisplay;
         refresh = mode->VRefresh;
-
-        /*
-         * FIXME: If VBE modes assume a high refresh (100) for now
-         */
-        if (pVia->pVbe) {
-            refresh = 100;
-            if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected)
-                refresh = 70;
-            if (pBIOSInfo->tv && pBIOSInfo->tv->status == XF86OutputStatusConnected)
-                refresh = 60;
-        } else {
-			if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected) {
-                width = pBIOSInfo->Panel->NativeMode->Width;
-                height = pBIOSInfo->Panel->NativeMode->Height;
-                if ((width == 1400) && (height == 1050)) {
-                    width = 1280;
-                    height = 1024;
-                    refresh = 60;
-                }
-            } else if (pBIOSInfo->tv) {
-                bTV = 1;
-            }
-        }
-        
-        if (bTV) {
-    
-            /* 
-             * Approximative, VERY conservative formula in some cases.
-             * This formula and the one below are derived analyzing the
-             * tables present in VIA's own drivers. They may reject the over-
-             * lay in some cases where VIA's driver don't.
-             */
-            dClock = (width * height * 60) / 580000;
-    
-        } else {
-    
-            /*
-             * Approximative, slightly conservative formula. See above.
-             */
-            dClock = (width * height * refresh) / 680000;
-        }
-    
+	/* 
+	 * Approximative, VERY conservative formula in some cases.
+	 * This formula and the one below are derived analyzing the
+	 * tables present in VIA's own drivers. They may reject the over-
+	 * lay in some cases where VIA's driver don't.
+	 */
+	dClock = (width * height * refresh) / 680000;
         if (dClock) {
             needBandWidth =
                 (float)(((pScrn->bitsPerPixel >> 3) + VIDEO_BPP) * dClock);

@@ -309,6 +309,9 @@ via_lvds_save(xf86OutputPtr output)
 static void
 via_lvds_restore(xf86OutputPtr output)
 {
+	ScrnInfoPtr pScrn = output->scrn;
+
+	ViaLCDPower(pScrn, TRUE);
 }
 
 static int
