@@ -379,10 +379,12 @@ VIAEnterVT(int scrnIndex, int flags)
 			output->funcs->save(output);
 	}
 
-	if (!drmSetMaster(pVia->drmFD)) {
-		xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-					"drmSetMaster failed: %s\n",
-					strerror(errno));
+	if (pVia->KMS) {
+		if (!drmSetMaster(pVia->drmFD)) {
+			xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+						"drmSetMaster failed: %s\n",
+						strerror(errno));
+		}
 	}
 
 	if (!xf86SetDesiredModes(pScrn))
@@ -395,25 +397,27 @@ VIAEnterVT(int scrnIndex, int flags)
 	if (!pVia->IsSecondary)
 		viaRestoreVideo(pScrn);
 
+	if (!pVia->KMS) {
 #ifdef XF86DRI
-	if (pVia->directRenderingType) {
-		kickVblank(pScrn);
-		VIADRIRingBufferInit(pScrn);
-		viaDRIOffscreenRestore(pScrn);
-	}
+		if (pVia->directRenderingType == DRI_1) {
+			kickVblank(pScrn);
+			VIADRIRingBufferInit(pScrn);
+			viaDRIOffscreenRestore(pScrn);
+		}
 #endif
-	if (!pVia->NoAccel) {
-		viaAccelFillRect(pScrn, 0, 0, pScrn->displayWidth, pScrn->virtualY,
-						0x00000000);
-		viaAccelSyncMarker(pScrn);
-	} else {
-		memset(pVia->FBBase, 0x00, pVia->Bpl * pScrn->virtualY);
-	}
+		if (!pVia->NoAccel) {
+			viaAccelFillRect(pScrn, 0, 0, pScrn->displayWidth, pScrn->virtualY,
+							0x00000000);
+			viaAccelSyncMarker(pScrn);
+		} else {
+			memset(pVia->FBBase, 0x00, pVia->Bpl * pScrn->virtualY);
+		}
 
 #ifdef XF86DRI
-	if (pVia->directRenderingType)
-		DRIUnlock(screenInfo.screens[scrnIndex]);
+		if (pVia->directRenderingType == DRI_1)
+			DRIUnlock(screenInfo.screens[scrnIndex]);
 #endif
+	}
 	return ret;
 }
 
@@ -428,31 +432,29 @@ VIALeaveVT(int scrnIndex, int flags)
 	DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIALeaveVT\n"));
 
 #ifdef XF86DRI
-	if (pVia->directRenderingType) {
-		volatile drm_via_sarea_t *saPriv = (drm_via_sarea_t *) DRIGetSAREAPrivate(pScrn->pScreen);
+	if (pVia->KMS) {
+		if (!drmDropMaster(pVia->drmFD)) {
+			xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+						"drmDropMaster failed: %s\n",
+						strerror(errno));
+		}
+	} else {
+		if (pVia->directRenderingType == DRI_1) {
+			volatile drm_via_sarea_t *saPriv = (drm_via_sarea_t *) DRIGetSAREAPrivate(pScrn->pScreen);
 
-		DRILock(screenInfo.screens[scrnIndex], 0);
-		saPriv->ctxOwner = ~0;
+			DRILock(screenInfo.screens[scrnIndex], 0);
+			saPriv->ctxOwner = ~0;
+
+			viaAccelSync(pScrn);
+
+			VIADRIRingBufferCleanup(pScrn);
+			viaDRIOffscreenSave(pScrn);
+
+			if (pVia->VQEnable)
+				viaDisableVQ(pScrn);
+		}
 	}
 #endif
-
-	viaAccelSync(pScrn);
-
-#ifdef XF86DRI
-	if (pVia->directRenderingType) {
-		VIADRIRingBufferCleanup(pScrn);
-		viaDRIOffscreenSave(pScrn);
-	}
-#endif
-
-	if (!drmDropMaster(pVia->drmFD)) {
-		xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-					"drmDropMaster failed: %s\n",
-					strerror(errno));
-	}
-
-	if (pVia->VQEnable)
-		viaDisableVQ(pScrn);
 
 	/* Save video status and turn off all video activities. */
 	if (!pVia->IsSecondary)
@@ -945,7 +947,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 				/* DRI2 or DRI1 support */
 				if (pVia->drmVerMajor <= drmCompat.major) {
 					xf86DrvMsg(pScrn->scrnIndex, X_INFO, "DRI 1 api supported\n");
-					pVia->directRenderingType = DRI_DRI1;
+					pVia->directRenderingType = DRI_1;
 				} else {
 					xf86DrvMsg(pScrn->scrnIndex, X_INFO, "DRI 2 api not supported yet\n");
 				}
@@ -1682,7 +1684,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 
 #ifdef XF86DRI
 	if (pVia->drmFD != -1) {
-		if (pVia->directRenderingType == DRI_DRI1) {
+		if (pVia->directRenderingType == DRI_1) {
 			/* DRI2 or DRI1 support */
 			if (VIADRI1ScreenInit(pScreen, DRICreatePCIBusID(pVia->PciInfo)))
 				DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "DRI1 ScreenInit\n"));

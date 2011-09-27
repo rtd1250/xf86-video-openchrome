@@ -147,8 +147,8 @@ typedef struct {
 
 enum dri_type {
 	DRI_NONE,
-	DRI_DRI1,
-	DRI_DRI2
+	DRI_1,
+	DRI_2
 };
 
 #ifdef XF86DRI
