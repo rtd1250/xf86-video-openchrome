@@ -945,7 +945,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 						drmCompat.major);
 			} else {
 				/* DRI2 or DRI1 support */
-				if (pVia->drmVerMajor <= drmCompat.major) {
+				if (pVia->drmVerMajor < drmCompat.major) {
 					xf86DrvMsg(pScrn->scrnIndex, X_INFO, "DRI 1 api supported\n");
 					pVia->directRenderingType = DRI_1;
 				} else {
