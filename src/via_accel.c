@@ -299,7 +299,7 @@ viaSetupCBuffer(ScrnInfoPtr pScrn, ViaCommandBuffer * buf, unsigned size)
     buf->has3dState = FALSE;
     buf->flushFunc = viaFlushPCI;
 #ifdef XF86DRI
-    if (pVia->directRenderingType) {
+    if (pVia->directRenderingType == DRI_1) {
         buf->flushFunc = viaFlushDRIEnabled;
     }
 #endif
@@ -1420,7 +1420,7 @@ viaCheckUpload(ScrnInfoPtr pScrn, Via3DState * v3d)
     pVia->lastToUpload = v3d;
 
 #ifdef XF86DRI
-    if (pVia->directRenderingType) {
+    if (pVia->directRenderingType == DRI_1) {
         volatile drm_via_sarea_t *saPriv = (drm_via_sarea_t *)
                 DRIGetSAREAPrivate(pScrn->pScreen);
         int myContext = DRIGetContext(pScrn->pScreen);
@@ -2359,7 +2359,7 @@ viaInitExa(ScreenPtr pScreen)
     pExa->DoneCopy = viaExaDoneSolidCopy;
 
 #ifdef XF86DRI
-    if (pVia->directRenderingType) {
+    if (pVia->directRenderingType == DRI_1) {
 #ifdef linux
         if ((pVia->drmVerMajor > 2) ||
             ((pVia->drmVerMajor == 2) && (pVia->drmVerMinor >= 7))) {
@@ -2512,7 +2512,7 @@ UMSAccelInit(ScreenPtr pScreen)
      */
 
 #ifdef XF86DRI
-    if (pVia->directRenderingType) {
+    if (pVia->directRenderingType == DRI_1) {
         pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart) / 2;
         maxY = pScrn->virtualY + (pVia->driSize / pVia->Bpl);
     } else
@@ -2562,7 +2562,7 @@ UMSAccelSetup(ScrnInfoPtr pScrn)
 
 	pVia->agpDMA = FALSE;
 #ifdef XF86DRI
-	if (pVia->directRenderingType) {
+	if (pVia->directRenderingType == DRI_1) {
 		if (VIADRIFinishScreenInit(pScreen)) {
 			VIADRIPtr pVIADRI = pVia->pDRIInfo->devPrivate;
 
@@ -2597,14 +2597,14 @@ UMSAccelSetup(ScrnInfoPtr pScrn)
 	} else {
 		viaFinishInitAccel(pScreen);
 #ifdef XF86DRI
-		if (pVia->directRenderingType)
+		if (pVia->directRenderingType == DRI_1)
 			DRILock(screenInfo.screens[pScrn->scrnIndex], 0);
 #endif
 		viaAccelFillRect(pScrn, pScrn->frameX0, pScrn->frameY0,
 						pScrn->displayWidth, pScrn->virtualY, 0x00000000);
 		viaAccelSyncMarker(pScrn);
 #ifdef XF86DRI
-		if (pVia->directRenderingType)
+		if (pVia->directRenderingType == DRI_1)
 			DRIUnlock(screenInfo.screens[pScrn->scrnIndex]);
 #endif
 	}
@@ -2624,7 +2624,7 @@ viaExitAccel(ScreenPtr pScreen)
 
     if (pVia->useEXA) {
 #ifdef XF86DRI
-        if (pVia->directRenderingType) {
+        if (pVia->directRenderingType == DRI_1) {
             if (pVia->texAddr) {
                 drmCommandWrite(pVia->drmFD, DRM_VIA_FREEMEM,
                                 &pVia->texAGPBuffer, sizeof(drm_via_mem_t));

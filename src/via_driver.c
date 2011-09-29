@@ -1658,7 +1658,7 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
 	xf86_cursors_fini(pScreen);
 
 #ifdef XF86DRI
-	if (pVia->directRenderingType)
+	if (pVia->directRenderingType == DRI_1)
 		VIADRICloseScreen(pScreen);
 #endif
 
