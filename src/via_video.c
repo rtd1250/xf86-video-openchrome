@@ -45,8 +45,6 @@
 #include "via_driver.h"
 #include "via_video.h"
 
-#include "via.h"
-
 #include "xf86xv.h"
 #include <X11/extensions/Xv.h>
 #include "xaa.h"

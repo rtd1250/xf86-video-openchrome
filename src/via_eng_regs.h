@@ -22,7 +22,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _VIA_H_
+#ifndef _VIA_ENG_REGS_H_
 #define _VIA_H_ 1
 
 #include <errno.h>
@@ -733,4 +733,4 @@
 #define CHIP_REVISION(p)  (p)->chipRev
 #endif
 
-#endif /* _VIA_H_ */
+#endif /* _VIA_ENG_REGS_H_ */

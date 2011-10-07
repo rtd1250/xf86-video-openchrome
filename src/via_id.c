@@ -30,7 +30,6 @@
 #endif
 
 #include "via_driver.h"
-#include "via.h"
 #include "via_id.h"
 
 /*

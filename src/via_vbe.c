@@ -33,7 +33,6 @@
 #include "config.h"
 #endif
 
-#include "via.h"
 #include "via_driver.h"
 #include "vbe.h"
 #include "vbeModes.h"

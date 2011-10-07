@@ -30,7 +30,6 @@
 #include "config.h"
 #endif
 
-#include "via.h"
 #include "compiler.h"
 #include "xf86.h"
 #include "via_id.h"

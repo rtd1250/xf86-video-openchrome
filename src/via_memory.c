@@ -29,8 +29,6 @@
 #include "xf86_OSproc.h"
 #include "xf86fbman.h"
 
-#include "via.h"
-
 #ifdef XF86DRI
 #include "xf86drm.h"
 #endif

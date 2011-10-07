@@ -38,7 +38,6 @@
 #include "GL/glxtokens.h"
 #include "sarea.h"
 
-#include "via.h"
 #include "via_driver.h"
 #include "via_drm.h"
 #include "via_dri.h"

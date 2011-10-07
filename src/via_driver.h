@@ -64,6 +64,7 @@
 #include "via_dmabuffer.h"
 #include "via_3d.h"
 #include "via_video.h"
+#include "via_eng_regs.h"
 
 #ifdef XSERVER_LIBPCIACCESS
 #include <pciaccess.h>

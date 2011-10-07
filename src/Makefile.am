@@ -35,7 +35,7 @@ openchrome_drv_la_LDFLAGS = -module -avoid-version
 openchrome_drv_ladir = @moduledir@/drivers
 
 openchrome_drv_la_SOURCES = \
-         via.h \
+         via_eng_regs.h \
          via_3d.c \
          via_3d.h \
          via_3d_reg.h \
