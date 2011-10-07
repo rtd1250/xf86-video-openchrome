@@ -24,11 +24,11 @@ libchromeXvMCPro_la_SOURCES = \
 	xf86dristr.h \
 	vldXvMC.h
 
-libchromeXvMC_la_CFLAGS = @XORG_CFLAGS@ @DRI_CFLAGS@ @XVMC_CFLAGS@ -I$(top_srcdir)/src -I$(top_srcdir)/libxvmc -DTRUE=1 -DFALSE=0
+libchromeXvMC_la_CFLAGS = @XORG_CFLAGS@ @DRI_CFLAGS@ @XVMC_CFLAGS@ -I$(top_srcdir)/src -I$(top_srcdir)/src/xvmc -DTRUE=1 -DFALSE=0
 libchromeXvMC_la_LDFLAGS = -version-number 1:0:0
 libchromeXvMC_la_LIBADD = @DRI_LIBS@ @XVMC_LIBS@
 
-libchromeXvMCPro_la_CFLAGS = @XORG_CFLAGS@ @DRI_CFLAGS@ @XVMC_CFLAGS@ -I$(top_srcdir)/src -I$(top_srcdir)/libxvmc -DTRUE=1 -DFALSE=0
+libchromeXvMCPro_la_CFLAGS = @XORG_CFLAGS@ @DRI_CFLAGS@ @XVMC_CFLAGS@ -I$(top_srcdir)/src -I$(top_srcdir)/src/xvmc -DTRUE=1 -DFALSE=0
 libchromeXvMCPro_la_LDFLAGS = -version-number 1:0:0
 libchromeXvMCPro_la_LIBADD = @DRI_LIBS@ @XVMC_LIBS@
 else
