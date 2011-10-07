@@ -208,7 +208,7 @@ viaFlushPCI(ViaCommandBuffer * buf)
 									&& (loop++ < MAXLOOP)) ;
 					    break;
 						default:
-							while (!(VIAGETREG(VIA_REG_STATUS) & VIA_VR_QUEUE_BUSY)
+							while (!(VIAGETREG(VIA_REG_STATUS) & VIA_VR_QUEUE_EMPTY)
                                    && (loop++ < MAXLOOP)) ;
 							while ((VIAGETREG(VIA_REG_STATUS) &
 									(VIA_CMD_RGTR_BUSY | VIA_2D_ENG_BUSY))
@@ -561,7 +561,7 @@ viaAccelSync(ScrnInfoPtr pScrn)
                    && (loop++ < MAXLOOP)) ;
             break;
         default:
-            while (!(VIAGETREG(VIA_REG_STATUS) & VIA_VR_QUEUE_BUSY)
+            while (!(VIAGETREG(VIA_REG_STATUS) & VIA_VR_QUEUE_EMPTY)
                    && (loop++ < MAXLOOP)) ;
 
             while ((VIAGETREG(VIA_REG_STATUS) &

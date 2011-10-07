@@ -960,18 +960,6 @@ ViaShadowCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x76, temp >> 4, 0x70);
 }
 
-void
-viaCursorSetFB(ScrnInfoPtr pScrn)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    if ((pVia->FBFreeEnd - pVia->FBFreeStart) > pVia->CursorSize) {
-        pVia->CursorStart = pVia->FBFreeEnd - pVia->CursorSize;
-        pVia->FBFreeEnd = pVia->CursorStart;
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CursorStart: 0x%x\n", pVia->CursorStart);
-    }
-}
-
 Bool
 UMSHWCursorInit(ScreenPtr pScreen)
 {
@@ -980,13 +968,13 @@ UMSHWCursorInit(ScreenPtr pScreen)
 	int flags = (HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_1 |
 				 HARDWARE_CURSOR_AND_SOURCE_WITH_MASK |
 				 HARDWARE_CURSOR_TRUECOLOR_AT_8BPP);
+	int max_height, max_width, i = 0;
 	xf86CursorInfoPtr cursor_info;
-	int max_height, max_width, i;
 	VIAPtr pVia = VIAPTR(pScrn);
 	ViaCRTCInfoPtr iga;
 	xf86CrtcPtr crtc;
 
-	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAHWCursorInit\n"));
+	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "UMSHWCursorInit\n"));
 
 	switch (pVia->Chipset) {
 	case VIA_CLE266:
@@ -1006,15 +994,19 @@ UMSHWCursorInit(ScreenPtr pScreen)
 	iga = crtc->driver_private;
 
 	/* Set cursor location in frame buffer. */
-	viaCursorSetFB(pScrn);
+	if ((pVia->FBFreeEnd - pVia->FBFreeStart) > pVia->CursorSize) {
+		pVia->CursorStart = pVia->FBFreeEnd - pVia->CursorSize;
+		pVia->FBFreeEnd = pVia->CursorStart;
+	}
+	pVia->cursorOffset = pScrn->fbOffset + pVia->CursorStart;
 	pVia->cursorMap = pVia->FBBase + pVia->CursorStart;
 	if (pVia->cursorMap == NULL)
 		return FALSE;
 
-	pVia->cursorOffset = pScrn->fbOffset + pVia->CursorStart;
 	memset(pVia->cursorMap, 0x00, pVia->CursorSize);
-
 	VIASETREG(VIA_REG_CURSOR_MODE, pVia->cursorOffset);
+
+	xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CursorAddress: %p\n", pVia->cursorMap);
 
 	/* Init HI_X0 */
 	switch (pVia->Chipset) {

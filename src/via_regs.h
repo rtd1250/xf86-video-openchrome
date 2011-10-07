@@ -38,7 +38,7 @@
 #define BIOS_BASE               0xc0000
 
 
-#define VIA_MMIO_REGSIZE        0x9000
+#define VIA_MMIO_REGSIZE        0xD000		/* DisplayPort: 0xC610~0xC7D4 */
 #define VIA_MMIO_REGBASE        0x0
 #define VIA_MMIO_VGABASE        0x8000
 #define VIA_MMIO_BLTBASE        0x200000
@@ -69,9 +69,13 @@
 #define VIA_REG_PITCH           0x038       /* pitch of src and dst */
 #define VIA_REG_MONOPAT0        0x03C
 #define VIA_REG_MONOPAT1        0x040
+#define VIA_REG_ROT_TMP_ADDR    0x044       /* Rotation Temporary Base Address */
+#define VIA_REG_ROTSRC          0x048       /* Resolution X,Y of Rotation Source */
+#define VIA_REG_ROT_TMP_PITCH   0x04C       /* Pitch of Rotation Temporary Memory */
+#define VIA_REG_ROTDST          0x050       /* Resolution X,Y of Rotation Destination*/
 #define VIA_REG_COLORPAT        0x100       /* from 0x100 to 0x1ff */
 
-/* defineds vor VIA 2D registers for VT3353 (M1 engine) */
+/* defines for VIA 2D registers for VT3353 (M1 engine) */
 #define VIA_REG_GECMD_M1        0x000
 #define VIA_REG_GEMODE_M1       0x004
 #define VIA_REG_GESTATUS_M1     0x004       /* as same as VIA_REG_GEMODE */
@@ -99,10 +103,15 @@
 #define VIA_REG_MONOPATBGC_M1   0x05C       /* Add background color of Pattern */
 #define VIA_REG_COLORPAT_M1     0x100       /* from 0x100 to 0x1ff */
 
-
+/*410*/
+#define VIA_REG_CFC		0x030
+#define VIA_REG_SCALEFACTOR	0x034
+#define VIA_REG_SCALINGMODE	0x038
+#define VIA_REG_23DIDCLT	0x060
+#define VIA_REG_23DWAITCLT	0x06c
 /* defines for VIA video registers */
-#define VIA_REG_INTERRUPT       0x200
-#define VIA_REG_CRTCSTART       0x214
+#define VIA_REG_INTERRUPT	0x200
+#define VIA_REG_CRTCSTART	0x214
 
 
 /* defines for VIA HW cursor registers */
@@ -167,18 +176,31 @@
 #define VIA_CMD_RGTR_BUSY       0x00000080  /* Command Regulator is busy */
 #define VIA_2D_ENG_BUSY         0x00000002  /* 2D Engine is busy */
 #define VIA_3D_ENG_BUSY         0x00000001  /* 3D Engine is busy */
-#define VIA_VR_QUEUE_BUSY       0x00020000 /* Virtual Queue is busy */
+#define VIA_VR_QUEUE_EMPTY	0x00020000  /* Virtual Queue is busy */
 
-/* VIA_REG_STATUS(0x400): Egine Status */
+/* VIA_REG_STATUS(0x400): Engine Status for H5 */
 #define VIA_CMD_RGTR_BUSY_H5    0x00000010  /* Command Regulator is busy */
 #define VIA_2D_ENG_BUSY_H5      0x00000002  /* 2D Engine is busy */
 #define VIA_3D_ENG_BUSY_H5      0x00001FE1  /* 3D Engine is busy */
 #define VIA_VR_QUEUE_BUSY_H5    0x00000004  /* Virtual Queue is busy */
 
+/* VIA_REG_STATUS(0x400): Engine Status for VT3353 */
+#define VIA_CMD_RGTR_BUSY_M1   0x00000010  /* Command Regulator is busy */
+#define VIA_2D_ENG_BUSY_M1     0x00000002  /* 2D Engine is busy */
+#define VIA_3D_ENG_BUSY_M1     0x00001FE1  /* 3D Engine is busy */
+#define VIA_VR_QUEUE_BUSY_M1   0x00000004  /* Virtual Queue is busy */
+
 /* VIA_REG_GECMD(0x00): 2D Engine Command  */
 #define VIA_GEC_NOOP            0x00000000
 #define VIA_GEC_BLT             0x00000001
 #define VIA_GEC_LINE            0x00000005
+/*410 GECMD*/
+#define VIA_GEC_ALPHA               0x00000003
+#define VIA_GEC_BLT_ROT             0x00000009
+#define VIA_GEC_MONOTEX             0x00000002
+#define VIA_GEC_ALPHA_ROT_MONOTEX   0x0000000a
+
+#define VIA_GEC_ROT		0x00000008  /* Rotate Command */
 
 #define VIA_GEC_SRC_XY          0x00000000
 #define VIA_GEC_SRC_LINEAR      0x00000010
