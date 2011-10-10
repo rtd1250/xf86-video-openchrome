@@ -348,7 +348,7 @@ CH7xxxModeI2C(ScrnInfoPtr pScrn, DisplayModePtr mode)
         Mask = ch7019MaskTable;
     }
 
-    DEBUG(xf86DrvMsg(pBIOSInfo->scrnIndex, X_INFO, "CH7011ModeI2C\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CH7011ModeI2C\n"));
 
     xf86I2CWriteByte(pBIOSInfo->TVI2CDev, 0x49, 0x3E);
     xf86I2CWriteByte(pBIOSInfo->TVI2CDev, 0x1E, 0xD0);
@@ -425,7 +425,7 @@ CH7xxxModeCrtc(xf86CrtcPtr crtc, DisplayModePtr mode)
         Mask = ch7019MaskTable;
     }
 
-    DEBUG(xf86DrvMsg(pBIOSInfo->scrnIndex, X_INFO, "CH7xxxModeCrtc\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CH7xxxModeCrtc\n"));
 
     if (pVia->IsSecondary) {
         switch (pScrn->bitsPerPixel) {

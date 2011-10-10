@@ -149,8 +149,6 @@ typedef struct ViaSimultaneousInfo {
 
 
 typedef struct _VIABIOSINFO {
-    int         scrnIndex;
-
 	xf86OutputPtr analog;
 	xf86OutputPtr lvds;
 	xf86OutputPtr tv;

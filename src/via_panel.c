@@ -80,7 +80,6 @@ VIAGetRec(ScrnInfoPtr pScrn)
         VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
         if (pBIOSInfo) {
-            pBIOSInfo->scrnIndex = pScrn->scrnIndex;
             pBIOSInfo->TVI2CDev = NULL;
 
             pBIOSInfo->Panel =
