@@ -551,7 +551,6 @@ via_dp_init(ScrnInfoPtr pScrn)
 		output->possible_clones = 0;
 		output->interlaceAllowed = TRUE;
 		output->doubleScanAllowed = FALSE;
-		pBIOSInfo->dp = output;
 	}
 }
 
@@ -711,7 +710,6 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
 
     pBIOSInfo->analog = NULL;
     pBIOSInfo->lvds = NULL;
-    pBIOSInfo->dp = NULL;
 
     /* VGA */
 	via_analog_init(pScrn);
