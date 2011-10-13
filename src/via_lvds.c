@@ -448,11 +448,11 @@ via_lvds_init(ScrnInfoPtr pScrn)
 
 	if (pBIOSInfo->ForcePanel) {
 		xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Enabling panel from config.\n");
-		output = xf86OutputCreate(pScrn, &via_lvds_funcs, "LVDS");
+		output = xf86OutputCreate(pScrn, &via_lvds_funcs, "LVDS-0");
 	} else if (pVia->Id && (pVia->Id->Outputs & VIA_DEVICE_LCD)) {
 		xf86DrvMsg(pScrn->scrnIndex, X_INFO,
 				"Enabling panel from PCI-subsystem ID information.\n");
-		output = xf86OutputCreate(pScrn, &via_lvds_funcs, "LVDS");
+		output = xf86OutputCreate(pScrn, &via_lvds_funcs, "LVDS-0");
 	}
 	if (output)  {
 			output->possible_crtcs = 0x2;
