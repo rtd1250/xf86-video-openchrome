@@ -232,7 +232,6 @@ typedef struct _VIA {
 
     /* These are linear addresses. */
     unsigned char*      MapBase;
-    unsigned char*      VidMapBase;
     unsigned char*      MpegMapBase;
     unsigned char*      BltBase;
     unsigned char*      MapBaseDense;

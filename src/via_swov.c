@@ -174,7 +174,7 @@ FlushVidRegBuffer(VIAPtr pVia)
     viaWaitVideoCommandFire(pVia);
 
     for (i = 0; i < pVia->VidRegCursor; i += 2) {
-        VIDOutD(pVia->VidRegBuffer[i], pVia->VidRegBuffer[i + 1]);
+        VIASETREG(pVia->VidRegBuffer[i], pVia->VidRegBuffer[i + 1]);
         DBG_DD(ErrorF("FlushVideoRegs: [%i] %08lx %08lx\n",
                       i >> 1, pVia->VidRegBuffer[i] + 0x200,
                       pVia->VidRegBuffer[i + 1]));
@@ -1159,7 +1159,7 @@ AddHQVSurface(ScrnInfoPtr pScrn, unsigned int numbuf, CARD32 fourcc)
 
     for (i = 0; i < numbuf; i++) {
         pVia->swov.overlayRecordV1.dwHQVAddr[i] = addr;
-        VIDOutD(AddrReg[i] + proReg, addr);
+        VIASETREG(AddrReg[i] + proReg, addr);
         addr += fbsize;
     }
 
@@ -1377,18 +1377,18 @@ SetFIFO_V3(VIAPtr pVia, CARD8 depth, CARD8 prethreshold, CARD8 threshold)
         case PCI_CHIP_VT3353:
         case PCI_CHIP_VT3409:
             SaveVideoRegister(pVia, ALPHA_V3_FIFO_CONTROL,
-                              (VIDInD(ALPHA_V3_FIFO_CONTROL) & ALPHA_FIFO_MASK)
+                              (VIAGETREG(ALPHA_V3_FIFO_CONTROL) & ALPHA_FIFO_MASK)
                                | ((depth - 1) & 0xff) | ((threshold & 0xff) << 8));
             SaveVideoRegister(pVia, ALPHA_V3_PREFIFO_CONTROL,
-                              (VIDInD(ALPHA_V3_PREFIFO_CONTROL)
+                              (VIAGETREG(ALPHA_V3_PREFIFO_CONTROL)
                               & ~V3_FIFO_MASK_3314) | (prethreshold & 0xff));
             break;
         default :
             SaveVideoRegister(pVia, ALPHA_V3_FIFO_CONTROL,
-                              (VIDInD(ALPHA_V3_FIFO_CONTROL) & ALPHA_FIFO_MASK)
+                              (VIAGETREG(ALPHA_V3_FIFO_CONTROL) & ALPHA_FIFO_MASK)
                               | ((depth - 1) & 0xff) | ((threshold & 0xff) << 8));
             SaveVideoRegister(pVia, ALPHA_V3_PREFIFO_CONTROL,
-                              (VIDInD(ALPHA_V3_PREFIFO_CONTROL) & ~V3_FIFO_MASK)
+                              (VIAGETREG(ALPHA_V3_PREFIFO_CONTROL) & ~V3_FIFO_MASK)
                               | (prethreshold & 0x7f));
             break;
     }
@@ -1603,8 +1603,8 @@ SetChromaKey(VIAPtr pVia, unsigned long videoFlag,
     chromaLow &= CHROMA_KEY_LOW;
     chromaHigh &= CHROMA_KEY_HIGH;
 
-    chromaLow |= (VIDInD(V_CHROMAKEY_LOW) & ~CHROMA_KEY_LOW);
-    chromaHigh |= (VIDInD(V_CHROMAKEY_HIGH) & ~CHROMA_KEY_HIGH);
+    chromaLow |= (VIAGETREG(V_CHROMAKEY_LOW) & ~CHROMA_KEY_LOW);
+    chromaHigh |= (VIAGETREG(V_CHROMAKEY_HIGH) & ~CHROMA_KEY_HIGH);
 
     if (pVia->VideoEngine == VIDEO_ENGINE_CME)
         chromaLow |= 0x40000000;

@@ -178,8 +178,6 @@ VIAMapMMIO(ScrnInfoPtr pScrn)
         return FALSE;
     }
 
-    /* Memory mapped IO for video engine. */
-    pVia->VidMapBase = pVia->MapBase + 0x200;
     /* Memory mapped IO for mpeg engine. */
     pVia->MpegMapBase = pVia->MapBase + 0xc00;
 
