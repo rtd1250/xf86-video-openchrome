@@ -33,7 +33,7 @@
 #include "xf86.h"
 #include "xf86_OSproc.h"
 
-#if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 6 
+#if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 6
 #include "xf86Resources.h"
 #endif
 
@@ -270,17 +270,17 @@ DecideOverlaySupport(ScrnInfoPtr pScrn)
         return TRUE;
 #endif
 
-    /* Small trick here. We keep the height in 16's of lines and width in 32's 
+    /* Small trick here. We keep the height in 16's of lines and width in 32's
      * to avoid numeric overflow */
 
     if (pVia->ChipId != PCI_CHIP_VT3205 &&
         pVia->ChipId != PCI_CHIP_VT3204 &&
         pVia->ChipId != PCI_CHIP_VT3259 &&
-        pVia->ChipId != PCI_CHIP_VT3314 && 
-        pVia->ChipId != PCI_CHIP_VT3327 && 
-        pVia->ChipId != PCI_CHIP_VT3336 && 
-        pVia->ChipId != PCI_CHIP_VT3409 && 
-        pVia->ChipId != PCI_CHIP_VT3364 && 
+        pVia->ChipId != PCI_CHIP_VT3314 &&
+        pVia->ChipId != PCI_CHIP_VT3327 &&
+        pVia->ChipId != PCI_CHIP_VT3336 &&
+        pVia->ChipId != PCI_CHIP_VT3409 &&
+        pVia->ChipId != PCI_CHIP_VT3364 &&
         pVia->ChipId != PCI_CHIP_VT3324 &&
 	pVia->ChipId != PCI_CHIP_VT3353) {
         CARD32 bandwidth = (mode->HDisplay >> 4) * (mode->VDisplay >> 5) *
@@ -313,7 +313,6 @@ DecideOverlaySupport(ScrnInfoPtr pScrn)
         return FALSE;
 
     } else {
-        
         VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
         unsigned width, height, refresh, dClock;
         float mClock, memEfficiency, needBandWidth, totalBandWidth;
@@ -370,7 +369,7 @@ DecideOverlaySupport(ScrnInfoPtr pScrn)
         width = mode->HDisplay;
         height = mode->VDisplay;
         refresh = mode->VRefresh;
-	/* 
+	/*
 	 * Approximative, VERY conservative formula in some cases.
 	 * This formula and the one below are derived analyzing the
 	 * tables present in VIA's own drivers. They may reject the over-
@@ -381,7 +380,7 @@ DecideOverlaySupport(ScrnInfoPtr pScrn)
             needBandWidth =
                 (float)(((pScrn->bitsPerPixel >> 3) + VIDEO_BPP) * dClock);
             totalBandWidth = (float)(mClock * 16. * memEfficiency);
-    
+
             DBG_DD(ErrorF(" via_video.c : cBitsPerPel= %d : \n",
                 pScrn->bitsPerPixel));
             DBG_DD(ErrorF(" via_video.c : Video_Bpp= %d : \n", VIDEO_BPP));
@@ -429,7 +428,7 @@ static void
 viaResetVideo(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    vmmtr viaVidEng = (vmmtr) pVia->VidMapBase;
+    vmmtr viaVidEng = (vmmtr) (pVia->MapBase + 0x200);
 
     DBG_DD(ErrorF(" via_video.c : viaResetVideo: \n"));
 
@@ -439,15 +438,14 @@ viaResetVideo(ScrnInfoPtr pScrn)
     viaVidEng->compose = V3_COMMAND_FIRE;
     viaVidEng->color_key = 0x821;
     viaVidEng->snd_color_key = 0x821;
-
 }
 
 void
 viaSaveVideo(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    vmmtr viaVidEng = (vmmtr) pVia->VidMapBase;
-    
+    vmmtr viaVidEng = (vmmtr) (pVia->MapBase + 0x200);
+
     DBG_DD(ErrorF(" via_video.c : viaSaveVideo : \n"));
     /* Save video registers */
     memcpy(pVia->VideoRegs, (void*)viaVidEng, sizeof(video_via_regs));
@@ -464,14 +462,13 @@ void
 viaRestoreVideo(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    vmmtr viaVidEng = (vmmtr) pVia->VidMapBase;
+    vmmtr viaVidEng = (vmmtr) (pVia->MapBase + 0x200);
     video_via_regs  *localVidEng = pVia->VideoRegs;
 
-    
     DBG_DD(ErrorF(" via_video.c : viaRestoreVideo : \n"));
+
     /* Restore video registers */
-    /* flush restored video engines' setting to VidMapBase */
-    
+    /* flush restored video engines' setting to MapBase */
     viaVidEng->alphawin_hvstart = localVidEng->alphawin_hvstart;
     viaVidEng->alphawin_size   = localVidEng->alphawin_size;
     viaVidEng->alphawin_ctl    = localVidEng->alphawin_ctl;
@@ -503,7 +500,7 @@ viaRestoreVideo(ScrnInfoPtr pScrn)
 
         /* Fix cursor garbage after suspend for VX855 and VX900 (#405) */
         /* 0x2E4 T Signature Data Result 1 */
-        viaVidEng->video1u_addr1         = localVidEng->video1u_addr1; 
+        viaVidEng->video1u_addr1         = localVidEng->video1u_addr1;
         /* 0x2E8 HI for Primary Display FIFO Control Signal */
         viaVidEng->video1u_addr2         = localVidEng->video1u_addr2;
         /* 0x2EC HI for Primary Display FIFO Transparent color */
@@ -533,10 +530,10 @@ viaRestoreVideo(ScrnInfoPtr pScrn)
     viaVidEng->video3_zoom     = localVidEng->video3_zoom;
     viaVidEng->video3_mictl    = localVidEng->video3_mictl;
     viaVidEng->video3_CSC1     = localVidEng->video3_CSC1;
-    viaVidEng->video3_CSC2     = localVidEng->video3_CSC2;    
+    viaVidEng->video3_CSC2     = localVidEng->video3_CSC2;
     viaVidEng->compose         = localVidEng->compose;
-    
-    viaVidEng->video3_ctl = pVia->dwV3;
+    viaVidEng->video3_ctl      = pVia->dwV3;
+
     if (pVia->ChipId != PCI_CHIP_VT3314) {
         viaVidEng->video1_ctl = pVia->dwV1;
         viaVidEng->compose = V1_COMMAND_FIRE;
@@ -548,7 +545,7 @@ void
 viaExitVideo(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    vmmtr viaVidEng = (vmmtr) pVia->VidMapBase;
+    vmmtr viaVidEng = (vmmtr) (pVia->MapBase + 0x200);
     XF86VideoAdaptorPtr curAdapt;
     int i, j, numPorts;
 
@@ -634,7 +631,7 @@ viaInitVideo(ScreenPtr pScreen)
         (pVia->Chipset == VIA_K8M800) || (pVia->Chipset == VIA_PM800) ||
         (pVia->Chipset == VIA_VM800) || (pVia->Chipset == VIA_K8M890) ||
         (pVia->Chipset == VIA_P4M900) || (pVia->Chipset == VIA_CX700) ||
-        (pVia->Chipset == VIA_P4M890) || (pVia->Chipset == VIA_VX800) || 
+        (pVia->Chipset == VIA_P4M890) || (pVia->Chipset == VIA_VX800) ||
         (pVia->Chipset == VIA_VX855)) {
         num_new = viaSetupAdaptors(pScreen, &newAdaptors);
         num_adaptors = xf86XVListGenericAdaptors(pScrn, &adaptors);
@@ -796,7 +793,7 @@ viaSetPortAttribute(ScrnInfoPtr pScrn,
         Atom attribute, INT32 value, pointer data)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    vmmtr viaVidEng = (vmmtr) pVia->VidMapBase;
+    vmmtr viaVidEng = (vmmtr) (pVia->MapBase + 0x200);
     viaPortPrivPtr pPriv = (viaPortPrivPtr) data;
     int attr, avalue;
 
@@ -891,7 +888,6 @@ viaGetPortAttribute(ScrnInfoPtr pScrn,
 
     } else {
         DBG_DD(ErrorF(" via_video.c : viaGetPortAttribute : is not supported the attribute\n"));
-        
         /*return BadMatch */;
     }
     return Success;
@@ -932,33 +928,29 @@ Flip(VIAPtr pVia, viaPortPrivPtr pPriv, int fourcc,
         case FOURCC_RV15:
         case FOURCC_RV16:
         case FOURCC_RV32:
-            while ((VIDInD(HQV_CONTROL + proReg) & HQV_SW_FLIP)
+            while ((VIAGETREG(HQV_CONTROL + proReg) & HQV_SW_FLIP)
                     && --count);
-            VIDOutD(HQV_SRC_STARTADDR_Y + proReg,
+            VIASETREG(HQV_SRC_STARTADDR_Y + proReg,
                 pVia->swov.SWDevice.dwSWPhysicalAddr[DisplayBufferIndex]);
-            VIDOutD(HQV_CONTROL + proReg,
-                (VIDInD(HQV_CONTROL +
-                proReg) & ~HQV_FLIP_ODD) | HQV_SW_FLIP | HQV_FLIP_STATUS);
+            VIASETREG(HQV_CONTROL + proReg, (VIAGETREG(HQV_CONTROL + proReg) & ~HQV_FLIP_ODD) | HQV_SW_FLIP | HQV_FLIP_STATUS);
             break;
         case FOURCC_YV12:
         default:
-            while ((VIDInD(HQV_CONTROL + proReg) & HQV_SW_FLIP)
+            while ((VIAGETREG(HQV_CONTROL + proReg) & HQV_SW_FLIP)
                     && --count);
-            VIDOutD(HQV_SRC_STARTADDR_Y + proReg,
+            VIASETREG(HQV_SRC_STARTADDR_Y + proReg,
                 pVia->swov.SWDevice.dwSWPhysicalAddr[DisplayBufferIndex]);
             if (pVia->VideoEngine == VIDEO_ENGINE_CME) {
-                VIDOutD(HQV_SRC_STARTADDR_U + proReg,
+                VIASETREG(HQV_SRC_STARTADDR_U + proReg,
                 pVia->swov.SWDevice.dwSWCrPhysicalAddr[DisplayBufferIndex]);
             } else {
-                VIDOutD(HQV_SRC_STARTADDR_U,
+                VIASETREG(HQV_SRC_STARTADDR_U,
                     pVia->swov.SWDevice.dwSWCbPhysicalAddr[DisplayBufferIndex]);
-                VIDOutD(HQV_SRC_STARTADDR_V,
+                VIASETREG(HQV_SRC_STARTADDR_V,
                     pVia->swov.SWDevice.dwSWCrPhysicalAddr[DisplayBufferIndex]);
             }
-            VIDOutD(HQV_CONTROL + proReg,
-            (VIDInD(HQV_CONTROL +
-                proReg) & ~HQV_FLIP_ODD) | HQV_SW_FLIP | HQV_FLIP_STATUS);
-        break;
+            VIASETREG(HQV_CONTROL + proReg, (VIAGETREG(HQV_CONTROL + proReg) & ~HQV_FLIP_ODD) | HQV_SW_FLIP | HQV_FLIP_STATUS);
+	    break;
     }
 }
 
@@ -970,8 +962,8 @@ static void
 nv12cp(unsigned char *dst,
     const unsigned char *src, int dstPitch, int w, int h, int yuv422)
 {
-    /* 
-     * Blit luma component as a fake YUY2 assembler blit. 
+    /*
+     * Blit luma component as a fake YUY2 assembler blit.
      */
 
     (*viaFastVidCpy) (dst, src, dstPitch, w >> 1, h, TRUE);
@@ -1000,7 +992,7 @@ viaDmaBlitImage(VIAPtr pVia,
     Bool nv12Conversion;
 
     bounceBuffer = ((unsigned long)src & 15);
-    nv12Conversion = (pVia->VideoEngine == VIDEO_ENGINE_CME && 
+    nv12Conversion = (pVia->VideoEngine == VIDEO_ENGINE_CME &&
         id == FOURCC_YV12);
 
     switch (id) {
@@ -1104,7 +1096,6 @@ viaDmaBlitImage(VIAPtr pVia,
         while (-EAGAIN == (err =
             drmCommandWriteRead(pVia->drmFD, DRM_VIA_DMA_BLIT, &blit,
                 sizeof(blit))));
-        
         if (err < 0)
             return -1;
     }
@@ -1176,7 +1167,7 @@ viaPutImage(ScrnInfoPtr pScrn,
                 ViaSwovSurfaceDestroy(pScrn, pPriv);
             }
 
-            if (Success != (retCode = 
+            if (Success != (retCode =
                 ViaSwovSurfaceCreate(pScrn, pPriv, id, width, height))) {
                 DBG_DD(ErrorF
                         ("             : Fail to Create SW Video Surface\n"));
@@ -1243,7 +1234,7 @@ viaPutImage(ScrnInfoPtr pScrn,
                 return BadAlloc;
             }
 
-            /* 
+            /*
              *  fill video overlay parameter
              */
             lpUpdateOverlay->SrcLeft = src_x;
@@ -1280,7 +1271,7 @@ viaPutImage(ScrnInfoPtr pScrn,
 
             pVia->dwFrameNum++;
 
-            /* If the dest rec. & extendFIFO doesn't change, don't do UpdateOverlay 
+            /* If the dest rec. & extendFIFO doesn't change, don't do UpdateOverlay
              * unless the surface clipping has changed */
             if ((pPriv->old_drw_x == drw_x) && (pPriv->old_drw_y == drw_y)
                     && (pPriv->old_drw_w == drw_w) && (pPriv->old_drw_h == drw_h)
@@ -1435,9 +1426,8 @@ viaQueryImageAttributes(ScrnInfoPtr pScrn,
     if (offsets)
         DBG_DD(ErrorF(" offsets[0]=%d, offsets[1]=%d, offsets[2]=%d, ",
                     offsets[0], offsets[1], offsets[2]));
-    
-    DBG_DD(ErrorF(" width=%d, height=%d \n", *w, *h));
 
+    DBG_DD(ErrorF(" width=%d, height=%d \n", *w, *h));
     return size;
 }
 

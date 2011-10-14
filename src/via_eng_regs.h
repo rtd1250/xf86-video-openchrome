@@ -90,7 +90,7 @@
 /*
  *      video registers
  */
-#define V_FLAGS				    0x00
+#define V_FLAGS			0x200
 #define V_CAP_STATUS            0x04
 #define V_FLIP_STATUS           0x04
 #define V_ALPHA_WIN_START       0x08
@@ -103,7 +103,7 @@
 #define V_ALPHA_STARTADDR       0x24
 #define V_CHROMAKEY_LOW         0x28
 #define V_CHROMAKEY_HIGH        0x2C
-#define V1_CONTROL              0x30
+#define V1_CONTROL              0x230
 #define V12_QWORD_PER_LINE      0x34
 #define V1_STARTADDR_1          0x38
 #define V1_STARTADDR_Y1         V1_STARTADDR_1
@@ -130,14 +130,14 @@
 #define ALPHA_V3_FIFO_CONTROL   0x78
 #define V3_SOURCE_WIDTH         0x7C
 #define V3_COLOR_KEY            0x80
-#define V1_ColorSpaceReg_1      0x84
-#define V1_ColorSpaceReg_2      0x88
+#define V1_ColorSpaceReg_1      0x284
+#define V1_ColorSpaceReg_2      0x288
 #define V1_STARTADDR_CB0        0x8C
 #define V1_OPAQUE_CONTROL       0x90  /* To be deleted */
 #define V3_OPAQUE_CONTROL       0x94  /* To be deleted */
-#define V_COMPOSE_MODE          0x98
+#define V_COMPOSE_MODE          0x298
 #define V3_STARTADDR_2          0x9C
-#define V3_CONTROL              0xA0
+#define V3_CONTROL              0x2A0
 #define V3_STARTADDR_0          0xA4
 #define V3_STARTADDR_1          0xA8
 #define V3_STRIDE               0xAC
@@ -145,11 +145,11 @@
 #define V3_WIN_START_X          0xB2
 #define V3_WIN_END_Y            0xB4
 #define V3_WIN_END_X            0xB6
-#define V3_ALPHA_QWORD_PER_LINE 0xB8
+#define V3_ALPHA_QWORD_PER_LINE 0x2B8
 #define V3_ZOOM_CONTROL         0xBC
 #define V3_MINI_CONTROL         0xC0
-#define V3_ColorSpaceReg_1      0xC4
-#define V3_ColorSpaceReg_2      0xC8
+#define V3_ColorSpaceReg_1      0x2C4
+#define V3_ColorSpaceReg_2      0x2C8
 #define V3_DISPLAY_TEMP         0xCC  /* No use */
 #define V1_STARTADDR_CB1        0xE4
 #define V1_STARTADDR_CB2        0xE8
@@ -175,7 +175,7 @@
 #define CAP0_ANCIL_COUNT    0x130
 #define CAP0_MAXCOUNT       0x134
 #define CAP0_VBIMAX_COUNT   0x138
-#define CAP0_DATA_COUNT     0x13C 
+#define CAP0_DATA_COUNT     0x13C
 #define CAP0_FB_STARTADDR0  0x140
 #define CAP0_FB_STARTADDR1  0x144
 #define CAP0_FB_STARTADDR2  0x148
@@ -190,22 +190,22 @@
 #define CAP1_ANCIL_COUNT    0x174 /*To be deleted*/
 #define CAP1_MAXCOUNT       0x178
 #define CAP1_VBIMAX_COUNT   0x17C /*To be deleted*/
-#define CAP1_DATA_COUNT     0x180 
+#define CAP1_DATA_COUNT     0x180
 #define CAP1_FB_STARTADDR0  0x184
 #define CAP1_FB_STARTADDR1  0x188
-#define CAP1_STRIDE         0x18C 
+#define CAP1_STRIDE         0x18C
 
 /* SUBPICTURE Registers */
-#define SUBP_CONTROL_STRIDE     0x1C0
-#define SUBP_STARTADDR          0x1C4
-#define RAM_TABLE_CONTROL       0x1C8
-#define RAM_TABLE_READ          0x1CC
+#define SUBP_CONTROL_STRIDE     0x3C0
+#define SUBP_STARTADDR          0x3C4
+#define RAM_TABLE_CONTROL       0x3C8
+#define RAM_TABLE_READ          0x3CC
 
-/* HQV Registers*/ 
-#define HQV_CONTROL             0x1D0
-#define HQV_SRC_STARTADDR_Y     0x1D4
-#define HQV_SRC_STARTADDR_U     0x1D8
-#define HQV_SRC_STARTADDR_V     0x1DC
+/* HQV Registers*/
+#define HQV_CONTROL             0x3D0
+#define HQV_SRC_STARTADDR_Y     0x3D4
+#define HQV_SRC_STARTADDR_U     0x3D8
+#define HQV_SRC_STARTADDR_V     0x3DC
 #define HQV_SRC_FETCH_LINE      0x1E0
 #define HQV_FILTER_CONTROL      0x1E4
 #define HQV_MINIFY_CONTROL      0x1E8

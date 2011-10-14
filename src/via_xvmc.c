@@ -28,7 +28,7 @@
 #include "xf86.h"
 #include "xf86_OSproc.h"
 
-#if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 6 
+#if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 6
 #include "xf86Resources.h"
 #endif
 
@@ -70,7 +70,7 @@
 /*
  * List of attributes for the XvMC extension to handle.
  * As long as the attribute is supported by the Xv adaptor, it needs only
- * to be added here to be supported also by XvMC. 
+ * to be added here to be supported also by XvMC.
  * Currently, only colorkey seems to be supported by Xv for Putimage.
  */
 static char *attrXvMC[VIA_NUM_XVMC_ATTRIBUTES] = { "XV_COLORKEY",
@@ -266,8 +266,8 @@ static XF86ImagePtr Via_subpicture_list[2] = {
     (XF86ImagePtr) & ai44_subpicture
 };
 
-/* 
- * Filling in the device dependent adaptor record. 
+/*
+ * Filling in the device dependent adaptor record.
  * This is named "VIA Video Overlay" because this code falls under the
  * XV extension, the name must match or it won't be used.
  *
@@ -770,10 +770,10 @@ ViaXvMCDestroySubpicture(ScrnInfoPtr pScrn, XvMCSubpicturePtr pSubp)
                         i | VIA_XVMC_VALID, 0, __ret);
                 if (!__ret) {
                     /* Turn subpicture off. */
-                    while (VIDInD(V_COMPOSE_MODE) &
+                    while (VIAGETREG(V_COMPOSE_MODE) &
                            (V1_COMMAND_FIRE | V3_COMMAND_FIRE)) ;
-                    VIDOutD(SUBP_CONTROL_STRIDE,
-                            VIDInD(SUBP_CONTROL_STRIDE) & ~SUBP_HQV_ENABLE);
+                    VIASETREG(SUBP_CONTROL_STRIDE,
+                            VIAGETREG(SUBP_CONTROL_STRIDE) & ~SUBP_HQV_ENABLE);
                 }
             }
 
@@ -809,10 +809,10 @@ viaXvMCSetDisplayLock(ScrnInfoPtr pScrn, ViaXvMCXVPriv * vx)
 
         if (sAPriv->XvMCSubPicOn[vx->xvmc_port] & VIA_XVMC_VALID) {
             sAPriv->XvMCSubPicOn[vx->xvmc_port] = 0;
-            while (VIDInD(V_COMPOSE_MODE) &
+            while (VIAGETREG(V_COMPOSE_MODE) &
                    (V1_COMMAND_FIRE | V3_COMMAND_FIRE)) ;
-            VIDOutD(SUBP_CONTROL_STRIDE,
-                    VIDInD(SUBP_CONTROL_STRIDE) & ~SUBP_HQV_ENABLE);
+            VIASETREG(SUBP_CONTROL_STRIDE,
+                    VIAGETREG(SUBP_CONTROL_STRIDE) & ~SUBP_HQV_ENABLE);
         }
     }
     return 0;
