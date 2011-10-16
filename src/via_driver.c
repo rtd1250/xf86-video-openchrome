@@ -52,7 +52,6 @@
 #ifdef XF86DRI
 #include "dri.h"
 #endif
-#include "via_id.h"
 
 /* RandR support */
 #include "xf86RandR12.h"

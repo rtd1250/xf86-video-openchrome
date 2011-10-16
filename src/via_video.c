@@ -53,7 +53,6 @@
 #include "via_xvpriv.h"
 #include "via_swov.h"
 #include "via_memcpy.h"
-#include "via_id.h"
 #include "fourcc.h"
 
 /*

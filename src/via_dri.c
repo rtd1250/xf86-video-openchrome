@@ -41,7 +41,6 @@
 #include "via_driver.h"
 #include "via_drm.h"
 #include "via_dri.h"
-#include "via_id.h"
 #include "xf86drm.h"
 
 #ifndef DRIINFO_MAJOR_VERSION

@@ -28,7 +28,6 @@
 
 #include "globals.h"
 #include "via_driver.h"
-#include "via_id.h"
 
 static void
 ViaMMIODisable(ScrnInfoPtr pScrn)

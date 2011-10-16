@@ -32,7 +32,6 @@
 
 #include "compiler.h"
 #include "xf86.h"
-#include "via_id.h"
 #include "via_driver.h" /* for HAVE_DEBUG */
 #include "via_vgahw.h"
 

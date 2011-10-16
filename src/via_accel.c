@@ -40,7 +40,6 @@
 
 #include "via_driver.h"
 #include "via_regs.h"
-#include "via_id.h"
 #include "via_dmabuffer.h"
 
 #ifdef X_HAVE_XAAGETROP

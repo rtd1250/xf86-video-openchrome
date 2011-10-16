@@ -30,7 +30,6 @@
 #include "via_driver.h"
 #include "via_vgahw.h"
 #include "via_vt162x.h"
-#include "via_id.h"
 
 static void
 ViaSetTVClockSource(xf86CrtcPtr crtc)

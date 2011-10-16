@@ -42,7 +42,6 @@
 #include "via_drm.h"
 #endif
 #include "via_vgahw.h"
-#include "via_id.h"
 
 #include <math.h>
 #include <unistd.h>

@@ -30,7 +30,6 @@
 #endif
 
 #include "via_driver.h"
-#include "via_id.h"
 
 /*
  * There's no reason for this to be known outside of via_id.o;

@@ -30,7 +30,6 @@
 
 #include "via_driver.h"
 #include "via_vgahw.h"
-#include "via_id.h"
 
 /*
  * Now that via_bios is no longer such a behemoth and the relevant code has
