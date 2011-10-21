@@ -1272,10 +1272,7 @@ iga1_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
 	if (pVia->pVbe) {
 		ViaVbeAdjustFrame(scrnIndex, x, y);
 	} else {
-		if (pVia->UseLegacyModeSwitch)
-			ViaFirstCRTCSetStartingAddress(pScrn, x, y);
-		else
-			ViaFirstCRTCSetStartingAddress(pScrn, x, y);
+		ViaFirstCRTCSetStartingAddress(pScrn, x, y);
 	}
 
 	VIAVidAdjustFrame(pScrn, x, y);
@@ -1723,10 +1720,7 @@ iga2_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
 	if (pVia->pVbe) {
 		ViaVbeAdjustFrame(scrnIndex, x, y);
 	} else {
-		if (pVia->UseLegacyModeSwitch)
-			ViaSecondCRTCSetStartingAddress(pScrn, x, y);
-		else
-			ViaSecondCRTCSetStartingAddress(pScrn, x, y);
+		ViaSecondCRTCSetStartingAddress(pScrn, x, y);
 	}
 	VIAVidAdjustFrame(pScrn, x, y);
 }
