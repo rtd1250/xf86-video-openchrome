@@ -37,8 +37,8 @@
 #include "vbe.h"
 #include "vbeModes.h"
 
-#define R16(v)                ((v) & 0xffff)
-
+#define R16(v)			((v) & 0xffff)
+#define VBE_DEFAULT_REFRESH	6000
 
 void
 ViaVbeAdjustFrame(int scrnIndex, int x, int y)

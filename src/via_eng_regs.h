@@ -32,11 +32,6 @@
 #include <assert.h>
 #include <stdlib.h>
 
-/* Video Engines */
-#define VIDEO_ENGINE_UNK	0 /* Unknown video engine */
-#define VIDEO_ENGINE_CLE	1 /* CLE First generation video engine */
-#define VIDEO_ENGINE_CME	2 /* CME Second generation video engine */
-
 /* Video status flag */
 
 #define VIDEO_HIDE              0x00000000  /*Video off*/
@@ -66,7 +61,7 @@
 #define SW_USE_V1               0x00000010  /*[ 4] : 1:Capture 1 use V1, 0:Capture 1 use V3             */
 #define SW_USE_V3               0x00000000  /*[ 4] : 1:Capture 1 use V1, 0:Capture 1 use V3             */
 #define SW_USE_HQV              0x00000020  /*[ 5] : 1:Capture 1 use HQV,0:Capture 1 not use HQV        */
-     
+
 /*
 #define VIDEO1_INUSE            0x00000010  //[ 4] : 1:Video 1 is used with S/W flip
 #define VIDEO1_USE_HQV          0x00000020  //[ 5] : 1:Video 1 use HQV with S/W flip
@@ -158,49 +153,23 @@
 #define V1_STARTADDR_CR1        0x2F4
 #define V1_STARTADDR_CR2        0x2F8
 #define V1_STARTADDR_CR3        0x2FC
-
-/* These regs move about on diffrent hw */
-#define VIA_REG_HI_CONTROL1	VIA_REG_ALPHA_CONTROL
-#define VIA_REG_HI_BASE1	VIA_REG_ALPHA_BASE
-#define VIA_REG_HI_POS1		VIA_REG_ALPHA_POS
-#define VIA_REG_HI_OFFSET1	VIA_REG_ALPHA_OFFSET
-#define VIA_REG_HI_FIFO1	VIA_REG_ALPHA_FIFO
-#define VIA_REG_HI_TRANSKEY1	VIA_REG_ALPHA_TRANSKEY
-
-/* Note that Hardware Icon and Alpha Window overlap */
-#define VIA_REG_ALPHA_CONTROL	0x260
-#define VIA_REG_ALPHA_BASE	0x224
-#define VIA_REG_ALPHA_POS	0x208
-#define VIA_REG_ALPHA_OFFSET	0x20C
-#define VIA_REG_ALPHA_PREFIFO	0x268
-#define VIA_REG_ALPHA_FIFO	0x278
-#define VIA_REG_ALPHA_TRANSKEY	0x270
-
-/* secret regs */
-#define VIA_REG_HI_CONTROL0	0x2F0
-#define VIA_REG_HI_BASE0	0x2F4
-#define VIA_REG_HI_POS0		0x2F8
-#define VIA_REG_HI_OFFSET0	0x2FC
-#define VIA_REG_HI_FIFO0	0x2E8
-#define VIA_REG_HI_TRANSKEY0	0x2EC
-
 /*CN400 and older Hardware Icon engine register*/
-#define VIA_REG_HI_POSSTART		0x208
-#define VIA_REG_HI_CENTEROFFSET		0x20C
-#define VIA_REG_HI_FBOFFSET		0x224
-#define VIA_REG_HI_CONTROL		0x260
-#define VIA_REG_HI_TRANSPARENT_COLOR	0x270
-#define VIA_REG_HI_INVTCOLOR		0x274
+#define HI_POSSTART		0x208
+#define HI_CENTEROFFSET		0x20C
+#define HI_FBOFFSET		0x224
+#define HI_CONTROL		0x260
+#define HI_TRANSPARENT_COLOR	0x270
+#define HI_INVTCOLOR		0x274
 /* VT3324 primary Hardware Icon engine register */
-#define VIA_REG_PRIM_HI_POSEND		0x290
-#define VIA_REG_V327_HI_INVTCOLOR	0x2E4
-#define VIA_REG_PRIM_HI_FIFO		0x2E8
-#define VIA_REG_PRIM_HI_TRANSCOLOR	0x2EC
-#define VIA_REG_PRIM_HI_CTRL		0x2F0
-#define VIA_REG_PRIM_HI_FBOFFSET	0x2F4
-#define VIA_REG_PRIM_HI_POSSTART	0x2F8
-#define VIA_REG_PRIM_HI_CENTEROFFSET	0x2FC
-#define VIA_REG_PRIM_HI_INVTCOLOR	0x120C
+#define PRIM_HI_POSEND		0x290
+#define V327_HI_INVTCOLOR	0x2E4
+#define PRIM_HI_FIFO		0x2E8
+#define PRIM_HI_TRANSCOLOR	0x2EC
+#define PRIM_HI_CTRL		0x2F0
+#define PRIM_HI_FBOFFSET	0x2F4
+#define PRIM_HI_POSSTART	0x2F8
+#define PRIM_HI_CENTEROFFSET	0x2FC
+#define PRIM_HI_INVTCOLOR	0x120C
 
 /* Video Capture Engine Registers
  * Capture Port 1
@@ -751,8 +720,6 @@
 #define		MPG_SLICE_RESET			0x0400000
 #define MPG_SLICE_LENGTH	0x9C
 #define	MPG_SLICE_DATA		0xA0
-
-#define VBE_DEFAULT_REFRESH                     6000
 
 #ifdef XSERVER_LIBPCIACCESS
 #define VIA_MEMBASE(p,n)  (p)->regions[(n)].base_addr

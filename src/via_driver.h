@@ -69,6 +69,7 @@
 #ifdef XSERVER_LIBPCIACCESS
 #include <pciaccess.h>
 #endif
+#include <errno.h>
 
 #ifdef XF86DRI
 #define _XF86DRI_SERVER_
@@ -111,6 +112,11 @@
 #define VIA_RES_SHARED NULL
 #define VIA_RES_UNDEF NULL
 #endif
+
+/* Video Engines */
+#define VIDEO_ENGINE_UNK	0 /* Unknown video engine */
+#define VIDEO_ENGINE_CLE	1 /* CLE First generation video engine */
+#define VIDEO_ENGINE_CME	2 /* CME Second generation video engine */
 
 static int gVIAEntityIndex = -1;
 
