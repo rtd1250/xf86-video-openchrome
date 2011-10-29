@@ -70,36 +70,6 @@ static const ViaDRMVersion drmCompat = { 3, 1, 0 };
 static void VIAIdentify(int flags);
 
 #ifdef XSERVER_LIBPCIACCESS
-struct pci_device *
-via_pci_device(const struct pci_slot_match *bridge_match)
-{
-    struct pci_device_iterator *slot_iterator;
-    struct pci_device *bridge;
-
-    slot_iterator = pci_slot_match_iterator_create(bridge_match);
-    bridge = pci_device_next(slot_iterator);
-    pci_iterator_destroy(slot_iterator);
-    return bridge;
-}
-
-struct pci_device *
-via_host_bridge(void)
-{
-    static const struct pci_slot_match bridge_match = {
-        0, 0, 0, 0, 0
-    };
-    return via_pci_device(&bridge_match);
-}
-
-struct pci_device *
-viaPciDeviceVga(void)
-{
-    static const struct pci_slot_match bridge_match = {
-        0, 0, 0, 3, 0
-    };
-    return via_pci_device(&bridge_match);
-}
-
 static Bool via_pci_probe(DriverPtr drv, int entity_num,
                           struct pci_device *dev, intptr_t match_data);
 #else /* !XSERVER_LIBPCIACCESS */
@@ -787,12 +757,8 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     MessageType from = X_DEFAULT;
     char *mod = NULL, *s = NULL;
 #ifdef XF86DRI
-	char *busId = NULL;
-	drmVersionPtr drmVer;
-#endif
-#ifdef XSERVER_LIBPCIACCESS
-    struct pci_device *bridge = via_host_bridge();
-    uint8_t rev = 0 ;
+    char *busId = NULL;
+    drmVersionPtr drmVer;
 #endif
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAPreInit\n"));
@@ -896,8 +862,11 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     } else {
         /* Read PCI bus 0, dev 0, function 0, index 0xF6 to get chip revision */
 #ifdef XSERVER_LIBPCIACCESS
-		pci_device_cfg_read_u8(bridge, &rev, 0xF6);
-		pVia->ChipRev = rev;
+	struct pci_device *bridge = pci_device_get_parent_bridge(pVia->PciInfo);
+	uint8_t rev = 0;
+
+	pci_device_cfg_read_u8(bridge, &rev, 0xF6);
+	pVia->ChipRev = rev;
 #else
         pVia->ChipRev = pciReadByte(pciTag(0, 0, 0), 0xF6);
 #endif

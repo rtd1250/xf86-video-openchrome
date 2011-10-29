@@ -255,13 +255,8 @@ typedef struct _VIA {
 
 	CreateScreenResourcesProcPtr CreateScreenResources;
     CloseScreenProcPtr  CloseScreen;
-#ifdef XSERVER_LIBPCIACCESS
-    struct pci_device *PciInfo;
-    int mmio_bar;
-    int fb_bar;
-    PCITAG PciTag;
-#else
-    pciVideoPtr PciInfo;
+    struct pci_device  *PciInfo;
+#ifndef XSERVER_LIBPCIACCESS
     PCITAG PciTag;
 #endif
     int                 Chipset;
