@@ -1,5 +1,5 @@
 /*
- * Copyright 2004 Thomas Hellstrom, All Rights Reserved.
+ * Copyright 2011 James Simmons, All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -20,12 +20,29 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-#ifndef _VIA_MEMCPY_H_
-#define _VIA_MEMCPY_H_
+#ifndef _VIA_MEMMGR_H_
+#define _VIA_MEMMGR_H_
 #include "xf86.h"
 
-typedef void (*vidCopyFunc)(unsigned char *, const unsigned char *, 
-			    int, int, int, int);
-extern vidCopyFunc viaVidCopyInit( char *copyType, ScreenPtr pScreen );
+typedef struct {
+    unsigned long   base;               /* Offset into fb */
+    int    pool;                        /* Pool we drew from */
+#ifdef XF86DRI
+    int    drm_fd;                      /* Fd in DRM mode */
+    drm_via_mem_t drm;                  /* DRM management object */
+#endif
+    void  *pVia;                        /* VIA driver pointer */
+    FBLinearPtr linear;                 /* X linear pool info ptr */
+    ExaOffscreenArea *exa;
+    ScrnInfoPtr pScrn;
+} VIAMem;
+
+typedef VIAMem *VIAMemPtr;
+
+/* In via_memory.c */
+void VIAFreeLinear(VIAMemPtr);
+int VIAAllocLinear(VIAMemPtr, ScrnInfoPtr, unsigned long);
+int viaOffscreenLinear(VIAMemPtr, ScrnInfoPtr, unsigned long);
+void VIAInitLinear(ScreenPtr pScreen);
 
 #endif

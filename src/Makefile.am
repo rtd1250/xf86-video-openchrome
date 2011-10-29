@@ -52,7 +52,7 @@ openchrome_drv_la_SOURCES = \
          via_id.c \
          via_lvds.c \
          via_memcpy.c \
-         via_memcpy.h \
+         via_memmgr.h \
          via_memory.c \
          via_outputs.c \
          via_mode.h \

@@ -57,9 +57,19 @@
 #include "vbe.h"
 #include "xaa.h"
 
+#ifdef XF86DRI
+#define _XF86DRI_SERVER_
+#include "sarea.h"
+#include "dri.h"
+#include "GL/glxint.h"
+#include "via_dri.h"
+#include "via_drm.h"
+#endif
+#include "exa.h"
+#include "via_memmgr.h"
+
 #include "via_regs.h"
 #include "via_bios.h"
-#include "via_priv.h"
 #include "via_swov.h"
 #include "via_dmabuffer.h"
 #include "via_3d.h"
@@ -71,15 +81,6 @@
 #endif
 #include <errno.h>
 
-#ifdef XF86DRI
-#define _XF86DRI_SERVER_
-#include "sarea.h"
-#include "dri.h"
-#include "GL/glxint.h"
-#include "via_dri.h"
-#endif
-
-#include "exa.h"
 #define VIA_AGP_UPL_SIZE    (1024*128)
 #define VIA_DMA_DL_SIZE     (1024*128)
 #define VIA_SCRATCH_SIZE    (4*1024*1024)
@@ -441,7 +442,7 @@ void viaAccelTextureBlit(ScrnInfoPtr, unsigned long, unsigned, unsigned,
 			 unsigned long, unsigned, unsigned,
 			 unsigned, unsigned, int);
 
-/*In via_video.c*/
+/* In via_video.c */
 void viaInitVideo(ScreenPtr pScreen);
 void viaExitVideo(ScrnInfoPtr pScrn);
 void viaSaveVideo(ScrnInfoPtr pScrn);
@@ -450,11 +451,10 @@ void viaSetColorSpace(VIAPtr pVia, int hue, int saturation, int brightness, int 
 		      Bool reset);
 void VIAVidAdjustFrame(ScrnInfoPtr pScrn, int x, int y);
 
-/* In via_memory.c */
-void VIAFreeLinear(VIAMemPtr);
-int VIAAllocLinear(VIAMemPtr, ScrnInfoPtr, unsigned long);
-int viaOffscreenLinear(VIAMemPtr, ScrnInfoPtr, unsigned long);
-void VIAInitLinear(ScreenPtr pScreen);
+/* In via_memcpy.c */
+typedef void (*vidCopyFunc)(unsigned char *, const unsigned char *,
+                            int, int, int, int);
+extern vidCopyFunc viaVidCopyInit( char *copyType, ScreenPtr pScreen );
 
 /* In via_xwmc.c */
 

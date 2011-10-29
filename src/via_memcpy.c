@@ -26,7 +26,6 @@
 #endif
 
 #include "via_driver.h"
-#include "via_memcpy.h"
 #include "compiler.h"
 
 
@@ -575,7 +574,7 @@ viaVidCopyInit(char *copyType, ScreenPtr pScreen)
 
     /*
      * Allocate an area of offscreen FB memory, (buf1), a simulated video
-     * player buffer (buf2) and a pool of uninitialized "video" data (buf3). 
+     * player buffer (buf2) and a pool of uninitialized "video" data (buf3).
      */
 
     if (VIAAllocLinear(&tmpFbBuffer, pScrn, alignSize + 31))

@@ -129,29 +129,12 @@ typedef struct
     CARD32         dwMPEGProgressiveMode; /* default value : VIA_PROGRESSIVE */
     CARD32         dwHQVheapInfo;         /* video memory heap of the HQV buffer */
     CARD32         dwVideoControl;        /* video control flag */
-    CARD32         dwminifyH; 			   /* Horizontal minify factor */
+    CARD32         dwminifyH;			   /* Horizontal minify factor */
     CARD32         dwminifyV;			   /* Vertical minify factor */
     CARD32         dwMpegDecoded;
 } OVERLAYRECORD;
 
 #define MEM_BLOCKS		4
-
-typedef struct {
-    unsigned long   base;		/* Offset into fb */
-    int    pool;			/* Pool we drew from */
-#ifdef XF86DRI
-    int    drm_fd;			/* Fd in DRM mode */
-    drm_via_mem_t drm;			/* DRM management object */
-#endif
-    void  *pVia;			/* VIA driver pointer */
-    FBLinearPtr linear;			/* X linear pool info ptr */
-    ExaOffscreenArea *exa;
-    ScrnInfoPtr pScrn;
-} VIAMem;
-
-typedef VIAMem *VIAMemPtr;
-
-
 
 typedef struct  {
     unsigned long   gdwVideoFlagSW;
