@@ -191,27 +191,29 @@ viaFlushPCI(ViaCommandBuffer * buf)
                      * for an unacceptable amount of time in VIASETREG while
                      * other high priority interrupts may be pending.
                      */
-					switch (pVia->Chipset) {
-					    case VIA_VX800:
-					    case VIA_VX855:
-					    case VIA_VX900:
-							while ((VIAGETREG(VIA_REG_STATUS) &
-							       (VIA_CMD_RGTR_BUSY_H5 | VIA_2D_ENG_BUSY_H5))
-									&& (loop++ < MAXLOOP)) ;
-					    break;
-					    case VIA_K8M890:
-					    case VIA_P4M890:
-					    case VIA_P4M900:
-							while ((VIAGETREG(VIA_REG_STATUS) &
-									(VIA_CMD_RGTR_BUSY | VIA_2D_ENG_BUSY))
-									&& (loop++ < MAXLOOP)) ;
-					    break;
-						default:
-							while (!(VIAGETREG(VIA_REG_STATUS) & VIA_VR_QUEUE_EMPTY)
-                                   && (loop++ < MAXLOOP)) ;
-							while ((VIAGETREG(VIA_REG_STATUS) &
-									(VIA_CMD_RGTR_BUSY | VIA_2D_ENG_BUSY))
-									&& (loop++ < MAXLOOP)) ;
+                    switch (pVia->Chipset) {
+                    case VIA_VX800:
+                    case VIA_VX855:
+                    case VIA_VX900:
+                        while ((VIAGETREG(VIA_REG_STATUS) &
+                                (VIA_CMD_RGTR_BUSY_H5 | VIA_2D_ENG_BUSY_H5)) &&
+                                (loop++ < MAXLOOP)) ;
+                        break;
+
+                    case VIA_K8M890:
+                    case VIA_P4M890:
+                    case VIA_P4M900:
+                        while ((VIAGETREG(VIA_REG_STATUS) &
+                                (VIA_CMD_RGTR_BUSY | VIA_2D_ENG_BUSY)) &&
+                                (loop++ < MAXLOOP)) ;
+                        break;
+
+                    default:
+                        while (!(VIAGETREG(VIA_REG_STATUS) & VIA_VR_QUEUE_EMPTY) &&
+                                (loop++ < MAXLOOP)) ;
+                        while ((VIAGETREG(VIA_REG_STATUS) &
+                                (VIA_CMD_RGTR_BUSY | VIA_2D_ENG_BUSY)) &&
+                                (loop++ < MAXLOOP)) ;
                     }
                 }
                 offset = (*bp++ & 0x0FFFFFFF) << 2;
@@ -1440,7 +1442,6 @@ viaOrder(CARD32 val, CARD32 * shift)
     return (val == (1 << *shift));
 }
 
-
 /*
  * Exa functions. It is assumed that EXA does not exceed the blitter limits.
  */
@@ -1854,8 +1855,8 @@ viaExaDownloadFromScreen(PixmapPtr pSrc, int x, int y, int w, int h,
 }
 
 /*
- * Upload to framebuffer memory using memcpy to AGP pipelined with a 
- * 3D engine texture operation from AGP to framebuffer. The AGP buffers (2) 
+ * Upload to framebuffer memory using memcpy to AGP pipelined with a
+ * 3D engine texture operation from AGP to framebuffer. The AGP buffers (2)
  * should be kept rather small for optimal pipelining.
  */
 static Bool

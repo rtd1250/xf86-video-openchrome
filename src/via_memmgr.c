@@ -45,7 +45,7 @@
  *
  *	The pool code indicates who provided the memory:
  *	0  -  nobody
- *	1  -  xf86 linear 
+ *	1  -  xf86 linear
  *	2  -  DRM
  */
 
