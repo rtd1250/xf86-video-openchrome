@@ -359,6 +359,7 @@ ViaPanelGetNativeDisplayMode(ScrnInfoPtr pScrn)
             p->CrtcVBlankEnd = max(p->CrtcVSyncEnd, p->CrtcVTotal);
             p->CrtcHBlankStart = min(p->CrtcHSyncStart, p->CrtcHDisplay);
             p->CrtcHBlankEnd = max(p->CrtcHSyncEnd, p->CrtcHTotal);
+            p->type = M_T_DRIVER | M_T_PREFERRED;
 
             pVia->pBIOSInfo->Panel->NativeDisplayMode = p;
         } else {
