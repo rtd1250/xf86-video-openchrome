@@ -328,7 +328,6 @@ VIAEnterVT(int scrnIndex, int flags)
 	ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
 	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
 	VIAPtr pVia = VIAPTR(pScrn);
-	Bool ret;
 	int i;
 
 	DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIAEnterVT\n"));
@@ -386,7 +385,7 @@ VIAEnterVT(int scrnIndex, int flags)
 			DRIUnlock(screenInfo.screens[scrnIndex]);
 #endif
 	}
-	return ret;
+	return TRUE;
 }
 
 static void
@@ -455,6 +454,9 @@ VIAFreeScreen(int scrnIndex, int flags)
 	VIAPtr pVia = VIAPTR(pScrn);
 
 	DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIAFreeScreen\n"));
+
+    if (pVia->directRenderingType != DRI_2)
+        VIAUnmapMem(pScrn);
 
 	VIAFreeRec(xf86Screens[scrnIndex]);
 
@@ -1616,11 +1618,9 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
 		pVia->ShadowPtr = NULL;
 	}
 
-	/* Is the display currently visible? */
-	if (pScrn->vtSema)
-		pScrn->LeaveVT(scrnIndex, 0);
-
-	VIAUnmapMem(pScrn);
+    /* Is the display currently visible? */
+    if (pScrn->vtSema)
+        VIALeaveVT(scrnIndex, 0);
 
 	xf86_cursors_fini(pScreen);
 

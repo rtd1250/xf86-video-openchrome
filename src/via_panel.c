@@ -107,7 +107,7 @@ VIAGetRec(ScrnInfoPtr pScrn)
 
 } /* VIAGetRec */
 
-static void
+void
 VIAFreeRec(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
