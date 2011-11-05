@@ -2181,8 +2181,11 @@ viaIsAGP(VIAPtr pVia, PixmapPtr pPix, unsigned long *offset)
 }
 
 static Bool
-viaIsOffscreen(VIAPtr pVia, PixmapPtr pPix)
+viaExaIsOffscreen(PixmapPtr pPix)
 {
+    ScrnInfoPtr pScrn = xf86Screens[pPix->drawable.pScreen->myNum];
+    VIAPtr pVia = VIAPTR(pScrn);
+
     return ((unsigned long)pPix->devPrivate.ptr -
             (unsigned long)pVia->FBBase) < pVia->videoRambytes;
 }
@@ -2260,7 +2263,7 @@ viaExaPrepareComposite(int op, PicturePtr pSrcPicture,
     if (!pVia->srcP) {
         offset = exaGetPixmapOffset(pSrc);
         isAGP = viaIsAGP(pVia, pSrc, &offset);
-        if (!isAGP && !viaIsOffscreen(pVia, pSrc))
+        if (!isAGP && !viaExaIsOffscreen(pSrc))
             return FALSE;
         if (!v3d->setTexture(v3d, curTex, offset,
                              exaGetPixmapPitch(pSrc), pVia->nPOT[curTex],
@@ -2274,7 +2277,7 @@ viaExaPrepareComposite(int op, PicturePtr pSrcPicture,
     if (pMaskPicture && !pVia->maskP) {
         offset = exaGetPixmapOffset(pMask);
         isAGP = viaIsAGP(pVia, pMask, &offset);
-        if (!isAGP && !viaIsOffscreen(pVia, pMask))
+        if (!isAGP && !viaExaIsOffscreen(pMask))
             return FALSE;
         viaOrder(pMask->drawable.width, &width);
         viaOrder(pMask->drawable.height, &height);
@@ -2440,6 +2443,9 @@ UMSAccelInit(ScreenPtr pScreen)
 
     viaInitialize2DEngine(pScrn);
 
+    if (Success != viaSetupCBuffer(pScrn, &pVia->cb, 0))
+        pVia->NoAccel = TRUE;
+
     /* Sync marker space. */
     pVia->FBFreeEnd -= 32;
     pVia->markerOffset = (pVia->FBFreeEnd + 31) & ~31;
@@ -2593,20 +2599,8 @@ UMSAccelSetup(ScrnInfoPtr pScrn)
 		VIAInitLinear(pScreen);
 		pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart - pVia->Bpl);
 
-	} else {
+	} else
 		viaFinishInitAccel(pScreen);
-#ifdef XF86DRI
-		if (pVia->directRenderingType == DRI_1)
-			DRILock(screenInfo.screens[pScrn->scrnIndex], 0);
-#endif
-		viaAccelFillRect(pScrn, pScrn->frameX0, pScrn->frameY0,
-						pScrn->displayWidth, pScrn->virtualY, 0x00000000);
-		viaAccelSyncMarker(pScrn);
-#ifdef XF86DRI
-		if (pVia->directRenderingType == DRI_1)
-			DRIUnlock(screenInfo.screens[pScrn->scrnIndex]);
-#endif
-	}
 }
 
 /*
@@ -2733,11 +2727,6 @@ viaFinishInitAccel(ScreenPtr pScreen)
             pVia->scratchOffset = pVia->scratchFBBuffer->offset;
             pVia->scratchAddr = (char *)pVia->FBBase + pVia->scratchOffset;
         }
-    }
-    if (Success != viaSetupCBuffer(pScrn, &pVia->cb, 0)) {
-        pVia->NoAccel = TRUE;
-        viaExitAccel(pScreen);
-        return;
     }
 }
 
