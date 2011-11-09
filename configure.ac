@@ -62,6 +62,11 @@ AC_ARG_ENABLE(xv-debug, AC_HELP_STRING([--enable-xv-debug],
               [XV_DEBUG="$enableval"],
               [XV_DEBUG=no])
 
+AC_ARG_ENABLE(tools, AC_HELP_STRING([--enable-viaregtool],
+				    [Enable build of registers dumper tool [[default=no]]]),
+              [TOOLS="$enableval"],
+              [TOOLS=no])
+
 # Checks for extensions
 XORG_DRIVER_CHECK_EXT(RANDR, randrproto)
 XORG_DRIVER_CHECK_EXT(RENDER, renderproto)
@@ -157,6 +162,11 @@ if test "$XV_DEBUG" = yes; then
         AC_DEFINE(XV_DEBUG,1,[Enable XVideo debug support])
 fi
 
+AM_CONDITIONAL(TOOLS, test x$TOOLS = xyes)
+if test "$TOOLS" = yes; then
+        AC_DEFINE(TOOLS,1,[Enable build of registers dumper tool])
+fi
+
 AC_SUBST([DRI_CFLAGS])
 AC_SUBST([XORG_CFLAGS])
 AC_SUBST([moduledir])
@@ -179,4 +189,5 @@ AC_OUTPUT([
 	src/xvmc/Makefile
 	src/Makefile
 	man/Makefile
+	tools/Makefile
 ])
