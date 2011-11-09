@@ -62,7 +62,7 @@ AC_ARG_ENABLE(xv-debug, AC_HELP_STRING([--enable-xv-debug],
               [XV_DEBUG="$enableval"],
               [XV_DEBUG=no])
 
-AC_ARG_ENABLE(tools, AC_HELP_STRING([--enable-viaregtool],
+AC_ARG_ENABLE(viaregtool, AC_HELP_STRING([--enable-viaregtool],
 				    [Enable build of registers dumper tool [[default=no]]]),
               [TOOLS="$enableval"],
               [TOOLS=no])
