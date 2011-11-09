@@ -1104,6 +1104,18 @@ static void unlock_registers(void)
 	writeb_idx_mask(0x3d5, 0x11, 0x00, 0x80);	/* unlock 0..7 */
 }
 
+static void usage(void)
+{
+	printf("Usage :\n");
+	printf("-h | --help  : Display this usage message.\n");
+	printf("-d | --dump  : Dump all registers.\n");
+	printf("-p | --pll   : Display PLL.\n");
+	printf("-m | --mode  : Display modes.\n");
+	printf("-r | --read  : Read register.\n");
+	printf("-w | --write : Write register.\n");
+	printf("-g | --gpio  : Display GPIO state.\n");
+}
+
 int main(int argc, char **argv)
 {
 	struct mode m;
@@ -1116,6 +1128,12 @@ int main(int argc, char **argv)
 	rc = iopl(3);
 	if (rc < 0) {
 		perror("iopl");
+		printf("Need root privileges.\n");
+		exit(1);
+	}
+
+	if (argc <= 1) {
+		usage();
 		exit(1);
 	}
 
@@ -1127,6 +1145,7 @@ int main(int argc, char **argv)
 		u_int8_t index;
 		unsigned long val;
 		static struct option long_options[] = {
+			{ "help", 0, 0, 'h' },
 			{ "dump", 0, 0, 'd' },
 			{ "pll", 0, 0, 'p' },
 			{ "mode", 0, 0, 'm' },
@@ -1135,13 +1154,17 @@ int main(int argc, char **argv)
 			{ "gpio", 1, 0, 'g' },
 		};
 
-		c = getopt_long(argc, argv, "dpmr:w:g", long_options,
+		c = getopt_long(argc, argv, "hdpmr:w:g", long_options,
 				&option_index);
 
-		if (c == -1)
+		if (c == -1) {
 			break;
+		}
 
 		switch (c) {
+		case 'h':
+			usage();
+			exit(1);
 		case 'd':
 			dump_all_registers();
 			break;
@@ -1189,6 +1212,7 @@ int main(int argc, char **argv)
 			printf("\n");
 			break;
 		default:
+			usage();
 			exit(1);
 		}
 	}
