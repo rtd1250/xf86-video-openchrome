@@ -343,7 +343,6 @@ typedef struct _VIA {
     drm_handle_t        frameBufferHandle;
     unsigned long		agpAddr;
     drmAddress          agpMappedAddr;
-    unsigned char		*agpBase;
     unsigned int		agpSize;
     Bool				IsPCI;
     ViaXvMC             xvmc;

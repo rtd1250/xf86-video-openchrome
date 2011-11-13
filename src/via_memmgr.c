@@ -98,7 +98,7 @@ viaOffScreenLinear(VIAMemPtr mem, ScrnInfoPtr pScrn, unsigned long size)
 
     VIAPtr pVia = VIAPTR(pScrn);
 
-    if (pVia->useEXA && !pVia->NoAccel) {
+    if (pVia->exaDriverPtr && !pVia->NoAccel) {
 
         mem->exa = exaOffscreenAlloc(pScrn->pScreen, size,
                                      32, TRUE, NULL, NULL);
@@ -106,6 +106,7 @@ viaOffScreenLinear(VIAMemPtr mem, ScrnInfoPtr pScrn, unsigned long size)
             return BadAlloc;
         mem->exa->save = viaExaFBSave;
         mem->base = mem->exa->offset;
+        mem->size = size;
         mem->pool = 1;
         mem->pScrn = pScrn;
         return Success;
@@ -117,6 +118,7 @@ viaOffScreenLinear(VIAMemPtr mem, ScrnInfoPtr pScrn, unsigned long size)
     if (mem->linear == NULL)
         return BadAlloc;
     mem->base = mem->linear->offset * depth;
+    mem->size = size;
     mem->pool = 1;
     mem->pScrn = pScrn;
     return Success;

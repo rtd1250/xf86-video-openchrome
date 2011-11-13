@@ -45,7 +45,7 @@ typedef struct {
 } viaRegion, *viaRegionPtr;
 
 typedef struct {
-    viaRegion regs, agp;
+    viaRegion regs;
     int deviceID;
     int width;
     int height;

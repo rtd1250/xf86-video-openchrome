@@ -24,9 +24,18 @@
 #define _VIA_MEMMGR_H_
 #include "xf86.h"
 
+struct buffer_object {
+    unsigned long handle;
+    unsigned long offset;
+    unsigned long pitch;
+    unsigned long size;
+    void *ptr;
+};
+
 typedef struct {
     unsigned long   base;               /* Offset into fb */
-    int    pool;                        /* Pool we drew from */
+    int     pool;                       /* Pool we drew from */
+    int     size;
 #ifdef XF86DRI
     int    drm_fd;                      /* Fd in DRM mode */
     drm_via_mem_t drm;                  /* DRM management object */
