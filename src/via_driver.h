@@ -225,7 +225,6 @@ typedef struct _VIA {
 	Bool				KMS;
     Bool                FirstInit;
     unsigned long       videoRambytes;
-    int                 videoRamKbytes;
     int                 FBFreeStart;
     int                 FBFreeEnd;
     int                 driSize;
