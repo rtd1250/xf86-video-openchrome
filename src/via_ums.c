@@ -205,7 +205,6 @@ VIAMapMMIO(ScrnInfoPtr pScrn)
 
         vgaHWGetIOBase(hwp);
     }
-
     return TRUE;
 }
 
@@ -361,15 +360,15 @@ UMSResourceManagement(ScrnInfoPtr pScrn)
     if (ret != TRUE)
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "UMSAccelInit xf86InitFBManager init failed\n");
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+            "Frame Buffer From (%d,%d) To (%d,%d)\n",
+            AvailFBArea.x1, AvailFBArea.y1, AvailFBArea.x2, AvailFBArea.y2));
+
     offset = (pVia->FBFreeStart + pVia->Bpp - 1) / pVia->Bpp;
     size = pVia->FBFreeEnd / pVia->Bpp - offset;
 
     if (size > 0)
         xf86InitFBManagerLinear(pScreen, offset, size);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-            "Frame Buffer From (%d,%d) To (%d,%d)\n",
-            AvailFBArea.x1, AvailFBArea.y1, AvailFBArea.x2, AvailFBArea.y2));
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
             "Using %d lines for offscreen memory.\n",

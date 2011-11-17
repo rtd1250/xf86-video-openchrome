@@ -1798,7 +1798,6 @@ UMSAccelInit(ScreenPtr pScreen)
     VIAPtr pVia = VIAPTR(pScrn);
     Bool nPOTSupported, ret;
 
-
     /*  HW Limitation are described here:
      *
      *  1. H2/H5/H6 2D source and destination:

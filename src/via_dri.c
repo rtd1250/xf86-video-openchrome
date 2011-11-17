@@ -79,11 +79,7 @@ static char VIAClientDriverName[] = "unichrome";
 static const ViaDRMVersion drmExpected = { 1, 3, 0 };
 static const ViaDRMVersion drmCompat = { 2, 0, 0 };
 
-int test_alloc_FB(ScreenPtr pScreen, VIAPtr pVia, int Size);
-int test_alloc_AGP(ScreenPtr pScreen, VIAPtr pVia, int Size);
 static Bool VIAInitVisualConfigs(ScreenPtr pScreen);
-static Bool VIADRIAgpInit(ScreenPtr pScreen, VIAPtr pVia);
-static Bool VIADRIFBInit(ScreenPtr pScreen, VIAPtr pVia);
 static Bool VIADRIKernelInit(ScreenPtr pScreen, VIAPtr pVia);
 static Bool VIADRIMapInit(ScreenPtr pScreen, VIAPtr pVia);
 
@@ -326,14 +322,14 @@ VIASetAgpMode(ScrnInfoPtr pScrn)
 
     if (drmAgpEnable(pVia->drmFD, mode) < 0)
         return FALSE;
-
     return TRUE;
 }
 
 static Bool
-VIADRIAgpInit(ScreenPtr pScreen, VIAPtr pVia)
+VIADRIAgpInit(ScrnInfoPtr pScrn)
 {
     unsigned long agpCmdSize, agp_phys;
+    VIAPtr pVia = VIAPTR(pScrn);
     drm_handle_t handle;
     drmAddress agpaddr;
     drm_via_agp_t agp;
@@ -341,13 +337,13 @@ VIADRIAgpInit(ScreenPtr pScreen, VIAPtr pVia)
 
     pVia->agpSize = 0;
     if (drmAgpAcquire(pVia->drmFD) < 0) {
-        xf86DrvMsg(pScreen->myNum, X_ERROR, "[drm] drmAgpAcquire failed %d\n",
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "[drm] drmAgpAcquire failed %d\n",
                    errno);
         return FALSE;
     }
 
-    if (!VIASetAgpMode(xf86Screens[pScreen->myNum])) {
-        xf86DrvMsg(pScreen->myNum, X_ERROR, "[drm] VIASetAgpMode failed\n");
+    if (!VIASetAgpMode(pScrn)) {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "[drm] VIASetAgpMode failed\n");
         drmAgpRelease(pVia->drmFD);
         return FALSE;
     }
@@ -355,20 +351,20 @@ VIADRIAgpInit(ScreenPtr pScreen, VIAPtr pVia)
     agpCmdSize = (pVia->agpEnable) ? AGP_CMDBUF_SIZE : 0;
     if (pVia->agpMem * 1024 < agpCmdSize + AGP_PAGE_SIZE) {
         pVia->agpMem = (agpCmdSize + AGP_PAGE_SIZE) / 1024;
-        xf86DrvMsg(pScreen->myNum, X_INFO,
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                    "[drm] Forcing AGP size to %d kB\n", pVia->agpMem);
     }
 
     agpPages = (pVia->agpMem * 1024 + AGP_PAGE_SIZE - 1) / AGP_PAGE_SIZE;
     if (drmAgpAlloc(pVia->drmFD, agpPages * AGP_PAGE_SIZE,
                     0, &agp_phys, &pVia->agpHandle) < 0) {
-        xf86DrvMsg(pScreen->myNum, X_ERROR, "[drm] drmAgpAlloc failed\n");
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "[drm] drmAgpAlloc failed\n");
         drmAgpRelease(pVia->drmFD);
         return FALSE;
     }
 
     if (drmAgpBind(pVia->drmFD, pVia->agpHandle, 0) < 0) {
-        xf86DrvMsg(pScreen->myNum, X_ERROR, "[drm] drmAgpBind failed\n");
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "[drm] drmAgpBind failed\n");
         drmAgpFree(pVia->drmFD, pVia->agpHandle);
         drmAgpRelease(pVia->drmFD);
         return FALSE;
@@ -390,12 +386,12 @@ VIADRIAgpInit(ScreenPtr pScreen, VIAPtr pVia)
         return FALSE;
     }
 
-    xf86DrvMsg(pScreen->myNum, X_INFO, "[drm] drmAgpEnabled succeeded\n");
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] drmAgpEnabled succeeded\n");
 
     /* Allocate all of AGP memory */
     if (drmAddMap(pVia->drmFD, 0, pVia->agpSize,
                   DRM_AGP, 0, &handle) < 0) {
-        xf86DrvMsg(pScreen->myNum, X_ERROR,
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                    "[drm] Failed to map public agp area.\n");
         pVia->agpSize = 0;
         drmAgpUnbind(pVia->drmFD, pVia->agpHandle);
@@ -406,32 +402,32 @@ VIADRIAgpInit(ScreenPtr pScreen, VIAPtr pVia)
     drmMap(pVia->drmFD, handle, pVia->agpSize, &agpaddr);
     pVia->agpMappedAddr = agpaddr;
 
-    xf86DrvMsg(pScreen->myNum, X_INFO,
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                "[drm] agpAddr = 0x%08lx\n", pVia->agpAddr);
-    xf86DrvMsg(pScreen->myNum, X_INFO,
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                "[drm] agpSize = 0x%08x\n", pVia->agpSize);
-    xf86DrvMsg(pScreen->myNum, X_INFO,
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                "[drm] agp physical addr = 0x%08lx\n", pVia->agpMappedAddr);
     return TRUE;
 }
 
 static Bool
-VIADRIFBInit(ScreenPtr pScreen, VIAPtr pVia)
+VIADRIFBInit(ScrnInfoPtr pScrn)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    VIAPtr pVia = VIAPTR(pScrn);
     int FBSize = pVia->driSize, FBOffset;
     VIADRIPtr pVIADRI = pVia->pDRIInfo->devPrivate;
     drm_via_fb_t fb;
 
     if (FBSize < pVia->Bpl) {
-        xf86DrvMsg(pScreen->myNum, X_ERROR,
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                    "[drm] No DRM framebuffer heap available.\n"
                    "[drm] Please increase the frame buffer\n"
                    "[drm] memory area in the BIOS. Disabling DRI.\n");
         return FALSE;
     }
     if (FBSize < 3 * (pScrn->virtualY * pVia->Bpl)) {
-        xf86DrvMsg(pScreen->myNum, X_WARNING,
+        xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
                    "[drm] The DRM heap and pixmap cache memory may be too\n"
                    "[drm] small for optimal performance. Please increase\n"
                    "[drm] the frame buffer memory area in the BIOS.\n");
@@ -439,7 +435,7 @@ VIADRIFBInit(ScreenPtr pScreen, VIAPtr pVia)
 
     pVia->driOffScreenMem.pool = 0;
     if (Success != viaOffScreenLinear(&pVia->driOffScreenMem, pScrn, FBSize)) {
-        xf86DrvMsg(pScreen->myNum, X_ERROR,
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                    "[drm] Failed to allocate offscreen frame buffer area.\n");
         return FALSE;
     }
@@ -454,19 +450,33 @@ VIADRIFBInit(ScreenPtr pScreen, VIAPtr pVia)
 
     if (drmCommandWrite(pVia->drmFD, DRM_VIA_FB_INIT, &fb,
                         sizeof(drm_via_fb_t)) < 0) {
-        xf86DrvMsg(pScreen->myNum, X_ERROR,
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                     "[drm] Failed to initialize frame buffer area.\n");
         return FALSE;
     } else {
-        xf86DrvMsg(pScreen->myNum, X_INFO,
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                     "[drm] Using %d bytes for DRM memory heap.\n", FBSize);
         return TRUE;
     }
 }
 
-static Bool
-VIADRIPciInit(ScreenPtr pScreen, VIAPtr pVia)
+Bool
+VIADRI1BufferInit(ScrnInfoPtr pScrn)
 {
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    pVia->IsPCI = !VIADRIAgpInit(pScrn);
+    if (pVia->IsPCI)
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[dri] Using PCI.\n");
+    else
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[dri] Using AGP.\n");
+
+    if (!(VIADRIFBInit(pScrn))) {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                   "[dri] Frame buffer initialization failed.\n");
+        return FALSE;
+    }
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[dri] Frame buffer initialized.\n");
     return TRUE;
 }
 
@@ -596,7 +606,7 @@ VIAInitVisualConfigs(ScreenPtr pScreen)
 }
 
 Bool
-VIADRI1ScreenInit(ScreenPtr pScreen, char *busId)
+VIADRI1ScreenInit(ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
     VIAPtr pVia = VIAPTR(pScrn);
@@ -652,7 +662,7 @@ VIADRI1ScreenInit(ScreenPtr pScreen, char *busId)
             pDRIInfo->clientDriverName = VIAClientDriverName;
             break;
     }
-    pDRIInfo->busIdString = busId;
+    pDRIInfo->busIdString = DRICreatePCIBusID(pVia->PciInfo);
     pDRIInfo->ddxDriverMajorVersion = VIA_DRIDDX_VERSION_MAJOR;
     pDRIInfo->ddxDriverMinorVersion = VIA_DRIDDX_VERSION_MINOR;
     pDRIInfo->ddxDriverPatchVersion = VIA_DRIDDX_VERSION_PATCH;
@@ -806,22 +816,17 @@ VIADRIFinishScreenInit(ScreenPtr pScreen)
     VIADRIPtr pVIADRI;
 
     pVia->pDRIInfo->driverSwapMethod = DRI_HIDE_X_CONTEXT;
+    pVIADRI = (VIADRIPtr) pVia->pDRIInfo->devPrivate;
 
-    pVia->IsPCI = !VIADRIAgpInit(pScreen, pVia);
-
-    if (pVia->IsPCI)
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[dri] Using PCI.\n");
-    else
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[dri] Using AGP.\n");
-
-    if (!(VIADRIFBInit(pScreen, pVia))) {
+    if (!(VIADRI1BufferInit(pScrn))) {
         VIADRICloseScreen(pScreen);
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                   "[dri] Frame buffer initialization failed.\n");
+                   "[dri] Buffer initialization failed.\n");
         return FALSE;
     }
 
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[dri] Frame buffer initialized.\n");
+    pVIADRI->fbOffset = pVia->driOffScreenMem.base;
+    pVIADRI->fbSize = pVia->driOffScreenMem.size;
 
     DRIFinishScreenInit(pScreen);
 
@@ -840,7 +845,6 @@ VIADRIFinishScreenInit(ScreenPtr pScreen)
         memset(saPriv, 0, sizeof(*saPriv));
         saPriv->ctxOwner = -1;
     }
-    pVIADRI = (VIADRIPtr) pVia->pDRIInfo->devPrivate;
     pVIADRI->deviceID = pVia->Chipset;
     pVIADRI->width = pScrn->virtualX;
     pVIADRI->height = pScrn->virtualY;

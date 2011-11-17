@@ -470,7 +470,7 @@ unsigned long viaXvMCPutImageSize(ScrnInfoPtr pScrn);
 void ViaI2CInit(ScrnInfoPtr pScrn);
 
 #ifdef XF86DRI
-Bool VIADRI1ScreenInit(ScreenPtr pScreen, char *busid);
+Bool VIADRI1ScreenInit(ScreenPtr pScreen);
 void VIADRICloseScreen(ScreenPtr pScreen);
 Bool VIADRIFinishScreenInit(ScreenPtr pScreen);
 void VIADRIRingBufferCleanup(ScrnInfoPtr pScrn);
