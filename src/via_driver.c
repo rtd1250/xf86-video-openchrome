@@ -920,7 +920,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 				} else {
 					xf86DrvMsg(pScrn->scrnIndex, X_INFO, "DRI 2 api not supported yet\n");
 				}
-				drmClose(pVia->drmFD);
 			}
 		} else {
 			xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Could not get DRM driver version\n");

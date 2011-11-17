@@ -229,6 +229,7 @@ typedef struct _VIA {
     int                 FBFreeEnd;
     int                 driSize;
     int                 maxDriSize;
+    VIAMem              vq_bo;
     int                 VQStart;
     int                 VQEnd;
 
@@ -358,6 +359,7 @@ typedef struct _VIA {
 
     CARD8               ActiveDevice;	/* Option */
 
+    VIAMem              cursor_bo;
     void                *cursorMap;
     CARD32              cursorOffset;
     int                 CursorStart;
@@ -477,6 +479,7 @@ void VIADRIRingBufferCleanup(ScrnInfoPtr pScrn);
 Bool VIADRIRingBufferInit(ScrnInfoPtr pScrn);
 void viaDRIOffscreenRestore(ScrnInfoPtr pScrn);
 void viaDRIOffscreenSave(ScrnInfoPtr pScrn);
+Bool VIADRIBufferInit(ScrnInfoPtr pScrn);
 
 #endif /* XF86DRI */
 

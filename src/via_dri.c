@@ -415,8 +415,7 @@ static Bool
 VIADRIFBInit(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    int FBSize = pVia->driSize, FBOffset;
-    VIADRIPtr pVIADRI = pVia->pDRIInfo->devPrivate;
+    int FBSize = pVia->driSize;
     drm_via_fb_t fb;
 
     if (FBSize < pVia->Bpl) {
@@ -440,14 +439,8 @@ VIADRIFBInit(ScrnInfoPtr pScrn)
         return FALSE;
     }
 
-    FBOffset = pVia->driOffScreenMem.base;
-
-    pVIADRI->fbOffset = FBOffset;
-    pVIADRI->fbSize = FBSize;
-
-    fb.offset = FBOffset;
+    fb.offset = pVia->driOffScreenMem.base;
     fb.size = FBSize;
-
     if (drmCommandWrite(pVia->drmFD, DRM_VIA_FB_INIT, &fb,
                         sizeof(drm_via_fb_t)) < 0) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
@@ -615,6 +608,7 @@ VIADRI1ScreenInit(ScreenPtr pScreen)
 
     /* If symbols or version check fails, we still want this to be NULL. */
     pVia->pDRIInfo = NULL;
+    drmClose(pVia->drmFD);
 
     /* Check that the GLX, DRI, and DRM modules have been loaded by testing
      * for canonical symbols in each module. */

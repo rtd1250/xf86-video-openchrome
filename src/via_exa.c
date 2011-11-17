@@ -1815,11 +1815,9 @@ UMSAccelInit(ScreenPtr pScreen)
      *                     Scissor is the same as color window.
      * */
     pVia->VQStart = 0;
-    if (((pVia->FBFreeEnd - pVia->FBFreeStart) >= VIA_VQ_SIZE) &&
-		  pVia->VQEnable) {
-		pVia->VQStart = pVia->FBFreeEnd - VIA_VQ_SIZE;
-		pVia->VQEnd = pVia->VQStart + VIA_VQ_SIZE - 1;
-		pVia->FBFreeEnd -= VIA_VQ_SIZE;
+    if (VIAAllocLinear(&pVia->vq_bo, pScrn, VIA_VQ_SIZE) == Success) {
+        pVia->VQStart = pVia->vq_bo.base;
+        pVia->VQEnd = pVia->vq_bo.base + pVia->vq_bo.size;
     }
 
     viaInitialize2DEngine(pScrn);
@@ -1881,7 +1879,7 @@ UMSAccelInit(ScreenPtr pScreen)
     if ((pVia->driSize > (pVia->maxDriSize * 1024)) && pVia->maxDriSize > 0)
         pVia->driSize = pVia->maxDriSize * 1024;
 
-	return viaInitXAA(pScreen);
+    return viaInitXAA(pScreen);
 }
 
 void

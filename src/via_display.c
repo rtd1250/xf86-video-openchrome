@@ -994,17 +994,16 @@ UMSHWCursorInit(ScreenPtr pScreen)
 	iga = crtc->driver_private;
 
 	/* Set cursor location in frame buffer. */
-	if ((pVia->FBFreeEnd - pVia->FBFreeStart) > pVia->CursorSize) {
-		pVia->CursorStart = pVia->FBFreeEnd - pVia->CursorSize;
-		pVia->FBFreeEnd = pVia->CursorStart;
-	}
-	pVia->cursorOffset = pScrn->fbOffset + pVia->CursorStart;
-	pVia->cursorMap = pVia->FBBase + pVia->CursorStart;
-	if (pVia->cursorMap == NULL)
-		return FALSE;
-	memset(pVia->cursorMap, 0x00, pVia->CursorSize);
+    if (VIAAllocLinear(&pVia->cursor_bo, pScrn, pVia->CursorSize) == Success)
+        return FALSE;
 
-	xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Cursor Address: %p\n", pVia->cursorMap);
+	pVia->CursorStart = pVia->cursor_bo.base;
+    pVia->cursorOffset = pScrn->fbOffset + pVia->CursorStart;
+    pVia->cursorMap = pVia->FBBase + pVia->CursorStart;
+    if (pVia->cursorMap == NULL)
+        return FALSE;
+    memset(pVia->cursorMap, 0x00, pVia->CursorSize);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Cursor Address: %p\n", pVia->cursorMap);
 
 	/* Init HI_X0 */
 	switch (pVia->Chipset) {
