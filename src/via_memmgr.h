@@ -52,6 +52,5 @@ typedef VIAMem *VIAMemPtr;
 void VIAFreeLinear(VIAMemPtr);
 int VIAAllocLinear(VIAMemPtr, ScrnInfoPtr, unsigned long);
 int viaOffscreenLinear(VIAMemPtr, ScrnInfoPtr, unsigned long);
-void VIAInitLinear(ScreenPtr pScreen);
 
 #endif

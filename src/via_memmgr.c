@@ -161,21 +161,3 @@ VIAAllocLinear(VIAMemPtr mem, ScrnInfoPtr pScrn, unsigned long size)
     ErrorF("Linear memory allocation failed\n");
     return BadAlloc;
 }
-
-void
-VIAInitLinear(ScreenPtr pScreen)
-{
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    if (pVia->useEXA && !pVia->NoAccel)
-        return;
-    else
-    {
-        unsigned long offset = (pVia->FBFreeStart + pVia->Bpp - 1) / pVia->Bpp;
-        long size = pVia->FBFreeEnd / pVia->Bpp - offset;
-
-        if (size > 0)
-            xf86InitFBManagerLinear(pScreen, offset, size);
-    }
-}

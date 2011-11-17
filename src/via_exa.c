@@ -1796,10 +1796,7 @@ UMSAccelInit(ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
     VIAPtr pVia = VIAPTR(pScrn);
-    BoxRec AvailFBArea;
-    int maxY;
-    Bool ret;
-    Bool nPOTSupported;
+    Bool nPOTSupported, ret;
 
 
     /*  HW Limitation are described here:
@@ -1865,19 +1862,13 @@ UMSAccelInit(ScreenPtr pScreen)
 
             /*
              * Docs recommend turning off also Xv here, but we handle this
-             * case with the old linear offscreen FB manager through
-             * VIAInitLinear.
+             * case with the old linear offscreen FB manager
              */
-
             pVia->NoAccel = TRUE;
             return FALSE;
         }
 
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                   "[EXA] Trying to enable EXA acceleration.\n");
-
         pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart) / 2;
-
         if ((pVia->driSize > (pVia->maxDriSize * 1024))
             && pVia->maxDriSize > 0)
             pVia->driSize = pVia->maxDriSize * 1024;
@@ -1887,60 +1878,10 @@ UMSAccelInit(ScreenPtr pScreen)
         return TRUE;
     }
 
-    /*
-     * Finally, we set up the memory space available to the pixmap
-     * cache.
-     */
-    AvailFBArea.x1 = 0;
-    AvailFBArea.y1 = 0;
-    AvailFBArea.x2 = pScrn->displayWidth;
-
-    /*
-     * Memory distribution for XAA is tricky. We'd like to make the
-     * pixmap cache no larger than 3 x visible screen size, otherwise
-     * XAA may get slow for some undetermined reason.
-     */
-
-#ifdef XF86DRI
-    if (pVia->directRenderingType == DRI_1) {
-        pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart) / 2;
-        maxY = pScrn->virtualY + (pVia->driSize / pVia->Bpl);
-    } else
-#endif
-    {
-        maxY = pVia->FBFreeEnd / pVia->Bpl;
-    }
-    if (maxY > 4 * pScrn->virtualY)
-        maxY = 4 * pScrn->virtualY;
-
-    /* Non-rotate */
-    AvailFBArea.y2 = maxY;
-    pVia->FBFreeStart = (maxY + 1) * pVia->Bpl;
-
-    /*
-    *   Initialization of the XFree86 framebuffer manager is done via
-    *   Bool xf86InitFBManager(ScreenPtr pScreen, BoxPtr FullBox)
-    *   FullBox represents the area of the framebuffer that the manager
-    *   is allowed to manage. This is typically a box with a width
-    *   of pScrn->displayWidth and a height of as many lines as can be fit
-    *   within the total video memory
-    */
-    ret = xf86InitFBManager(pScreen, &AvailFBArea);
-    if (ret != TRUE) {
-		xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "UMSAccelInit xf86InitFBManager init failed\n");
-    }
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-               "Frame Buffer From (%d,%d) To (%d,%d)\n",
-               AvailFBArea.x1, AvailFBArea.y1, AvailFBArea.x2, AvailFBArea.y2));
-    VIAInitLinear(pScreen);
-
     pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart - pVia->Bpl);
     if ((pVia->driSize > (pVia->maxDriSize * 1024)) && pVia->maxDriSize > 0)
         pVia->driSize = pVia->maxDriSize * 1024;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                     "Using %d lines for offscreen memory.\n",
-                     AvailFBArea.y2 - pScrn->virtualY));
 	return viaInitXAA(pScreen);
 }
 
@@ -1965,26 +1906,9 @@ UMSAccelSetup(ScrnInfoPtr pScrn)
 	}
 #endif
 
-	if (pVia->NoAccel) {
+	if (pVia->NoAccel)
 		memset(pVia->FBBase, 0x00, pVia->videoRambytes);
-
-		/*
-		 * This is only for Xv in Noaccel path, and since Xv is in some
-		 * sense accelerated, it might be a better idea to disable it
-		 * altogether.
-		 */
-		BoxRec AvailFBArea;
-
-		AvailFBArea.x1 = 0;
-		AvailFBArea.y1 = 0;
-		AvailFBArea.x2 = pScrn->displayWidth;
-		AvailFBArea.y2 = pScrn->virtualY + 1;
-		pVia->FBFreeStart = (AvailFBArea.y2 + 1) * pVia->Bpl;
-		xf86InitFBManager(pScreen, &AvailFBArea);
-		VIAInitLinear(pScreen);
-		pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart - pVia->Bpl);
-
-	} else
+	else
 		viaFinishInitAccel(pScreen);
 }
 

@@ -310,6 +310,70 @@ VIAMapFB(ScrnInfoPtr pScrn)
 Bool
 UMSResourceManagement(ScrnInfoPtr pScrn)
 {
+    ScreenPtr pScreen = pScrn->pScreen;
+    VIAPtr pVia = VIAPTR(pScrn);
+    unsigned long offset;
+    BoxRec AvailFBArea;
+    Bool ret = TRUE;
+    long size;
+    int maxY;
+
+    if (pVia->useEXA)
+        return TRUE;
+
+    AvailFBArea.x1 = 0;
+    AvailFBArea.y1 = 0;
+    AvailFBArea.x2 = pScrn->displayWidth;
+
+    if (pVia->NoAccel) {
+        /*
+         * This is only for Xv in Noaccel path, and since Xv is in some
+         * sense accelerated, it might be a better idea to disable it
+         * altogether.
+         */
+        pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart - pVia->Bpl);
+        maxY = pScrn->virtualY + 1;
+
+    } else {
+#ifdef XF86DRI
+        if (pVia->directRenderingType == DRI_1) {
+            pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart) / 2;
+            maxY = pScrn->virtualY + (pVia->driSize / pVia->Bpl);
+        } else
+#endif
+            maxY = pVia->FBFreeEnd / pVia->Bpl;
+    }
+    if (maxY > 32767)
+        maxY = 32767;
+
+    AvailFBArea.y2 = maxY;
+    pVia->FBFreeStart = (AvailFBArea.y2 + 1) * pVia->Bpl;
+
+    /*
+     *   Initialization of the XFree86 framebuffer manager is done via
+     *   Bool xf86InitFBManager(ScreenPtr pScreen, BoxPtr FullBox)
+     *   FullBox represents the area of the framebuffer that the manager
+     *   is allowed to manage. This is typically a box with a width
+     *   of pScrn->displayWidth and a height of as many lines as can be fit
+     *   within the total video memory
+     */
+    ret = xf86InitFBManager(pScreen, &AvailFBArea);
+    if (ret != TRUE)
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "UMSAccelInit xf86InitFBManager init failed\n");
+
+    offset = (pVia->FBFreeStart + pVia->Bpp - 1) / pVia->Bpp;
+    size = pVia->FBFreeEnd / pVia->Bpp - offset;
+
+    if (size > 0)
+        xf86InitFBManagerLinear(pScreen, offset, size);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+            "Frame Buffer From (%d,%d) To (%d,%d)\n",
+            AvailFBArea.x1, AvailFBArea.y1, AvailFBArea.x2, AvailFBArea.y2));
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+            "Using %d lines for offscreen memory.\n",
+            AvailFBArea.y2 - pScrn->virtualY));
     return TRUE;
 }
 
