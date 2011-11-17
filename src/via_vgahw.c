@@ -35,6 +35,11 @@
 #include "via_driver.h" /* for HAVE_DEBUG */
 #include "via_vgahw.h"
 
+#if ABI_VIDEODRV_VERSION < 12
+#define PIOOFFSET hwp->PIOOffset
+#else
+#define PIOOFFSET 0
+#endif
 
 static CARD8
 ViaVgahwIn(vgaHWPtr hwp, int address)
@@ -42,7 +47,7 @@ ViaVgahwIn(vgaHWPtr hwp, int address)
     if (hwp->MMIOBase)
         return MMIO_IN8(hwp->MMIOBase, hwp->MMIOOffset + address);
     else
-        return inb(hwp->PIOOffset + address);
+        return inb(PIOOFFSET + address);
 }
 
 static void
@@ -51,7 +56,7 @@ ViaVgahwOut(vgaHWPtr hwp, int address, CARD8 value)
     if (hwp->MMIOBase)
         MMIO_OUT8(hwp->MMIOBase, hwp->MMIOOffset + address, value);
     else
-        outb(hwp->PIOOffset + address, value);
+        outb(PIOOFFSET + address, value);
 }
 
 /*
