@@ -113,6 +113,10 @@ static int viaSetPortAttribute(ScrnInfoPtr, Atom, INT32, pointer);
 static int viaPutImage(ScrnInfoPtr, short, short, short, short, short, short,
     short, short, int, unsigned char *, short, short, Bool,
     RegionPtr, pointer, DrawablePtr);
+static void UVBlit(unsigned char *dest,
+    const unsigned char *uBuffer,
+    const unsigned char *vBuffer,
+    unsigned width, unsigned srcPitch, unsigned dstPitch, unsigned lines);
 static void nv12Blit(unsigned char *nv12Chroma,
     const unsigned char *uBuffer,
     const unsigned char *vBuffer,
@@ -154,11 +158,12 @@ static XF86AttributeRec AttributesG[NUM_ATTRIBUTES_G] = {
     {XvSettable | XvGettable, 0, 1, "XV_AUTOPAINT_COLORKEY"}
 };
 
-#define NUM_IMAGES_G 6
+#define NUM_IMAGES_G 7
 
 static XF86ImageRec ImagesG[NUM_IMAGES_G] = {
     XVIMAGE_YUY2,
     XVIMAGE_YV12,
+    XVIMAGE_I420,
     {
         /*
          * Below, a dummy picture type that is used in XvPutImage only to do
@@ -933,6 +938,7 @@ Flip(VIAPtr pVia, viaPortPrivPtr pPriv, int fourcc,
             VIASETREG(HQV_CONTROL + proReg, (VIAGETREG(HQV_CONTROL + proReg) & ~HQV_FLIP_ODD) | HQV_SW_FLIP | HQV_FLIP_STATUS);
             break;
         case FOURCC_YV12:
+        case FOURCC_I420:
         default:
             while ((VIAGETREG(HQV_CONTROL + proReg) & HQV_SW_FLIP)
                     && --count);
@@ -952,21 +958,51 @@ Flip(VIAPtr pVia, viaPortPrivPtr pPriv, int fourcc,
     }
 }
 
-/*
- * Slow and dirty. NV12 blit.
- */
-
 static void
-nv12cp(unsigned char *dst,
-    const unsigned char *src, int dstPitch, int w, int h, int yuv422)
+planar420cp(unsigned char *dst, const unsigned char *src, int dstPitch,
+            int w, int h, int i420)
 {
+    unsigned long srcUOffset, srcVOffset;
+
     /*
      * Blit luma component as a fake YUY2 assembler blit.
      */
+    if (i420) {
+        srcVOffset  = w * h + (w >> 1) * (h >> 1);
+        srcUOffset = w * h;
+    } else {
+        srcUOffset  = w * h + (w >> 1) * (h >> 1);
+        srcVOffset = w * h;
+    }
+
+    (*viaFastVidCpy) (dst, src, dstPitch, w >> 1, h, 1);
+    UVBlit(dst + dstPitch * h, src + srcUOffset,
+            src + srcVOffset, w >> 1, w >> 1, dstPitch, h >> 1);
+}
+
+/*
+ * Slow and dirty. NV12 blit.
+ */
+static void
+nv12cp(unsigned char *dst, const unsigned char *src, int dstPitch,
+        int w, int h, int i420)
+{
+    unsigned long srcUOffset, srcVOffset;
+
+    /*
+     * Blit luma component as a fake YUY2 assembler blit.
+     */
+    if (i420) {
+        srcVOffset  = w * h + (w >> 1) * (h >> 1);
+        srcUOffset = w * h;
+    } else {
+        srcUOffset  = w * h + (w >> 1) * (h >> 1);
+        srcVOffset = w * h;
+    }
 
     (*viaFastVidCpy) (dst, src, dstPitch, w >> 1, h, TRUE);
-    nv12Blit(dst + dstPitch * h, src + w * h + (w >> 1) * (h >> 1),
-            src + w * h, w >> 1, w >> 1, dstPitch, h >> 1);
+    nv12Blit(dst + dstPitch * h, src + srcUOffset,
+            src + srcVOffset, w >> 1, w >>1, dstPitch, h >> 1);
 }
 
 #ifdef XF86DRI
@@ -991,7 +1027,7 @@ viaDmaBlitImage(VIAPtr pVia,
 
     bounceBuffer = ((unsigned long)src & 15);
     nv12Conversion = (pVia->VideoEngine == VIDEO_ENGINE_CME &&
-        id == FOURCC_YV12);
+                     (id == FOURCC_YV12 || id == FOURCC_I420));
 
     switch (id) {
         case FOURCC_YUY2:
@@ -1006,6 +1042,7 @@ viaDmaBlitImage(VIAPtr pVia,
             break;
 
         case FOURCC_YV12:
+        case FOURCC_I420:
         default:
             bounceStride = ALIGN_TO(width, 16);
             bounceLines = height;
@@ -1021,7 +1058,7 @@ viaDmaBlitImage(VIAPtr pVia,
                 pPort->dmaBounceBuffer = 0;
             }
             size = bounceStride * bounceLines + 16;
-            if (FOURCC_YV12 == id)
+            if (id == FOURCC_YV12 || id == FOURCC_I420)
                 size += ALIGN_TO(bounceStride >> 1, 16) * bounceLines;
             pPort->dmaBounceBuffer = (unsigned char *)malloc(size);
             pPort->dmaBounceLines = bounceLines;
@@ -1061,7 +1098,7 @@ viaDmaBlitImage(VIAPtr pVia,
 
     lumaSync = blit.sync;
 
-    if (id == FOURCC_YV12) {
+    if (id == FOURCC_YV12 || id == FOURCC_I420) {
         unsigned tmp = ALIGN_TO(width >> 1, 16);
 
         if (nv12Conversion) {
@@ -1192,6 +1229,17 @@ viaPutImage(ScrnInfoPtr pScrn,
 #endif
                 } else {
                     switch (id) {
+                        case FOURCC_I420:
+                            if (pVia->VideoEngine == VIDEO_ENGINE_CME) {
+                                planar420cp(pVia->swov.SWDevice.
+                                    lpSWOverlaySurface[pVia->dwFrameNum & 1],
+                                    buf, dstPitch, width, height, 1);
+                            } else {
+                                (*viaFastVidCpy)(pVia->swov.SWDevice.
+                                    lpSWOverlaySurface[pVia->dwFrameNum & 1],
+                                    buf, dstPitch, width, height, 0);
+                            }
+                            break;
                         case FOURCC_YV12:
                             if (pVia->VideoEngine == VIDEO_ENGINE_CME) {
                                 nv12cp(pVia->swov.SWDevice.
@@ -1357,6 +1405,7 @@ viaQueryImageAttributes(ScrnInfoPtr pScrn,
         offsets[0] = 0;
 
     switch (id) {
+        case FOURCC_I420:
         case FOURCC_YV12: /*Planar format : YV12 -4:2:0 */
             *h = (*h + 1) & ~1;
             size = *w;
@@ -1440,6 +1489,35 @@ VIAVidAdjustFrame(ScrnInfoPtr pScrn, int x, int y)
     pVia->swov.panning_x = x;
     pVia->swov.panning_y = y;
 }
+
+/*
+ * Blit the U and V Fields. Used to Flip the U V for I420.
+ */
+
+static void
+UVBlit(unsigned char *dst,
+        const unsigned char *uBuffer,
+        const unsigned char *vBuffer,
+        unsigned width, unsigned srcPitch, unsigned dstPitch, unsigned lines)
+{
+    int i, j;
+
+    dstPitch >>= 1;
+
+    for(j = 0; j < lines; j++)
+    {
+        for(i = 0; i < width; i++)
+        {
+            dst[i] = (uBuffer[i] << 8) | (vBuffer[i] << 16);
+        }
+
+        dst += dstPitch;
+        uBuffer += srcPitch;
+        vBuffer += srcPitch;
+    }
+
+}
+
 
 /*
  * Blit the chroma field from one buffer to another while at the same time converting from
