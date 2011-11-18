@@ -994,7 +994,7 @@ UMSHWCursorInit(ScreenPtr pScreen)
 	iga = crtc->driver_private;
 
 	/* Set cursor location in frame buffer. */
-    if (VIAAllocLinear(&pVia->cursor_bo, pScrn, pVia->CursorSize) == Success)
+    if (VIAAllocLinear(&pVia->cursor_bo, pScrn, pVia->CursorSize) != Success)
         return FALSE;
 
 	pVia->CursorStart = pVia->cursor_bo.base;
