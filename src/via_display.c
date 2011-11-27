@@ -962,42 +962,42 @@ ViaShadowCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 Bool
 UMSHWCursorInit(ScreenPtr pScreen)
 {
-	ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
-	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
-	int flags = (HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_1 |
-				 HARDWARE_CURSOR_AND_SOURCE_WITH_MASK |
-				 HARDWARE_CURSOR_TRUECOLOR_AT_8BPP);
-	int max_height, max_width, i = 0;
-	xf86CursorInfoPtr cursor_info;
-	VIAPtr pVia = VIAPTR(pScrn);
-	CARD32 dwHiControl;
-	ViaCRTCInfoPtr iga;
-	xf86CrtcPtr crtc;
+    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
+    int flags = (HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_1 |
+                 HARDWARE_CURSOR_AND_SOURCE_WITH_MASK |
+                 HARDWARE_CURSOR_TRUECOLOR_AT_8BPP);
+    int max_height, max_width, i = 0;
+    xf86CursorInfoPtr cursor_info;
+    VIAPtr pVia = VIAPTR(pScrn);
+    CARD32 dwHiControl;
+    ViaCRTCInfoPtr iga;
+    xf86CrtcPtr crtc;
 
-	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "UMSHWCursorInit\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "UMSHWCursorInit\n"));
 
-	switch (pVia->Chipset) {
-	case VIA_CLE266:
-	case VIA_KM400:
-		max_height = max_width = 32;
-		pVia->CursorSize = ((max_height *  max_width) / 8) * 2;
-		break;
-	default:
-		DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "HWCursor ARGB enabled\n"));
-		flags |= HARDWARE_CURSOR_ARGB;
-		max_height = max_width = 64;
-		pVia->CursorSize = max_width * (max_height + 1) << 2;
-		break;
-	}
+    switch (pVia->Chipset) {
+    case VIA_CLE266:
+    case VIA_KM400:
+        max_height = max_width = 32;
+        pVia->CursorSize = ((max_height *  max_width) / 8) * 2;
+        break;
+    default:
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "HWCursor ARGB enabled\n"));
+        flags |= HARDWARE_CURSOR_ARGB;
+        max_height = max_width = 64;
+        pVia->CursorSize = max_width * (max_height + 1) << 2;
+        break;
+    }
 
-	crtc = xf86_config->crtc[i];
-	iga = crtc->driver_private;
+    crtc = xf86_config->crtc[i];
+    iga = crtc->driver_private;
 
-	/* Set cursor location in frame buffer. */
+    /* Set cursor location in frame buffer. */
     if (VIAAllocLinear(&pVia->cursor_bo, pScrn, pVia->CursorSize) != Success)
         return FALSE;
 
-	pVia->CursorStart = pVia->cursor_bo.base;
+    pVia->CursorStart = pVia->cursor_bo.base;
     pVia->cursorOffset = pScrn->fbOffset + pVia->CursorStart;
     pVia->cursorMap = pVia->FBBase + pVia->CursorStart;
     if (pVia->cursorMap == NULL)
@@ -1005,51 +1005,51 @@ UMSHWCursorInit(ScreenPtr pScreen)
     memset(pVia->cursorMap, 0x00, pVia->CursorSize);
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Cursor Address: %p\n", pVia->cursorMap);
 
-	/* Init HI_X0 */
-	switch (pVia->Chipset) {
-	case VIA_CX700:
-	/* case VIA_CN750: */
-	case VIA_P4M890:
-	case VIA_P4M900:
-	case VIA_VX800:
-	case VIA_VX855:
-	case VIA_VX900:
-		/* set 0 as transparent color key for IGA 2 */
-		VIASETREG(HI_TRANSPARENT_COLOR, 0);
-		VIASETREG(HI_INVTCOLOR, 0X00FFFFFF);
-		VIASETREG(ALPHA_V3_PREFIFO_CONTROL, 0xE0000);
-		VIASETREG(ALPHA_V3_FIFO_CONTROL, 0xE0F0000);
-		VIASETREG(HI_FBOFFSET, pVia->cursorOffset);
+    /* Init HI_X0 */
+    switch (pVia->Chipset) {
+    case VIA_CX700:
+    /* case VIA_CN750: */
+    case VIA_P4M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        /* set 0 as transparent color key for IGA 2 */
+        VIASETREG(HI_TRANSPARENT_COLOR, 0);
+        VIASETREG(HI_INVTCOLOR, 0X00FFFFFF);
+        VIASETREG(ALPHA_V3_PREFIFO_CONTROL, 0xE0000);
+        VIASETREG(ALPHA_V3_FIFO_CONTROL, 0xE0F0000);
+        VIASETREG(HI_FBOFFSET, pVia->cursorOffset);
 
-		/* Turn cursor 2 off. */
-		dwHiControl = VIAGETREG(HI_CONTROL);
-		VIASETREG(HI_CONTROL, dwHiControl & 0xFFFFFFFA);
+        /* Turn cursor 2 off. */
+        dwHiControl = VIAGETREG(HI_CONTROL);
+        VIASETREG(HI_CONTROL, dwHiControl & 0xFFFFFFFA);
 
-		/* set 0 as transparent color key for IGA 1 */
-		VIASETREG(PRIM_HI_TRANSCOLOR, 0);
-		VIASETREG(PRIM_HI_FIFO, 0x0D000D0F);
-		VIASETREG(PRIM_HI_INVTCOLOR, 0x00FFFFFF);
-		VIASETREG(V327_HI_INVTCOLOR, 0x00FFFFFF);
-		VIASETREG(PRIM_HI_FBOFFSET, pVia->cursorOffset);
+        /* set 0 as transparent color key for IGA 1 */
+        VIASETREG(PRIM_HI_TRANSCOLOR, 0);
+	    VIASETREG(PRIM_HI_FIFO, 0x0D000D0F);
+        VIASETREG(PRIM_HI_INVTCOLOR, 0x00FFFFFF);
+        VIASETREG(V327_HI_INVTCOLOR, 0x00FFFFFF);
+        VIASETREG(PRIM_HI_FBOFFSET, pVia->cursorOffset);
 
-		/* Turn cursor 1 off. */
-		dwHiControl = VIAGETREG(PRIM_HI_CTRL);
-		VIASETREG(PRIM_HI_CTRL, dwHiControl & 0xFFFFFFFA);
-		break;
+        /* Turn cursor 1 off. */
+        dwHiControl = VIAGETREG(PRIM_HI_CTRL);
+        VIASETREG(PRIM_HI_CTRL, dwHiControl & 0xFFFFFFFA);
+        break;
 
-	default:
-		VIASETREG(HI_FBOFFSET, pVia->cursorOffset);
-		VIASETREG(HI_TRANSPARENT_COLOR, 0);
-		VIASETREG(HI_INVTCOLOR, 0X00FFFFFF);
-		VIASETREG(ALPHA_V3_PREFIFO_CONTROL, 0xE0000);
-		VIASETREG(ALPHA_V3_FIFO_CONTROL, 0xE0F0000);
+    default:
+        VIASETREG(HI_FBOFFSET, pVia->cursorOffset);
+        VIASETREG(HI_TRANSPARENT_COLOR, 0);
+        VIASETREG(HI_INVTCOLOR, 0X00FFFFFF);
+        VIASETREG(ALPHA_V3_PREFIFO_CONTROL, 0xE0000);
+        VIASETREG(ALPHA_V3_FIFO_CONTROL, 0xE0F0000);
 
-		/* Turn cursor off. */
-		dwHiControl = VIAGETREG(HI_CONTROL);
-		VIASETREG(HI_CONTROL, dwHiControl & 0xFFFFFFFA);
-		break;
-	}
-	return xf86_cursors_init(pScreen, max_width, max_height, flags);
+        /* Turn cursor off. */
+        dwHiControl = VIAGETREG(HI_CONTROL);
+        VIASETREG(HI_CONTROL, dwHiControl & 0xFFFFFFFA);
+        break;
+    }
+    return xf86_cursors_init(pScreen, max_width, max_height, flags);
 }
 
 static void
@@ -1062,71 +1062,70 @@ iga1_crtc_dpms(xf86CrtcPtr crtc, int mode)
     if (pVia->pVbe) {
         ViaVbeDPMS(pScrn, mode);
     } else {
-
         switch (mode) {
-            case DPMSModeOn:
-                if (pBIOSInfo->Simultaneous->IsActive)
-                    ViaDisplayEnableSimultaneous(pScrn);
-                break;
+        case DPMSModeOn:
+            if (pBIOSInfo->Simultaneous->IsActive)
+                ViaDisplayEnableSimultaneous(pScrn);
+            break;
 
-            case DPMSModeStandby:
-            case DPMSModeSuspend:
-            case DPMSModeOff:
-                if (pBIOSInfo->Simultaneous->IsActive)
-                    ViaDisplayDisableSimultaneous(pScrn);
-                break;
+        case DPMSModeStandby:
+        case DPMSModeSuspend:
+        case DPMSModeOff:
+            if (pBIOSInfo->Simultaneous->IsActive)
+                ViaDisplayDisableSimultaneous(pScrn);
+            break;
 
-			default:
-                xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Invalid DPMS mode %d\n",
-                           mode);
-                break;
+		default:
+            xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Invalid DPMS mode %d\n",
+                        mode);
+            break;
         }
-	//vgaHWSaveScreen(pScrn->pScreen, mode);
+        //vgaHWSaveScreen(pScrn->pScreen, mode);
     }
 }
 
 static void
 iga1_crtc_save(xf86CrtcPtr crtc)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	vgaHWPtr hwp = VGAHWPTR(pScrn);
-	VIAPtr pVia = VIAPTR(pScrn);
+    ScrnInfoPtr pScrn = crtc->scrn;
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
 
-	if (pVia->pVbe && pVia->vbeSR) {
-		ViaVbeSaveRestore(pScrn, MODE_SAVE);
-	} else {
-		VIASave(pScrn);
-	}
+    if (pVia->pVbe && pVia->vbeSR) {
+        ViaVbeSaveRestore(pScrn, MODE_SAVE);
+    } else {
+        VIASave(pScrn);
+    }
 
-	vgaHWUnlock(hwp);
+    vgaHWUnlock(hwp);
 }
 
 static void
 iga1_crtc_restore(xf86CrtcPtr crtc)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	vgaHWPtr hwp = VGAHWPTR(pScrn);
-	VIAPtr pVia = VIAPTR(pScrn);
+    ScrnInfoPtr pScrn = crtc->scrn;
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
 
-	if (pVia->pVbe && pVia->vbeSR)
-		ViaVbeSaveRestore(pScrn, MODE_RESTORE);
-	else
-		VIARestore(pScrn);
+    if (pVia->pVbe && pVia->vbeSR)
+        ViaVbeSaveRestore(pScrn, MODE_RESTORE);
+    else
+        VIARestore(pScrn);
 
-	/* A soft reset helps to avoid a 3D hang on VT switch. */
-	switch (pVia->Chipset) {
-	case VIA_K8M890:
-	case VIA_P4M900:
-	case VIA_VX800:
-	case VIA_VX855:
-	case VIA_VX900:
-		break;
+    /* A soft reset helps to avoid a 3D hang on VT switch. */
+    switch (pVia->Chipset) {
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        break;
 
-	default:
-		hwp->writeSeq(hwp, 0x1A, pVia->SavedReg.SR1A | 0x40);
-		break;
-	}
-	vgaHWLock(hwp);
+    default:
+        hwp->writeSeq(hwp, 0x1A, pVia->SavedReg.SR1A | 0x40);
+        break;
+    }
+    vgaHWLock(hwp);
 }
 
 static Bool
@@ -1144,25 +1143,25 @@ static Bool
 iga1_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
                         DisplayModePtr adjusted_mode)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	VIAPtr pVia = VIAPTR(pScrn);
-	CARD32 temp;
+    ScrnInfoPtr pScrn = crtc->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+    CARD32 temp;
 
-	if (pVia->pVbe)
-		return TRUE;
+    if (pVia->pVbe)
+        return TRUE;
 
-	if (ViaFirstCRTCModeValid(pScrn, mode) != MODE_OK)
-		return FALSE;
+    if (ViaFirstCRTCModeValid(pScrn, mode) != MODE_OK)
+        return FALSE;
 
-	temp = mode->CrtcHDisplay * mode->CrtcVDisplay * mode->VRefresh
-			* (pScrn->bitsPerPixel >> 3);
-	if (pVia->pBIOSInfo->Bandwidth < temp) {
-		xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-					"Required bandwidth is not available. (%u > %u)\n",
-					(unsigned)temp, (unsigned)pVia->pBIOSInfo->Bandwidth);
-		return FALSE;
-	}
-	return TRUE;
+    temp = mode->CrtcHDisplay * mode->CrtcVDisplay * mode->VRefresh *
+            (pScrn->bitsPerPixel >> 3);
+    if (pVia->pBIOSInfo->Bandwidth < temp) {
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "Required bandwidth is not available. (%u > %u)\n",
+                    (unsigned)temp, (unsigned)pVia->pBIOSInfo->Bandwidth);
+        return FALSE;
+    }
+    return TRUE;
 }
 
 static void
@@ -1175,37 +1174,33 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 					DisplayModePtr adjusted_mode,
 					int x, int y)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	VIAPtr pVia = VIAPTR(pScrn);
+    ScrnInfoPtr pScrn = crtc->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
 
-	pVia->OverlaySupported = FALSE;
+    pVia->OverlaySupported = FALSE;
 
-	if (!pVia->pVbe) {
+    if (!pVia->pVbe) {
+        if (!vgaHWInit(pScrn, adjusted_mode))
+            return;
 
-		if (!vgaHWInit(pScrn, adjusted_mode))
-			return;
+        if (pVia->UseLegacyModeSwitch) {
+            ViaModePrimaryLegacy(crtc, adjusted_mode);
+        } else {
+            ViaCRTCInit(pScrn);
+            ViaModeFirstCRTC(pScrn, mode);
 
-		if (pVia->UseLegacyModeSwitch) {
-			ViaModePrimaryLegacy(crtc, adjusted_mode);
-		} else {
-			ViaCRTCInit(pScrn);
-			ViaModeFirstCRTC(pScrn, mode);
-
-			if (pVia->pBIOSInfo->Simultaneous->IsActive)
-				ViaDisplayEnableSimultaneous(pScrn);
-			else
-				ViaDisplayDisableSimultaneous(pScrn);
-		}
-
-	} else {
-
-		if (!ViaVbeSetMode(pScrn, adjusted_mode))
-			return;
-	}
-
-	/* Enable the graphics engine. */
-	if (!pVia->NoAccel)
-		VIAInitialize3DEngine(pScrn);
+            if (pVia->pBIOSInfo->Simultaneous->IsActive)
+                ViaDisplayEnableSimultaneous(pScrn);
+            else
+                ViaDisplayDisableSimultaneous(pScrn);
+        }
+    } else {
+        if (!ViaVbeSetMode(pScrn, adjusted_mode))
+            return;
+    }
+    /* Enable the graphics engine. */
+    if (!pVia->NoAccel)
+        VIAInitialize3DEngine(pScrn);
 }
 
 static void
@@ -1217,64 +1212,64 @@ static void
 iga1_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
 					int size)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	vgaHWPtr hwp = VGAHWPTR(pScrn);
-	VIAPtr pVia = VIAPTR(pScrn);
-	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-	int SR1A, SR1B, CR67, CR6A;
-	LOCO colors[size];
-	int i, index;
+    ScrnInfoPtr pScrn = crtc->scrn;
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+    int SR1A, SR1B, CR67, CR6A;
+    LOCO colors[size];
+    int i, index;
 
-	for (i = 0; i < size; i++) {
-		colors[i].red = red[i] >> 8;
-		colors[i].green = green[i] >> 8;
-		colors[i].blue = blue[i] >> 8;
-	}
+    for (i = 0; i < size; i++) {
+        colors[i].red = red[i] >> 8;
+        colors[i].green = green[i] >> 8;
+        colors[i].blue = blue[i] >> 8;
+    }
 
-	if (pScrn->bitsPerPixel != 8) {
-		switch (pVia->Chipset) {
-		case VIA_CLE266:
-		case VIA_KM400:
-			ViaSeqMask(hwp, 0x16, 0x80, 0x80);
-			break;
-		default:
-			ViaCrtcMask(hwp, 0x33, 0x80, 0x80);
-			break;
-		}
+    if (pScrn->bitsPerPixel != 8) {
+        switch (pVia->Chipset) {
+        case VIA_CLE266:
+        case VIA_KM400:
+            ViaSeqMask(hwp, 0x16, 0x80, 0x80);
+            break;
+        default:
+            ViaCrtcMask(hwp, 0x33, 0x80, 0x80);
+            break;
+        }
 
-		ViaSeqMask(hwp, 0x1A, 0x00, 0x01);
-		VIALoadRgbLut(pScrn, 0, size, colors);
+        ViaSeqMask(hwp, 0x1A, 0x00, 0x01);
+        VIALoadRgbLut(pScrn, 0, size, colors);
 
-	} else {
+    } else {
 
-		SR1A = hwp->readSeq(hwp, 0x1A);
-		SR1B = hwp->readSeq(hwp, 0x1B);
-		CR67 = hwp->readCrtc(hwp, 0x67);
-		CR6A = hwp->readCrtc(hwp, 0x6A);
+        SR1A = hwp->readSeq(hwp, 0x1A);
+        SR1B = hwp->readSeq(hwp, 0x1B);
+        CR67 = hwp->readCrtc(hwp, 0x67);
+        CR6A = hwp->readCrtc(hwp, 0x6A);
 
-		for (i = 0; i < size; i++) {
-			hwp->writeDacWriteAddr(hwp, i);
-			hwp->writeDacData(hwp, colors[i].red);
-			hwp->writeDacData(hwp, colors[i].green);
-			hwp->writeDacData(hwp, colors[i].blue);
-		}
-	}
+        for (i = 0; i < size; i++) {
+            hwp->writeDacWriteAddr(hwp, i);
+            hwp->writeDacData(hwp, colors[i].red);
+            hwp->writeDacData(hwp, colors[i].green);
+            hwp->writeDacData(hwp, colors[i].blue);
+        }
+    }
 }
 
 static void
 iga1_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	int scrnIndex = pScrn->scrnIndex;
-	VIAPtr pVia = VIAPTR(pScrn);
+    ScrnInfoPtr pScrn = crtc->scrn;
+    int scrnIndex = pScrn->scrnIndex;
+    VIAPtr pVia = VIAPTR(pScrn);
 
-	if (pVia->pVbe) {
-		ViaVbeAdjustFrame(scrnIndex, x, y);
-	} else {
-		ViaFirstCRTCSetStartingAddress(pScrn, x, y);
-	}
+    if (pVia->pVbe) {
+        ViaVbeAdjustFrame(scrnIndex, x, y);
+    } else {
+        ViaFirstCRTCSetStartingAddress(pScrn, x, y);
+    }
 
-	VIAVidAdjustFrame(pScrn, x, y);
+    VIAVidAdjustFrame(pScrn, x, y);
 }
 
 static void *
@@ -1303,137 +1298,137 @@ iga1_crtc_shadow_destroy(xf86CrtcPtr crtc, PixmapPtr rotate_pixmap, void *data)
 static void
 iga1_crtc_set_cursor_colors (xf86CrtcPtr crtc, int bg, int fg)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
-	int height = 64, width = 64, i;
-	VIAPtr pVia = VIAPTR(pScrn);
-	CARD32 pixel, temp, *dst;
+    ScrnInfoPtr pScrn = crtc->scrn;
+    xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
+    int height = 64, width = 64, i;
+    VIAPtr pVia = VIAPTR(pScrn);
+    CARD32 pixel, temp, *dst;
 
-	if (xf86_config->cursor_fg)
-		return;
+    if (xf86_config->cursor_fg)
+        return;
 
-	fg |= 0xff000000;
-	bg |= 0xff000000;
+    fg |= 0xff000000;
+    bg |= 0xff000000;
 
-	/* Don't recolour the image if we don't have to. */
-	if (fg == xf86_config->cursor_fg && bg == xf86_config->cursor_bg)
-		return;
+    /* Don't recolour the image if we don't have to. */
+    if (fg == xf86_config->cursor_fg && bg == xf86_config->cursor_bg)
+        return;
 
-	switch(pVia->Chipset) {
-	case VIA_CX700:
-	case VIA_P4M890:
-	case VIA_P4M900:
-	case VIA_VX800:
-	case VIA_VX855:
-	case VIA_VX900:
-		temp = VIAGETREG(PRIM_HI_CTRL);
-		VIASETREG(PRIM_HI_CTRL, temp & 0xFFFFFFFE);
-		break;
+    switch(pVia->Chipset) {
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        temp = VIAGETREG(PRIM_HI_CTRL);
+        VIASETREG(PRIM_HI_CTRL, temp & 0xFFFFFFFE);
+        break;
 
-	default:
-		temp = VIAGETREG(HI_CONTROL);
-		VIASETREG(HI_CONTROL, temp & 0xFFFFFFFE);
-		height = width = 32;
-		break;
-	}
+    default:
+        temp = VIAGETREG(HI_CONTROL);
+        VIASETREG(HI_CONTROL, temp & 0xFFFFFFFE);
+        height = width = 32;
+        break;
+    }
 
-	dst = (CARD32*)pVia->cursorMap;
-	for (i = 0; i < height * width; i++, dst++)
-		if ((pixel = *dst))
-			*dst = (pixel == xf86_config->cursor_fg) ? fg : bg;
+    dst = (CARD32*)pVia->cursorMap;
+    for (i = 0; i < height * width; i++, dst++)
+        if ((pixel = *dst))
+            *dst = (pixel == xf86_config->cursor_fg) ? fg : bg;
 
-	xf86_config->cursor_fg = fg;
-	xf86_config->cursor_bg = bg;
+    xf86_config->cursor_fg = fg;
+    xf86_config->cursor_bg = bg;
 }
 
 static void
 iga1_crtc_set_cursor_position (xf86CrtcPtr crtc, int x, int y)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	VIAPtr pVia = VIAPTR(pScrn);
-	unsigned xoff, yoff;
+    ScrnInfoPtr pScrn = crtc->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+    unsigned xoff, yoff;
 
-	if (x < 0) {
-		xoff = ((-x) & 0xFE);
-		x = 0;
-	} else {
-		xoff = 0;
-	}
+    if (x < 0) {
+        xoff = ((-x) & 0xFE);
+        x = 0;
+    } else {
+        xoff = 0;
+    }
 
-	if (y < 0) {
-		yoff = ((-y) & 0xFE);
-		y = 0;
-	} else {
-		yoff = 0;
-	}
+    if (y < 0) {
+        yoff = ((-y) & 0xFE);
+        y = 0;
+    } else {
+        yoff = 0;
+    }
 
-	switch(pVia->Chipset) {
-	case VIA_CX700:
-	case VIA_P4M890:
-	case VIA_P4M900:
-	case VIA_VX800:
-	case VIA_VX855:
-	case VIA_VX900:
-		VIASETREG(PRIM_HI_POSSTART,    ((x    << 16) | (y    & 0x07ff)));
-		VIASETREG(PRIM_HI_CENTEROFFSET, ((xoff << 16) | (yoff & 0x07ff)));
-		break;
+    switch(pVia->Chipset) {
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        VIASETREG(PRIM_HI_POSSTART,    ((x    << 16) | (y    & 0x07ff)));
+        VIASETREG(PRIM_HI_CENTEROFFSET, ((xoff << 16) | (yoff & 0x07ff)));
+        break;
 
-	default:
-		VIASETREG(HI_POSSTART,    ((x    << 16) | (y    & 0x07ff)));
-		VIASETREG(HI_CENTEROFFSET, ((xoff << 16) | (yoff & 0x07ff)));
-		break;
-	}
+    default:
+        VIASETREG(HI_POSSTART,    ((x    << 16) | (y    & 0x07ff)));
+        VIASETREG(HI_CENTEROFFSET, ((xoff << 16) | (yoff & 0x07ff)));
+        break;
+    }
 }
 
 static void
 iga1_crtc_show_cursor (xf86CrtcPtr crtc)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	VIAPtr pVia = VIAPTR(pScrn);
+    ScrnInfoPtr pScrn = crtc->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
 
-	switch(pVia->Chipset) {
-	case VIA_CX700:
-	case VIA_P4M890:
-	case VIA_P4M900:
-	case VIA_VX800:
-	case VIA_VX855:
-	case VIA_VX900:
-		VIASETREG(PRIM_HI_FBOFFSET, pVia->cursorOffset);
-		VIASETREG(PRIM_HI_CTRL, 0x36000005);
-		break;
+    switch(pVia->Chipset) {
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        VIASETREG(PRIM_HI_FBOFFSET, pVia->cursorOffset);
+        VIASETREG(PRIM_HI_CTRL, 0x36000005);
+        break;
 
-	default:
-		/* Mono Cursor Display Path [bit31]: Primary */
-		VIASETREG(HI_FBOFFSET, pVia->cursorOffset);
-		VIASETREG(HI_CONTROL, 0x76000005);
-		break;
-	}
+    default:
+        /* Mono Cursor Display Path [bit31]: Primary */
+        VIASETREG(HI_FBOFFSET, pVia->cursorOffset);
+        VIASETREG(HI_CONTROL, 0x76000005);
+        break;
+    }
 }
 
 static void
 iga1_crtc_hide_cursor (xf86CrtcPtr crtc)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	VIAPtr pVia = VIAPTR(pScrn);
-	CARD32 temp;
+    ScrnInfoPtr pScrn = crtc->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+    CARD32 temp;
 
-	switch(pVia->Chipset) {
-	case VIA_CX700:
-	case VIA_P4M890:
-	case VIA_P4M900:
-	case VIA_VX800:
-	case VIA_VX855:
-	case VIA_VX900:
-		temp = VIAGETREG(PRIM_HI_CTRL);
-		VIASETREG(PRIM_HI_CTRL, temp & 0xFFFFFFFA);
-		break;
+    switch(pVia->Chipset) {
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        temp = VIAGETREG(PRIM_HI_CTRL);
+        VIASETREG(PRIM_HI_CTRL, temp & 0xFFFFFFFA);
+        break;
 
-	default:
-		temp = VIAGETREG(HI_CONTROL);
-		/* Hardware cursor disable [bit0] */
-		VIASETREG(HI_CONTROL, temp & 0xFFFFFFFA);
-		break;
-	}
+    default:
+        temp = VIAGETREG(HI_CONTROL);
+        /* Hardware cursor disable [bit0] */
+        VIASETREG(HI_CONTROL, temp & 0xFFFFFFFA);
+        break;
+    }
 }
 
 /*
@@ -1442,53 +1437,53 @@ iga1_crtc_hide_cursor (xf86CrtcPtr crtc)
 static void
 iga1_crtc_load_cursor_image(xf86CrtcPtr crtc, CARD8 *src)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	VIAPtr pVia = VIAPTR(pScrn);
-	CARD32 *dst;
+    ScrnInfoPtr pScrn = crtc->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+    CARD32 *dst;
 
-	dst = (CARD32*)(pVia->cursorMap);
-	memcpy(dst, src, pVia->CursorSize);
+    dst = (CARD32*)(pVia->cursorMap);
+    memcpy(dst, src, pVia->CursorSize);
 }
 
 static void
 iga1_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	VIAPtr pVia = VIAPTR(pScrn);
-	CARD32 *dst = (CARD32*)(pVia->cursorMap);
+    ScrnInfoPtr pScrn = crtc->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+    CARD32 *dst = (CARD32*)(pVia->cursorMap);
 
-	memcpy(dst, image, pVia->CursorSize);
+    memcpy(dst, image, pVia->CursorSize);
 }
 
 static void
 iga_crtc_destroy(xf86CrtcPtr crtc)
 {
-	if (crtc->driver_private)
-		free(crtc->driver_private);
+    if (crtc->driver_private)
+        free(crtc->driver_private);
 }
 
 static const xf86CrtcFuncsRec iga1_crtc_funcs = {
-	.dpms			= iga1_crtc_dpms,
-	.save			= iga1_crtc_save,
-	.restore		= iga1_crtc_restore,
-	.lock			= iga1_crtc_lock,
-	.unlock			= iga1_crtc_unlock,
-	.mode_fixup		= iga1_crtc_mode_fixup,
-	.prepare		= iga1_crtc_prepare,
-	.mode_set		= iga1_crtc_mode_set,
-	.commit			= iga1_crtc_commit,
-	.gamma_set		= iga1_crtc_gamma_set,
-	.shadow_create		= iga1_crtc_shadow_create,
-	.shadow_allocate	= iga1_crtc_shadow_allocate,
-	.shadow_destroy		= iga1_crtc_shadow_destroy,
-	.set_cursor_colors	= iga1_crtc_set_cursor_colors,
-	.set_cursor_position	= iga1_crtc_set_cursor_position,
-	.show_cursor		= iga1_crtc_show_cursor,
-	.hide_cursor		= iga1_crtc_hide_cursor,
-	.load_cursor_image	= iga1_crtc_load_cursor_image,
-	.load_cursor_argb	= iga1_crtc_load_cursor_argb,
-	.set_origin		= iga1_crtc_set_origin,
-	.destroy		= iga_crtc_destroy,
+    .dpms                   = iga1_crtc_dpms,
+    .save                   = iga1_crtc_save,
+    .restore                = iga1_crtc_restore,
+    .lock                   = iga1_crtc_lock,
+    .unlock                 = iga1_crtc_unlock,
+    .mode_fixup             = iga1_crtc_mode_fixup,
+    .prepare                = iga1_crtc_prepare,
+    .mode_set               = iga1_crtc_mode_set,
+    .commit                 = iga1_crtc_commit,
+    .gamma_set              = iga1_crtc_gamma_set,
+    .shadow_create          = iga1_crtc_shadow_create,
+    .shadow_allocate        = iga1_crtc_shadow_allocate,
+    .shadow_destroy         = iga1_crtc_shadow_destroy,
+    .set_cursor_colors      = iga1_crtc_set_cursor_colors,
+    .set_cursor_position    = iga1_crtc_set_cursor_position,
+    .show_cursor            = iga1_crtc_show_cursor,
+    .hide_cursor            = iga1_crtc_hide_cursor,
+    .load_cursor_image      = iga1_crtc_load_cursor_image,
+    .load_cursor_argb       = iga1_crtc_load_cursor_argb,
+    .set_origin             = iga1_crtc_set_origin,
+    .destroy                = iga_crtc_destroy,
 };
 
 static void
@@ -1501,57 +1496,54 @@ iga2_crtc_dpms(xf86CrtcPtr crtc, int mode)
     if (pVia->pVbe) {
         ViaVbeDPMS(pScrn, mode);
     } else {
-
         switch (mode) {
-            case DPMSModeOn:
-                if (pBIOSInfo->Simultaneous->IsActive)
-                    ViaDisplayEnableSimultaneous(pScrn);
-                break;
+        case DPMSModeOn:
+            if (pBIOSInfo->Simultaneous->IsActive)
+                ViaDisplayEnableSimultaneous(pScrn);
+            break;
 
-            case DPMSModeStandby:
-            case DPMSModeSuspend:
-            case DPMSModeOff:
-                if (pBIOSInfo->Simultaneous->IsActive)
-                    ViaDisplayDisableSimultaneous(pScrn);
-                break;
+        case DPMSModeStandby:
+        case DPMSModeSuspend:
+        case DPMSModeOff:
+            if (pBIOSInfo->Simultaneous->IsActive)
+                ViaDisplayDisableSimultaneous(pScrn);
+            break;
 
-			default:
-                xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Invalid DPMS mode %d\n",
-                           mode);
-                break;
+        default:
+            xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Invalid DPMS mode %d\n",
+                        mode);
+            break;
         }
-	//vgaHWSaveScreen(pScrn->pScreen, mode);
+        //vgaHWSaveScreen(pScrn->pScreen, mode);
     }
 }
 
 static void
 iga2_crtc_save(xf86CrtcPtr crtc)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	vgaHWPtr hwp = VGAHWPTR(pScrn);
-	VIAPtr pVia = VIAPTR(pScrn);
+    ScrnInfoPtr pScrn = crtc->scrn;
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
 
-	if (pVia->pVbe && pVia->vbeSR) {
-		ViaVbeSaveRestore(pScrn, MODE_SAVE);
-	} else {
-		VIASave(pScrn);
-	}
+    if (pVia->pVbe && pVia->vbeSR)
+        ViaVbeSaveRestore(pScrn, MODE_SAVE);
+    else
+        VIASave(pScrn);
 	vgaHWUnlock(hwp);
 }
 
 static void
 iga2_crtc_restore(xf86CrtcPtr crtc)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	vgaHWPtr hwp = VGAHWPTR(pScrn);
-	VIAPtr pVia = VIAPTR(pScrn);
+    ScrnInfoPtr pScrn = crtc->scrn;
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
 
-	if (pVia->pVbe && pVia->vbeSR)
-		ViaVbeSaveRestore(pScrn, MODE_RESTORE);
-	else
-		VIARestore(pScrn);
-
-	vgaHWLock(hwp);
+    if (pVia->pVbe && pVia->vbeSR)
+        ViaVbeSaveRestore(pScrn, MODE_RESTORE);
+    else
+        VIARestore(pScrn);
+    vgaHWLock(hwp);
 }
 
 static Bool
@@ -1569,25 +1561,25 @@ static Bool
 iga2_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
                         DisplayModePtr adjusted_mode)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	VIAPtr pVia = VIAPTR(pScrn);
-	CARD32 temp;
+    ScrnInfoPtr pScrn = crtc->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+    CARD32 temp;
 
-	if (pVia->pVbe)
-		return TRUE;
+    if (pVia->pVbe)
+        return TRUE;
 
-	if (ViaSecondCRTCModeValid(pScrn, mode) != MODE_OK)
-		return FALSE;
+    if (ViaSecondCRTCModeValid(pScrn, mode) != MODE_OK)
+        return FALSE;
 
-	temp = mode->CrtcHDisplay * mode->CrtcVDisplay * mode->VRefresh
-			* (pScrn->bitsPerPixel >> 3);
-	if (pVia->pBIOSInfo->Bandwidth < temp) {
-		xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-					"Required bandwidth is not available. (%u > %u)\n",
-					(unsigned)temp, (unsigned)pVia->pBIOSInfo->Bandwidth);
-		return FALSE;
-	}
-	return TRUE;
+    temp = mode->CrtcHDisplay * mode->CrtcVDisplay * mode->VRefresh *
+            (pScrn->bitsPerPixel >> 3);
+    if (pVia->pBIOSInfo->Bandwidth < temp) {
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "Required bandwidth is not available. (%u > %u)\n",
+			        (unsigned)temp, (unsigned)pVia->pBIOSInfo->Bandwidth);
+        return FALSE;
+    }
+    return TRUE;
 }
 
 static void
@@ -1597,38 +1589,37 @@ iga2_crtc_prepare (xf86CrtcPtr crtc)
 
 static void
 iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
-					DisplayModePtr adjusted_mode,
-					int x, int y)
+                    DisplayModePtr adjusted_mode, int x, int y)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	VIAPtr pVia = VIAPTR(pScrn);
+    ScrnInfoPtr pScrn = crtc->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
 
-	pVia->OverlaySupported = FALSE;
+    pVia->OverlaySupported = FALSE;
 
-	if (pVia->pVbe) {
-		if (!ViaVbeSetMode(pScrn, adjusted_mode))
-			return;
-	} else {
-		if (!vgaHWInit(pScrn, adjusted_mode))
-			return;
+    if (pVia->pVbe) {
+        if (!ViaVbeSetMode(pScrn, adjusted_mode))
+            return;
+    } else {
+        if (!vgaHWInit(pScrn, adjusted_mode))
+            return;
 
-		if (pVia->UseLegacyModeSwitch) {
-				ViaModeSecondaryLegacy(crtc, adjusted_mode);
-		} else {
-			ViaCRTCInit(pScrn);
-			ViaModeSecondCRTC(pScrn, adjusted_mode);
-			ViaSecondDisplayChannelEnable(pScrn);
+        if (pVia->UseLegacyModeSwitch) {
+            ViaModeSecondaryLegacy(crtc, adjusted_mode);
+        } else {
+            ViaCRTCInit(pScrn);
+            ViaModeSecondCRTC(pScrn, adjusted_mode);
+            ViaSecondDisplayChannelEnable(pScrn);
 
-			/* Yes we have to run this otherwise the 2nd CRTC
-			 * is not set properly. Will cleanup the code later */
-			ViaModeFirstCRTC(pScrn, adjusted_mode);
+            /* Yes we have to run this otherwise the 2nd CRTC
+             * is not set properly. Will cleanup the code later */
+            ViaModeFirstCRTC(pScrn, adjusted_mode);
 
-			if (pVia->pBIOSInfo->Simultaneous->IsActive)
-				ViaDisplayEnableSimultaneous(pScrn);
-			else
-				ViaDisplayDisableSimultaneous(pScrn);
-		}
-	}
+            if (pVia->pBIOSInfo->Simultaneous->IsActive)
+                ViaDisplayEnableSimultaneous(pScrn);
+            else
+                ViaDisplayDisableSimultaneous(pScrn);
+        }
+    }
 }
 
 static void
@@ -1640,88 +1631,86 @@ static void
 iga2_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
 					int size)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	vgaHWPtr hwp = VGAHWPTR(pScrn);
-	VIAPtr pVia = VIAPTR(pScrn);
-	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-	int SR1A, SR1B, CR67, CR6A;
-	LOCO colors[size];
-	int i, index;
+    ScrnInfoPtr pScrn = crtc->scrn;
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+    int SR1A, SR1B, CR67, CR6A;
+    LOCO colors[size];
+    int i, index;
 
-	for (i = 0; i < size; i++) {
-		colors[i].red = red[i] >> 8;
-		colors[i].green = green[i] >> 8;
-		colors[i].blue = blue[i] >> 8;
-	}
+    for (i = 0; i < size; i++) {
+        colors[i].red = red[i] >> 8;
+        colors[i].green = green[i] >> 8;
+        colors[i].blue = blue[i] >> 8;
+    }
 
-	if (pScrn->bitsPerPixel != 8) {
-		if (!(pVia->Chipset == VIA_CLE266 &&
-			CLE266_REV_IS_AX(pVia->ChipRev))) {
-			ViaSeqMask(hwp, 0x1A, 0x01, 0x01);
-			ViaCrtcMask(hwp, 0x6A, 0x02, 0x02);
+    if (pScrn->bitsPerPixel != 8) {
+        if (!(pVia->Chipset == VIA_CLE266 &&
+            CLE266_REV_IS_AX(pVia->ChipRev))) {
+            ViaSeqMask(hwp, 0x1A, 0x01, 0x01);
+            ViaCrtcMask(hwp, 0x6A, 0x02, 0x02);
 
-			switch (pVia->Chipset) {
-			case VIA_CLE266:
-			case VIA_KM400:
-			case VIA_K8M800:
-			case VIA_PM800:
-				break;
+            switch (pVia->Chipset) {
+            case VIA_CLE266:
+            case VIA_KM400:
+            case VIA_K8M800:
+            case VIA_PM800:
+                break;
 
-			default:
-				ViaCrtcMask(hwp, 0x6A, 0x20, 0x20);
-				break;
-			}
-			VIALoadRgbLut(pScrn, 0, size, colors);
-		}
+            default:
+                ViaCrtcMask(hwp, 0x6A, 0x20, 0x20);
+                break;
+            }
+            VIALoadRgbLut(pScrn, 0, size, colors);
+        }
+    } else {
+        SR1A = hwp->readSeq(hwp, 0x1A);
+        SR1B = hwp->readSeq(hwp, 0x1B);
+        CR67 = hwp->readCrtc(hwp, 0x67);
+        CR6A = hwp->readCrtc(hwp, 0x6A);
 
-	} else {
+        ViaSeqMask(hwp, 0x1A, 0x01, 0x01);
+        ViaSeqMask(hwp, 0x1B, 0x80, 0x80);
+        ViaCrtcMask(hwp, 0x67, 0x00, 0xC0);
+        ViaCrtcMask(hwp, 0x6A, 0xC0, 0xC0);
 
-		SR1A = hwp->readSeq(hwp, 0x1A);
-		SR1B = hwp->readSeq(hwp, 0x1B);
-		CR67 = hwp->readCrtc(hwp, 0x67);
-		CR6A = hwp->readCrtc(hwp, 0x6A);
+        for (i = 0; i < size; i++) {
+            hwp->writeDacWriteAddr(hwp, i);
+            hwp->writeDacData(hwp, colors[i].red);
+            hwp->writeDacData(hwp, colors[i].green);
+            hwp->writeDacData(hwp, colors[i].blue);
+        }
 
-		ViaSeqMask(hwp, 0x1A, 0x01, 0x01);
-		ViaSeqMask(hwp, 0x1B, 0x80, 0x80);
-		ViaCrtcMask(hwp, 0x67, 0x00, 0xC0);
-		ViaCrtcMask(hwp, 0x6A, 0xC0, 0xC0);
+        hwp->writeSeq(hwp, 0x1A, SR1A);
+        hwp->writeSeq(hwp, 0x1B, SR1B);
+        hwp->writeCrtc(hwp, 0x67, CR67);
+        hwp->writeCrtc(hwp, 0x6A, CR6A);
 
-		for (i = 0; i < size; i++) {
-			hwp->writeDacWriteAddr(hwp, i);
-			hwp->writeDacData(hwp, colors[i].red);
-			hwp->writeDacData(hwp, colors[i].green);
-			hwp->writeDacData(hwp, colors[i].blue);
-		}
-
-		hwp->writeSeq(hwp, 0x1A, SR1A);
-		hwp->writeSeq(hwp, 0x1B, SR1B);
-		hwp->writeCrtc(hwp, 0x67, CR67);
-		hwp->writeCrtc(hwp, 0x6A, CR6A);
-
-		/* Screen 0 palette was changed by mode setting of Screen 1,
-		 * so load it again. */
-		for (i = 0; i < size; i++) {
-			hwp->writeDacWriteAddr(hwp, i);
-			hwp->writeDacData(hwp, colors[i].red);
-			hwp->writeDacData(hwp, colors[i].green);
-			hwp->writeDacData(hwp, colors[i].blue);
-		}
-	}
+        /* Screen 0 palette was changed by mode setting of Screen 1,
+         * so load it again. */
+        for (i = 0; i < size; i++) {
+            hwp->writeDacWriteAddr(hwp, i);
+            hwp->writeDacData(hwp, colors[i].red);
+            hwp->writeDacData(hwp, colors[i].green);
+            hwp->writeDacData(hwp, colors[i].blue);
+        }
+    }
 }
 
 static void
 iga2_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	int scrnIndex = pScrn->scrnIndex;
-	VIAPtr pVia = VIAPTR(pScrn);
+    ScrnInfoPtr pScrn = crtc->scrn;
+    int scrnIndex = pScrn->scrnIndex;
+    VIAPtr pVia = VIAPTR(pScrn);
 
-	if (pVia->pVbe) {
-		ViaVbeAdjustFrame(scrnIndex, x, y);
-	} else {
-		ViaSecondCRTCSetStartingAddress(pScrn, x, y);
-	}
-	VIAVidAdjustFrame(pScrn, x, y);
+    if (pVia->pVbe) {
+        ViaVbeAdjustFrame(scrnIndex, x, y);
+    } else {
+        ViaSecondCRTCSetStartingAddress(pScrn, x, y);
+    }
+    VIAVidAdjustFrame(pScrn, x, y);
 }
 
 static void *
@@ -1750,192 +1739,192 @@ iga2_crtc_shadow_destroy(xf86CrtcPtr crtc, PixmapPtr rotate_pixmap, void *data)
 static void
 iga2_crtc_set_cursor_colors(xf86CrtcPtr crtc, int bg, int fg)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
-	int height = 64, width = 64, i;
-	VIAPtr pVia = VIAPTR(pScrn);
-	CARD32 pixel, temp, *dst;
+    ScrnInfoPtr pScrn = crtc->scrn;
+    xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
+    int height = 64, width = 64, i;
+    VIAPtr pVia = VIAPTR(pScrn);
+    CARD32 pixel, temp, *dst;
 
-	if (xf86_config->cursor_fg)
-		return;
+    if (xf86_config->cursor_fg)
+        return;
 
-	fg |= 0xff000000;
-	bg |= 0xff000000;
+    fg |= 0xff000000;
+    bg |= 0xff000000;
 
-	/* Don't recolour the image if we don't have to. */
-	if (fg == xf86_config->cursor_fg && bg == xf86_config->cursor_bg)
-		return;
+    /* Don't recolour the image if we don't have to. */
+    if (fg == xf86_config->cursor_fg && bg == xf86_config->cursor_bg)
+        return;
 
-	switch(pVia->Chipset) {
-	case VIA_CX700:
-	case VIA_P4M890:
-	case VIA_P4M900:
-	case VIA_VX800:
-	case VIA_VX855:
-	case VIA_VX900:
-		temp = VIAGETREG(HI_CONTROL);
-		VIASETREG(HI_CONTROL, temp & 0xFFFFFFFE);
-		break;
+    switch(pVia->Chipset) {
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        temp = VIAGETREG(HI_CONTROL);
+        VIASETREG(HI_CONTROL, temp & 0xFFFFFFFE);
+        break;
 
-	default:
-		temp = VIAGETREG(HI_CONTROL);
-		VIASETREG(HI_CONTROL, temp & 0xFFFFFFFE);
-		height = width = 32;
-		break;
-	}
+    default:
+        temp = VIAGETREG(HI_CONTROL);
+        VIASETREG(HI_CONTROL, temp & 0xFFFFFFFE);
+        height = width = 32;
+        break;
+    }
 
-	dst = (CARD32*)pVia->cursorMap;
-	for (i = 0; i < width * height; i++, dst++)
-		if ((pixel = *dst))
-			*dst = (pixel == xf86_config->cursor_fg) ? fg : bg;
+    dst = (CARD32*)pVia->cursorMap;
+    for (i = 0; i < width * height; i++, dst++)
+        if ((pixel = *dst))
+            *dst = (pixel == xf86_config->cursor_fg) ? fg : bg;
 
-	xf86_config->cursor_fg = fg;
-	xf86_config->cursor_bg = bg;
+    xf86_config->cursor_fg = fg;
+    xf86_config->cursor_bg = bg;
 }
 
 static void
 iga2_crtc_set_cursor_position(xf86CrtcPtr crtc, int x, int y)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	VIAPtr pVia = VIAPTR(pScrn);
-	unsigned xoff, yoff;
+    ScrnInfoPtr pScrn = crtc->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+    unsigned xoff, yoff;
 
-	if (x < 0) {
-		xoff = ((-x) & 0xFE);
-		x = 0;
-	} else {
-		xoff = 0;
-	}
+    if (x < 0) {
+        xoff = ((-x) & 0xFE);
+        x = 0;
+    } else {
+        xoff = 0;
+    }
 
-	if (y < 0) {
-		yoff = ((-y) & 0xFE);
-		y = 0;
-	} else {
-		yoff = 0;
-	}
+    if (y < 0) {
+        yoff = ((-y) & 0xFE);
+        y = 0;
+    } else {
+        yoff = 0;
+    }
 
-	switch(pVia->Chipset) {
-	case VIA_CX700:
-	case VIA_P4M890:
-	case VIA_P4M900:
-	case VIA_VX800:
-	case VIA_VX855:
-	case VIA_VX900:
-		VIASETREG(HI_POSSTART,    ((x    << 16) | (y    & 0x07ff)));
-		VIASETREG(HI_CENTEROFFSET, ((xoff << 16) | (yoff & 0x07ff)));
-		break;
+    switch(pVia->Chipset) {
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        VIASETREG(HI_POSSTART,    ((x    << 16) | (y    & 0x07ff)));
+        VIASETREG(HI_CENTEROFFSET, ((xoff << 16) | (yoff & 0x07ff)));
+        break;
 
-	default:
-		VIASETREG(HI_POSSTART,    ((x    << 16) | (y    & 0x07ff)));
-		VIASETREG(HI_CENTEROFFSET, ((xoff << 16) | (yoff & 0x07ff)));
-		break;
-	}
+    default:
+        VIASETREG(HI_POSSTART,    ((x    << 16) | (y    & 0x07ff)));
+        VIASETREG(HI_CENTEROFFSET, ((xoff << 16) | (yoff & 0x07ff)));
+        break;
+    }
 }
 
 static void
 iga2_crtc_show_cursor(xf86CrtcPtr crtc)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	VIAPtr pVia = VIAPTR(pScrn);
+    ScrnInfoPtr pScrn = crtc->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
 
-	switch(pVia->Chipset) {
-	case VIA_CX700:
-	case VIA_P4M890:
-	case VIA_P4M900:
-	case VIA_VX800:
-	case VIA_VX855:
-	case VIA_VX900:
-		VIASETREG(HI_FBOFFSET, pVia->cursorOffset);
-		VIASETREG(HI_CONTROL, 0xB6000005);
-		break;
+    switch(pVia->Chipset) {
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        VIASETREG(HI_FBOFFSET, pVia->cursorOffset);
+        VIASETREG(HI_CONTROL, 0xB6000005);
+        break;
 
-	default:
-		/* Mono Cursor Display Path [bit31]: Secondary */
-		/* FIXME For CLE266 and KM400 try to enable 32x32 cursor size [bit1] */
-		VIASETREG(HI_FBOFFSET, pVia->cursorOffset);
-		VIASETREG(HI_CONTROL, 0xF6000005);
-		break;
-	}
+    default:
+        /* Mono Cursor Display Path [bit31]: Secondary */
+        /* FIXME For CLE266 and KM400 try to enable 32x32 cursor size [bit1] */
+        VIASETREG(HI_FBOFFSET, pVia->cursorOffset);
+        VIASETREG(HI_CONTROL, 0xF6000005);
+        break;
+    }
 }
 
 static void
 iga2_crtc_hide_cursor(xf86CrtcPtr crtc)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	VIAPtr pVia = VIAPTR(pScrn);
-	CARD32 temp;
+    ScrnInfoPtr pScrn = crtc->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+    CARD32 temp;
 
-	switch(pVia->Chipset) {
-	case VIA_CX700:
-	case VIA_P4M890:
-	case VIA_P4M900:
-	case VIA_VX800:
-	case VIA_VX855:
-	case VIA_VX900:
-		temp = VIAGETREG(HI_CONTROL);
-		VIASETREG(HI_CONTROL, temp & 0xFFFFFFFA);
-		break;
+    switch(pVia->Chipset) {
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+	    temp = VIAGETREG(HI_CONTROL);
+        VIASETREG(HI_CONTROL, temp & 0xFFFFFFFA);
+        break;
 
-	default:
-		temp = VIAGETREG(HI_CONTROL);
-		/* Hardware cursor disable [bit0] */
-		VIASETREG(HI_CONTROL, temp & 0xFFFFFFFA);
-		break;
+    default:
+        temp = VIAGETREG(HI_CONTROL);
+        /* Hardware cursor disable [bit0] */
+        VIASETREG(HI_CONTROL, temp & 0xFFFFFFFA);
+        break;
 	}
 }
 
 static void
 iga2_crtc_load_cursor_image(xf86CrtcPtr crtc, CARD8 *src)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	VIAPtr pVia = VIAPTR(pScrn);
+    ScrnInfoPtr pScrn = crtc->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
 
-	memcpy(pVia->cursorMap, src, pVia->CursorSize);
+    memcpy(pVia->cursorMap, src, pVia->CursorSize);
 }
 
 static void
 iga2_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	VIAPtr pVia = VIAPTR(pScrn);
+    ScrnInfoPtr pScrn = crtc->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
 
-	memcpy(pVia->cursorMap, image, pVia->CursorSize);
+    memcpy(pVia->cursorMap, image, pVia->CursorSize);
 }
 
 static const xf86CrtcFuncsRec iga2_crtc_funcs = {
-	.dpms			= iga2_crtc_dpms,
-	.save			= iga2_crtc_save,
-	.restore		= iga2_crtc_restore,
-	.lock			= iga2_crtc_lock,
-	.unlock			= iga2_crtc_unlock,
-	.mode_fixup		= iga2_crtc_mode_fixup,
-	.prepare		= iga2_crtc_prepare,
-	.mode_set		= iga2_crtc_mode_set,
-	.commit			= iga2_crtc_commit,
-	.gamma_set		= iga2_crtc_gamma_set,
-	.shadow_create		= iga2_crtc_shadow_create,
-	.shadow_allocate	= iga2_crtc_shadow_allocate,
-	.shadow_destroy		= iga2_crtc_shadow_destroy,
-	.set_cursor_colors	= iga2_crtc_set_cursor_colors,
-	.set_cursor_position	= iga2_crtc_set_cursor_position,
-	.show_cursor		= iga2_crtc_show_cursor,
-	.hide_cursor		= iga2_crtc_hide_cursor,
-	.load_cursor_image	= iga2_crtc_load_cursor_image,
-	.load_cursor_argb	= iga2_crtc_load_cursor_argb,
-	.set_origin		= iga2_crtc_set_origin,
-	.destroy		= iga_crtc_destroy,
+    .dpms                   = iga2_crtc_dpms,
+    .save                   = iga2_crtc_save,
+    .restore                = iga2_crtc_restore,
+    .lock                   = iga2_crtc_lock,
+    .unlock                 = iga2_crtc_unlock,
+    .mode_fixup             = iga2_crtc_mode_fixup,
+    .prepare                = iga2_crtc_prepare,
+    .mode_set               = iga2_crtc_mode_set,
+    .commit                 = iga2_crtc_commit,
+    .gamma_set              = iga2_crtc_gamma_set,
+    .shadow_create          = iga2_crtc_shadow_create,
+    .shadow_allocate        = iga2_crtc_shadow_allocate,
+    .shadow_destroy         = iga2_crtc_shadow_destroy,
+    .set_cursor_colors      = iga2_crtc_set_cursor_colors,
+    .set_cursor_position    = iga2_crtc_set_cursor_position,
+    .show_cursor            = iga2_crtc_show_cursor,
+    .hide_cursor            = iga2_crtc_hide_cursor,
+    .load_cursor_image      = iga2_crtc_load_cursor_image,
+    .load_cursor_argb       = iga2_crtc_load_cursor_argb,
+    .set_origin             = iga2_crtc_set_origin,
+    .destroy                = iga_crtc_destroy,
 };
 
 Bool
 UMSCrtcInit(ScrnInfoPtr pScrn)
 {
-	ViaCRTCInfoPtr iga1_rec = NULL, iga2_rec = NULL;
-	vgaHWPtr hwp = VGAHWPTR(pScrn);
-	int max_pitch, max_height, i;
-	VIAPtr pVia = VIAPTR(pScrn);
-	ClockRangePtr clockRanges;
-	VIABIOSInfoPtr pBIOSInfo;
-	xf86CrtcPtr iga1, iga2;
+    ViaCRTCInfoPtr iga1_rec = NULL, iga2_rec = NULL;
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    int max_pitch, max_height, i;
+    VIAPtr pVia = VIAPTR(pScrn);
+    ClockRangePtr clockRanges;
+    VIABIOSInfoPtr pBIOSInfo;
+    xf86CrtcPtr iga1, iga2;
 
     /* Read memory bandwidth from registers. */
     pVia->MemClk = hwp->readCrtc(hwp, 0x3D) >> 4;
@@ -1981,88 +1970,88 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
         return FALSE;
     }
 
-	pVia->pVbe = NULL;
-	if (pVia->useVBEModes) {
-		/* VBE doesn't properly initialise int10 itself. */
-		if (xf86LoadSubModule(pScrn, "int10") &&
-			xf86LoadSubModule(pScrn, "vbe")) {
-			pVia->pVbe = VBEExtendedInit(NULL, pVia->EntityIndex,
-										SET_BIOS_SCRATCH |
-										RESTORE_BIOS_SCRATCH);
-		}
+    pVia->pVbe = NULL;
+    if (pVia->useVBEModes) {
+        /* VBE doesn't properly initialise int10 itself. */
+        if (xf86LoadSubModule(pScrn, "int10") &&
+            xf86LoadSubModule(pScrn, "vbe")) {
+            pVia->pVbe = VBEExtendedInit(NULL, pVia->EntityIndex,
+                                        SET_BIOS_SCRATCH |
+                                        RESTORE_BIOS_SCRATCH);
+        }
 
-		if (!pVia->pVbe)
-			xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "VBE initialisation failed."
-						" Using builtin code to set modes.\n");
-		else
-			ConfiguredMonitor = vbeDoEDID(pVia->pVbe, NULL);
-	}
+        if (!pVia->pVbe)
+            xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "VBE initialisation failed."
+                        " Using builtin code to set modes.\n");
+        else
+            ConfiguredMonitor = vbeDoEDID(pVia->pVbe, NULL);
+    }
 
     /* Might not belong here temporary fix for bug fix */
     xf86CrtcConfigInit(pScrn, &via_xf86crtc_config_funcs);
 
-	iga1_rec = (ViaCRTCInfoPtr) xnfcalloc(sizeof(ViaCRTCInfoPtr), 1);
-	if (!iga1_rec) {
-		xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "IGA1 Rec allocation failed.\n");
-		return FALSE;
-	}
+    iga1_rec = (ViaCRTCInfoPtr) xnfcalloc(sizeof(ViaCRTCInfoPtr), 1);
+    if (!iga1_rec) {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "IGA1 Rec allocation failed.\n");
+        return FALSE;
+    }
 
-	iga1 = xf86CrtcCreate(pScrn, &iga1_crtc_funcs);
-	if (!iga1) {
-		xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "xf86CrtcCreate failed.\n");
-		free(iga1_rec);
-		return FALSE;
-	}
-	iga1_rec->index = 0;
-	iga1->driver_private = iga1_rec;
+    iga1 = xf86CrtcCreate(pScrn, &iga1_crtc_funcs);
+    if (!iga1) {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "xf86CrtcCreate failed.\n");
+        free(iga1_rec);
+        return FALSE;
+    }
+    iga1_rec->index = 0;
+    iga1->driver_private = iga1_rec;
 
-	iga2_rec = (ViaCRTCInfoPtr) xnfcalloc(sizeof(ViaCRTCInfoPtr), 1);
-	if (!iga2_rec) {
-		xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "IGA1 Rec allocation failed.\n");
-		xf86CrtcDestroy(iga1);
-		return FALSE;
-	}
+    iga2_rec = (ViaCRTCInfoPtr) xnfcalloc(sizeof(ViaCRTCInfoPtr), 1);
+    if (!iga2_rec) {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "IGA1 Rec allocation failed.\n");
+        xf86CrtcDestroy(iga1);
+        return FALSE;
+    }
 
-	iga2 = xf86CrtcCreate(pScrn, &iga2_crtc_funcs);
-	if (!iga2) {
-		xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "xf86CrtcCreate failed.\n");
-		xf86CrtcDestroy(iga1);
-		free(iga2_rec);
-		return FALSE;
-	}
-	iga2_rec->index = 1;
-	iga2->driver_private = iga2_rec;
+    iga2 = xf86CrtcCreate(pScrn, &iga2_crtc_funcs);
+    if (!iga2) {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "xf86CrtcCreate failed.\n");
+        xf86CrtcDestroy(iga1);
+        free(iga2_rec);
+        return FALSE;
+    }
+    iga2_rec->index = 1;
+    iga2->driver_private = iga2_rec;
 
-	switch (pVia->Chipset) {
-	case VIA_CLE266:
-	case VIA_KM400:
-	case VIA_K8M800:
-	case VIA_PM800:
-	case VIA_VM800:
-		max_pitch = 3344;
-		max_height = 2508;
-		break;
+    switch (pVia->Chipset) {
+    case VIA_CLE266:
+    case VIA_KM400:
+    case VIA_K8M800:
+    case VIA_PM800:
+    case VIA_VM800:
+        max_pitch = 3344;
+        max_height = 2508;
+        break;
 
-	case VIA_CX700:
-	case VIA_K8M890:
-	case VIA_P4M890:
-	case VIA_P4M900:
-		max_pitch = 8192/(pScrn->bitsPerPixel >> 3)-1;
-		max_height = max_pitch;
-		break;
+    case VIA_CX700:
+    case VIA_K8M890:
+    case VIA_P4M890:
+    case VIA_P4M900:
+        max_pitch = 8192/(pScrn->bitsPerPixel >> 3)-1;
+        max_height = max_pitch;
+        break;
 
-	default:
-		max_pitch = 16384/(pScrn->bitsPerPixel >> 3)-1;
-		max_height = max_pitch;
-		break;
-	}
+    default:
+        max_pitch = 16384/(pScrn->bitsPerPixel >> 3)-1;
+        max_height = max_pitch;
+        break;
+    }
 
-	xf86CrtcSetSizeRange(pScrn, 320, 200, max_pitch, max_height);
+    xf86CrtcSetSizeRange(pScrn, 320, 200, max_pitch, max_height);
 
-	ViaOutputsDetect(pScrn);
+    ViaOutputsDetect(pScrn);
 
-	if (!xf86InitialConfiguration(pScrn, TRUE))
-		return FALSE;
+    if (!xf86InitialConfiguration(pScrn, TRUE))
+        return FALSE;
 
     if (pVia->pVbe) {
 

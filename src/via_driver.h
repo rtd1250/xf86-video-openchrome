@@ -104,7 +104,7 @@
 #define PATCHLEVEL      0
 #define VIA_VERSION     ((VERSION_MAJOR<<24) | (VERSION_MINOR<<16) | PATCHLEVEL)
 
-#define VIA_VQ_SIZE             (256 * 1024)
+#define VIA_VQ_SIZE     (256 * 1024)
 
 #if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 6
 #define VIA_RES_SHARED RES_SHARED_VGA
@@ -115,9 +115,9 @@
 #endif
 
 /* Video Engines */
-#define VIDEO_ENGINE_UNK	0 /* Unknown video engine */
-#define VIDEO_ENGINE_CLE	1 /* CLE First generation video engine */
-#define VIDEO_ENGINE_CME	2 /* CME Second generation video engine */
+#define VIDEO_ENGINE_UNK    0   /* Unknown video engine */
+#define VIDEO_ENGINE_CLE    1   /* CLE First generation video engine */
+#define VIDEO_ENGINE_CME    2   /* CME Second generation video engine */
 
 static int gVIAEntityIndex = -1;
 
@@ -222,7 +222,7 @@ typedef struct _VIA {
     VIARegRec           SavedReg;
     int                 Bpp, Bpl;
 
-	Bool				KMS;
+    Bool                KMS;
     Bool                FirstInit;
     unsigned long       videoRambytes;
     int                 FBFreeStart;
@@ -247,7 +247,7 @@ typedef struct _VIA {
 
     /* Here are all the Options */
     Bool                VQEnable;
-    Bool				hwcursor;
+    Bool                hwcursor;
     Bool                NoAccel;
     Bool                shadowFB;
     Rotation            rotate;
@@ -330,21 +330,21 @@ typedef struct _VIA {
     Bool                HasSecondary;
     Bool                SAMM;
 
-	enum dri_type		directRenderingType;
+    enum dri_type       directRenderingType;
 #ifdef XF86DRI
     Bool                XvMCEnabled;
-    DRIInfoPtr			pDRIInfo;
-    int					drmFD;
-    int					numVisualConfigs;
+    DRIInfoPtr          pDRIInfo;
+    int                 drmFD;
+    int                 numVisualConfigs;
     __GLXvisualConfig*	pVisualConfigs;
     VIAConfigPrivPtr	pVisualConfigsPriv;
-    drm_handle_t		agpHandle;
-    drm_handle_t		registerHandle;
+    drm_handle_t        agpHandle;
+    drm_handle_t        registerHandle;
     drm_handle_t        frameBufferHandle;
-    unsigned long		agpAddr;
+    unsigned long       agpAddr;
     drmAddress          agpMappedAddr;
-    unsigned int		agpSize;
-    Bool				IsPCI;
+    unsigned int        agpSize;
+    Bool                IsPCI;
     ViaXvMC             xvmc;
     int                 drmVerMajor;
     int                 drmVerMinor;
@@ -352,7 +352,7 @@ typedef struct _VIA {
     VIAMem              driOffScreenMem;
     void *              driOffScreenSave;
 #endif
-    Bool				DRIIrqEnable;
+    Bool                DRIIrqEnable;
     Bool                agpEnable;
     Bool                dma2d;
     Bool                dmaXV;
@@ -363,23 +363,23 @@ typedef struct _VIA {
     void                *cursorMap;
     CARD32              cursorOffset;
     int                 CursorStart;
-	int					CursorSize;
+    int                 CursorSize;
 
     /* Video */
     int                 VideoEngine;
-    swovRec		swov;
+    swovRec             swov;
     CARD32              VideoStatus;
-    VIAHWDiff		HWDiff;
-    unsigned long	dwV1, dwV3;
-    unsigned long	OverlaySupported;
-    unsigned long	dwFrameNum;
+    VIAHWDiff           HWDiff;
+    unsigned long       dwV1, dwV3;
+    unsigned long       OverlaySupported;
+    unsigned long       dwFrameNum;
 
-    CARD32*		VidRegBuffer; /* Temporary buffer for video overlay registers. */
-    unsigned long	VidRegCursor; /* Write cursor for VidRegBuffer. */
+    CARD32*             VidRegBuffer; /* Temporary buffer for video overlay registers. */
+    unsigned long       VidRegCursor; /* Write cursor for VidRegBuffer. */
 
-    unsigned long	old_dwUseExtendedFIFO;
+    unsigned long       old_dwUseExtendedFIFO;
 
-    ViaSharedPtr	sharedData;
+    ViaSharedPtr        sharedData;
     Bool                useDmaBlit;
 
     void                *displayMap;
@@ -395,8 +395,8 @@ typedef struct _VIA {
     Bool                I2CScan;
 #endif /* HAVE_DEBUG */
 
-    Bool                UseLegacyModeSwitch ;
-    video_via_regs*     VideoRegs ;
+    Bool                UseLegacyModeSwitch;
+    video_via_regs*     VideoRegs;
 } VIARec, *VIAPtr;
 
 #define VIAPTR(p) ((VIAPtr)((p)->driverPrivate))
