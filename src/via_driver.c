@@ -358,7 +358,9 @@ VIAEnterVT(int scrnIndex, int flags)
         return FALSE;
 
     xf86SaveScreen(pScrn->pScreen, SCREEN_SAVER_ON);
-    xf86_reload_cursors(pScrn->pScreen);
+
+    if (pVia->hwcursor)
+        xf86_reload_cursors(pScrn->pScreen);
 
     /* Restore video status. */
     if (!pVia->IsSecondary)
@@ -1751,9 +1753,11 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     }
 
     pScrn->vtSema = TRUE;
+    pScreen->SaveScreen = xf86SaveScreen;
     pVia->CloseScreen = pScreen->CloseScreen;
     pScreen->CloseScreen = VIACloseScreen;
-    pScreen->SaveScreen = xf86SaveScreen;
+    pVia->CreateScreenResources = pScreen->CreateScreenResources;
+    pScreen->CreateScreenResources = VIACreateScreenResources;
 
     if (!xf86CrtcScreenInit(pScreen))
         return FALSE;

@@ -793,7 +793,7 @@ viaSubsequentDashedTwoPointLine(ScrnInfoPtr pScrn, int x1, int y1, int x2,
     viaSubsequentSolidTwoPointLine(pScrn, x1, y1, x2, y2, flags);
 }
 
-int
+Bool
 viaInitXAA(ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
@@ -921,5 +921,4 @@ viaInitXAA(ScreenPtr pScreen)
         xaaptr->ImageWriteRange = (64 * 1024);
 
     return XAAInit(pScreen, xaaptr);
-
 }

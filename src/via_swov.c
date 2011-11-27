@@ -1145,7 +1145,7 @@ AddHQVSurface(ScrnInfoPtr pScrn, unsigned int numbuf, CARD32 fourcc)
         proReg = PRO_HQV1_OFFSET;
 
     isplanar = ((fourcc == FOURCC_YV12) || (fourcc == FOURCC_I420) ||
-				(fourcc == FOURCC_XVMC));
+                (fourcc == FOURCC_XVMC));
 
     width = pVia->swov.SWDevice.gdwSWSrcWidth;
     height = pVia->swov.SWDevice.gdwSWSrcHeight;
@@ -1511,7 +1511,7 @@ SetupFIFOs(VIAPtr pVia, unsigned long videoFlag,
 {
     if (miniCtl & V1_Y_INTERPOLY) {
         if (pVia->swov.SrcFourCC == FOURCC_YV12
-			|| pVia->swov.SrcFourCC == FOURCC_I420
+            || pVia->swov.SrcFourCC == FOURCC_I420
             || pVia->swov.SrcFourCC == FOURCC_XVMC) {
             if (videoFlag & VIDEO_HQV_INUSE) {
                 if (videoFlag & VIDEO_1_INUSE)
@@ -1545,7 +1545,7 @@ SetupFIFOs(VIAPtr pVia, unsigned long videoFlag,
         }
     } else {
         if (pVia->swov.SrcFourCC == FOURCC_YV12
-			|| pVia->swov.SrcFourCC == FOURCC_I420
+            || pVia->swov.SrcFourCC == FOURCC_I420
             || pVia->swov.SrcFourCC == FOURCC_XVMC) {
             if (videoFlag & VIDEO_HQV_INUSE) {
                 if (videoFlag & VIDEO_1_INUSE)
@@ -1896,7 +1896,7 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
     pVia->swov.overlayRecordV1.dwOffset = dwOffset;
 
     if (pVia->swov.SrcFourCC == FOURCC_YV12
-		|| pVia->swov.SrcFourCC == FOURCC_I420
+        || pVia->swov.SrcFourCC == FOURCC_I420
         || pVia->swov.SrcFourCC == FOURCC_XVMC) {
 
         YCBCRREC YCbCr;
