@@ -531,7 +531,7 @@ viaVidCopyInit(char *copyType, ScreenPtr pScreen)
     char *tmpBuf, *endBuf;
     int count, j, bestSoFar;
     unsigned best, tmp, testSize, alignSize, tmp2;
-    VIAMem tmpFbBuffer;
+    struct buffer_object *tmpFbBuffer;
     McFuncData *curData;
     FILE *cpuInfoFile;
     double cpuFreq;
@@ -570,25 +570,23 @@ viaVidCopyInit(char *copyType, ScreenPtr pScreen)
 
     alignSize = BSIZH * (BSIZA + (BSIZA >> 1));
     testSize = BSIZH * (BSIZW + (BSIZW >> 1));
-    tmpFbBuffer.pool = 0;
-
     /*
      * Allocate an area of offscreen FB memory, (buf1), a simulated video
      * player buffer (buf2) and a pool of uninitialized "video" data (buf3).
      */
-
-    if (VIAAllocLinear(&tmpFbBuffer, pScrn, alignSize + 31))
+    tmpFbBuffer = drm_bo_alloc(pScrn, alignSize + 31);
+    if (!tmpFbBuffer)
         return libc_YUV42X;
     if (NULL == (buf2 = (unsigned char *)malloc(testSize))) {
-        VIAFreeLinear(&tmpFbBuffer);
+        drm_bo_free(tmpFbBuffer);
         return libc_YUV42X;
     }
     if (NULL == (buf3 = (unsigned char *)malloc(testSize))) {
         free(buf2);
-        VIAFreeLinear(&tmpFbBuffer);
+        drm_bo_free(tmpFbBuffer);
         return libc_YUV42X;
     }
-    buf1 = (unsigned char *)pVia->FBBase + tmpFbBuffer.base;
+    buf1 = (unsigned char *)pVia->FBBase + tmpFbBuffer->offset;
 
     /* Align the frame buffer destination memory to a 32 byte boundary. */
     if ((unsigned long)buf1 & 31)
@@ -642,7 +640,7 @@ viaVidCopyInit(char *copyType, ScreenPtr pScreen)
     }
     free(buf3);
     free(buf2);
-    VIAFreeLinear(&tmpFbBuffer);
+    drm_bo_free(tmpFbBuffer);
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                "Using %s YUV42X copy for %s.\n",
                mcFunctions[bestSoFar].mName, copyType);

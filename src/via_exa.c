@@ -1815,9 +1815,10 @@ UMSAccelInit(ScreenPtr pScreen)
      *                     Scissor is the same as color window.
      * */
     pVia->VQStart = 0;
-    if (VIAAllocLinear(&pVia->vq_bo, pScrn, VIA_VQ_SIZE) == Success) {
-        pVia->VQStart = pVia->vq_bo.base;
-        pVia->VQEnd = pVia->vq_bo.base + pVia->vq_bo.size;
+    pVia->vq_bo = drm_bo_alloc(pScrn, VIA_VQ_SIZE);
+    if (pVia->vq_bo) {
+        pVia->VQStart = pVia->vq_bo->offset;
+        pVia->VQEnd = pVia->vq_bo->offset + pVia->vq_bo->size;
     }
 
     viaInitialize2DEngine(pScrn);

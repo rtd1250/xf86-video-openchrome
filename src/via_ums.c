@@ -307,7 +307,7 @@ VIAMapFB(ScrnInfoPtr pScrn)
 }
 
 Bool
-UMSResourceManagement(ScrnInfoPtr pScrn)
+ums_create(ScrnInfoPtr pScrn)
 {
     ScreenPtr pScreen = pScrn->pScreen;
     VIAPtr pVia = VIAPTR(pScrn);
@@ -317,34 +317,30 @@ UMSResourceManagement(ScrnInfoPtr pScrn)
     long size;
     int maxY;
 
-    if (pVia->useEXA)
-        return TRUE;
+#ifdef XF86DRI
+    if (pVia->directRenderingType == DRI_1) {
+        /* In the case of DRI with EXA we handle all VRAM by the DRI ioctls */
+        if (pVia->useEXA) {
+            pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart - pVia->Bpl);
+            return TRUE;
+        } else {
+            /* XAA has to use FBManager so we have to split the space with DRI */
+            pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart) / 2;
+            if ((pVia->driSize > (pVia->maxDriSize * 1024)) && pVia->maxDriSize > 0)
+                pVia->driSize = pVia->maxDriSize * 1024;
+            maxY = pScrn->virtualY + (pVia->driSize / pVia->Bpl);
+        }
+    } else
+#endif
+        maxY = pVia->FBFreeEnd / pVia->Bpl;
+
+    /* FBManager can't handle more than 32767 scan lines */
+    if (maxY > 32767)
+        maxY = 32767;
 
     AvailFBArea.x1 = 0;
     AvailFBArea.y1 = 0;
     AvailFBArea.x2 = pScrn->displayWidth;
-
-    if (pVia->NoAccel) {
-        /*
-         * This is only for Xv in Noaccel path, and since Xv is in some
-         * sense accelerated, it might be a better idea to disable it
-         * altogether.
-         */
-        pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart - pVia->Bpl);
-        maxY = pScrn->virtualY + 1;
-
-    } else {
-#ifdef XF86DRI
-        if (pVia->directRenderingType == DRI_1) {
-            pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart) / 2;
-            maxY = pScrn->virtualY + (pVia->driSize / pVia->Bpl);
-        } else
-#endif
-            maxY = pVia->FBFreeEnd / pVia->Bpl;
-    }
-    if (maxY > 32767)
-        maxY = 32767;
-
     AvailFBArea.y2 = maxY;
     pVia->FBFreeStart = (AvailFBArea.y2 + 1) * pVia->Bpl;
 
@@ -358,7 +354,7 @@ UMSResourceManagement(ScrnInfoPtr pScrn)
      */
     ret = xf86InitFBManager(pScreen, &AvailFBArea);
     if (ret != TRUE)
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "UMSAccelInit xf86InitFBManager init failed\n");
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "xf86InitFBManager init failed\n");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
             "Frame Buffer From (%d,%d) To (%d,%d)\n",
@@ -366,7 +362,6 @@ UMSResourceManagement(ScrnInfoPtr pScrn)
 
     offset = (pVia->FBFreeStart + pVia->Bpp - 1) / pVia->Bpp;
     size = pVia->FBFreeEnd / pVia->Bpp - offset;
-
     if (size > 0)
         xf86InitFBManagerLinear(pScreen, offset, size);
 

@@ -166,7 +166,7 @@ enum dri_type {
 #define VIA_XVMC_MAX_SURFACES 20
 
 typedef struct {
-    VIAMem memory_ref;
+    struct buffer_object *memory_ref;
     unsigned long offsets[VIA_XVMC_MAX_BUFFERS];
 } ViaXvMCSurfacePriv;
 
@@ -229,7 +229,7 @@ typedef struct _VIA {
     int                 FBFreeEnd;
     int                 driSize;
     int                 maxDriSize;
-    VIAMem              vq_bo;
+    struct buffer_object *vq_bo;
     int                 VQStart;
     int                 VQEnd;
 
@@ -349,7 +349,7 @@ typedef struct _VIA {
     int                 drmVerMajor;
     int                 drmVerMinor;
     int                 drmVerPL;
-    VIAMem              driOffScreenMem;
+    struct buffer_object driOffScreenMem;
     void *              driOffScreenSave;
 #endif
     Bool                DRIIrqEnable;
@@ -359,7 +359,7 @@ typedef struct _VIA {
 
     CARD8               ActiveDevice;	/* Option */
 
-    VIAMem              cursor_bo;
+    struct buffer_object *cursor_bo;
     void                *cursorMap;
     CARD32              cursorOffset;
     int                 CursorStart;
@@ -422,6 +422,7 @@ void VIAInitialize3DEngine(ScrnInfoPtr pScrn);
 /* In via_ums.c */
 Bool VIAMapMem(ScrnInfoPtr pScrn);
 void VIAUnmapMem(ScrnInfoPtr pScrn);
+Bool ums_create(ScrnInfoPtr pScrn);
 
 /* In via_accel.c. */
 Bool UMSAccelInit(ScreenPtr);

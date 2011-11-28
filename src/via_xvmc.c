@@ -584,9 +584,8 @@ ViaXvMCCreateSurface(ScrnInfoPtr pScrn, XvMCSurfacePtr pSurf,
 
     ctx = pSurf->context;
     bufSize = size_yuv420(ctx->width, ctx->height);
-    sPriv->memory_ref.pool = 0;
-    if (VIAAllocLinear(&(sPriv->memory_ref), pScrn,
-                       numBuffers * bufSize + 32)) {
+    sPriv->memory_ref = drm_bo_alloc(pScrn, numBuffers * bufSize + 32);
+    if (!sPriv->memory_ref) {
         free(*priv);
         free(sPriv);
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "[XvMC] ViaXvMCCreateSurface: "
@@ -595,7 +594,7 @@ ViaXvMCCreateSurface(ScrnInfoPtr pScrn, XvMCSurfacePtr pSurf,
     }
 
     (*priv)[1] = numBuffers;
-    (*priv)[2] = sPriv->offsets[0] = ALIGN_TO(sPriv->memory_ref.base, 32);
+    (*priv)[2] = sPriv->offsets[0] = ALIGN_TO(sPriv->memory_ref->offset, 32);
     for (i = 1; i < numBuffers; ++i) {
         (*priv)[i + 2] = sPriv->offsets[i] = sPriv->offsets[i - 1] + bufSize;
     }
@@ -660,15 +659,15 @@ ViaXvMCCreateSubpicture(ScrnInfoPtr pScrn, XvMCSubpicturePtr pSubp,
 
     ctx = pSubp->context;
     bufSize = size_xx44(ctx->width, ctx->height);
-    sPriv->memory_ref.pool = 0;
-    if (VIAAllocLinear(&(sPriv->memory_ref), pScrn, 1 * bufSize + 32)) {
+    sPriv->memory_ref = drm_bo_alloc(pScrn, 1 * bufSize + 32);
+    if (!sPriv->memory_ref) {
         free(*priv);
         free(sPriv);
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "[XvMC] ViaXvMCCreateSubpicture:"
                    " Unable to allocate framebuffer memory!\n");
         return BadAlloc;
     }
-    (*priv)[1] = sPriv->offsets[0] = ALIGN_TO(sPriv->memory_ref.base, 32);
+    (*priv)[1] = sPriv->offsets[0] = ALIGN_TO(sPriv->memory_ref->offset, 32);
 
     vXvMC->sPrivs[srfNo] = sPriv;
     vXvMC->surfaces[srfNo] = pSubp->subpicture_id;
@@ -734,7 +733,7 @@ ViaXvMCDestroySurface(ScrnInfoPtr pScrn, XvMCSurfacePtr pSurf)
                     ViaOverlayHide(pScrn);
             }
 
-            VIAFreeLinear(&(vXvMC->sPrivs[i]->memory_ref));
+            drm_bo_free(vXvMC->sPrivs[i]->memory_ref);
             free(vXvMC->sPrivs[i]);
             vXvMC->nSurfaces--;
             vXvMC->sPrivs[i] = 0;
@@ -776,7 +775,7 @@ ViaXvMCDestroySubpicture(ScrnInfoPtr pScrn, XvMCSubpicturePtr pSubp)
                 }
             }
 
-            VIAFreeLinear(&(vXvMC->sPrivs[i]->memory_ref));
+            drm_bo_free(vXvMC->sPrivs[i]->memory_ref);
             free(vXvMC->sPrivs[i]);
             vXvMC->nSurfaces--;
             vXvMC->sPrivs[i] = 0;

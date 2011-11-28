@@ -921,6 +921,8 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
                     pVia->directRenderingType = DRI_1;
                 } else {
                     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "DRI 2 api not supported yet\n");
+                    pVia->directRenderingType = DRI_2;
+                    pVia->NoAccel = TRUE;
                 }
             }
         } else {
@@ -1647,7 +1649,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     pScrn->pScreen = pScreen;
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAScreenInit\n"));
 
-    if (!UMSResourceManagement(pScrn))
+    if (!drm_bo_manager_init(pScrn))
         return FALSE;
 
 #ifdef XF86DRI

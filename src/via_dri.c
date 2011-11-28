@@ -439,7 +439,7 @@ VIADRIFBInit(ScrnInfoPtr pScrn)
         return FALSE;
     }
 
-    fb.offset = pVia->driOffScreenMem.base;
+    fb.offset = pVia->driOffScreenMem.offset;
     fb.size = FBSize;
     if (drmCommandWrite(pVia->drmFD, DRM_VIA_FB_INIT, &fb,
                         sizeof(drm_via_fb_t)) < 0) {
@@ -763,7 +763,7 @@ VIADRICloseScreen(ScreenPtr pScreen)
     }
 
     DRICloseScreen(pScreen);
-    VIAFreeLinear(&pVia->driOffScreenMem);
+    drm_bo_free(&pVia->driOffScreenMem);
 
     if (pVia->pDRIInfo) {
         if ((pVIADRI = (VIADRIPtr) pVia->pDRIInfo->devPrivate)) {
@@ -819,7 +819,7 @@ VIADRIFinishScreenInit(ScreenPtr pScreen)
         return FALSE;
     }
 
-    pVIADRI->fbOffset = pVia->driOffScreenMem.base;
+    pVIADRI->fbOffset = pVia->driOffScreenMem.offset;
     pVIADRI->fbSize = pVia->driOffScreenMem.size;
 
     DRIFinishScreenInit(pScreen);
