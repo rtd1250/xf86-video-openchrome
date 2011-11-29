@@ -140,13 +140,13 @@ typedef struct ViaPanelInfo {
 } ViaPanelInfoRec, *ViaPanelInfoPtr ;
 
 typedef struct ViaCRTCInfo {
-	CARD8	index;
+    struct buffer_object    *cursor_bo;
+    CARD8                   index;
 } ViaCRTCInfoRec, *ViaCRTCInfoPtr;
 
 typedef struct ViaSimultaneousInfo {
     Bool IsActive ;
 } ViaSimultaneousInfoRec, *ViaSimultaneousInfoPtr ;
-
 
 typedef struct _VIABIOSINFO {
 	xf86OutputPtr analog;

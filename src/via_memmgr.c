@@ -131,6 +131,25 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size)
     return obj;
 }
 
+void*
+drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+    void *virtual = NULL;
+
+    switch (obj->pool) {
+    default:
+        virtual = pVia->FBBase + obj->offset;
+        break;
+    }
+    return virtual;
+}
+
+void
+drm_bo_unmap(struct buffer_object *obj)
+{
+}
+
 void
 drm_bo_free(struct buffer_object *obj)
 {

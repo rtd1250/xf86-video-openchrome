@@ -29,7 +29,7 @@ struct buffer_object {
     unsigned long   offset;             /* Offset into fb */
     //unsigned long pitch;
     unsigned long   size;
-    //void *ptr;
+    void            *ptr;
     int             pool;               /* Pool we drew from */
 #ifdef XF86DRI
     int    drm_fd;                      /* Fd in DRM mode */
@@ -41,12 +41,14 @@ struct buffer_object {
     ScrnInfoPtr pScrn;
 };
 
+int viaOffscreenLinear(struct buffer_object *, ScrnInfoPtr, unsigned long);
+
 /* In via_memory.c */
 Bool drm_bo_manager_init(ScrnInfoPtr pScrn);
 
 struct buffer_object *drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size);
+void *drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj);
+void drm_bo_unmap(struct buffer_object *obj);
 void drm_bo_free(struct buffer_object *);
-
-int viaOffscreenLinear(struct buffer_object *, ScrnInfoPtr, unsigned long);
 
 #endif

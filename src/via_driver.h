@@ -356,12 +356,6 @@ typedef struct _VIA {
 
     CARD8               ActiveDevice;	/* Option */
 
-    struct buffer_object *cursor_bo;
-    void                *cursorMap;
-    CARD32              cursorOffset;
-    int                 CursorStart;
-    int                 CursorSize;
-
     /* Video */
     int                 VideoEngine;
     swovRec             swov;

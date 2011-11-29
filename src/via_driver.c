@@ -1747,7 +1747,9 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- SW cursor set up\n"));
 
     if (pVia->hwcursor) {
-        if (!UMSHWCursorInit(pScreen)) {
+        xf86CrtcPtr crtc = xf86_config->crtc[0];
+
+        if (!UMSHWCursorInit(crtc)) {
             pVia->hwcursor = FALSE;
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                         "Hardware cursor initialization failed\n");
