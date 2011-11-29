@@ -99,10 +99,7 @@
 #define AGP_SIZE (AGP_PAGE_SIZE * AGP_PAGES)
 
 #define DRIVER_NAME     "openchrome"
-#define VERSION_MAJOR   0
-#define VERSION_MINOR   3
-#define PATCHLEVEL      0
-#define VIA_VERSION     ((VERSION_MAJOR<<24) | (VERSION_MINOR<<16) | PATCHLEVEL)
+#define VIA_VERSION     ((VIA_MAJOR_VERSION << 24) | (VIA_MINOR_VERSION << 16) | VIA_PATCHLEVEL)
 
 #define VIA_VQ_SIZE     (256 * 1024)
 

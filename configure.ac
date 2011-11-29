@@ -22,9 +22,19 @@
 
 AC_PREREQ(2.57)
 AC_INIT([xf86-video-openchrome],
-        0.2.904,
+        0.3.0,
         [http://www.openchrome.org/trac/report/1],
         xf86-video-openchrome)
+
+AC_DEFINE_UNQUOTED([VIA_MAJOR_VERSION],
+                   [$(echo $PACKAGE_VERSION | sed -e 's/^\([[0-9]]*\)\.[[0-9]]*\.[[0-9]]*/\1/')],
+                   [Major version])
+AC_DEFINE_UNQUOTED([VIA_MINOR_VERSION],
+                   [$(echo $PACKAGE_VERSION | sed -e 's/^[[0-9]]*\.\([[0-9]]*\)\.[[0-9]]*/\1/')],
+                   [Minor version])
+AC_DEFINE_UNQUOTED([VIA_PATCHLEVEL],
+                   [$(echo $PACKAGE_VERSION | sed -e 's/^[[0-9]]*\.[[0-9]]*\.\([[0-9]]*\)/\1/')],
+                   [Patch version])
 
 AC_CONFIG_SRCDIR([Makefile.am])
 AM_CONFIG_HEADER([config.h])
