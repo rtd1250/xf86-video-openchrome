@@ -763,7 +763,7 @@ VIADRICloseScreen(ScreenPtr pScreen)
     }
 
     DRICloseScreen(pScreen);
-    drm_bo_free(&pVia->driOffScreenMem);
+    drm_bo_free(pScrn, &pVia->driOffScreenMem);
 
     if (pVia->pDRIInfo) {
         if ((pVIADRI = (VIADRIPtr) pVia->pDRIInfo->devPrivate)) {

@@ -733,7 +733,7 @@ ViaXvMCDestroySurface(ScrnInfoPtr pScrn, XvMCSurfacePtr pSurf)
                     ViaOverlayHide(pScrn);
             }
 
-            drm_bo_free(vXvMC->sPrivs[i]->memory_ref);
+            drm_bo_free(pScrn, vXvMC->sPrivs[i]->memory_ref);
             free(vXvMC->sPrivs[i]);
             vXvMC->nSurfaces--;
             vXvMC->sPrivs[i] = 0;
@@ -775,7 +775,7 @@ ViaXvMCDestroySubpicture(ScrnInfoPtr pScrn, XvMCSubpicturePtr pSubp)
                 }
             }
 
-            drm_bo_free(vXvMC->sPrivs[i]->memory_ref);
+            drm_bo_free(pScrn, vXvMC->sPrivs[i]->memory_ref);
             free(vXvMC->sPrivs[i]);
             vXvMC->nSurfaces--;
             vXvMC->sPrivs[i] = 0;

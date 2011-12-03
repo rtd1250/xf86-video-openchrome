@@ -153,9 +153,6 @@ typedef struct  {
     OVERLAYRECORD   overlayRecordV1;
     OVERLAYRECORD   overlayRecordV3;
 
-    BoxRec  AvailFBArea;
-    FBLinearPtr   SWOVlinear;
-
     Bool MPEG_ON;
     Bool SWVideo_ON;
 

@@ -1152,7 +1152,7 @@ AddHQVSurface(ScrnInfoPtr pScrn, unsigned int numbuf, CARD32 fourcc)
     pitch = pVia->swov.SWDevice.dwPitch;
     fbsize = pitch * height * (isplanar ? 2 : 1);
 
-    drm_bo_free(pVia->swov.HQVMem);
+    drm_bo_free(pScrn, pVia->swov.HQVMem);
     pVia->swov.HQVMem = drm_bo_alloc(pScrn, fbsize * numbuf);
     if (!pVia->swov.HQVMem)
         return BadAlloc;
@@ -1205,7 +1205,7 @@ CreateSurface(ScrnInfoPtr pScrn, CARD32 FourCC, CARD16 Width,
     }
 
     if (doalloc) {
-        drm_bo_free(pVia->swov.SWfbMem);
+        drm_bo_free(pScrn, pVia->swov.SWfbMem);
         pVia->swov.SWfbMem = drm_bo_alloc(pScrn, fbsize * 2);
         if (!pVia->swov.SWfbMem)
             return BadAlloc;
@@ -1334,24 +1334,24 @@ ViaSwovSurfaceDestroy(ScrnInfoPtr pScrn, viaPortPrivPtr pPriv)
             case FOURCC_RV15:
                 pVia->swov.SrcFourCC = 0;
 
-                drm_bo_free(pVia->swov.SWfbMem);
+                drm_bo_free(pScrn, pVia->swov.SWfbMem);
                 if ((pVia->swov.gdwVideoFlagSW & SW_USE_HQV))
-                    drm_bo_free(pVia->swov.HQVMem);
+                    drm_bo_free(pScrn, pVia->swov.HQVMem);
                 pVia->swov.gdwVideoFlagSW = 0;
                 break;
 
             case FOURCC_HQVSW:
-                drm_bo_free(pVia->swov.HQVMem);
+                drm_bo_free(pScrn, pVia->swov.HQVMem);
                 pVia->swov.gdwVideoFlagSW = 0;
                 break;
 
             case FOURCC_YV12:
             case FOURCC_I420:
-                drm_bo_free(pVia->swov.SWfbMem);
+                drm_bo_free(pScrn, pVia->swov.SWfbMem);
             case FOURCC_XVMC:
                 pVia->swov.SrcFourCC = 0;
 
-                drm_bo_free(pVia->swov.HQVMem);
+                drm_bo_free(pScrn, pVia->swov.HQVMem);
                 pVia->swov.gdwVideoFlagSW = 0;
                 break;
         }

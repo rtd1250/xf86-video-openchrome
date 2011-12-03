@@ -1244,7 +1244,7 @@ iga1_crtc_set_cursor_colors (xf86CrtcPtr crtc, int bg, int fg)
     for (i = 0; i < height * width; i++, dst++)
         if ((pixel = *dst))
             *dst = (pixel == xf86_config->cursor_fg) ? fg : bg;
-    drm_bo_unmap(iga->cursor_bo);
+    drm_bo_unmap(pScrn, iga->cursor_bo);
 
     xf86_config->cursor_fg = fg;
     xf86_config->cursor_bg = bg;
@@ -1354,7 +1354,7 @@ iga_crtc_load_cursor_image(xf86CrtcPtr crtc, CARD8 *src)
     dst = drm_bo_map(pScrn, iga->cursor_bo);
     memset(dst, 0x00, iga->cursor_bo->size);
     memcpy(dst, src, iga->cursor_bo->size);
-    drm_bo_unmap(iga->cursor_bo);
+    drm_bo_unmap(pScrn, iga->cursor_bo);
 }
 
 static void
@@ -1367,7 +1367,7 @@ iga_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
     dst = drm_bo_map(pScrn, iga->cursor_bo);
     memset(dst, 0x00, iga->cursor_bo->size);
     memcpy(dst, image, iga->cursor_bo->size);
-    drm_bo_unmap(iga->cursor_bo);
+    drm_bo_unmap(pScrn, iga->cursor_bo);
 }
 
 static void
@@ -1693,7 +1693,7 @@ iga2_crtc_set_cursor_colors(xf86CrtcPtr crtc, int bg, int fg)
     for (i = 0; i < width * height; i++, dst++)
         if ((pixel = *dst))
             *dst = (pixel == xf86_config->cursor_fg) ? fg : bg;
-    drm_bo_unmap(iga->cursor_bo);
+    drm_bo_unmap(pScrn, iga->cursor_bo);
 
     xf86_config->cursor_fg = fg;
     xf86_config->cursor_bg = bg;

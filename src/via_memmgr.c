@@ -62,8 +62,8 @@ int
 viaOffScreenLinear(struct buffer_object *obj, ScrnInfoPtr pScrn, unsigned long size)
 {
     int depth = pScrn->bitsPerPixel >> 3;
-
     VIAPtr pVia = VIAPTR(pScrn);
+    FBLinearPtr linear;
 
     if (pVia->exaDriverPtr && !pVia->NoAccel) {
 
@@ -75,19 +75,18 @@ viaOffScreenLinear(struct buffer_object *obj, ScrnInfoPtr pScrn, unsigned long s
         obj->offset = obj->exa->offset;
         obj->size = size;
         obj->pool = 1;
-        obj->pScrn = pScrn;
         return Success;
     }
 
-    obj->linear = xf86AllocateOffscreenLinear(pScrn->pScreen,
-                                              (size + depth - 1) / depth,
-                                              32, NULL, NULL, NULL);
-    if (obj->linear == NULL)
+    linear = xf86AllocateOffscreenLinear(pScrn->pScreen,
+                                        (size + depth - 1) / depth,
+                                        32, NULL, NULL, NULL);
+    if (!linear)
         return BadAlloc;
-    obj->offset = obj->linear->offset * depth;
+    obj->offset = linear->offset * depth;
+    obj->handle = (unsigned long) linear;
     obj->size = size;
     obj->pool = 1;
-    obj->pScrn = pScrn;
     return Success;
 }
 
@@ -102,12 +101,10 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size)
     if (obj) {
 #ifdef XF86DRI
         if (pVia->directRenderingType == DRI_1) {
-            obj->pScrn = pScrn;
-            obj->drm_fd = pVia->drmFD;
             obj->drm.context = DRIGetContext(pScrn->pScreen);
             obj->drm.size = size;
             obj->drm.type = VIA_MEM_VIDEO;
-            ret = drmCommandWriteRead(obj->drm_fd, DRM_VIA_ALLOCMEM,
+            ret = drmCommandWriteRead(pVia->drmFD, DRM_VIA_ALLOCMEM,
                                       &obj->drm, sizeof(drm_via_mem_t));
             if (ret || (size != obj->drm.size)) {
                 /* Try X Offsceen fallback before failing. */
@@ -146,38 +143,41 @@ drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
 }
 
 void
-drm_bo_unmap(struct buffer_object *obj)
+drm_bo_unmap(ScrnInfoPtr pScrn, struct buffer_object *obj)
 {
 }
 
 void
-drm_bo_free(struct buffer_object *obj)
+drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
 {
+    VIAPtr pVia = VIAPTR(pScrn);
+    FBLinearPtr linear;
+
     if (obj) {
         DEBUG(ErrorF("Freed %lu (pool %d)\n", obj->offset, obj->pool));
         switch (obj->pool) {
         case 0:
             break;
         case 1:
-            {
-                VIAPtr pVia = VIAPTR(obj->pScrn);
-
-                if (pVia->useEXA && !pVia->NoAccel) {
-                    exaOffscreenFree(obj->pScrn->pScreen, obj->exa);
-                    obj->linear = NULL;
-                    obj->pool = 0;
-                    return;
-                }
+            if (pVia->useEXA && !pVia->NoAccel) {
+                exaOffscreenFree(pScrn->pScreen, obj->exa);
+                obj->handle = 0;
+                obj->pool = 0;
+                return;
             }
-            xf86FreeOffscreenLinear(obj->linear);
-            obj->linear = NULL;
+
+            linear = (FBLinearPtr) obj->handle;
+            xf86FreeOffscreenLinear(linear);
+            obj->handle = 0;
             obj->pool = 0;
             break;
         case 2:
 #ifdef XF86DRI
-            if (drmCommandWrite(obj->drm_fd, DRM_VIA_FREEMEM,
-                                &obj->drm, sizeof(drm_via_mem_t)) < 0)
-                ErrorF("DRM module failed free.\n");
+            if (pVia->directRenderingType == DRI_1) {
+                if (drmCommandWrite(pVia->drmFD, DRM_VIA_FREEMEM,
+                                    &obj->drm, sizeof(drm_via_mem_t)) < 0)
+                    ErrorF("DRM module failed free.\n");
+            }
 #endif
             obj->pool = 0;
             break;

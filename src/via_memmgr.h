@@ -25,20 +25,16 @@
 #include "xf86.h"
 
 struct buffer_object {
-    //unsigned long   handle;
+    unsigned long   handle;
     unsigned long   offset;             /* Offset into fb */
-    //unsigned long pitch;
+    unsigned long   pitch;
     unsigned long   size;
     void            *ptr;
     int             pool;               /* Pool we drew from */
 #ifdef XF86DRI
-    int    drm_fd;                      /* Fd in DRM mode */
     drm_via_mem_t drm;                  /* DRM management object */
 #endif
-    void  *pVia;                        /* VIA driver pointer */
-    FBLinearPtr linear;                 /* X linear pool info ptr */
     ExaOffscreenArea *exa;
-    ScrnInfoPtr pScrn;
 };
 
 int viaOffscreenLinear(struct buffer_object *, ScrnInfoPtr, unsigned long);
@@ -48,7 +44,7 @@ Bool drm_bo_manager_init(ScrnInfoPtr pScrn);
 
 struct buffer_object *drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size);
 void *drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj);
-void drm_bo_unmap(struct buffer_object *obj);
-void drm_bo_free(struct buffer_object *);
+void drm_bo_unmap(ScrnInfoPtr pScrn, struct buffer_object *obj);
+void drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *);
 
 #endif
