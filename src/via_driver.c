@@ -346,14 +346,6 @@ VIAEnterVT(int scrnIndex, int flags)
             output->funcs->save(output);
     }
 
-    if (pVia->KMS) {
-        if (!drmSetMaster(pVia->drmFD)) {
-            xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                        "drmSetMaster failed: %s\n",
-                        strerror(errno));
-        }
-    }
-
     if (!xf86SetDesiredModes(pScrn))
         return FALSE;
 
@@ -401,27 +393,19 @@ VIALeaveVT(int scrnIndex, int flags)
     DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIALeaveVT\n"));
 
 #ifdef XF86DRI
-    if (pVia->KMS) {
-        if (!drmDropMaster(pVia->drmFD)) {
-            xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                        "drmDropMaster failed: %s\n",
-                        strerror(errno));
-        }
-    } else {
-        if (pVia->directRenderingType == DRI_1) {
-            volatile drm_via_sarea_t *saPriv = (drm_via_sarea_t *) DRIGetSAREAPrivate(pScrn->pScreen);
+    if (pVia->directRenderingType == DRI_1) {
+        volatile drm_via_sarea_t *saPriv = (drm_via_sarea_t *) DRIGetSAREAPrivate(pScrn->pScreen);
 
-            DRILock(screenInfo.screens[scrnIndex], 0);
-            saPriv->ctxOwner = ~0;
+        DRILock(screenInfo.screens[scrnIndex], 0);
+        saPriv->ctxOwner = ~0;
 
-            viaAccelSync(pScrn);
+        viaAccelSync(pScrn);
 
-            VIADRIRingBufferCleanup(pScrn);
-            viaDRIOffscreenSave(pScrn);
+        VIADRIRingBufferCleanup(pScrn);
+        viaDRIOffscreenSave(pScrn);
 
-            if (pVia->VQEnable)
-                viaDisableVQ(pScrn);
-        }
+        if (pVia->VQEnable)
+            viaDisableVQ(pScrn);
     }
 #endif
 
@@ -1631,6 +1615,11 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
     if (pVia->directRenderingType == DRI_1)
         VIADRICloseScreen(pScreen);
 #endif
+    if (pVia->KMS)
+        if (!drmDropMaster(pVia->drmFD))
+            xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                        "drmDropMaster failed: %s\n",
+                        strerror(errno));
 
     pScrn->vtSema = FALSE;
     pScreen->CloseScreen = pVia->CloseScreen;
@@ -1648,6 +1637,14 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 
     pScrn->pScreen = pScreen;
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAScreenInit\n"));
+
+    if (pVia->KMS) {
+        if (!drmSetMaster(pVia->drmFD)) {
+            xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                        "drmSetMaster failed: %s\n",
+                        strerror(errno));
+        }
+    }
 
     if (!drm_bo_manager_init(pScrn))
         return FALSE;
