@@ -1575,16 +1575,28 @@ VIACreateScreenResources(ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
     VIAPtr pVia = VIAPTR(pScrn);
+    PixmapPtr rootPixmap;
+    void *surface;
 
     pScreen->CreateScreenResources = pVia->CreateScreenResources;
     if (!(*pScreen->CreateScreenResources)(pScreen))
         return FALSE;
     pScreen->CreateScreenResources = VIACreateScreenResources;
 
-    if (pVia->shadowFB) {
-        PixmapPtr pixmap = pScreen->GetScreenPixmap(pScreen);
+    surface = pVia->FBBase;
+    if (!surface)
+        return FALSE;
 
-        if (!shadowAdd(pScreen, pixmap, shadowUpdatePackedWeak(),
+    rootPixmap = pScreen->GetScreenPixmap(pScreen);
+
+    if (pVia->shadowFB)
+        surface = pVia->ShadowPtr;
+
+    if (!pScreen->ModifyPixmapHeader(rootPixmap, -1, -1, -1, -1, -1, surface))
+        return FALSE;
+
+    if (pVia->shadowFB) {
+        if (!shadowAdd(pScreen, rootPixmap, shadowUpdatePackedWeak(),
                         viaShadowWindow, 0, NULL))
             return FALSE;
     }
@@ -1601,6 +1613,7 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
 
     viaExitAccel(pScreen);
     if (pVia->ShadowPtr) {
+        shadowRemove(pScreen, pScreen->GetScreenPixmap(pScreen));
         free(pVia->ShadowPtr);
         pVia->ShadowPtr = NULL;
     }
@@ -1632,7 +1645,6 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 	ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
-    void *FBStart = NULL;
     int i;
 
     pScrn->pScreen = pScreen;
@@ -1695,16 +1707,13 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 
     if (pVia->shadowFB) {
         int pitch = BitmapBytePad(pScrn->bitsPerPixel * pScrn->displayWidth);
+
         pVia->ShadowPtr = malloc(pitch * pScrn->virtualY);
-        FBStart = pVia->ShadowPtr;
+        if (!pVia->ShadowPtr)
+            pVia->shadowFB = FALSE;
     }
 
-    if (!FBStart) {
-        pVia->shadowFB = FALSE;
-        FBStart = pVia->FBBase;
-    }
-
-    if (!fbScreenInit(pScreen, FBStart, pScrn->virtualX, pScrn->virtualY,
+    if (!fbScreenInit(pScreen, NULL, pScrn->virtualX, pScrn->virtualY,
                         pScrn->xDpi, pScrn->yDpi, pScrn->displayWidth,
                         pScrn->bitsPerPixel))
         return FALSE;
@@ -1727,8 +1736,9 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
             }
         }
     }
+
     /* Must be after RGB ordering is fixed. */
-    fbPictureInit(pScreen, 0, 0);
+    fbPictureInit(pScreen, NULL, 0);
 
     if (!pVia->NoAccel && !UMSAccelInit(pScreen))
         return FALSE;
