@@ -1754,9 +1754,39 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- SW cursor set up\n"));
 
     if (pVia->hwcursor) {
-        xf86CrtcPtr crtc = xf86_config->crtc[0];
+        xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
+        int flags = (HARDWARE_CURSOR_AND_SOURCE_WITH_MASK |
+                     HARDWARE_CURSOR_TRUECOLOR_AT_8BPP);
+        int size, cursorSize, i = 0;
 
-        if (!UMSHWCursorInit(crtc)) {
+        switch (pVia->Chipset) {
+        case VIA_CLE266:
+        case VIA_KM400:
+            flags |= HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_1;
+            size = 32;
+            cursorSize = ((size * size) >> 3) * 2;
+            break;
+        default:
+            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "HWCursor ARGB enabled\n"));
+            flags |= (HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_64 | HARDWARE_CURSOR_ARGB);
+            size = 64;
+            cursorSize = size * (size + 1) << 2;
+            break;
+        }
+
+        for (i = 0; i < xf86_config->num_crtc; i++) {
+            xf86CrtcPtr crtc = xf86_config->crtc[i];
+            ViaCRTCInfoPtr iga = crtc->driver_private;
+
+            /* Set cursor location in frame buffer. */
+            iga->cursor_bo = drm_bo_alloc(pScrn, cursorSize);
+            if (!iga->cursor_bo)
+                continue;
+
+            //iga->cursor_bo->offset += pScrn->fbOffset;
+        }
+
+        if (!xf86_cursors_init(pScreen, size, size, flags)) {
             pVia->hwcursor = FALSE;
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                         "Hardware cursor initialization failed\n");
@@ -1773,9 +1803,6 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     if (!xf86CrtcScreenInit(pScreen))
         return FALSE;
 
-    xf86DPMSInit(pScreen, xf86DPMSSet, 0);
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- DPMS set up\n"));
-
     if (!miCreateDefColormap(pScreen))
         return FALSE;
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Def Color map set up\n"));
@@ -1786,8 +1813,10 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
         return FALSE;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Palette loaded\n"));
-
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Color maps etc. set up\n"));
+
+    xf86DPMSInit(pScreen, xf86DPMSSet, 0);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- DPMS set up\n"));
 
     UMSAccelSetup(pScrn);
 

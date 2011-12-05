@@ -1946,6 +1946,36 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
         break;
     }
 
+    /* Init HI_X0 for cursor */
+    switch (pVia->Chipset) {
+    case VIA_CX700:
+    /* case VIA_CN750: */
+    case VIA_P4M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        /* set 0 as transparent color key for IGA 2 */
+        VIASETREG(HI_TRANSPARENT_COLOR, 0);
+        VIASETREG(HI_INVTCOLOR, 0X00FFFFFF);
+        VIASETREG(ALPHA_V3_PREFIFO_CONTROL, 0xE0000);
+        VIASETREG(ALPHA_V3_FIFO_CONTROL, 0xE0F0000);
+
+        /* set 0 as transparent color key for IGA 1 */
+        VIASETREG(PRIM_HI_TRANSCOLOR, 0);
+        VIASETREG(PRIM_HI_FIFO, 0x0D000D0F);
+        VIASETREG(PRIM_HI_INVTCOLOR, 0x00FFFFFF);
+        VIASETREG(V327_HI_INVTCOLOR, 0x00FFFFFF);
+        break;
+
+    default:
+        VIASETREG(HI_TRANSPARENT_COLOR, 0);
+        VIASETREG(HI_INVTCOLOR, 0X00FFFFFF);
+        VIASETREG(ALPHA_V3_PREFIFO_CONTROL, 0xE0000);
+        VIASETREG(ALPHA_V3_FIFO_CONTROL, 0xE0F0000);
+        break;
+    }
+
     xf86CrtcSetSizeRange(pScrn, 320, 200, max_pitch, max_height);
 
     ViaOutputsDetect(pScrn);
@@ -2025,83 +2055,4 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
         }
     }
     return TRUE;
-}
-
-Bool
-UMSHWCursorInit(xf86CrtcPtr crtc)
-{
-    ScrnInfoPtr pScrn = crtc->scrn;
-    ScreenPtr pScreen = pScrn->pScreen;
-    xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
-    int flags = (HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_1 |
-                 HARDWARE_CURSOR_AND_SOURCE_WITH_MASK |
-                 HARDWARE_CURSOR_TRUECOLOR_AT_8BPP);
-    int size, cursorSize, i = 0;
-    xf86CursorInfoPtr cursor_info;
-    VIAPtr pVia = VIAPTR(pScrn);
-    CARD32 dwHiControl;
-    ViaCRTCInfoPtr iga;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "UMSHWCursorInit\n"));
-
-    switch (pVia->Chipset) {
-    case VIA_CLE266:
-    case VIA_KM400:
-        size = 32;
-        cursorSize = ((size * size) >> 3) * 2;
-        break;
-    default:
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "HWCursor ARGB enabled\n"));
-        flags |= HARDWARE_CURSOR_ARGB;
-        size = 64;
-        cursorSize = size * (size + 1) << 2;
-        break;
-    }
-
-    for (i = 0; i < xf86_config->num_crtc; i++) {
-        xf86CrtcPtr crtc = xf86_config->crtc[i];
-
-    iga = crtc->driver_private;
-
-    /* Set cursor location in frame buffer. */
-    iga->cursor_bo = drm_bo_alloc(pScrn, cursorSize);
-    if (!iga->cursor_bo)
-        continue;
-    iga->cursor_bo->offset += pScrn->fbOffset;
-
-    /* Init HI_X0 */
-    switch (pVia->Chipset) {
-    case VIA_CX700:
-    /* case VIA_CN750: */
-    case VIA_P4M890:
-    case VIA_P4M900:
-    case VIA_VX800:
-    case VIA_VX855:
-    case VIA_VX900:
-        /* set 0 as transparent color key for IGA 2 */
-        if (iga->index) {
-            VIASETREG(HI_TRANSPARENT_COLOR, 0);
-            VIASETREG(HI_INVTCOLOR, 0X00FFFFFF);
-            VIASETREG(ALPHA_V3_PREFIFO_CONTROL, 0xE0000);
-            VIASETREG(ALPHA_V3_FIFO_CONTROL, 0xE0F0000);
-
-        } else {
-            /* set 0 as transparent color key for IGA 1 */
-            VIASETREG(PRIM_HI_TRANSCOLOR, 0);
-            VIASETREG(PRIM_HI_FIFO, 0x0D000D0F);
-            VIASETREG(PRIM_HI_INVTCOLOR, 0x00FFFFFF);
-            VIASETREG(V327_HI_INVTCOLOR, 0x00FFFFFF);
-            break;
-        }
-    default:
-        if (!iga->index) {
-            VIASETREG(HI_TRANSPARENT_COLOR, 0);
-            VIASETREG(HI_INVTCOLOR, 0X00FFFFFF);
-            VIASETREG(ALPHA_V3_PREFIFO_CONTROL, 0xE0000);
-            VIASETREG(ALPHA_V3_FIFO_CONTROL, 0xE0F0000);
-        }
-        break;
-    }
-    }
-    return xf86_cursors_init(pScreen, size, size, flags);
 }
