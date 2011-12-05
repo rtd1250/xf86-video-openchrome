@@ -31,9 +31,6 @@ struct buffer_object {
     unsigned long   size;
     void            *ptr;
     int             pool;               /* Pool we drew from */
-#ifdef XF86DRI
-    drm_via_mem_t drm;                  /* DRM management object */
-#endif
     ExaOffscreenArea *exa;
 };
 

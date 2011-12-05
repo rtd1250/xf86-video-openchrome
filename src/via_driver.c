@@ -1658,20 +1658,20 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
         }
     }
 
-    if (!drm_bo_manager_init(pScrn))
-        return FALSE;
-
 #ifdef XF86DRI
     if (pVia->drmFD != -1) {
         if (pVia->directRenderingType == DRI_1) {
             /* DRI2 or DRI1 support */
             if (VIADRI1ScreenInit(pScreen))
-                DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "DRI1 ScreenInit\n"));
+                DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "DRI1 ScreenInit commplete\n"));
             else
                 pVia->directRenderingType = DRI_NONE;
         }
     }
 #endif
+
+    if (!drm_bo_manager_init(pScrn))
+        return FALSE;
 
     for (i = 0; i < xf86_config->num_crtc; i++) {
         xf86CrtcPtr crtc = xf86_config->crtc[i];

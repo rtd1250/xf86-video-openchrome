@@ -346,7 +346,7 @@ typedef struct _VIA {
     int                 drmVerMajor;
     int                 drmVerMinor;
     int                 drmVerPL;
-    struct buffer_object driOffScreenMem;
+    struct buffer_object *driOffScreenMem;
     void *              driOffScreenSave;
 #endif
     Bool                DRIIrqEnable;

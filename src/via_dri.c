@@ -80,7 +80,6 @@ static const ViaDRMVersion drmExpected = { 1, 3, 0 };
 static const ViaDRMVersion drmCompat = { 2, 0, 0 };
 
 static Bool VIAInitVisualConfigs(ScreenPtr pScreen);
-static Bool VIADRIKernelInit(ScreenPtr pScreen, VIAPtr pVia);
 static Bool VIADRIMapInit(ScreenPtr pScreen, VIAPtr pVia);
 
 static Bool VIACreateContext(ScreenPtr pScreen, VisualPtr visual,
@@ -432,15 +431,8 @@ VIADRIFBInit(ScrnInfoPtr pScrn)
                    "[drm] the frame buffer memory area in the BIOS.\n");
     }
 
-    pVia->driOffScreenMem.pool = 0;
-    if (Success != viaOffScreenLinear(&pVia->driOffScreenMem, pScrn, FBSize)) {
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                   "[drm] Failed to allocate offscreen frame buffer area.\n");
-        return FALSE;
-    }
-
-    fb.offset = pVia->driOffScreenMem.offset;
-    fb.size = FBSize;
+    fb.offset = pScrn->virtualY * pVia->Bpl;
+    fb.size = pVia->FBFreeEnd;
     if (drmCommandWrite(pVia->drmFD, DRM_VIA_FB_INIT, &fb,
                         sizeof(drm_via_fb_t)) < 0) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
@@ -448,29 +440,9 @@ VIADRIFBInit(ScrnInfoPtr pScrn)
         return FALSE;
     } else {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                    "[drm] Using %d bytes for DRM memory heap.\n", FBSize);
+                    "[drm] Using %d KB for DRM memory heap.\n", fb.size >> 10);
         return TRUE;
     }
-}
-
-Bool
-VIADRI1BufferInit(ScrnInfoPtr pScrn)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    pVia->IsPCI = !VIADRIAgpInit(pScrn);
-    if (pVia->IsPCI)
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[dri] Using PCI.\n");
-    else
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[dri] Using AGP.\n");
-
-    if (!(VIADRIFBInit(pScrn))) {
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                   "[dri] Frame buffer initialization failed.\n");
-        return FALSE;
-    }
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[dri] Frame buffer initialized.\n");
-    return TRUE;
 }
 
 static Bool
@@ -603,6 +575,7 @@ VIADRI1ScreenInit(ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
     VIAPtr pVia = VIAPTR(pScrn);
+    int major, minor, patch;
     DRIInfoPtr pDRIInfo;
     VIADRIPtr pVIADRI;
 
@@ -623,19 +596,15 @@ VIADRI1ScreenInit(ScreenPtr pScreen)
     }
 
     /* Check the DRI version. */
-    {
-        int major, minor, patch;
-
-        DRIQueryVersion(&major, &minor, &patch);
-        if (major != DRIINFO_MAJOR_VERSION || minor < DRIINFO_MINOR_VERSION) {
-            xf86DrvMsg(pScreen->myNum, X_ERROR,
-                       "[dri] VIADRI1ScreenInit failed -- FALSE mismatch.\n"
-                       "[dri] libdri is %d.%d.%d, but %d.%d.x is needed.\n"
-                       "[dri] Disabling DRI.\n",
-                       major, minor, patch,
-                       DRIINFO_MAJOR_VERSION, DRIINFO_MINOR_VERSION);
-            return FALSE;
-        }
+    DRIQueryVersion(&major, &minor, &patch);
+    if (major != DRIINFO_MAJOR_VERSION || minor < DRIINFO_MINOR_VERSION) {
+        xf86DrvMsg(pScreen->myNum, X_ERROR,
+                    "[dri] VIADRI1ScreenInit failed -- FALSE mismatch.\n"
+                    "[dri] libdri is %d.%d.%d, but %d.%d.x is needed.\n"
+                    "[dri] Disabling DRI.\n",
+                    major, minor, patch,
+                    DRIINFO_MAJOR_VERSION, DRIINFO_MINOR_VERSION);
+        return FALSE;
     }
 
     pVia->pDRIInfo = DRICreateInfoRec();
@@ -737,10 +706,7 @@ VIADRI1ScreenInit(ScreenPtr pScreen)
     xf86DrvMsg(pScreen->myNum, X_INFO, "[drm] mmio Registers = 0x%08lx\n",
                (unsigned long)pVIADRI->regs.handle);
 
-    pVIADRI->drixinerama = FALSE;
-
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[dri] mmio mapped.\n");
-
     return TRUE;
 }
 
@@ -763,7 +729,7 @@ VIADRICloseScreen(ScreenPtr pScreen)
     }
 
     DRICloseScreen(pScreen);
-    drm_bo_free(pScrn, &pVia->driOffScreenMem);
+    drm_bo_free(pScrn, pVia->driOffScreenMem);
 
     if (pVia->pDRIInfo) {
         if ((pVIADRI = (VIADRIPtr) pVia->pDRIInfo->devPrivate)) {
@@ -812,22 +778,13 @@ VIADRIFinishScreenInit(ScreenPtr pScreen)
     pVia->pDRIInfo->driverSwapMethod = DRI_HIDE_X_CONTEXT;
     pVIADRI = (VIADRIPtr) pVia->pDRIInfo->devPrivate;
 
-    if (!(VIADRI1BufferInit(pScrn))) {
-        VIADRICloseScreen(pScreen);
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                   "[dri] Buffer initialization failed.\n");
-        return FALSE;
-    }
-
-    pVIADRI->fbOffset = pVia->driOffScreenMem.offset;
-    pVIADRI->fbSize = pVia->driOffScreenMem.size;
+    pVia->driOffScreenMem = drm_bo_alloc(pScrn, pVia->driSize);
+    pVIADRI->fbOffset = pVia->driOffScreenMem->offset;
+    pVIADRI->fbSize = pVia->driOffScreenMem->size;
+    pVIADRI->drixinerama = FALSE;
 
     DRIFinishScreenInit(pScreen);
 
-    if (!VIADRIKernelInit(pScreen, pVia)) {
-        VIADRICloseScreen(pScreen);
-        return FALSE;
-    }
     xf86DrvMsg(pScreen->myNum, X_INFO, "[dri] Kernel data initialized.\n");
 
     /* Set SAREA value. */
@@ -894,10 +851,24 @@ VIADRIMoveBuffers(WindowPtr pParent, DDXPointRec ptOldOrg,
 }
 
 /* Initialize the kernel data structures. */
-static Bool
-VIADRIKernelInit(ScreenPtr pScreen, VIAPtr pVia)
+Bool
+VIADRIKernelInit(ScrnInfoPtr pScrn)
 {
+    VIAPtr pVia = VIAPTR(pScrn);
     drm_via_init_t drmInfo;
+
+    pVia->IsPCI = !VIADRIAgpInit(pScrn);
+    if (pVia->IsPCI)
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[dri] Using PCI.\n");
+    else
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[dri] Using AGP.\n");
+
+    if (!(VIADRIFBInit(pScrn))) {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                   "[dri] Frame buffer initialization failed.\n");
+        return FALSE;
+    }
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[dri] Frame buffer initialized.\n");
 
     memset(&drmInfo, 0, sizeof(drm_via_init_t));
     drmInfo.func = VIA_INIT_MAP;
@@ -910,9 +881,9 @@ VIADRIKernelInit(ScreenPtr pScreen, VIAPtr pVia)
     } else {
         /*For AMD64*/
 #ifndef __x86_64__
-	drmInfo.agpAddr = (CARD32)pVia->agpAddr;
+	    drmInfo.agpAddr = (CARD32)pVia->agpAddr;
 #else
-	drmInfo.agpAddr = (CARD64)pVia->agpAddr;
+	    drmInfo.agpAddr = (CARD64)pVia->agpAddr;
 #endif
     }
 
@@ -920,6 +891,7 @@ VIADRIKernelInit(ScreenPtr pScreen, VIAPtr pVia)
                          sizeof(drm_via_init_t))) < 0)
         return FALSE;
 
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[dri] Kernel data initialized.\n");
     return TRUE;
 }
 
