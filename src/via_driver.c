@@ -1607,7 +1607,9 @@ static Bool
 VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
+    xf86CrtcConfigPtr   xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
+    int i;
 
     DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIACloseScreen\n"));
 
@@ -1623,6 +1625,14 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
         VIALeaveVT(scrnIndex, 0);
 
     xf86_cursors_fini(pScreen);
+
+    for (i = 0; i < xf86_config->num_crtc; i++) {
+        xf86CrtcPtr crtc = xf86_config->crtc[i];
+        ViaCRTCInfoRec *iga = crtc->driver_private;
+
+        if (iga->cursor_bo)
+            drm_bo_free(pScrn, iga->cursor_bo);
+    }
 
 #ifdef XF86DRI
     if (pVia->directRenderingType == DRI_1)
