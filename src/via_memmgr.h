@@ -34,8 +34,6 @@ struct buffer_object {
     ExaOffscreenArea *exa;
 };
 
-int viaOffscreenLinear(struct buffer_object *, ScrnInfoPtr, unsigned long);
-
 /* In via_memory.c */
 Bool drm_bo_manager_init(ScrnInfoPtr pScrn);
 

@@ -53,8 +53,6 @@ typedef struct {
     int bytesPerPixel;
     int priv1;
     int priv2;
-    int fbOffset;
-    int fbSize;
     Bool drixinerama;
     int backOffset;
     int depthOffset;

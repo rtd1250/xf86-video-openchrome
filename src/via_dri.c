@@ -779,8 +779,6 @@ VIADRIFinishScreenInit(ScreenPtr pScreen)
     pVIADRI = (VIADRIPtr) pVia->pDRIInfo->devPrivate;
 
     pVia->driOffScreenMem = drm_bo_alloc(pScrn, pVia->driSize);
-    pVIADRI->fbOffset = pVia->driOffScreenMem->offset;
-    pVIADRI->fbSize = pVia->driOffScreenMem->size;
     pVIADRI->drixinerama = FALSE;
 
     DRIFinishScreenInit(pScreen);
@@ -920,12 +918,12 @@ VIADRIMapInit(ScreenPtr pScreen, VIAPtr pVia)
 #define DRM_VIA_BLIT_MAX_SIZE (2048*2048*4)
 
 static int
-viaDRIFBMemcpy(int fd, unsigned long fbOffset, unsigned char *addr,
-               unsigned long size, Bool toFB)
+viaDRIFBMemcpy(int fd, struct buffer_object *vram, unsigned char *addr,
+               Bool toFB)
 {
-    int err;
+    unsigned long fbOffset = vram->offset, size = vram->size, curSize;
     drm_via_dmablit_t blit;
-    unsigned long curSize;
+    int err;
 
     do {
         curSize = (size > DRM_VIA_BLIT_MAX_SIZE) ? DRM_VIA_BLIT_MAX_SIZE : size;
@@ -964,23 +962,20 @@ void
 viaDRIOffscreenSave(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
+    unsigned long srcSize = pVia->driOffScreenMem->size;
     VIADRIPtr pVIADRI = pVia->pDRIInfo->devPrivate;
-    unsigned char *saveAddr = pVia->FBBase + pVIADRI->fbOffset;
-    unsigned long saveSize = pVIADRI->fbSize;
-    unsigned long curSize;
     int err;
 
     if (pVia->driOffScreenSave)
         free(pVia->driOffScreenSave);
 
-    pVia->driOffScreenSave = malloc(saveSize + 16);
+    pVia->driOffScreenSave = malloc(srcSize + 16);
     if (pVia->driOffScreenSave) {
+        void *dst, *src = drm_bo_map(pScrn, pVia->driOffScreenMem);
+
+        dst = (void *) ALIGN_TO((unsigned long) pVia->driOffScreenSave, 16);
         if ((pVia->drmVerMajor == 2) && (pVia->drmVerMinor >= 8)) {
-            err = viaDRIFBMemcpy(pVia->drmFD, pVIADRI->fbOffset,
-                                 (unsigned char *)
-                                 ALIGN_TO((unsigned long)
-                                          pVia->driOffScreenSave, 16),
-                                 saveSize, FALSE);
+            err = viaDRIFBMemcpy(pVia->drmFD, pVia->driOffScreenMem, dst, FALSE);
             if (!err)
                 return;
 
@@ -989,9 +984,8 @@ viaDRIOffscreenSave(ScrnInfoPtr pScrn)
                        "\tUsing slow software backup instead.\n",
                        strerror(-err));
         }
-        memcpy((void *)ALIGN_TO((unsigned long)pVia->driOffScreenSave, 16),
-               saveAddr, saveSize);
-
+        memcpy(dst, src, srcSize);
+        drm_bo_unmap(pScrn, pVia->driOffScreenMem);
     } else {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                    "Out of memory trying to backup DRI offscreen memory.\n");
@@ -1005,14 +999,15 @@ viaDRIOffscreenRestore(ScrnInfoPtr pScrn)
     VIAPtr pVia = VIAPTR(pScrn);
     VIADRIPtr pVIADRI = pVia->pDRIInfo->devPrivate;
 
-    unsigned char *saveAddr = pVia->FBBase + pVIADRI->fbOffset;
-    unsigned long saveSize = pVIADRI->fbSize;
-
     if (pVia->driOffScreenSave) {
-        memcpy(saveAddr,
-               (void *)ALIGN_TO((unsigned long)pVia->driOffScreenSave, 16),
-               saveSize);
+        void *src, *dst = drm_bo_map(pScrn, pVia->driOffScreenMem);
+
+        src = (void *) ALIGN_TO((unsigned long)pVia->driOffScreenSave, 16);
+        memcpy(dst, src, pVia->driOffScreenMem->size);
         free(pVia->driOffScreenSave);
         pVia->driOffScreenSave = NULL;
+
+        drm_bo_unmap(pScrn, pVia->driOffScreenMem);
+    } else {
     }
 }

@@ -1792,8 +1792,6 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
             iga->cursor_bo = drm_bo_alloc(pScrn, cursorSize);
             if (!iga->cursor_bo)
                 continue;
-
-            //iga->cursor_bo->offset += pScrn->fbOffset;
         }
 
         if (!xf86_cursors_init(pScreen, size, size, flags)) {

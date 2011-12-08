@@ -211,26 +211,6 @@ viaAccelClippingHelper(VIAPtr pVia, int refY)
 }
 
 /*
- * Emit a solid blit operation to the command buffer.
- */
-static void
-viaAccelSolidHelper(VIAPtr pVia, int x, int y, int w, int h,
-                    unsigned fbBase, CARD32 mode, unsigned pitch,
-                    CARD32 fg, CARD32 cmd)
-{
-    RING_VARS;
-
-    BEGIN_RING(14);
-    OUT_RING_H1(VIA_REG(pVia, GEMODE), mode);
-    OUT_RING_H1(VIA_REG(pVia, DSTBASE), fbBase >> 3);
-    viaPitchHelper(pVia, pitch, 0);
-    OUT_RING_H1(VIA_REG(pVia, DSTPOS), (y << 16) | (x & 0xFFFF));
-    OUT_RING_H1(VIA_REG(pVia, DIMENSION), ((h - 1) << 16) | (w - 1));
-    OUT_RING_H1(VIA_REG(pVia, MONOPATFGC), fg);
-    OUT_RING_H1(VIA_REG(pVia, GECMD), cmd);
-}
-
-/*
  * Check if we can use a planeMask and update the 2D context accordingly.
  */
 static Bool

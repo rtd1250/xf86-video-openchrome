@@ -586,7 +586,7 @@ viaVidCopyInit(char *copyType, ScreenPtr pScreen)
         drm_bo_free(pScrn, tmpFbBuffer);
         return libc_YUV42X;
     }
-    buf1 = (unsigned char *)pVia->FBBase + tmpFbBuffer->offset;
+    buf1 = drm_bo_map(pScrn, tmpFbBuffer);
 
     /* Align the frame buffer destination memory to a 32 byte boundary. */
     if ((unsigned long)buf1 & 31)
@@ -640,6 +640,7 @@ viaVidCopyInit(char *copyType, ScreenPtr pScreen)
     }
     free(buf3);
     free(buf2);
+    drm_bo_unmap(pScrn, tmpFbBuffer);
     drm_bo_free(pScrn, tmpFbBuffer);
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                "Using %s YUV42X copy for %s.\n",

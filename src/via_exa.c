@@ -634,7 +634,7 @@ viaAccelClippingHelper(VIAPtr pVia, int refY)
 /*
  * Emit a solid blit operation to the command buffer.
  */
-static void
+void
 viaAccelSolidHelper(VIAPtr pVia, int x, int y, int w, int h,
                     unsigned fbBase, CARD32 mode, unsigned pitch,
                     CARD32 fg, CARD32 cmd)
