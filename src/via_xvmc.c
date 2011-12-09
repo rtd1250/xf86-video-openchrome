@@ -584,7 +584,7 @@ ViaXvMCCreateSurface(ScrnInfoPtr pScrn, XvMCSurfacePtr pSurf,
 
     ctx = pSurf->context;
     bufSize = size_yuv420(ctx->width, ctx->height);
-    sPriv->memory_ref = drm_bo_alloc(pScrn, numBuffers * bufSize + 32);
+    sPriv->memory_ref = drm_bo_alloc(pScrn, numBuffers * bufSize + 32, TTM_PL_VRAM);
     if (!sPriv->memory_ref) {
         free(*priv);
         free(sPriv);
@@ -659,7 +659,7 @@ ViaXvMCCreateSubpicture(ScrnInfoPtr pScrn, XvMCSubpicturePtr pSubp,
 
     ctx = pSubp->context;
     bufSize = size_xx44(ctx->width, ctx->height);
-    sPriv->memory_ref = drm_bo_alloc(pScrn, 1 * bufSize + 32);
+    sPriv->memory_ref = drm_bo_alloc(pScrn, 1 * bufSize + 32, TTM_PL_VRAM);
     if (!sPriv->memory_ref) {
         free(*priv);
         free(sPriv);

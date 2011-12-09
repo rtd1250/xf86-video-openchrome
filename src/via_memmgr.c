@@ -59,7 +59,8 @@ viaExaFBSave(ScreenPtr pScreen, ExaOffscreenArea * exa)
 }
 
 int
-viaOffScreenLinear(struct buffer_object *obj, ScrnInfoPtr pScrn, unsigned long size)
+viaOffScreenLinear(struct buffer_object *obj, ScrnInfoPtr pScrn,
+                   unsigned long size)
 {
     int depth = pScrn->bitsPerPixel >> 3;
     VIAPtr pVia = VIAPTR(pScrn);
@@ -73,8 +74,8 @@ viaOffScreenLinear(struct buffer_object *obj, ScrnInfoPtr pScrn, unsigned long s
             return BadAlloc;
         obj->exa->save = viaExaFBSave;
         obj->offset = obj->exa->offset;
+        obj->domain = TTM_PL_SYSTEM;
         obj->size = size;
-        obj->pool = 1;
         return Success;
     }
 
@@ -85,13 +86,13 @@ viaOffScreenLinear(struct buffer_object *obj, ScrnInfoPtr pScrn, unsigned long s
         return BadAlloc;
     obj->offset = linear->offset * depth;
     obj->handle = (unsigned long) linear;
+    obj->domain = TTM_PL_SYSTEM;
     obj->size = size;
-    obj->pool = 1;
     return Success;
 }
 
 struct buffer_object *
-drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size)
+drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, int domain)
 {
     struct buffer_object *obj = NULL;
     VIAPtr pVia = VIAPTR(pScrn);
@@ -99,35 +100,43 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size)
 
     obj = xnfcalloc(1, sizeof(*obj));
     if (obj) {
+        switch (domain) {
+        case TTM_PL_VRAM:
+        case TTM_PL_TT:
 #ifdef XF86DRI
-        if (pVia->directRenderingType == DRI_1) {
-            drm_via_mem_t drm;
+            if (pVia->directRenderingType == DRI_1) {
+                drm_via_mem_t drm;
 
-            drm.context = DRIGetContext(pScrn->pScreen);
-            drm.size = size;
-            drm.type = VIA_MEM_VIDEO;
-            ret = drmCommandWriteRead(pVia->drmFD, DRM_VIA_ALLOCMEM,
-                                      &drm, sizeof(drm_via_mem_t));
-            if (ret || (size != drm.size)) {
-                DEBUG(ErrorF("DRM memory allocation failed %d\n", ret));
-                /* Try X Offsceen fallback before failing. */
-                if (Success != viaOffScreenLinear(obj, pScrn, size)) {
-                    ErrorF("Linear memory allocation failed\n");
-                    free(obj);
+                drm.context = DRIGetContext(pScrn->pScreen);
+                drm.size = size;
+                drm.type = (domain == TTM_PL_TT ? VIA_MEM_AGP : VIA_MEM_VIDEO);
+                ret = drmCommandWriteRead(pVia->drmFD, DRM_VIA_ALLOCMEM,
+                                            &drm, sizeof(drm_via_mem_t));
+                if (ret || (size != drm.size)) {
+                    DEBUG(ErrorF("DRM memory allocation failed %d\n", ret));
+                    /* Try X Offsceen fallback before failing. */
+                    if (Success != viaOffScreenLinear(obj, pScrn, size)) {
+                        ErrorF("Linear memory allocation failed\n");
+                        free(obj);
+                    }
+                    return obj;
                 }
+                obj->offset = drm.offset;
+                obj->handle = drm.index;
+                obj->domain = domain;
+                obj->size = drm.size;
+                DEBUG(ErrorF("%u of DRI memory allocated at %llx\n", obj->size, obj->offset));
                 return obj;
             }
-            obj->offset = drm.offset;
-            obj->handle = drm.index;
-            obj->size = drm.size;
-            obj->pool = 2;
-            DEBUG(ErrorF("%u of DRI memory allocated at %llx\n", obj->size, obj->offset));
-            return obj;
-        }
+            break;
 #endif
-        if (Success != viaOffScreenLinear(obj, pScrn, size)) {
-            ErrorF("Linear memory allocation failed\n");
-            free(obj);
+        case TTM_PL_SYSTEM:
+        default:
+            if (Success != viaOffScreenLinear(obj, pScrn, size)) {
+                ErrorF("Linear memory allocation failed\n");
+                free(obj);
+            }
+            break;
         }
     }
     return obj;
@@ -139,7 +148,11 @@ drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
     VIAPtr pVia = VIAPTR(pScrn);
     void *virtual = NULL;
 
-    switch (obj->pool) {
+    switch (obj->domain) {
+    case TTM_PL_TT:
+        virtual = pVia->agpMappedAddr + obj->offset;
+        break;
+    case TTM_PL_VRAM:
     default:
         virtual = pVia->FBBase + obj->offset;
         break;
@@ -158,11 +171,9 @@ drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
     VIAPtr pVia = VIAPTR(pScrn);
 
     if (obj) {
-        DEBUG(ErrorF("Freed %lu (pool %d)\n", obj->offset, obj->pool));
-        switch (obj->pool) {
-        case 0:
-            break;
-        case 1:
+        DEBUG(ErrorF("Freed %lu (pool %d)\n", obj->offset, obj->domain));
+        switch (obj->domain) {
+        case TTM_PL_SYSTEM:
             if (pVia->useEXA && !pVia->NoAccel) {
                 exaOffscreenFree(pScrn->pScreen, obj->exa);
             } else {
@@ -171,7 +182,8 @@ drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
                 xf86FreeOffscreenLinear(linear);
             }
             break;
-        case 2:
+        case TTM_PL_VRAM:
+        case TTM_PL_TT:
 #ifdef XF86DRI
             if (pVia->directRenderingType == DRI_1) {
                 drm_via_mem_t drm;
@@ -184,8 +196,6 @@ drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
 #endif
             break;
         }
-        obj->handle = 0;
-        obj->pool = 0;
         free(obj);
     }
 }

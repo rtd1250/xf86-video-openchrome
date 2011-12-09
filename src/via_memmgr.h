@@ -24,20 +24,25 @@
 #define _VIA_MEMMGR_H_
 #include "xf86.h"
 
+#define TTM_PL_SYSTEM   0
+#define TTM_PL_TT       1
+#define TTM_PL_VRAM     2
+
 struct buffer_object {
     unsigned long   handle;
     unsigned long   offset;             /* Offset into fb */
     unsigned long   pitch;
     unsigned long   size;
     void            *ptr;
-    int             pool;               /* Pool we drew from */
+    int             domain;
     ExaOffscreenArea *exa;
 };
 
 /* In via_memory.c */
 Bool drm_bo_manager_init(ScrnInfoPtr pScrn);
 
-struct buffer_object *drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size);
+struct buffer_object *drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size,
+                                    int domain);
 void *drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj);
 void drm_bo_unmap(ScrnInfoPtr pScrn, struct buffer_object *obj);
 void drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *);

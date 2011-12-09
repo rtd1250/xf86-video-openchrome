@@ -778,7 +778,7 @@ VIADRIFinishScreenInit(ScreenPtr pScreen)
     pVia->pDRIInfo->driverSwapMethod = DRI_HIDE_X_CONTEXT;
     pVIADRI = (VIADRIPtr) pVia->pDRIInfo->devPrivate;
 
-    pVia->driOffScreenMem = drm_bo_alloc(pScrn, pVia->driSize);
+    pVia->driOffScreenMem = drm_bo_alloc(pScrn, pVia->driSize, TTM_PL_VRAM);
     pVIADRI->drixinerama = FALSE;
 
     DRIFinishScreenInit(pScreen);

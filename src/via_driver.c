@@ -1789,7 +1789,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
             ViaCRTCInfoPtr iga = crtc->driver_private;
 
             /* Set cursor location in frame buffer. */
-            iga->cursor_bo = drm_bo_alloc(pScrn, cursorSize);
+            iga->cursor_bo = drm_bo_alloc(pScrn, cursorSize, TTM_PL_VRAM);
             if (!iga->cursor_bo)
                 continue;
         }
