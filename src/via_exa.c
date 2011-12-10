@@ -1255,7 +1255,7 @@ viaExaTexUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
     unsigned dstOffset;
     CARD32 texWidth, texHeight, texPitch;
     int format;
-    char *dst;
+    char *dst, *texAddr;
     int i, sync[2], yOffs, bufH, bufOffs, height;
     Bool buf;
     Via3DState *v3d = &pVia->v3d;
@@ -1279,7 +1279,7 @@ viaExaTexUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
         return TRUE;
     }
 
-    if (!pVia->texAddr)
+    if (!pVia->texAGPBuffer->ptr)
         return FALSE;
 
     switch (pDst->drawable.bitsPerPixel) {
@@ -1313,11 +1313,12 @@ viaExaTexUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
 
     texHeight = height << 1;
     bufOffs = texPitch * height;
+    texAddr = (char *) drm_bo_map(pScrn, pVia->texAGPBuffer);
 
     v3d->setDestination(v3d, dstOffset, dstPitch, format);
     v3d->setDrawing(v3d, 0x0c, 0xFFFFFFFF, 0x000000FF, 0x00);
     v3d->setFlags(v3d, 1, TRUE, TRUE, FALSE);
-    if (!v3d->setTexture(v3d, 0, pVia->texOffset + pVia->agpAddr, texPitch,
+    if (!v3d->setTexture(v3d, 0, (unsigned long) texAddr, texPitch,
                          pVia->nPOT[0], texWidth, texHeight, format,
                          via_single, via_single, via_src, TRUE))
         return FALSE;
@@ -1334,7 +1335,7 @@ viaExaTexUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
     while (h) {
         buf = (buf) ? 0 : 1;
         bufH = (h > height) ? height : h;
-        dst = pVia->texAddr + ((buf) ? bufOffs : 0);
+        dst = texAddr + ((buf) ? bufOffs : 0);
 
         if (sync[buf] >= 0)
             viaAccelWaitMarker(pScrn->pScreen, sync[buf]);
@@ -1799,7 +1800,6 @@ UMSAccelInit(ScreenPtr pScreen)
     pVia->nPOT[1] = nPOTSupported;
 
 #ifdef XF86DRI
-    pVia->texAddr = NULL;
     pVia->dBounce = NULL;
     pVia->scratchAddr = NULL;
 #endif /* XF86DRI */
@@ -1874,25 +1874,22 @@ viaExitAccel(ScreenPtr pScreen)
     if (pVia->useEXA) {
 #ifdef XF86DRI
         if (pVia->directRenderingType == DRI_1) {
-            if (pVia->texAddr) {
-                drmCommandWrite(pVia->drmFD, DRM_VIA_FREEMEM,
-                                &pVia->texAGPBuffer, sizeof(drm_via_mem_t));
-                pVia->texAddr = NULL;
+            if (pVia->texAGPBuffer) {
+                drm_bo_free(pScrn, pVia->texAGPBuffer);
+                pVia->texAGPBuffer = NULL;
             }
-            if (pVia->scratchAddr && !pVia->IsPCI &&
-                ((unsigned long)pVia->scratchAddr -
-                 (unsigned long)pVia->agpMappedAddr == pVia->scratchOffset)) {
-                drmCommandWrite(pVia->drmFD, DRM_VIA_FREEMEM,
-                                &pVia->scratchAGPBuffer, sizeof(drm_via_mem_t));
-                pVia->scratchAddr = NULL;
+
+            if (pVia->scratchBuffer) {
+                drm_bo_free(pScrn, pVia->scratchBuffer);
+                pVia->scratchBuffer = NULL;
             }
         }
         if (pVia->dBounce)
             free(pVia->dBounce);
 #endif /* XF86DRI */
-        if (pVia->scratchAddr) {
-            exaOffscreenFree(pScreen, pVia->scratchFBBuffer);
-            pVia->scratchAddr = NULL;
+        if (pVia->scratchBuffer) {
+            drm_bo_free(pScrn, pVia->scratchBuffer);
+            pVia->scratchBuffer = NULL;
         }
         if (pVia->exaDriverPtr) {
             exaDriverFini(pScreen);
@@ -1917,7 +1914,6 @@ viaFinishInitAccel(ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
     VIAPtr pVia = VIAPTR(pScrn);
-
 #ifdef XF86DRI
     int size, ret;
 
@@ -1930,58 +1926,40 @@ viaFinishInitAccel(ScreenPtr pScreen)
             /* Allocate upload and scratch space. */
             if (pVia->exaDriverPtr->UploadToScreen == viaExaTexUploadToScreen) {
                 size = VIA_AGP_UPL_SIZE * 2 + 32;
-                pVia->texAGPBuffer.context = 1;
-                pVia->texAGPBuffer.size = size;
-                pVia->texAGPBuffer.type = VIA_MEM_AGP;
-                ret = drmCommandWriteRead(pVia->drmFD, DRM_VIA_ALLOCMEM,
-                                          &pVia->texAGPBuffer,
-                                          sizeof(drm_via_mem_t));
 
-                if (ret || size != pVia->texAGPBuffer.size) {
-                    pVia->texAGPBuffer.size = 0;
-                } else {
+                pVia->texAGPBuffer = drm_bo_alloc(pScrn, size, TTM_PL_TT);
+                if (!pVia->texAGPBuffer) {
                     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                                "Allocated %u kiB of AGP memory for "
                                "system-to-framebuffer transfer.\n",
                                size / 1024);
-                    pVia->texOffset = (pVia->texAGPBuffer.offset + 31) & ~31;
-                    pVia->texAddr =
-                            (char *)pVia->agpMappedAddr + pVia->texOffset;
+                    pVia->texAGPBuffer->offset = (pVia->texAGPBuffer->offset + 31) & ~31;
                 }
             }
 
             size = pVia->exaScratchSize * 1024 + 32;
-            pVia->scratchAGPBuffer.context = 1;
-            pVia->scratchAGPBuffer.size = size;
-            pVia->scratchAGPBuffer.type = VIA_MEM_AGP;
-            ret = drmCommandWriteRead(pVia->drmFD, DRM_VIA_ALLOCMEM,
-                                      &pVia->scratchAGPBuffer,
-                                      sizeof(drm_via_mem_t));
-            if (ret || size != pVia->scratchAGPBuffer.size) {
-                pVia->scratchAGPBuffer.size = 0;
-            } else {
+            pVia->scratchBuffer = drm_bo_alloc(pScrn, size, TTM_PL_TT);
+            if (!pVia->scratchBuffer) {
                 xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                            "Allocated %u kiB of AGP memory for "
                            "EXA scratch area.\n", size / 1024);
                 pVia->scratchOffset =
-                        (pVia->scratchAGPBuffer.offset + 31) & ~31;
-                pVia->scratchAddr =
-                        (char *)pVia->agpMappedAddr + pVia->scratchOffset;
+                        (pVia->scratchBuffer->offset + 31) & ~31;
+                pVia->scratchAddr = drm_bo_map(pScrn, pVia->scratchBuffer);
             }
         }
     }
 #endif /* XF86DRI */
     if (!pVia->scratchAddr && pVia->useEXA) {
+        size = pVia->exaScratchSize * 1024 + 32;
+        pVia->scratchAGPBuffer = drm_bo_alloc(pScrn, size, TTM_PL_SYSTEM);
 
-        pVia->scratchFBBuffer =
-                exaOffscreenAlloc(pScreen, pVia->exaScratchSize * 1024,
-                                  32, TRUE, NULL, NULL);
-        if (pVia->scratchFBBuffer) {
+        if (!pVia->scratchAGPBuffer) {
             xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                        "Allocated %u kiB of framebuffer memory for "
                        "EXA scratch area.\n", pVia->exaScratchSize);
-            pVia->scratchOffset = pVia->scratchFBBuffer->offset;
-            pVia->scratchAddr = (char *)pVia->FBBase + pVia->scratchOffset;
+            pVia->scratchOffset = pVia->scratchAGPBuffer->offset;
+            pVia->scratchAddr = drm_bo_map(pScrn, pVia->scratchAGPBuffer);
         }
     }
 }

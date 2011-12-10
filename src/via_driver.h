@@ -295,16 +295,13 @@ typedef struct _VIA {
     Bool                componentAlpha;
     void               *srcP;
     CARD32              srcFormat;
-    ExaOffscreenArea   *scratchFBBuffer;
     unsigned            scratchOffset;
     int                 exaScratchSize;
     char *              scratchAddr;
     Bool                noComposite;
 #ifdef XF86DRI
-    drm_via_mem_t       scratchAGPBuffer;
-    drm_via_mem_t       texAGPBuffer;
-    unsigned            texOffset;
-    char *              texAddr;
+    struct buffer_object *scratchBuffer;
+    struct buffer_object *texAGPBuffer;
     char *              dBounce;
 #endif
 
