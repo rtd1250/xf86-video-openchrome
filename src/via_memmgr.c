@@ -128,7 +128,8 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, int domain)
                 obj->handle = drm.index;
                 obj->domain = domain;
                 obj->size = drm.size;
-                DEBUG(ErrorF("%u of DRI memory allocated at %llx\n", obj->size, obj->offset));
+                DEBUG(ErrorF("%u of DRI memory allocated at %llx, handle %lld\n",
+                            obj->size, obj->offset, obj->handle));
                 return obj;
             }
             break;
@@ -194,10 +195,10 @@ drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
             if (pVia->directRenderingType == DRI_1) {
                 drm_via_mem_t drm;
 
-                drm.index = obj->handle = drm.index;
+                drm.index = obj->handle;
                 if (drmCommandWrite(pVia->drmFD, DRM_VIA_FREEMEM,
                                     &drm, sizeof(drm_via_mem_t)) < 0)
-                    ErrorF("DRM module failed free.\n");
+                    ErrorF("DRM failed to free for handle %lld.\n", obj->handle);
             }
 #endif
             break;
