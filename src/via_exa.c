@@ -1426,55 +1426,6 @@ viaExaUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
 #endif /* XF86DRI */
 
 static Bool
-viaExaUploadToScratch(PixmapPtr pSrc, PixmapPtr pDst)
-{
-    ScrnInfoPtr pScrn = xf86Screens[pSrc->drawable.pScreen->myNum];
-    VIAPtr pVia = VIAPTR(pScrn);
-    char *src, *dst;
-    unsigned w, wBytes, srcPitch, h;
-    CARD32 dstPitch;
-
-    if (!pVia->scratchAddr)
-        return FALSE;
-
-    *pDst = *pSrc;
-    w = pSrc->drawable.width;
-    h = pSrc->drawable.height;
-    wBytes = (w * pSrc->drawable.bitsPerPixel + 7) >> 3;
-
-    viaOrder(wBytes, &dstPitch);
-    dstPitch = 1 << dstPitch;
-    if (dstPitch < 8)
-        dstPitch = 8;
-    if (dstPitch * h > pVia->exaScratchSize * 1024) {
-        ErrorF("EXA UploadToScratch Failed %u %u %u %u\n",
-               (unsigned int)dstPitch, h, (unsigned int)(dstPitch * h),
-               pVia->exaScratchSize * 1024);
-        return FALSE;
-    }
-
-    pDst->devKind = dstPitch;
-    pDst->devPrivate.ptr = dst = pVia->scratchAddr;
-    src = pSrc->devPrivate.ptr;
-    srcPitch = exaGetPixmapPitch(pSrc);
-
-    /*
-     * Copying to AGP needs not be HW accelerated.
-     * If scratch is in FB, we are without DRI and HW accel.
-     */
-
-    viaAccelSync(pScrn);
-
-    while (h--) {
-        memcpy(dst, src, wBytes);
-        dst += dstPitch;
-        src += srcPitch;
-    }
-
-    return TRUE;
-}
-
-static Bool
 viaExaCheckComposite(int op, PicturePtr pSrcPicture,
                      PicturePtr pMaskPicture, PicturePtr pDstPicture)
 {
@@ -1764,8 +1715,6 @@ viaInitExa(ScreenPtr pScreen)
         }
     }
 #endif /* XF86DRI */
-
-    pExa->UploadToScratch = viaExaUploadToScratch;
 
     if (!pVia->noComposite) {
         pExa->CheckComposite = viaExaCheckComposite;
