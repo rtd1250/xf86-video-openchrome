@@ -1952,14 +1952,14 @@ viaFinishInitAccel(ScreenPtr pScreen)
 #endif /* XF86DRI */
     if (!pVia->scratchAddr && pVia->useEXA) {
         size = pVia->exaScratchSize * 1024 + 32;
-        pVia->scratchAGPBuffer = drm_bo_alloc(pScrn, size, TTM_PL_SYSTEM);
+        pVia->scratchBuffer = drm_bo_alloc(pScrn, size, TTM_PL_SYSTEM);
 
-        if (!pVia->scratchAGPBuffer) {
+        if (!pVia->scratchBuffer) {
             xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                        "Allocated %u kiB of framebuffer memory for "
                        "EXA scratch area.\n", pVia->exaScratchSize);
-            pVia->scratchOffset = pVia->scratchAGPBuffer->offset;
-            pVia->scratchAddr = drm_bo_map(pScrn, pVia->scratchAGPBuffer);
+            pVia->scratchOffset = pVia->scratchBuffer->offset;
+            pVia->scratchAddr = drm_bo_map(pScrn, pVia->scratchBuffer);
         }
     }
 }
