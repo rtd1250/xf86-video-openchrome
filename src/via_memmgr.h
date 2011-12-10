@@ -35,7 +35,6 @@ struct buffer_object {
     unsigned long   size;
     void            *ptr;
     int             domain;
-    ExaOffscreenArea *exa;
 };
 
 /* In via_memory.c */

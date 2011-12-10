@@ -67,13 +67,16 @@ viaOffScreenLinear(struct buffer_object *obj, ScrnInfoPtr pScrn,
     FBLinearPtr linear;
 
     if (pVia->exaDriverPtr && !pVia->NoAccel) {
+        ExaOffscreenArea *exa;
 
-        obj->exa = exaOffscreenAlloc(pScrn->pScreen, size,
+        exa = exaOffscreenAlloc(pScrn->pScreen, size,
                                      32, TRUE, NULL, NULL);
-        if (obj->exa == NULL)
+        if (!exa)
             return BadAlloc;
-        obj->exa->save = viaExaFBSave;
-        obj->offset = obj->exa->offset;
+        exa->save = viaExaFBSave;
+
+        obj->offset = exa->offset;
+        obj->handle = (unsigned long) exa;
         obj->domain = TTM_PL_SYSTEM;
         obj->size = size;
         return Success;
@@ -119,7 +122,7 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, int domain)
                         ErrorF("Linear memory allocation failed\n");
                         free(obj);
                     }
-                    return obj;
+                    return NULL;
                 }
                 obj->offset = drm.offset;
                 obj->handle = drm.index;
@@ -135,6 +138,7 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, int domain)
             if (Success != viaOffScreenLinear(obj, pScrn, size)) {
                 ErrorF("Linear memory allocation failed\n");
                 free(obj);
+                obj = NULL;
             }
             break;
         }
@@ -174,8 +178,10 @@ drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
         DEBUG(ErrorF("Freed %lu (pool %d)\n", obj->offset, obj->domain));
         switch (obj->domain) {
         case TTM_PL_SYSTEM:
-            if (pVia->useEXA && !pVia->NoAccel) {
-                exaOffscreenFree(pScrn->pScreen, obj->exa);
+            if (pVia->useEXA && !pVia->NoAccel && obj->handle) {
+                ExaOffscreenArea *exa = (ExaOffscreenArea *) obj->handle;
+
+                exaOffscreenFree(pScrn->pScreen, exa);
             } else {
                 FBLinearPtr linear = (FBLinearPtr) obj->handle;
 
