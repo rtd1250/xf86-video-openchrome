@@ -151,23 +151,23 @@ void*
 drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    void *virtual = NULL;
 
     switch (obj->domain) {
     case TTM_PL_TT:
-        virtual = pVia->agpMappedAddr + obj->offset;
+        obj->ptr = pVia->agpMappedAddr + obj->offset;
         break;
     case TTM_PL_VRAM:
     default:
-        virtual = pVia->FBBase + obj->offset;
+        obj->ptr = pVia->FBBase + obj->offset;
         break;
     }
-    return virtual;
+    return obj->ptr;
 }
 
 void
 drm_bo_unmap(ScrnInfoPtr pScrn, struct buffer_object *obj)
 {
+    obj->ptr = NULL;
 }
 
 void
