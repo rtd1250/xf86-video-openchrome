@@ -1111,9 +1111,9 @@ ViaSetVidCtl(VIAPtr pVia, unsigned int videoFlag)
  * Fill the buffer with 0x8000 (YUV2 black).
  */
 static void
-ViaYUVFillBlack(VIAPtr pVia, int offset, int num)
+ViaYUVFillBlack(VIAPtr pVia, void *buf, int num)
 {
-    CARD16 *ptr = (CARD16 *) (pVia->FBBase + offset);
+    CARD16 *ptr = (CARD16 *) buf;
 
     while (num-- > 0)
 #if X_BYTE_ORDER == X_LITTLE_ENDIAN
@@ -1134,6 +1134,7 @@ AddHQVSurface(ScrnInfoPtr pScrn, unsigned int numbuf, CARD32 fourcc)
     unsigned int i, width, height, pitch, fbsize, addr;
     unsigned long retCode;
     BOOL isplanar;
+    void *buf;
 
     VIAPtr pVia = VIAPTR(pScrn);
     CARD32 AddrReg[3] = { HQV_DST_STARTADDR0, HQV_DST_STARTADDR1,
@@ -1157,15 +1158,16 @@ AddHQVSurface(ScrnInfoPtr pScrn, unsigned int numbuf, CARD32 fourcc)
     if (!pVia->swov.HQVMem)
         return BadAlloc;
     addr = pVia->swov.HQVMem->offset;
+    buf = drm_bo_map(pScrn, pVia->swov.HQVMem);
 
-    ViaYUVFillBlack(pVia, addr, fbsize);
+    ViaYUVFillBlack(pVia, buf, fbsize);
 
     for (i = 0; i < numbuf; i++) {
         pVia->swov.overlayRecordV1.dwHQVAddr[i] = addr;
         VIASETREG(AddrReg[i] + proReg, addr);
         addr += fbsize;
     }
-
+    drm_bo_unmap(pScrn, pVia->swov.HQVMem);
     return Success;
 }
 
@@ -1181,6 +1183,7 @@ CreateSurface(ScrnInfoPtr pScrn, CARD32 FourCC, CARD16 Width,
     unsigned long pitch, fbsize, addr;
     unsigned long retCode;
     BOOL isplanar;
+    void *buf;
 
     pVia->swov.SrcFourCC = FourCC;
     pVia->swov.gdwVideoFlagSW = ViaInitVideoStatusFlag(pVia);
@@ -1210,14 +1213,14 @@ CreateSurface(ScrnInfoPtr pScrn, CARD32 FourCC, CARD16 Width,
         if (!pVia->swov.SWfbMem)
             return BadAlloc;
         addr = pVia->swov.SWfbMem->offset;
+        buf = drm_bo_map(pScrn, pVia->swov.SWfbMem);
 
-        ViaYUVFillBlack(pVia, addr, fbsize);
+        ViaYUVFillBlack(pVia, buf, fbsize);
 
         pVia->swov.SWDevice.dwSWPhysicalAddr[0] = addr;
         pVia->swov.SWDevice.dwSWPhysicalAddr[1] = addr + fbsize;
-        pVia->swov.SWDevice.lpSWOverlaySurface[0] = pVia->FBBase + addr;
-        pVia->swov.SWDevice.lpSWOverlaySurface[1] =
-                pVia->swov.SWDevice.lpSWOverlaySurface[0] + fbsize;
+        pVia->swov.SWDevice.lpSWOverlaySurface[0] = buf;
+        pVia->swov.SWDevice.lpSWOverlaySurface[1] = buf + fbsize;
 
         if (isplanar) {
             pVia->swov.SWDevice.dwSWCrPhysicalAddr[0] =
@@ -1298,11 +1301,6 @@ ViaSwovSurfaceCreate(ScrnInfoPtr pScrn, viaPortPrivPtr pPriv,
     }
 
     if (retCode == Success) {
-        pVia->swov.SWDevice.lpSWOverlaySurface[0] = pVia->FBBase
-                + pVia->swov.SWDevice.dwSWPhysicalAddr[0];
-        pVia->swov.SWDevice.lpSWOverlaySurface[1] = pVia->FBBase
-                + pVia->swov.SWDevice.dwSWPhysicalAddr[1];
-
         DBG_DD(ErrorF(" lpSWOverlaySurface[0]: %p\n",
                       pVia->swov.SWDevice.lpSWOverlaySurface[0]));
         DBG_DD(ErrorF(" lpSWOverlaySurface[1]: %p\n",
@@ -1334,23 +1332,29 @@ ViaSwovSurfaceDestroy(ScrnInfoPtr pScrn, viaPortPrivPtr pPriv)
             case FOURCC_RV15:
                 pVia->swov.SrcFourCC = 0;
 
+                drm_bo_unmap(pScrn, pVia->swov.SWfbMem);
                 drm_bo_free(pScrn, pVia->swov.SWfbMem);
-                if ((pVia->swov.gdwVideoFlagSW & SW_USE_HQV))
+                if ((pVia->swov.gdwVideoFlagSW & SW_USE_HQV)) {
+                    drm_bo_unmap(pScrn, pVia->swov.HQVMem);
                     drm_bo_free(pScrn, pVia->swov.HQVMem);
+                }
                 pVia->swov.gdwVideoFlagSW = 0;
                 break;
 
             case FOURCC_HQVSW:
+                drm_bo_unmap(pScrn, pVia->swov.HQVMem);
                 drm_bo_free(pScrn, pVia->swov.HQVMem);
                 pVia->swov.gdwVideoFlagSW = 0;
                 break;
 
             case FOURCC_YV12:
             case FOURCC_I420:
+                drm_bo_unmap(pScrn, pVia->swov.SWfbMem);
                 drm_bo_free(pScrn, pVia->swov.SWfbMem);
             case FOURCC_XVMC:
                 pVia->swov.SrcFourCC = 0;
 
+                drm_bo_unmap(pScrn, pVia->swov.HQVMem);
                 drm_bo_free(pScrn, pVia->swov.HQVMem);
                 pVia->swov.gdwVideoFlagSW = 0;
                 break;

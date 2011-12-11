@@ -1777,9 +1777,12 @@ UMSAccelInit(ScreenPtr pScreen)
         pVia->NoAccel = TRUE;
 
     /* Sync marker space. */
-    pVia->FBFreeEnd -= 32;
-    pVia->markerOffset = (pVia->FBFreeEnd + 31) & ~31;
-    pVia->markerBuf = (CARD32 *) ((char *)pVia->FBBase + pVia->markerOffset);
+    pVia->exa_sync_bo = drm_bo_alloc(pScrn, 32, TTM_PL_VRAM);
+    if (!pVia->exa_sync_bo)
+        return FALSE;
+    pVia->markerOffset = pVia->exa_sync_bo->offset;
+    pVia->markerOffset = (pVia->markerOffset + 31) & ~31;
+    pVia->markerBuf = (CARD32 *) drm_bo_map(pScrn, pVia->exa_sync_bo);
     *pVia->markerBuf = 0;
     pVia->curMarker = 0;
     pVia->lastMarkerRead = 0;
@@ -1890,6 +1893,14 @@ viaExitAccel(ScreenPtr pScreen)
         if (pVia->scratchBuffer) {
             drm_bo_free(pScrn, pVia->scratchBuffer);
             pVia->scratchBuffer = NULL;
+        }
+        if (pVia->vq_bo) {
+            drm_bo_unmap(pScrn, pVia->vq_bo);
+            drm_bo_free(pScrn, pVia->vq_bo);
+        }
+        if (pVia->exa_sync_bo) {
+            drm_bo_unmap(pScrn, pVia->exa_sync_bo);
+            drm_bo_free(pScrn, pVia->exa_sync_bo);
         }
         if (pVia->exaDriverPtr) {
             exaDriverFini(pScreen);

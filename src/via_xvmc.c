@@ -524,6 +524,7 @@ ViaXvMCCreateSurface(ScrnInfoPtr pScrn, XvMCSurfacePtr pSurf,
     ViaXvMCSurfacePriv *sPriv;
     XvMCContextPtr ctx;
     unsigned bufSize, yBufSize;
+    void *buf;
 
     if (VIA_XVMC_MAX_SURFACES == vXvMC->nSurfaces) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
@@ -592,6 +593,7 @@ ViaXvMCCreateSurface(ScrnInfoPtr pScrn, XvMCSurfacePtr pSurf,
                    "Unable to allocate frambuffer memory!\n");
         return BadAlloc;
     }
+    buf = drm_bo_map(pScrn, sPriv->memory_ref);
 
     (*priv)[1] = numBuffers;
     (*priv)[2] = sPriv->offsets[0] = ALIGN_TO(sPriv->memory_ref->offset, 32);
@@ -601,9 +603,9 @@ ViaXvMCCreateSurface(ScrnInfoPtr pScrn, XvMCSurfacePtr pSurf,
 
     yBufSize = stride(ctx->width) * ctx->height;
     for (i = 0; i < numBuffers; ++i) {
-        memset((CARD8 *) (pVia->FBBase) + sPriv->offsets[i], 0, yBufSize);
-        memset((CARD8 *) (pVia->FBBase) + sPriv->offsets[i] + yBufSize, 0x80,
-               yBufSize >> 1);
+        memset(buf, 0, yBufSize);
+        memset(buf + yBufSize, 0x80, yBufSize >> 1);
+        buf += bufSize;
     }
 
     vXvMC->sPrivs[srfNo] = sPriv;
@@ -732,7 +734,7 @@ ViaXvMCDestroySurface(ScrnInfoPtr pScrn, XvMCSurfacePtr pSurf)
                 if (!__ret)
                     ViaOverlayHide(pScrn);
             }
-
+            drm_bo_unmap(pScrn, vXvMC->sPrivs[i]->memory_ref);
             drm_bo_free(pScrn, vXvMC->sPrivs[i]->memory_ref);
             free(vXvMC->sPrivs[i]);
             vXvMC->nSurfaces--;

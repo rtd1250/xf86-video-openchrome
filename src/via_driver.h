@@ -278,6 +278,7 @@ typedef struct _VIA {
     Via3DState          *lastToUpload;
     ViaCommandBuffer    cb;
     int                 accelMarker;
+    struct buffer_object *exa_sync_bo;
     CARD32              markerOffset;
     CARD32             *markerBuf;
     CARD32              curMarker;

@@ -1219,10 +1219,8 @@ viaPutImage(ScrnInfoPtr pScrn,
                 if (pVia->useDmaBlit) {
 #ifdef XF86DRI
                     if (viaDmaBlitImage(pVia, pPriv, buf,
-                        (unsigned char *)pVia->swov.SWDevice.
-                        lpSWOverlaySurface[pVia->dwFrameNum & 1] -
-                        (unsigned char *)pVia->FBBase, width, height,
-                        dstPitch, id)) {
+                        (unsigned char *)pVia->swov.SWDevice.dwSWPhysicalAddr[pVia->dwFrameNum & 1],
+                        width, height, dstPitch, id)) {
                             viaXvError(pScrn, pPriv, xve_dmablit);
                         return BadAccess;
                     }
