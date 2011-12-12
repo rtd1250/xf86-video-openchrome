@@ -99,7 +99,6 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, int domain)
 {
     struct buffer_object *obj = NULL;
     VIAPtr pVia = VIAPTR(pScrn);
-    int ret;
 
     obj = xnfcalloc(1, sizeof(*obj));
     if (obj) {
@@ -109,30 +108,24 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, int domain)
 #ifdef XF86DRI
             if (pVia->directRenderingType == DRI_1) {
                 drm_via_mem_t drm;
+                int ret;
 
                 drm.context = DRIGetContext(pScrn->pScreen);
                 drm.size = size;
                 drm.type = (domain == TTM_PL_TT ? VIA_MEM_AGP : VIA_MEM_VIDEO);
                 ret = drmCommandWriteRead(pVia->drmFD, DRM_VIA_ALLOCMEM,
                                             &drm, sizeof(drm_via_mem_t));
-                if (ret || (size != drm.size)) {
+                if (!ret && (size == drm.size)) {
+                    obj->offset = drm.offset;
+                    obj->handle = drm.index;
+                    obj->domain = domain;
+                    obj->size = drm.size;
+                    DEBUG(ErrorF("%lu of DRI memory allocated at %lx, handle %lu\n",
+                                obj->size, obj->offset, obj->handle));
+                    break;
+                } else
                     DEBUG(ErrorF("DRM memory allocation failed %d\n", ret));
-                    /* Try X Offsceen fallback before failing. */
-                    if (Success != viaOffScreenLinear(obj, pScrn, size)) {
-                        ErrorF("Linear memory allocation failed\n");
-                        free(obj);
-                    }
-                    return NULL;
-                }
-                obj->offset = drm.offset;
-                obj->handle = drm.index;
-                obj->domain = domain;
-                obj->size = drm.size;
-                DEBUG(ErrorF("%u of DRI memory allocated at %llx, handle %lld\n",
-                            obj->size, obj->offset, obj->handle));
-                return obj;
             }
-            break;
 #endif
         case TTM_PL_SYSTEM:
         default:
