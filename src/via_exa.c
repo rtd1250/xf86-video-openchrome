@@ -1950,7 +1950,7 @@ viaFinishInitAccel(ScreenPtr pScreen)
 
             size = pVia->exaScratchSize * 1024 + 32;
             pVia->scratchBuffer = drm_bo_alloc(pScrn, size, TTM_PL_TT);
-            if (!pVia->scratchBuffer) {
+            if (pVia->scratchBuffer) {
                 xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                            "Allocated %u kiB of AGP memory for "
                            "EXA scratch area.\n", size / 1024);
@@ -1965,7 +1965,7 @@ viaFinishInitAccel(ScreenPtr pScreen)
         size = pVia->exaScratchSize * 1024 + 32;
         pVia->scratchBuffer = drm_bo_alloc(pScrn, size, TTM_PL_SYSTEM);
 
-        if (!pVia->scratchBuffer) {
+        if (pVia->scratchBuffer) {
             xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                        "Allocated %u kiB of framebuffer memory for "
                        "EXA scratch area.\n", pVia->exaScratchSize);
