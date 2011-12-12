@@ -1939,7 +1939,7 @@ viaFinishInitAccel(ScreenPtr pScreen)
                 size = VIA_AGP_UPL_SIZE * 2 + 32;
 
                 pVia->texAGPBuffer = drm_bo_alloc(pScrn, size, TTM_PL_TT);
-                if (!pVia->texAGPBuffer) {
+                if (pVia->texAGPBuffer) {
                     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                                "Allocated %u kiB of AGP memory for "
                                "system-to-framebuffer transfer.\n",
