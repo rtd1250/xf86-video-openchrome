@@ -48,16 +48,6 @@
  *	1  -  xf86 linear
  *	2  -  DRM
  */
-
-static void
-viaExaFBSave(ScreenPtr pScreen, ExaOffscreenArea * exa)
-{
-    FatalError("Xserver is incompatible with openchrome EXA.\n"
-               "\t\tPlease look at Xorg bugzilla bug #7639, and at\n"
-               "\t\thttp://wiki.openchrome.org/tikiwiki/tiki-index"
-               ".php?page=EXAAcceleration .\n");
-}
-
 int
 viaOffScreenLinear(struct buffer_object *obj, ScrnInfoPtr pScrn,
                    unsigned long size)
@@ -65,22 +55,6 @@ viaOffScreenLinear(struct buffer_object *obj, ScrnInfoPtr pScrn,
     int depth = pScrn->bitsPerPixel >> 3;
     VIAPtr pVia = VIAPTR(pScrn);
     FBLinearPtr linear;
-
-    if (pVia->exaDriverPtr && !pVia->NoAccel) {
-        ExaOffscreenArea *exa;
-
-        exa = exaOffscreenAlloc(pScrn->pScreen, size,
-                                     32, TRUE, NULL, NULL);
-        if (!exa)
-            return BadAlloc;
-        exa->save = viaExaFBSave;
-
-        obj->offset = exa->offset;
-        obj->handle = (unsigned long) exa;
-        obj->domain = TTM_PL_SYSTEM;
-        obj->size = size;
-        return Success;
-    }
 
     linear = xf86AllocateOffscreenLinear(pScrn->pScreen,
                                         (size + depth - 1) / depth,
@@ -171,12 +145,7 @@ drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
     if (obj) {
         DEBUG(ErrorF("Freed %lu (pool %d)\n", obj->offset, obj->domain));
         switch (obj->domain) {
-        case TTM_PL_SYSTEM:
-            if (pVia->useEXA && !pVia->NoAccel && obj->handle) {
-                ExaOffscreenArea *exa = (ExaOffscreenArea *) obj->handle;
-
-                exaOffscreenFree(pScrn->pScreen, exa);
-            } else {
+        case TTM_PL_SYSTEM: {
                 FBLinearPtr linear = (FBLinearPtr) obj->handle;
 
                 xf86FreeOffscreenLinear(linear);
