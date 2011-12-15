@@ -236,21 +236,9 @@ void ViaSecondCRTCHorizontalQWCount(ScrnInfoPtr pScrn, int width);
 void ViaSecondCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaShadowCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
 
-/* via_panel.c */
-void ViaPanelScale(ScrnInfoPtr pScrn, int resWidth, int resHeight, int panelWidth, int panelHeight );
-void ViaPanelScaleDisable(ScrnInfoPtr pScrn);
-void ViaPanelGetNativeModeFromScratchPad(ScrnInfoPtr pScrn);
-void ViaPanelGetNativeModeFromOption(ScrnInfoPtr pScrn, char* name);
-void ViaPanelGetNativeDisplayMode(ScrnInfoPtr pScrn);
-xf86OutputStatus ViaPanelPreInit(ScrnInfoPtr pScrn);
-void ViaPanelCenterMode(DisplayModePtr centerMode, DisplayModePtr panelMode, DisplayModePtr mode);
-Bool ViaPanelGetSizeFromDDCv1(ScrnInfoPtr pScrn, int* width, int* height);
-Bool ViaPanelGetSizeFromDDCv2(ScrnInfoPtr pScrn, int* width);
-Bool ViaPanelGetSizeFromEDID(ScrnInfoPtr pScrn, xf86MonPtr pMon, int* width, int* height);
-
 /* via_lvds.c */
+void ViaPanelGetNativeModeFromOption(ScrnInfoPtr pScrn, char* name);
 void via_lvds_init(ScrnInfoPtr pScrn);
-void ViaLVDSPower(ScrnInfoPtr pScrn, Bool on);
 
 /* in via_bandwidth.c */
 void ViaSetPrimaryFIFO(ScrnInfoPtr pScrn, DisplayModePtr mode);
