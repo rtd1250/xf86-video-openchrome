@@ -1852,23 +1852,17 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
     }
 
     if (pVia->hwcursor) {
-        if (!xf86LoadSubModule(pScrn, "ramdac")) {
-            VIAFreeRec(pScrn);
+        if (!xf86LoadSubModule(pScrn, "ramdac"))
             return FALSE;
-        }
     }
 
-    if (!xf86LoadSubModule(pScrn, "i2c")) {
-        VIAFreeRec(pScrn);
+    if (!xf86LoadSubModule(pScrn, "i2c"))
         return FALSE;
-    } else {
+    else
         ViaI2CInit(pScrn);
-    }
 
-    if (!xf86LoadSubModule(pScrn, "ddc")) {
-        VIAFreeRec(pScrn);
+    if (!xf86LoadSubModule(pScrn, "ddc"))
         return FALSE;
-    }
 
     pVia->pVbe = NULL;
     if (pVia->useVBEModes) {
@@ -1985,10 +1979,8 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
 
     if (pVia->pVbe) {
 
-        if (!ViaVbeModePreInit(pScrn)) {
-            VIAFreeRec(pScrn);
+        if (!ViaVbeModePreInit(pScrn))
             return FALSE;
-        }
 
     } else {
         /*
@@ -2042,7 +2034,6 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
         if (i == -1) {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                        "xf86ValidateModes failure\n");
-            VIAFreeRec(pScrn);
             return FALSE;
         }
 
@@ -2050,7 +2041,6 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
 
         if (i == 0 || pScrn->modes == NULL) {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "No valid modes found\n");
-            VIAFreeRec(pScrn);
             return FALSE;
         }
     }

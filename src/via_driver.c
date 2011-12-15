@@ -429,6 +429,46 @@ VIALeaveVT(int scrnIndex, int flags)
     pScrn->vtSema = FALSE;
 }
 
+static void
+VIAFreeRec(ScrnInfoPtr pScrn)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAFreeRec\n"));
+    if (!pScrn->driverPrivate)
+        return;
+
+    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+
+    if (pBIOSInfo) {
+
+        if (pBIOSInfo->Panel) {
+            if (pBIOSInfo->Panel->NativeMode)
+                free(pBIOSInfo->Panel->NativeMode);
+            if (pBIOSInfo->Panel->CenteredMode)
+                free(pBIOSInfo->Panel->CenteredMode);
+            free(pBIOSInfo->Panel);
+        }
+        if (pBIOSInfo->Simultaneous)
+            free(pBIOSInfo->Simultaneous);
+    }
+
+    if (VIAPTR(pScrn)->pVbe)
+        vbeFree(VIAPTR(pScrn)->pVbe);
+
+    if (pVia->VideoRegs)
+        free(pVia->VideoRegs);
+
+    if (((VIARec *) (pScrn->driverPrivate))->pBIOSInfo->TVI2CDev)
+        xf86DestroyI2CDevRec((((VIARec *) (pScrn->driverPrivate))->pBIOSInfo->TVI2CDev), TRUE);
+    free(((VIARec *) (pScrn->driverPrivate))->pBIOSInfo);
+
+    VIAUnmapMem(pScrn);
+
+    free(pScrn->driverPrivate);
+    pScrn->driverPrivate = NULL;
+} /* VIAFreeRec */
+
 /*
  * This only gets called when a screen is being deleted.  It does not
  * get called routinely at the end of a server generation.
@@ -444,12 +484,11 @@ VIAFreeScreen(int scrnIndex, int flags)
     if (pVia->directRenderingType != DRI_2)
         VIAUnmapMem(pScrn);
 
-    VIAFreeRec(xf86Screens[scrnIndex]);
+    VIAFreeRec(pScrn);
 
     if (!pVia->KMS && xf86LoaderCheckSymbol("vgaHWFreeHWRec"))
         vgaHWFreeHWRec(xf86Screens[scrnIndex]);
 }
-
 
 static void
 VIAIdentify(int flags)
@@ -782,46 +821,6 @@ VIAGetRec(ScrnInfoPtr pScrn)
     }
     return ret;
 } /* VIAGetRec */
-
-void
-VIAFreeRec(ScrnInfoPtr pScrn)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAFreeRec\n"));
-    if (!pScrn->driverPrivate)
-        return;
-
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-
-    if (pBIOSInfo) {
-
-        if (pBIOSInfo->Panel) {
-            if (pBIOSInfo->Panel->NativeMode)
-                free(pBIOSInfo->Panel->NativeMode);
-            if (pBIOSInfo->Panel->CenteredMode)
-                free(pBIOSInfo->Panel->CenteredMode);
-            free(pBIOSInfo->Panel);
-        }
-        if (pBIOSInfo->Simultaneous)
-            free(pBIOSInfo->Simultaneous);
-    }
-
-    if (VIAPTR(pScrn)->pVbe)
-        vbeFree(VIAPTR(pScrn)->pVbe);
-
-    if (pVia->VideoRegs)
-        free(pVia->VideoRegs);
-
-    if (((VIARec *) (pScrn->driverPrivate))->pBIOSInfo->TVI2CDev)
-        xf86DestroyI2CDevRec((((VIARec *) (pScrn->driverPrivate))->pBIOSInfo->TVI2CDev), TRUE);
-    free(((VIARec *) (pScrn->driverPrivate))->pBIOSInfo);
-
-    VIAUnmapMem(pScrn);
-
-    free(pScrn->driverPrivate);
-    pScrn->driverPrivate = NULL;
-} /* VIAFreeRec */
 
 static Bool
 VIAPreInit(ScrnInfoPtr pScrn, int flags)
