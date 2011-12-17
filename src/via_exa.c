@@ -1833,15 +1833,11 @@ UMSAccelSetup(ScrnInfoPtr pScrn)
 	pVia->agpDMA = FALSE;
 #ifdef XF86DRI
 	if (pVia->directRenderingType == DRI_1) {
-		if (VIADRIFinishScreenInit(pScreen)) {
-			VIADRIPtr pVIADRI = pVia->pDRIInfo->devPrivate;
-
-			pVia->agpDMA = pVia->dma2d && pVIADRI->ringBufActive;
-			xf86DrvMsg(pScrn->scrnIndex, X_INFO, "direct rendering enabled\n");
-		} else {
+		if (!VIADRIFinishScreenInit(pScreen)) {
 			xf86DrvMsg(pScrn->scrnIndex, X_INFO, "direct rendering disabled\n");
 			pVia->directRenderingType = DRI_NONE;
-		}
+		} else
+			xf86DrvMsg(pScrn->scrnIndex, X_INFO, "direct rendering enabled\n");
 	}
 #endif
 

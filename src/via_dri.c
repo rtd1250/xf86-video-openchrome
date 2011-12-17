@@ -807,6 +807,7 @@ VIADRIFinishScreenInit(ScreenPtr pScreen)
 
     pVIADRI->ringBufActive = 0;
     VIADRIRingBufferInit(pScrn);
+    pVia->agpDMA = pVia->dma2d && pVIADRI->ringBufActive;
     return TRUE;
 }
 
