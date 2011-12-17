@@ -1817,21 +1817,10 @@ UMSAccelInit(ScreenPtr pScreen)
             pVia->NoAccel = TRUE;
             return FALSE;
         }
-
-        pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart) / 2;
-        if ((pVia->driSize > (pVia->maxDriSize * 1024))
-            && pVia->maxDriSize > 0)
-            pVia->driSize = pVia->maxDriSize * 1024;
-
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                    "[EXA] Enabled EXA acceleration.\n");
         return TRUE;
     }
-
-    pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart - pVia->Bpl);
-    if ((pVia->driSize > (pVia->maxDriSize * 1024)) && pVia->maxDriSize > 0)
-        pVia->driSize = pVia->maxDriSize * 1024;
-
     return viaInitXAA(pScreen);
 }
 

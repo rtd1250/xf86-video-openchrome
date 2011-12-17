@@ -414,22 +414,7 @@ static Bool
 VIADRIFBInit(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    int FBSize = pVia->driSize;
     drm_via_fb_t fb;
-
-    if (FBSize < pVia->Bpl) {
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                   "[drm] No DRM framebuffer heap available.\n"
-                   "[drm] Please increase the frame buffer\n"
-                   "[drm] memory area in the BIOS. Disabling DRI.\n");
-        return FALSE;
-    }
-    if (FBSize < 3 * (pScrn->virtualY * pVia->Bpl)) {
-        xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                   "[drm] The DRM heap and pixmap cache memory may be too\n"
-                   "[drm] small for optimal performance. Please increase\n"
-                   "[drm] the frame buffer memory area in the BIOS.\n");
-    }
 
     fb.offset = pScrn->virtualY * pVia->Bpl;
     fb.size = pVia->FBFreeEnd;
@@ -777,13 +762,25 @@ VIADRIFinishScreenInit(ScreenPtr pScreen)
 
     pVia->pDRIInfo->driverSwapMethod = DRI_HIDE_X_CONTEXT;
     pVIADRI = (VIADRIPtr) pVia->pDRIInfo->devPrivate;
-
-    pVia->driOffScreenMem = drm_bo_alloc(pScrn, pVia->driSize, TTM_PL_VRAM);
     pVIADRI->drixinerama = FALSE;
 
-    DRIFinishScreenInit(pScreen);
+    if (pVia->driSize < pVia->Bpl) {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                   "[drm] No DRM framebuffer heap available.\n"
+                   "[drm] Please increase the frame buffer\n"
+                   "[drm] memory area in the BIOS. Disabling DRI.\n");
+        return FALSE;
+    }
+    if (pVia->driSize < 3 * (pScrn->virtualY * pVia->Bpl)) {
+        xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                   "[drm] The DRM heap and pixmap cache memory may be too\n"
+                   "[drm] small for optimal performance. Please increase\n"
+                   "[drm] the frame buffer memory area in the BIOS.\n");
+    }
 
-    xf86DrvMsg(pScreen->myNum, X_INFO, "[dri] Kernel data initialized.\n");
+    pVia->driOffScreenMem = drm_bo_alloc(pScrn, pVia->driSize, TTM_PL_VRAM);
+
+    DRIFinishScreenInit(pScreen);
 
     /* Set SAREA value. */
     {

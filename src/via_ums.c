@@ -319,17 +319,16 @@ ums_create(ScrnInfoPtr pScrn)
 
 #ifdef XF86DRI
     if (pVia->directRenderingType == DRI_1) {
-        /* In the case of DRI with EXA we handle all VRAM by the DRI ioctls */
-        if (pVia->useEXA) {
-            pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart - pVia->Bpl);
+        pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart) / 2;
+        if ((pVia->driSize > (pVia->maxDriSize * 1024)) && pVia->maxDriSize > 0)
+            pVia->driSize = pVia->maxDriSize * 1024;
+
+        /* In the case of DRI we handle all VRAM by the DRI ioctls */
+        if (pVia->useEXA)
             return TRUE;
-        } else {
-            /* XAA has to use FBManager so we have to split the space with DRI */
-            pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart) / 2;
-            if ((pVia->driSize > (pVia->maxDriSize * 1024)) && pVia->maxDriSize > 0)
-                pVia->driSize = pVia->maxDriSize * 1024;
-            maxY = pScrn->virtualY + (pVia->driSize / pVia->Bpl);
-        }
+
+        /* XAA has to use FBManager so we have to split the space with DRI */
+        maxY = pScrn->virtualY + (pVia->driSize / pVia->Bpl);
     } else
 #endif
         maxY = pVia->FBFreeEnd / pVia->Bpl;
