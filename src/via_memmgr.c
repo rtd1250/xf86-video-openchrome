@@ -99,6 +99,8 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, int domain)
                     break;
                 } else
                     DEBUG(ErrorF("DRM memory allocation failed %d\n", ret));
+            } else if (pVia->directRenderingType == DRI_2) {
+                
             }
 #endif
         case TTM_PL_SYSTEM:

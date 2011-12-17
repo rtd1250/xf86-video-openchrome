@@ -24,6 +24,8 @@
 #ifndef _VIA_DRM_H_
 #define _VIA_DRM_H_
 
+#include "drm.h"
+
 /* WARNING: These defines must be the same as what the Xserver uses.
  * if you change them, you must change the defines in the Xserver.
  */
@@ -31,16 +33,16 @@
 #ifndef _VIA_DEFINES_
 #define _VIA_DEFINES_
 
-#if !defined(__KERNEL__) && !defined(_KERNEL)
+#ifndef __KERNEL__
 #include "via_drmclient.h"
 #endif
 
-#define VIA_NR_SAREA_CLIPRECTS 		8
+#define VIA_NR_SAREA_CLIPRECTS          8
 #define VIA_NR_XVMC_PORTS               10
 #define VIA_NR_XVMC_LOCKS               5
 #define VIA_MAX_CACHELINE_SIZE          64
 #define XVMCLOCKPTR(saPriv,lockNo)					\
-	((volatile drm_hw_lock_t *)(((((unsigned long) (saPriv)->XvMCLockArea) + \
+	((__volatile__ struct drm_hw_lock *)(((((unsigned long) (saPriv)->XvMCLockArea) + \
 				      (VIA_MAX_CACHELINE_SIZE - 1)) &	\
 				     ~(VIA_MAX_CACHELINE_SIZE - 1)) +	\
 				    VIA_MAX_CACHELINE_SIZE*(lockNo)))
@@ -62,12 +64,12 @@
 
 /* VIA specific ioctls */
 #define DRM_VIA_ALLOCMEM	0x00
-#define DRM_VIA_FREEMEM	        0x01
+#define DRM_VIA_FREEMEM	    0x01
 #define DRM_VIA_AGP_INIT	0x02
-#define DRM_VIA_FB_INIT	        0x03
-#define DRM_VIA_MAP_INIT	0x04
-#define DRM_VIA_DEC_FUTEX       0x05
-#define NOT_USED
+#define DRM_VIA_FB_INIT	    0x03
+#define DRM_VIA_MAP_INIT    0x04
+#define DRM_VIA_DEC_FUTEX   0x05
+#define DRM_VIA_GEM_CREATE  0x06
 #define DRM_VIA_DMA_INIT	0x07
 #define DRM_VIA_CMDBUFFER	0x08
 #define DRM_VIA_FLUSH	        0x09
@@ -84,6 +86,7 @@
 #define DRM_IOCTL_VIA_FB_INIT	  DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_FB_INIT, drm_via_fb_t)
 #define DRM_IOCTL_VIA_MAP_INIT	  DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_MAP_INIT, drm_via_init_t)
 #define DRM_IOCTL_VIA_DEC_FUTEX   DRM_IOW( DRM_COMMAND_BASE + DRM_VIA_DEC_FUTEX, drm_via_futex_t)
+#define DRM_IOCTL_VIA_GEM_CREATE  DRM_IOW( DRM_COMMAND_BASE + DRM_VIA_GEM_CREATE, struct drm_gem_create)
 #define DRM_IOCTL_VIA_DMA_INIT	  DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_DMA_INIT, drm_via_dma_init_t)
 #define DRM_IOCTL_VIA_CMDBUFFER	  DRM_IOW( DRM_COMMAND_BASE + DRM_VIA_CMDBUFFER, drm_via_cmdbuffer_t)
 #define DRM_IOCTL_VIA_FLUSH	  DRM_IO(  DRM_COMMAND_BASE + DRM_VIA_FLUSH)
@@ -110,7 +113,7 @@
 
 #define VIA_MEM_VIDEO   0	/* matches drm constant */
 #define VIA_MEM_AGP     1	/* matches drm constant */
-#define VIA_MEM_SYSTEM  2		
+#define VIA_MEM_SYSTEM  2
 #define VIA_MEM_MIXED   3
 #define VIA_MEM_UNKNOWN 4
 
@@ -158,7 +161,7 @@ typedef struct _drm_via_dma_init {
 	enum {
 		VIA_INIT_DMA = 0x01,
 		VIA_CLEANUP_DMA = 0x02,
-                VIA_DMA_INITIALIZED = 0x03
+        VIA_DMA_INITIALIZED = 0x03
 	} func;
 
 	unsigned long offset;
@@ -183,7 +186,7 @@ typedef struct _drm_via_tex_region {
 typedef struct _drm_via_sarea {
 	unsigned int dirty;
 	unsigned int nbox;
-	drm_clip_rect_t boxes[VIA_NR_SAREA_CLIPRECTS];
+	struct drm_clip_rect boxes[VIA_NR_SAREA_CLIPRECTS];
 	drm_via_tex_region_t texList[VIA_NR_TEX_REGIONS + 1];
 	int texAge;		/* last time texture was uploaded */
 	int ctxOwner;		/* last context to upload state */
@@ -199,12 +202,12 @@ typedef struct _drm_via_sarea {
 
 	unsigned int XvMCDisplaying[VIA_NR_XVMC_PORTS];
 	unsigned int XvMCSubPicOn[VIA_NR_XVMC_PORTS];
-	unsigned int XvMCCtxNoGrabbed;	/* Last context to hold decoder */	
+	unsigned int XvMCCtxNoGrabbed;	/* Last context to hold decoder */
 
 	/* Used by the 3d driver only at this point, for pageflipping:
 	 */
 
-        unsigned int pfCurrentOffset;
+    unsigned int pfCurrentOffset;
 } drm_via_sarea_t;
 
 typedef struct _drm_via_cmdbuf_size {
@@ -226,12 +229,13 @@ typedef enum {
 #define VIA_IRQ_FLAGS_MASK 0xF0000000
 
 enum drm_via_irqs{drm_via_irq_hqv0 = 0,
-		  drm_via_irq_hqv1,
-		  drm_via_irq_dma0_dd,
-		  drm_via_irq_dma0_td,
-		  drm_via_irq_dma1_dd,
-		  drm_via_irq_dma1_td,
-                  drm_via_irq_num};
+    drm_via_irq_hqv1,
+	drm_via_irq_dma0_dd,
+	drm_via_irq_dma0_td,
+	drm_via_irq_dma1_dd,
+	drm_via_irq_dma1_td,
+    drm_via_irq_num
+};
 
 struct drm_via_wait_irq_request{
 	unsigned irq;
@@ -245,26 +249,64 @@ typedef union drm_via_irqwait {
 	struct drm_wait_vblank_reply reply;
 } drm_via_irqwait_t;
 
-typedef struct drm_via_blitsync { 
+typedef struct drm_via_blitsync {
 	uint32_t sync_handle;
 	unsigned engine;
 } drm_via_blitsync_t;
 
 typedef struct drm_via_dmablit {
-	uint32_t num_lines;          
-	uint32_t line_length;        
+	uint32_t num_lines;
+	uint32_t line_length;
 
-        uint32_t fb_addr;                
-	uint32_t fb_stride;              
+    uint32_t fb_addr;
+	uint32_t fb_stride;
 
-        unsigned char *mem_addr;        
-	uint32_t  mem_stride;        
-       
+    unsigned char *mem_addr;
+	uint32_t  mem_stride;
+
 	int bounce_buffer;
-        int to_fb;
+    int to_fb;
 
-	drm_via_blitsync_t sync;   
+	drm_via_blitsync_t sync;
 } drm_via_dmablit_t;
 
+struct drm_gem_create {
+    /**
+     * Requested size for the object.
+     *
+     * The (page-aligned) allocated size for the object will be returned.
+     */
+    uint64_t size;
+
+    /*
+     * Place the memory at the proper aligment.
+     */
+    uint64_t alignment;
+
+    /**
+     * Format of data i.e tile pitch, for linear it is zero
+     */
+    uint64_t pitch;
+
+    /**
+     * Give hints where to allocate this object.
+     */
+    uint32_t write_domains;
+    uint32_t read_domains;
+
+    /**
+     * Returned handle for the object.
+     *
+     * Object handles are nonzero.
+     */
+    uint32_t handle;
+
+    /**
+     * Padding for future expansion.
+     */
+    uint32_t pad1;
+    uint64_t pad2;
+    uint64_t pad3;
+};
 
 #endif				/* _VIA_DRM_H_ */
