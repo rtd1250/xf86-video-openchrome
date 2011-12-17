@@ -108,6 +108,8 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, int domain)
                 free(obj);
                 obj = NULL;
             }
+            DEBUG(ErrorF("%lu of Linear memory allocated at %lx, handle %lu\n",
+                            obj->size, obj->offset, obj->handle));
             break;
         }
     }
