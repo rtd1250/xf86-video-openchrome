@@ -416,7 +416,7 @@ VIADRIFBInit(ScrnInfoPtr pScrn)
     VIAPtr pVia = VIAPTR(pScrn);
     drm_via_fb_t fb;
 
-    fb.offset = pScrn->virtualY * pVia->Bpl;
+    fb.offset = pVia->FBFreeStart;
     fb.size = pVia->FBFreeEnd;
     if (drmCommandWrite(pVia->drmFD, DRM_VIA_FB_INIT, &fb,
                         sizeof(drm_via_fb_t)) < 0) {
@@ -761,6 +761,8 @@ VIADRIFinishScreenInit(ScreenPtr pScreen)
     VIADRIPtr pVIADRI;
 
     pVia->pDRIInfo->driverSwapMethod = DRI_HIDE_X_CONTEXT;
+    pVia->agpDMA = FALSE;
+
     pVIADRI = (VIADRIPtr) pVia->pDRIInfo->devPrivate;
     pVIADRI->drixinerama = FALSE;
 

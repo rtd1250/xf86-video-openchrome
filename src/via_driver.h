@@ -226,6 +226,7 @@ typedef struct _VIA {
     int                 FBFreeEnd;
     int                 driSize;
     int                 maxDriSize;
+    struct buffer_object *front_bo;
     struct buffer_object *vq_bo;
     int                 VQStart;
     int                 VQEnd;

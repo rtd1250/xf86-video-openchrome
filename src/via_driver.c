@@ -371,7 +371,7 @@ VIAEnterVT(int scrnIndex, int flags)
                             0x00000000);
             viaAccelSyncMarker(pScrn);
         } else {
-            memset(pVia->FBBase, 0x00, pVia->Bpl * pScrn->virtualY);
+            memset(pVia->front_bo->ptr, 0x00, pVia->front_bo->size);
         }
 
 #ifdef XF86DRI
@@ -1653,7 +1653,7 @@ viaShadowWindow(ScreenPtr screen, CARD32 row, CARD32 offset, int mode,
 
     stride = (pScrn->displayWidth * pScrn->bitsPerPixel) / 8;
     *size = stride;
-    return ((uint8_t *)pVia->FBBase + row * stride + offset);
+    return ((uint8_t *)pVia->front_bo->ptr + row * stride + offset);
 }
 
 static Bool
@@ -1669,7 +1669,7 @@ VIACreateScreenResources(ScreenPtr pScreen)
         return FALSE;
     pScreen->CreateScreenResources = VIACreateScreenResources;
 
-    surface = pVia->FBBase;
+    surface = pVia->front_bo->ptr;
     if (!surface)
         return FALSE;
 
@@ -1741,7 +1741,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 	ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
-    int i;
+    int size, i;
 
     pScrn->pScreen = pScreen;
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAScreenInit\n"));
@@ -1767,6 +1767,14 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 #endif
 
     if (!drm_bo_manager_init(pScrn))
+        return FALSE;
+
+    size = (pScrn->displayWidth * pScrn->bitsPerPixel >> 3) * pScrn->virtualY;
+    pVia->front_bo = drm_bo_alloc(pScrn, size, TTM_PL_VRAM);
+    if (!pVia->front_bo)
+        return FALSE;
+
+    if (!drm_bo_map(pScrn, pVia->front_bo))
         return FALSE;
 
     for (i = 0; i < xf86_config->num_crtc; i++) {
@@ -1853,7 +1861,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
         xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
         int flags = (HARDWARE_CURSOR_AND_SOURCE_WITH_MASK |
                      HARDWARE_CURSOR_TRUECOLOR_AT_8BPP);
-        int size, cursorSize, i = 0;
+        int cursorSize, i = 0;
 
         switch (pVia->Chipset) {
         case VIA_CLE266:

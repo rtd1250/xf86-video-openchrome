@@ -285,8 +285,7 @@ VIAMapFB(ScrnInfoPtr pScrn)
         }
 #endif
 
-        pVia->FBFreeStart = (pScrn->displayWidth * pScrn->bitsPerPixel >> 3) *
-                pScrn->virtualY;
+        pVia->FBFreeStart = 0;
         pVia->FBFreeEnd = pVia->videoRambytes;
 
         xf86DrvMsg(pScrn->scrnIndex, X_PROBED,

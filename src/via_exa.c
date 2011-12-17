@@ -1830,7 +1830,6 @@ UMSAccelSetup(ScrnInfoPtr pScrn)
 	ScreenPtr pScreen = pScrn->pScreen;
 	VIAPtr pVia = VIAPTR(pScrn);
 
-	pVia->agpDMA = FALSE;
 #ifdef XF86DRI
 	if (pVia->directRenderingType == DRI_1) {
 		if (!VIADRIFinishScreenInit(pScreen)) {

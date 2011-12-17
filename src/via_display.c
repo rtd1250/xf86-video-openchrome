@@ -624,7 +624,7 @@ ViaFirstCRTCSetStartingAddress(ScrnInfoPtr pScrn, int x, int y)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaFirstCRTCSetStartingAddress\n"));
 
     Base = (y * pScrn->displayWidth + x) * (pScrn->bitsPerPixel / 8);
-    Base = Base >> 1;
+    Base = (Base + pVia->front_bo->offset) >> 1;
 
     hwp->writeCrtc(hwp, 0x0C, (Base & 0xFF00) >> 8);
     hwp->writeCrtc(hwp, 0x0D, Base & 0xFF);
@@ -638,12 +638,12 @@ ViaFirstCRTCSetStartingAddress(ScrnInfoPtr pScrn, int x, int y)
 void
 ViaSecondCRTCSetStartingAddress(ScrnInfoPtr pScrn, int x, int y)
 {
+    VIAPtr pVia = VIAPTR(pScrn);
     vgaHWPtr hwp = VGAHWPTR(pScrn);
-    CARD32 Base;
-    CARD32 tmp;
+    CARD32 Base, tmp;
 
     Base = (y * pScrn->displayWidth + x) * (pScrn->bitsPerPixel / 8);
-    Base = (Base + pScrn->fbOffset) >> 3;
+    Base = (Base + pVia->front_bo->offset) >> 3;
 
     tmp = hwp->readCrtc(hwp, 0x62) & 0x01;
     tmp |= (Base & 0x7F) << 1;
