@@ -585,7 +585,8 @@ ViaXvMCCreateSurface(ScrnInfoPtr pScrn, XvMCSurfacePtr pSurf,
 
     ctx = pSurf->context;
     bufSize = size_yuv420(ctx->width, ctx->height);
-    sPriv->memory_ref = drm_bo_alloc(pScrn, numBuffers * bufSize + 32, TTM_PL_VRAM);
+    sPriv->memory_ref = drm_bo_alloc(pScrn, numBuffers * bufSize,
+                                    32, TTM_PL_VRAM);
     if (!sPriv->memory_ref) {
         free(*priv);
         free(sPriv);
@@ -596,7 +597,7 @@ ViaXvMCCreateSurface(ScrnInfoPtr pScrn, XvMCSurfacePtr pSurf,
     buf = drm_bo_map(pScrn, sPriv->memory_ref);
 
     (*priv)[1] = numBuffers;
-    (*priv)[2] = sPriv->offsets[0] = ALIGN_TO(sPriv->memory_ref->offset, 32);
+    (*priv)[2] = sPriv->offsets[0] = sPriv->memory_ref->offset;
     for (i = 1; i < numBuffers; ++i) {
         (*priv)[i + 2] = sPriv->offsets[i] = sPriv->offsets[i - 1] + bufSize;
     }
@@ -661,7 +662,7 @@ ViaXvMCCreateSubpicture(ScrnInfoPtr pScrn, XvMCSubpicturePtr pSubp,
 
     ctx = pSubp->context;
     bufSize = size_xx44(ctx->width, ctx->height);
-    sPriv->memory_ref = drm_bo_alloc(pScrn, 1 * bufSize + 32, TTM_PL_VRAM);
+    sPriv->memory_ref = drm_bo_alloc(pScrn, 1 * bufSize, 32, TTM_PL_VRAM);
     if (!sPriv->memory_ref) {
         free(*priv);
         free(sPriv);
@@ -669,7 +670,7 @@ ViaXvMCCreateSubpicture(ScrnInfoPtr pScrn, XvMCSubpicturePtr pSubp,
                    " Unable to allocate framebuffer memory!\n");
         return BadAlloc;
     }
-    (*priv)[1] = sPriv->offsets[0] = ALIGN_TO(sPriv->memory_ref->offset, 32);
+    (*priv)[1] = sPriv->offsets[0] = sPriv->memory_ref->offset;
 
     vXvMC->sPrivs[srfNo] = sPriv;
     vXvMC->surfaces[srfNo] = pSubp->subpicture_id;

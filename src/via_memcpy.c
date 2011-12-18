@@ -574,7 +574,7 @@ viaVidCopyInit(char *copyType, ScreenPtr pScreen)
      * Allocate an area of offscreen FB memory, (buf1), a simulated video
      * player buffer (buf2) and a pool of uninitialized "video" data (buf3).
      */
-    tmpFbBuffer = drm_bo_alloc(pScrn, alignSize + 31, TTM_PL_VRAM);
+    tmpFbBuffer = drm_bo_alloc(pScrn, alignSize, 32, TTM_PL_VRAM);
     if (!tmpFbBuffer)
         return libc_YUV42X;
     if (NULL == (buf2 = (unsigned char *)malloc(testSize))) {
@@ -587,11 +587,6 @@ viaVidCopyInit(char *copyType, ScreenPtr pScreen)
         return libc_YUV42X;
     }
     buf1 = drm_bo_map(pScrn, tmpFbBuffer);
-
-    /* Align the frame buffer destination memory to a 32 byte boundary. */
-    if ((unsigned long)buf1 & 31)
-        buf1 += (32 - ((unsigned long)buf1 & 31));
-
     bestSoFar = 0;
     best = 0xFFFFFFFFU;
 

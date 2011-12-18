@@ -29,6 +29,7 @@
 #define TTM_PL_VRAM     2
 
 struct buffer_object {
+    unsigned long   map_offset;
     unsigned long   handle;
     unsigned long   offset;             /* Offset into fb */
     unsigned long   pitch;
@@ -41,7 +42,7 @@ struct buffer_object {
 Bool drm_bo_manager_init(ScrnInfoPtr pScrn);
 
 struct buffer_object *drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size,
-                                    int domain);
+                                    unsigned int alignment, int domain);
 void *drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj);
 void drm_bo_unmap(ScrnInfoPtr pScrn, struct buffer_object *obj);
 void drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *);

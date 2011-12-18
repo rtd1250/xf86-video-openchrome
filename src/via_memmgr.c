@@ -69,28 +69,32 @@ viaOffScreenLinear(struct buffer_object *obj, ScrnInfoPtr pScrn,
 }
 
 struct buffer_object *
-drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, int domain)
+drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int domain)
 {
     struct buffer_object *obj = NULL;
     VIAPtr pVia = VIAPTR(pScrn);
 
     obj = xnfcalloc(1, sizeof(*obj));
     if (obj) {
+        obj->map_offset = (unsigned long) pVia->FBBase;
+
         switch (domain) {
-        case TTM_PL_VRAM:
         case TTM_PL_TT:
+            obj->map_offset = (unsigned long) pVia->agpMappedAddr;
+        case TTM_PL_VRAM:
 #ifdef XF86DRI
             if (pVia->directRenderingType == DRI_1) {
                 drm_via_mem_t drm;
                 int ret;
 
+                size = ALIGN_TO(size, alignment);
                 drm.context = DRIGetContext(pScrn->pScreen);
                 drm.size = size;
                 drm.type = (domain == TTM_PL_TT ? VIA_MEM_AGP : VIA_MEM_VIDEO);
                 ret = drmCommandWriteRead(pVia->drmFD, DRM_VIA_ALLOCMEM,
                                             &drm, sizeof(drm_via_mem_t));
                 if (!ret && (size == drm.size)) {
-                    obj->offset = drm.offset;
+                    obj->offset = ALIGN_TO(drm.offset, alignment);
                     obj->handle = drm.index;
                     obj->domain = domain;
                     obj->size = drm.size;
@@ -99,8 +103,6 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, int domain)
                     break;
                 } else
                     DEBUG(ErrorF("DRM memory allocation failed %d\n", ret));
-            } else if (pVia->directRenderingType == DRI_2) {
-                
             }
 #endif
         case TTM_PL_SYSTEM:
@@ -121,17 +123,7 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, int domain)
 void*
 drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
 {
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    switch (obj->domain) {
-    case TTM_PL_TT:
-        obj->ptr = pVia->agpMappedAddr + obj->offset;
-        break;
-    case TTM_PL_VRAM:
-    default:
-        obj->ptr = pVia->FBBase + obj->offset;
-        break;
-    }
+    obj->ptr = (unsigned char *) obj->map_offset + obj->offset;
     return obj->ptr;
 }
 

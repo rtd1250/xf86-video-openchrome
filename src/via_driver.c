@@ -1770,7 +1770,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
         return FALSE;
 
     size = (pScrn->displayWidth * pScrn->bitsPerPixel >> 3) * pScrn->virtualY;
-    pVia->front_bo = drm_bo_alloc(pScrn, size, TTM_PL_VRAM);
+    pVia->front_bo = drm_bo_alloc(pScrn, size, 16, TTM_PL_VRAM);
     if (!pVia->front_bo)
         return FALSE;
 
@@ -1883,7 +1883,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
             ViaCRTCInfoPtr iga = crtc->driver_private;
 
             /* Set cursor location in frame buffer. */
-            iga->cursor_bo = drm_bo_alloc(pScrn, cursorSize, TTM_PL_VRAM);
+            iga->cursor_bo = drm_bo_alloc(pScrn, cursorSize, 16, TTM_PL_VRAM);
             if (!iga->cursor_bo)
                 continue;
         }

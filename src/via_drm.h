@@ -279,7 +279,7 @@ struct drm_gem_create {
     uint64_t size;
 
     /*
-     * Place the memory at the proper aligment.
+     * Place the memory at the proper alignment.
      */
     uint64_t alignment;
 

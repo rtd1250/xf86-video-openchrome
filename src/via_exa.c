@@ -1765,7 +1765,7 @@ UMSAccelInit(ScreenPtr pScreen)
      *                     Scissor is the same as color window.
      * */
     pVia->VQStart = 0;
-    pVia->vq_bo = drm_bo_alloc(pScrn, VIA_VQ_SIZE, TTM_PL_VRAM);
+    pVia->vq_bo = drm_bo_alloc(pScrn, VIA_VQ_SIZE, 16, TTM_PL_VRAM);
     if (pVia->vq_bo) {
         pVia->VQStart = pVia->vq_bo->offset;
         pVia->VQEnd = pVia->vq_bo->offset + pVia->vq_bo->size;
@@ -1777,7 +1777,7 @@ UMSAccelInit(ScreenPtr pScreen)
         pVia->NoAccel = TRUE;
 
     /* Sync marker space. */
-    pVia->exa_sync_bo = drm_bo_alloc(pScrn, 32, TTM_PL_VRAM);
+    pVia->exa_sync_bo = drm_bo_alloc(pScrn, 32, 32, TTM_PL_VRAM);
     if (!pVia->exa_sync_bo)
         return FALSE;
     pVia->markerOffset = pVia->exa_sync_bo->offset;
@@ -1920,9 +1920,9 @@ viaFinishInitAccel(ScreenPtr pScreen)
 
             /* Allocate upload and scratch space. */
             if (pVia->exaDriverPtr->UploadToScreen == viaExaTexUploadToScreen) {
-                size = VIA_AGP_UPL_SIZE * 2 + 32;
+                size = VIA_AGP_UPL_SIZE * 2;
 
-                pVia->texAGPBuffer = drm_bo_alloc(pScrn, size, TTM_PL_TT);
+                pVia->texAGPBuffer = drm_bo_alloc(pScrn, size, 32, TTM_PL_TT);
                 if (pVia->texAGPBuffer) {
                     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                                "Allocated %u kiB of AGP memory for "
@@ -1932,8 +1932,8 @@ viaFinishInitAccel(ScreenPtr pScreen)
                 }
             }
 
-            size = pVia->exaScratchSize * 1024 + 32;
-            pVia->scratchBuffer = drm_bo_alloc(pScrn, size, TTM_PL_TT);
+            size = pVia->exaScratchSize * 1024;
+            pVia->scratchBuffer = drm_bo_alloc(pScrn, size, 32, TTM_PL_TT);
             if (pVia->scratchBuffer) {
                 xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                            "Allocated %u kiB of AGP memory for "
@@ -1947,7 +1947,7 @@ viaFinishInitAccel(ScreenPtr pScreen)
 #endif /* XF86DRI */
     if (!pVia->scratchAddr && pVia->useEXA) {
         size = pVia->exaScratchSize * 1024 + 32;
-        pVia->scratchBuffer = drm_bo_alloc(pScrn, size, TTM_PL_SYSTEM);
+        pVia->scratchBuffer = drm_bo_alloc(pScrn, size, 32, TTM_PL_SYSTEM);
 
         if (pVia->scratchBuffer) {
             xf86DrvMsg(pScrn->scrnIndex, X_INFO,

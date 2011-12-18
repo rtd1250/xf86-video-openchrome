@@ -780,7 +780,7 @@ VIADRIFinishScreenInit(ScreenPtr pScreen)
                    "[drm] the frame buffer memory area in the BIOS.\n");
     }
 
-    pVia->driOffScreenMem = drm_bo_alloc(pScrn, pVia->driSize, TTM_PL_VRAM);
+    pVia->driOffScreenMem = drm_bo_alloc(pScrn, pVia->driSize, 16, TTM_PL_VRAM);
 
     DRIFinishScreenInit(pScreen);
 
@@ -973,7 +973,7 @@ viaDRIOffscreenSave(ScrnInfoPtr pScrn)
     if (pVia->driOffScreenSave) {
         void *dst, *src = drm_bo_map(pScrn, pVia->driOffScreenMem);
 
-        dst = (void *) ALIGN_TO((unsigned long) pVia->driOffScreenSave, 16);
+        dst = pVia->driOffScreenSave;
         if ((pVia->drmVerMajor == 2) && (pVia->drmVerMinor >= 8)) {
             err = viaDRIFBMemcpy(pVia->drmFD, pVia->driOffScreenMem, dst, FALSE);
             if (!err)
@@ -1002,7 +1002,7 @@ viaDRIOffscreenRestore(ScrnInfoPtr pScrn)
     if (pVia->driOffScreenSave) {
         void *src, *dst = drm_bo_map(pScrn, pVia->driOffScreenMem);
 
-        src = (void *) ALIGN_TO((unsigned long)pVia->driOffScreenSave, 16);
+        src = pVia->driOffScreenSave;
         memcpy(dst, src, pVia->driOffScreenMem->size);
         free(pVia->driOffScreenSave);
         pVia->driOffScreenSave = NULL;
