@@ -24,6 +24,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <sys/mman.h>
 
 #include "xf86.h"
 #include "xf86_OSproc.h"
@@ -73,6 +74,7 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
 {
     struct buffer_object *obj = NULL;
     VIAPtr pVia = VIAPTR(pScrn);
+    int ret;
 
     obj = xnfcalloc(1, sizeof(*obj));
     if (obj) {
@@ -85,7 +87,6 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
 #ifdef XF86DRI
             if (pVia->directRenderingType == DRI_1) {
                 drm_via_mem_t drm;
-                int ret;
 
                 size = ALIGN_TO(size, alignment);
                 drm.context = DRIGetContext(pScrn->pScreen);
@@ -103,6 +104,29 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
                     break;
                 } else
                     DEBUG(ErrorF("DRM memory allocation failed %d\n", ret));
+            } else if (pVia->directRenderingType == DRI_2) {
+                struct drm_gem_create args;
+
+                /* Some day this will be moved to libdrm. */
+                args.write_domains = domain;
+                args.alignment = alignment;
+                args.pitch = 0;
+                args.size = size;
+                ret = drmCommandWriteRead(pVia->drmFD, DRM_VIA_GEM_CREATE,
+                                        &args, sizeof(struct drm_gem_create));
+                if (!ret) {
+                    /* Okay the X server expects to know the offset because
+                     * of non-KMS. Once we have KMS working the offset
+                     * will not be valid. */
+                    obj->map_offset = args.map_handle;
+                    obj->offset = args.offset;
+                    obj->handle = args.handle;
+                    obj->size = args.size;
+                    obj->domain = domain;
+                    DEBUG(ErrorF("%lu of DRI2 memory allocated at %lx, handle %lu\n",
+                                obj->size, obj->offset, obj->handle));
+                    break;
+                }
             }
 #endif
         case TTM_PL_SYSTEM:
@@ -123,13 +147,23 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
 void*
 drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
 {
-    obj->ptr = (unsigned char *) obj->map_offset + obj->offset;
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    if (pVia->directRenderingType == DRI_2) {
+        obj->ptr = mmap(0, obj->size, PROT_READ | PROT_WRITE,
+                        MAP_SHARED, pVia->drmFD, obj->map_offset);
+    } else
+        obj->ptr = (unsigned char *) obj->map_offset + obj->offset;
     return obj->ptr;
 }
 
 void
 drm_bo_unmap(ScrnInfoPtr pScrn, struct buffer_object *obj)
 {
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    if (pVia->directRenderingType == DRI_2)
+        munmap(obj->ptr, obj->size);
     obj->ptr = NULL;
 }
 
@@ -157,6 +191,12 @@ drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
                 if (drmCommandWrite(pVia->drmFD, DRM_VIA_FREEMEM,
                                     &drm, sizeof(drm_via_mem_t)) < 0)
                     ErrorF("DRM failed to free for handle %lld.\n", obj->handle);
+            } else  if (pVia->directRenderingType == DRI_2) {
+                struct drm_gem_close close;
+
+                close.handle = obj->handle;
+                if (ioctl(pVia->drmFD, DRM_IOCTL_GEM_CLOSE, &close) < 0)
+                    ErrorF("DRM failed to free for handle %lld.\n", obj->handle);
             }
 #endif
             break;
@@ -169,8 +209,11 @@ Bool
 drm_bo_manager_init(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    Bool ret = ums_create(pScrn);
+    Bool ret = TRUE;
 
+    if (pVia->directRenderingType == DRI_2)
+        return ret;
+    ret = ums_create(pScrn);
 #ifdef XF86DRI
     if (pVia->directRenderingType == DRI_1)
         ret = VIADRIKernelInit(pScrn);

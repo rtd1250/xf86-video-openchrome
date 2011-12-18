@@ -37,10 +37,10 @@
 #include "via_drmclient.h"
 #endif
 
-#define VIA_NR_SAREA_CLIPRECTS          8
-#define VIA_NR_XVMC_PORTS               10
-#define VIA_NR_XVMC_LOCKS               5
-#define VIA_MAX_CACHELINE_SIZE          64
+#define VIA_NR_SAREA_CLIPRECTS		8
+#define VIA_NR_XVMC_PORTS		10
+#define VIA_NR_XVMC_LOCKS		5
+#define VIA_MAX_CACHELINE_SIZE		64
 #define XVMCLOCKPTR(saPriv,lockNo)					\
 	((__volatile__ struct drm_hw_lock *)(((((unsigned long) (saPriv)->XvMCLockArea) + \
 				      (VIA_MAX_CACHELINE_SIZE - 1)) &	\
@@ -64,21 +64,21 @@
 
 /* VIA specific ioctls */
 #define DRM_VIA_ALLOCMEM	0x00
-#define DRM_VIA_FREEMEM	    0x01
+#define DRM_VIA_FREEMEM		0x01
 #define DRM_VIA_AGP_INIT	0x02
-#define DRM_VIA_FB_INIT	    0x03
-#define DRM_VIA_MAP_INIT    0x04
-#define DRM_VIA_DEC_FUTEX   0x05
-#define DRM_VIA_GEM_CREATE  0x06
+#define DRM_VIA_FB_INIT		0x03
+#define DRM_VIA_MAP_INIT	0x04
+#define DRM_VIA_DEC_FUTEX	0x05
+#define DRM_VIA_GEM_CREATE	0x06
 #define DRM_VIA_DMA_INIT	0x07
 #define DRM_VIA_CMDBUFFER	0x08
-#define DRM_VIA_FLUSH	        0x09
-#define DRM_VIA_PCICMD	        0x0a
+#define DRM_VIA_FLUSH		0x09
+#define DRM_VIA_PCICMD		0x0a
 #define DRM_VIA_CMDBUF_SIZE	0x0b
 #define NOT_USED
-#define DRM_VIA_WAIT_IRQ        0x0d
-#define DRM_VIA_DMA_BLIT        0x0e
-#define DRM_VIA_BLIT_SYNC       0x0f
+#define DRM_VIA_WAIT_IRQ	0x0d
+#define DRM_VIA_DMA_BLIT	0x0e
+#define DRM_VIA_BLIT_SYNC	0x0f
 
 #define DRM_IOCTL_VIA_ALLOCMEM	  DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_ALLOCMEM, drm_via_mem_t)
 #define DRM_IOCTL_VIA_FREEMEM	  DRM_IOW( DRM_COMMAND_BASE + DRM_VIA_FREEMEM, drm_via_mem_t)
@@ -161,7 +161,7 @@ typedef struct _drm_via_dma_init {
 	enum {
 		VIA_INIT_DMA = 0x01,
 		VIA_CLEANUP_DMA = 0x02,
-        VIA_DMA_INITIALIZED = 0x03
+		VIA_DMA_INITIALIZED = 0x03
 	} func;
 
 	unsigned long offset;
@@ -206,8 +206,7 @@ typedef struct _drm_via_sarea {
 
 	/* Used by the 3d driver only at this point, for pageflipping:
 	 */
-
-    unsigned int pfCurrentOffset;
+	unsigned int pfCurrentOffset;
 } drm_via_sarea_t;
 
 typedef struct _drm_via_cmdbuf_size {
@@ -229,15 +228,15 @@ typedef enum {
 #define VIA_IRQ_FLAGS_MASK 0xF0000000
 
 enum drm_via_irqs{drm_via_irq_hqv0 = 0,
-    drm_via_irq_hqv1,
+	drm_via_irq_hqv1,
 	drm_via_irq_dma0_dd,
 	drm_via_irq_dma0_td,
 	drm_via_irq_dma1_dd,
 	drm_via_irq_dma1_td,
-    drm_via_irq_num
+	drm_via_irq_num
 };
 
-struct drm_via_wait_irq_request{
+struct drm_via_wait_irq_request {
 	unsigned irq;
 	via_irq_seq_type_t type;
 	uint32_t sequence;
@@ -254,59 +253,76 @@ typedef struct drm_via_blitsync {
 	unsigned engine;
 } drm_via_blitsync_t;
 
+/*
+ * Below,"flags" is currently unused but will be used for possible future
+ * extensions like kernel space bounce buffers for bad alignments and
+ * blit engine busy-wait polling for better latency in the absence of
+ * interrupts.
+ */
+
 typedef struct drm_via_dmablit {
 	uint32_t num_lines;
 	uint32_t line_length;
 
-    uint32_t fb_addr;
+	uint32_t fb_addr;
 	uint32_t fb_stride;
 
-    unsigned char *mem_addr;
+	unsigned char *mem_addr;
 	uint32_t  mem_stride;
 
 	int bounce_buffer;
-    int to_fb;
+	int to_fb;
 
 	drm_via_blitsync_t sync;
 } drm_via_dmablit_t;
 
 struct drm_gem_create {
-    /**
-     * Requested size for the object.
-     *
-     * The (page-aligned) allocated size for the object will be returned.
-     */
-    uint64_t size;
+	/**
+	 * Requested size for the object.
+	 *
+	 * The (page-aligned) allocated size for the object will be returned.
+	 */
+	uint64_t size;
 
-    /*
-     * Place the memory at the proper alignment.
-     */
-    uint64_t alignment;
+	/*
+	 * Place the memory at the proper alignment.
+	 */
+	uint64_t alignment;
 
-    /**
-     * Format of data i.e tile pitch, for linear it is zero
-     */
-    uint64_t pitch;
+	/**
+	 * Format of data i.e tile pitch, for linear it is zero
+	 */
+	uint64_t pitch;
 
-    /**
-     * Give hints where to allocate this object.
-     */
-    uint32_t write_domains;
-    uint32_t read_domains;
+	/**
+	 * Give hints where to allocate this object.
+	 */
+	uint32_t write_domains;
+	uint32_t read_domains;
 
-    /**
-     * Returned handle for the object.
-     *
-     * Object handles are nonzero.
-     */
-    uint32_t handle;
+	/**
+	 * Offset to start of memory region.
+	 */
+	uint64_t offset;
 
-    /**
-     * Padding for future expansion.
-     */
-    uint32_t pad1;
-    uint64_t pad2;
-    uint64_t pad3;
+	/**
+	 * Handle need to mmap the buffer.
+	 */
+	uint64_t map_handle;
+
+	/**
+	 * Returned handle for the object.
+	 *
+	 * Object handles are nonzero.
+	 */
+	uint32_t handle;
+
+	/**
+	 * Padding for future expansion.
+	 */
+	uint32_t pad1;
+	uint64_t pad2;
+	uint64_t pad3;
 };
 
 #endif				/* _VIA_DRM_H_ */

@@ -1699,6 +1699,9 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
 
     DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIACloseScreen\n"));
 
+    if (pVia->directRenderingType != DRI_2)
+        viaExitVideo(pScrn);
+
     viaExitAccel(pScreen);
     if (pVia->ShadowPtr) {
         shadowRemove(pScreen, pScreen->GetScreenPixmap(pScreen));
@@ -1844,8 +1847,10 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     /* Must be after RGB ordering is fixed. */
     fbPictureInit(pScreen, NULL, 0);
 
-    if (!pVia->NoAccel && !UMSAccelInit(pScreen))
-        return FALSE;
+    if (pVia->directRenderingType != DRI_2) {
+        if (!pVia->NoAccel && !UMSAccelInit(pScreen))
+            return FALSE;
+    }
 
     miInitializeBackingStore(pScreen);
     xf86SetBackingStore(pScreen);
@@ -1920,9 +1925,11 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     xf86DPMSInit(pScreen, xf86DPMSSet, 0);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- DPMS set up\n"));
 
-    UMSAccelSetup(pScrn);
+    if (pVia->directRenderingType != DRI_2) {
+        UMSAccelSetup(pScrn);
 
-    viaInitVideo(pScreen);
+        viaInitVideo(pScreen);
+    }
 
     if (serverGeneration == 1)
         xf86ShowUnusedOptions(pScrn->scrnIndex, pScrn->options);
