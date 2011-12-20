@@ -378,7 +378,7 @@ UMSPreInit(ScrnInfoPtr pScrn)
     vgaHWPtr hwp;
 #ifdef XSERVER_LIBPCIACCESS
     struct pci_device *vgaDevice = pci_device_find_by_slot(0, 0, 0, 3);
-    struct pci_device *bridge = pci_device_get_parent_bridge(vgaDevice);
+    struct pci_device *bridge = pci_device_find_by_slot(0, 0, 0, 0);
 #endif
     int bMemSize = 0;
 
