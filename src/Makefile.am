@@ -42,7 +42,7 @@ openchrome_drv_la_SOURCES = \
          via_exa.c \
          via_xaa.c \
          via_bandwidth.c \
-         via_bios.h \
+         via_ums.h \
          via_ch7xxx.c \
          via_ch7xxx.h \
          via_display.c \

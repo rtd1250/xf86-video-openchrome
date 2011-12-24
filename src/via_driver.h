@@ -69,7 +69,7 @@
 #include "via_memmgr.h"
 
 #include "via_regs.h"
-#include "via_bios.h"
+#include "via_ums.h"
 #include "via_swov.h"
 #include "via_dmabuffer.h"
 #include "via_3d.h"
