@@ -47,7 +47,7 @@ static ViaPanelModeRec ViaPanelNativeModes[] = {
     {1280, 800},    /* 0x7 Resolution 1280x800 (Samsung NC20) */
     {800, 480},     /* 0x8 For Quanta 800x480 */
     {1024, 600},    /* 0x9 Resolution 1024x600 (for HP 2133) */
-    {1366, 768},    /* 0xA Resolution 1366x768 */
+    {1368, 768},    /* 0xA Resolution 1366x768 */
     {1920, 1080},
     {1920, 1200},
     {1280, 1024},   /* 0xD */
@@ -1166,29 +1166,28 @@ ViaPanelGetNativeDisplayMode(ScrnInfoPtr pScrn)
     if (panelMode->Width && panelMode->Height) {
         /* TODO: fix refresh rate */
         DisplayModePtr p = xf86CVTMode(panelMode->Width, panelMode->Height,
-                                        60.0f, TRUE, FALSE);
+                                       60.0f, FALSE, FALSE);
         if (p) {
+            p->CrtcHDisplay = p->HDisplay;
+            p->CrtcHSyncStart = p->HSyncStart;
+            p->CrtcHSyncEnd = p->HSyncEnd;
+            p->CrtcHTotal = p->HTotal;
+            p->CrtcHSkew = p->HSkew;
+            p->CrtcVDisplay = p->VDisplay;
+            p->CrtcVSyncStart = p->VSyncStart;
+            p->CrtcVSyncEnd = p->VSyncEnd;
+            p->CrtcVTotal = p->VTotal;
 
-        p->CrtcHDisplay = p->HDisplay;
-        p->CrtcHSyncStart = p->HSyncStart;
-        p->CrtcHSyncEnd = p->HSyncEnd;
-        p->CrtcHTotal = p->HTotal;
-        p->CrtcHSkew = p->HSkew;
-        p->CrtcVDisplay = p->VDisplay;
-        p->CrtcVSyncStart = p->VSyncStart;
-        p->CrtcVSyncEnd = p->VSyncEnd;
-        p->CrtcVTotal = p->VTotal;
+            p->CrtcVBlankStart = min(p->CrtcVSyncStart, p->CrtcVDisplay);
+            p->CrtcVBlankEnd = max(p->CrtcVSyncEnd, p->CrtcVTotal);
+            p->CrtcHBlankStart = min(p->CrtcHSyncStart, p->CrtcHDisplay);
+            p->CrtcHBlankEnd = max(p->CrtcHSyncEnd, p->CrtcHTotal);
+            p->type = M_T_DRIVER | M_T_PREFERRED;
 
-        p->CrtcVBlankStart = min(p->CrtcVSyncStart, p->CrtcVDisplay);
-        p->CrtcVBlankEnd = max(p->CrtcVSyncEnd, p->CrtcVTotal);
-        p->CrtcHBlankStart = min(p->CrtcHSyncStart, p->CrtcHDisplay);
-        p->CrtcHBlankEnd = max(p->CrtcHSyncEnd, p->CrtcHTotal);
-        p->type = M_T_DRIVER | M_T_PREFERRED;
-
-        pVia->pBIOSInfo->Panel->NativeDisplayMode = p;
-    } else {
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                    "Out of memory. Size: %d bytes\n", sizeof(DisplayModeRec));
+            pVia->pBIOSInfo->Panel->NativeDisplayMode = p;
+        } else {
+            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                        "Out of memory. Size: %d bytes\n", sizeof(DisplayModeRec));
         }
     } else {
         xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
