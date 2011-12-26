@@ -994,7 +994,7 @@ uploadHQVShadow(XvMCLowLevel * xl, unsigned offset, HQVRegister * shadow,
 
     if (flip) {
 	tmp = GETHQVSHADOW(shadow, 0x3D0);
-	OUT_RING_QW_AGP(cb, offset + HQV_CONTROL + 0x200,
+	OUT_RING_QW_AGP(cb, offset + HQV_CONTROL,
 	    HQV_ENABLE | HQV_GEN_IRQ | HQV_SUBPIC_FLIP | HQV_SW_FLIP | tmp);
     }
     shadow[0].set = FALSE;
@@ -1291,7 +1291,7 @@ viaVideoSubPictureOffLocked(void *xlp)
     stride = VIDIN(xl, proReg | SUBP_CONTROL_STRIDE);
     WAITFLAGS(cb, LL_MODE_VIDEO);
     BEGIN_HEADER6_DATA(cb, xl, 1);
-    OUT_RING_QW_AGP(cb, proReg | SUBP_CONTROL_STRIDE | 0x200,
+    OUT_RING_QW_AGP(cb, proReg | SUBP_CONTROL_STRIDE,
 	stride & ~SUBP_HQV_ENABLE);
 }
 
@@ -1310,14 +1310,14 @@ viaVideoSubPictureLocked(void *xlp, ViaXvMCSubPicture * pViaSubPic)
     WAITFLAGS(cb, LL_MODE_VIDEO);
     BEGIN_HEADER6_DATA(cb, xl, VIA_SUBPIC_PALETTE_SIZE + 2);
     for (i = 0; i < VIA_SUBPIC_PALETTE_SIZE; ++i) {
-	OUT_RING_QW_AGP(cb, proReg | RAM_TABLE_CONTROL | 0x200,
+	OUT_RING_QW_AGP(cb, proReg | RAM_TABLE_CONTROL,
 	    pViaSubPic->palette[i]);
     }
 
     cWord = (pViaSubPic->stride & SUBP_STRIDE_MASK) | SUBP_HQV_ENABLE;
     cWord |= (pViaSubPic->ia44) ? SUBP_IA44 : SUBP_AI44;
-    OUT_RING_QW_AGP(cb, proReg | SUBP_STARTADDR | 0x200, pViaSubPic->offset);
-    OUT_RING_QW_AGP(cb, proReg | SUBP_CONTROL_STRIDE | 0x200, cWord);
+    OUT_RING_QW_AGP(cb, proReg | SUBP_STARTADDR, pViaSubPic->offset);
+    OUT_RING_QW_AGP(cb, proReg | SUBP_CONTROL_STRIDE, cWord);
 }
 
 void
