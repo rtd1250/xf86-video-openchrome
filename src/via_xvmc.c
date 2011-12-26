@@ -608,6 +608,7 @@ ViaXvMCCreateSurface(ScrnInfoPtr pScrn, XvMCSurfacePtr pSurf,
         memset(buf + yBufSize, 0x80, yBufSize >> 1);
         buf += bufSize;
     }
+    drm_bo_unmap(pScrn, sPriv->memory_ref);
 
     vXvMC->sPrivs[srfNo] = sPriv;
     vXvMC->surfaces[srfNo] = pSurf->surface_id;
@@ -735,7 +736,6 @@ ViaXvMCDestroySurface(ScrnInfoPtr pScrn, XvMCSurfacePtr pSurf)
                 if (!__ret)
                     ViaOverlayHide(pScrn);
             }
-            drm_bo_unmap(pScrn, vXvMC->sPrivs[i]->memory_ref);
             drm_bo_free(pScrn, vXvMC->sPrivs[i]->memory_ref);
             free(vXvMC->sPrivs[i]);
             vXvMC->nSurfaces--;
