@@ -22,3 +22,8 @@ AUTOMAKE_OPTIONS = foreign
 SUBDIRS = src man tools
 
 EXTRA_DIST = COPYING NEWS README
+
+ChangeLog:
+	$(CHANGELOG_CMD)
+
+dist-hook: ChangeLog
