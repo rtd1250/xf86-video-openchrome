@@ -39,7 +39,7 @@
 #include <X11/extensions/dpms.h>
 #endif
 
-#include "svnversion.h"
+#include "version.h"
 
 #include "via_driver.h"
 #include "via_video.h"
