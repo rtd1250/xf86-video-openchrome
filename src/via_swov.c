@@ -392,6 +392,7 @@ viaOverlayGetV1V3Format(VIAPtr pVia, int vport, /* 1 or 3, as in V1 or V3 */
     if (videoFlag & VIDEO_HQV_INUSE) {
         switch (pVia->swov.SrcFourCC) {
             case FOURCC_YV12:
+            case FOURCC_I420:
             case FOURCC_XVMC:
                 *pHQVCtl |= HQV_YUV420;
                 break;
@@ -421,6 +422,7 @@ viaOverlayGetV1V3Format(VIAPtr pVia, int vport, /* 1 or 3, as in V1 or V3 */
     } else {
         switch (pVia->swov.SrcFourCC) {
             case FOURCC_YV12:
+            case FOURCC_I420:
             case FOURCC_XVMC:
                 if (vport == 1) {
                     *pVidCtl |= V1_YCbCr420;
@@ -503,6 +505,7 @@ viaOverlayGetSrcStartAddress(VIAPtr pVia,
                 break;
 
             case FOURCC_YV12:
+            case FOURCC_I420:
             case FOURCC_XVMC:
 
                 if (videoFlag & VIDEO_HQV_INUSE)
@@ -763,6 +766,7 @@ viaOverlayGetFetch(VIAPtr pVia, unsigned long videoFlag,
 
     switch (pVia->swov.SrcFourCC) {
         case FOURCC_YV12:
+        case FOURCC_I420:
         case FOURCC_XVMC:
             n = 0; /* 2^n = 1 byte per pixel (Y channel in planar YUV) */
             break;
@@ -1146,7 +1150,8 @@ AddHQVSurface(ScrnInfoPtr pScrn, unsigned int numbuf, CARD32 fourcc)
         !(pVia->swov.gdwVideoFlagSW & VIDEO_1_INUSE))
         proReg = PRO_HQV1_OFFSET;
 
-    isplanar = ((fourcc == FOURCC_YV12) || (fourcc == FOURCC_XVMC));
+    isplanar = ((fourcc == FOURCC_YV12) || (fourcc == FOURCC_I420) ||
+				(fourcc == FOURCC_XVMC));
 
     width = pVia->swov.SWDevice.gdwSWSrcWidth;
     height = pVia->swov.SWDevice.gdwSWSrcHeight;
@@ -1189,6 +1194,7 @@ CreateSurface(ScrnInfoPtr pScrn, CARD32 FourCC, CARD16 Width,
     isplanar = FALSE;
     switch (FourCC) {
         case FOURCC_YV12:
+        case FOURCC_I420:
         case FOURCC_XVMC:
             isplanar = TRUE;
             pitch = ALIGN_TO(Width, 32);
@@ -1281,9 +1287,10 @@ ViaSwovSurfaceCreate(ScrnInfoPtr pScrn, viaPortPrivPtr pPriv,
             break;
 
         case FOURCC_YV12:
+        case FOURCC_I420:
             retCode = CreateSurface(pScrn, FourCC, Width, Height, TRUE);
             if (retCode == Success)
-                retCode = AddHQVSurface(pScrn, numbuf, FOURCC_YV12);
+                retCode = AddHQVSurface(pScrn, numbuf, FourCC);
             break;
 
         case FOURCC_XVMC:
@@ -1345,6 +1352,7 @@ ViaSwovSurfaceDestroy(ScrnInfoPtr pScrn, viaPortPrivPtr pPriv)
                 break;
 
             case FOURCC_YV12:
+            case FOURCC_I420:
                 VIAFreeLinear(&pVia->swov.SWfbMem);
             case FOURCC_XVMC:
                 pVia->swov.SrcFourCC = 0;
@@ -1509,6 +1517,7 @@ SetupFIFOs(VIAPtr pVia, unsigned long videoFlag,
 {
     if (miniCtl & V1_Y_INTERPOLY) {
         if (pVia->swov.SrcFourCC == FOURCC_YV12
+			|| pVia->swov.SrcFourCC == FOURCC_I420
             || pVia->swov.SrcFourCC == FOURCC_XVMC) {
             if (videoFlag & VIDEO_HQV_INUSE) {
                 if (videoFlag & VIDEO_1_INUSE)
@@ -1542,6 +1551,7 @@ SetupFIFOs(VIAPtr pVia, unsigned long videoFlag,
         }
     } else {
         if (pVia->swov.SrcFourCC == FOURCC_YV12
+			|| pVia->swov.SrcFourCC == FOURCC_I420
             || pVia->swov.SrcFourCC == FOURCC_XVMC) {
             if (videoFlag & VIDEO_HQV_INUSE) {
                 if (videoFlag & VIDEO_1_INUSE)
@@ -1891,6 +1901,7 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
     pVia->swov.overlayRecordV1.dwOffset = dwOffset;
 
     if (pVia->swov.SrcFourCC == FOURCC_YV12
+		|| pVia->swov.SrcFourCC == FOURCC_I420
         || pVia->swov.SrcFourCC == FOURCC_XVMC) {
 
         YCBCRREC YCbCr;
@@ -1983,6 +1994,7 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
             SetHQVFetch(pVia, hqvSrcFetch, oriSrcHeight);
 
         if (pVia->swov.SrcFourCC == FOURCC_YV12
+            || pVia->swov.SrcFourCC == FOURCC_I420
             || pVia->swov.SrcFourCC == FOURCC_XVMC) {
             if (videoFlag & VIDEO_1_INUSE)
                 SaveVideoRegister(pVia, V1_STRIDE, srcPitch << 1);
@@ -2292,6 +2304,7 @@ VIAVidUpdateOverlay(ScrnInfoPtr pScrn, LPDDUPDATEOVERLAY pUpdate)
         (pVia->swov.SrcFourCC == FOURCC_RV16) ||
         (pVia->swov.SrcFourCC == FOURCC_RV32) ||
         (pVia->swov.SrcFourCC == FOURCC_YV12) ||
+        (pVia->swov.SrcFourCC == FOURCC_I420) ||
         (pVia->swov.SrcFourCC == FOURCC_XVMC)) {
         videoFlag = pVia->swov.gdwVideoFlagSW;
     }
@@ -2366,6 +2379,7 @@ VIAVidUpdateOverlay(ScrnInfoPtr pScrn, LPDDUPDATEOVERLAY pUpdate)
         (pVia->swov.SrcFourCC == FOURCC_RV16) ||
         (pVia->swov.SrcFourCC == FOURCC_RV32) ||
         (pVia->swov.SrcFourCC == FOURCC_YV12) ||
+        (pVia->swov.SrcFourCC == FOURCC_I420) ||
         (pVia->swov.SrcFourCC == FOURCC_XVMC)) {
         pVia->swov.SWDevice.gdwSWDstLeft = pUpdate->DstLeft + panDX;
         pVia->swov.SWDevice.gdwSWDstTop = pUpdate->DstTop + panDY;
@@ -2425,6 +2439,7 @@ ViaOverlayHide(ScrnInfoPtr pScrn)
         (pVia->swov.SrcFourCC == FOURCC_RV16) ||
         (pVia->swov.SrcFourCC == FOURCC_RV32) ||
         (pVia->swov.SrcFourCC == FOURCC_YV12) ||
+        (pVia->swov.SrcFourCC == FOURCC_I420) ||
         (pVia->swov.SrcFourCC == FOURCC_XVMC))
         videoFlag = pVia->swov.gdwVideoFlagSW;
 
