@@ -1754,7 +1754,7 @@ SetVideoWindow(ScrnInfoPtr pScrn, unsigned long videoFlag,
      * If the resolution is smaller than the panel's physical size,
      * the video display in Y direction will be cut.
      * So, we need to adjust the Y top and bottom position.
-     */
+     *
     if (videoFlag & VIDEO_1_INUSE) {
         if (pBIOSInfo->SetDVI && pBIOSInfo->scaleY) {
             top = (pUpdate->DstTop * pBIOSInfo->Panel->NativeMode->Height
@@ -1762,7 +1762,7 @@ SetVideoWindow(ScrnInfoPtr pScrn, unsigned long videoFlag,
             bottom = (pUpdate->DstBottom * pBIOSInfo->Panel->NativeMode->Height
                       / pScrn->currentMode->VDisplay);
         }
-    }
+    }*/
 
     if (top < 0)
         top = 0;
@@ -1843,13 +1843,13 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
                   pUpdate->DstTop, pUpdate->DstBottom));
 
     dstWidth = pUpdate->DstRight - pUpdate->DstLeft;
-	if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected &&
+	/*if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected &&
 		pBIOSInfo->Panel->Scale) {
-        /* FIXME: We need to determine if the panel is using V1 or V3 */
+        * FIXME: We need to determine if the panel is using V1 or V3 *
         float hfactor = (float)pBIOSInfo->Panel->NativeMode->Width
                         / pScrn->currentMode->HDisplay;
         dstWidth *= hfactor;
-    }
+    }*/
 
     pVia->swov.overlayRecordV1.dwWidth = dstWidth;
     pVia->swov.overlayRecordV1.dwHeight = dstHeight =

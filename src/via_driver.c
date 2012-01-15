@@ -219,11 +219,6 @@ static OptionInfoRec VIAOptions[] = {
     {OPTION_ROTATE,              "Rotate",           OPTV_ANYSTR,  {0}, FALSE},
     {OPTION_VIDEORAM,            "VideoRAM",         OPTV_INTEGER, {0}, FALSE},
     {OPTION_ACTIVEDEVICE,        "ActiveDevice",     OPTV_ANYSTR,  {0}, FALSE},
-    {OPTION_BUSWIDTH,            "BusWidth",         OPTV_ANYSTR,  {0}, FALSE},
-    {OPTION_CENTER,              "Center",           OPTV_BOOLEAN, {0}, FALSE},
-    {OPTION_PANELSIZE,           "PanelSize",        OPTV_ANYSTR,  {0}, FALSE},
-    /* Forcing use of panel is a last resort - don't document this one. */
-    {OPTION_FORCEPANEL,          "ForcePanel",       OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_TVDOTCRAWL,          "TVDotCrawl",       OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_TVDEFLICKER,         "TVDeflicker",      OPTV_INTEGER, {0}, FALSE},
     {OPTION_TVTYPE,              "TVType",           OPTV_ANYSTR,  {0}, FALSE},
@@ -440,16 +435,8 @@ VIAFreeRec(ScrnInfoPtr pScrn)
 
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
-    if (pBIOSInfo) {
-
-        if (pBIOSInfo->Panel) {
-            if (pBIOSInfo->Panel->NativeMode)
-                free(pBIOSInfo->Panel->NativeMode);
-            if (pBIOSInfo->Panel->CenteredMode)
-                free(pBIOSInfo->Panel->CenteredMode);
-            free(pBIOSInfo->Panel);
-        }
-    }
+    if (pBIOSInfo)
+        free(pBIOSInfo);
 
     if (VIAPTR(pScrn)->pVbe)
         vbeFree(VIAPTR(pScrn)->pVbe);
@@ -776,18 +763,16 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
 Bool
 VIAGetRec(ScrnInfoPtr pScrn)
 {
-    Bool ret;
+    Bool ret = FALSE;
+    VIAPtr pVia;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAGetRec\n"));
 
-    ret = FALSE;
     if (pScrn->driverPrivate)
         return TRUE;
 
     /* allocate VIARec */
-    pScrn->driverPrivate = xnfcalloc(sizeof(VIARec), 1);
-    VIAPtr pVia = ((VIARec *) (pScrn->driverPrivate));
-
+    pVia = (VIARec *) xnfcalloc(sizeof(VIARec), 1);
     if (pVia) {
         pVia->pBIOSInfo = xnfcalloc(sizeof(VIABIOSInfoRec), 1);
         VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
@@ -795,21 +780,14 @@ VIAGetRec(ScrnInfoPtr pScrn)
         if (pBIOSInfo) {
             pBIOSInfo->TVI2CDev = NULL;
 
-            pBIOSInfo->Panel =
-                    (ViaPanelInfoPtr) xnfcalloc(sizeof(ViaPanelInfoRec), 1);
-            if (pBIOSInfo->Panel) {
-                pBIOSInfo->Panel->NativeModeIndex = VIA_PANEL_INVALID;
-                pBIOSInfo->Panel->NativeMode =
-                        (ViaPanelModePtr) xnfcalloc(sizeof(ViaPanelModeRec), 1);
-                pBIOSInfo->Panel->CenteredMode =
-                        (DisplayModePtr) xnfcalloc(sizeof(DisplayModeRec), 1);
-                ret = pBIOSInfo->Panel->NativeMode
-                        && pBIOSInfo->Panel->CenteredMode;
+            pVia->VideoRegs = (video_via_regs *) xnfcalloc(sizeof(video_via_regs), 1);
+            if (!pVia->VideoRegs) {
+                free(pBIOSInfo);
+                free(pVia);
+            } else {
+                pScrn->driverPrivate = pVia;
+                ret = TRUE;
             }
-            pVia->VideoRegs =
-                    (video_via_regs *) xnfcalloc(sizeof(video_via_regs), 1);
-            if (!pVia->VideoRegs)
-                ret = FALSE;
         }
     }
     return ret;
@@ -1344,57 +1322,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             pVia->ActiveDevice |= VIA_DEVICE_TV;
     }
 
-    /* Digital Output Bus Width Option */
     pBIOSInfo = pVia->pBIOSInfo;
-    pBIOSInfo->BusWidth = VIA_DI_12BIT;
-    from = X_DEFAULT;
-    if ((s = xf86GetOptValString(VIAOptions, OPTION_BUSWIDTH))) {
-        from = X_CONFIG;
-        if (!xf86NameCmp(s, "12BIT")) {
-            pBIOSInfo->BusWidth = VIA_DI_12BIT;
-        } else if (!xf86NameCmp(s, "24BIT")) {
-            pBIOSInfo->BusWidth = VIA_DI_24BIT;
-        }
-    }
-    xf86DrvMsg(pScrn->scrnIndex, from,
-               "Digital output bus width is %d bits.\n",
-               (pBIOSInfo->BusWidth == VIA_DI_12BIT) ? 12 : 24);
-
-
-    /* LCD Center/Expend Option */
-    pBIOSInfo->Center = FALSE;
-    from = xf86GetOptValBool(VIAOptions, OPTION_CENTER, &pBIOSInfo->Center)
-            ? X_CONFIG : X_DEFAULT;
-    xf86DrvMsg(pScrn->scrnIndex, from, "DVI Center is %s.\n",
-               pBIOSInfo->Center ? "enabled" : "disabled");
-
-    /* Panel Size Option */
-    if ((s = xf86GetOptValString(VIAOptions, OPTION_PANELSIZE))) {
-        ViaPanelGetNativeModeFromOption(pScrn, s);
-        if (pBIOSInfo->Panel->NativeModeIndex != VIA_PANEL_INVALID) {
-            ViaPanelModePtr mode = pBIOSInfo->Panel->NativeMode;
-
-            DEBUG(xf86DrvMsg
-                  (pScrn->scrnIndex, X_CONFIG, "Panel mode index is %d\n",
-                   pBIOSInfo->Panel->NativeModeIndex));
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                       "Selected Panel Size is %dx%d\n", mode->Width,
-                       mode->Height);
-        }
-    } else {
-        xf86DrvMsg(pScrn->scrnIndex, X_DEFAULT,
-                   "Panel size is not selected from config file.\n");
-    }
-
-    /* Force the use of the Panel? */
-    pBIOSInfo->ForcePanel = FALSE;
-    from = xf86GetOptValBool(VIAOptions, OPTION_FORCEPANEL,
-                             &pBIOSInfo->ForcePanel)
-            ? X_CONFIG : X_DEFAULT;
-    xf86DrvMsg(pScrn->scrnIndex, from,
-               "Panel will %sbe forced.\n",
-               pBIOSInfo->ForcePanel ? "" : "not ");
-
     pBIOSInfo->TVDotCrawl = FALSE;
     from = xf86GetOptValBool(VIAOptions, OPTION_TVDOTCRAWL,
                              &pBIOSInfo->TVDotCrawl)

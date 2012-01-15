@@ -126,10 +126,6 @@ typedef struct ViaPanelInfo {
     CARD8 NativeModeIndex;
     /* Generated mode for native resolution */
     DisplayModePtr  NativeDisplayMode ;
-#if 0
-    /* Panel size from configuration */
-    char*           PanelSizeFromOption;
-#endif
     /* Current mode but centered */
     DisplayModePtr  CenteredMode ;
     /* Determine if we must use the hardware scaler
@@ -137,6 +133,17 @@ typedef struct ViaPanelInfo {
      * was specified
      */
     Bool            Scale;
+
+    /* Panel/LCD entries */
+    CARD16      ResolutionIndex;
+    Bool        ForcePanel;
+    int         PanelIndex;
+    Bool        Center;
+    CARD8       BusWidth;		/* Digital Output Bus Width */
+    Bool        SetDVI;
+    /* LCD Simultaneous Expand Mode HWCursor Y Scale */
+    Bool        scaleY;
+    int         resY;
 } ViaPanelInfoRec, *ViaPanelInfoPtr ;
 
 typedef struct ViaCRTCInfo {
@@ -149,21 +156,9 @@ typedef struct _VIABIOSINFO {
 	xf86OutputPtr lvds;
 	xf86OutputPtr tv;
 
-    CARD16      ResolutionIndex;
     CARD32      Clock; /* register value for the dotclock */
     Bool        ClockExternal;
     CARD32      Bandwidth; /* available memory bandwidth */
-
-    /* Panel/LCD entries */
-    ViaPanelInfoPtr Panel ;
-    Bool        ForcePanel;
-    int         PanelIndex;
-    Bool        Center;
-    CARD8       BusWidth;		/* Digital Output Bus Width */
-    Bool        SetDVI;
-    /* LCD Simultaneous Expand Mode HWCursor Y Scale */
-    Bool        scaleY;
-    int         resY;
 
     /* Simultaneous */
     Bool SimultaneousEnabled;
@@ -210,7 +205,6 @@ CARD32 ViaGetMemoryBandwidth(ScrnInfoPtr pScrn);
 CARD32 ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaModePrimaryLegacy(xf86CrtcPtr crtc, DisplayModePtr mode);
 void ViaModeSecondaryLegacy(xf86CrtcPtr crtc, DisplayModePtr mode);
-void ViaLCDPower(ScrnInfoPtr pScrn, Bool On);
 void ViaDFPPower(ScrnInfoPtr pScrn, Bool On);
 void ViaTVPower(ScrnInfoPtr pScrn, Bool On);
 void ViaTVSave(ScrnInfoPtr pScrn);
@@ -233,7 +227,6 @@ void ViaSecondCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaShadowCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
 
 /* via_lvds.c */
-void ViaPanelGetNativeModeFromOption(ScrnInfoPtr pScrn, char* name);
 void via_lvds_init(ScrnInfoPtr pScrn);
 
 /* in via_bandwidth.c */

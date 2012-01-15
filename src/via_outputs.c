@@ -25,9 +25,9 @@
  */
 
 /*
- * via_mode.c
+ * via_outputs.c
  *
- * Everything to do with setting and changing modes.
+ * Everything to do with setting and changing xf86Outputs.
  *
  */
 
@@ -1118,71 +1118,6 @@ ViaModeSecondaryLegacy(xf86CrtcPtr crtc, DisplayModePtr mode)
     hwp->disablePalette(hwp);
 }
 
-/*
- *
- */
-static void
-ViaLCDPowerSequence(vgaHWPtr hwp, VIALCDPowerSeqRec Sequence)
-{
-    int i;
-
-    for (i = 0; i < Sequence.numEntry; i++) {
-        ViaVgahwMask(hwp, 0x300 + Sequence.port[i], Sequence.offset[i],
-                     0x301 + Sequence.port[i], Sequence.data[i],
-                     Sequence.mask[i]);
-        usleep(Sequence.delay[i]);
-    }
-}
-
-/*
- *
- */
-void
-ViaLCDPower(ScrnInfoPtr pScrn, Bool On)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-    int i;
-
-#ifdef HAVE_DEBUG
-    if (On)
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaLCDPower: On.\n");
-    else
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaLCDPower: Off.\n");
-#endif
-
-    /* Enable LCD */
-    if (On)
-        ViaCrtcMask(hwp, 0x6A, 0x08, 0x08);
-    else
-        ViaCrtcMask(hwp, 0x6A, 0x00, 0x08);
-
-    if (pBIOSInfo->LCDPower)
-        pBIOSInfo->LCDPower(pScrn, On);
-
-    /* Find Panel Size Index for PowerSeq Table */
-    if (pVia->Chipset == VIA_CLE266) {
-        if (pBIOSInfo->Panel->NativeModeIndex != VIA_PANEL_INVALID) {
-            for (i = 0; i < NumPowerOn; i++) {
-                if (lcdTable[pBIOSInfo->PanelIndex].powerSeq
-                    == powerOn[i].powerSeq)
-                    break;
-            }
-        } else
-            i = 0;
-    } else
-        /* KM and K8M use PowerSeq Table index 2. */
-        i = 2;
-
-    usleep(1);
-    if (On)
-        ViaLCDPowerSequence(hwp, powerOn[i]);
-    else
-        ViaLCDPowerSequence(hwp, powerOff[i]);
-    usleep(1);
-}
-
 void
 ViaDFPPower(ScrnInfoPtr pScrn, Bool On)
 {
@@ -1252,8 +1187,6 @@ ViaModeSecondCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode)
     VIAPtr pVia = VIAPTR(pScrn);
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
-    DisplayModePtr nativeDisplayMode = pBIOSInfo->Panel->NativeDisplayMode;
-    DisplayModePtr centeredMode = pBIOSInfo->Panel->CenteredMode;
     DisplayModePtr realMode = mode;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModeSecondCRTC\n"));
