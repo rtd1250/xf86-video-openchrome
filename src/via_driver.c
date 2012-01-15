@@ -449,8 +449,6 @@ VIAFreeRec(ScrnInfoPtr pScrn)
                 free(pBIOSInfo->Panel->CenteredMode);
             free(pBIOSInfo->Panel);
         }
-        if (pBIOSInfo->Simultaneous)
-            free(pBIOSInfo->Simultaneous);
     }
 
     if (VIAPTR(pScrn)->pVbe)
@@ -791,7 +789,6 @@ VIAGetRec(ScrnInfoPtr pScrn)
     VIAPtr pVia = ((VIARec *) (pScrn->driverPrivate));
 
     if (pVia) {
-
         pVia->pBIOSInfo = xnfcalloc(sizeof(VIABIOSInfoRec), 1);
         VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
@@ -806,12 +803,8 @@ VIAGetRec(ScrnInfoPtr pScrn)
                         (ViaPanelModePtr) xnfcalloc(sizeof(ViaPanelModeRec), 1);
                 pBIOSInfo->Panel->CenteredMode =
                         (DisplayModePtr) xnfcalloc(sizeof(DisplayModeRec), 1);
-                pBIOSInfo->Simultaneous =
-                        (ViaSimultaneousInfoPtr)
-                        xnfcalloc(sizeof(ViaSimultaneousInfoRec), 1);
                 ret = pBIOSInfo->Panel->NativeMode
-                        && pBIOSInfo->Panel->CenteredMode
-                        && pBIOSInfo->Simultaneous;
+                        && pBIOSInfo->Panel->CenteredMode;
             }
             pVia->VideoRegs =
                     (video_via_regs *) xnfcalloc(sizeof(video_via_regs), 1);

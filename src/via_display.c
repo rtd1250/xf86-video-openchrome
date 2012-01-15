@@ -971,14 +971,14 @@ iga1_crtc_dpms(xf86CrtcPtr crtc, int mode)
     } else {
         switch (mode) {
         case DPMSModeOn:
-            if (pBIOSInfo->Simultaneous->IsActive)
+            if (pBIOSInfo->SimultaneousEnabled)
                 ViaDisplayEnableSimultaneous(pScrn);
             break;
 
         case DPMSModeStandby:
         case DPMSModeSuspend:
         case DPMSModeOff:
-            if (pBIOSInfo->Simultaneous->IsActive)
+            if (pBIOSInfo->SimultaneousEnabled)
                 ViaDisplayDisableSimultaneous(pScrn);
             break;
 
@@ -1096,7 +1096,7 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
             ViaCRTCInit(pScrn);
             ViaModeFirstCRTC(pScrn, mode);
 
-            if (pVia->pBIOSInfo->Simultaneous->IsActive)
+            if (pVia->pBIOSInfo->SimultaneousEnabled)
                 ViaDisplayEnableSimultaneous(pScrn);
             else
                 ViaDisplayDisableSimultaneous(pScrn);
@@ -1413,14 +1413,14 @@ iga2_crtc_dpms(xf86CrtcPtr crtc, int mode)
     } else {
         switch (mode) {
         case DPMSModeOn:
-            if (pBIOSInfo->Simultaneous->IsActive)
+            if (pBIOSInfo->SimultaneousEnabled)
                 ViaDisplayEnableSimultaneous(pScrn);
             break;
 
         case DPMSModeStandby:
         case DPMSModeSuspend:
         case DPMSModeOff:
-            if (pBIOSInfo->Simultaneous->IsActive)
+            if (pBIOSInfo->SimultaneousEnabled)
                 ViaDisplayDisableSimultaneous(pScrn);
             break;
 
@@ -1529,7 +1529,7 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
              * is not set properly. Will cleanup the code later */
             ViaModeFirstCRTC(pScrn, adjusted_mode);
 
-            if (pVia->pBIOSInfo->Simultaneous->IsActive)
+            if (pVia->pBIOSInfo->SimultaneousEnabled)
                 ViaDisplayEnableSimultaneous(pScrn);
             else
                 ViaDisplayDisableSimultaneous(pScrn);

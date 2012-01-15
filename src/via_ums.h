@@ -144,10 +144,6 @@ typedef struct ViaCRTCInfo {
     CARD8                   index;
 } ViaCRTCInfoRec, *ViaCRTCInfoPtr;
 
-typedef struct ViaSimultaneousInfo {
-    Bool IsActive ;
-} ViaSimultaneousInfoRec, *ViaSimultaneousInfoPtr ;
-
 typedef struct _VIABIOSINFO {
 	xf86OutputPtr analog;
 	xf86OutputPtr lvds;
@@ -170,7 +166,7 @@ typedef struct _VIABIOSINFO {
     int         resY;
 
     /* Simultaneous */
-    ViaSimultaneousInfoPtr Simultaneous ;
+    Bool SimultaneousEnabled;
 
     /* TV entries */
     int         TVEncoder;
