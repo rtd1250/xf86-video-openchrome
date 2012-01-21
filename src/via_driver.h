@@ -318,8 +318,6 @@ typedef struct _VIA {
     I2CBusPtr           pI2CBus1;
     I2CBusPtr           pI2CBus2;
     I2CBusPtr           pI2CBus3;
-    xf86MonPtr          DDC1;
-    xf86MonPtr          DDC2;
 
     /* MHS */
     Bool                IsSecondary;
