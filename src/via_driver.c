@@ -1081,6 +1081,16 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             }
     }
 
+    /*
+     * PCI BAR are limited to 256 MB.
+     * This limitation will go away with TTM.
+     */
+    if (pScrn->videoRam > (256 << 10)) {
+        xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                   "Cannot use more than 256 MB of VRAM.\n");
+        pScrn->videoRam = (256 << 10);
+    }
+
     if (from == X_PROBED) {
         xf86DrvMsg(pScrn->scrnIndex, from,
                    "Probed amount of VideoRAM = %d kB\n", pScrn->videoRam);
