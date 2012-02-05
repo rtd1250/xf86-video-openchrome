@@ -810,13 +810,25 @@ via_lvds_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
 static void
 via_lvds_prepare(xf86OutputPtr output)
 {
-    ViaLCDPower(output, FALSE);
+    via_lvds_dpms(output, DPMSModeOff);
+
+    if (output->crtc) {
+        ViaCRTCInfoPtr iga = output->crtc->driver_private;
+        CARD8 value = 0x00; /* Value for IGA 1 */
+        ScrnInfoPtr pScrn = output->scrn;
+        vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+        /* IGA 2 */
+        if (iga->index)
+            value = 0x10;
+        ViaCrtcMask(hwp, 0x99, value, value);
+    }
 }
 
 static void
 via_lvds_commit(xf86OutputPtr output)
 {
-    ViaLCDPower(output, TRUE);
+    via_lvds_dpms(output, DPMSModeOn);
 }
 
 /*
@@ -1510,7 +1522,7 @@ via_lvds_init(ScrnInfoPtr pScrn)
         Panel->CenteredMode = (DisplayModePtr) xnfcalloc(sizeof(DisplayModeRec), 1);
 
         output->driver_private = Panel;
-        output->possible_crtcs = 0x2;
+        output->possible_crtcs = 0x3;
         output->possible_clones = 0;
         output->interlaceAllowed = FALSE;
         pBIOSInfo->lvds = output;

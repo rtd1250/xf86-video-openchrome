@@ -1525,10 +1525,6 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
             ViaModeSecondCRTC(pScrn, adjusted_mode);
             ViaSecondDisplayChannelEnable(pScrn);
 
-            /* Yes we have to run this otherwise the 2nd CRTC
-             * is not set properly. Will cleanup the code later */
-            ViaModeFirstCRTC(pScrn, adjusted_mode);
-
             if (pVia->pBIOSInfo->SimultaneousEnabled)
                 ViaDisplayEnableSimultaneous(pScrn);
             else

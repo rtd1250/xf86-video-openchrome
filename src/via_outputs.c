@@ -238,17 +238,19 @@ static Bool
 via_tv_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
 					DisplayModePtr adjusted_mode)
 {
-	return TRUE;
+    return TRUE;
 }
 
 static void
 via_tv_prepare(xf86OutputPtr output)
 {
+    via_tv_dpms(output, DPMSModeOff);
 }
 
 static void
 via_tv_commit(xf86OutputPtr output)
 {
+    via_tv_dpms(output, DPMSModeOn);
 }
 
 static void
@@ -619,11 +621,25 @@ via_analog_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
 static void
 via_analog_prepare(xf86OutputPtr output)
 {
+    via_analog_dpms(output, DPMSModeOff);
+
+    if (output->crtc) {
+        ViaCRTCInfoPtr iga = output->crtc->driver_private;
+        CARD8 value = 0x00; /* Value for IGA 1 */
+	    ScrnInfoPtr pScrn = output->scrn;
+        vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+        /* IGA 2 */
+        if (iga->index)
+            value = 0x40;
+        ViaSeqMask(hwp, 0x16, value, 0x40);
+    }
 }
 
 static void
 via_analog_commit(xf86OutputPtr output)
 {
+    via_analog_dpms(output, DPMSModeOn);
 }
 
 static void
@@ -680,20 +696,20 @@ static const xf86OutputFuncsRec via_analog_funcs = {
 void
 via_analog_init(ScrnInfoPtr pScrn)
 {
-	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
-	VIAPtr pVia = VIAPTR(pScrn);
-	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-	xf86OutputPtr output = NULL;
+    xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+    xf86OutputPtr output = NULL;
 
-	if (pVia->pI2CBus1) {
-		output = xf86OutputCreate(pScrn, &via_analog_funcs, "VGA-0");
+    if (pVia->pI2CBus1) {
+        output = xf86OutputCreate(pScrn, &via_analog_funcs, "VGA-0");
 
-		output->possible_crtcs = 0x1;
-		output->possible_clones = 0;
-		output->interlaceAllowed = TRUE;
-		output->doubleScanAllowed = FALSE;
-		pBIOSInfo->analog = output;
-	}
+        output->possible_crtcs = 0x3;
+        output->possible_clones = 0;
+        output->interlaceAllowed = TRUE;
+        output->doubleScanAllowed = FALSE;
+        pBIOSInfo->analog = output;
+    }
 }
 
 /*
