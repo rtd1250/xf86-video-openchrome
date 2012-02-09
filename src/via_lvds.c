@@ -618,9 +618,10 @@ ViaPanelGetNativeModeFromScratchPad(xf86OutputPtr output)
 }
 
 /* Used only for Legacy Mode Setting */
-static void
+static xf86OutputStatus
 VIAGetPanelSize(xf86OutputPtr output)
 {
+    xf86OutputStatus status = XF86OutputStatusDisconnected;
     ViaPanelInfoPtr Panel = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
@@ -674,16 +675,17 @@ VIAGetPanelSize(xf86OutputPtr output)
             xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Unable to "
                        "retrieve PanelSize: using default (1024x768)\n");
             Panel->NativeModeIndex = VIA_PANEL10X7;
-            return;
         }
     }
 
-    if (Panel->NativeModeIndex < 7)
+    if (Panel->NativeModeIndex < 7) {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Using panel at %s.\n",
                    PanelSizeString[Panel->NativeModeIndex]);
-    else
+        status = XF86OutputStatusConnected;
+    } else
         xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Unknown panel size "
                    "detected: %d.\n", Panel->NativeModeIndex);
+    return status;
 }
 
 /*
@@ -703,13 +705,10 @@ ViaPanelGetIndex(xf86OutputPtr output, DisplayModePtr mode)
 
     Panel->PanelIndex = VIA_BIOS_NUM_PANEL;
 
-    if (Panel->NativeModeIndex == VIA_PANEL_INVALID) {
-        VIAGetPanelSize(output);
-        if (Panel->NativeModeIndex == VIA_PANEL_INVALID) {
-            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                       "ViaPanelGetIndex: PanelSize not set.\n");
-            return FALSE;
-        }
+    if (VIAGetPanelSize(output) == XF86OutputStatusDisconnected) {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                    "ViaPanelGetIndex: Panel not detected.\n");
+        return FALSE;
     }
 
     if (!ViaGetResolutionIndex(pScrn, Panel, mode)) {
@@ -1295,11 +1294,10 @@ via_lvds_detect(xf86OutputPtr output)
     VIAPtr pVia = VIAPTR(pScrn);
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
-    CARD8 CR6A, CR6B, CR97, CR99;
 
     if (!pVia->UseLegacyModeSwitch) {
         /* First try to get the mode from EDID. */
-        if (panel->NativeModeIndex == VIA_PANEL_INVALID) {
+        if (!panel->NativeMode->Width || !panel->NativeMode->Height) {
             int width, height;
             Bool ret;
 
@@ -1313,17 +1311,18 @@ via_lvds_detect(xf86OutputPtr output)
                     status = XF86OutputStatusConnected;
                 }
             } else {
-                xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Unable to get panel size from EDID. Return code: %d\n", ret);
-                if (panel->NativeModeIndex == VIA_PANEL_INVALID)
+                if (!panel->NativeMode->Width || !panel->NativeMode->Height)
                     ViaPanelGetNativeModeFromScratchPad(output);
 
-                if (panel->NativeModeIndex != VIA_PANEL_INVALID)
+                if (panel->NativeMode->Width && panel->NativeMode->Height)
                     status = XF86OutputStatusConnected;
             }
-            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "NativeModeIndex: %d\n", panel->NativeModeIndex));
-        }
+            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "NativeMode: %d %d\n",
+                            panel->NativeMode->Width, panel->NativeMode->Height));
+        } else
+            status = XF86OutputStatusConnected;
     } else
-        VIAGetPanelSize(output);
+        status = VIAGetPanelSize(output);
     return status;
 }
 
@@ -1522,7 +1521,11 @@ via_lvds_init(ScrnInfoPtr pScrn)
         Panel->CenteredMode = (DisplayModePtr) xnfcalloc(sizeof(DisplayModeRec), 1);
 
         output->driver_private = Panel;
-        output->possible_crtcs = 0x3;
+
+        if (pVia->Chipset == VIA_VX900)
+            output->possible_crtcs = 0x3;
+        else
+            output->possible_crtcs = 0x2;
         output->possible_clones = 0;
         output->interlaceAllowed = FALSE;
         pBIOSInfo->lvds = output;
