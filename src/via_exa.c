@@ -1773,6 +1773,8 @@ UMSAccelInit(ScreenPtr pScreen)
 
     viaInitialize2DEngine(pScrn);
 
+    VIAInitialize3DEngine(pScrn);
+
     if (Success != viaSetupCBuffer(pScrn, &pVia->cb, 0))
         pVia->NoAccel = TRUE;
 

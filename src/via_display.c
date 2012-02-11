@@ -1094,7 +1094,7 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
             ViaModePrimaryLegacy(crtc, adjusted_mode);
         } else {
             ViaCRTCInit(pScrn);
-            ViaModeFirstCRTC(pScrn, mode);
+            ViaModeFirstCRTC(pScrn, adjusted_mode);
 
             if (pVia->pBIOSInfo->SimultaneousEnabled)
                 ViaDisplayEnableSimultaneous(pScrn);
@@ -1105,9 +1105,6 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
         if (!ViaVbeSetMode(pScrn, adjusted_mode))
             return;
     }
-    /* Enable the graphics engine. */
-    if (!pVia->NoAccel)
-        VIAInitialize3DEngine(pScrn);
 }
 
 static void
