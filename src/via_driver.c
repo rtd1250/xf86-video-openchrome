@@ -1599,7 +1599,8 @@ VIACreateScreenResources(ScreenPtr pScreen)
     if (pVia->shadowFB)
         surface = pVia->ShadowPtr;
 
-    if (!pScreen->ModifyPixmapHeader(rootPixmap, -1, -1, -1, -1, -1, surface))
+    if (!pScreen->ModifyPixmapHeader(rootPixmap, -1, -1, -1, -1, -1,
+                                        surface))
         return FALSE;
 
     if (pVia->shadowFB) {
@@ -1693,10 +1694,11 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     if (!drm_bo_manager_init(pScrn))
         return FALSE;
 
-    size = (pScrn->displayWidth * pScrn->bitsPerPixel >> 3) * pScrn->virtualY;
+    size = (pScrn->virtualX * pScrn->bitsPerPixel >> 3) * pScrn->virtualY;
     pVia->front_bo = drm_bo_alloc(pScrn, size, 16, TTM_PL_VRAM);
     if (!pVia->front_bo)
         return FALSE;
+    pScrn->displayWidth = pScrn->virtualX;
 
     if (!drm_bo_map(pScrn, pVia->front_bo))
         return FALSE;
@@ -1734,11 +1736,14 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Visuals set up\n"));
 
     if (pVia->shadowFB) {
-        int pitch = BitmapBytePad(pScrn->bitsPerPixel * pScrn->displayWidth);
+        int pitch = BitmapBytePad(pScrn->bitsPerPixel * pScrn->virtualX);
 
+        pVia->shadowFB = FALSE;
         pVia->ShadowPtr = malloc(pitch * pScrn->virtualY);
-        if (!pVia->ShadowPtr)
-            pVia->shadowFB = FALSE;
+        if (pVia->ShadowPtr) {
+            if (shadowSetup(pScreen))
+                pVia->shadowFB = TRUE;
+        }
     }
 
     if (!fbScreenInit(pScreen, NULL, pScrn->virtualX, pScrn->virtualY,

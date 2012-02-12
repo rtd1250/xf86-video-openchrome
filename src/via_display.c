@@ -1057,6 +1057,10 @@ iga1_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
     if (pVia->pVbe)
         return TRUE;
 
+    if ((mode->Clock < pScrn->clockRanges->minClock) ||
+        (mode->Clock > pScrn->clockRanges->maxClock))
+        return FALSE;
+
     if (ViaFirstCRTCModeValid(pScrn, mode) != MODE_OK)
         return FALSE;
 
@@ -1480,6 +1484,10 @@ iga2_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
     if (pVia->pVbe)
         return TRUE;
 
+    if ((mode->Clock < pScrn->clockRanges->minClock) ||
+        (mode->Clock > pScrn->clockRanges->maxClock))
+        return FALSE;
+
     if (ViaSecondCRTCModeValid(pScrn, mode) != MODE_OK)
         return FALSE;
 
@@ -1813,9 +1821,9 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
 {
     ViaCRTCInfoPtr iga1_rec = NULL, iga2_rec = NULL;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
-    int max_pitch, max_height, i;
     VIAPtr pVia = VIAPTR(pScrn);
     ClockRangePtr clockRanges;
+    int max_pitch, max_height;
     VIABIOSInfoPtr pBIOSInfo;
     xf86CrtcPtr iga1, iga2;
 
@@ -1874,7 +1882,23 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
             ConfiguredMonitor = vbeDoEDID(pVia->pVbe, NULL);
     }
 
-    /* Might not belong here temporary fix for bug fix */
+    /*
+     * Set up ClockRanges, which describe what clock ranges are
+     * available, and what sort of modes they can be used for.
+     */
+    clockRanges = xnfalloc(sizeof(ClockRange));
+    clockRanges->next = NULL;
+    clockRanges->minClock = 20000;
+    clockRanges->maxClock = 230000;
+
+    clockRanges->clockIndex = -1;
+    clockRanges->interlaceAllowed = TRUE;
+    clockRanges->doubleScanAllowed = FALSE;
+    pScrn->clockRanges = clockRanges;
+
+    /*
+     * Now handle the outputs
+     */
     xf86CrtcConfigInit(pScrn, &via_xf86crtc_config_funcs);
 
     iga1_rec = (ViaCRTCInfoPtr) xnfcalloc(sizeof(ViaCRTCInfoPtr), 1);
@@ -1909,6 +1933,18 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
     iga2_rec->index = 1;
     iga2->driver_private = iga2_rec;
 
+    /*
+     * CLE266A:
+     *   Max Line Pitch: 4080, (FB corruption when higher, driver problem?)
+     *   Max Height: 4096 (and beyond)
+     *
+     * CLE266A: primary AdjustFrame can use only 24 bits, so we are limited
+     * to 12x11 bits; 4080x2048 (~2:1), 3344x2508 (4:3), or 2896x2896 (1:1).
+     * TODO Test CLE266Cx, KM400, KM400A, K8M800, CN400 please.
+     *
+     * We should be able to limit the memory available for a mode to 32 MB,
+     * but miScanLineWidth fails to catch this properly (apertureSize).
+     */
     switch (pVia->Chipset) {
     case VIA_CLE266:
     case VIA_KM400:
@@ -1971,71 +2007,13 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
         return FALSE;
 
     if (pVia->pVbe) {
-
         if (!ViaVbeModePreInit(pScrn))
             return FALSE;
+    }
 
-    } else {
-        /*
-         * Set up ClockRanges, which describe what clock ranges are
-         * available, and what sort of modes they can be used for.
-         */
-        clockRanges = xnfalloc(sizeof(ClockRange));
-        clockRanges->next = NULL;
-        clockRanges->minClock = 20000;
-        clockRanges->maxClock = 230000;
-
-        clockRanges->clockIndex = -1;
-        clockRanges->interlaceAllowed = TRUE;
-        clockRanges->doubleScanAllowed = FALSE;
-
-        /*
-         * xf86ValidateModes will check that the mode HTotal and VTotal values
-         * don't exceed the chipset's limit if pScrn->maxHValue and
-         * pScrn->maxVValue are set.  Since our VIAValidMode() already takes
-         * care of this, we don't worry about setting them here.
-         *
-         * CLE266A:
-         *   Max Line Pitch: 4080, (FB corruption when higher, driver problem?)
-         *   Max Height: 4096 (and beyond)
-         *
-         * CLE266A: primary AdjustFrame can use only 24 bits, so we are limited
-         * to 12x11 bits; 4080x2048 (~2:1), 3344x2508 (4:3), or 2896x2896 (1:1).
-         * TODO Test CLE266Cx, KM400, KM400A, K8M800, CN400 please.
-         *
-         * We should be able to limit the memory available for a mode to 32 MB,
-         * but xf86ValidateModes (or miScanLineWidth) fails to catch this
-         * properly (apertureSize).
-         */
-
-        /* Select valid modes from those available. */
-        i = xf86ValidateModes(pScrn,
-                              pScrn->monitor->Modes,     /* List of modes available for the monitor */
-                              pScrn->display->modes,     /* List of mode names that the screen is requesting */
-                              clockRanges,               /* list of clock ranges */
-                              NULL,                      /* list of line pitches */
-                              256,                       /* minimum line pitch */
-                              max_pitch,                 /* maximum line pitch */
-                              16 * 8,                    /* pitch increment (in bits), we just want 16 bytes alignment */
-                              128,                       /* min virtual height */
-                              max_height,                /* maximum virtual height */
-                              pScrn->display->virtualX,  /* virtual width */
-                              pScrn->display->virtualY,  /* virtual height */
-                              pVia->videoRambytes,       /* apertureSize */
-                              LOOKUP_BEST_REFRESH);      /* lookup mode flags */
-
-        if (i == -1) {
-            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                       "xf86ValidateModes failure\n");
-            return FALSE;
-        }
-
-        /* This function deletes modes in the modes field of the ScrnInfoRec that have been marked as invalid. */        xf86PruneDriverModes(pScrn);
-
-        if (i == 0 || pScrn->modes == NULL) {
-            xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "No valid modes found\n");
-            return FALSE;
-        }
+    if (!pScrn->modes) {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "No valid modes found\n");
+        return FALSE;
     }
     return TRUE;
 }
