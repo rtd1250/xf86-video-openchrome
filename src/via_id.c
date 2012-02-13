@@ -142,6 +142,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"ECS P4M800PRO-M2 (V2.0)",               VIA_VM800,   0x1019, 0x2123, VIA_DEVICE_CRT},
     {"ECS C7VCM",                             VIA_VM800,   0x1019, 0xAA2D, VIA_DEVICE_CRT},
     {"PCChips V21G",                          VIA_VM800,   0x1019, 0xAA51, VIA_DEVICE_CRT},
+    {"Hewlett Packard DX2020",                VIA_VM800,   0x103C, 0x3027, VIA_DEVICE_CRT},
     {"Asustek P5VDC-MX",                      VIA_VM800,   0x1043, 0x3344, VIA_DEVICE_CRT},
     {"Asustek P5VDC-TVM",                     VIA_VM800,   0x1043, 0x81CE, VIA_DEVICE_CRT},
     {"Foxconn P4M800P7MB-RS2H",               VIA_VM800,   0x105B, 0x0CF0, VIA_DEVICE_CRT},
@@ -191,6 +192,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Gigabyte GA-VM900M",                    VIA_P4M900,  0x1458, 0xD000, VIA_DEVICE_CRT},
     {"MSI VR321",                             VIA_P4M900,  0x1462, 0x3355, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"MSI P4M900M / P4M900M2-F/L",            VIA_P4M900,  0x1462, 0x7255, VIA_DEVICE_CRT},
+    {"MSI PM9M-V",                            VIA_P4M900,  0x1462, 0x7364, VIA_DEVICE_CRT},
     {"MSI P4M900M3-L",                        VIA_P4M900,  0x1462, 0x7387, VIA_DEVICE_CRT},
     {"Twinhead H12V",                         VIA_P4M900,  0x14FF, 0xA00F, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Twinhead K15V",                         VIA_P4M900,  0x14FF, 0xA012, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
@@ -245,6 +247,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     /*** VX900 ***/
     {"Foxconn L740",                          VIA_VX900,   0x105B, 0x0CFD, VIA_DEVICE_LCD | VIA_DEVICE_CRT},
     {"HP T5550 Thin Client",                  VIA_VX900,   0x1106, 0x7122, VIA_DEVICE_CRT},
+    {"ASRock PV530",                          VIA_VX900,   0x1849, 0x7122, VIA_DEVICE_CRT},
 
 
     /* keep this */
