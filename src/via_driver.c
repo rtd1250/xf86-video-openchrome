@@ -1465,7 +1465,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 
     /* Set up screen parameters. */
     pVia->Bpp = pScrn->bitsPerPixel >> 3;
-    pVia->Bpl = pScrn->displayWidth * pVia->Bpp;
+    pVia->Bpl = pScrn->virtualX * pVia->Bpp;
 
     /* Set the current mode to the first in the list */
     pScrn->currentMode = pScrn->modes;
@@ -1663,12 +1663,13 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
 static Bool
 VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 {
-	ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     int size, i;
 
     pScrn->pScreen = pScreen;
+    pScrn->displayWidth = pScrn->virtualX;
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAScreenInit\n"));
 
     if (pVia->KMS) {
@@ -1698,7 +1699,6 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     pVia->front_bo = drm_bo_alloc(pScrn, size, 16, TTM_PL_VRAM);
     if (!pVia->front_bo)
         return FALSE;
-    pScrn->displayWidth = pScrn->virtualX;
 
     if (!drm_bo_map(pScrn, pVia->front_bo))
         return FALSE;
