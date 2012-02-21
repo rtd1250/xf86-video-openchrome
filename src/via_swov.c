@@ -1153,7 +1153,7 @@ AddHQVSurface(ScrnInfoPtr pScrn, unsigned int numbuf, CARD32 fourcc)
     pitch = pVia->swov.SWDevice.dwPitch;
     fbsize = pitch * height * (isplanar ? 2 : 1);
 
-    pVia->swov.HQVMem = drm_bo_alloc(pScrn, fbsize * numbuf, 1, TTM_PL_VRAM);
+    pVia->swov.HQVMem = drm_bo_alloc(pScrn, fbsize * numbuf, 1, TTM_PL_FLAG_VRAM);
     if (!pVia->swov.HQVMem)
         return BadAlloc;
     addr = pVia->swov.HQVMem->offset;
@@ -1207,7 +1207,7 @@ CreateSurface(ScrnInfoPtr pScrn, CARD32 FourCC, CARD16 Width,
     }
 
     if (doalloc) {
-        pVia->swov.SWfbMem = drm_bo_alloc(pScrn, fbsize * 2, 1, TTM_PL_VRAM);
+        pVia->swov.SWfbMem = drm_bo_alloc(pScrn, fbsize * 2, 1, TTM_PL_FLAG_VRAM);
         if (!pVia->swov.SWfbMem)
             return BadAlloc;
         addr = pVia->swov.SWfbMem->offset;

@@ -64,7 +64,7 @@ viaOffScreenLinear(struct buffer_object *obj, ScrnInfoPtr pScrn,
         return BadAlloc;
     obj->offset = linear->offset * depth;
     obj->handle = (unsigned long) linear;
-    obj->domain = TTM_PL_SYSTEM;
+    obj->domain = TTM_PL_FLAG_SYSTEM;
     obj->size = size;
     return Success;
 }
@@ -81,9 +81,9 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
         obj->map_offset = (unsigned long) pVia->FBBase;
 
         switch (domain) {
-        case TTM_PL_TT:
+        case TTM_PL_FLAG_TT:
             obj->map_offset = (unsigned long) pVia->agpMappedAddr;
-        case TTM_PL_VRAM:
+        case TTM_PL_FLAG_VRAM:
 #ifdef XF86DRI
             if (pVia->directRenderingType == DRI_1) {
                 drm_via_mem_t drm;
@@ -91,7 +91,7 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
                 size = ALIGN_TO(size, alignment);
                 drm.context = DRIGetContext(pScrn->pScreen);
                 drm.size = size;
-                drm.type = (domain == TTM_PL_TT ? VIA_MEM_AGP : VIA_MEM_VIDEO);
+                drm.type = (domain == TTM_PL_FLAG_TT ? VIA_MEM_AGP : VIA_MEM_VIDEO);
                 ret = drmCommandWriteRead(pVia->drmFD, DRM_VIA_ALLOCMEM,
                                             &drm, sizeof(drm_via_mem_t));
                 if (!ret && (size == drm.size)) {
@@ -129,7 +129,7 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
                 }
             }
 #endif
-        case TTM_PL_SYSTEM:
+        case TTM_PL_FLAG_SYSTEM:
         default:
             if (Success != viaOffScreenLinear(obj, pScrn, size)) {
                 ErrorF("Linear memory allocation failed\n");
@@ -175,14 +175,14 @@ drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
     if (obj) {
         DEBUG(ErrorF("Freed %lu (pool %d)\n", obj->offset, obj->domain));
         switch (obj->domain) {
-        case TTM_PL_SYSTEM: {
+        case TTM_PL_FLAG_SYSTEM: {
                 FBLinearPtr linear = (FBLinearPtr) obj->handle;
 
                 xf86FreeOffscreenLinear(linear);
             }
             break;
-        case TTM_PL_VRAM:
-        case TTM_PL_TT:
+        case TTM_PL_FLAG_VRAM:
+        case TTM_PL_FLAG_TT:
 #ifdef XF86DRI
             if (pVia->directRenderingType == DRI_1) {
                 drm_via_mem_t drm;

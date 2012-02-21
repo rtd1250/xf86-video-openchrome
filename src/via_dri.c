@@ -780,7 +780,7 @@ VIADRIFinishScreenInit(ScreenPtr pScreen)
                    "[drm] the frame buffer memory area in the BIOS.\n");
     }
 
-    pVia->driOffScreenMem = drm_bo_alloc(pScrn, pVia->driSize, 16, TTM_PL_VRAM);
+    pVia->driOffScreenMem = drm_bo_alloc(pScrn, pVia->driSize, 16, TTM_PL_FLAG_VRAM);
 
     DRIFinishScreenInit(pScreen);
 
