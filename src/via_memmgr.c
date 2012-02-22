@@ -108,7 +108,7 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
                 struct drm_gem_create args;
 
                 /* Some day this will be moved to libdrm. */
-                args.write_domains = domain;
+                args.domains = domain;
                 args.alignment = alignment;
                 args.pitch = 0;
                 args.size = size;

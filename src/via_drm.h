@@ -297,8 +297,12 @@ struct drm_gem_create {
 	/**
 	 * Give hints where to allocate this object.
 	 */
-	uint32_t write_domains;
-	uint32_t read_domains;
+	uint32_t domains;
+
+	/**
+	 * chmod values applied to a buffer. 
+	 */
+	uint32_t mode_t;
 
 	/**
 	 * Offset to start of memory region.
