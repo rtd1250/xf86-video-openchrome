@@ -260,7 +260,7 @@ viaFlushDRIEnabled(ViaCommandBuffer * cb)
             tmpSize -= b.size;
             b.buf = tmp;
             tmp += b.size;
-            if (drmCommandWrite(pVia->drmFD, ((pVia->agpDMA)
+            if (drmCommandWrite(pVia->drmmode.fd, ((pVia->agpDMA)
                                               ? DRM_VIA_CMDBUFFER :
                                               DRM_VIA_PCICMD), &b, sizeof(b))) {
                 ErrorF("DRM command buffer submission failed.\n");
@@ -1132,7 +1132,7 @@ viaAccelDMADownload(ScrnInfoPtr pScrn, unsigned long fbOffset,
         if (doSync[curBuf]) {
 
             do {
-                err = drmCommandWrite(pVia->drmFD, DRM_VIA_BLIT_SYNC,
+                err = drmCommandWrite(pVia->drmmode.fd, DRM_VIA_BLIT_SYNC,
                                       &curBlit->sync, sizeof(curBlit->sync));
             } while (err == -EAGAIN);
 
@@ -1170,7 +1170,7 @@ viaAccelDMADownload(ScrnInfoPtr pScrn, unsigned long fbOffset,
         fbOffset += curBlit->num_lines * srcPitch;
 
         do {
-            err = drmCommandWriteRead(pVia->drmFD, DRM_VIA_DMA_BLIT, curBlit,
+            err = drmCommandWriteRead(pVia->drmmode.fd, DRM_VIA_DMA_BLIT, curBlit,
                                       sizeof(*curBlit));
         } while (err == -EAGAIN);
 
@@ -1414,12 +1414,12 @@ viaExaUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
     blit.to_fb = 1;
 
     exaWaitSync(pScrn->pScreen);
-    while (-EAGAIN == (err = drmCommandWriteRead(pVia->drmFD, DRM_VIA_DMA_BLIT,
+    while (-EAGAIN == (err = drmCommandWriteRead(pVia->drmmode.fd, DRM_VIA_DMA_BLIT,
                                                  &blit, sizeof(blit)))) ;
     if (err < 0)
         return FALSE;
 
-    while (-EAGAIN == (err = drmCommandWrite(pVia->drmFD, DRM_VIA_BLIT_SYNC,
+    while (-EAGAIN == (err = drmCommandWrite(pVia->drmmode.fd, DRM_VIA_BLIT_SYNC,
                                              &blit.sync, sizeof(blit.sync)))) ;
     return (err == 0);
 }

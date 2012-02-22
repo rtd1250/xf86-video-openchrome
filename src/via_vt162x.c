@@ -34,7 +34,7 @@
 static void
 ViaSetTVClockSource(xf86CrtcPtr crtc)
 {
-	ViaCRTCInfoPtr iga = crtc->driver_private;
+	drmmode_crtc_private_ptr iga = crtc->driver_private;
 	ScrnInfoPtr pScrn = crtc->scrn;
 	VIAPtr pVia = VIAPTR(pScrn);
 	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;

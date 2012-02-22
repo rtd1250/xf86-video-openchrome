@@ -624,7 +624,7 @@ ViaFirstCRTCSetStartingAddress(ScrnInfoPtr pScrn, int x, int y)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaFirstCRTCSetStartingAddress\n"));
 
     Base = (y * pScrn->displayWidth + x) * (pScrn->bitsPerPixel / 8);
-    Base = (Base + pVia->front_bo->offset) >> 1;
+    Base = (Base + pVia->drmmode.front_bo->offset) >> 1;
 
     hwp->writeCrtc(hwp, 0x0C, (Base & 0xFF00) >> 8);
     hwp->writeCrtc(hwp, 0x0D, Base & 0xFF);
@@ -643,7 +643,7 @@ ViaSecondCRTCSetStartingAddress(ScrnInfoPtr pScrn, int x, int y)
     CARD32 Base, tmp;
 
     Base = (y * pScrn->displayWidth + x) * (pScrn->bitsPerPixel / 8);
-    Base = (Base + pVia->front_bo->offset) >> 3;
+    Base = (Base + pVia->drmmode.front_bo->offset) >> 3;
 
     tmp = hwp->readCrtc(hwp, 0x62) & 0x01;
     tmp |= (Base & 0x7F) << 1;
@@ -1208,7 +1208,7 @@ iga1_crtc_set_cursor_colors (xf86CrtcPtr crtc, int bg, int fg)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
-    ViaCRTCInfoPtr iga = crtc->driver_private;
+    drmmode_crtc_private_ptr iga = crtc->driver_private;
     int height = 64, width = 64, i;
     VIAPtr pVia = VIAPTR(pScrn);
     CARD32 pixel, temp, *dst;
@@ -1293,7 +1293,7 @@ iga1_crtc_set_cursor_position (xf86CrtcPtr crtc, int x, int y)
 static void
 iga1_crtc_show_cursor (xf86CrtcPtr crtc)
 {
-    ViaCRTCInfoPtr iga = crtc->driver_private;
+    drmmode_crtc_private_ptr iga = crtc->driver_private;
     ScrnInfoPtr pScrn = crtc->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
 
@@ -1348,7 +1348,7 @@ iga1_crtc_hide_cursor (xf86CrtcPtr crtc)
 static void
 iga_crtc_load_cursor_image(xf86CrtcPtr crtc, CARD8 *src)
 {
-    ViaCRTCInfoPtr iga = crtc->driver_private;
+    drmmode_crtc_private_ptr iga = crtc->driver_private;
     ScrnInfoPtr pScrn = crtc->scrn;
     void *dst;
 
@@ -1361,7 +1361,7 @@ iga_crtc_load_cursor_image(xf86CrtcPtr crtc, CARD8 *src)
 static void
 iga_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
 {
-    ViaCRTCInfoPtr iga = crtc->driver_private;
+    drmmode_crtc_private_ptr iga = crtc->driver_private;
     ScrnInfoPtr pScrn = crtc->scrn;
     void *dst;
 
@@ -1655,7 +1655,7 @@ iga2_crtc_shadow_destroy(xf86CrtcPtr crtc, PixmapPtr rotate_pixmap, void *data)
 static void
 iga2_crtc_set_cursor_colors(xf86CrtcPtr crtc, int bg, int fg)
 {
-    ViaCRTCInfoPtr iga = crtc->driver_private;
+    drmmode_crtc_private_ptr iga = crtc->driver_private;
     ScrnInfoPtr pScrn = crtc->scrn;
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
     int height = 64, width = 64, i;
@@ -1742,7 +1742,7 @@ iga2_crtc_set_cursor_position(xf86CrtcPtr crtc, int x, int y)
 static void
 iga2_crtc_show_cursor(xf86CrtcPtr crtc)
 {
-    ViaCRTCInfoPtr iga = crtc->driver_private;
+    drmmode_crtc_private_ptr iga = crtc->driver_private;
     ScrnInfoPtr pScrn = crtc->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
 
@@ -1819,7 +1819,7 @@ static const xf86CrtcFuncsRec iga2_crtc_funcs = {
 Bool
 UMSCrtcInit(ScrnInfoPtr pScrn)
 {
-    ViaCRTCInfoPtr iga1_rec = NULL, iga2_rec = NULL;
+    drmmode_crtc_private_ptr iga1_rec = NULL, iga2_rec = NULL;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     ClockRangePtr clockRanges;
@@ -1901,7 +1901,7 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
      */
     xf86CrtcConfigInit(pScrn, &via_xf86crtc_config_funcs);
 
-    iga1_rec = (ViaCRTCInfoPtr) xnfcalloc(sizeof(ViaCRTCInfoPtr), 1);
+    iga1_rec = (drmmode_crtc_private_ptr) xnfcalloc(sizeof(drmmode_crtc_private_ptr), 1);
     if (!iga1_rec) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "IGA1 Rec allocation failed.\n");
         return FALSE;
@@ -1916,7 +1916,7 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
     iga1_rec->index = 0;
     iga1->driver_private = iga1_rec;
 
-    iga2_rec = (ViaCRTCInfoPtr) xnfcalloc(sizeof(ViaCRTCInfoPtr), 1);
+    iga2_rec = (drmmode_crtc_private_ptr) xnfcalloc(sizeof(drmmode_crtc_private_ptr), 1);
     if (!iga2_rec) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "IGA1 Rec allocation failed.\n");
         xf86CrtcDestroy(iga1);
@@ -2003,17 +2003,9 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
 
     ViaOutputsDetect(pScrn);
 
-    if (!xf86InitialConfiguration(pScrn, TRUE))
-        return FALSE;
-
     if (pVia->pVbe) {
         if (!ViaVbeModePreInit(pScrn))
             return FALSE;
-    }
-
-    if (!pScrn->modes) {
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "No valid modes found\n");
-        return FALSE;
     }
     return TRUE;
 }

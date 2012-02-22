@@ -92,7 +92,7 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
                 drm.context = DRIGetContext(pScrn->pScreen);
                 drm.size = size;
                 drm.type = (domain == TTM_PL_FLAG_TT ? VIA_MEM_AGP : VIA_MEM_VIDEO);
-                ret = drmCommandWriteRead(pVia->drmFD, DRM_VIA_ALLOCMEM,
+                ret = drmCommandWriteRead(pVia->drmmode.fd, DRM_VIA_ALLOCMEM,
                                             &drm, sizeof(drm_via_mem_t));
                 if (!ret && (size == drm.size)) {
                     obj->offset = ALIGN_TO(drm.offset, alignment);
@@ -112,7 +112,7 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
                 args.alignment = alignment;
                 args.pitch = 0;
                 args.size = size;
-                ret = drmCommandWriteRead(pVia->drmFD, DRM_VIA_GEM_CREATE,
+                ret = drmCommandWriteRead(pVia->drmmode.fd, DRM_VIA_GEM_CREATE,
                                         &args, sizeof(struct drm_gem_create));
                 if (!ret) {
                     /* Okay the X server expects to know the offset because
@@ -151,7 +151,7 @@ drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
 
     if (pVia->directRenderingType == DRI_2) {
         obj->ptr = mmap(0, obj->size, PROT_READ | PROT_WRITE,
-                        MAP_SHARED, pVia->drmFD, obj->map_offset);
+                        MAP_SHARED, pVia->drmmode.fd, obj->map_offset);
     } else
         obj->ptr = (unsigned char *) obj->map_offset + obj->offset;
     return obj->ptr;
@@ -188,14 +188,14 @@ drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
                 drm_via_mem_t drm;
 
                 drm.index = obj->handle;
-                if (drmCommandWrite(pVia->drmFD, DRM_VIA_FREEMEM,
+                if (drmCommandWrite(pVia->drmmode.fd, DRM_VIA_FREEMEM,
                                     &drm, sizeof(drm_via_mem_t)) < 0)
                     ErrorF("DRM failed to free for handle %lld.\n", obj->handle);
             } else  if (pVia->directRenderingType == DRI_2) {
                 struct drm_gem_close close;
 
                 close.handle = obj->handle;
-                if (ioctl(pVia->drmFD, DRM_IOCTL_GEM_CLOSE, &close) < 0)
+                if (ioctl(pVia->drmmode.fd, DRM_IOCTL_GEM_CLOSE, &close) < 0)
                     ErrorF("DRM failed to free for handle %lld.\n", obj->handle);
             }
 #endif

@@ -69,6 +69,7 @@
 #include "via_memmgr.h"
 
 #include "via_regs.h"
+#include "via_kms.h"
 #include "via_ums.h"
 #include "via_swov.h"
 #include "via_dmabuffer.h"
@@ -226,7 +227,6 @@ typedef struct _VIA {
     int                 FBFreeEnd;
     int                 driSize;
     int                 maxDriSize;
-    struct buffer_object *front_bo;
     struct buffer_object *vq_bo;
     int                 VQStart;
     int                 VQEnd;
@@ -324,11 +324,11 @@ typedef struct _VIA {
     Bool                HasSecondary;
     Bool                SAMM;
 
+    drmmode_rec         drmmode;
     enum dri_type       directRenderingType;
 #ifdef XF86DRI
     Bool                XvMCEnabled;
     DRIInfoPtr          pDRIInfo;
-    int                 drmFD;
     int                 numVisualConfigs;
     __GLXvisualConfig*	pVisualConfigs;
     VIAConfigPrivPtr	pVisualConfigsPriv;

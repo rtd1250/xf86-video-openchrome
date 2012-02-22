@@ -353,7 +353,7 @@ ViaInitXVMC(ScreenPtr pScreen)
 
     vXvMC->mmioBase = pVia->registerHandle;
 
-    if (drmAddMap(pVia->drmFD,
+    if (drmAddMap(pVia->drmmode.fd,
                   (drm_handle_t) pVia->FrameBufferBase,
                   pVia->videoRambytes, DRM_FRAME_BUFFER, 0,
                   &(vXvMC->fbBase)) < 0) {
@@ -368,7 +368,7 @@ ViaInitXVMC(ScreenPtr pScreen)
                                          ? ppAdapt_pga : ppAdapt))) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                    "[XvMC] XvMCScreenInit failed. Disabling XvMC.\n");
-        drmRmMap(pVia->drmFD, vXvMC->fbBase);
+        drmRmMap(pVia->drmmode.fd, vXvMC->fbBase);
         return;
     }
 #if (XvMCVersion > 1) || (XvMCRevision > 0)
@@ -412,7 +412,7 @@ ViaCleanupXVMC(ScrnInfoPtr pScrn, XF86VideoAdaptorPtr * XvAdaptors,
 
     if (pVia->XvMCEnabled) {
         mpegDisable(pVia, 0);
-        drmRmMap(pVia->drmFD, vXvMC->mmioBase);
+        drmRmMap(pVia->drmmode.fd, vXvMC->mmioBase);
         cleanupViaXvMC(vXvMC, XvAdaptors, XvAdaptorCount);
     }
     for (i = 0; i < XvAdaptorCount; ++i) {

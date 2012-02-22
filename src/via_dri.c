@@ -183,7 +183,7 @@ VIADRIIrqInit(ScrnInfoPtr pScrn, VIADRIPtr pVIADRI)
     VIAPtr pVia = VIAPTR(pScrn);
 
     pVIADRI->irqEnabled = drmGetInterruptFromBusID
-            (pVia->drmFD,
+            (pVia->drmmode.fd,
 #ifdef XSERVER_LIBPCIACCESS
              ((pVia->PciInfo->domain << 8) | pVia->PciInfo->bus),
              pVia->PciInfo->dev, pVia->PciInfo->func
@@ -193,7 +193,7 @@ VIADRIIrqInit(ScrnInfoPtr pScrn, VIADRIPtr pVIADRI)
              ((pciConfigPtr)pVia->PciInfo->thisCard)->funcnum
 #endif
             );
-    if ((drmCtlInstHandler(pVia->drmFD, pVIADRI->irqEnabled))) {
+    if ((drmCtlInstHandler(pVia->drmmode.fd, pVIADRI->irqEnabled))) {
         xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
                    "[drm] Failure adding IRQ handler. "
                    "Falling back to IRQ-free operation.\n");
@@ -212,7 +212,7 @@ VIADRIIrqExit(ScrnInfoPtr pScrn, VIADRIPtr pVIADRI)
     VIAPtr pVia = VIAPTR(pScrn);
 
     if (pVIADRI->irqEnabled) {
-        if (drmCtlUninstHandler(pVia->drmFD)) {
+        if (drmCtlUninstHandler(pVia->drmmode.fd)) {
             xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                        "[drm] IRQ handler uninstalled.\n");
         } else {
@@ -234,7 +234,7 @@ VIADRIRingBufferCleanup(ScrnInfoPtr pScrn)
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                    "[drm] Cleaning up DMA ring-buffer.\n");
         ringBufInit.func = VIA_CLEANUP_DMA;
-        if (drmCommandWrite(pVia->drmFD, DRM_VIA_DMA_INIT, &ringBufInit,
+        if (drmCommandWrite(pVia->drmmode.fd, DRM_VIA_DMA_INIT, &ringBufInit,
                             sizeof(ringBufInit))) {
             xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
                        "[drm] Failed to clean up DMA ring-buffer: %d\n", errno);
@@ -277,7 +277,7 @@ VIADRIRingBufferInit(ScrnInfoPtr pScrn)
         ringBufInit.reg_pause_addr = pVIADRI->reg_pause_addr;
         ringBufInit.func = VIA_INIT_DMA;
 
-        if (drmCommandWrite(pVia->drmFD, DRM_VIA_DMA_INIT, &ringBufInit,
+        if (drmCommandWrite(pVia->drmmode.fd, DRM_VIA_DMA_INIT, &ringBufInit,
                             sizeof(ringBufInit))) {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                        "[drm] Failed to initialize DMA ring-buffer: %d\n",
@@ -297,9 +297,9 @@ static Bool
 VIASetAgpMode(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    CARD32 mode = drmAgpGetMode(pVia->drmFD);
-    unsigned int vendor = drmAgpVendorId(pVia->drmFD);
-    unsigned int device = drmAgpDeviceId(pVia->drmFD);
+    CARD32 mode = drmAgpGetMode(pVia->drmmode.fd);
+    unsigned int vendor = drmAgpVendorId(pVia->drmmode.fd);
+    unsigned int device = drmAgpDeviceId(pVia->drmmode.fd);
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] Detected AGP "
                "vendor 0x%04x, device 0x%04x\n", vendor, device);
@@ -319,7 +319,7 @@ VIASetAgpMode(ScrnInfoPtr pScrn)
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                "[drm] Trying to enable AGP fast writes.\n");
 
-    if (drmAgpEnable(pVia->drmFD, mode) < 0)
+    if (drmAgpEnable(pVia->drmmode.fd, mode) < 0)
         return FALSE;
     return TRUE;
 }
@@ -335,7 +335,7 @@ VIADRIAgpInit(ScrnInfoPtr pScrn)
     int agpPages;
 
     pVia->agpSize = 0;
-    if (drmAgpAcquire(pVia->drmFD) < 0) {
+    if (drmAgpAcquire(pVia->drmmode.fd) < 0) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "[drm] drmAgpAcquire failed %d\n",
                    errno);
         return FALSE;
@@ -343,7 +343,7 @@ VIADRIAgpInit(ScrnInfoPtr pScrn)
 
     if (!VIASetAgpMode(pScrn)) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "[drm] VIASetAgpMode failed\n");
-        drmAgpRelease(pVia->drmFD);
+        drmAgpRelease(pVia->drmmode.fd);
         return FALSE;
     }
 
@@ -355,17 +355,17 @@ VIADRIAgpInit(ScrnInfoPtr pScrn)
     }
 
     agpPages = (pVia->agpMem * 1024 + AGP_PAGE_SIZE - 1) / AGP_PAGE_SIZE;
-    if (drmAgpAlloc(pVia->drmFD, agpPages * AGP_PAGE_SIZE,
+    if (drmAgpAlloc(pVia->drmmode.fd, agpPages * AGP_PAGE_SIZE,
                     0, &agp_phys, &pVia->agpHandle) < 0) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "[drm] drmAgpAlloc failed\n");
-        drmAgpRelease(pVia->drmFD);
+        drmAgpRelease(pVia->drmmode.fd);
         return FALSE;
     }
 
-    if (drmAgpBind(pVia->drmFD, pVia->agpHandle, 0) < 0) {
+    if (drmAgpBind(pVia->drmmode.fd, pVia->agpHandle, 0) < 0) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "[drm] drmAgpBind failed\n");
-        drmAgpFree(pVia->drmFD, pVia->agpHandle);
-        drmAgpRelease(pVia->drmFD);
+        drmAgpFree(pVia->drmmode.fd, pVia->agpHandle);
+        drmAgpRelease(pVia->drmmode.fd);
         return FALSE;
     }
 
@@ -374,31 +374,31 @@ VIADRIAgpInit(ScrnInfoPtr pScrn)
      * public map not to include the buffer for security reasons.
      */
     pVia->agpSize = agpPages * AGP_PAGE_SIZE - agpCmdSize;
-    pVia->agpAddr = drmAgpBase(pVia->drmFD);
+    pVia->agpAddr = drmAgpBase(pVia->drmmode.fd);
     agp.offset = 0;
     agp.size = pVia->agpSize;
-    if (drmCommandWrite(pVia->drmFD, DRM_VIA_AGP_INIT, &agp,
+    if (drmCommandWrite(pVia->drmmode.fd, DRM_VIA_AGP_INIT, &agp,
                         sizeof(drm_via_agp_t)) < 0) {
-        drmAgpUnbind(pVia->drmFD, pVia->agpHandle);
-        drmAgpFree(pVia->drmFD, pVia->agpHandle);
-        drmAgpRelease(pVia->drmFD);
+        drmAgpUnbind(pVia->drmmode.fd, pVia->agpHandle);
+        drmAgpFree(pVia->drmmode.fd, pVia->agpHandle);
+        drmAgpRelease(pVia->drmmode.fd);
         return FALSE;
     }
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] drmAgpEnabled succeeded\n");
 
     /* Allocate all of AGP memory */
-    if (drmAddMap(pVia->drmFD, 0, pVia->agpSize,
+    if (drmAddMap(pVia->drmmode.fd, 0, pVia->agpSize,
                   DRM_AGP, 0, &handle) < 0) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                    "[drm] Failed to map public agp area.\n");
         pVia->agpSize = 0;
-        drmAgpUnbind(pVia->drmFD, pVia->agpHandle);
-        drmAgpFree(pVia->drmFD, pVia->agpHandle);
-        drmAgpRelease(pVia->drmFD);
+        drmAgpUnbind(pVia->drmmode.fd, pVia->agpHandle);
+        drmAgpFree(pVia->drmmode.fd, pVia->agpHandle);
+        drmAgpRelease(pVia->drmmode.fd);
         return FALSE;
     }
-    drmMap(pVia->drmFD, handle, pVia->agpSize, &agpaddr);
+    drmMap(pVia->drmmode.fd, handle, pVia->agpSize, &agpaddr);
     pVia->agpMappedAddr = agpaddr;
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -418,7 +418,7 @@ VIADRIFBInit(ScrnInfoPtr pScrn)
 
     fb.offset = pVia->FBFreeStart;
     fb.size = pVia->FBFreeEnd;
-    if (drmCommandWrite(pVia->drmFD, DRM_VIA_FB_INIT, &fb,
+    if (drmCommandWrite(pVia->drmmode.fd, DRM_VIA_FB_INIT, &fb,
                         sizeof(drm_via_fb_t)) < 0) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                     "[drm] Failed to initialize frame buffer area.\n");
@@ -566,7 +566,7 @@ VIADRI1ScreenInit(ScreenPtr pScreen)
 
     /* If symbols or version check fails, we still want this to be NULL. */
     pVia->pDRIInfo = NULL;
-    drmClose(pVia->drmFD);
+    drmClose(pVia->drmmode.fd);
 
     /* Check that the GLX, DRI, and DRM modules have been loaded by testing
      * for canonical symbols in each module. */
@@ -663,14 +663,14 @@ VIADRI1ScreenInit(ScreenPtr pScreen)
     pDRIInfo->MoveBuffers = VIADRIMoveBuffers;
     pDRIInfo->bufferRequests = DRI_ALL_WINDOWS;
 
-    if (!DRIScreenInit(pScreen, pDRIInfo, &pVia->drmFD)) {
+    if (!DRIScreenInit(pScreen, pDRIInfo, &pVia->drmmode.fd)) {
         xf86DrvMsg(pScreen->myNum, X_ERROR,
                    "[dri] DRIScreenInit failed.  Disabling DRI.\n");
         free(pDRIInfo->devPrivate);
         pDRIInfo->devPrivate = NULL;
         DRIDestroyInfoRec(pVia->pDRIInfo);
         pVia->pDRIInfo = NULL;
-        pVia->drmFD = -1;
+        pVia->drmmode.fd = -1;
         return FALSE;
     }
 
@@ -705,12 +705,12 @@ VIADRICloseScreen(ScreenPtr pScreen)
     VIADRIRingBufferCleanup(pScrn);
     if (pVia->agpSize) {
         drmUnmap(pVia->agpMappedAddr, pVia->agpSize);
-        drmRmMap(pVia->drmFD, pVia->agpHandle);
-        drmAgpUnbind(pVia->drmFD, pVia->agpHandle);
+        drmRmMap(pVia->drmmode.fd, pVia->agpHandle);
+        drmAgpUnbind(pVia->drmmode.fd, pVia->agpHandle);
         xf86DrvMsg(pScreen->myNum, X_INFO, "[drm] Freeing agp memory\n");
-        drmAgpFree(pVia->drmFD, pVia->agpHandle);
+        drmAgpFree(pVia->drmmode.fd, pVia->agpHandle);
         xf86DrvMsg(pScreen->myNum, X_INFO, "[drm] Releasing agp module\n");
-        drmAgpRelease(pVia->drmFD);
+        drmAgpRelease(pVia->drmmode.fd);
     }
 
     DRICloseScreen(pScreen);
@@ -885,7 +885,7 @@ VIADRIKernelInit(ScrnInfoPtr pScrn)
 #endif
     }
 
-    if ((drmCommandWrite(pVia->drmFD, DRM_VIA_MAP_INIT, &drmInfo,
+    if ((drmCommandWrite(pVia->drmmode.fd, DRM_VIA_MAP_INIT, &drmInfo,
                          sizeof(drm_via_init_t))) < 0)
         return FALSE;
 
@@ -899,13 +899,13 @@ VIADRIMapInit(ScreenPtr pScreen, VIAPtr pVia)
 {
     int flags = DRM_READ_ONLY;
 
-    if (drmAddMap(pVia->drmFD, pVia->MmioBase, VIA_MMIO_REGSIZE,
+    if (drmAddMap(pVia->drmmode.fd, pVia->MmioBase, VIA_MMIO_REGSIZE,
                   DRM_REGISTERS, flags, &pVia->registerHandle) < 0) {
         return FALSE;
     }
     xf86DrvMsg(pScreen->myNum, X_INFO, "[drm] register handle = 0x%08lx\n",
                (unsigned long)pVia->registerHandle);
-    if (drmAddMap(pVia->drmFD, pVia->FrameBufferBase, pVia->videoRambytes,
+    if (drmAddMap(pVia->drmmode.fd, pVia->FrameBufferBase, pVia->videoRambytes,
                   DRM_FRAME_BUFFER, 0, &pVia->frameBufferHandle) < 0) {
         return FALSE;
     }
@@ -975,7 +975,7 @@ viaDRIOffscreenSave(ScrnInfoPtr pScrn)
 
         dst = pVia->driOffScreenSave;
         if ((pVia->drmVerMajor == 2) && (pVia->drmVerMinor >= 8)) {
-            err = viaDRIFBMemcpy(pVia->drmFD, pVia->driOffScreenMem, dst, FALSE);
+            err = viaDRIFBMemcpy(pVia->drmmode.fd, pVia->driOffScreenMem, dst, FALSE);
             if (!err)
                 return;
 

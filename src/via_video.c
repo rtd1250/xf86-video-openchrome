@@ -1091,7 +1091,7 @@ viaDmaBlitImage(VIAPtr pVia,
     (unsigned)blit.line_length, (unsigned)blit.num_lines);
 #endif
     while (-EAGAIN == (err =
-        drmCommandWriteRead(pVia->drmFD, DRM_VIA_DMA_BLIT, &blit,
+        drmCommandWriteRead(pVia->drmmode.fd, DRM_VIA_DMA_BLIT, &blit,
         sizeof(blit)))) ;
     if (err < 0)
         return -1;
@@ -1129,13 +1129,13 @@ viaDmaBlitImage(VIAPtr pVia,
         blit.to_fb = 1;
 
         while (-EAGAIN == (err =
-            drmCommandWriteRead(pVia->drmFD, DRM_VIA_DMA_BLIT, &blit,
+            drmCommandWriteRead(pVia->drmmode.fd, DRM_VIA_DMA_BLIT, &blit,
                 sizeof(blit))));
         if (err < 0)
             return -1;
     }
 
-    while (-EAGAIN == (err = drmCommandWrite(pVia->drmFD, DRM_VIA_BLIT_SYNC,
+    while (-EAGAIN == (err = drmCommandWrite(pVia->drmmode.fd, DRM_VIA_BLIT_SYNC,
         chromaSync, sizeof(*chromaSync)))) ;
     if (err < 0)
         return -1;

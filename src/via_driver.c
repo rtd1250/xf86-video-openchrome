@@ -366,7 +366,7 @@ VIAEnterVT(int scrnIndex, int flags)
                             0x00000000);
             viaAccelSyncMarker(pScrn);
         } else {
-            memset(pVia->front_bo->ptr, 0x00, pVia->front_bo->size);
+            memset(pVia->drmmode.front_bo->ptr, 0x00, pVia->drmmode.front_bo->size);
         }
 
 #ifdef XF86DRI
@@ -923,15 +923,15 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     pVia->KMS = FALSE;
 #ifdef XF86DRI
     busId = DRICreatePCIBusID(pVia->PciInfo);
-    pVia->drmFD = drmOpen("via", busId);
-    if (pVia->drmFD != -1) {
+    pVia->drmmode.fd = drmOpen("via", busId);
+    if (pVia->drmmode.fd != -1) {
         if (!drmCheckModesettingSupported(busId)) {
             xf86DrvMsg(-1, X_ERROR, "[drm] KMS supported\n");
             pVia->KMS = TRUE;
         } else
             xf86DrvMsg(-1, X_ERROR, "[drm] KMS not enabled\n");
 
-        drmVer = drmGetVersion(pVia->drmFD);
+        drmVer = drmGetVersion(pVia->drmmode.fd);
         if (drmVer) {
             pVia->drmVerMajor = drmVer->version_major;
             pVia->drmVerMinor = drmVer->version_minor;
@@ -1451,8 +1451,23 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     }
 
     /* CRTC handling */
-    if (!UMSCrtcInit(pScrn)) {
-        VIAFreeRec(pScrn);
+    if (pVia->KMS) {
+        if (!KMSCrtcInit(pScrn, &pVia->drmmode)) {
+            VIAFreeRec(pScrn);
+            return FALSE;
+        }
+    } else {
+        if (!UMSCrtcInit(pScrn)) {
+            VIAFreeRec(pScrn);
+            return FALSE;
+        }
+    }
+
+    if (!xf86InitialConfiguration(pScrn, TRUE))
+        return FALSE;
+
+    if (!pScrn->modes) {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "No valid modes found\n");
         return FALSE;
     }
 
@@ -1574,7 +1589,7 @@ viaShadowWindow(ScreenPtr screen, CARD32 row, CARD32 offset, int mode,
 
     stride = (pScrn->displayWidth * pScrn->bitsPerPixel) / 8;
     *size = stride;
-    return ((uint8_t *)pVia->front_bo->ptr + row * stride + offset);
+    return ((uint8_t *)pVia->drmmode.front_bo->ptr + row * stride + offset);
 }
 
 static Bool
@@ -1590,7 +1605,7 @@ VIACreateScreenResources(ScreenPtr pScreen)
         return FALSE;
     pScreen->CreateScreenResources = VIACreateScreenResources;
 
-    surface = pVia->front_bo->ptr;
+    surface = pVia->drmmode.front_bo->ptr;
     if (!surface)
         return FALSE;
 
@@ -1639,7 +1654,7 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
 
     for (i = 0; i < xf86_config->num_crtc; i++) {
         xf86CrtcPtr crtc = xf86_config->crtc[i];
-        ViaCRTCInfoRec *iga = crtc->driver_private;
+        drmmode_crtc_private_ptr iga = crtc->driver_private;
 
         if (iga->cursor_bo)
             drm_bo_free(pScrn, iga->cursor_bo);
@@ -1650,7 +1665,7 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
         VIADRICloseScreen(pScreen);
 #endif
     if (pVia->KMS)
-        if (!drmDropMaster(pVia->drmFD))
+        if (!drmDropMaster(pVia->drmmode.fd))
             xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
                         "drmDropMaster failed: %s\n",
                         strerror(errno));
@@ -1673,7 +1688,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAScreenInit\n"));
 
     if (pVia->KMS) {
-        if (!drmSetMaster(pVia->drmFD)) {
+        if (drmSetMaster(pVia->drmmode.fd)) {
             xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
                         "drmSetMaster failed: %s\n",
                         strerror(errno));
@@ -1681,7 +1696,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     }
 
 #ifdef XF86DRI
-    if (pVia->drmFD != -1) {
+    if (pVia->drmmode.fd != -1) {
         if (pVia->directRenderingType == DRI_1) {
             /* DRI2 or DRI1 support */
             if (VIADRI1ScreenInit(pScreen))
@@ -1696,17 +1711,18 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
         return FALSE;
 
     size = (pScrn->virtualX * pScrn->bitsPerPixel >> 3) * pScrn->virtualY;
-    pVia->front_bo = drm_bo_alloc(pScrn, size, 16, TTM_PL_FLAG_VRAM);
-    if (!pVia->front_bo)
+    pVia->drmmode.front_bo = drm_bo_alloc(pScrn, size, 16, TTM_PL_FLAG_VRAM);
+    if (!pVia->drmmode.front_bo)
         return FALSE;
 
-    if (!drm_bo_map(pScrn, pVia->front_bo))
+    if (!drm_bo_map(pScrn, pVia->drmmode.front_bo))
         return FALSE;
 
     for (i = 0; i < xf86_config->num_crtc; i++) {
         xf86CrtcPtr crtc = xf86_config->crtc[i];
 
-        crtc->funcs->save(crtc);
+        if (crtc->funcs->save)
+            crtc->funcs->save(crtc);
     }
 
     xf86SetDesiredModes(pScrn);
@@ -1811,7 +1827,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 
         for (i = 0; i < xf86_config->num_crtc; i++) {
             xf86CrtcPtr crtc = xf86_config->crtc[i];
-            ViaCRTCInfoPtr iga = crtc->driver_private;
+            drmmode_crtc_private_ptr iga = crtc->driver_private;
 
             /* Set cursor location in frame buffer. */
             iga->cursor_bo = drm_bo_alloc(pScrn, cursorSize, 16, TTM_PL_FLAG_VRAM);

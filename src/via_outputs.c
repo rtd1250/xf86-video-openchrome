@@ -624,7 +624,7 @@ via_analog_prepare(xf86OutputPtr output)
     via_analog_dpms(output, DPMSModeOff);
 
     if (output->crtc) {
-        ViaCRTCInfoPtr iga = output->crtc->driver_private;
+        drmmode_crtc_private_ptr iga = output->crtc->driver_private;
         CARD8 value = 0x00; /* Value for IGA 1 */
 	    ScrnInfoPtr pScrn = output->scrn;
         vgaHWPtr hwp = VGAHWPTR(pScrn);

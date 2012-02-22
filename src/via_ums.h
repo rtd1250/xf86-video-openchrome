@@ -146,11 +146,6 @@ typedef struct ViaPanelInfo {
     int         resY;
 } ViaPanelInfoRec, *ViaPanelInfoPtr ;
 
-typedef struct ViaCRTCInfo {
-    struct buffer_object    *cursor_bo;
-    CARD8                   index;
-} ViaCRTCInfoRec, *ViaCRTCInfoPtr;
-
 typedef struct _VIABIOSINFO {
 	xf86OutputPtr analog;
 	xf86OutputPtr lvds;

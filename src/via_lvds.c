@@ -812,7 +812,7 @@ via_lvds_prepare(xf86OutputPtr output)
     via_lvds_dpms(output, DPMSModeOff);
 
     if (output->crtc) {
-        ViaCRTCInfoPtr iga = output->crtc->driver_private;
+        drmmode_crtc_private_ptr iga = output->crtc->driver_private;
         CARD8 value = 0x00; /* Value for IGA 1 */
         ScrnInfoPtr pScrn = output->scrn;
         vgaHWPtr hwp = VGAHWPTR(pScrn);
@@ -1251,7 +1251,7 @@ via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
             }
         } else {
             xf86CrtcPtr crtc = output->crtc;
-            ViaCRTCInfoPtr iga = crtc->driver_private;
+            drmmode_crtc_private_ptr iga = crtc->driver_private;
 
             if (iga->index) {
                 /* IGA 2 */
