@@ -1710,8 +1710,9 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     if (!drm_bo_manager_init(pScrn))
         return FALSE;
 
-    size = (pScrn->virtualX * pScrn->bitsPerPixel >> 3) * pScrn->virtualY;
-    pVia->drmmode.front_bo = drm_bo_alloc(pScrn, size, 16, TTM_PL_FLAG_VRAM);
+    size = pScrn->virtualX * pScrn->bitsPerPixel >> 3;
+    pVia->drmmode.front_bo = drm_bo_alloc_surface(pScrn, size, pScrn->virtualY,
+                                                    0, 16, TTM_PL_FLAG_VRAM);
     if (!pVia->drmmode.front_bo)
         return FALSE;
 
@@ -1821,7 +1822,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
             DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "HWCursor ARGB enabled\n"));
             flags |= (HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_64 | HARDWARE_CURSOR_ARGB);
             size = 64;
-            cursorSize = size * (size + 1) << 2;
+            cursorSize = (size * size) << 2;
             break;
         }
 
@@ -1831,8 +1832,6 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 
             /* Set cursor location in frame buffer. */
             iga->cursor_bo = drm_bo_alloc(pScrn, cursorSize, 16, TTM_PL_FLAG_VRAM);
-            if (!iga->cursor_bo)
-                continue;
         }
 
         if (!xf86_cursors_init(pScreen, size, size, flags)) {

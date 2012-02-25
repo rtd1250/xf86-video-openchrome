@@ -24,8 +24,8 @@
 #define _VIA_MEMMGR_H_
 #include "xf86.h"
 
-#define TTM_PL_FLAG_SYSTEM	1 
-#define TTM_PL_FLAG_TT		2 
+#define TTM_PL_FLAG_SYSTEM	1
+#define TTM_PL_FLAG_TT		2
 #define TTM_PL_FLAG_VRAM	4
 
 struct buffer_object {
@@ -41,8 +41,12 @@ struct buffer_object {
 /* In via_memory.c */
 Bool drm_bo_manager_init(ScrnInfoPtr pScrn);
 
-struct buffer_object *drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size,
-                                    unsigned int alignment, int domain);
+struct buffer_object *
+drm_bo_alloc_surface(ScrnInfoPtr pScrn, unsigned int width, unsigned int height,
+                    int format, unsigned int alignment, int domain);
+struct buffer_object *
+drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment,
+                int domain);
 void *drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj);
 void drm_bo_unmap(ScrnInfoPtr pScrn, struct buffer_object *obj);
 void drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *);
