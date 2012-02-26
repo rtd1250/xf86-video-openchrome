@@ -344,6 +344,8 @@ VIAEnterVT(int scrnIndex, int flags)
     if (!xf86SetDesiredModes(pScrn))
         return FALSE;
 
+    VIAAdjustFrame(pScrn->scrnIndex, pScrn->frameX0, pScrn->frameY0, 0);
+
     /* Restore/Init video status. */
     if (flags && pVia->directRenderingType != DRI_2)
         viaInitVideo(pScrn->pScreen);
