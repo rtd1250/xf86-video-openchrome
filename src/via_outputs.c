@@ -726,27 +726,27 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
     pBIOSInfo->analog = NULL;
     pBIOSInfo->lvds = NULL;
 
+    /* LVDS */
+    via_lvds_init(pScrn);
+
     /* VGA */
-	via_analog_init(pScrn);
+    via_analog_init(pScrn);
 
     /*
      * FIXME: xf86I2CProbeAddress(pVia->pI2CBus3, 0x40)
      * disables the panel on P4M900
      * See via_tv_detect.
      */
-	/* TV encoder */
-	via_tv_init(pScrn);
-
-	/* LVDS */
-	via_lvds_init(pScrn);
+    /* TV encoder */
+    via_tv_init(pScrn);
 
     switch (pVia->Chipset) {
-        case VIA_CX700:
-        case VIA_VX800:
-        case VIA_VX855:
-        case VIA_VX900:
-			via_dp_init(pScrn);
-            break;
+    case VIA_CX700:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        via_dp_init(pScrn);
+        break;
     }
 }
 
