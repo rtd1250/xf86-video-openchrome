@@ -1112,11 +1112,6 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 }
 
 static void
-iga1_crtc_commit(xf86CrtcPtr crtc)
-{
-}
-
-static void
 iga1_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
 					int size)
 {
@@ -1372,6 +1367,13 @@ iga_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
 }
 
 static void
+iga_crtc_commit(xf86CrtcPtr crtc)
+{
+    if (crtc->scrn->pScreen != NULL)
+        xf86_reload_cursors(crtc->scrn->pScreen);
+}
+
+static void
 iga_crtc_destroy(xf86CrtcPtr crtc)
 {
     if (crtc->driver_private)
@@ -1387,7 +1389,7 @@ static const xf86CrtcFuncsRec iga1_crtc_funcs = {
     .mode_fixup             = iga1_crtc_mode_fixup,
     .prepare                = iga1_crtc_prepare,
     .mode_set               = iga1_crtc_mode_set,
-    .commit                 = iga1_crtc_commit,
+    .commit                 = iga_crtc_commit,
     .gamma_set              = iga1_crtc_gamma_set,
     .shadow_create          = iga1_crtc_shadow_create,
     .shadow_allocate        = iga1_crtc_shadow_allocate,
@@ -1536,11 +1538,6 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
                 ViaDisplayDisableSimultaneous(pScrn);
         }
     }
-}
-
-static void
-iga2_crtc_commit(xf86CrtcPtr crtc)
-{
 }
 
 static void
@@ -1801,7 +1798,7 @@ static const xf86CrtcFuncsRec iga2_crtc_funcs = {
     .mode_fixup             = iga2_crtc_mode_fixup,
     .prepare                = iga2_crtc_prepare,
     .mode_set               = iga2_crtc_mode_set,
-    .commit                 = iga2_crtc_commit,
+    .commit                 = iga_crtc_commit,
     .gamma_set              = iga2_crtc_gamma_set,
     .shadow_create          = iga2_crtc_shadow_create,
     .shadow_allocate        = iga2_crtc_shadow_allocate,

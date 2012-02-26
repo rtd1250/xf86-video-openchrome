@@ -281,7 +281,7 @@ typedef struct _VIA {
     int                 accelMarker;
     struct buffer_object *exa_sync_bo;
     CARD32              markerOffset;
-    CARD32             *markerBuf;
+    void               *markerBuf;
     CARD32              curMarker;
     CARD32              lastMarkerRead;
     Bool                agpDMA;

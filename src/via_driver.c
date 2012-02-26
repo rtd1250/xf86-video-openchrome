@@ -344,12 +344,10 @@ VIAEnterVT(int scrnIndex, int flags)
     if (!xf86SetDesiredModes(pScrn))
         return FALSE;
 
-    xf86SaveScreen(pScrn->pScreen, SCREEN_SAVER_ON);
+    /* Restore/Init video status. */
+    if (flags && pVia->directRenderingType != DRI_2)
+        viaInitVideo(pScrn->pScreen);
 
-    if (pVia->hwcursor)
-        xf86_reload_cursors(pScrn->pScreen);
-
-    /* Restore video status. */
     if (!pVia->IsSecondary)
         viaRestoreVideo(pScrn);
 
@@ -370,7 +368,7 @@ VIAEnterVT(int scrnIndex, int flags)
         }
 
 #ifdef XF86DRI
-        if (pVia->directRenderingType == DRI_1)
+        if (!flags && pVia->directRenderingType == DRI_1)
             DRIUnlock(screenInfo.screens[scrnIndex]);
 #endif
     }
@@ -1719,20 +1717,6 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     if (!drm_bo_map(pScrn, pVia->drmmode.front_bo))
         return FALSE;
 
-    for (i = 0; i < xf86_config->num_crtc; i++) {
-        xf86CrtcPtr crtc = xf86_config->crtc[i];
-
-        if (crtc->funcs->save)
-            crtc->funcs->save(crtc);
-    }
-
-    xf86SetDesiredModes(pScrn);
-
-    /* Darken the screen for aesthetic reasons and set the viewport. */
-    xf86SaveScreen(pScreen, SCREEN_SAVER_ON);
-    pScrn->AdjustFrame(pScrn->scrnIndex, pScrn->frameX0, pScrn->frameY0, 0);
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Blanked\n"));
-
     miClearVisualTypes();
 
     if (pScrn->bitsPerPixel > 8 && !pVia->IsSecondary) {
@@ -1866,11 +1850,11 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     xf86DPMSInit(pScreen, xf86DPMSSet, 0);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- DPMS set up\n"));
 
-    if (pVia->directRenderingType != DRI_2) {
-        UMSAccelSetup(pScrn);
+    if (!VIAEnterVT(scrnIndex, 1))
+        return FALSE;
 
-        viaInitVideo(pScreen);
-    }
+    if (pVia->directRenderingType != DRI_2)
+        UMSAccelSetup(pScrn);
 
     if (serverGeneration == 1)
         xf86ShowUnusedOptions(pScrn->scrnIndex, pScrn->options);

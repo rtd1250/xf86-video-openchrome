@@ -784,7 +784,7 @@ viaAccelWaitMarker(ScreenPtr pScreen, int marker)
 
     if (pVia->agpDMA) {
         while ((pVia->lastMarkerRead - uMarker) > (1 << 24))
-            pVia->lastMarkerRead = *pVia->markerBuf;
+            pVia->lastMarkerRead = *(CARD32 *) pVia->markerBuf;
     } else {
         viaAccelSync(pScrn);
     }
@@ -1782,10 +1782,13 @@ UMSAccelInit(ScreenPtr pScreen)
     pVia->exa_sync_bo = drm_bo_alloc(pScrn, 32, 32, TTM_PL_FLAG_VRAM);
     if (!pVia->exa_sync_bo)
         return FALSE;
+
     pVia->markerOffset = pVia->exa_sync_bo->offset;
-    pVia->markerOffset = (pVia->markerOffset + 31) & ~31;
-    pVia->markerBuf = (CARD32 *) drm_bo_map(pScrn, pVia->exa_sync_bo);
-    *pVia->markerBuf = 0;
+    pVia->markerBuf = drm_bo_map(pScrn, pVia->exa_sync_bo);
+    if (!pVia->markerBuf) {
+        drm_bo_free(pScrn, pVia->exa_sync_bo);
+        return FALSE;
+    }
     pVia->curMarker = 0;
     pVia->lastMarkerRead = 0;
 
@@ -1959,6 +1962,7 @@ viaFinishInitAccel(ScreenPtr pScreen)
             pVia->scratchAddr = drm_bo_map(pScrn, pVia->scratchBuffer);
         }
     }
+    memset(pVia->markerBuf, 0, pVia->exa_sync_bo->size);
 }
 
 /*
