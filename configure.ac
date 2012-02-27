@@ -112,11 +112,11 @@ if test x$XSERVER_LIBPCIACCESS = xyes; then
 fi
 
 if test "$DRI" != no; then
-        AC_CHECK_FILE([${sdkdir}/dri.h],
+        AC_CHECK_HEADER([${sdkdir}/dri.h],
                       [have_dri_h="yes"], [have_dri_h="no"])
-        AC_CHECK_FILE([${sdkdir}/sarea.h],
+        AC_CHECK_HEADER([${sdkdir}/sarea.h],
                       [have_sarea_h="yes"], [have_sarea_h="no"])
-        AC_CHECK_FILE([${sdkdir}/dristruct.h],
+        AC_CHECK_HEADER([${sdkdir}/dristruct.h],
                       [have_dristruct_h="yes"], [have_dristruct_h="no"])
 fi
 
