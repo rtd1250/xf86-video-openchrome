@@ -51,6 +51,7 @@
 #include "fourcc.h"
 #include "fb.h"
 
+#include "xf86dri.h"
 #include "xf86Crtc.h"
 #include "xf86RandR12.h"
 #include "xf86cmap.h"

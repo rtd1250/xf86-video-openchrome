@@ -112,12 +112,13 @@ if test x$XSERVER_LIBPCIACCESS = xyes; then
 fi
 
 if test "$DRI" != no; then
+        PKG_CHECK_MODULES(DRI, [libdrm >= 2.2 xf86driproto])
         AC_CHECK_HEADER([${sdkdir}/dri.h],
-                      [have_dri_h="yes"], [have_dri_h="no"])
+                      [have_dri_h="yes"], [have_dri_h="no"],[-])
         AC_CHECK_HEADER([${sdkdir}/sarea.h],
-                      [have_sarea_h="yes"], [have_sarea_h="no"])
+                      [have_sarea_h="yes"], [have_sarea_h="no"],[-])
         AC_CHECK_HEADER([${sdkdir}/dristruct.h],
-                      [have_dristruct_h="yes"], [have_dristruct_h="no"])
+                      [have_dristruct_h="yes"], [have_dristruct_h="no"],[-])
 fi
 
 AC_MSG_CHECKING([whether to include DRI support])
