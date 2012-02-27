@@ -915,10 +915,10 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     pVia->drmmode.fd = drmOpen("via", busId);
     if (pVia->drmmode.fd != -1) {
         if (!drmCheckModesettingSupported(busId)) {
-            xf86DrvMsg(-1, X_ERROR, "[drm] KMS supported\n");
+            xf86DrvMsg(-1, X_INFO, "[drm] KMS supported\n");
             pVia->KMS = TRUE;
         } else
-            xf86DrvMsg(-1, X_ERROR, "[drm] KMS not enabled\n");
+            xf86DrvMsg(-1, X_INFO, "[drm] KMS not enabled\n");
 
         drmVer = drmGetVersion(pVia->drmmode.fd);
         if (drmVer) {
