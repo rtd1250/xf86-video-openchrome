@@ -353,27 +353,16 @@ VIAEnterVT(int scrnIndex, int flags)
     if (!pVia->IsSecondary)
         viaRestoreVideo(pScrn);
 
-    if (!pVia->KMS) {
 #ifdef XF86DRI
-        if (pVia->directRenderingType == DRI_1) {
-            kickVblank(pScrn);
-            VIADRIRingBufferInit(pScrn);
-            viaDRIOffscreenRestore(pScrn);
-        }
-#endif
-        if (!pVia->NoAccel) {
-            viaAccelFillRect(pScrn, 0, 0, pScrn->displayWidth, pScrn->virtualY,
-                            0x00000000);
-            viaAccelSyncMarker(pScrn);
-        } else {
-            memset(pVia->drmmode.front_bo->ptr, 0x00, pVia->drmmode.front_bo->size);
-        }
+    if (pVia->directRenderingType == DRI_1) {
+        kickVblank(pScrn);
+        VIADRIRingBufferInit(pScrn);
+        viaDRIOffscreenRestore(pScrn);
 
-#ifdef XF86DRI
-        if (!flags && pVia->directRenderingType == DRI_1)
+        if (!flags)
             DRIUnlock(screenInfo.screens[scrnIndex]);
-#endif
     }
+#endif
     return TRUE;
 }
 

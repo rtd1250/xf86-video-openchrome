@@ -412,14 +412,13 @@ Bool VIAMapMem(ScrnInfoPtr pScrn);
 void VIAUnmapMem(ScrnInfoPtr pScrn);
 Bool ums_create(ScrnInfoPtr pScrn);
 
-/* In via_accel.c. */
+/* In via_exa.c. */
 Bool UMSAccelInit(ScreenPtr);
 void viaInitialize2DEngine(ScrnInfoPtr);
 void viaAccelSync(ScrnInfoPtr);
 void viaDisableVQ(ScrnInfoPtr);
 void viaExitAccel(ScreenPtr);
 void viaAccelBlitRect(ScrnInfoPtr, int, int, int, int, int, int);
-void viaAccelFillRect(ScrnInfoPtr, int, int, int, int, unsigned long);
 void viaAccelSyncMarker(ScrnInfoPtr);
 void viaFinishInitAccel(ScreenPtr);
 void viaAccelWaitMarker(ScreenPtr, int);
