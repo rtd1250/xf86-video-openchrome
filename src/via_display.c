@@ -1898,7 +1898,7 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
      */
     xf86CrtcConfigInit(pScrn, &via_xf86crtc_config_funcs);
 
-    iga1_rec = (drmmode_crtc_private_ptr) xnfcalloc(sizeof(drmmode_crtc_private_ptr), 1);
+    iga1_rec = (drmmode_crtc_private_ptr) xnfcalloc(sizeof(drmmode_crtc_private_rec), 1);
     if (!iga1_rec) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "IGA1 Rec allocation failed.\n");
         return FALSE;
@@ -1913,7 +1913,7 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
     iga1_rec->index = 0;
     iga1->driver_private = iga1_rec;
 
-    iga2_rec = (drmmode_crtc_private_ptr) xnfcalloc(sizeof(drmmode_crtc_private_ptr), 1);
+    iga2_rec = (drmmode_crtc_private_ptr) xnfcalloc(sizeof(drmmode_crtc_private_rec), 1);
     if (!iga2_rec) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "IGA1 Rec allocation failed.\n");
         xf86CrtcDestroy(iga1);
