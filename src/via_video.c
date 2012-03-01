@@ -283,13 +283,14 @@ DecideOverlaySupport(ScrnInfoPtr pScrn)
         pVia->ChipId != PCI_CHIP_VT3327 &&
         pVia->ChipId != PCI_CHIP_VT3336 &&
         pVia->ChipId != PCI_CHIP_VT3409 &&
+        pVia->ChipId != PCI_CHIP_VT3410 &&
         pVia->ChipId != PCI_CHIP_VT3364 &&
         pVia->ChipId != PCI_CHIP_VT3324 &&
-	pVia->ChipId != PCI_CHIP_VT3353) {
+        pVia->ChipId != PCI_CHIP_VT3353) {
         CARD32 bandwidth = (mode->HDisplay >> 4) * (mode->VDisplay >> 5) *
-            pScrn->bitsPerPixel * mode->VRefresh;
+                            pScrn->bitsPerPixel * mode->VRefresh;
 
-    switch (pVia->MemClk) {
+        switch (pVia->MemClk) {
         case VIA_MEM_SDR100:           /* No overlay without DDR */
         case VIA_MEM_SDR133:
             return FALSE;
@@ -616,6 +617,7 @@ viaInitVideo(ScreenPtr pScreen)
         (pVia->Chipset == VIA_CX700) ||
         (pVia->Chipset == VIA_VX800) ||
         (pVia->Chipset == VIA_VX855) ||
+        (pVia->Chipset == VIA_VX900) ||
         (pVia->Chipset == VIA_P4M890));
     if ((pVia->drmVerMajor < 2) ||
         ((pVia->drmVerMajor == 2) && (pVia->drmVerMinor < 9)))
@@ -635,7 +637,7 @@ viaInitVideo(ScreenPtr pScreen)
         (pVia->Chipset == VIA_VM800) || (pVia->Chipset == VIA_K8M890) ||
         (pVia->Chipset == VIA_P4M900) || (pVia->Chipset == VIA_CX700) ||
         (pVia->Chipset == VIA_P4M890) || (pVia->Chipset == VIA_VX800) ||
-        (pVia->Chipset == VIA_VX855)) {
+        (pVia->Chipset == VIA_VX855 || (pVia->Chipset == VIA_VX900))) {
         num_new = viaSetupAdaptors(pScreen, &newAdaptors);
         num_adaptors = xf86XVListGenericAdaptors(pScrn, &adaptors);
     } else {

@@ -272,7 +272,7 @@
 #define V1_EXPIRE_NUM_A         0x000a0000
 #define V1_EXPIRE_NUM_F         0x000f0000 /* jason */
 #define V1_FIFO_EXTENDED        0x00200000
-#define V1_ON_CRT               0x00000000
+#define V1_ON_PRI               0x00000000
 #define V1_ON_SND_DISPLAY       0x80000000
 #define V1_FIFO_32V1_32V2       0x00000000
 #define V1_FIFO_48V1_32V2       0x00200000
@@ -606,24 +606,25 @@
 #define HQV_VDEBLOCK_FILTER 0x80000000
 #define HQV_HDEBLOCK_FILTER 0x00008000
 
-/* new added registers for VT3409.For some registers have different meanings 
+/* new added registers for VT3409.For some registers have different meanings
  * but the same address,we add postfix _409 to distinguish */
-#define HQV_COLOR_ADJUSTMENT_PRE_CTRL1      0x360
-#define HQV_COLOR_ADJUSTMENT_PRE_CTRL2      0x364
-#define HQV_COLOR_ADJUSTMENT_PRE_CTRL3      0x368
-#define HQV_COLOR_ADJUSTMENT_PRE_CTRL4      0x36C
-#define HQV_SRC_DATA_OFFSET_CTRL1_409       0x370 
-#define HQV_SRC_DATA_OFFSET_CTRL2_409       0x374  
-#define HQV_SRC_DATA_OFFSET_CTRL3_409       0x378  
-#define HQV_SRC_DATA_OFFSET_CTRL4_409       0x37C  
-#define HQV_DST_DATA_OFFSET_CTRL1           0x380
-#define HQV_DST_DATA_OFFSET_CTRL2           0x384  
-#define HQV_DST_DATA_OFFSET_CTRL3           0x388  
-#define HQV_DST_DATA_OFFSET_CTRL4           0x38C 
-#define HQV_RESIDUE_PIXEL_FRAME_STARTADDR   0x3BC
-#define HQV_BACKGROUND_DATA_OFFSET          0x3CC
-#define HQV_SUBP_HSCALE_CTRL                0x3E0
-#define HQV_SUBP_VSCALE_CTRL                0x3E8
+#define HQV_COLOR_ADJUSTMENT_PRE_CTRL1              0x360
+#define HQV_COLOR_ADJUSTMENT_PRE_CTRL2              0x364
+#define HQV_COLOR_ADJUSTMENT_PRE_CTRL3              0x368
+#define HQV_COLOR_ADJUSTMENT_PRE_CTRL4              0x36C
+#define HQV_SRC_DATA_OFFSET_CTRL1_409               0x370
+#define HQV_SRC_DATA_OFFSET_CTRL2_409               0x374
+#define HQV_SRC_DATA_OFFSET_CTRL3_409               0x378
+#define HQV_SRC_DATA_OFFSET_CTRL4_409               0x37C
+#define HQV_DST_DATA_OFFSET_CTRL1                   0x380
+#define HQV_DST_DATA_OFFSET_CTRL2                   0x384
+#define HQV_DST_DATA_OFFSET_CTRL3                   0x388
+#define HQV_DST_DATA_OFFSET_CTRL4                   0x38C
+#define HQV_SHARPNESS_DECODER_HANDSHAKE_CTRL_410    0x3A4
+#define HQV_RESIDUE_PIXEL_FRAME_STARTADDR           0x3BC
+#define HQV_BACKGROUND_DATA_OFFSET                  0x3CC
+#define HQV_SUBP_HSCALE_CTRL                        0x3E0
+#define HQV_SUBP_VSCALE_CTRL                        0x3E8
 
 /* Add new HQV Registers for VT3353: */
 #define HQV_SRC_DATA_OFFSET_CONTROL1        0x380
@@ -701,23 +702,23 @@
 #define MPG_MATRIX_DATA		0x60
 
 #define MPG_SLICE_CTRL_1	0x90
-#define		MPG_SLICE_MBAMAX		0x2FFF
-#define		MPG_SLICE_PREDICTIVE_DCT	0x4000
-#define		MPG_SLICE_TOP_FIRST		0x8000
-#define 	MPG_SLICE_MACROBLOCK_WIDTH(x)	((x)<<18)	/* in 64's */
+#define	MPG_SLICE_MBAMAX		0x2FFF
+#define	MPG_SLICE_PREDICTIVE_DCT	0x4000
+#define	MPG_SLICE_TOP_FIRST		0x8000
+#define	MPG_SLICE_MACROBLOCK_WIDTH(x)	((x)<<18)	/* in 64's */
 #define	MPG_SLICE_CTRL_2	0x94
-#define		MPG_SLICE_CONCEAL_MVEC		0x0000001
-#define		MPG_SLICE_QSCALE_TYPE		0x0000002
-#define		MPG_SLICE_DCPRECISION		0x000000C
-#define		MPG_SLICE_MACROBQUOT		0x0FFFFF0
-#define		MPG_SLICE_INTRAVLC		0x1000000
+#define	MPG_SLICE_CONCEAL_MVEC		0x0000001
+#define	MPG_SLICE_QSCALE_TYPE		0x0000002
+#define	MPG_SLICE_DCPRECISION		0x000000C
+#define	MPG_SLICE_MACROBQUOT		0x0FFFFF0
+#define	MPG_SLICE_INTRAVLC		0x1000000
 #define	MPG_SLICE_CTRL_3	0x98
-#define		MPG_SLICE_FHMVR			0x0000003
-#define		MPG_SLICE_FVMVR			0x000000C
-#define		MPG_SLICE_BHMVR			0x0000030
-#define		MPG_SLICE_BVMVR			0x00000C0
-#define		MPG_SLICE_SECOND_FIELD		0x0100000
-#define		MPG_SLICE_RESET			0x0400000
+#define	MPG_SLICE_FHMVR			0x0000003
+#define	MPG_SLICE_FVMVR			0x000000C
+#define	MPG_SLICE_BHMVR			0x0000030
+#define	MPG_SLICE_BVMVR			0x00000C0
+#define	MPG_SLICE_SECOND_FIELD		0x0100000
+#define	MPG_SLICE_RESET			0x0400000
 #define MPG_SLICE_LENGTH	0x9C
 #define	MPG_SLICE_DATA		0xA0
 

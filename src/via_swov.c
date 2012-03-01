@@ -332,6 +332,7 @@ VIAVidHWDiffInit(ScrnInfoPtr pScrn)
             HWDiff->HQVCmeRegs = hqv_cme_regs;
             break;
         case VIA_VX855:
+        case VIA_VX900:
             HWDiff->dwThreeHQVBuffer = VID_HWDIFF_TRUE;
             HWDiff->dwHQVFetchByteUnit = VID_HWDIFF_TRUE;
             HWDiff->dwSupportTwoColorKey = VID_HWDIFF_TRUE;
@@ -883,6 +884,7 @@ viaCalculateVideoColor(VIAPtr pVia, int hue, int saturation,
         case PCI_CHIP_VT3327:
         case PCI_CHIP_VT3353:
         case PCI_CHIP_VT3409:
+        case PCI_CHIP_VT3410:
             model = 0;
             break;
         case PCI_CHIP_CLE3122:
@@ -1022,6 +1024,7 @@ viaSetColorSpace(VIAPtr pVia, int hue, int saturation, int brightness,
         case PCI_CHIP_VT3364:
         case PCI_CHIP_VT3353:
         case PCI_CHIP_VT3409:
+        case PCI_CHIP_VT3410:
         case PCI_CHIP_CLE3122:
             VIASETREG(V1_ColorSpaceReg_2, col2);
             VIASETREG(V1_ColorSpaceReg_1, col1);
@@ -1052,6 +1055,7 @@ ViaInitVideoStatusFlag(VIAPtr pVia)
         case PCI_CHIP_VT3364:
         case PCI_CHIP_VT3353:
         case PCI_CHIP_VT3409:
+        case PCI_CHIP_VT3410:
             return (VIDEO_HQV_INUSE | SW_USE_HQV | VIDEO_1_INUSE
                     | VIDEO_ACTIVE | VIDEO_SHOW);
         case PCI_CHIP_CLE3122:
@@ -1092,6 +1096,7 @@ ViaSetVidCtl(VIAPtr pVia, unsigned int videoFlag)
             case PCI_CHIP_VT3353:
                 return V3_ENABLE | VIDEO_EXPIRE_NUM_VT3336;
             case PCI_CHIP_VT3409:
+            case PCI_CHIP_VT3410:
                 return V3_ENABLE | VIDEO_EXPIRE_NUM_VT3409;
             case PCI_CHIP_CLE3122:
                 if (CLE266_REV_IS_CX(pVia->ChipRev))
@@ -1382,6 +1387,7 @@ SetFIFO_V3(VIAPtr pVia, CARD8 depth, CARD8 prethreshold, CARD8 threshold)
         case PCI_CHIP_VT3327:
         case PCI_CHIP_VT3353:
         case PCI_CHIP_VT3409:
+        case PCI_CHIP_VT3410:
             SaveVideoRegister(pVia, ALPHA_V3_FIFO_CONTROL,
                               (VIAGETREG(ALPHA_V3_FIFO_CONTROL) & ALPHA_FIFO_MASK)
                                | ((depth - 1) & 0xff) | ((threshold & 0xff) << 8));
@@ -1447,6 +1453,7 @@ SetFIFO_V3_64or32or32(VIAPtr pVia)
         case PCI_CHIP_VT3364:
         case PCI_CHIP_VT3353:
         case PCI_CHIP_VT3409:
+        case PCI_CHIP_VT3410:
             SetFIFO_V3(pVia, 225, 200, 250);
             break;
         case PCI_CHIP_VT3204:
@@ -1480,6 +1487,7 @@ SetFIFO_V3_64or32or16(VIAPtr pVia)
         case PCI_CHIP_VT3364:
         case PCI_CHIP_VT3353:
         case PCI_CHIP_VT3409:
+        case PCI_CHIP_VT3410:
             SetFIFO_V3(pVia, 225, 200, 250);
             break;
         case PCI_CHIP_VT3204:
@@ -1664,7 +1672,7 @@ SetHQVFetch(VIAPtr pVia, CARD32 srcFetch, unsigned long srcHeight)
         srcFetch >>= 3;  /* fetch unit is 8 bytes */
     }
 
-    if (pVia->ChipId != PCI_CHIP_VT3409)
+    if ((pVia->ChipId != PCI_CHIP_VT3409) && (pVia->ChipId != PCI_CHIP_VT3410))
         SaveVideoRegister(pVia, HQV_SRC_FETCH_LINE + proReg,
                           ((srcFetch - 1) << 16) | (srcHeight - 1));
 }
@@ -1869,12 +1877,13 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
     /*
      * FIXME:
      * Enable video on secondary (change Panel to SecondCRTC?)
+     * Is it true you can't a second display with video?
      */
     if ((pVia->VideoEngine == VIDEO_ENGINE_CME ||
 		 pVia->Chipset == VIA_VM800) &&
         (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected)) {
 
-        /* V1_ON_SND_DISPLAY */
+        /* VAL_VIDE_ON_SND_DISPLAY */
         vidCtl |= V1_ON_SND_DISPLAY;
         /* SECOND_DISPLAY_COLOR_KEY_ENABLE */
         compose |= SECOND_DISPLAY_COLOR_KEY_ENABLE | 0x1;
@@ -2137,10 +2146,13 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
     if (pVia->VideoEngine == VIDEO_ENGINE_CME) {
         SaveVideoRegister(pVia, HQV_CME_REG(hwDiff, HQV_SDO_CTRL1),0);
         SaveVideoRegister(pVia, HQV_CME_REG(hwDiff, HQV_SDO_CTRL3),((pUpdate->SrcRight - 1 ) << 16) | (pUpdate->SrcBottom - 1));
-        if (pVia->Chipset == VIA_VX800 || pVia->Chipset == VIA_VX855) {
+        if ((pVia->Chipset == VIA_VX800) ||
+            (pVia->Chipset == VIA_VX855) ||
+            (pVia->Chipset == VIA_VX900)) {
             SaveVideoRegister(pVia, HQV_CME_REG(hwDiff, HQV_SDO_CTRL2),0);
             SaveVideoRegister(pVia, HQV_CME_REG(hwDiff, HQV_SDO_CTRL4),((pUpdate->SrcRight - 1 ) << 16) | (pUpdate->SrcBottom - 1));
-            if (pVia->Chipset == VIA_VX855) {
+            if ((pVia->Chipset == VIA_VX855) ||
+                (pVia->Chipset == VIA_VX900)) {
                 SaveVideoRegister(pVia, HQV_DST_DATA_OFFSET_CTRL1,0);
                 SaveVideoRegister(pVia, HQV_DST_DATA_OFFSET_CTRL3,((pUpdate->SrcRight - 1 ) << 16) | (pUpdate->SrcBottom - 1));
                 SaveVideoRegister(pVia, HQV_DST_DATA_OFFSET_CTRL2,0);
@@ -2151,8 +2163,17 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
                 SaveVideoRegister(pVia, HQV_SUBP_HSCALE_CTRL,0);
                 /*0x3e8*/
                 SaveVideoRegister(pVia, HQV_SUBP_VSCALE_CTRL,0);
-                SaveVideoRegister(pVia, HQV_DEFAULT_VIDEO_COLOR, HQV_FIX_COLOR);
             }
+
+            if (pVia->Chipset == VIA_VX900) {
+
+                SaveVideoRegister(pVia, HQV_SHARPNESS_DECODER_HANDSHAKE_CTRL_410, 0);        
+            }
+
+            // TODO Need to be tested on VX800
+            /* 0x3B8 */
+            SaveVideoRegister(pVia, HQV_DEFAULT_VIDEO_COLOR, HQV_FIX_COLOR);
+    
         }
     }
 
