@@ -4,7 +4,9 @@ Makefile
 Makefile.in
 *.la
 *.lo
+*.o
 openchrome.*
+via_regs_dump
 aclocal.m4
 autom4te.cache
 config.guess
