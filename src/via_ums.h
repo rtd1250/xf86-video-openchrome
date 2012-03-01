@@ -211,7 +211,6 @@ void ViaModeSecondCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaModeFirstCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode);
 
 /* via_display.c */
-void ViaPreInitCRTCConfig(ScrnInfoPtr pScrn);
 void ViaCRTCInit(ScrnInfoPtr pScrn);
 void ViaFirstCRTCSetStartingAddress(ScrnInfoPtr pSCrn, int x, int y);
 void ViaFirstCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
@@ -243,7 +242,5 @@ void ViaSecondDisplayChannelDisable(ScrnInfoPtr pScrn);
 void ViaDisplayInit(ScrnInfoPtr pScrn);
 void ViaDisplayEnableSimultaneous(ScrnInfoPtr pScrn);
 void ViaDisplayDisableSimultaneous(ScrnInfoPtr pScrn);
-void ViaDisplayEnableCRT(ScrnInfoPtr pScrn);
-void ViaDisplayDisableCRT(ScrnInfoPtr pScrn);
 
 #endif /* _VIA_BIOS_H_ */

@@ -115,19 +115,19 @@ ViaTVDACSense(ScrnInfoPtr pScrn)
 static void
 ViaTVSetMode(xf86CrtcPtr crtc, DisplayModePtr mode)
 {
-	ScrnInfoPtr pScrn = crtc->scrn;
-	VIAPtr pVia = VIAPTR(pScrn);
-	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+    ScrnInfoPtr pScrn = crtc->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
-	if (pBIOSInfo->TVModeI2C)
-		pBIOSInfo->TVModeI2C(pScrn, mode);
+    if (pBIOSInfo->TVModeI2C)
+        pBIOSInfo->TVModeI2C(pScrn, mode);
 
-	if (pBIOSInfo->TVModeCrtc)
-		pBIOSInfo->TVModeCrtc(crtc, mode);
+    if (pBIOSInfo->TVModeCrtc)
+        pBIOSInfo->TVModeCrtc(crtc, mode);
 
 	/* TV reset. */
-	xf86I2CWriteByte(pBIOSInfo->TVI2CDev, 0x1D, 0x00);
-	xf86I2CWriteByte(pBIOSInfo->TVI2CDev, 0x1D, 0x80);
+    xf86I2CWriteByte(pBIOSInfo->TVI2CDev, 0x1D, 0x00);
+    xf86I2CWriteByte(pBIOSInfo->TVI2CDev, 0x1D, 0x80);
 }
 
 void
@@ -166,72 +166,72 @@ static Bool
 via_tv_set_property(xf86OutputPtr output, Atom property,
 					RRPropertyValuePtr value)
 {
-	return FALSE;
+    return FALSE;
 }
 
 static Bool
 via_tv_get_property(xf86OutputPtr output, Atom property)
 {
-	return FALSE;
+    return FALSE;
 }
 
 static void
 via_tv_dpms(xf86OutputPtr output, int mode)
 {
-	ScrnInfoPtr pScrn = output->scrn;
+    ScrnInfoPtr pScrn = output->scrn;
 
-	switch (mode) {
-	case DPMSModeOn:
-		ViaTVPower(pScrn, TRUE);
-		break;
+    switch (mode) {
+    case DPMSModeOn:
+        ViaTVPower(pScrn, TRUE);
+        break;
 
-	case DPMSModeStandby:
-	case DPMSModeSuspend:
-	case DPMSModeOff:
-		ViaTVPower(pScrn, FALSE);
-		break;
-	}
+    case DPMSModeStandby:
+    case DPMSModeSuspend:
+    case DPMSModeOff:
+        ViaTVPower(pScrn, FALSE);
+        break;
+    }
 }
 
 static void
 via_tv_save(xf86OutputPtr output)
 {
-	ScrnInfoPtr pScrn = output->scrn;
+    ScrnInfoPtr pScrn = output->scrn;
 
-	ViaTVSave(pScrn);
+    ViaTVSave(pScrn);
 }
 
 static void
 via_tv_restore(xf86OutputPtr output)
 {
-	ScrnInfoPtr pScrn = output->scrn;
+    ScrnInfoPtr pScrn = output->scrn;
 
-	ViaTVRestore(pScrn);
+    ViaTVRestore(pScrn);
 }
 
 static int
 via_tv_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
 {
-	ScrnInfoPtr pScrn = output->scrn;
-	VIAPtr pVia = VIAPTR(pScrn);
-	int ret = MODE_OK;
+    ScrnInfoPtr pScrn = output->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+    int ret = MODE_OK;
 
     if (pVia->UseLegacyModeSwitch) {
-		VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+        VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
-		if (pBIOSInfo->TVModeValid) {
-			ret = pBIOSInfo->TVModeValid(pScrn, pMode);
-			if (ret != MODE_OK) {
-				xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-							"Mode \"%s\" is not supported by TV encoder.\n",
-							pMode->name);
-			}
-		}
-	} else {
+        if (pBIOSInfo->TVModeValid) {
+            ret = pBIOSInfo->TVModeValid(pScrn, pMode);
+            if (ret != MODE_OK) {
+                xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "Mode \"%s\" is not supported by TV encoder.\n",
+                            pMode->name);
+            }
+        }
+    } else {
         if (!ViaModeDotClockTranslate(pScrn, pMode))
             return MODE_NOCLOCK;
     }
-	return ret;
+    return ret;
 }
 
 static Bool
@@ -254,40 +254,105 @@ via_tv_commit(xf86OutputPtr output)
 }
 
 static void
+ViaDisplayEnableDVO(ScrnInfoPtr pScrn, int port)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDisplayEnableDVO, port: %d\n", port));
+    switch (port) {
+    case VIA_DI_PORT_DVP0:
+        ViaSeqMask(hwp, 0x1E, 0xC0, 0xC0);
+        break;
+    case VIA_DI_PORT_DVP1:
+        ViaSeqMask(hwp, 0x1E, 0x30, 0x30);
+        break;
+    }
+}
+
+static void
+ViaDisplayDisableDVO(ScrnInfoPtr pScrn, int port)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDisplayDisableDVO, port: %d\n", port));
+    switch (port) {
+    case VIA_DI_PORT_DVP0:
+        ViaSeqMask(hwp, 0x1E, 0x00, 0xC0);
+        break;
+    case VIA_DI_PORT_DVP1:
+        ViaSeqMask(hwp, 0x1E, 0x00, 0x30);
+        break;
+    }
+}
+
+static void
+ViaDisplaySetStreamOnDVO(ScrnInfoPtr pScrn, int port, int iga)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    int regNum;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDisplaySetStreamOnDVO, port: %d\n", port));
+
+    switch (port) {
+        case VIA_DI_PORT_DVP0:
+            regNum = 0x96;
+            break;
+        case VIA_DI_PORT_DVP1:
+            regNum = 0x9B;
+            break;
+        case VIA_DI_PORT_DFPLOW:
+            regNum = 0x97;
+            break;
+        case VIA_DI_PORT_DFPHIGH:
+            regNum = 0x99;
+            break;
+    }
+
+    if (!iga)
+        ViaCrtcMask(hwp, regNum, 0x00, 0x10);
+    else
+        ViaCrtcMask(hwp, regNum, 0x10, 0x10);
+}
+
+static void
 via_tv_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 				DisplayModePtr adjusted_mode)
 {
-	ScrnInfoPtr pScrn = output->scrn;
-	VIAPtr pVia = VIAPTR(pScrn);
-	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+    ScrnInfoPtr pScrn = output->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
-	/* TV on FirstCrtc */
-	ViaDisplaySetStreamOnDVO(pScrn, pBIOSInfo->TVDIPort, TRUE);
-	ViaDisplayEnableDVO(pScrn, pBIOSInfo->TVDIPort);
+    /* TV on FirstCrtc */
+    if (output->crtc) {
+        drmmode_crtc_private_ptr iga = output->crtc->driver_private;
 
-	ViaTVSetMode(output->crtc, adjusted_mode);
+        ViaDisplaySetStreamOnDVO(pScrn, pBIOSInfo->TVDIPort, iga->index);
+    }
+    ViaDisplayEnableDVO(pScrn, pBIOSInfo->TVDIPort);
 
-	pVia->FirstInit = FALSE;
+    ViaTVSetMode(output->crtc, adjusted_mode);
+
+    pVia->FirstInit = FALSE;
 }
 
 static xf86OutputStatus
 via_tv_detect(xf86OutputPtr output)
 {
-	xf86OutputStatus status = XF86OutputStatusDisconnected;
-	ScrnInfoPtr pScrn = output->scrn;
+    xf86OutputStatus status = XF86OutputStatusDisconnected;
+    ScrnInfoPtr pScrn = output->scrn;
 
-	if (ViaTVDACSense(pScrn))
-		status = XF86OutputStatusConnected;
-	return status;
+    if (ViaTVDACSense(pScrn))
+        status = XF86OutputStatusConnected;
+    return status;
 }
 
 static DisplayModePtr
 via_tv_get_modes(xf86OutputPtr output)
 {
-	ScrnInfoPtr pScrn = output->scrn;
-	VIAPtr pVia = VIAPTR(pScrn);
+    ScrnInfoPtr pScrn = output->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
 
-	return pVia->pBIOSInfo->TVModes;
+    return pVia->pBIOSInfo->TVModes;
 }
 
 static void
@@ -296,20 +361,20 @@ via_tv_destroy(xf86OutputPtr output)
 }
 
 static const xf86OutputFuncsRec via_tv_funcs = {
-	.create_resources	= via_tv_create_resources,
-	.set_property		= via_tv_set_property,
-	.get_property		= via_tv_get_property,
-	.dpms				= via_tv_dpms,
-	.save				= via_tv_save,
-	.restore			= via_tv_restore,
-	.mode_valid			= via_tv_mode_valid,
-	.mode_fixup			= via_tv_mode_fixup,
-	.prepare			= via_tv_prepare,
-	.commit				= via_tv_commit,
-	.mode_set			= via_tv_mode_set,
-	.detect				= via_tv_detect,
-	.get_modes			= via_tv_get_modes,
-	.destroy			= via_tv_destroy,
+    .create_resources   = via_tv_create_resources,
+    .set_property       = via_tv_set_property,
+    .get_property       = via_tv_get_property,
+    .dpms               = via_tv_dpms,
+    .save               = via_tv_save,
+    .restore            = via_tv_restore,
+    .mode_valid         = via_tv_mode_valid,
+    .mode_fixup         = via_tv_mode_fixup,
+    .prepare            = via_tv_prepare,
+    .commit             = via_tv_commit,
+    .mode_set           = via_tv_mode_set,
+    .detect             = via_tv_detect,
+    .get_modes          = via_tv_get_modes,
+    .destroy            = via_tv_destroy,
 };
 
 /*
@@ -318,10 +383,10 @@ static const xf86OutputFuncsRec via_tv_funcs = {
 static Bool
 via_tv_init(ScrnInfoPtr pScrn)
 {
-	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
-	VIAPtr pVia = VIAPTR(pScrn);
-	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-	xf86OutputPtr output = NULL;
+    xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+    xf86OutputPtr output = NULL;
 
     /* preset some pBIOSInfo TV related values -- move up */
     pBIOSInfo->TVEncoder = VIA_NONETV;
@@ -401,9 +466,9 @@ via_tv_init(ScrnInfoPtr pScrn)
         return FALSE;
     }
 
-	output = xf86OutputCreate(pScrn, &via_tv_funcs, "TV-0");
-	pVia->FirstInit = TRUE;
-	pBIOSInfo->tv = output;
+    output = xf86OutputCreate(pScrn, &via_tv_funcs, "TV-0");
+    pVia->FirstInit = TRUE;
+    pBIOSInfo->tv = output;
     /* Save now */
     pBIOSInfo->TVSave(pScrn);
 
@@ -423,31 +488,31 @@ static Bool
 via_dp_set_property(xf86OutputPtr output, Atom property,
 						RRPropertyValuePtr value)
 {
-	return FALSE;
+    return FALSE;
 }
 
 static Bool
 via_dp_get_property(xf86OutputPtr output, Atom property)
 {
-	return FALSE;
+    return FALSE;
 }
 
 static void
 via_dp_dpms(xf86OutputPtr output, int mode)
 {
-	ScrnInfoPtr pScrn = output->scrn;
+    ScrnInfoPtr pScrn = output->scrn;
 
-	switch (mode) {
-	case DPMSModeOn:
-		ViaDFPPower(pScrn, TRUE);
-		break;
+    switch (mode) {
+    case DPMSModeOn:
+        ViaDFPPower(pScrn, TRUE);
+        break;
 
-	case DPMSModeStandby:
-	case DPMSModeSuspend:
-	case DPMSModeOff:
-		ViaDFPPower(pScrn, FALSE);
-		break;
-	}
+    case DPMSModeStandby:
+    case DPMSModeSuspend:
+    case DPMSModeOff:
+        ViaDFPPower(pScrn, FALSE);
+        break;
+    }
 }
 
 static void
@@ -463,18 +528,18 @@ via_dp_restore(xf86OutputPtr output)
 static int
 via_dp_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
 {
-	ScrnInfoPtr pScrn = output->scrn;
+    ScrnInfoPtr pScrn = output->scrn;
 
-	if (!ViaModeDotClockTranslate(pScrn, pMode))
-		return MODE_NOCLOCK;
-	return MODE_OK;
+    if (!ViaModeDotClockTranslate(pScrn, pMode))
+        return MODE_NOCLOCK;
+    return MODE_OK;
 }
 
 static Bool
 via_dp_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
 						DisplayModePtr adjusted_mode)
 {
-	return TRUE;
+    return TRUE;
 }
 
 static void
@@ -491,28 +556,36 @@ static void
 via_dp_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 				DisplayModePtr adjusted_mode)
 {
-	ScrnInfoPtr pScrn = output->scrn;
+    ScrnInfoPtr pScrn = output->scrn;
 
-	/* DFP on FirstCrtc */
-	ViaDisplaySetStreamOnDFP(pScrn, TRUE);
-	ViaDFPPower(pScrn, TRUE);
+    if (output->crtc) {
+        drmmode_crtc_private_ptr iga = output->crtc->driver_private;
+        CARD8 value = 0x00; /* Value for IGA 1 */
+        vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+        /* IGA 2 */
+        if (iga->index)
+            value = 0x10;
+        ViaSeqMask(hwp, 0x99, value, 0x10);
+    }
+    ViaDFPPower(pScrn, TRUE);
 }
 
 static xf86OutputStatus
 via_dp_detect(xf86OutputPtr output)
 {
-	xf86OutputStatus status = XF86OutputStatusDisconnected;
-	ScrnInfoPtr pScrn = output->scrn;
+    xf86OutputStatus status = XF86OutputStatusDisconnected;
+    ScrnInfoPtr pScrn = output->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
-	xf86MonPtr mon;
+    xf86MonPtr mon;
 
-	mon = xf86OutputGetEDID(output, pVia->pI2CBus2);
-	if (mon && DIGITAL(mon->features.input_type)) {
-		xf86OutputSetEDID(output, mon);
-		DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "DDC pI2CBus2 detected a DP\n"));
-		status = XF86OutputStatusConnected;
-	}
-	return status;
+    mon = xf86OutputGetEDID(output, pVia->pI2CBus2);
+    if (mon && DIGITAL(mon->features.input_type)) {
+        xf86OutputSetEDID(output, mon);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "DDC pI2CBus2 detected a DP\n"));
+        status = XF86OutputStatusConnected;
+    }
+    return status;
 }
 
 static void
@@ -521,38 +594,62 @@ via_dp_destroy(xf86OutputPtr output)
 }
 
 static const xf86OutputFuncsRec via_dp_funcs = {
-	.create_resources	= via_dp_create_resources,
-	.set_property		= via_dp_set_property,
-	.get_property		= via_dp_get_property,
-	.dpms				= via_dp_dpms,
-	.save				= via_dp_save,
-	.restore			= via_dp_restore,
-	.mode_valid			= via_dp_mode_valid,
-	.mode_fixup			= via_dp_mode_fixup,
-	.prepare			= via_dp_prepare,
-	.commit				= via_dp_commit,
-	.mode_set			= via_dp_mode_set,
-	.detect				= via_dp_detect,
-	.get_modes			= xf86OutputGetEDIDModes,
-	.destroy			= via_dp_destroy,
+    .create_resources   = via_dp_create_resources,
+    .set_property       = via_dp_set_property,
+    .get_property       = via_dp_get_property,
+    .dpms               = via_dp_dpms,
+    .save               = via_dp_save,
+    .restore            = via_dp_restore,
+    .mode_valid         = via_dp_mode_valid,
+    .mode_fixup         = via_dp_mode_fixup,
+    .prepare            = via_dp_prepare,
+    .commit             = via_dp_commit,
+    .mode_set           = via_dp_mode_set,
+    .detect             = via_dp_detect,
+    .get_modes          = xf86OutputGetEDIDModes,
+    .destroy            = via_dp_destroy,
 };
 
 void
 via_dp_init(ScrnInfoPtr pScrn)
 {
-	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
-	VIAPtr pVia = VIAPTR(pScrn);
-	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-	xf86OutputPtr output = NULL;
+    xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+    xf86OutputPtr output = NULL;
 
-	if (pVia->pI2CBus2)
-		output = xf86OutputCreate(pScrn, &via_dp_funcs, "DP-0");
-	if (output) {
-		output->possible_crtcs = 0x1;
-		output->possible_clones = 0;
-		output->interlaceAllowed = TRUE;
-		output->doubleScanAllowed = FALSE;
-	}
+    if (pVia->pI2CBus2)
+        output = xf86OutputCreate(pScrn, &via_dp_funcs, "DP-0");
+    if (output) {
+        output->possible_crtcs = 0x1;
+        output->possible_clones = 0;
+        output->interlaceAllowed = TRUE;
+        output->doubleScanAllowed = FALSE;
+    }
+}
+
+/*
+ * Enables CRT using DPMS registers.
+ */
+static void
+ViaDisplayEnableCRT(ScrnInfoPtr pScrn)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDisplayEnableCRT\n"));
+    ViaCrtcMask(hwp, 0x36, 0x00, 0x30);
+}
+
+/*
+ * Disables CRT using DPMS registers.
+ */
+static void
+ViaDisplayDisableCRT(ScrnInfoPtr pScrn)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDisplayDisableCRT\n"));
+    ViaCrtcMask(hwp, 0x36, 0x30, 0x30);
 }
 
 static void
@@ -564,31 +661,31 @@ static Bool
 via_analog_set_property(xf86OutputPtr output, Atom property,
 						RRPropertyValuePtr value)
 {
-	return FALSE;
+    return FALSE;
 }
 
 static Bool
 via_analog_get_property(xf86OutputPtr output, Atom property)
 {
-	return FALSE;
+    return FALSE;
 }
 
 static void
 via_analog_dpms(xf86OutputPtr output, int mode)
 {
-	ScrnInfoPtr pScrn = output->scrn;
+    ScrnInfoPtr pScrn = output->scrn;
 
-	switch (mode) {
-	case DPMSModeOn:
-		ViaDisplayEnableCRT(pScrn);
-		break;
+    switch (mode) {
+    case DPMSModeOn:
+        ViaDisplayEnableCRT(pScrn);
+        break;
 
-	case DPMSModeStandby:
-	case DPMSModeSuspend:
-	case DPMSModeOff:
-		ViaDisplayDisableCRT(pScrn);
-		break;
-	}
+    case DPMSModeStandby:
+    case DPMSModeSuspend:
+    case DPMSModeOff:
+        ViaDisplayDisableCRT(pScrn);
+        break;
+    }
 }
 
 static void
@@ -604,36 +701,24 @@ via_analog_restore(xf86OutputPtr output)
 static int
 via_analog_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
 {
-	ScrnInfoPtr pScrn = output->scrn;
+    ScrnInfoPtr pScrn = output->scrn;
 
-	if (!ViaModeDotClockTranslate(pScrn, pMode))
-			return MODE_NOCLOCK;
-	return MODE_OK;
+    if (!ViaModeDotClockTranslate(pScrn, pMode))
+        return MODE_NOCLOCK;
+    return MODE_OK;
 }
 
 static Bool
 via_analog_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
 						DisplayModePtr adjusted_mode)
 {
-	return TRUE;
+    return TRUE;
 }
 
 static void
 via_analog_prepare(xf86OutputPtr output)
 {
     via_analog_dpms(output, DPMSModeOff);
-
-    if (output->crtc) {
-        drmmode_crtc_private_ptr iga = output->crtc->driver_private;
-        CARD8 value = 0x00; /* Value for IGA 1 */
-	    ScrnInfoPtr pScrn = output->scrn;
-        vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-        /* IGA 2 */
-        if (iga->index)
-            value = 0x40;
-        ViaSeqMask(hwp, 0x16, value, 0x40);
-    }
 }
 
 static void
@@ -646,29 +731,37 @@ static void
 via_analog_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 					DisplayModePtr adjusted_mode)
 {
-	ScrnInfoPtr pScrn = output->scrn;
+    ScrnInfoPtr pScrn = output->scrn;
 
-	/* CRT on FirstCRTC */
-	ViaDisplaySetStreamOnCRT(pScrn, TRUE);
-	ViaDisplayEnableCRT(pScrn);
+    if (output->crtc) {
+        drmmode_crtc_private_ptr iga = output->crtc->driver_private;
+        CARD8 value = 0x00; /* Value for IGA 1 */
+        vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+        /* IGA 2 */
+        if (iga->index)
+            value = 0x40;
+        ViaSeqMask(hwp, 0x16, value, 0x40);
+    }
+    ViaDisplayEnableCRT(pScrn);
 }
 
 static xf86OutputStatus
 via_analog_detect(xf86OutputPtr output)
 {
-	xf86OutputStatus status = XF86OutputStatusDisconnected;
-	ScrnInfoPtr pScrn = output->scrn;
-	VIAPtr pVia = VIAPTR(pScrn);
-	xf86MonPtr mon;
+    xf86OutputStatus status = XF86OutputStatusDisconnected;
+    ScrnInfoPtr pScrn = output->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+    xf86MonPtr mon;
 
-	mon = xf86OutputGetEDID(output, pVia->pI2CBus1);
-	if (mon && !DIGITAL(mon->features.input_type)) {
-		xf86OutputSetEDID(output, mon);
-		DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "DDC pI2CBus1 detected a CRT\n"));
-		status = XF86OutputStatusConnected;
-	} else
-		ViaDisplayDisableCRT(pScrn);
-	return status;
+    mon = xf86OutputGetEDID(output, pVia->pI2CBus1);
+    if (mon && !DIGITAL(mon->features.input_type)) {
+        xf86OutputSetEDID(output, mon);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "DDC pI2CBus1 detected a CRT\n"));
+        status = XF86OutputStatusConnected;
+    } else
+        ViaDisplayDisableCRT(pScrn);
+    return status;
 }
 
 static void
@@ -677,20 +770,20 @@ via_analog_destroy(xf86OutputPtr output)
 }
 
 static const xf86OutputFuncsRec via_analog_funcs = {
-	.create_resources	= via_analog_create_resources,
-	.set_property		= via_analog_set_property,
-	.get_property		= via_analog_get_property,
-	.dpms				= via_analog_dpms,
-	.save				= via_analog_save,
-	.restore			= via_analog_restore,
-	.mode_valid			= via_analog_mode_valid,
-	.mode_fixup			= via_analog_mode_fixup,
-	.prepare			= via_analog_prepare,
-	.commit				= via_analog_commit,
-	.mode_set			= via_analog_mode_set,
-	.detect				= via_analog_detect,
-	.get_modes			= xf86OutputGetEDIDModes,
-	.destroy			= via_analog_destroy,
+    .create_resources	= via_analog_create_resources,
+    .set_property       = via_analog_set_property,
+    .get_property       = via_analog_get_property,
+    .dpms               = via_analog_dpms,
+    .save               = via_analog_save,
+    .restore            = via_analog_restore,
+    .mode_valid         = via_analog_mode_valid,
+    .mode_fixup         = via_analog_mode_fixup,
+    .prepare            = via_analog_prepare,
+    .commit             = via_analog_commit,
+    .mode_set           = via_analog_mode_set,
+    .detect             = via_analog_detect,
+    .get_modes          = xf86OutputGetEDIDModes,
+    .destroy            = via_analog_destroy,
 };
 
 void
