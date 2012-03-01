@@ -193,6 +193,13 @@ void ViaVbeDPMS(ScrnInfoPtr pScrn, int mode);
 void ViaVbeDoDPMS(ScrnInfoPtr pScrn, int mode);
 int ViaVbePanelPower(vbeInfoPtr pVbe, int mode);
 
+/* via_ums.c */
+Bool VIAMapMem(ScrnInfoPtr pScrn);
+void VIAUnmapMem(ScrnInfoPtr pScrn);
+void VIAInitialize3DEngine(ScrnInfoPtr pScrn);
+Bool ums_create(ScrnInfoPtr pScrn);
+Bool UMSPreInit(ScrnInfoPtr pScrn);
+
 /* via_output.c */
 void ViaOutputsDetect(ScrnInfoPtr pScrn);
 void via_analog_init(ScrnInfoPtr pScrn);

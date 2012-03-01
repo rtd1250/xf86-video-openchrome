@@ -408,11 +408,6 @@ typedef struct
 /* Prototypes. */
 void VIAInitialize3DEngine(ScrnInfoPtr pScrn);
 
-/* In via_ums.c */
-Bool VIAMapMem(ScrnInfoPtr pScrn);
-void VIAUnmapMem(ScrnInfoPtr pScrn);
-Bool ums_create(ScrnInfoPtr pScrn);
-
 /* In via_exa.c. */
 Bool UMSAccelInit(ScreenPtr);
 void viaInitialize2DEngine(ScrnInfoPtr);

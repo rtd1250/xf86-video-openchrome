@@ -82,7 +82,6 @@ static Bool VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc,
                           char **argv);
 static const OptionInfoRec *VIAAvailableOptions(int chipid, int busid);
 
-Bool UMSPreInit(ScrnInfoPtr pScrn);
 Bool UMSCrtcInit(ScrnInfoPtr pScrn);
 void UMSAccelSetup(ScrnInfoPtr pScrn);
 
