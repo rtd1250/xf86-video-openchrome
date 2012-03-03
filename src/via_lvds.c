@@ -1458,29 +1458,24 @@ static const xf86OutputFuncsRec via_lvds_funcs = {
 static void
 ViaPanelGetNativeModeFromOption(ScrnInfoPtr pScrn, ViaPanelInfoPtr panel, char *name)
 {
+    char aux[strlen(name) + 1];
     CARD8 length, index;
-    char aux[10];
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                      "ViaPanelGetNativeModeFromOption\n"));
 
     panel->NativeModeIndex = VIA_PANEL_INVALID;
-    if (strlen(name) < 10) {
-        length = sizeof(ViaPanelNativeModes) / sizeof(ViaPanelModeRec);
+    length = sizeof(ViaPanelNativeModes) / sizeof(ViaPanelModeRec);
 
-        for (index = 0; index < length; index++) {
-            sprintf(aux, "%dx%d", ViaPanelNativeModes[index].Width,
-                    ViaPanelNativeModes[index].Height);
-            if (!xf86NameCmp(name, aux)) {
-                panel->NativeModeIndex = index;
-                panel->NativeMode->Width = ViaPanelNativeModes[index].Width;
-                panel->NativeMode->Height = ViaPanelNativeModes[index].Height;
-                break;
-            }
+    for (index = 0; index < length; index++) {
+        sprintf(aux, "%dx%d", ViaPanelNativeModes[index].Width,
+                ViaPanelNativeModes[index].Height);
+        if (!xf86NameCmp(name, aux)) {
+            panel->NativeModeIndex = index;
+            panel->NativeMode->Width = ViaPanelNativeModes[index].Width;
+            panel->NativeMode->Height = ViaPanelNativeModes[index].Height;
+            break;
         }
-    } else {
-        xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                   "%s is not a valid panel size.\n", name);
     }
 }
 
@@ -1499,6 +1494,19 @@ via_lvds_init(ScrnInfoPtr pScrn)
 
     if (!Panel)
         return;
+
+    Panel->NativeModeIndex = VIA_PANEL_INVALID;
+    Panel->NativeMode = (ViaPanelModePtr) xnfcalloc(sizeof(ViaPanelModeRec), 1);
+    if (!Panel->NativeMode) {
+        free(Panel);
+        return;
+    }
+    Panel->CenteredMode = (DisplayModePtr) xnfcalloc(sizeof(DisplayModeRec), 1);
+    if (!Panel->CenteredMode) {
+        free(Panel->NativeMode);
+        free(Panel);
+        return;
+    }
 
     memcpy(Options, ViaPanelOptions, sizeof(ViaPanelOptions));
     xf86ProcessOptions(pScrn->scrnIndex, pScrn->options, Options);
@@ -1542,7 +1550,9 @@ via_lvds_init(ScrnInfoPtr pScrn)
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
                        "Selected Panel Size is %dx%d\n", mode->Width,
                        mode->Height);
-        }
+        } else
+            xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                        "%s is not a valid panel size.\n", s);
     } else {
         xf86DrvMsg(pScrn->scrnIndex, X_DEFAULT,
                    "Panel size is not selected from config file.\n");
@@ -1558,10 +1568,6 @@ via_lvds_init(ScrnInfoPtr pScrn)
     }
 
     if (output)  {
-        Panel->NativeModeIndex = VIA_PANEL_INVALID;
-        Panel->NativeMode = (ViaPanelModePtr) xnfcalloc(sizeof(ViaPanelModeRec), 1);
-        Panel->CenteredMode = (DisplayModePtr) xnfcalloc(sizeof(DisplayModeRec), 1);
-
         output->driver_private = Panel;
 
         if (pVia->Chipset == VIA_VX900)
@@ -1570,6 +1576,11 @@ via_lvds_init(ScrnInfoPtr pScrn)
             output->possible_crtcs = 0x2;
         output->possible_clones = 0;
         output->interlaceAllowed = FALSE;
+        output->doubleScanAllowed = FALSE;
         pBIOSInfo->lvds = output;
+    } else {
+        free(Panel->CenteredMode);
+        free(Panel->NativeMode);
+        free(Panel);
     }
 }
