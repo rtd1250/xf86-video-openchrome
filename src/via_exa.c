@@ -1215,7 +1215,7 @@ viaExaDownloadFromScreen(PixmapPtr pSrc, int x, int y, int w, int h,
 
     exaWaitSync(pScrn->pScreen);
     if (totSize < VIA_MIN_DOWNLOAD) {
-        bounceAligned = (char *)pVia->FBBase + srcOffset;
+        bounceAligned = (char *)pVia->drmmode.front_bo->ptr + srcOffset;
         while (h--) {
             memcpy(dst, bounceAligned, wBytes);
             dst += dst_pitch;
@@ -1267,7 +1267,7 @@ viaExaTexUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
         dstOffset = x * pDst->drawable.bitsPerPixel;
         if (dstOffset & 3)
             return FALSE;
-        dst = (char *)pVia->FBBase + (exaGetPixmapOffset(pDst) + y * dstPitch
+        dst = (char *)pVia->drmmode.front_bo->ptr + (exaGetPixmapOffset(pDst) + y * dstPitch
                                       + (dstOffset >> 3));
         exaWaitSync(pScrn->pScreen);
 
@@ -1385,7 +1385,7 @@ viaExaUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
     dstOffset = exaGetPixmapOffset(pDst) + y * dstPitch + (dstOffset >> 3);
 
     if (wBytes * h < VIA_MIN_UPLOAD || wBytes < 65) {
-        dst = (char *)pVia->FBBase + dstOffset;
+        dst = (char *)pVia->drmmode.front_bo->ptr + dstOffset;
 
         exaWaitSync(pScrn->pScreen);
         while (h--) {
@@ -1524,7 +1524,7 @@ viaExaIsOffscreen(PixmapPtr pPix)
     VIAPtr pVia = VIAPTR(pScrn);
 
     return ((unsigned long)pPix->devPrivate.ptr -
-            (unsigned long)pVia->FBBase) < pVia->videoRambytes;
+            (unsigned long)pVia->drmmode.front_bo->ptr) < pVia->drmmode.front_bo->size;
 }
 
 static Bool
@@ -1846,7 +1846,7 @@ UMSAccelSetup(ScrnInfoPtr pScrn)
 #endif
 
 	if (pVia->NoAccel)
-		memset(pVia->FBBase, 0x00, pVia->videoRambytes);
+		memset(pVia->drmmode.front_bo->ptr, 0x00, pVia->drmmode.front_bo->size);
 	else
 		viaFinishInitAccel(pScreen);
 }
