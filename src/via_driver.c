@@ -671,7 +671,7 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
     pVia->maxDriSize = 0;
     pVia->agpMem = AGP_SIZE / 1024;
     pVia->ActiveDevice = 0x00;
-    pVia->I2CDevices = 0x00;
+    pVia->I2CDevices = VIA_I2C_BUS1 | VIA_I2C_BUS2 | VIA_I2C_BUS3;
     pVia->VideoEngine = VIDEO_ENGINE_CLE;
 #ifdef HAVE_DEBUG
     pVia->PrintVGARegs = FALSE;
@@ -1428,8 +1428,8 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     ViaCheckCardId(pScrn);
 
     /* I2CDevices Option for I2C Initialization */
-    //pVia->I2CDevices = 0x00;
     if ((s = xf86GetOptValString(VIAOptions, OPTION_I2CDEVICES))) {
+        pVia->I2CDevices = 0;
         if (strstr(s, "Bus1"))
             pVia->I2CDevices |= VIA_I2C_BUS1;
         if (strstr(s, "Bus2"))
@@ -1437,6 +1437,9 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         if (strstr(s, "Bus3"))
             pVia->I2CDevices |= VIA_I2C_BUS3;
     }
+
+    if (!xf86NameCmp(pVia->Id->String, "OLPC XO 1.5"))
+        pVia->I2CDevices &= ~VIA_I2C_BUS2;
 
     /* CRTC handling */
     if (pVia->KMS) {

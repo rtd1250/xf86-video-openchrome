@@ -476,6 +476,9 @@ ViaPanelGetSizeFromDDCv1(xf86OutputPtr output, int *width, int *height)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAGetPanelSizeFromDDCv1\n"));
 
+    if (!(pVia->I2CDevices & VIA_I2C_BUS2))
+        return FALSE;
+
     if (!xf86I2CProbeAddress(pVia->pI2CBus2, 0xA0))
         return FALSE;
 
