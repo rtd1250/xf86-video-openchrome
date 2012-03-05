@@ -381,7 +381,7 @@ ums_create(ScrnInfoPtr pScrn)
 
 #ifdef XF86DRI
     if (pVia->directRenderingType == DRI_1) {
-        pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart) / 2;
+        pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart) >> 2;
         if ((pVia->driSize > (pVia->maxDriSize * 1024)) && pVia->maxDriSize > 0)
             pVia->driSize = pVia->maxDriSize * 1024;
 
