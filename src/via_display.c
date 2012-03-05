@@ -980,6 +980,22 @@ iga1_crtc_prepare (xf86CrtcPtr crtc)
 }
 
 static void
+iga1_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
+{
+    ScrnInfoPtr pScrn = crtc->scrn;
+    int scrnIndex = pScrn->scrnIndex;
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    if (pVia->pVbe) {
+        ViaVbeAdjustFrame(scrnIndex, x, y);
+    } else {
+        ViaFirstCRTCSetStartingAddress(pScrn, x, y);
+    }
+
+    VIAVidAdjustFrame(pScrn, x, y);
+}
+
+static void
 iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 					DisplayModePtr adjusted_mode,
 					int x, int y)
@@ -1008,6 +1024,7 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
         if (!ViaVbeSetMode(pScrn, adjusted_mode))
             return;
     }
+    iga1_crtc_set_origin(crtc, 0, 0);
 }
 
 static void
@@ -1056,22 +1073,6 @@ iga1_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
             hwp->writeDacData(hwp, colors[i].blue);
         }
     }
-}
-
-static void
-iga1_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
-{
-    ScrnInfoPtr pScrn = crtc->scrn;
-    int scrnIndex = pScrn->scrnIndex;
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    if (pVia->pVbe) {
-        ViaVbeAdjustFrame(scrnIndex, x, y);
-    } else {
-        ViaFirstCRTCSetStartingAddress(pScrn, x, y);
-    }
-
-    VIAVidAdjustFrame(pScrn, x, y);
 }
 
 static void *
@@ -1409,6 +1410,21 @@ iga2_crtc_prepare (xf86CrtcPtr crtc)
 }
 
 static void
+iga2_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
+{
+    ScrnInfoPtr pScrn = crtc->scrn;
+    int scrnIndex = pScrn->scrnIndex;
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    if (pVia->pVbe) {
+        ViaVbeAdjustFrame(scrnIndex, x, y);
+    } else {
+        ViaSecondCRTCSetStartingAddress(pScrn, x, y);
+    }
+    VIAVidAdjustFrame(pScrn, x, y);
+}
+
+static void
 iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
                     DisplayModePtr adjusted_mode, int x, int y)
 {
@@ -1437,6 +1453,7 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
                 ViaDisplayDisableSimultaneous(pScrn);
         }
     }
+    iga2_crtc_set_origin(crtc, 0, 0);
 }
 
 static void
@@ -1508,21 +1525,6 @@ iga2_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
             hwp->writeDacData(hwp, colors[i].blue);
         }
     }
-}
-
-static void
-iga2_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
-{
-    ScrnInfoPtr pScrn = crtc->scrn;
-    int scrnIndex = pScrn->scrnIndex;
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    if (pVia->pVbe) {
-        ViaVbeAdjustFrame(scrnIndex, x, y);
-    } else {
-        ViaSecondCRTCSetStartingAddress(pScrn, x, y);
-    }
-    VIAVidAdjustFrame(pScrn, x, y);
 }
 
 static void *
