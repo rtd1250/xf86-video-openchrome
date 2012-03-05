@@ -246,7 +246,6 @@ typedef struct _VIA {
 
     /* Here are all the Options */
     Bool                VQEnable;
-    Bool                hwcursor;
     Bool                NoAccel;
     Bool                shadowFB;
     Rotation            rotate;

@@ -226,10 +226,8 @@ drmmode_set_mode_major(xf86CrtcPtr crtc, DisplayModePtr mode,
         }
     }
 
-#if 0
-    if (pScrn->pScreen && !xf86ReturnOptValBool(info->Options, OPTION_SW_CURSOR, FALSE))
+    if (pScrn->pScreen && drmmode->hwcursor)
         xf86_reload_cursors(pScrn->pScreen);
-#endif
 done:
     if (!ret) {
         crtc->x = saved_x;
@@ -261,27 +259,35 @@ drmmode_set_cursor_position (xf86CrtcPtr crtc, int x, int y)
 static void
 drmmode_hide_cursor (xf86CrtcPtr crtc)
 {
+    xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(crtc->scrn);
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
+    xf86CursorInfoPtr cursor_info = xf86_config->cursor_info;
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
 
-    drmModeSetCursor(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id, 0, 64, 64);
+    drmModeSetCursor(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id, 0,
+                        cursor_info->MaxWidth, cursor_info->MaxHeight);
 }
 
 static void
 drmmode_show_cursor (xf86CrtcPtr crtc)
 {
+    xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(crtc->scrn);
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
-    drmmode_ptr drmmode = drmmode_crtc->drmmode;
+    xf86CursorInfoPtr cursor_info = xf86_config->cursor_info;
     uint32_t handle = drmmode_crtc->cursor_bo->handle;
+    drmmode_ptr drmmode = drmmode_crtc->drmmode;
 
-    drmModeSetCursor(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id, handle, 64, 64);
+    drmModeSetCursor(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id, handle,
+                        cursor_info->MaxWidth, cursor_info->MaxHeight);
 }
 
 static void
 drmmode_load_cursor_argb (xf86CrtcPtr crtc, CARD32 *image)
 {
+    xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(crtc->scrn);
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
-    uint32_t *ptr;
+    xf86CursorInfoPtr cursor_info = xf86_config->cursor_info;
+    uint32_t handle = drmmode_crtc->cursor_bo->handle, *ptr;
     int i;
 
     /* cursor should be mapped already */
@@ -289,6 +295,14 @@ drmmode_load_cursor_argb (xf86CrtcPtr crtc, CARD32 *image)
     memset(ptr, 0x00, drmmode_crtc->cursor_bo->size);
     memcpy(ptr, image, drmmode_crtc->cursor_bo->size);
     drm_bo_unmap(crtc->scrn, drmmode_crtc->cursor_bo);
+
+    if (drmModeSetCursor(drmmode_crtc->drmmode->fd, drmmode_crtc->mode_crtc->crtc_id,
+                            handle, cursor_info->MaxWidth, cursor_info->MaxHeight)) {
+        drmmode_ptr drmmode = drmmode_crtc->drmmode;
+
+        cursor_info->MaxWidth = cursor_info->MaxHeight = 0;
+        drmmode->hwcursor = FALSE;
+    }
 }
 
 static void

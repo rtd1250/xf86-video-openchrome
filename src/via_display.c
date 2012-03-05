@@ -1269,7 +1269,10 @@ iga_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
 static void
 iga_crtc_commit(xf86CrtcPtr crtc)
 {
-    if (crtc->scrn->pScreen != NULL)
+    ScrnInfoPtr pScrn = crtc->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    if (crtc->scrn->pScreen != NULL && pVia->drmmode.hwcursor)
         xf86_reload_cursors(crtc->scrn->pScreen);
 }
 
@@ -1750,7 +1753,7 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
         }
     }
 
-    if (pVia->hwcursor) {
+    if (pVia->drmmode.hwcursor) {
         if (!xf86LoadSubModule(pScrn, "ramdac"))
             return FALSE;
     }

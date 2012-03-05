@@ -655,7 +655,7 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
     pVia->noComposite = FALSE;
     pVia->useEXA = TRUE;
     pVia->exaScratchSize = VIA_SCRATCH_SIZE / 1024;
-    pVia->hwcursor = TRUE;
+    pVia->drmmode.hwcursor = TRUE;
     pVia->VQEnable = TRUE;
     pVia->DRIIrqEnable = TRUE;
     pVia->agpEnable = TRUE;
@@ -689,14 +689,14 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
             pVia->UseLegacyModeSwitch = TRUE;
             pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP0;
 			/* FIXME Mono HW Cursors not working */
-			pVia->hwcursor = FALSE;
+			pVia->drmmode.hwcursor = FALSE;
             break;
         case VIA_KM400:
             /* IRQ is not broken on KM400A, but testing (pVia->ChipRev < 0x80)
              * is not enough to make sure we have an older, broken KM400. */
             pVia->DRIIrqEnable = FALSE;
 			/* FIXME Mono HW Cursors not working */
-			pVia->hwcursor = FALSE;
+			pVia->drmmode.hwcursor = FALSE;
             pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP0;
             break;
         case VIA_K8M800:
@@ -1195,13 +1195,13 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     /* Use a hardware cursor, unless on secondary or on shadow framebuffer. */
     from = X_DEFAULT;
     if (pVia->IsSecondary || pVia->shadowFB)
-        pVia->hwcursor = FALSE;
+        pVia->drmmode.hwcursor = FALSE;
     else if (xf86GetOptValBool(VIAOptions, OPTION_SWCURSOR,
-                               &pVia->hwcursor)) {
-        pVia->hwcursor = !pVia->hwcursor;
+                               &pVia->drmmode.hwcursor)) {
+        pVia->drmmode.hwcursor = !pVia->drmmode.hwcursor;
         from = X_CONFIG;
     }
-    if (pVia->hwcursor)
+    if (pVia->drmmode.hwcursor)
         xf86DrvMsg(pScrn->scrnIndex, from, "Using hardware two-color "
                    "cursors and software full-color cursors.\n");
     else
@@ -1780,7 +1780,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     miDCInitialize(pScreen, xf86GetPointerScreenFuncs());
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- SW cursor set up\n"));
 
-    if (pVia->hwcursor) {
+    if (pVia->drmmode.hwcursor) {
         xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
         int flags = (HARDWARE_CURSOR_AND_SOURCE_WITH_MASK |
                      HARDWARE_CURSOR_TRUECOLOR_AT_8BPP);
@@ -1810,7 +1810,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
         }
 
         if (!xf86_cursors_init(pScreen, size, size, flags)) {
-            pVia->hwcursor = FALSE;
+            pVia->drmmode.hwcursor = FALSE;
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                         "Hardware cursor initialization failed\n");
         }

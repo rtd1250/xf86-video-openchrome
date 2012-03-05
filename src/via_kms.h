@@ -44,6 +44,8 @@ typedef struct {
 #endif
     drmEventContext event_context;
     struct buffer_object *front_bo;
+
+    Bool hwcursor;
 } drmmode_rec, *drmmode_ptr;
 
 typedef struct {
