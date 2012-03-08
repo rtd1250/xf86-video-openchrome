@@ -820,7 +820,7 @@ drmmode_xf86crtc_resize (ScrnInfoPtr scrn, int width, int height)
     drmmode_crtc_private_ptr drmmode_crtc = xf86_config->crtc[0]->driver_private;
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
     int	i, pitch, old_width, old_height, old_pitch;
-    int cpp = (scrn->bitsPerPixel + 1) / 8;
+    int cpp = (scrn->bitsPerPixel + 7) / 8;
     struct buffer_object *old_front = NULL;
     ScreenPtr screen = scrn->pScreen;
     uint32_t old_fb_id;
@@ -841,7 +841,8 @@ drmmode_xf86crtc_resize (ScrnInfoPtr scrn, int width, int height)
     old_fb_id = drmmode->fb_id;
     old_front = drmmode->front_bo;
 
-    drmmode->front_bo = drm_bo_alloc(scrn, width, height, scrn->bitsPerPixel);
+    drmmode->front_bo = drm_bo_alloc_surface(scrn, width * cpp, height, 0, 16,
+                                                TTM_PL_FLAG_VRAM);
     if (!drmmode->front_bo)
         goto fail;
 

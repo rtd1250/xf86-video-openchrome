@@ -1629,6 +1629,7 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
         viaExitVideo(pScrn);
 
     viaExitAccel(pScreen);
+
     if (pVia->ShadowPtr) {
         shadowRemove(pScreen, pScreen->GetScreenPixmap(pScreen));
         free(pVia->ShadowPtr);
@@ -1649,15 +1650,26 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
             drm_bo_free(pScrn, iga->cursor_bo);
     }
 
+    if (pVia->drmmode.front_bo) {
+        if (pVia->KMS && pVia->drmmode.fb_id)
+            drmModeRmFB(pVia->drmmode.fd, pVia->drmmode.fb_id);
+        pVia->drmmode.fb_id = 0;
+
+        drm_bo_free(pScrn, pVia->drmmode.front_bo);
+    }
+
 #ifdef XF86DRI
     if (pVia->directRenderingType == DRI_1)
         VIADRICloseScreen(pScreen);
 #endif
-    if (pVia->KMS)
-        if (!drmDropMaster(pVia->drmmode.fd))
+    if (pVia->KMS) {
+        drmmode_uevent_fini(pScrn, &pVia->drmmode);
+
+        if (drmDropMaster(pVia->drmmode.fd))
             xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
                         "drmDropMaster failed: %s\n",
                         strerror(errno));
+    }
 
     pScrn->vtSema = FALSE;
     pScreen->CloseScreen = pVia->CloseScreen;

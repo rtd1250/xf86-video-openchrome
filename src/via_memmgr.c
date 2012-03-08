@@ -115,11 +115,9 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
                     obj->handle = drm.index;
                     obj->domain = domain;
                     obj->size = drm.size;
-                    DEBUG(ErrorF("%lu of DRI memory allocated at %lx, handle %lu\n",
+                    DEBUG(ErrorF("%lu bytes of DRI memory allocated at %lx, handle %lu\n",
                                 obj->size, obj->offset, obj->handle));
-                    break;
-                } else
-                    DEBUG(ErrorF("DRM memory allocation failed %d\n", ret));
+                }
             } else if (pVia->directRenderingType == DRI_2) {
                 struct drm_gem_create args;
 
@@ -139,11 +137,17 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
                     obj->handle = args.handle;
                     obj->size = args.size;
                     obj->domain = domain;
-                    DEBUG(ErrorF("%lu of DRI2 memory allocated at %lx, handle %lu\n",
+                    DEBUG(ErrorF("%lu bytes of DRI2 memory allocated at %lx, handle %lu\n",
                                 obj->size, obj->offset, obj->handle));
-                    break;
                 }
             }
+
+            if (ret) {
+                    DEBUG(ErrorF("DRM memory allocation failed %d\n", ret));
+                    free(obj);
+                    obj = NULL;
+            };
+            break;
 #endif
         case TTM_PL_FLAG_SYSTEM:
         default:
@@ -152,7 +156,7 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
                 free(obj);
                 obj = NULL;
             }
-            DEBUG(ErrorF("%lu of Linear memory allocated at %lx, handle %lu\n",
+            DEBUG(ErrorF("%lu bytes of Linear memory allocated at %lx, handle %lu\n",
                             obj->size, obj->offset, obj->handle));
             break;
         }
