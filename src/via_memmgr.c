@@ -100,8 +100,14 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
         case TTM_PL_FLAG_TT:
             obj->map_offset = (unsigned long) pVia->agpMappedAddr;
         case TTM_PL_FLAG_VRAM:
+            if (pVia->directRenderingType == DRI_NONE) {
+                if (Success != viaOffScreenLinear(obj, pScrn, size)) {
+                    ErrorF("Linear memory allocation failed\n");
+                    ret = -ENOMEM;
+                } else
+                    DEBUG(ErrorF("%lu bytes of Linear memory allocated at %lx, handle %lu\n", obj->size, obj->offset, obj->handle));
 #ifdef XF86DRI
-            if (pVia->directRenderingType == DRI_1) {
+            } else if (pVia->directRenderingType == DRI_1) {
                 drm_via_mem_t drm;
 
                 size = ALIGN_TO(size, alignment);
@@ -140,6 +146,7 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
                     DEBUG(ErrorF("%lu bytes of DRI2 memory allocated at %lx, handle %lu\n",
                                 obj->size, obj->offset, obj->handle));
                 }
+#endif
             }
 
             if (ret) {
@@ -148,16 +155,9 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
                     obj = NULL;
             };
             break;
-#endif
+
         case TTM_PL_FLAG_SYSTEM:
         default:
-            if (Success != viaOffScreenLinear(obj, pScrn, size)) {
-                ErrorF("Linear memory allocation failed\n");
-                free(obj);
-                obj = NULL;
-            }
-            DEBUG(ErrorF("%lu bytes of Linear memory allocated at %lx, handle %lu\n",
-                            obj->size, obj->offset, obj->handle));
             break;
         }
     }
