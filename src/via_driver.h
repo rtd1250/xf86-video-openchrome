@@ -56,7 +56,6 @@
 #include "xf86RandR12.h"
 #include "xf86cmap.h"
 #include "vbe.h"
-#include "xaa.h"
 
 #ifdef XF86DRI
 #define _XF86DRI_SERVER_
@@ -273,7 +272,6 @@ typedef struct _VIA {
     unsigned char*      ShadowPtr;
 
     /* Support for XAA acceleration */
-    XAAInfoRecPtr       AccelInfoRec;
     ViaTwodContext      td;
     Via3DState          v3d;
     Via3DState          *lastToUpload;

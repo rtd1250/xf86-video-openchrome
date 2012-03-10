@@ -34,8 +34,6 @@
 #endif
 
 #include <X11/Xarch.h>
-#include "xaalocal.h"
-#include "xaarop.h"
 #include "miline.h"
 
 #include "via_driver.h"
@@ -1811,22 +1809,18 @@ UMSAccelInit(ScreenPtr pScreen)
     pVia->dBounce = NULL;
     pVia->scratchAddr = NULL;
 #endif /* XF86DRI */
-    if (pVia->useEXA) {
-        pVia->exaDriverPtr = viaInitExa(pScreen);
-        if (!pVia->exaDriverPtr) {
-
-            /*
-             * Docs recommend turning off also Xv here, but we handle this
-             * case with the old linear offscreen FB manager
-             */
-            pVia->NoAccel = TRUE;
-            return FALSE;
-        }
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                   "[EXA] Enabled EXA acceleration.\n");
-        return TRUE;
+    pVia->exaDriverPtr = viaInitExa(pScreen);
+    if (!pVia->exaDriverPtr) {
+        /*
+         * Docs recommend turning off also Xv here, but we handle this
+         * case with the old linear offscreen FB manager
+         */
+        pVia->NoAccel = TRUE;
+        return FALSE;
     }
-    return viaInitXAA(pScreen);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "[EXA] Enabled EXA acceleration.\n");
+    return TRUE;
 }
 
 void
@@ -1897,10 +1891,6 @@ viaExitAccel(ScreenPtr pScreen)
         free(pVia->exaDriverPtr);
         pVia->exaDriverPtr = NULL;
         return;
-    }
-    if (pVia->AccelInfoRec) {
-        XAADestroyInfoRec(pVia->AccelInfoRec);
-        pVia->AccelInfoRec = NULL;
     }
 }
 

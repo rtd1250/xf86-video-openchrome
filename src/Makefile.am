@@ -40,7 +40,6 @@ openchrome_drv_la_SOURCES = \
          via_3d.h \
          via_3d_reg.h \
          via_exa.c \
-         via_xaa.c \
          via_bandwidth.c \
          via_ums.h \
          via_ch7xxx.c \

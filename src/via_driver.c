@@ -1167,7 +1167,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
                 pVia->useEXA = TRUE;
             } else if (!xf86NameCmp(s, "XAA")) {
                 from = X_CONFIG;
-                pVia->useEXA = FALSE;
+                pVia->useEXA = TRUE;
             }
         }
         xf86DrvMsg(pScrn->scrnIndex, from,
@@ -1483,19 +1483,17 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     }
 
     if (!pVia->NoAccel) {
-        if (pVia->useEXA) {
-            XF86ModReqInfo req;
-            int errmaj, errmin;
+        XF86ModReqInfo req;
+        int errmaj, errmin;
 
-            memset(&req, 0, sizeof(req));
-            req.majorversion = 2;
-            req.minorversion = 0;
-            if (!LoadSubModule(pScrn->module, "exa", NULL, NULL, NULL, &req,
-                               &errmaj, &errmin)) {
-                LoaderErrorMsg(NULL, "exa", errmaj, errmin);
-                VIAFreeRec(pScrn);
-                return FALSE;
-            }
+        memset(&req, 0, sizeof(req));
+        req.majorversion = 2;
+        req.minorversion = 0;
+        if (!LoadSubModule(pScrn->module, "exa", NULL, NULL, NULL, &req,
+                            &errmaj, &errmin)) {
+            LoaderErrorMsg(NULL, "exa", errmaj, errmin);
+            VIAFreeRec(pScrn);
+            return FALSE;
         }
         if (!xf86LoadSubModule(pScrn, "xaa")) {
             VIAFreeRec(pScrn);
