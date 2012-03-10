@@ -195,16 +195,14 @@ drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
     if (obj) {
         DEBUG(ErrorF("Freed %lu (pool %d)\n", obj->offset, obj->domain));
         switch (obj->domain) {
-        case TTM_PL_FLAG_SYSTEM: {
+        case TTM_PL_FLAG_VRAM:
+        case TTM_PL_FLAG_TT:
+            if (pVia->directRenderingType == DRI_NONE) {
                 FBLinearPtr linear = (FBLinearPtr) obj->handle;
 
                 xf86FreeOffscreenLinear(linear);
-            }
-            break;
-        case TTM_PL_FLAG_VRAM:
-        case TTM_PL_FLAG_TT:
 #ifdef XF86DRI
-            if (pVia->directRenderingType == DRI_1) {
+            } else if (pVia->directRenderingType == DRI_1) {
                 drm_via_mem_t drm;
 
                 drm.index = obj->handle;
@@ -217,8 +215,11 @@ drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
                 close.handle = obj->handle;
                 if (ioctl(pVia->drmmode.fd, DRM_IOCTL_GEM_CLOSE, &close) < 0)
                     ErrorF("DRM failed to free for handle %lld.\n", obj->handle);
-            }
 #endif
+            }
+            break;
+
+        defaule:
             break;
         }
         free(obj);
