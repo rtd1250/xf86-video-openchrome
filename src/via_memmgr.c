@@ -219,7 +219,7 @@ drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
             }
             break;
 
-        defaule:
+        default:
             break;
         }
         free(obj);
