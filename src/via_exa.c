@@ -345,7 +345,7 @@ viaInitAgp(VIAPtr pVia)
 
 /*
  * Initialize the virtual command queue. Header-2 commands can be put
- * in this queue for buffering. AFAIK it doesn't handle Header-1 
+ * in this queue for buffering. AFAIK it doesn't handle Header-1
  * commands, which is really a pity, since it has to be idled before
  * issuing a Header-1 command.
  */
@@ -1662,7 +1662,6 @@ viaExaComposite(PixmapPtr pDst, int srcX, int srcY, int maskX, int maskY,
                   width, height);
 }
 
-
 static ExaDriverPtr
 viaInitExa(ScreenPtr pScreen)
 {
@@ -1670,10 +1669,10 @@ viaInitExa(ScreenPtr pScreen)
     VIAPtr pVia = VIAPTR(pScrn);
     ExaDriverPtr pExa = exaDriverAlloc();
 
-    memset(pExa, 0, sizeof(*pExa));
-
     if (!pExa)
         return NULL;
+
+    memset(pExa, 0, sizeof(*pExa));
 
     pExa->exa_major = EXA_VERSION_MAJOR;
     pExa->exa_minor = EXA_VERSION_MINOR;
