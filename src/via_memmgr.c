@@ -64,7 +64,7 @@ viaOffScreenLinear(struct buffer_object *obj, ScrnInfoPtr pScrn,
         return BadAlloc;
     obj->offset = linear->offset * depth;
     obj->handle = (unsigned long) linear;
-    obj->domain = TTM_PL_FLAG_SYSTEM;
+    obj->domain = TTM_PL_FLAG_VRAM;
     obj->size = size;
     return Success;
 }
@@ -117,6 +117,8 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
                 ret = drmCommandWriteRead(pVia->drmmode.fd, DRM_VIA_ALLOCMEM,
                                             &drm, sizeof(drm_via_mem_t));
                 if (!ret && (size == drm.size)) {
+                    if (domain == TTM_PL_FLAG_VRAM)
+                        drm.offset -= pVia->FBFreeStart;
                     obj->offset = ALIGN_TO(drm.offset, alignment);
                     obj->handle = drm.index;
                     obj->domain = domain;
