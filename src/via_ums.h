@@ -120,14 +120,11 @@ typedef struct ViaPanelMode {
 
 typedef struct ViaPanelInfo {
     Bool IsActive ;
-    /* current native resolution */
-    ViaPanelModePtr NativeMode ;
+    /* Native physical resolution */
+    int NativeHeight;
+    int NativeWidth;
     /* Native resolution index, see via_panel.c */
     CARD8 NativeModeIndex;
-    /* Generated mode for native resolution */
-    DisplayModePtr  NativeDisplayMode ;
-    /* Current mode but centered */
-    DisplayModePtr  CenteredMode ;
     /* Determine if we must use the hardware scaler
      * It might be false even if the "Center" option
      * was specified
