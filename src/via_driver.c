@@ -343,23 +343,20 @@ VIAEnterVT(int scrnIndex, int flags)
     if (!xf86SetDesiredModes(pScrn))
         return FALSE;
 
-    /* Restore/Init video status. */
-    if (flags && pVia->directRenderingType != DRI_2)
-        viaInitVideo(pScrn->pScreen);
-
-    if (!pVia->IsSecondary)
-        viaRestoreVideo(pScrn);
+    if (!flags) {
+        /* Restore video status. */
+        if (!pVia->IsSecondary)
+            viaRestoreVideo(pScrn);
 
 #ifdef XF86DRI
-    if (pVia->directRenderingType == DRI_1) {
-        kickVblank(pScrn);
-        VIADRIRingBufferInit(pScrn);
-        viaDRIOffscreenRestore(pScrn);
-
-        if (!flags)
+        if (pVia->directRenderingType == DRI_1) {
+            kickVblank(pScrn);
+            VIADRIRingBufferInit(pScrn);
+            viaDRIOffscreenRestore(pScrn);
             DRIUnlock(screenInfo.screens[scrnIndex]);
-    }
+        }
 #endif
+    }
     return TRUE;
 }
 
@@ -1854,8 +1851,11 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     if (!VIAEnterVT(scrnIndex, 1))
         return FALSE;
 
-    if (pVia->directRenderingType != DRI_2)
+    if (pVia->directRenderingType != DRI_2) {
         UMSAccelSetup(pScrn);
+
+        viaInitVideo(pScrn->pScreen);
+    }
 
     if (serverGeneration == 1)
         xf86ShowUnusedOptions(pScrn->scrnIndex, pScrn->options);
