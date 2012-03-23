@@ -1492,10 +1492,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             VIAFreeRec(pScrn);
             return FALSE;
         }
-        if (!xf86LoadSubModule(pScrn, "xaa")) {
-            VIAFreeRec(pScrn);
-            return FALSE;
-        }
     }
 
     if (pVia->shadowFB) {

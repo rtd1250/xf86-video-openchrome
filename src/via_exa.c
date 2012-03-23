@@ -39,14 +39,7 @@
 #include "via_driver.h"
 #include "via_regs.h"
 #include "via_dmabuffer.h"
-
-#ifdef X_HAVE_XAAGETROP
-#define VIAACCELPATTERNROP(vRop) (XAAGetPatternROP(vRop) << 24)
-#define VIAACCELCOPYROP(vRop) (XAAGetCopyROP(vRop) << 24)
-#else
-#define VIAACCELPATTERNROP(vRop) (XAAPatternROP[vRop] << 24)
-#define VIAACCELCOPYROP(vRop) (XAACopyROP[vRop] << 24)
-#endif
+#include "via_rop.h"
 
 enum VIA_2D_Regs {
 	GECMD,
