@@ -164,48 +164,6 @@ ViaCRTCSetAttributeRegisters(ScrnInfoPtr pScrn)
     hwp->writeAttr(hwp, 0x14, 0x00);
 }
 
-static Bool
-via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
-{
-	ScreenPtr screen = screenInfo.screens[scrn->scrnIndex];
-	PixmapPtr ppix = screen->GetScreenPixmap(screen);
-	int old_width, old_height, old_pitch, pitch;
-	VIAPtr pVia = VIAPTR(scrn);
-	void *shadow = NULL;
-
-	if (scrn->virtualX == width && scrn->virtualY == height)
-		return TRUE;
-
-    DEBUG(xf86DrvMsg(scrn->scrnIndex, X_INFO, "xf86crtc_resize\n"));
-
-	old_width = scrn->virtualX;
-	old_height = scrn->virtualY;
-    scrn->virtualX = width;
-    scrn->virtualY = height;
-
-	if (pVia->shadowFB) {
-		pitch = BitmapBytePad(scrn->bitsPerPixel * width);
-		shadow = malloc(height * pitch);
-		if (!shadow)
-			goto fail;
-		free(pVia->ShadowPtr);
-		pVia->ShadowPtr = shadow;
-		screen->ModifyPixmapHeader(ppix, width, height, -1, -1, pitch,
-									pVia->ShadowPtr);
-	}
-	return xf86SetDesiredModes(scrn);
-
-fail:
-	scrn->virtualY = old_height;
-	scrn->virtualX = old_width;
-	return FALSE;
-}
-
-static const
-xf86CrtcConfigFuncsRec via_xf86crtc_config_funcs = {
-    via_xf86crtc_resize
-};
-
 void
 VIALoadRgbLut(ScrnInfoPtr pScrn, int start, int numColors, LOCO *colors)
 {
@@ -1800,8 +1758,6 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
     /*
      * Now handle the outputs
      */
-    xf86CrtcConfigInit(pScrn, &via_xf86crtc_config_funcs);
-
     iga1_rec = (drmmode_crtc_private_ptr) xnfcalloc(sizeof(drmmode_crtc_private_rec), 1);
     if (!iga1_rec) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "IGA1 Rec allocation failed.\n");
@@ -1814,6 +1770,7 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
         free(iga1_rec);
         return FALSE;
     }
+    iga1_rec->drmmode = &pVia->drmmode;
     iga1_rec->index = 0;
     iga1->driver_private = iga1_rec;
 
@@ -1831,6 +1788,7 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
         free(iga2_rec);
         return FALSE;
     }
+    iga2_rec->drmmode = &pVia->drmmode;
     iga2_rec->index = 1;
     iga2->driver_private = iga2_rec;
 

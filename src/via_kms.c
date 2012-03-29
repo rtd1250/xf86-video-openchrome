@@ -802,17 +802,6 @@ drmmode_clones_init(ScrnInfoPtr scrn, drmmode_ptr drmmode)
     }
 }
 
-static void *
-drmmode_map_front_bo(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
-{
-    int ret;
-
-    if (drmmode->front_bo->ptr)
-        return drmmode->front_bo->ptr;
-
-    return drm_bo_map(pScrn, drmmode->front_bo);
-}
-
 static Bool
 drmmode_xf86crtc_resize (ScrnInfoPtr scrn, int width, int height)
 {
@@ -859,7 +848,7 @@ drmmode_xf86crtc_resize (ScrnInfoPtr scrn, int width, int height)
     if (ret)
         goto fail;
 
-    new_pixels  = drmmode_map_front_bo(scrn, drmmode);
+    new_pixels  = drm_bo_map(scrn, drmmode->front_bo);
     if (!new_pixels)
         goto fail;
 

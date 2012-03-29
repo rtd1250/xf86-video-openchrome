@@ -1187,11 +1187,10 @@ viaExaDownloadFromScreen(PixmapPtr pSrc, int x, int y, int w, int h,
                          char *dst, int dst_pitch)
 {
     ScrnInfoPtr pScrn = xf86Screens[pSrc->drawable.pScreen->myNum];
-    VIAPtr pVia = VIAPTR(pScrn);
-    unsigned srcPitch = exaGetPixmapPitch(pSrc);
     unsigned wBytes = (pSrc->drawable.bitsPerPixel * w + 7) >> 3;
-    unsigned srcOffset;
+    unsigned srcPitch = exaGetPixmapPitch(pSrc), srcOffset;
     char *bounceAligned = NULL;
+    VIAPtr pVia = VIAPTR(pScrn);
     unsigned totSize;
 
     if (!w || !h)
@@ -1206,7 +1205,8 @@ viaExaDownloadFromScreen(PixmapPtr pSrc, int x, int y, int w, int h,
 
     exaWaitSync(pScrn->pScreen);
     if (totSize < VIA_MIN_DOWNLOAD) {
-        bounceAligned = (char *)pVia->drmmode.front_bo->ptr + srcOffset;
+        bounceAligned = (char *) drm_bo_map(pScrn, pVia->drmmode.front_bo) + srcOffset;
+
         while (h--) {
             memcpy(dst, bounceAligned, wBytes);
             dst += dst_pitch;
@@ -1240,16 +1240,14 @@ viaExaTexUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
                         int src_pitch)
 {
     ScrnInfoPtr pScrn = xf86Screens[pDst->drawable.pScreen->myNum];
-    VIAPtr pVia = VIAPTR(pScrn);
-    unsigned dstPitch = exaGetPixmapPitch(pDst);
+    unsigned dstPitch = exaGetPixmapPitch(pDst), dstOffset;
     unsigned wBytes = (w * pDst->drawable.bitsPerPixel + 7) >> 3;
-    unsigned dstOffset;
+    int i, sync[2], yOffs, bufH, bufOffs, height, format;
     CARD32 texWidth, texHeight, texPitch;
-    int format;
-    char *dst, *texAddr;
-    int i, sync[2], yOffs, bufH, bufOffs, height;
-    Bool buf;
+    VIAPtr pVia = VIAPTR(pScrn);
     Via3DState *v3d = &pVia->v3d;
+    char *dst, *texAddr;
+    Bool buf;
 
     if (!w || !h)
         return TRUE;
@@ -1258,8 +1256,10 @@ viaExaTexUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
         dstOffset = x * pDst->drawable.bitsPerPixel;
         if (dstOffset & 3)
             return FALSE;
-        dst = (char *)pVia->drmmode.front_bo->ptr + (exaGetPixmapOffset(pDst) + y * dstPitch
-                                      + (dstOffset >> 3));
+
+        dst = (char *) drm_bo_map(pScrn, pVia->drmmode.front_bo) +
+                        (exaGetPixmapOffset(pDst) + y * dstPitch +
+                        (dstOffset >> 3));
         exaWaitSync(pScrn->pScreen);
 
         while (h--) {
@@ -1376,7 +1376,7 @@ viaExaUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
     dstOffset = exaGetPixmapOffset(pDst) + y * dstPitch + (dstOffset >> 3);
 
     if (wBytes * h < VIA_MIN_UPLOAD || wBytes < 65) {
-        dst = (char *)pVia->drmmode.front_bo->ptr + dstOffset;
+        dst = (char *) drm_bo_map(pScrn, pVia->drmmode.front_bo) + dstOffset;
 
         exaWaitSync(pScrn->pScreen);
         while (h--) {
@@ -1515,7 +1515,7 @@ viaExaIsOffscreen(PixmapPtr pPix)
     VIAPtr pVia = VIAPTR(pScrn);
 
     return ((unsigned long)pPix->devPrivate.ptr -
-            (unsigned long)pVia->drmmode.front_bo->ptr) < pVia->drmmode.front_bo->size;
+            (unsigned long) drm_bo_map(pScrn, pVia->drmmode.front_bo)) < pVia->drmmode.front_bo->size;
 }
 
 static Bool
@@ -1690,18 +1690,15 @@ viaInitExa(ScreenPtr pScreen)
 #ifdef XF86DRI
     if (pVia->directRenderingType == DRI_1) {
 #ifdef linux
-        if ((pVia->drmVerMajor > 2) ||
-            ((pVia->drmVerMajor == 2) && (pVia->drmVerMinor >= 7))) {
-            pExa->DownloadFromScreen = viaExaDownloadFromScreen;
-        }
+        pExa->DownloadFromScreen = viaExaDownloadFromScreen;
 #endif /* linux */
         switch (pVia->Chipset) {
             case VIA_K8M800:
             case VIA_KM400:
-                pExa->UploadToScreen = viaExaTexUploadToScreen;
+                pExa->UploadToScreen = NULL; //viaExaTexUploadToScreen;
                 break;
             default:
-                pExa->UploadToScreen = NULL;
+                pExa->UploadToScreen = NULL; //viaExaUploadToScreen;
                 break;
         }
     }
@@ -1831,9 +1828,7 @@ UMSAccelSetup(ScrnInfoPtr pScrn)
 	}
 #endif
 
-	if (pVia->NoAccel)
-		memset(pVia->drmmode.front_bo->ptr, 0x00, pVia->drmmode.front_bo->size);
-	else
+	if (!pVia->NoAccel)
 		viaFinishInitAccel(pScreen);
 }
 

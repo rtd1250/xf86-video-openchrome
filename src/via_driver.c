@@ -777,6 +777,101 @@ VIAGetRec(ScrnInfoPtr pScrn)
 } /* VIAGetRec */
 
 static Bool
+via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
+{
+    xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(scrn);
+    drmmode_crtc_private_ptr drmmode_crtc = xf86_config->crtc[0]->driver_private;
+    drmmode_ptr drmmode = drmmode_crtc->drmmode;
+    int old_width, old_height, old_dwidth, pitch;
+    int cpp = (scrn->bitsPerPixel + 7) >> 3;
+    struct buffer_object *old_front = NULL;
+    ScreenPtr screen = scrn->pScreen;
+    VIAPtr pVia = VIAPTR(scrn);
+    void *new_pixels = NULL;
+    uint32_t old_fb_id;
+    PixmapPtr ppix;
+
+    if (scrn->virtualX == width && scrn->virtualY == height)
+        return TRUE;
+
+    xf86DrvMsg(scrn->scrnIndex, X_INFO,
+                "Allocate new frame buffer %dx%d stride\n",
+                width, height);
+
+    old_width = scrn->virtualX;
+    old_height = scrn->virtualY;
+    old_dwidth = scrn->displayWidth;
+    old_fb_id = drmmode->fb_id;
+    old_front = drmmode->front_bo;
+
+    drmmode->front_bo = drm_bo_alloc_surface(scrn, width * cpp, height,
+                                                    0, 16, TTM_PL_FLAG_VRAM);
+    if (!drmmode->front_bo)
+        goto fail;
+
+    pitch = drmmode->front_bo->pitch;
+
+    if (pVia->KMS) {
+        if (drmModeAddFB(drmmode->fd, width, height, scrn->depth,
+                        scrn->bitsPerPixel, pitch,
+                        drmmode->front_bo->handle,
+                        &drmmode->fb_id))
+            goto fail;
+    }
+
+    new_pixels = drm_bo_map(scrn, drmmode->front_bo);
+    if (!new_pixels)
+        goto fail;
+
+    if (pVia->shadowFB) {
+        new_pixels = malloc(height * pitch);
+        if (!new_pixels)
+            goto fail;
+        free(pVia->ShadowPtr);
+        pVia->ShadowPtr = new_pixels;
+    }
+    scrn->virtualX = width;
+    scrn->virtualY = height;
+    scrn->displayWidth = pitch / cpp;
+
+    ppix = screen->GetScreenPixmap(screen);
+    if (!screen->ModifyPixmapHeader(ppix, width, height, -1, -1, pitch,
+                                    new_pixels))
+        goto fail;
+
+#if XORG_VERSION_CURRENT < XORG_VERSION_NUMERIC(1,9,99,1,0)
+    scrn->pixmapPrivate.ptr = ppix->devPrivate.ptr;
+#endif
+
+    if (xf86SetDesiredModes(scrn)) {
+        if (old_front) {
+            if (old_fb_id && pVia->KMS)
+                drmModeRmFB(drmmode->fd, old_fb_id);
+            drm_bo_unmap(scrn, old_front);
+            drm_bo_free(scrn, old_front);
+        }
+        return TRUE;
+    }
+
+fail:
+    if (drmmode->front_bo) {
+        drm_bo_unmap(scrn, drmmode->front_bo);
+        drm_bo_free(scrn, drmmode->front_bo);
+    }
+    drmmode->front_bo = old_front;
+    drmmode->fb_id = old_fb_id;
+    scrn->virtualY = old_height;
+    scrn->virtualX = old_width;
+    scrn->displayWidth = old_dwidth;
+    return FALSE;
+}
+
+static const
+xf86CrtcConfigFuncsRec via_xf86crtc_config_funcs = {
+    via_xf86crtc_resize
+};
+
+static Bool
 VIAPreInit(ScrnInfoPtr pScrn, int flags)
 {
     EntityInfoPtr pEnt;
@@ -1437,6 +1532,8 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         pVia->I2CDevices &= ~VIA_I2C_BUS2;
 
     /* CRTC handling */
+    xf86CrtcConfigInit(pScrn, &via_xf86crtc_config_funcs);
+
     if (pVia->KMS) {
         if (!KMSCrtcInit(pScrn, &pVia->drmmode)) {
             VIAFreeRec(pScrn);
@@ -1569,7 +1666,7 @@ viaShadowWindow(ScreenPtr screen, CARD32 row, CARD32 offset, int mode,
 
     stride = (pScrn->displayWidth * pScrn->bitsPerPixel) / 8;
     *size = stride;
-    return ((uint8_t *)pVia->drmmode.front_bo->ptr + row * stride + offset);
+    return ((uint8_t *) drm_bo_map(pScrn, pVia->drmmode.front_bo) + row * stride + offset);
 }
 
 static Bool
@@ -1585,16 +1682,18 @@ VIACreateScreenResources(ScreenPtr pScreen)
         return FALSE;
     pScreen->CreateScreenResources = VIACreateScreenResources;
 
-    surface = pVia->drmmode.front_bo->ptr;
+    rootPixmap = pScreen->GetScreenPixmap(pScreen);
+
+    surface = drm_bo_map(pScrn, pVia->drmmode.front_bo);
     if (!surface)
         return FALSE;
-
-    rootPixmap = pScreen->GetScreenPixmap(pScreen);
 
     if (pVia->shadowFB)
         surface = pVia->ShadowPtr;
 
-    if (!pScreen->ModifyPixmapHeader(rootPixmap, -1, -1, -1, -1, -1,
+    if (!pScreen->ModifyPixmapHeader(rootPixmap, pScrn->virtualX,
+                                        pScrn->virtualY, -1, -1,
+                                        pVia->drmmode.front_bo->pitch,
                                         surface))
         return FALSE;
 
