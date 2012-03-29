@@ -88,9 +88,9 @@ static struct ViaDotClock {
     { 122726, 0x073C, /* 0x878802 */ { { 1, 2, 4, 137 } } },
     { 135000, 0x0742, /* 0x6f8801 */ { { 1, 2, 3, 113 } } },
     { 148500, 0x0853, /* 0x518800 */ { { 1, 2, 2,  83 } } },
-    { 155800, 0x0857, /* 0x558402 */ { { 1, 1, 4,  87 } } }, 
+    { 155800, 0x0857, /* 0x558402 */ { { 1, 1, 4,  87 } } },
     { 157500, 0x422C, /* 0x2a8400 */ { { 1, 1, 2,  44 } } },
-    { 161793, 0x4571, /* 0x6f8403 */ { { 1, 1, 5, 113 } } }, 
+    { 161793, 0x4571, /* 0x6f8403 */ { { 1, 1, 5, 113 } } },
     { 162000, 0x0A71, /* 0x6f8403 */ { { 1, 1, 5, 113 } } },
     { 175500, 0x4231, /* 0x2f8400 */ { { 1, 1, 2,  49 } } },
     { 189000, 0x0542, /* 0x4d8401 */ { { 1, 1, 3,  79 } } },
@@ -106,49 +106,6 @@ static struct ViaDotClock {
  * Panel
  *
  */
-/*
- * Since mode->PrivFlags is overwritten to support the antique Tseng
- * this is the only way to flag a selfdefined mode as such.
- */
-struct ViaModePriv {
-    char   id[12]; /* "Unichrome" */
-};
-
-static struct ViaModePriv ViaPanelPrivate = {
-    { 'U', 'n', 'i', 'c', 'h', 'r', 'o', 'm', 'e', 0, 0, 0 },
-};
-
-#define MODEPREFIX(name) NULL, NULL, name, 0,M_T_DEFAULT
-#define MODESUFFIX       0,0, 0,0,0,0,0,0,0, 0,0,0,0,0,0,FALSE,FALSE,\
-	sizeof(struct ViaModePriv),(void *)&ViaPanelPrivate,0,0.0,0.0
-
-static DisplayModeRec ViaPanelModes[] = {
-    { MODEPREFIX("640x480"),    25312,  640,  656,  752,  800, 0,  480,  489,  491,  525, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX },
-    { MODEPREFIX("720x480"),    26591,  720,  736,  808,  896, 0,  480,  480,  483,  497, 0, V_NHSYNC | V_PVSYNC, MODESUFFIX },
-    { MODEPREFIX("720x576"),    32663,  720,  744,  816,  912, 0,  576,  576,  579,  597, 0, V_NHSYNC | V_PVSYNC, MODESUFFIX },
-    { MODEPREFIX("800x480"),    40000,   800,  832,  960, 1056, 0,   480,  541,  545,  628, 0, V_NHSYNC | V_PVSYNC, MODESUFFIX },
-    { MODEPREFIX("800x600"),    39822,  800,  840,  968, 1056, 0,  600,  600,  604,  628, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX },
-    { MODEPREFIX("848x480"),    33750,  848,  864,  976, 1088, 0,  480,  485,  493,  517, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX },
-    { MODEPREFIX("856x480"),    31704,  856,  872,  960, 1064, 0,  480,  480,  483,  497, 0, V_NHSYNC | V_PVSYNC, MODESUFFIX },
-    { MODEPREFIX("1024x512"),   41164, 1024, 1056, 1160, 1296, 0,  512,  512,  515,  531, 0, V_NHSYNC | V_PVSYNC, MODESUFFIX },
-    { MODEPREFIX("1024x576"),   46981, 1024, 1064, 1168, 1312, 0,  576,  576,  579,  597, 0, V_NHSYNC | V_PVSYNC, MODESUFFIX },
-    { MODEPREFIX("1024x600"),   48960, 1024, 1048, 1152, 1312, 0,  600,  601,  604,  630, 0, V_NHSYNC | V_PVSYNC, MODESUFFIX },
-    { MODEPREFIX("1024x768"),   65028, 1024, 1048, 1184, 1344, 0,  768,  770,  776,  806, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX },
-    { MODEPREFIX("1152x864"),   81613, 1152, 1216, 1336, 1520, 0,  864,  864,  867,  895, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX },
-    { MODEPREFIX("1280x768"),   81135, 1280, 1328, 1440, 1688, 0,  768,  770,  776,  802, 0, V_PHSYNC | V_NVSYNC, MODESUFFIX },
-    { MODEPREFIX("1280x720"),   74600, 1280, 1341, 1474, 1688, 0,  720,  721,  724,  746, 0, V_NHSYNC | V_PVSYNC, MODESUFFIX },
-    { MODEPREFIX("1280x800"),   83500, 1280, 1352, 1480, 1680, 0,  800,  803,  809,  831, 0, V_NHSYNC | V_PVSYNC, MODESUFFIX },
-    { MODEPREFIX("1200x900"),   57275, 1200, 1208, 1216, 1240, 0,  900,  905,  908,  912, 0, V_NHSYNC | V_NVSYNC, MODESUFFIX },
-    { MODEPREFIX("1280x960"),  108280, 1280, 1376, 1488, 1800, 0,  960,  960,  963, 1000, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX },
-    { MODEPREFIX("1280x1024"), 108280, 1280, 1328, 1440, 1688, 0, 1024, 1024, 1027, 1066, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX },
-    { MODEPREFIX("1360x768"),   85500, 1360, 1392, 1712, 1744, 0,  768,  783,  791,  807, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX },
-    { MODEPREFIX("1366x768"),  85860,  1366, 1440, 1584, 1800, 0, 768,  769,  772,   795, 0, V_NHSYNC | V_PVSYNC, MODESUFFIX },
-    { MODEPREFIX("1400x1050"), 122726, 1400, 1488, 1640, 1880, 0, 1050, 1050, 1053, 1087, 0, V_NHSYNC | V_PVSYNC, MODESUFFIX },
-    { MODEPREFIX("1440x900"),  106470, 1440, 1520, 1672, 1904, 0,  900,  901,  904,  932, 0, V_NHSYNC | V_PVSYNC, MODESUFFIX },
-    { MODEPREFIX("1600x1200"), 161793, 1600, 1664, 1856, 2160, 0, 1200, 1200, 1203, 1250, 0, V_PHSYNC | V_PVSYNC, MODESUFFIX },
-    { MODEPREFIX("1920x1080"), 172900, 1920, 2043, 2249, 2578, 0, 1080, 1081, 1084, 1118, 0, V_NHSYNC | V_PVSYNC, MODESUFFIX },
-    { MODEPREFIX(NULL), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, MODESUFFIX },
-};
 
 #define VIA_RES_640X480     0
 #define VIA_RES_800X600     1

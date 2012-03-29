@@ -78,6 +78,16 @@ static ViaPanelModeRec ViaPanelNativeModes[] = {
     {800, 480}     /* 0x13 General 8x4 panel use this setting */
 };
 
+#define MODEPREFIX(name) NULL, NULL, name, 0, M_T_DRIVER | M_T_DEFAULT
+#define MODESUFFIX 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,FALSE,FALSE,0,NULL,0,0.0,0.0
+
+static DisplayModeRec OLPCMode = {
+    MODEPREFIX("1200x900"),
+    57275, 1200, 1208, 1216, 1240, 0,
+    900,  905,  908,  912, 0,
+    V_NHSYNC | V_NVSYNC, MODESUFFIX
+};
+
 /*
 	1. Formula:
 		2^13 X 0.0698uSec [1/14.318MHz] = 8192 X 0.0698uSec =572.1uSec
@@ -1390,8 +1400,13 @@ via_lvds_get_modes(xf86OutputPtr output)
              * using CVT.
              */
             if (Panel->NativeWidth && Panel->NativeHeight) {
-                p = xf86CVTMode(Panel->NativeWidth, Panel->NativeHeight,
-                                60.0f, FALSE, FALSE);
+                VIAPtr pVia = VIAPTR(pScrn);
+
+                if (!xf86NameCmp(pVia->Id->String, "OLPC XO 1.5"))
+                    p = xf86DuplicateMode(&OLPCMode);
+                else
+                    p = xf86CVTMode(Panel->NativeWidth, Panel->NativeHeight,
+                                    60.0f, FALSE, FALSE);
                 if (p) {
                     p->CrtcHDisplay = p->HDisplay;
                     p->CrtcHSyncStart = p->HSyncStart;
@@ -1561,6 +1576,12 @@ via_lvds_init(ScrnInfoPtr pScrn)
         output->possible_clones = 0;
         output->interlaceAllowed = FALSE;
         output->doubleScanAllowed = FALSE;
+
+        if (!xf86NameCmp(pVia->Id->String, "OLPC XO 1.5")) {
+            output->mm_height = 152;
+            output->mm_width = 114;
+        }
+
         pBIOSInfo->lvds = output;
     } else {
         free(Panel);
