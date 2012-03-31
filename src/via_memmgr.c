@@ -174,6 +174,10 @@ drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
     if (pVia->directRenderingType == DRI_2) {
         obj->ptr = mmap(0, obj->size, PROT_READ | PROT_WRITE,
                         MAP_SHARED, pVia->drmmode.fd, obj->map_offset);
+        if (obj->ptr == MAP_FAILED) {
+            DEBUG(ErrorF("mmap failed with error %d\n", -errno));
+            obj->ptr = NULL;
+        }
     } else
         obj->ptr = (unsigned char *) obj->map_offset + obj->offset;
     return obj->ptr;
