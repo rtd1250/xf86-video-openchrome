@@ -830,12 +830,11 @@ drmmode_xf86crtc_resize (ScrnInfoPtr scrn, int width, int height)
     old_fb_id = drmmode->fb_id;
     old_front = drmmode->front_bo;
 
-    drmmode->front_bo = drm_bo_alloc_surface(scrn, width * cpp, height, 0, 16,
+    pitch = width * cpp;
+    drmmode->front_bo = drm_bo_alloc_surface(scrn, &pitch, height, 0, 16,
                                                 TTM_PL_FLAG_VRAM);
     if (!drmmode->front_bo)
         goto fail;
-
-    pitch = drmmode->front_bo->pitch;
 
     scrn->virtualX = width;
     scrn->virtualY = height;

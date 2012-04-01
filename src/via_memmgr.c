@@ -70,18 +70,15 @@ viaOffScreenLinear(struct buffer_object *obj, ScrnInfoPtr pScrn,
 }
 
 struct buffer_object *
-drm_bo_alloc_surface(ScrnInfoPtr pScrn, unsigned int width, unsigned int height,
+drm_bo_alloc_surface(ScrnInfoPtr pScrn, unsigned int *pitch, unsigned int height,
                     int format, unsigned int alignment, int domain)
 {
     struct buffer_object *obj = NULL;
-    unsigned int pitch, size;
 
-    pitch = ALIGN_TO(width, 16);
-    size = pitch * height;
-
-    obj = drm_bo_alloc(pScrn, size, alignment, domain);
+    *pitch = ALIGN_TO(*pitch, alignment);
+    obj = drm_bo_alloc(pScrn, *pitch * height, alignment, domain);
     if (obj)
-        obj->pitch = pitch;
+        obj->pitch = *pitch;
     return obj;
 }
 

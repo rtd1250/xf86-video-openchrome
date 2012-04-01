@@ -804,12 +804,11 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
     old_fb_id = drmmode->fb_id;
     old_front = drmmode->front_bo;
 
-    drmmode->front_bo = drm_bo_alloc_surface(scrn, width * cpp, height,
-                                                    0, 16, TTM_PL_FLAG_VRAM);
+    pitch = width * cpp;
+    drmmode->front_bo = drm_bo_alloc_surface(scrn, &pitch, height, 0,
+                                            16, TTM_PL_FLAG_VRAM);
     if (!drmmode->front_bo)
         goto fail;
-
-    pitch = drmmode->front_bo->pitch;
 
     if (pVia->KMS) {
         if (drmModeAddFB(drmmode->fd, width, height, scrn->depth,
@@ -1772,7 +1771,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
-    int size, i;
+    int pitch, i;
 
     pScrn->pScreen = pScreen;
     pScrn->displayWidth = pScrn->virtualX;
@@ -1801,8 +1800,8 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     if (!drm_bo_manager_init(pScrn))
         return FALSE;
 
-    size = pScrn->virtualX * pScrn->bitsPerPixel >> 3;
-    pVia->drmmode.front_bo = drm_bo_alloc_surface(pScrn, size, pScrn->virtualY,
+    pitch = pScrn->virtualX * pScrn->bitsPerPixel >> 3;
+    pVia->drmmode.front_bo = drm_bo_alloc_surface(pScrn, &pitch, pScrn->virtualY,
                                                     0, 16, TTM_PL_FLAG_VRAM);
     if (!pVia->drmmode.front_bo)
         return FALSE;
@@ -1886,7 +1885,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
         xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
         int flags = (HARDWARE_CURSOR_AND_SOURCE_WITH_MASK |
                      HARDWARE_CURSOR_TRUECOLOR_AT_8BPP);
-        int cursorSize, i = 0;
+        int cursorSize, size, i = 0;
 
         switch (pVia->Chipset) {
         case VIA_CLE266:

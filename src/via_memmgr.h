@@ -42,7 +42,7 @@ struct buffer_object {
 Bool drm_bo_manager_init(ScrnInfoPtr pScrn);
 
 struct buffer_object *
-drm_bo_alloc_surface(ScrnInfoPtr pScrn, unsigned int width, unsigned int height,
+drm_bo_alloc_surface(ScrnInfoPtr pScrn, unsigned int *pitch, unsigned int height,
                     int format, unsigned int alignment, int domain);
 struct buffer_object *
 drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment,
