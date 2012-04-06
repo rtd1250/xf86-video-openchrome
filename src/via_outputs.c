@@ -817,7 +817,6 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaOutputsDetect\n"));
 
     pBIOSInfo->analog = NULL;
-    pBIOSInfo->lvds = NULL;
 
     /* LVDS */
     via_lvds_init(pScrn);

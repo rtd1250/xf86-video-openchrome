@@ -145,7 +145,6 @@ typedef struct ViaPanelInfo {
 
 typedef struct _VIABIOSINFO {
 	xf86OutputPtr analog;
-	xf86OutputPtr lvds;
 	xf86OutputPtr tv;
 
     CARD32      Clock; /* register value for the dotclock */

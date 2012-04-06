@@ -1804,7 +1804,7 @@ SetVideoWindow(ScrnInfoPtr pScrn, unsigned long videoFlag,
  * Upd_Video()
  */
 static Bool
-Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
+Upd_Video(xf86CrtcPtr crtc, unsigned long videoFlag,
           unsigned long startAddr, LPDDUPDATEOVERLAY pUpdate,
           unsigned long srcPitch,
           unsigned long oriSrcWidth, unsigned long oriSrcHeight,
@@ -1813,12 +1813,12 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
           unsigned long colorKeyLow, unsigned long colorKeyHigh,
           unsigned long chromaKeyLow, unsigned long chromaKeyHigh)
 {
+    drmmode_crtc_private_ptr iga = crtc->driver_private;
+    ScrnInfoPtr pScrn = crtc->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAHWDiff *hwDiff = &pVia->HWDiff;
-
-    int i;
     unsigned long vidCtl = 0, compose;
     unsigned long srcWidth, srcHeight, dstWidth, dstHeight;
     unsigned long zoomCtl = 0, miniCtl = 0;
@@ -1830,6 +1830,7 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
     unsigned long hqvSrcFetch = 0, hqvOffset = 0;
     unsigned long dwOffset = 0, fetch = 0, tmp = 0;
     unsigned long proReg = 0;
+    int i;
 
     DBG_DD(ErrorF("videoflag=%ld\n", videoFlag));
 
@@ -1874,15 +1875,11 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
     }
 
     /*
-     * FIXME:
-     * Enable video on secondary (change Panel to SecondCRTC?)
-     * Is it true you can't a second display with video?
+     * Enable video on secondary
      */
     if ((pVia->VideoEngine == VIDEO_ENGINE_CME ||
-		 pVia->Chipset == VIA_VM800) &&
-        (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected)) {
-
-        /* VAL_VIDE_ON_SND_DISPLAY */
+         pVia->Chipset == VIA_VM800) && iga->index) {
+        /* V1_ON_SND_DISPLAY */
         vidCtl |= V1_ON_SND_DISPLAY;
         /* SECOND_DISPLAY_COLOR_KEY_ENABLE */
         compose |= SECOND_DISPLAY_COLOR_KEY_ENABLE | 0x1;
@@ -2277,8 +2274,9 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
  *  Note: updates the overlay image parameter.
  */
 Bool
-VIAVidUpdateOverlay(ScrnInfoPtr pScrn, LPDDUPDATEOVERLAY pUpdate)
+VIAVidUpdateOverlay(xf86CrtcPtr crtc, LPDDUPDATEOVERLAY pUpdate)
 {
+    ScrnInfoPtr pScrn = crtc->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
     OVERLAYRECORD *ovlV1 = &pVia->swov.overlayRecordV1;
 
@@ -2425,7 +2423,7 @@ VIAVidUpdateOverlay(ScrnInfoPtr pScrn, LPDDUPDATEOVERLAY pUpdate)
 
     /* Update the overlay */
 
-    if (!Upd_Video(pScrn, videoFlag, startAddr, pUpdate,
+    if (!Upd_Video(crtc, videoFlag, startAddr, pUpdate,
                    pVia->swov.SWDevice.dwPitch, ovlV1->dwV1OriWidth,
                    ovlV1->dwV1OriHeight, deinterlaceMode, haveColorKey,
                    haveChromaKey, colorKeyLow, colorKeyHigh, chromaKeyLow,

@@ -259,10 +259,11 @@ static unsigned numAdaptPort[XV_ADAPT_NUM] = { 1 };
  */
 
 static Bool
-DecideOverlaySupport(ScrnInfoPtr pScrn)
+DecideOverlaySupport(xf86CrtcPtr crtc)
 {
+    DisplayModePtr mode = &crtc->desiredMode;
+    ScrnInfoPtr pScrn = crtc->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
-    DisplayModePtr mode = pScrn->currentMode;
 
 #ifdef HAVE_DEBUG
     if (pVia->disableXvBWCheck)
@@ -313,7 +314,6 @@ DecideOverlaySupport(ScrnInfoPtr pScrn)
         return FALSE;
 
     } else {
-        VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
         unsigned width, height, refresh, dClock;
         float mClock, memEfficiency, needBandWidth, totalBandWidth;
 
@@ -369,13 +369,14 @@ DecideOverlaySupport(ScrnInfoPtr pScrn)
         width = mode->HDisplay;
         height = mode->VDisplay;
         refresh = mode->VRefresh;
-	/*
-	 * Approximative, VERY conservative formula in some cases.
-	 * This formula and the one below are derived analyzing the
-	 * tables present in VIA's own drivers. They may reject the over-
-	 * lay in some cases where VIA's driver don't.
-	 */
-	dClock = (width * height * refresh) / 680000;
+
+        /*
+         * Approximative, VERY conservative formula in some cases.
+         * This formula and the one below are derived analyzing the
+         * tables present in VIA's own drivers. They may reject the over-
+         * lay in some cases where VIA's driver don't.
+         */
+        dClock = (width * height * refresh) / 680000;
         if (dClock) {
             needBandWidth =
                 (float)(((pScrn->bitsPerPixel >> 3) + VIDEO_BPP) * dClock);
@@ -1170,6 +1171,7 @@ viaPutImage(ScrnInfoPtr pScrn,
 {
     VIAPtr pVia = VIAPTR(pScrn);
     viaPortPrivPtr pPriv = (viaPortPrivPtr) data;
+    xf86CrtcPtr crtc = NULL;
     unsigned long retCode;
 
 # ifdef XV_DEBUG
@@ -1182,6 +1184,14 @@ viaPutImage(ScrnInfoPtr pScrn,
     ErrorF(" via_xv.c : drw_x=%d drw_y=%d drw_w=%d drw_h=%d\n", drw_x,
             drw_y, drw_w, drw_h);
 # endif
+
+    /* Find out which CRTC the surface will belong to */
+    crtc = window_belongs_to_crtc(pScrn, drw_x, drw_y, drw_w, drw_h);
+    if (!crtc) {
+        DBG_DD(ErrorF(" via_xv.c : No usable CRTC\n"));
+        viaXvError(pScrn, pPriv, xve_adaptor);
+        return BadAlloc;
+    }
 
     switch (pPriv->xv_adaptor) {
         case XV_ADAPT_SWOV:
@@ -1266,9 +1276,8 @@ viaPutImage(ScrnInfoPtr pScrn,
             }
 
             /* If there is bandwidth issue, block the H/W overlay */
-
             if (!pVia->OverlaySupported &&
-                    !(pVia->OverlaySupported = DecideOverlaySupport(pScrn))) {
+                    !(pVia->OverlaySupported = DecideOverlaySupport(crtc))) {
                 DBG_DD(ErrorF
                         (" via_xv.c : Xv Overlay rejected due to insufficient "
                                 "memory bandwidth.\n"));
@@ -1356,7 +1365,7 @@ viaPutImage(ScrnInfoPtr pScrn,
             /*
              *  Update video overlay
              */
-            if (!VIAVidUpdateOverlay(pScrn, lpUpdateOverlay)) {
+            if (!VIAVidUpdateOverlay(crtc, lpUpdateOverlay)) {
                 DBG_DD(ErrorF
                         (" via_xv.c : call v4l updateoverlay fail. \n"));
             } else {

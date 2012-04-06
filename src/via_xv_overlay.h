@@ -81,7 +81,7 @@ void VIAVidHWDiffInit(ScrnInfoPtr pScrn);
 int ViaSwovSurfaceCreate(ScrnInfoPtr pScrn, viaPortPrivPtr pPriv,
     CARD32 FourCC, CARD16 Width, CARD16 Height);
 void ViaSwovSurfaceDestroy(ScrnInfoPtr pScrn, viaPortPrivPtr pPriv);
-Bool VIAVidUpdateOverlay(ScrnInfoPtr pScrn, LPDDUPDATEOVERLAY pUpdate);
+Bool VIAVidUpdateOverlay(xf86CrtcPtr crtc, LPDDUPDATEOVERLAY pUpdate);
 void ViaOverlayHide(ScrnInfoPtr pScrn);
 
 #endif /* _VIA_SWOV_H_ */

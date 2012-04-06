@@ -77,7 +77,7 @@ typedef struct {
     int enc_clone_mask;
 } drmmode_output_private_rec, *drmmode_output_private_ptr;
 
-
+extern xf86CrtcPtr window_belongs_to_crtc(ScrnInfoPtr pScrn, int x, int y, int w, int h);
 extern Bool KMSCrtcInit(ScrnInfoPtr pScrn, drmmode_ptr drmmode);
 extern void drmmode_uevent_init(ScrnInfoPtr scrn, drmmode_ptr drmmode);
 extern void drmmode_uevent_fini(ScrnInfoPtr scrn, drmmode_ptr drmmode);

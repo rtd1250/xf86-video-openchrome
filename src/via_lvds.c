@@ -1500,7 +1500,6 @@ via_lvds_init(ScrnInfoPtr pScrn)
     OptionInfoPtr  Options = xnfalloc(sizeof(ViaPanelOptions));
     MessageType from = X_DEFAULT;
     VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
     xf86OutputPtr output = NULL;
     Bool ForcePanel = FALSE;
     char *s = NULL;
@@ -1581,8 +1580,6 @@ via_lvds_init(ScrnInfoPtr pScrn)
             output->mm_height = 152;
             output->mm_width = 114;
         }
-
-        pBIOSInfo->lvds = output;
     } else {
         free(Panel);
     }
