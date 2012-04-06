@@ -59,7 +59,7 @@
 #include "dristruct.h"
 #include "dri.h"
 #include "via_xvpriv.h"
-#include "via_video.h"
+#include "via_xv.h"
 
 #define MAKE_ATOM(a) MakeAtom(a, strlen(a), TRUE)
 

@@ -35,7 +35,6 @@
 #endif
 
 #include "via_driver.h"
-#include "via_swov.h"
 #ifdef XF86DRI
 #include "via_drm.h"
 #endif

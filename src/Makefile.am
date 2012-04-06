@@ -59,16 +59,16 @@ openchrome_drv_la_SOURCES = \
          via_mode.h \
          via_priv.h \
          via_regs.h \
-         via_swov.c \
-         via_swov.h \
+         via_xv_overlay.c \
+         via_xv_overlay.h \
          via_ums.c \
          via_kms.h \
          via_kms.c \
          via_vbe.c \
          via_vgahw.c \
          via_vgahw.h \
-         via_video.c \
-         via_video.h \
+         via_xv.c \
+         via_xv.h \
          via_vt162x.c \
          via_vt162x.h \
          via_xvpriv.h

@@ -71,10 +71,10 @@
 #include "via_regs.h"
 #include "via_kms.h"
 #include "via_ums.h"
-#include "via_swov.h"
 #include "via_dmabuffer.h"
 #include "via_3d.h"
-#include "via_video.h"
+#include "via_xv.h"
+#include "via_xv_overlay.h"
 #include "via_eng_regs.h"
 
 #ifdef XSERVER_LIBPCIACCESS
@@ -423,7 +423,7 @@ void viaAccelTextureBlit(ScrnInfoPtr, unsigned long, unsigned, unsigned,
 			 unsigned long, unsigned, unsigned,
 			 unsigned, unsigned, int);
 
-/* In via_video.c */
+/* In via_xv.c */
 void viaInitVideo(ScreenPtr pScreen);
 void viaExitVideo(ScrnInfoPtr pScrn);
 void viaSaveVideo(ScrnInfoPtr pScrn);

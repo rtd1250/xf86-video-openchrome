@@ -40,9 +40,7 @@
 #endif
 
 #include "version.h"
-
 #include "via_driver.h"
-#include "via_video.h"
 
 #if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 6
 #include "xf86RAC.h"

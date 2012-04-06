@@ -43,13 +43,11 @@
 #include "xf86fbman.h"
 #include "regionstr.h"
 #include "via_driver.h"
-#include "via_video.h"
 
 #include "xf86xv.h"
 #include <X11/extensions/Xv.h>
 #include "dixstruct.h"
 #include "via_xvpriv.h"
-#include "via_swov.h"
 #include "fourcc.h"
 
 /*
@@ -383,17 +381,17 @@ DecideOverlaySupport(ScrnInfoPtr pScrn)
                 (float)(((pScrn->bitsPerPixel >> 3) + VIDEO_BPP) * dClock);
             totalBandWidth = (float)(mClock * 16. * memEfficiency);
 
-            DBG_DD(ErrorF(" via_video.c : cBitsPerPel= %d : \n",
+            DBG_DD(ErrorF(" via_xv.c : cBitsPerPel= %d : \n",
                 pScrn->bitsPerPixel));
-            DBG_DD(ErrorF(" via_video.c : Video_Bpp= %d : \n", VIDEO_BPP));
-            DBG_DD(ErrorF(" via_video.c : refresh = %d : \n", refresh));
-            DBG_DD(ErrorF(" via_video.c : dClock= %d : \n", dClock));
-            DBG_DD(ErrorF(" via_video.c : mClk= %f : \n", mClock));
-            DBG_DD(ErrorF(" via_video.c : memEfficiency= %f : \n",
+            DBG_DD(ErrorF(" via_xv.c : Video_Bpp= %d : \n", VIDEO_BPP));
+            DBG_DD(ErrorF(" via_xv.c : refresh = %d : \n", refresh));
+            DBG_DD(ErrorF(" via_xv.c : dClock= %d : \n", dClock));
+            DBG_DD(ErrorF(" via_xv.c : mClk= %f : \n", mClock));
+            DBG_DD(ErrorF(" via_xv.c : memEfficiency= %f : \n",
                 memEfficiency));
-            DBG_DD(ErrorF(" via_video.c : needBandwidth= %f : \n",
+            DBG_DD(ErrorF(" via_xv.c : needBandwidth= %f : \n",
                 needBandWidth));
-            DBG_DD(ErrorF(" via_video.c : totalBandwidth= %f : \n",
+            DBG_DD(ErrorF(" via_xv.c : totalBandwidth= %f : \n",
                 totalBandWidth));
             if (needBandWidth < totalBandWidth)
                 return TRUE;
@@ -432,7 +430,7 @@ viaResetVideo(ScrnInfoPtr pScrn)
     VIAPtr pVia = VIAPTR(pScrn);
     vmmtr viaVidEng = (vmmtr) (pVia->MapBase + 0x200);
 
-    DBG_DD(ErrorF(" via_video.c : viaResetVideo: \n"));
+    DBG_DD(ErrorF(" via_xv.c : viaResetVideo: \n"));
 
     viaVidEng->video1_ctl = 0;
     viaVidEng->video3_ctl = 0;
@@ -448,7 +446,7 @@ viaSaveVideo(ScrnInfoPtr pScrn)
     VIAPtr pVia = VIAPTR(pScrn);
     vmmtr viaVidEng = (vmmtr) (pVia->MapBase + 0x200);
 
-    DBG_DD(ErrorF(" via_video.c : viaSaveVideo : \n"));
+    DBG_DD(ErrorF(" via_xv.c : viaSaveVideo : \n"));
     /* Save video registers */
     memcpy(pVia->VideoRegs, (void*)viaVidEng, sizeof(video_via_regs));
 
@@ -467,7 +465,7 @@ viaRestoreVideo(ScrnInfoPtr pScrn)
     vmmtr viaVidEng = (vmmtr) (pVia->MapBase + 0x200);
     video_via_regs  *localVidEng = pVia->VideoRegs;
 
-    DBG_DD(ErrorF(" via_video.c : viaRestoreVideo : \n"));
+    DBG_DD(ErrorF(" via_xv.c : viaRestoreVideo : \n"));
 
     /* Restore video registers */
     /* flush restored video engines' setting to MapBase */
@@ -551,7 +549,7 @@ viaExitVideo(ScrnInfoPtr pScrn)
     XF86VideoAdaptorPtr curAdapt;
     int i, j, numPorts;
 
-    DBG_DD(ErrorF(" via_video.c : viaExitVideo : \n"));
+    DBG_DD(ErrorF(" via_xv.c : viaExitVideo : \n"));
 
 #ifdef XF86DRI
     ViaCleanupXVMC(pScrn, viaAdaptPtr, XV_ADAPT_NUM);
@@ -596,7 +594,7 @@ viaInitVideo(ScreenPtr pScreen)
     XF86VideoAdaptorPtr *adaptors, *newAdaptors;
     int num_adaptors, num_new;
 
-    DBG_DD(ErrorF(" via_video.c : viaInitVideo, Screen[%d]\n", pScrn->scrnIndex));
+    DBG_DD(ErrorF(" via_xv.c : viaInitVideo, Screen[%d]\n", pScrn->scrnIndex));
 
     allAdaptors = NULL;
     newAdaptors = NULL;
@@ -645,7 +643,7 @@ viaInitVideo(ScreenPtr pScreen)
         memset(viaAdaptPtr, 0, sizeof(viaAdaptPtr));
     }
 
-    DBG_DD(ErrorF(" via_video.c : num_adaptors : %d\n", num_adaptors));
+    DBG_DD(ErrorF(" via_xv.c : num_adaptors : %d\n", num_adaptors));
     if (newAdaptors) {
         allAdaptors = malloc((num_adaptors + num_new) *
                 sizeof(XF86VideoAdaptorPtr *));
@@ -680,7 +678,7 @@ viaSetupAdaptors(ScreenPtr pScreen, XF86VideoAdaptorPtr ** adaptors)
     DevUnion *pdevUnion;
     int i, j, usedPorts, numPorts;
 
-    DBG_DD(ErrorF(" via_video.c : viaSetupAdaptors (viaSetupImageVideo): \n"));
+    DBG_DD(ErrorF(" via_xv.c : viaSetupAdaptors (viaSetupImageVideo): \n"));
 
     xvBrightness = MAKE_ATOM("XV_BRIGHTNESS");
     xvContrast = MAKE_ATOM("XV_CONTRAST");
@@ -772,7 +770,7 @@ viaStopVideo(ScrnInfoPtr pScrn, pointer data, Bool exit)
     VIAPtr pVia = VIAPTR(pScrn);
     viaPortPrivPtr pPriv = (viaPortPrivPtr) data;
 
-    DBG_DD(ErrorF(" via_video.c : viaStopVideo: exit=%d\n", exit));
+    DBG_DD(ErrorF(" via_xv.c : viaStopVideo: exit=%d\n", exit));
 
     REGION_EMPTY(pScrn->pScreen, &pPriv->clip);
     ViaOverlayHide(pScrn);
@@ -800,7 +798,7 @@ viaSetPortAttribute(ScrnInfoPtr pScrn,
     viaPortPrivPtr pPriv = (viaPortPrivPtr) data;
     int attr, avalue;
 
-    DBG_DD(ErrorF(" via_video.c : viaSetPortAttribute : \n"));
+    DBG_DD(ErrorF(" via_xv.c : viaSetPortAttribute : \n"));
 
     /* Color Key */
     if (attribute == xvColorKey) {
@@ -841,7 +839,7 @@ viaSetPortAttribute(ScrnInfoPtr pScrn,
                 pPriv->brightness, pPriv->contrast, FALSE);
     } else {
         DBG_DD(ErrorF
-                (" via_video.c : viaSetPortAttribute : is not supported the attribute"));
+                (" via_xv.c : viaSetPortAttribute : is not supported the attribute"));
         return BadMatch;
     }
 
@@ -858,13 +856,13 @@ viaGetPortAttribute(ScrnInfoPtr pScrn,
 {
     viaPortPrivPtr pPriv = (viaPortPrivPtr) data;
 
-    DBG_DD(ErrorF(" via_video.c : viaGetPortAttribute : port %d %ld\n",
+    DBG_DD(ErrorF(" via_xv.c : viaGetPortAttribute : port %d %ld\n",
                     pPriv->xv_portnum, attribute));
 
     *value = 0;
     if (attribute == xvColorKey) {
         *value = (INT32) pPriv->colorKey;
-        DBG_DD(ErrorF(" via_video.c :    ColorKey 0x%lx\n", pPriv->colorKey));
+        DBG_DD(ErrorF(" via_xv.c :    ColorKey 0x%lx\n", pPriv->colorKey));
     } else if (attribute == xvAutoPaint) {
         *value = (INT32) pPriv->autoPaint;
         DBG_DD(ErrorF("    AutoPaint = %08ld\n", *value));
@@ -890,7 +888,7 @@ viaGetPortAttribute(ScrnInfoPtr pScrn,
         }
 
     } else {
-        DBG_DD(ErrorF(" via_video.c : viaGetPortAttribute : is not supported the attribute\n"));
+        DBG_DD(ErrorF(" via_xv.c : viaGetPortAttribute : is not supported the attribute\n"));
         /*return BadMatch */;
     }
     return Success;
@@ -903,7 +901,7 @@ viaQueryBestSize(ScrnInfoPtr pScrn,
     short drw_w, short drw_h,
     unsigned int *p_w, unsigned int *p_h, pointer data)
 {
-    DBG_DD(ErrorF(" via_video.c : viaQueryBestSize :\n"));
+    DBG_DD(ErrorF(" via_xv.c : viaQueryBestSize :\n"));
     *p_w = drw_w;
     *p_h = drw_h;
 
@@ -1175,13 +1173,13 @@ viaPutImage(ScrnInfoPtr pScrn,
     unsigned long retCode;
 
 # ifdef XV_DEBUG
-    ErrorF(" via_video.c : viaPutImage : called,  Screen[%d]\n", pScrn->scrnIndex);
-    ErrorF(" via_video.c : FourCC=0x%x width=%d height=%d sync=%d\n", id,
+    ErrorF(" via_xv.c : viaPutImage : called,  Screen[%d]\n", pScrn->scrnIndex);
+    ErrorF(" via_xv.c : FourCC=0x%x width=%d height=%d sync=%d\n", id,
             width, height, sync);
     ErrorF
-    (" via_video.c : src_x=%d src_y=%d src_w=%d src_h=%d colorkey=0x%lx\n",
+    (" via_xv.c : src_x=%d src_y=%d src_w=%d src_h=%d colorkey=0x%lx\n",
             src_x, src_y, src_w, src_h, pPriv->colorKey);
-    ErrorF(" via_video.c : drw_x=%d drw_y=%d drw_w=%d drw_h=%d\n", drw_x,
+    ErrorF(" via_xv.c : drw_x=%d drw_y=%d drw_w=%d drw_h=%d\n", drw_x,
             drw_y, drw_w, drw_h);
 # endif
 
@@ -1194,7 +1192,7 @@ viaPutImage(ScrnInfoPtr pScrn,
             int dstPitch;
             unsigned long dwUseExtendedFIFO = 0;
 
-            DBG_DD(ErrorF(" via_video.c :              : S/W Overlay! \n"));
+            DBG_DD(ErrorF(" via_xv.c :              : S/W Overlay! \n"));
             /*  Allocate video memory(CreateSurface),
              *  add codes to judge if need to re-create surface
              */
@@ -1272,7 +1270,7 @@ viaPutImage(ScrnInfoPtr pScrn,
             if (!pVia->OverlaySupported &&
                     !(pVia->OverlaySupported = DecideOverlaySupport(pScrn))) {
                 DBG_DD(ErrorF
-                        (" via_video.c : Xv Overlay rejected due to insufficient "
+                        (" via_xv.c : Xv Overlay rejected due to insufficient "
                                 "memory bandwidth.\n"));
                 viaXvError(pScrn, pPriv, xve_bandwidth);
                 return BadAlloc;
@@ -1324,7 +1322,7 @@ viaPutImage(ScrnInfoPtr pScrn,
                     && (pVia->old_dwUseExtendedFIFO == dwUseExtendedFIFO)
                     && (pVia->VideoStatus & VIDEO_SWOV_ON) &&
                     REGION_EQUAL(pScrn->pScreen, &pPriv->clip, clipBoxes)) {
-                DBG_DD(ErrorF(" via_video.c : don't do UpdateOverlay! \n"));
+                DBG_DD(ErrorF(" via_xv.c : don't do UpdateOverlay! \n"));
                 viaXvError(pScrn, pPriv, xve_none);
                 return Success;
             }
@@ -1353,27 +1351,27 @@ viaPutImage(ScrnInfoPtr pScrn,
                     }
                 }
             } else {
-                DBG_DD(ErrorF(" via_video.c : // No need to draw Colorkey!! \n"));
+                DBG_DD(ErrorF(" via_xv.c : // No need to draw Colorkey!! \n"));
             }
             /*
              *  Update video overlay
              */
             if (!VIAVidUpdateOverlay(pScrn, lpUpdateOverlay)) {
                 DBG_DD(ErrorF
-                        (" via_video.c : call v4l updateoverlay fail. \n"));
+                        (" via_xv.c : call v4l updateoverlay fail. \n"));
             } else {
-                DBG_DD(ErrorF(" via_video.c : PutImage done OK\n"));
+                DBG_DD(ErrorF(" via_xv.c : PutImage done OK\n"));
                 viaXvError(pScrn, pPriv, xve_none);
                 return Success;
             }
             break;
         }
         default:
-            DBG_DD(ErrorF(" via_video.c : XVPort not supported\n"));
+            DBG_DD(ErrorF(" via_xv.c : XVPort not supported\n"));
             viaXvError(pScrn, pPriv, xve_adaptor);
             break;
     }
-    DBG_DD(ErrorF(" via_video.c : PutImage done OK\n"));
+    DBG_DD(ErrorF(" via_xv.c : PutImage done OK\n"));
     viaXvError(pScrn, pPriv, xve_none);
     return Success;
 }
@@ -1386,9 +1384,9 @@ viaQueryImageAttributes(ScrnInfoPtr pScrn,
     int size, tmp;
     VIAPtr pVia = VIAPTR(pScrn);
 
-    DBG_DD(ErrorF(" via_video.c : viaQueryImageAttributes : FourCC=0x%x, ",
+    DBG_DD(ErrorF(" via_xv.c : viaQueryImageAttributes : FourCC=0x%x, ",
             id));
-    DBG_DD(ErrorF(" via_video.c : Screen[%d],  w=%d, h=%d\n", pScrn->scrnIndex, *w, *h));
+    DBG_DD(ErrorF(" via_xv.c : Screen[%d],  w=%d, h=%d\n", pScrn->scrnIndex, *w, *h));
 
     if ((!w) || (!h))
         return 0;
