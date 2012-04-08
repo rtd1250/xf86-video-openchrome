@@ -683,15 +683,11 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
         case VIA_CLE266:
             pVia->UseLegacyModeSwitch = TRUE;
             pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP0;
-			/* FIXME Mono HW Cursors not working */
-			pVia->drmmode.hwcursor = FALSE;
             break;
         case VIA_KM400:
             /* IRQ is not broken on KM400A, but testing (pVia->ChipRev < 0x80)
              * is not enough to make sure we have an older, broken KM400. */
             pVia->DRIIrqEnable = FALSE;
-			/* FIXME Mono HW Cursors not working */
-			pVia->drmmode.hwcursor = FALSE;
             pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP0;
             break;
         case VIA_K8M800:
