@@ -1237,7 +1237,7 @@ viaPutImage(ScrnInfoPtr pScrn,
                     switch (id) {
                         case FOURCC_I420:
                             if (pVia->VideoEngine == VIDEO_ENGINE_CME) {
-                                planar420cp(pVia->swov.SWDevice.
+                                nv12cp(pVia->swov.SWDevice.
                                     lpSWOverlaySurface[pVia->dwFrameNum & 1],
                                     buf, dstPitch, width, height, 1);
                             } else {
