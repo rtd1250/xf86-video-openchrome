@@ -1061,16 +1061,11 @@ iga1_crtc_set_cursor_colors (xf86CrtcPtr crtc, int bg, int fg)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
-    drmmode_crtc_private_ptr iga = crtc->driver_private;
-    int height = 64, width = 64, i;
     VIAPtr pVia = VIAPTR(pScrn);
-    CARD32 pixel, temp, *dst;
+    CARD32 temp;
 
     if (xf86_config->cursor_fg)
         return;
-
-    fg |= 0xff000000;
-    bg |= 0xff000000;
 
     /* Don't recolour the image if we don't have to. */
     if (fg == xf86_config->cursor_fg && bg == xf86_config->cursor_bg)
@@ -1090,15 +1085,8 @@ iga1_crtc_set_cursor_colors (xf86CrtcPtr crtc, int bg, int fg)
     default:
         temp = VIAGETREG(HI_CONTROL);
         VIASETREG(HI_CONTROL, temp & 0xFFFFFFFE);
-        height = width = 32;
         break;
     }
-
-    dst = (CARD32 *) drm_bo_map(pScrn, iga->cursor_bo);
-    for (i = 0; i < height * width; i++, dst++)
-        if ((pixel = *dst))
-            *dst = (pixel == xf86_config->cursor_fg) ? fg : bg;
-    drm_bo_unmap(pScrn, iga->cursor_bo);
 
     xf86_config->cursor_fg = fg;
     xf86_config->cursor_bg = bg;
@@ -1195,22 +1183,6 @@ iga1_crtc_hide_cursor (xf86CrtcPtr crtc)
     }
 }
 
-/*
-    Load Mono Cursor Image
-*/
-static void
-iga_crtc_load_cursor_image(xf86CrtcPtr crtc, CARD8 *src)
-{
-    drmmode_crtc_private_ptr iga = crtc->driver_private;
-    ScrnInfoPtr pScrn = crtc->scrn;
-    void *dst;
-
-    dst = drm_bo_map(pScrn, iga->cursor_bo);
-    memset(dst, 0x00, iga->cursor_bo->size);
-    memcpy(dst, src, iga->cursor_bo->size);
-    drm_bo_unmap(pScrn, iga->cursor_bo);
-}
-
 static void
 iga_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
 {
@@ -1259,7 +1231,6 @@ static const xf86CrtcFuncsRec iga1_crtc_funcs = {
     .set_cursor_position    = iga1_crtc_set_cursor_position,
     .show_cursor            = iga1_crtc_show_cursor,
     .hide_cursor            = iga1_crtc_hide_cursor,
-    .load_cursor_image      = iga_crtc_load_cursor_image,
     .load_cursor_argb       = iga_crtc_load_cursor_argb,
     .set_origin             = iga1_crtc_set_origin,
     .destroy                = iga_crtc_destroy,
@@ -1669,7 +1640,6 @@ static const xf86CrtcFuncsRec iga2_crtc_funcs = {
     .set_cursor_position    = iga2_crtc_set_cursor_position,
     .show_cursor            = iga2_crtc_show_cursor,
     .hide_cursor            = iga2_crtc_hide_cursor,
-    .load_cursor_image      = iga_crtc_load_cursor_image,
     .load_cursor_argb       = iga_crtc_load_cursor_argb,
     .set_origin             = iga2_crtc_set_origin,
     .destroy                = iga_crtc_destroy,
