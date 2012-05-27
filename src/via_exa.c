@@ -1732,8 +1732,8 @@ Bool
 UMSAccelInit(ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    Bool nPOTSupported, ret = FALSE;
     VIAPtr pVia = VIAPTR(pScrn);
-    Bool nPOTSupported, ret;
 
     /*  HW Limitation are described here:
      *
@@ -1753,10 +1753,11 @@ UMSAccelInit(ScreenPtr pScreen)
      * */
     pVia->VQStart = 0;
     pVia->vq_bo = drm_bo_alloc(pScrn, VIA_VQ_SIZE, 16, TTM_PL_FLAG_VRAM);
-    if (pVia->vq_bo) {
-        pVia->VQStart = pVia->vq_bo->offset;
-        pVia->VQEnd = pVia->vq_bo->offset + pVia->vq_bo->size;
-    }
+    if (!pVia->vq_bo)
+        goto err;
+
+    pVia->VQStart = pVia->vq_bo->offset;
+    pVia->VQEnd = pVia->vq_bo->offset + pVia->vq_bo->size;
 
     viaInitialize2DEngine(pScrn);
 
@@ -1765,17 +1766,19 @@ UMSAccelInit(ScreenPtr pScreen)
     if (Success != viaSetupCBuffer(pScrn, &pVia->cb, 0))
         pVia->NoAccel = TRUE;
 
+    pVia->exa_sync_bo = drm_bo_alloc(pScrn, 32, 32, TTM_PL_FLAG_VRAM);
+    if (!pVia->exa_sync_bo)
+        goto err;
+
     /* Sync marker space. */
     pVia->exa_sync_bo = drm_bo_alloc(pScrn, 32, 32, TTM_PL_FLAG_VRAM);
     if (!pVia->exa_sync_bo)
-        return FALSE;
+        goto err;
 
     pVia->markerOffset = pVia->exa_sync_bo->offset;
     pVia->markerBuf = drm_bo_map(pScrn, pVia->exa_sync_bo);
-    if (!pVia->markerBuf) {
-        drm_bo_free(pScrn, pVia->exa_sync_bo);
-        return FALSE;
-    }
+    if (!pVia->markerBuf)
+        goto err;
     pVia->curMarker = 0;
     pVia->lastMarkerRead = 0;
 
@@ -1805,11 +1808,22 @@ UMSAccelInit(ScreenPtr pScreen)
          * case with the old linear offscreen FB manager
          */
         pVia->NoAccel = TRUE;
-        return FALSE;
-    }
+    } else
+        ret = TRUE;
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "[EXA] Enabled EXA acceleration.\n");
-    return TRUE;
+err:
+    if (!ret) {
+        if (pVia->markerBuf) {
+            drm_bo_unmap(pScrn, pVia->exa_sync_bo);
+            pVia->markerBuf = NULL;
+        }
+        if (pVia->exa_sync_bo)
+            drm_bo_free(pScrn, pVia->exa_sync_bo);
+        if (pVia->vq_bo)
+            drm_bo_free(pScrn, pVia->vq_bo);
+    }
+    return ret;
 }
 
 void

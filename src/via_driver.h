@@ -270,13 +270,14 @@ typedef struct _VIA {
     /* Support for shadowFB and rotation */
     unsigned char*      ShadowPtr;
 
-    /* Support for XAA acceleration */
+    /* Support for EXA acceleration */
     ViaTwodContext      td;
     Via3DState          v3d;
     Via3DState          *lastToUpload;
     ViaCommandBuffer    cb;
     int                 accelMarker;
     struct buffer_object *exa_sync_bo;
+    struct buffer_object *exaMem;
     CARD32              markerOffset;
     void               *markerBuf;
     CARD32              curMarker;
