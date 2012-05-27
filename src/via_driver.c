@@ -1803,6 +1803,9 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     if (!drm_bo_map(pScrn, pVia->drmmode.front_bo))
         return FALSE;
 
+    if (!UMSAccelInit(pScrn->pScreen))
+        return FALSE;
+
     miClearVisualTypes();
 
     if (pScrn->bitsPerPixel > 8 && !pVia->IsSecondary) {
@@ -1860,10 +1863,8 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     /* Must be after RGB ordering is fixed. */
     fbPictureInit(pScreen, NULL, 0);
 
-    if (pVia->directRenderingType != DRI_2) {
-        if (!pVia->NoAccel && !UMSAccelInit(pScreen))
-            return FALSE;
-    }
+    if (!pVia->NoAccel && !viaInitExa(pScreen))
+        return FALSE;
 
     miInitializeBackingStore(pScreen);
     xf86SetBackingStore(pScreen);

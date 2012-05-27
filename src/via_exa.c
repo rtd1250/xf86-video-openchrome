@@ -1655,15 +1655,15 @@ viaExaComposite(PixmapPtr pDst, int srcX, int srcY, int maskX, int maskY,
                   width, height);
 }
 
-static ExaDriverPtr
+Bool
 viaInitExa(ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
-    VIAPtr pVia = VIAPTR(pScrn);
     ExaDriverPtr pExa = exaDriverAlloc();
+    VIAPtr pVia = VIAPTR(pScrn);
 
     if (!pExa)
-        return NULL;
+        return FALSE;
 
     memset(pExa, 0, sizeof(*pExa));
 
@@ -1716,13 +1716,15 @@ viaInitExa(ScreenPtr pScreen)
 
     if (!exaDriverInit(pScreen, pExa)) {
         free(pExa);
-        return NULL;
+        return FALSE;
     }
 
+    pVia->exaDriverPtr = pExa;
     viaInit3DState(&pVia->v3d);
-    return pExa;
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "[EXA] Enabled EXA acceleration.\n");
+    return TRUE;
 }
-
 
 /*
  * Acceleration initialization function. Sets up offscreen memory disposition,
@@ -1801,17 +1803,7 @@ UMSAccelInit(ScreenPtr pScreen)
     pVia->dBounce = NULL;
     pVia->scratchAddr = NULL;
 #endif /* XF86DRI */
-    pVia->exaDriverPtr = viaInitExa(pScreen);
-    if (!pVia->exaDriverPtr) {
-        /*
-         * Docs recommend turning off also Xv here, but we handle this
-         * case with the old linear offscreen FB manager
-         */
-        pVia->NoAccel = TRUE;
-    } else
-        ret = TRUE;
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "[EXA] Enabled EXA acceleration.\n");
+    ret = TRUE;
 err:
     if (!ret) {
         if (pVia->markerBuf) {

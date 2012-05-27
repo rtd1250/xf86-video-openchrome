@@ -406,6 +406,7 @@ typedef struct
 void VIAInitialize3DEngine(ScrnInfoPtr pScrn);
 
 /* In via_exa.c. */
+Bool viaInitExa(ScreenPtr pScreen);
 Bool UMSAccelInit(ScreenPtr);
 void viaInitialize2DEngine(ScrnInfoPtr);
 void viaAccelSync(ScrnInfoPtr);
