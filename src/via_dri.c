@@ -31,7 +31,6 @@
 #include "xf86_OSproc.h"
 #include "xf86Priv.h"
 
-#include "xf86PciInfo.h"
 #include "xf86Pci.h"
 
 #define _XF86DRI_SERVER_

@@ -86,7 +86,7 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
 {
     struct buffer_object *obj = NULL;
     VIAPtr pVia = VIAPTR(pScrn);
-    int ret;
+    int ret = 0;
 
     obj = xnfcalloc(1, sizeof(*obj));
     if (obj) {
@@ -146,18 +146,19 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
                 }
 #endif
             }
-
-            if (ret) {
-                    DEBUG(ErrorF("DRM memory allocation failed %d\n", ret));
-                    free(obj);
-                    obj = NULL;
-            };
             break;
 
         case TTM_PL_FLAG_SYSTEM:
         default:
+            ret = -ENXIO;
             break;
         }
+
+        if (ret) {
+            DEBUG(ErrorF("DRM memory allocation failed %d\n", ret));
+            free(obj);
+            obj = NULL;
+        };
     }
     return obj;
 }
