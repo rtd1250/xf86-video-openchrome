@@ -838,6 +838,7 @@ viaExaPrepareSolid(PixmapPtr pPixmap, int alu, Pixel planeMask, Pixel fg)
 
     if (!viaAccelPlaneMaskHelper(tdc, planeMask))
         return FALSE;
+
     viaAccelTransparentHelper(pVia, 0x0, 0x0, TRUE);
 
     tdc->cmd = VIA_GEC_BLT | VIA_GEC_FIXCOLOR_PAT | VIAACCELPATTERNROP(alu);
@@ -1946,102 +1947,6 @@ viaFinishInitAccel(ScreenPtr pScreen)
         }
     }
     memset(pVia->markerBuf, 0, pVia->exa_sync_bo->size);
-}
-
-/*
- * DGA accelerated functions go here and let them be independent of
- * acceleration method.
- */
-void
-viaAccelBlitRect(ScrnInfoPtr pScrn, int srcx, int srcy, int w, int h,
-                 int dstx, int dsty)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-    ViaTwodContext *tdc = &pVia->td;
-    unsigned dstOffset = pScrn->fbOffset + dsty * pVia->Bpl;
-    unsigned srcOffset = pScrn->fbOffset + srcy * pVia->Bpl;
-
-    RING_VARS;
-
-    if (!w || !h)
-        return;
-
-    if (!pVia->NoAccel) {
-
-        int xdir = ((srcx < dstx) && (srcy == dsty)) ? -1 : 1;
-        int ydir = (srcy < dsty) ? -1 : 1;
-        CARD32 cmd = VIA_GEC_BLT | VIAACCELCOPYROP(GXcopy);
-
-        if (xdir < 0)
-            cmd |= VIA_GEC_DECX;
-        if (ydir < 0)
-            cmd |= VIA_GEC_DECY;
-
-        viaAccelSetMode(pScrn->bitsPerPixel, tdc);
-        viaAccelTransparentHelper(pVia, 0x0, 0x0, FALSE);
-        viaAccelCopyHelper(pVia, srcx, 0, dstx, 0, w, h, srcOffset, dstOffset,
-                           tdc->mode, pVia->Bpl, pVia->Bpl, cmd);
-        pVia->accelMarker = viaAccelMarkSync(pScrn->pScreen);
-        ADVANCE_RING;
-    }
-}
-
-void
-viaAccelFillRect(ScrnInfoPtr pScrn, int x, int y, int w, int h,
-                 unsigned long color)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-    unsigned dstBase = pScrn->fbOffset + y * pVia->Bpl;
-    ViaTwodContext *tdc = &pVia->td;
-    CARD32 cmd = VIA_GEC_BLT | VIA_GEC_FIXCOLOR_PAT |
-            VIAACCELPATTERNROP(GXcopy);
-    RING_VARS;
-
-    if (!w || !h)
-        return;
-
-    if (!pVia->NoAccel) {
-        viaAccelSetMode(pScrn->bitsPerPixel, tdc);
-        viaAccelTransparentHelper(pVia, 0x0, 0x0, FALSE);
-        viaAccelSolidHelper(pVia, x, 0, w, h, dstBase, tdc->mode,
-                            pVia->Bpl, color, cmd);
-        pVia->accelMarker = viaAccelMarkSync(pScrn->pScreen);
-        ADVANCE_RING;
-    }
-}
-
-void
-viaAccelFillPixmap(ScrnInfoPtr pScrn,
-                   unsigned long offset,
-                   unsigned long pitch,
-                   int depth, int x, int y, int w, int h, unsigned long color)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-    unsigned dstBase = offset + y * pitch;
-    ViaTwodContext *tdc = &pVia->td;
-    CARD32 cmd = VIA_GEC_BLT | VIA_GEC_FIXCOLOR_PAT |
-            VIAACCELPATTERNROP(GXcopy);
-    RING_VARS;
-
-    if (!w || !h)
-        return;
-
-    if (!pVia->NoAccel) {
-        viaAccelSetMode(depth, tdc);
-        viaAccelTransparentHelper(pVia, 0x0, 0x0, FALSE);
-        viaAccelSolidHelper(pVia, x, 0, w, h, dstBase, tdc->mode,
-                            pitch, color, cmd);
-        pVia->accelMarker = viaAccelMarkSync(pScrn->pScreen);
-        ADVANCE_RING;
-    }
-}
-
-void
-viaAccelSyncMarker(ScrnInfoPtr pScrn)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    viaAccelWaitMarker(pScrn->pScreen, pVia->accelMarker);
 }
 
 void
