@@ -1,5 +1,5 @@
 /*
- * Copyright (C) Thomas Hellstrom (2005) 
+ * Copyright (C) Thomas Hellstrom (2005)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -37,6 +37,7 @@ typedef struct _ViaCommandBuffer
     int header_start;
     int rindex;
     Bool has3dState;
+    const unsigned      *TwodRegs;
     void (*flushFunc) (struct _ViaCommandBuffer * cb);
 } ViaCommandBuffer;
 

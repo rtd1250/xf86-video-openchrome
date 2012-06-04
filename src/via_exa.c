@@ -128,20 +128,20 @@ static const unsigned via_2d_regs_m1[] = {
     [MONOPATBGC]        = VIA_REG_MONOPATBGC_M1
 };
 
-#define VIA_REG(pVia, name)	(pVia)->TwodRegs[name]
+#define VIA_REG(name)   (cb->TwodRegs[name])
 
 /*
  * Use PCI MMIO to flush the command buffer when AGP DMA is not available.
  */
 static void
-viaDumpDMA(ViaCommandBuffer * buf)
+viaDumpDMA(ViaCommandBuffer *cb)
 {
-    register CARD32 *bp = buf->buf;
-    CARD32 *endp = bp + buf->pos;
+    register CARD32 *bp = cb->buf;
+    CARD32 *endp = bp + cb->pos;
 
     while (bp != endp) {
-        if (((bp - buf->buf) & 3) == 0) {
-            ErrorF("\n %04lx: ", (unsigned long)(bp - buf->buf));
+        if (((bp - cb->buf) & 3) == 0) {
+            ErrorF("\n %04lx: ", (unsigned long)(bp - cb->buf));
         }
         ErrorF("0x%08x ", (unsigned)*bp++);
     }
@@ -149,15 +149,15 @@ viaDumpDMA(ViaCommandBuffer * buf)
 }
 
 void
-viaFlushPCI(ViaCommandBuffer * buf)
+viaFlushPCI(ViaCommandBuffer *cb)
 {
-    register CARD32 *bp = buf->buf;
+    register CARD32 *bp = cb->buf;
     CARD32 transSetting;
-    CARD32 *endp = bp + buf->pos;
+    CARD32 *endp = bp + cb->pos;
     unsigned loop = 0;
     register CARD32 offset = 0;
     register CARD32 value;
-    VIAPtr pVia = VIAPTR(buf->pScrn);
+    VIAPtr pVia = VIAPTR(cb->pScrn);
 
     while (bp < endp) {
         if (*bp == HALCYON_HEADER2) {
@@ -215,9 +215,9 @@ viaFlushPCI(ViaCommandBuffer * buf)
             ErrorF("Command stream parser error.\n");
         }
     }
-    buf->pos = 0;
-    buf->mode = 0;
-    buf->has3dState = FALSE;
+    cb->pos = 0;
+    cb->mode = 0;
+    cb->has3dState = FALSE;
 }
 
 #ifdef XF86DRI
@@ -227,7 +227,7 @@ viaFlushPCI(ViaCommandBuffer * buf)
  * the DRM command verifier will lose track of the 3D engine state.
  */
 static void
-viaFlushDRIEnabled(ViaCommandBuffer * cb)
+viaFlushDRIEnabled(ViaCommandBuffer *cb)
 {
     ScrnInfoPtr pScrn = cb->pScrn;
     VIAPtr pVia = VIAPTR(pScrn);
@@ -271,27 +271,27 @@ viaFlushDRIEnabled(ViaCommandBuffer * cb)
  * are intended for Unichrome Pro group A video commands.
  */
 int
-viaSetupCBuffer(ScrnInfoPtr pScrn, ViaCommandBuffer * buf, unsigned size)
+viaSetupCBuffer(ScrnInfoPtr pScrn, ViaCommandBuffer *cb, unsigned size)
 {
 #ifdef XF86DRI
     VIAPtr pVia = VIAPTR(pScrn);
 #endif
 
-    buf->pScrn = pScrn;
-    buf->bufSize = ((size == 0) ? VIA_DMASIZE : size) >> 2;
-    buf->buf = (CARD32 *) calloc(buf->bufSize, sizeof(CARD32));
-    if (!buf->buf)
+    cb->pScrn = pScrn;
+    cb->bufSize = ((size == 0) ? VIA_DMASIZE : size) >> 2;
+    cb->buf = (CARD32 *) calloc(cb->bufSize, sizeof(CARD32));
+    if (!cb->buf)
         return BadAlloc;
-    buf->waitFlags = 0;
-    buf->pos = 0;
-    buf->mode = 0;
-    buf->header_start = 0;
-    buf->rindex = 0;
-    buf->has3dState = FALSE;
-    buf->flushFunc = viaFlushPCI;
+    cb->waitFlags = 0;
+    cb->pos = 0;
+    cb->mode = 0;
+    cb->header_start = 0;
+    cb->rindex = 0;
+    cb->has3dState = FALSE;
+    cb->flushFunc = viaFlushPCI;
 #ifdef XF86DRI
     if (pVia->directRenderingType == DRI_1) {
-        buf->flushFunc = viaFlushDRIEnabled;
+        cb->flushFunc = viaFlushDRIEnabled;
     }
 #endif
     return Success;
@@ -301,11 +301,11 @@ viaSetupCBuffer(ScrnInfoPtr pScrn, ViaCommandBuffer * buf, unsigned size)
  * Free resources associated with a command buffer.
  */
 void
-viaTearDownCBuffer(ViaCommandBuffer * buf)
+viaTearDownCBuffer(ViaCommandBuffer *cb)
 {
-    if (buf && buf->buf)
-        free(buf->buf);
-    buf->buf = NULL;
+    if (cb && cb->buf)
+        free(cb->buf);
+    cb->buf = NULL;
 }
 
 /*
@@ -486,10 +486,10 @@ viaInitialize2DEngine(ScrnInfoPtr pScrn)
     case VIA_VX800:
     case VIA_VX855:
     case VIA_VX900:
-        pVia->TwodRegs = via_2d_regs_m1;
+        pVia->cb.TwodRegs = via_2d_regs_m1;
         break;
     default:
-        pVia->TwodRegs = via_2d_regs;
+        pVia->cb.TwodRegs = via_2d_regs;
         break;
     }
 
@@ -594,7 +594,7 @@ viaPitchHelper(VIAPtr pVia, unsigned dstPitch, unsigned srcPitch)
         pVia->Chipset != VIA_VX900) {
         val |= VIA_PITCH_ENABLE;
     }
-    OUT_RING_H1(VIA_REG(pVia, PITCH), val);
+    OUT_RING_H1(VIA_REG(PITCH), val);
 }
 
 /*
@@ -612,9 +612,9 @@ viaAccelClippingHelper(VIAPtr pVia, int refY)
         refY = (refY < tdc->clipY1) ? refY : tdc->clipY1;
         tdc->cmd |= VIA_GEC_CLIP_ENABLE;
         BEGIN_RING(4);
-        OUT_RING_H1(VIA_REG(pVia, CLIPTL),
+        OUT_RING_H1(VIA_REG(CLIPTL),
                     ((tdc->clipY1 - refY) << 16) | tdc->clipX1);
-        OUT_RING_H1(VIA_REG(pVia, CLIPBR),
+        OUT_RING_H1(VIA_REG(CLIPBR),
 		    ((tdc->clipY2 - refY) << 16) | tdc->clipX2);
     } else {
         tdc->cmd &= ~VIA_GEC_CLIP_ENABLE;
@@ -633,13 +633,13 @@ viaAccelSolidHelper(VIAPtr pVia, int x, int y, int w, int h,
     RING_VARS;
 
     BEGIN_RING(14);
-    OUT_RING_H1(VIA_REG(pVia, GEMODE), mode);
-    OUT_RING_H1(VIA_REG(pVia, DSTBASE), fbBase >> 3);
+    OUT_RING_H1(VIA_REG(GEMODE), mode);
+    OUT_RING_H1(VIA_REG(DSTBASE), fbBase >> 3);
     viaPitchHelper(pVia, pitch, 0);
-    OUT_RING_H1(VIA_REG(pVia, DSTPOS), (y << 16) | (x & 0xFFFF));
-    OUT_RING_H1(VIA_REG(pVia, DIMENSION), ((h - 1) << 16) | (w - 1));
-    OUT_RING_H1(VIA_REG(pVia, MONOPATFGC), fg);
-    OUT_RING_H1(VIA_REG(pVia, GECMD), cmd);
+    OUT_RING_H1(VIA_REG(DSTPOS), (y << 16) | (x & 0xFFFF));
+    OUT_RING_H1(VIA_REG(DIMENSION), ((h - 1) << 16) | (w - 1));
+    OUT_RING_H1(VIA_REG(MONOPATFGC), fg);
+    OUT_RING_H1(VIA_REG(GECMD), cmd);
 }
 
 /*
@@ -695,9 +695,9 @@ viaAccelTransparentHelper(VIAPtr pVia, CARD32 keyControl,
     tdc->keyControl &= ((usePlaneMask) ? 0xF0000000 : 0x00000000);
     tdc->keyControl |= (keyControl & 0x0FFFFFFF);
     BEGIN_RING(4);
-    OUT_RING_H1(VIA_REG(pVia, KEYCONTROL), tdc->keyControl);
+    OUT_RING_H1(VIA_REG(KEYCONTROL), tdc->keyControl);
     if (keyControl) {
-        OUT_RING_H1(VIA_REG(pVia, SRCCOLORKEY), transColor);
+        OUT_RING_H1(VIA_REG(SRCCOLORKEY), transColor);
     }
 }
 
@@ -723,14 +723,14 @@ viaAccelCopyHelper(VIAPtr pVia, int xs, int ys, int xd, int yd,
     }
 
     BEGIN_RING(16);
-    OUT_RING_H1(VIA_REG(pVia, GEMODE), mode);
-    OUT_RING_H1(VIA_REG(pVia, SRCBASE), srcFbBase >> 3);
-    OUT_RING_H1(VIA_REG(pVia, DSTBASE), dstFbBase >> 3);
+    OUT_RING_H1(VIA_REG(GEMODE), mode);
+    OUT_RING_H1(VIA_REG(SRCBASE), srcFbBase >> 3);
+    OUT_RING_H1(VIA_REG(DSTBASE), dstFbBase >> 3);
     viaPitchHelper(pVia, dstPitch, srcPitch);
-    OUT_RING_H1(VIA_REG(pVia, SRCPOS), (ys << 16) | (xs & 0xFFFF));
-    OUT_RING_H1(VIA_REG(pVia, DSTPOS), (yd << 16) | (xd & 0xFFFF));
-    OUT_RING_H1(VIA_REG(pVia, DIMENSION), ((h - 1) << 16) | (w - 1));
-    OUT_RING_H1(VIA_REG(pVia, GECMD), cmd);
+    OUT_RING_H1(VIA_REG(SRCPOS), (ys << 16) | (xs & 0xFFFF));
+    OUT_RING_H1(VIA_REG(DSTPOS), (yd << 16) | (xd & 0xFFFF));
+    OUT_RING_H1(VIA_REG(DIMENSION), ((h - 1) << 16) | (w - 1));
+    OUT_RING_H1(VIA_REG(GECMD), cmd);
 }
 
 /*
@@ -754,7 +754,7 @@ viaAccelMarkSync(ScreenPtr pScreen)
 
     if (pVia->agpDMA) {
         BEGIN_RING(2);
-        OUT_RING_H1(VIA_REG(pVia, KEYCONTROL), 0x00);
+        OUT_RING_H1(VIA_REG(KEYCONTROL), 0x00);
         viaAccelSolidHelper(pVia, 0, 0, 1, 1, pVia->markerOffset,
                             VIA_GEM_32bpp, 4, pVia->curMarker,
                             (0xF0 << 24) | VIA_GEC_BLT | VIA_GEC_FIXCOLOR_PAT);
