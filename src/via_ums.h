@@ -192,7 +192,6 @@ int ViaVbePanelPower(vbeInfoPtr pVbe, int mode);
 /* via_ums.c */
 Bool VIAMapMem(ScrnInfoPtr pScrn);
 void VIAUnmapMem(ScrnInfoPtr pScrn);
-void VIAInitialize3DEngine(ScrnInfoPtr pScrn);
 Bool ums_create(ScrnInfoPtr pScrn);
 Bool UMSPreInit(ScrnInfoPtr pScrn);
 
@@ -214,6 +213,7 @@ void ViaModeSecondCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaModeFirstCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode);
 
 /* via_display.c */
+Bool UMSCrtcInit(ScrnInfoPtr pScrn);
 void ViaCRTCInit(ScrnInfoPtr pScrn);
 void ViaFirstCRTCSetStartingAddress(ScrnInfoPtr pSCrn, int x, int y);
 void ViaFirstCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);

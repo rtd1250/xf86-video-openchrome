@@ -401,18 +401,11 @@ typedef struct
     ScrnInfoPtr pPrimaryScrn;
 } VIAEntRec, *VIAEntPtr;
 
-/* Prototypes. */
-void VIAInitialize3DEngine(ScrnInfoPtr pScrn);
-
 /* In via_exa.c. */
 Bool viaInitExa(ScreenPtr pScreen);
-Bool UMSAccelInit(ScreenPtr);
-void viaInitialize2DEngine(ScrnInfoPtr);
+Bool viaAccelSetMode(int bpp, ViaTwodContext * tdc);
 void viaAccelSync(ScrnInfoPtr);
-void viaDisableVQ(ScrnInfoPtr);
 void viaExitAccel(ScreenPtr);
-void viaAccelBlitRect(ScrnInfoPtr, int, int, int, int, int, int);
-void viaAccelSyncMarker(ScrnInfoPtr);
 void viaFinishInitAccel(ScreenPtr);
 void viaAccelWaitMarker(ScreenPtr, int);
 int viaAccelMarkSync(ScreenPtr);
@@ -422,6 +415,23 @@ void viaAccelTextureBlit(ScrnInfoPtr, unsigned long, unsigned, unsigned,
 			 unsigned, unsigned, unsigned, unsigned,
 			 unsigned long, unsigned, unsigned,
 			 unsigned, unsigned, int);
+
+/* In via_exa_h2.c */
+Bool viaExaPrepareSolid(PixmapPtr pPixmap, int alu, Pixel planeMask,
+                        Pixel fg);
+void viaExaSolid(PixmapPtr pPixmap, int x1, int y1, int x2, int y2);
+void viaExaDoneSolidCopy(PixmapPtr pPixmap);
+Bool viaExaPrepareCopy(PixmapPtr pSrcPixmap, PixmapPtr pDstPixmap,
+                        int xdir, int ydir, int alu, Pixel planeMask);
+void viaExaCopy(PixmapPtr pDstPixmap, int srcX, int srcY, int dstX,
+                int dstY, int width, int height);
+Bool viaExaCheckComposite(int op, PicturePtr pSrcPicture,
+                            PicturePtr pMaskPicture, PicturePtr pDstPicture);
+Bool viaExaPrepareComposite(int op, PicturePtr pSrcPicture,
+                            PicturePtr pMaskPicture, PicturePtr pDstPicture,
+                            PixmapPtr pSrc, PixmapPtr pMask, PixmapPtr pDst);
+void viaExaComposite(PixmapPtr pDst, int srcX, int srcY, int maskX, int maskY,
+                        int dstX, int dstY, int width, int height);
 
 /* In via_xv.c */
 void viaInitVideo(ScreenPtr pScreen);

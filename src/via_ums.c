@@ -29,6 +29,93 @@
 #include "globals.h"
 #include "via_driver.h"
 
+enum VIA_2D_Regs {
+    GECMD,
+    GEMODE,
+    GESTATUS,
+    SRCPOS,
+    DSTPOS,
+    LINE_K1K2,
+    LINE_XY,
+    LINE_ERROR,
+    DIMENSION,
+    PATADDR,
+    FGCOLOR,
+    DSTCOLORKEY,
+    BGCOLOR,
+    SRCCOLORKEY,
+    CLIPTL,
+    CLIPBR,
+    OFFSET,
+    KEYCONTROL,
+    SRCBASE,
+    DSTBASE,
+    PITCH,
+    MONOPAT0,
+    MONOPAT1,
+    COLORPAT,
+    MONOPATFGC,
+    MONOPATBGC
+};
+
+/* register offsets for old 2D core */
+static const unsigned via_2d_regs[] = {
+    [GECMD]             = VIA_REG_GECMD,
+    [GEMODE]            = VIA_REG_GEMODE,
+    [GESTATUS]          = VIA_REG_GESTATUS,
+    [SRCPOS]            = VIA_REG_SRCPOS,
+    [DSTPOS]            = VIA_REG_DSTPOS,
+    [LINE_K1K2]         = VIA_REG_LINE_K1K2,
+    [LINE_XY]           = VIA_REG_LINE_XY,
+    [LINE_ERROR]        = VIA_REG_LINE_ERROR,
+    [DIMENSION]         = VIA_REG_DIMENSION,
+    [PATADDR]           = VIA_REG_PATADDR,
+    [FGCOLOR]           = VIA_REG_FGCOLOR,
+    [DSTCOLORKEY]       = VIA_REG_DSTCOLORKEY,
+    [BGCOLOR]           = VIA_REG_BGCOLOR,
+    [SRCCOLORKEY]       = VIA_REG_SRCCOLORKEY,
+    [CLIPTL]            = VIA_REG_CLIPTL,
+    [CLIPBR]            = VIA_REG_CLIPBR,
+    [KEYCONTROL]        = VIA_REG_KEYCONTROL,
+    [SRCBASE]           = VIA_REG_SRCBASE,
+    [DSTBASE]           = VIA_REG_DSTBASE,
+    [PITCH]             = VIA_REG_PITCH,
+    [MONOPAT0]          = VIA_REG_MONOPAT0,
+    [MONOPAT1]          = VIA_REG_MONOPAT1,
+    [COLORPAT]          = VIA_REG_COLORPAT,
+    [MONOPATFGC]        = VIA_REG_FGCOLOR,
+    [MONOPATBGC]        = VIA_REG_BGCOLOR
+};
+
+/* register offsets for new 2D core (M1 in VT3353 == VX800) */
+static const unsigned via_2d_regs_m1[] = {
+    [GECMD]             = VIA_REG_GECMD_M1,
+    [GEMODE]            = VIA_REG_GEMODE_M1,
+    [GESTATUS]          = VIA_REG_GESTATUS_M1,
+    [SRCPOS]            = VIA_REG_SRCPOS_M1,
+    [DSTPOS]            = VIA_REG_DSTPOS_M1,
+    [LINE_K1K2]         = VIA_REG_LINE_K1K2_M1,
+    [LINE_XY]           = VIA_REG_LINE_XY_M1,
+    [LINE_ERROR]        = VIA_REG_LINE_ERROR_M1,
+    [DIMENSION]         = VIA_REG_DIMENSION_M1,
+    [PATADDR]           = VIA_REG_PATADDR_M1,
+    [FGCOLOR]           = VIA_REG_FGCOLOR_M1,
+    [DSTCOLORKEY]       = VIA_REG_DSTCOLORKEY_M1,
+    [BGCOLOR]           = VIA_REG_BGCOLOR_M1,
+    [SRCCOLORKEY]       = VIA_REG_SRCCOLORKEY_M1,
+    [CLIPTL]            = VIA_REG_CLIPTL_M1,
+    [CLIPBR]            = VIA_REG_CLIPBR_M1,
+    [KEYCONTROL]        = VIA_REG_KEYCONTROL_M1,
+    [SRCBASE]           = VIA_REG_SRCBASE_M1,
+    [DSTBASE]           = VIA_REG_DSTBASE_M1,
+    [PITCH]             = VIA_REG_PITCH_M1,
+    [MONOPAT0]          = VIA_REG_MONOPAT0_M1,
+    [MONOPAT1]          = VIA_REG_MONOPAT1_M1,
+    [COLORPAT]          = VIA_REG_COLORPAT_M1,
+    [MONOPATFGC]        = VIA_REG_MONOPATFGC_M1,
+    [MONOPATBGC]        = VIA_REG_MONOPATBGC_M1
+};
+
 static void
 ViaMMIODisable(ScrnInfoPtr pScrn)
 {
@@ -305,7 +392,200 @@ VIAMapFB(ScrnInfoPtr pScrn)
     return TRUE;
 }
 
+/*
+ * Leftover from VIA's code.
+ */
+static void
+viaInitPCIe(VIAPtr pVia)
+{
+    VIASETREG(0x41c, 0x00100000);
+    VIASETREG(0x420, 0x680A0000);
+    VIASETREG(0x420, 0x02000000);
+}
+
+static void
+viaInitAgp(VIAPtr pVia)
+{
+    VIASETREG(VIA_REG_TRANSET, 0x00100000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x00000000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x00333004);
+    VIASETREG(VIA_REG_TRANSPACE, 0x60000000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x61000000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x62000000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x63000000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x64000000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x7D000000);
+
+    VIASETREG(VIA_REG_TRANSET, 0xfe020000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x00000000);
+}
+
+/*
+ * Initialize the virtual command queue. Header-2 commands can be put
+ * in this queue for buffering. AFAIK it doesn't handle Header-1
+ * commands, which is really a pity, since it has to be idled before
+ * issuing a Header-1 command.
+ */
+static void
+viaEnableAgpVQ(VIAPtr pVia)
+{
+   CARD32
+       vqStartAddr = pVia->VQStart,
+       vqEndAddr = pVia->VQEnd,
+       vqStartL = 0x50000000 | (vqStartAddr & 0xFFFFFF),
+       vqEndL = 0x51000000 | (vqEndAddr & 0xFFFFFF),
+       vqStartEndH = 0x52000000 | ((vqStartAddr & 0xFF000000) >> 24) |
+       ((vqEndAddr & 0xFF000000) >> 16),
+       vqLen = 0x53000000 | (VIA_VQ_SIZE >> 3);
+
+    VIASETREG(VIA_REG_TRANSET, 0x00fe0000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x080003fe);
+    VIASETREG(VIA_REG_TRANSPACE, 0x0a00027c);
+    VIASETREG(VIA_REG_TRANSPACE, 0x0b000260);
+    VIASETREG(VIA_REG_TRANSPACE, 0x0c000274);
+    VIASETREG(VIA_REG_TRANSPACE, 0x0d000264);
+    VIASETREG(VIA_REG_TRANSPACE, 0x0e000000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x0f000020);
+    VIASETREG(VIA_REG_TRANSPACE, 0x1000027e);
+    VIASETREG(VIA_REG_TRANSPACE, 0x110002fe);
+    VIASETREG(VIA_REG_TRANSPACE, 0x200f0060);
+    VIASETREG(VIA_REG_TRANSPACE, 0x00000006);
+    VIASETREG(VIA_REG_TRANSPACE, 0x40008c0f);
+    VIASETREG(VIA_REG_TRANSPACE, 0x44000000);
+    VIASETREG(VIA_REG_TRANSPACE, 0x45080c04);
+    VIASETREG(VIA_REG_TRANSPACE, 0x46800408);
+
+    VIASETREG(VIA_REG_TRANSPACE, vqStartEndH);
+    VIASETREG(VIA_REG_TRANSPACE, vqStartL);
+    VIASETREG(VIA_REG_TRANSPACE, vqEndL);
+    VIASETREG(VIA_REG_TRANSPACE, vqLen);
+}
+
+static void
+viaEnablePCIeVQ(VIAPtr pVia)
+{
+   CARD32
+       vqStartAddr = pVia->VQStart,
+       vqEndAddr = pVia->VQEnd,
+       vqStartL = 0x70000000 | (vqStartAddr & 0xFFFFFF),
+       vqEndL = 0x71000000 | (vqEndAddr & 0xFFFFFF),
+       vqStartEndH = 0x72000000 | ((vqStartAddr & 0xFF000000) >> 24) |
+       ((vqEndAddr & 0xFF000000) >> 16),
+       vqLen = 0x73000000 | (VIA_VQ_SIZE >> 3);
+
+    VIASETREG(0x41c, 0x00100000);
+    VIASETREG(0x420, vqStartEndH);
+    VIASETREG(0x420, vqStartL);
+    VIASETREG(0x420, vqEndL);
+    VIASETREG(0x420, vqLen);
+    VIASETREG(0x420, 0x74301001);
+    VIASETREG(0x420, 0x00000000);
+}
+
+/*
+ * Disable the virtual command queue.
+ */
 void
+viaDisableVQ(ScrnInfoPtr pScrn)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    switch (pVia->Chipset) {
+        case VIA_K8M890:
+        case VIA_P4M900:
+        case VIA_VX800:
+        case VIA_VX855:
+        case VIA_VX900:
+            VIASETREG(0x41c, 0x00100000);
+            VIASETREG(0x420, 0x74301000);
+            break;
+        default:
+            VIASETREG(VIA_REG_TRANSET, 0x00fe0000);
+            VIASETREG(VIA_REG_TRANSPACE, 0x00000004);
+            VIASETREG(VIA_REG_TRANSPACE, 0x40008c0f);
+            VIASETREG(VIA_REG_TRANSPACE, 0x44000000);
+            VIASETREG(VIA_REG_TRANSPACE, 0x45080c04);
+            VIASETREG(VIA_REG_TRANSPACE, 0x46800408);
+            break;
+    }
+}
+
+/*
+ * Initialize the 2D engine and set the 2D context mode to the
+ * current screen depth. Also enable the virtual queue.
+ */
+static void
+VIAInitialize2DEngine(ScrnInfoPtr pScrn)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+    ViaTwodContext *tdc = &pVia->td;
+    int i;
+
+    /* Initialize the 2D engine registers to reset the 2D engine. */
+    for (i = 0x04; i <= 0x40; i += 4) {
+        VIASETREG(i, 0x0);
+    }
+
+    if (pVia->Chipset == VIA_VX800 ||
+        pVia->Chipset == VIA_VX855 ||
+        pVia->Chipset == VIA_VX900) {
+        for (i = 0x44; i <= 0x5c; i += 4) {
+            VIASETREG(i, 0x0);
+        }
+    }
+
+    if (pVia->Chipset == VIA_VX900)
+    {
+        /*410 redefine 0x30 34 38*/
+        VIASETREG(0x60, 0x0); /*already useable here*/
+    }
+
+    /* Make the VIA_REG() macro magic work */
+    switch (pVia->Chipset) {
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        pVia->cb.TwodRegs = via_2d_regs_m1;
+        break;
+    default:
+        pVia->cb.TwodRegs = via_2d_regs;
+        break;
+    }
+
+    switch (pVia->Chipset) {
+        case VIA_K8M890:
+        case VIA_P4M900:
+        case VIA_VX800:
+        case VIA_VX855:
+        case VIA_VX900:
+            viaInitPCIe(pVia);
+            break;
+        default:
+            viaInitAgp(pVia);
+            break;
+    }
+
+    if (pVia->VQStart != 0) {
+        switch (pVia->Chipset) {
+            case VIA_K8M890:
+            case VIA_P4M900:
+            case VIA_VX800:
+            case VIA_VX855:
+            case VIA_VX900:
+                viaEnablePCIeVQ(pVia);
+                break;
+            default:
+                viaEnableAgpVQ(pVia);
+                break;
+        }
+    } else {
+        viaDisableVQ(pScrn);
+    }
+
+    viaAccelSetMode(pScrn->bitsPerPixel, tdc);
+}
+
+static void
 VIAInitialize3DEngine(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
@@ -366,6 +646,63 @@ VIAInitialize3DEngine(ScrnInfoPtr pScrn)
     VIASETREG(VIA_REG_TRANSPACE, 0x10000000);
     VIASETREG(VIA_REG_TRANSPACE, 0x11000000);
     VIASETREG(VIA_REG_TRANSPACE, 0x20000000);
+}
+
+/*
+ * Acceleration initialization function. Sets up offscreen memory disposition,
+ * and initializes engines and acceleration method.
+ */
+Bool
+UMSAccelInit(ScreenPtr pScreen)
+{
+    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    VIAPtr pVia = VIAPTR(pScrn);
+    Bool ret = FALSE;
+
+    pVia->VQStart = 0;
+    pVia->vq_bo = drm_bo_alloc(pScrn, VIA_VQ_SIZE, 16, TTM_PL_FLAG_VRAM);
+    if (!pVia->vq_bo)
+        goto err;
+
+    pVia->VQStart = pVia->vq_bo->offset;
+    pVia->VQEnd = pVia->vq_bo->offset + pVia->vq_bo->size;
+
+    VIAInitialize2DEngine(pScrn);
+    VIAInitialize3DEngine(pScrn);
+
+    pVia->exa_sync_bo = drm_bo_alloc(pScrn, 32, 32, TTM_PL_FLAG_VRAM);
+    if (!pVia->exa_sync_bo)
+        goto err;
+
+    /* Sync marker space. */
+    pVia->exa_sync_bo = drm_bo_alloc(pScrn, 32, 32, TTM_PL_FLAG_VRAM);
+    if (!pVia->exa_sync_bo)
+        goto err;
+
+    pVia->markerOffset = pVia->exa_sync_bo->offset;
+    pVia->markerBuf = drm_bo_map(pScrn, pVia->exa_sync_bo);
+    if (!pVia->markerBuf)
+        goto err;
+    pVia->curMarker = 0;
+    pVia->lastMarkerRead = 0;
+
+#ifdef XF86DRI
+    pVia->dBounce = NULL;
+    pVia->scratchAddr = NULL;
+#endif /* XF86DRI */
+    ret = TRUE;
+err:
+    if (!ret) {
+        if (pVia->markerBuf) {
+            drm_bo_unmap(pScrn, pVia->exa_sync_bo);
+            pVia->markerBuf = NULL;
+        }
+        if (pVia->exa_sync_bo)
+            drm_bo_free(pScrn, pVia->exa_sync_bo);
+        if (pVia->vq_bo)
+            drm_bo_free(pScrn, pVia->vq_bo);
+    }
+    return ret;
 }
 
 Bool

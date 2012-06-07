@@ -80,9 +80,6 @@ static Bool VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc,
                           char **argv);
 static const OptionInfoRec *VIAAvailableOptions(int chipid, int busid);
 
-Bool UMSCrtcInit(ScrnInfoPtr pScrn);
-void UMSAccelSetup(ScrnInfoPtr pScrn);
-
 #ifdef XSERVER_LIBPCIACCESS
 
 #define VIA_DEVICE_MATCH(d,i) \
@@ -1941,7 +1938,17 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
         return FALSE;
 
     if (pVia->directRenderingType != DRI_2) {
-        UMSAccelSetup(pScrn);
+#ifdef XF86DRI
+        if (pVia->directRenderingType == DRI_1) {
+            if (!VIADRIFinishScreenInit(pScreen)) {
+                xf86DrvMsg(pScrn->scrnIndex, X_INFO, "direct rendering disabled\n");
+                pVia->directRenderingType = DRI_NONE;
+            } else
+                xf86DrvMsg(pScrn->scrnIndex, X_INFO, "direct rendering enabled\n");
+        }
+#endif
+        if (!pVia->NoAccel)
+            viaFinishInitAccel(pScreen);
 
         viaInitVideo(pScrn->pScreen);
     }
