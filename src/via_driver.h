@@ -407,31 +407,69 @@ Bool viaAccelSetMode(int bpp, ViaTwodContext * tdc);
 void viaAccelSync(ScrnInfoPtr);
 void viaExitAccel(ScreenPtr);
 void viaFinishInitAccel(ScreenPtr);
-void viaAccelWaitMarker(ScreenPtr, int);
-int viaAccelMarkSync(ScreenPtr);
+Bool viaOrder(CARD32 val, CARD32 * shift);
+CARD32 viaBitExpandHelper(CARD32 pixel, CARD32 bits);
+Bool viaCheckUpload(ScrnInfoPtr pScrn, Via3DState * v3d);
+void viaPixelARGB8888(unsigned format, void *pixelP, CARD32 * argb8888);
+Bool viaExpandablePixel(int format);
 void viaAccelFillPixmap(ScrnInfoPtr, unsigned long, unsigned long,
 			int, int, int, int, int, unsigned long);
 void viaAccelTextureBlit(ScrnInfoPtr, unsigned long, unsigned, unsigned,
 			 unsigned, unsigned, unsigned, unsigned,
 			 unsigned long, unsigned, unsigned,
 			 unsigned, unsigned, int);
+#ifdef VIA_DEBUG_COMPOSITE
+void viaExaCompositePictDesc(PicturePtr pict, char *string, int n);
+void viaExaPrintComposite(CARD8 op, PicturePtr pSrc, PicturePtr pMask,
+                            PicturePtr pDst);
+#endif
 
 /* In via_exa_h2.c */
-Bool viaExaPrepareSolid(PixmapPtr pPixmap, int alu, Pixel planeMask,
+Bool viaExaPrepareSolid_H2(PixmapPtr pPixmap, int alu, Pixel planeMask,
                         Pixel fg);
-void viaExaSolid(PixmapPtr pPixmap, int x1, int y1, int x2, int y2);
-void viaExaDoneSolidCopy(PixmapPtr pPixmap);
-Bool viaExaPrepareCopy(PixmapPtr pSrcPixmap, PixmapPtr pDstPixmap,
-                        int xdir, int ydir, int alu, Pixel planeMask);
-void viaExaCopy(PixmapPtr pDstPixmap, int srcX, int srcY, int dstX,
-                int dstY, int width, int height);
-Bool viaExaCheckComposite(int op, PicturePtr pSrcPicture,
+void viaExaSolid_H2(PixmapPtr pPixmap, int x1, int y1, int x2, int y2);
+void viaExaDoneSolidCopy_H2(PixmapPtr pPixmap);
+Bool viaExaPrepareCopy_H2(PixmapPtr pSrcPixmap, PixmapPtr pDstPixmap,
+                            int xdir, int ydir, int alu, Pixel planeMask);
+void viaExaCopy_H2(PixmapPtr pDstPixmap, int srcX, int srcY, int dstX,
+                    int dstY, int width, int height);
+Bool viaExaCheckComposite_H2(int op, PicturePtr pSrcPicture,
                             PicturePtr pMaskPicture, PicturePtr pDstPicture);
-Bool viaExaPrepareComposite(int op, PicturePtr pSrcPicture,
+Bool viaExaPrepareComposite_H2(int op, PicturePtr pSrcPicture,
                             PicturePtr pMaskPicture, PicturePtr pDstPicture,
                             PixmapPtr pSrc, PixmapPtr pMask, PixmapPtr pDst);
-void viaExaComposite(PixmapPtr pDst, int srcX, int srcY, int maskX, int maskY,
-                        int dstX, int dstY, int width, int height);
+void viaExaComposite_H2(PixmapPtr pDst, int srcX, int srcY,
+                        int maskX, int maskY, int dstX, int dstY,
+                        int width, int height);
+int viaAccelMarkSync_H2(ScreenPtr);
+
+/* In via_exa_h6.c */
+Bool viaExaPrepareSolid_H6(PixmapPtr pPixmap, int alu, Pixel planeMask,
+                        Pixel fg);
+void viaExaSolid_H6(PixmapPtr pPixmap, int x1, int y1, int x2, int y2);
+void viaExaDoneSolidCopy_H6(PixmapPtr pPixmap);
+Bool viaExaPrepareCopy_H6(PixmapPtr pSrcPixmap, PixmapPtr pDstPixmap,
+                            int xdir, int ydir, int alu, Pixel planeMask);
+void viaExaCopy_H6(PixmapPtr pDstPixmap, int srcX, int srcY, int dstX,
+                    int dstY, int width, int height);
+Bool viaExaCheckComposite_H6(int op, PicturePtr pSrcPicture,
+                            PicturePtr pMaskPicture, PicturePtr pDstPicture);
+Bool viaExaPrepareComposite_H6(int op, PicturePtr pSrcPicture,
+                            PicturePtr pMaskPicture, PicturePtr pDstPicture,
+                            PixmapPtr pSrc, PixmapPtr pMask, PixmapPtr pDst);
+void viaExaComposite_H6(PixmapPtr pDst, int srcX, int srcY,
+                        int maskX, int maskY, int dstX, int dstY,
+                        int width, int height);
+int viaAccelMarkSync_H6(ScreenPtr);
+
+/* In via_xv.c */
+void viaInitVideo(ScreenPtr pScreen);
+void viaExitVideo(ScrnInfoPtr pScrn);
+void viaSaveVideo(ScrnInfoPtr pScrn);
+void viaRestoreVideo(ScrnInfoPtr pScrn);
+void viaSetColorSpace(VIAPtr pVia, int hue, int saturation, int brightness, int contrast,
+		      Bool reset);
+
 
 /* In via_xv.c */
 void viaInitVideo(ScreenPtr pScreen);

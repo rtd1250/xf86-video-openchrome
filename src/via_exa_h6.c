@@ -46,7 +46,7 @@
  * to deal with the subtle differences of M1 and old 2D engine
  */
 static void
-viaPitchHelper_H2(VIAPtr pVia, unsigned dstPitch, unsigned srcPitch)
+viaPitchHelper_H6(VIAPtr pVia, unsigned dstPitch, unsigned srcPitch)
 {
     unsigned val = (dstPitch >> 3) << 16 | (srcPitch >> 3);
     RING_VARS;
@@ -56,7 +56,7 @@ viaPitchHelper_H2(VIAPtr pVia, unsigned dstPitch, unsigned srcPitch)
         pVia->Chipset != VIA_VX900) {
         val |= VIA_PITCH_ENABLE;
     }
-    OUT_RING_H1(VIA_REG_PITCH, val);
+    OUT_RING_H1(VIA_REG_PITCH_M1, val);
 }
 
 /*
@@ -64,7 +64,7 @@ viaPitchHelper_H2(VIAPtr pVia, unsigned dstPitch, unsigned srcPitch)
  * current command with clipping info.
  */
 static int
-viaAccelClippingHelper_H2(VIAPtr pVia, int refY)
+viaAccelClippingHelper_H6(VIAPtr pVia, int refY)
 {
     ViaTwodContext *tdc = &pVia->td;
 
@@ -74,9 +74,9 @@ viaAccelClippingHelper_H2(VIAPtr pVia, int refY)
         refY = (refY < tdc->clipY1) ? refY : tdc->clipY1;
         tdc->cmd |= VIA_GEC_CLIP_ENABLE;
         BEGIN_RING(4);
-        OUT_RING_H1(VIA_REG_CLIPTL,
+        OUT_RING_H1(VIA_REG_CLIPTL_M1,
                     ((tdc->clipY1 - refY) << 16) | tdc->clipX1);
-        OUT_RING_H1(VIA_REG_CLIPBR,
+        OUT_RING_H1(VIA_REG_CLIPBR_M1,
 		    ((tdc->clipY2 - refY) << 16) | tdc->clipX2);
     } else {
         tdc->cmd &= ~VIA_GEC_CLIP_ENABLE;
@@ -88,27 +88,27 @@ viaAccelClippingHelper_H2(VIAPtr pVia, int refY)
  * Emit a solid blit operation to the command buffer.
  */
 void
-viaAccelSolidHelper_H2(VIAPtr pVia, int x, int y, int w, int h,
+viaAccelSolidHelper_H6(VIAPtr pVia, int x, int y, int w, int h,
                         unsigned fbBase, CARD32 mode, unsigned pitch,
                         CARD32 fg, CARD32 cmd)
 {
     RING_VARS;
 
     BEGIN_RING(14);
-    OUT_RING_H1(VIA_REG_GEMODE, mode);
-    OUT_RING_H1(VIA_REG_DSTBASE, fbBase >> 3);
-    viaPitchHelper_H2(pVia, pitch, 0);
-    OUT_RING_H1(VIA_REG_DSTPOS, (y << 16) | (x & 0xFFFF));
-    OUT_RING_H1(VIA_REG_DIMENSION, ((h - 1) << 16) | (w - 1));
-    OUT_RING_H1(VIA_REG_FGCOLOR, fg);
-    OUT_RING_H1(VIA_REG_GECMD, cmd);
+    OUT_RING_H1(VIA_REG_GEMODE_M1, mode);
+    OUT_RING_H1(VIA_REG_DSTBASE_M1, fbBase >> 3);
+    viaPitchHelper_H6(pVia, pitch, 0);
+    OUT_RING_H1(VIA_REG_DSTPOS_M1, (y << 16) | (x & 0xFFFF));
+    OUT_RING_H1(VIA_REG_DIMENSION_M1, ((h - 1) << 16) | (w - 1));
+    OUT_RING_H1(VIA_REG_MONOPATFGC_M1, fg);
+    OUT_RING_H1(VIA_REG_GECMD_M1, cmd);
 }
 
 /*
  * Check if we can use a planeMask and update the 2D context accordingly.
  */
 static Bool
-viaAccelPlaneMaskHelper_H2(ViaTwodContext * tdc, CARD32 planeMask)
+viaAccelPlaneMaskHelper_H6(ViaTwodContext * tdc, CARD32 planeMask)
 {
     CARD32 modeMask = (1 << ((1 << tdc->bytesPPShift) << 3)) - 1;
     CARD32 curMask = 0x00000000;
@@ -147,7 +147,7 @@ viaAccelPlaneMaskHelper_H2(ViaTwodContext * tdc, CARD32 planeMask)
  * Emit transparency state and color to the command buffer.
  */
 static void
-viaAccelTransparentHelper_H2(VIAPtr pVia, CARD32 keyControl,
+viaAccelTransparentHelper_H6(VIAPtr pVia, CARD32 keyControl,
                           CARD32 transColor, Bool usePlaneMask)
 {
     ViaTwodContext *tdc = &pVia->td;
@@ -157,9 +157,9 @@ viaAccelTransparentHelper_H2(VIAPtr pVia, CARD32 keyControl,
     tdc->keyControl &= ((usePlaneMask) ? 0xF0000000 : 0x00000000);
     tdc->keyControl |= (keyControl & 0x0FFFFFFF);
     BEGIN_RING(4);
-    OUT_RING_H1(VIA_REG_KEYCONTROL, tdc->keyControl);
+    OUT_RING_H1(VIA_REG_KEYCONTROL_M1, tdc->keyControl);
     if (keyControl) {
-        OUT_RING_H1(VIA_REG_SRCCOLORKEY, transColor);
+        OUT_RING_H1(VIA_REG_SRCCOLORKEY_M1, transColor);
     }
 }
 
@@ -167,7 +167,7 @@ viaAccelTransparentHelper_H2(VIAPtr pVia, CARD32 keyControl,
  * Emit a copy blit operation to the command buffer.
  */
 static void
-viaAccelCopyHelper_H2(VIAPtr pVia, int xs, int ys, int xd, int yd,
+viaAccelCopyHelper_H6(VIAPtr pVia, int xs, int ys, int xd, int yd,
                    int w, int h, unsigned srcFbBase, unsigned dstFbBase,
                    CARD32 mode, unsigned srcPitch, unsigned dstPitch,
                    CARD32 cmd)
@@ -185,14 +185,14 @@ viaAccelCopyHelper_H2(VIAPtr pVia, int xs, int ys, int xd, int yd,
     }
 
     BEGIN_RING(16);
-    OUT_RING_H1(VIA_REG_GEMODE, mode);
-    OUT_RING_H1(VIA_REG_SRCBASE, srcFbBase >> 3);
-    OUT_RING_H1(VIA_REG_DSTBASE, dstFbBase >> 3);
-    viaPitchHelper_H2(pVia, dstPitch, srcPitch);
-    OUT_RING_H1(VIA_REG_SRCPOS, (ys << 16) | (xs & 0xFFFF));
-    OUT_RING_H1(VIA_REG_DSTPOS, (yd << 16) | (xd & 0xFFFF));
-    OUT_RING_H1(VIA_REG_DIMENSION, ((h - 1) << 16) | (w - 1));
-    OUT_RING_H1(VIA_REG_GECMD, cmd);
+    OUT_RING_H1(VIA_REG_GEMODE_M1, mode);
+    OUT_RING_H1(VIA_REG_SRCBASE_M1, srcFbBase >> 3);
+    OUT_RING_H1(VIA_REG_DSTBASE_M1, dstFbBase >> 3);
+    viaPitchHelper_H6(pVia, dstPitch, srcPitch);
+    OUT_RING_H1(VIA_REG_SRCPOS_M1, (ys << 16) | (xs & 0xFFFF));
+    OUT_RING_H1(VIA_REG_DSTPOS_M1, (yd << 16) | (xd & 0xFFFF));
+    OUT_RING_H1(VIA_REG_DIMENSION_M1, ((h - 1) << 16) | (w - 1));
+    OUT_RING_H1(VIA_REG_GECMD_M1, cmd);
 }
 
 /*
@@ -202,7 +202,7 @@ viaAccelCopyHelper_H2(VIAPtr pVia, int xs, int ys, int xd, int yd,
  * write to the PCI DMA engines from the AGP command stream.
  */
 int
-viaAccelMarkSync_H2(ScreenPtr pScreen)
+viaAccelMarkSync_H6(ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
     VIAPtr pVia = VIAPTR(pScrn);
@@ -216,9 +216,9 @@ viaAccelMarkSync_H2(ScreenPtr pScreen)
 
     if (pVia->agpDMA) {
         BEGIN_RING(2);
-        OUT_RING_H1(VIA_REG_KEYCONTROL, 0x00);
-        viaAccelSolidHelper_H2(pVia, 0, 0, 1, 1, pVia->markerOffset,
-                                VIA_GEM_32bpp, 4, pVia->curMarker,
+        OUT_RING_H1(VIA_REG_KEYCONTROL_M1, 0x00);
+        viaAccelSolidHelper_H6(pVia, 0, 0, 1, 1, pVia->markerOffset,
+                            VIA_GEM_32bpp, 4, pVia->curMarker,
                             (0xF0 << 24) | VIA_GEC_BLT | VIA_GEC_FIXCOLOR_PAT);
         ADVANCE_RING;
     }
@@ -229,7 +229,7 @@ viaAccelMarkSync_H2(ScreenPtr pScreen)
  * Exa functions. It is assumed that EXA does not exceed the blitter limits.
  */
 Bool
-viaExaPrepareSolid_H2(PixmapPtr pPixmap, int alu, Pixel planeMask, Pixel fg)
+viaExaPrepareSolid_H6(PixmapPtr pPixmap, int alu, Pixel planeMask, Pixel fg)
 {
     ScrnInfoPtr pScrn = xf86Screens[pPixmap->drawable.pScreen->myNum];
     VIAPtr pVia = VIAPTR(pScrn);
@@ -243,10 +243,10 @@ viaExaPrepareSolid_H2(PixmapPtr pPixmap, int alu, Pixel planeMask, Pixel fg)
     if (!viaAccelSetMode(pPixmap->drawable.depth, tdc))
         return FALSE;
 
-    if (!viaAccelPlaneMaskHelper_H2(tdc, planeMask))
+    if (!viaAccelPlaneMaskHelper_H6(tdc, planeMask))
         return FALSE;
 
-    viaAccelTransparentHelper_H2(pVia, 0x0, 0x0, TRUE);
+    viaAccelTransparentHelper_H6(pVia, 0x0, 0x0, TRUE);
 
     tdc->cmd = VIA_GEC_BLT | VIA_GEC_FIXCOLOR_PAT | VIAACCELPATTERNROP(alu);
 
@@ -256,7 +256,7 @@ viaExaPrepareSolid_H2(PixmapPtr pPixmap, int alu, Pixel planeMask, Pixel fg)
 }
 
 void
-viaExaSolid_H2(PixmapPtr pPixmap, int x1, int y1, int x2, int y2)
+viaExaSolid_H6(PixmapPtr pPixmap, int x1, int y1, int x2, int y2)
 {
     ScrnInfoPtr pScrn = xf86Screens[pPixmap->drawable.pScreen->myNum];
     VIAPtr pVia = VIAPTR(pScrn);
@@ -270,18 +270,18 @@ viaExaSolid_H2(PixmapPtr pPixmap, int x1, int y1, int x2, int y2)
     dstPitch = exaGetPixmapPitch(pPixmap);
     dstOffset = exaGetPixmapOffset(pPixmap);
 
-    viaAccelSolidHelper_H2(pVia, x1, y1, w, h, dstOffset, tdc->mode,
+    viaAccelSolidHelper_H6(pVia, x1, y1, w, h, dstOffset, tdc->mode,
                             dstPitch, tdc->fgColor, tdc->cmd);
     ADVANCE_RING;
 }
 
 void
-viaExaDoneSolidCopy_H2(PixmapPtr pPixmap)
+viaExaDoneSolidCopy_H6(PixmapPtr pPixmap)
 {
 }
 
 Bool
-viaExaPrepareCopy_H2(PixmapPtr pSrcPixmap, PixmapPtr pDstPixmap, int xdir,
+viaExaPrepareCopy_H6(PixmapPtr pSrcPixmap, PixmapPtr pDstPixmap, int xdir,
                         int ydir, int alu, Pixel planeMask)
 {
     ScrnInfoPtr pScrn = xf86Screens[pDstPixmap->drawable.pScreen->myNum];
@@ -310,15 +310,15 @@ viaExaPrepareCopy_H2(PixmapPtr pSrcPixmap, PixmapPtr pDstPixmap, int xdir,
     if (!viaAccelSetMode(pDstPixmap->drawable.bitsPerPixel, tdc))
         return FALSE;
 
-    if (!viaAccelPlaneMaskHelper_H2(tdc, planeMask))
+    if (!viaAccelPlaneMaskHelper_H6(tdc, planeMask))
         return FALSE;
-    viaAccelTransparentHelper_H2(pVia, 0x0, 0x0, TRUE);
+    viaAccelTransparentHelper_H6(pVia, 0x0, 0x0, TRUE);
 
     return TRUE;
 }
 
 void
-viaExaCopy_H2(PixmapPtr pDstPixmap, int srcX, int srcY, int dstX, int dstY,
+viaExaCopy_H6(PixmapPtr pDstPixmap, int srcX, int srcY, int dstX, int dstY,
                 int width, int height)
 {
     ScrnInfoPtr pScrn = xf86Screens[pDstPixmap->drawable.pScreen->myNum];
@@ -332,14 +332,14 @@ viaExaCopy_H2(PixmapPtr pDstPixmap, int srcX, int srcY, int dstX, int dstY,
     if (!width || !height)
         return;
 
-    viaAccelCopyHelper_H2(pVia, srcX, srcY, dstX, dstY, width, height,
-                       srcOffset, dstOffset, tdc->mode, tdc->srcPitch,
-                       exaGetPixmapPitch(pDstPixmap), tdc->cmd);
+    viaAccelCopyHelper_H6(pVia, srcX, srcY, dstX, dstY, width, height,
+                            srcOffset, dstOffset, tdc->mode, tdc->srcPitch,
+                            exaGetPixmapPitch(pDstPixmap), tdc->cmd);
     ADVANCE_RING;
 }
 
 Bool
-viaExaCheckComposite_H2(int op, PicturePtr pSrcPicture,
+viaExaCheckComposite_H6(int op, PicturePtr pSrcPicture,
                         PicturePtr pMaskPicture, PicturePtr pDstPicture)
 {
     ScrnInfoPtr pScrn = xf86Screens[pDstPicture->pDrawable->pScreen->myNum];
@@ -440,7 +440,7 @@ viaExaIsOffscreen(PixmapPtr pPix)
 }
 
 Bool
-viaExaPrepareComposite_H2(int op, PicturePtr pSrcPicture,
+viaExaPrepareComposite_H6(int op, PicturePtr pSrcPicture,
                             PicturePtr pMaskPicture, PicturePtr pDstPicture,
                             PixmapPtr pSrc, PixmapPtr pMask, PixmapPtr pDst)
 {
@@ -550,7 +550,7 @@ viaExaPrepareComposite_H2(int op, PicturePtr pSrcPicture,
 }
 
 void
-viaExaComposite_H2(PixmapPtr pDst, int srcX, int srcY, int maskX, int maskY,
+viaExaComposite_H6(PixmapPtr pDst, int srcX, int srcY, int maskX, int maskY,
                     int dstX, int dstY, int width, int height)
 {
     ScrnInfoPtr pScrn = xf86Screens[pDst->drawable.pScreen->myNum];
@@ -574,29 +574,4 @@ viaExaComposite_H2(PixmapPtr pDst, int srcX, int srcY, int maskX, int maskY,
 
     v3d->emitQuad(v3d, &pVia->cb, dstX, dstY, srcX, srcY, maskX, maskY,
                   width, height);
-}
-
-void
-viaAccelTextureBlit(ScrnInfoPtr pScrn, unsigned long srcOffset,
-                    unsigned srcPitch, unsigned w, unsigned h, unsigned srcX,
-                    unsigned srcY, unsigned srcFormat, unsigned long dstOffset,
-                    unsigned dstPitch, unsigned dstX, unsigned dstY,
-                    unsigned dstFormat, int rotate)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-    CARD32 wOrder, hOrder;
-    Via3DState *v3d = &pVia->v3d;
-
-    viaOrder(w, &wOrder);
-    viaOrder(h, &hOrder);
-
-    v3d->setDestination(v3d, dstOffset, dstPitch, dstFormat);
-    v3d->setDrawing(v3d, 0x0c, 0xFFFFFFFF, 0x000000FF, 0x00);
-    v3d->setFlags(v3d, 1, TRUE, TRUE, FALSE);
-    v3d->setTexture(v3d, 0, srcOffset, srcPitch, TRUE,
-                    1 << wOrder, 1 << hOrder, srcFormat,
-                    via_single, via_single, via_src, FALSE);
-    v3d->emitState(v3d, &pVia->cb, viaCheckUpload(pScrn, v3d));
-    v3d->emitClipRect(v3d, &pVia->cb, dstX, dstY, w, h);
-    v3d->emitQuad(v3d, &pVia->cb, dstX, dstY, srcX, srcY, 0, 0, w, h);
 }

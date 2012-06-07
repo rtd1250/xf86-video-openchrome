@@ -37,7 +37,6 @@ typedef struct _ViaCommandBuffer
     int header_start;
     int rindex;
     Bool has3dState;
-    const unsigned      *TwodRegs;
     void (*flushFunc) (struct _ViaCommandBuffer * cb);
 } ViaCommandBuffer;
 

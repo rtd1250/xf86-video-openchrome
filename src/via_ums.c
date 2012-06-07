@@ -29,93 +29,6 @@
 #include "globals.h"
 #include "via_driver.h"
 
-enum VIA_2D_Regs {
-    GECMD,
-    GEMODE,
-    GESTATUS,
-    SRCPOS,
-    DSTPOS,
-    LINE_K1K2,
-    LINE_XY,
-    LINE_ERROR,
-    DIMENSION,
-    PATADDR,
-    FGCOLOR,
-    DSTCOLORKEY,
-    BGCOLOR,
-    SRCCOLORKEY,
-    CLIPTL,
-    CLIPBR,
-    OFFSET,
-    KEYCONTROL,
-    SRCBASE,
-    DSTBASE,
-    PITCH,
-    MONOPAT0,
-    MONOPAT1,
-    COLORPAT,
-    MONOPATFGC,
-    MONOPATBGC
-};
-
-/* register offsets for old 2D core */
-static const unsigned via_2d_regs[] = {
-    [GECMD]             = VIA_REG_GECMD,
-    [GEMODE]            = VIA_REG_GEMODE,
-    [GESTATUS]          = VIA_REG_GESTATUS,
-    [SRCPOS]            = VIA_REG_SRCPOS,
-    [DSTPOS]            = VIA_REG_DSTPOS,
-    [LINE_K1K2]         = VIA_REG_LINE_K1K2,
-    [LINE_XY]           = VIA_REG_LINE_XY,
-    [LINE_ERROR]        = VIA_REG_LINE_ERROR,
-    [DIMENSION]         = VIA_REG_DIMENSION,
-    [PATADDR]           = VIA_REG_PATADDR,
-    [FGCOLOR]           = VIA_REG_FGCOLOR,
-    [DSTCOLORKEY]       = VIA_REG_DSTCOLORKEY,
-    [BGCOLOR]           = VIA_REG_BGCOLOR,
-    [SRCCOLORKEY]       = VIA_REG_SRCCOLORKEY,
-    [CLIPTL]            = VIA_REG_CLIPTL,
-    [CLIPBR]            = VIA_REG_CLIPBR,
-    [KEYCONTROL]        = VIA_REG_KEYCONTROL,
-    [SRCBASE]           = VIA_REG_SRCBASE,
-    [DSTBASE]           = VIA_REG_DSTBASE,
-    [PITCH]             = VIA_REG_PITCH,
-    [MONOPAT0]          = VIA_REG_MONOPAT0,
-    [MONOPAT1]          = VIA_REG_MONOPAT1,
-    [COLORPAT]          = VIA_REG_COLORPAT,
-    [MONOPATFGC]        = VIA_REG_FGCOLOR,
-    [MONOPATBGC]        = VIA_REG_BGCOLOR
-};
-
-/* register offsets for new 2D core (M1 in VT3353 == VX800) */
-static const unsigned via_2d_regs_m1[] = {
-    [GECMD]             = VIA_REG_GECMD_M1,
-    [GEMODE]            = VIA_REG_GEMODE_M1,
-    [GESTATUS]          = VIA_REG_GESTATUS_M1,
-    [SRCPOS]            = VIA_REG_SRCPOS_M1,
-    [DSTPOS]            = VIA_REG_DSTPOS_M1,
-    [LINE_K1K2]         = VIA_REG_LINE_K1K2_M1,
-    [LINE_XY]           = VIA_REG_LINE_XY_M1,
-    [LINE_ERROR]        = VIA_REG_LINE_ERROR_M1,
-    [DIMENSION]         = VIA_REG_DIMENSION_M1,
-    [PATADDR]           = VIA_REG_PATADDR_M1,
-    [FGCOLOR]           = VIA_REG_FGCOLOR_M1,
-    [DSTCOLORKEY]       = VIA_REG_DSTCOLORKEY_M1,
-    [BGCOLOR]           = VIA_REG_BGCOLOR_M1,
-    [SRCCOLORKEY]       = VIA_REG_SRCCOLORKEY_M1,
-    [CLIPTL]            = VIA_REG_CLIPTL_M1,
-    [CLIPBR]            = VIA_REG_CLIPBR_M1,
-    [KEYCONTROL]        = VIA_REG_KEYCONTROL_M1,
-    [SRCBASE]           = VIA_REG_SRCBASE_M1,
-    [DSTBASE]           = VIA_REG_DSTBASE_M1,
-    [PITCH]             = VIA_REG_PITCH_M1,
-    [MONOPAT0]          = VIA_REG_MONOPAT0_M1,
-    [MONOPAT1]          = VIA_REG_MONOPAT1_M1,
-    [COLORPAT]          = VIA_REG_COLORPAT_M1,
-    [MONOPATFGC]        = VIA_REG_MONOPATFGC_M1,
-    [MONOPATBGC]        = VIA_REG_MONOPATBGC_M1
-};
-
 static void
 ViaMMIODisable(ScrnInfoPtr pScrn)
 {
@@ -538,18 +451,6 @@ VIAInitialize2DEngine(ScrnInfoPtr pScrn)
     {
         /*410 redefine 0x30 34 38*/
         VIASETREG(0x60, 0x0); /*already useable here*/
-    }
-
-    /* Make the VIA_REG() macro magic work */
-    switch (pVia->Chipset) {
-    case VIA_VX800:
-    case VIA_VX855:
-    case VIA_VX900:
-        pVia->cb.TwodRegs = via_2d_regs_m1;
-        break;
-    default:
-        pVia->cb.TwodRegs = via_2d_regs;
-        break;
     }
 
     switch (pVia->Chipset) {

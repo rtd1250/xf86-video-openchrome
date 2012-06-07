@@ -245,6 +245,215 @@ viaAccelSetMode(int bpp, ViaTwodContext * tdc)
 }
 
 /*
+ * Switch 2D state clipping on.
+ */
+void
+viaSetClippingRectangle(ScrnInfoPtr pScrn, int x1, int y1, int x2, int y2)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+    ViaTwodContext *tdc = &pVia->td;
+
+    tdc->clipping = TRUE;
+    tdc->clipX1 = (x1 & 0xFFFF);
+    tdc->clipY1 = y1;
+    tdc->clipX2 = (x2 & 0xFFFF);
+    tdc->clipY2 = y2;
+}
+
+/*
+ * Check if we need to force upload of the whole 3D state (when other
+ * clients or subsystems have touched the 3D engine). Also tell DRI
+ * clients and subsystems that we have touched the 3D engine.
+ */
+Bool
+viaCheckUpload(ScrnInfoPtr pScrn, Via3DState * v3d)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+    Bool forceUpload;
+
+    forceUpload = (pVia->lastToUpload != v3d);
+    pVia->lastToUpload = v3d;
+
+#ifdef XF86DRI
+    if (pVia->directRenderingType == DRI_1) {
+        volatile drm_via_sarea_t *saPriv = (drm_via_sarea_t *)
+                DRIGetSAREAPrivate(pScrn->pScreen);
+        int myContext = DRIGetContext(pScrn->pScreen);
+
+        forceUpload = forceUpload || (saPriv->ctxOwner != myContext);
+        saPriv->ctxOwner = myContext;
+    }
+#endif
+    return forceUpload;
+}
+
+Bool
+viaOrder(CARD32 val, CARD32 * shift)
+{
+    *shift = 0;
+
+    while (val > (1 << *shift))
+        (*shift)++;
+    return (val == (1 << *shift));
+}
+
+/*
+ * Helper for bitdepth expansion.
+ */
+CARD32
+viaBitExpandHelper(CARD32 pixel, CARD32 bits)
+{
+    CARD32 component, mask, tmp;
+
+    component = pixel & ((1 << bits) - 1);
+    mask = (1 << (8 - bits)) - 1;
+    tmp = component << (8 - bits);
+    return ((component & 1) ? (tmp | mask) : tmp);
+}
+
+/*
+ * Extract the components from a pixel of the given format to an argb8888 pixel. * This is used to extract data from one-pixel repeat pixmaps.
+ * Assumes little endian.
+ */
+void
+viaPixelARGB8888(unsigned format, void *pixelP, CARD32 * argb8888)
+{
+    CARD32 bits, shift, pixel, bpp;
+
+    bpp = PICT_FORMAT_BPP(format);
+
+    if (bpp <= 8) {
+        pixel = *((CARD8 *) pixelP);
+    } else if (bpp <= 16) {
+        pixel = *((CARD16 *) pixelP);
+    } else {
+        pixel = *((CARD32 *) pixelP);
+    }
+
+    switch (PICT_FORMAT_TYPE(format)) {
+        case PICT_TYPE_A:
+            bits = PICT_FORMAT_A(format);
+            *argb8888 = viaBitExpandHelper(pixel, bits) << 24;
+            return;
+        case PICT_TYPE_ARGB:
+            shift = 0;
+            bits = PICT_FORMAT_B(format);
+            *argb8888 = viaBitExpandHelper(pixel, bits);
+            shift += bits;
+            bits = PICT_FORMAT_G(format);
+            *argb8888 |= viaBitExpandHelper(pixel >> shift, bits) << 8;
+            shift += bits;
+            bits = PICT_FORMAT_R(format);
+            *argb8888 |= viaBitExpandHelper(pixel >> shift, bits) << 16;
+            shift += bits;
+            bits = PICT_FORMAT_A(format);
+            *argb8888 |= ((bits) ? viaBitExpandHelper(pixel >> shift,
+                                                      bits) : 0xFF) << 24;
+            return;
+        case PICT_TYPE_ABGR:
+            shift = 0;
+            bits = PICT_FORMAT_B(format);
+            *argb8888 = viaBitExpandHelper(pixel, bits) << 16;
+            shift += bits;
+            bits = PICT_FORMAT_G(format);
+            *argb8888 |= viaBitExpandHelper(pixel >> shift, bits) << 8;
+            shift += bits;
+            bits = PICT_FORMAT_R(format);
+            *argb8888 |= viaBitExpandHelper(pixel >> shift, bits);
+            shift += bits;
+            bits = PICT_FORMAT_A(format);
+            *argb8888 |= ((bits) ? viaBitExpandHelper(pixel >> shift,
+                                                      bits) : 0xFF) << 24;
+            return;
+        default:
+            break;
+    }
+    return;
+}
+
+Bool
+viaExpandablePixel(int format)
+{
+    int formatType = PICT_FORMAT_TYPE(format);
+
+    return (formatType == PICT_TYPE_A ||
+            formatType == PICT_TYPE_ABGR || formatType == PICT_TYPE_ARGB);
+}
+
+#ifdef VIA_DEBUG_COMPOSITE
+void
+viaExaCompositePictDesc(PicturePtr pict, char *string, int n)
+{
+    char format[20];
+    char size[20];
+
+    if (!pict) {
+        snprintf(string, n, "None");
+        return;
+    }
+
+    switch (pict->format) {
+        case PICT_x8r8g8b8:
+            snprintf(format, 20, "RGB8888");
+            break;
+        case PICT_a8r8g8b8:
+            snprintf(format, 20, "ARGB8888");
+            break;
+        case PICT_r5g6b5:
+            snprintf(format, 20, "RGB565  ");
+            break;
+        case PICT_x1r5g5b5:
+            snprintf(format, 20, "RGB555  ");
+            break;
+        case PICT_a8:
+            snprintf(format, 20, "A8      ");
+            break;
+        case PICT_a1:
+            snprintf(format, 20, "A1      ");
+            break;
+        default:
+            snprintf(format, 20, "0x%x", (int)pict->format);
+            break;
+    }
+
+    snprintf(size, 20, "%dx%d%s", pict->pDrawable->width,
+             pict->pDrawable->height, pict->repeat ? " R" : "");
+
+    snprintf(string, n, "0x%lx: fmt %s (%s)", (long)pict->pDrawable, format,
+             size);
+}
+
+void
+viaExaPrintComposite(CARD8 op, PicturePtr pSrc, PicturePtr pMask,
+                        PicturePtr pDst)
+{
+    char sop[20];
+    char srcdesc[40], maskdesc[40], dstdesc[40];
+
+    switch (op) {
+        case PictOpSrc:
+            sprintf(sop, "Src");
+            break;
+        case PictOpOver:
+            sprintf(sop, "Over");
+            break;
+        default:
+            sprintf(sop, "0x%x", (int)op);
+            break;
+    }
+
+    viaExaCompositePictDesc(pSrc, srcdesc, 40);
+    viaExaCompositePictDesc(pMask, maskdesc, 40);
+    viaExaCompositePictDesc(pDst, dstdesc, 40);
+
+    ErrorF("Composite fallback: op %s, \n"
+           "                    src  %s, \n"
+           "                    mask %s, \n"
+           "                    dst  %s, \n", sop, srcdesc, maskdesc, dstdesc);
+}
+#endif /* VIA_DEBUG_COMPOSITE */
+
+/*
  * Wait for acceleration engines idle. An expensive way to sync.
  */
 void
@@ -278,6 +487,24 @@ viaAccelSync(ScrnInfoPtr pScrn)
                     (VIA_CMD_RGTR_BUSY | VIA_2D_ENG_BUSY | VIA_3D_ENG_BUSY))
                    && (loop++ < MAXLOOP)) ;
             break;
+    }
+}
+
+/*
+ * Wait for the value to get blitted, or in the PCI case for engine idle.
+ */
+static void
+viaAccelWaitMarker(ScreenPtr pScreen, int marker)
+{
+    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    VIAPtr pVia = VIAPTR(pScrn);
+    CARD32 uMarker = marker;
+
+    if (pVia->agpDMA) {
+        while ((pVia->lastMarkerRead - uMarker) > (1 << 24))
+            pVia->lastMarkerRead = *(CARD32 *) pVia->markerBuf;
+    } else {
+        viaAccelSync(pScrn);
     }
 }
 
@@ -532,7 +759,7 @@ viaExaTexUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
         v3d->emitQuad(v3d, &pVia->cb, x, y + yOffs, 0, (buf) ? height : 0, 0,
                       0, w, bufH);
 
-        sync[buf] = viaAccelMarkSync(pScrn->pScreen);
+        sync[buf] = pVia->exaDriverPtr->MarkSync(pScrn->pScreen);
 
         h -= bufH;
         yOffs += bufH;
@@ -605,13 +832,29 @@ viaInitExa(ScreenPtr pScreen)
     pExa->maxX = 2047;
     pExa->maxY = 2047;
     pExa->WaitMarker = viaAccelWaitMarker;
-    pExa->MarkSync = viaAccelMarkSync;
-    pExa->PrepareSolid = viaExaPrepareSolid;
-    pExa->Solid = viaExaSolid;
-    pExa->DoneSolid = viaExaDoneSolidCopy;
-    pExa->PrepareCopy = viaExaPrepareCopy;
-    pExa->Copy = viaExaCopy;
-    pExa->DoneCopy = viaExaDoneSolidCopy;
+
+    switch (pVia->Chipset) {
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        pExa->MarkSync = viaAccelMarkSync_H6;
+        pExa->PrepareSolid = viaExaPrepareSolid_H6;
+        pExa->Solid = viaExaSolid_H6;
+        pExa->DoneSolid = viaExaDoneSolidCopy_H6;
+        pExa->PrepareCopy = viaExaPrepareCopy_H6;
+        pExa->Copy = viaExaCopy_H6;
+        pExa->DoneCopy = viaExaDoneSolidCopy_H6;
+        break;
+    default:
+        pExa->MarkSync = viaAccelMarkSync_H2;
+        pExa->PrepareSolid = viaExaPrepareSolid_H2;
+        pExa->Solid = viaExaSolid_H2;
+        pExa->DoneSolid = viaExaDoneSolidCopy_H2;
+        pExa->PrepareCopy = viaExaPrepareCopy_H2;
+        pExa->Copy = viaExaCopy_H2;
+        pExa->DoneCopy = viaExaDoneSolidCopy_H2;
+        break;
+    }
 
 #ifdef XF86DRI
     if (pVia->directRenderingType == DRI_1) {
@@ -619,22 +862,34 @@ viaInitExa(ScreenPtr pScreen)
         pExa->DownloadFromScreen = viaExaDownloadFromScreen;
 #endif /* linux */
         switch (pVia->Chipset) {
-            case VIA_K8M800:
-            case VIA_KM400:
-                pExa->UploadToScreen = NULL; //viaExaTexUploadToScreen;
-                break;
-            default:
-                pExa->UploadToScreen = NULL; //viaExaUploadToScreen;
-                break;
+        case VIA_K8M800:
+        case VIA_KM400:
+            pExa->UploadToScreen = NULL; //viaExaTexUploadToScreen;
+            break;
+        default:
+            pExa->UploadToScreen = NULL; //viaExaUploadToScreen;
+            break;
         }
     }
 #endif /* XF86DRI */
 
     if (!pVia->noComposite) {
-        pExa->CheckComposite = viaExaCheckComposite;
-        pExa->PrepareComposite = viaExaPrepareComposite;
-        pExa->Composite = viaExaComposite;
-        pExa->DoneComposite = viaExaDoneSolidCopy;
+        switch (pVia->Chipset) {
+        case VIA_VX800:
+        case VIA_VX855:
+        case VIA_VX900:
+            pExa->CheckComposite = viaExaCheckComposite_H6;
+            pExa->PrepareComposite = viaExaPrepareComposite_H6;
+            pExa->Composite = viaExaComposite_H6;
+            pExa->DoneComposite = viaExaDoneSolidCopy_H6;
+            break;
+        default:
+            pExa->CheckComposite = viaExaCheckComposite_H2;
+            pExa->PrepareComposite = viaExaPrepareComposite_H2;
+            pExa->Composite = viaExaComposite_H2;
+            pExa->DoneComposite = viaExaDoneSolidCopy_H2;
+            break;
+        }
     } else {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                    "[EXA] Disabling EXA accelerated composite.\n");
