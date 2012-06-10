@@ -42,24 +42,6 @@
 #include "via_rop.h"
 
 /*
- * This is a small helper to wrap around a PITCH register write
- * to deal with the subtle differences of M1 and old 2D engine
- */
-static void
-viaPitchHelper_H6(VIAPtr pVia, unsigned dstPitch, unsigned srcPitch)
-{
-    unsigned val = (dstPitch >> 3) << 16 | (srcPitch >> 3);
-    RING_VARS;
-
-    if (pVia->Chipset != VIA_VX800 &&
-        pVia->Chipset != VIA_VX855 &&
-        pVia->Chipset != VIA_VX900) {
-        val |= VIA_PITCH_ENABLE;
-    }
-    OUT_RING_H1(VIA_REG_PITCH_M1, val);
-}
-
-/*
  * Emit clipping borders to the command buffer and update the 2D context
  * current command with clipping info.
  */
@@ -82,26 +64,6 @@ viaAccelClippingHelper_H6(VIAPtr pVia, int refY)
         tdc->cmd &= ~VIA_GEC_CLIP_ENABLE;
     }
     return refY;
-}
-
-/*
- * Emit a solid blit operation to the command buffer.
- */
-void
-viaAccelSolidHelper_H6(VIAPtr pVia, int x, int y, int w, int h,
-                        unsigned fbBase, CARD32 mode, unsigned pitch,
-                        CARD32 fg, CARD32 cmd)
-{
-    RING_VARS;
-
-    BEGIN_RING(14);
-    OUT_RING_H1(VIA_REG_GEMODE_M1, mode);
-    OUT_RING_H1(VIA_REG_DSTBASE_M1, fbBase >> 3);
-    viaPitchHelper_H6(pVia, pitch, 0);
-    OUT_RING_H1(VIA_REG_DSTPOS_M1, (y << 16) | (x & 0xFFFF));
-    OUT_RING_H1(VIA_REG_DIMENSION_M1, ((h - 1) << 16) | (w - 1));
-    OUT_RING_H1(VIA_REG_MONOPATFGC_M1, fg);
-    OUT_RING_H1(VIA_REG_GECMD_M1, cmd);
 }
 
 /*
@@ -164,38 +126,6 @@ viaAccelTransparentHelper_H6(VIAPtr pVia, CARD32 keyControl,
 }
 
 /*
- * Emit a copy blit operation to the command buffer.
- */
-static void
-viaAccelCopyHelper_H6(VIAPtr pVia, int xs, int ys, int xd, int yd,
-                   int w, int h, unsigned srcFbBase, unsigned dstFbBase,
-                   CARD32 mode, unsigned srcPitch, unsigned dstPitch,
-                   CARD32 cmd)
-{
-    RING_VARS;
-
-    if (cmd & VIA_GEC_DECY) {
-        ys += h - 1;
-        yd += h - 1;
-    }
-
-    if (cmd & VIA_GEC_DECX) {
-        xs += w - 1;
-        xd += w - 1;
-    }
-
-    BEGIN_RING(16);
-    OUT_RING_H1(VIA_REG_GEMODE_M1, mode);
-    OUT_RING_H1(VIA_REG_SRCBASE_M1, srcFbBase >> 3);
-    OUT_RING_H1(VIA_REG_DSTBASE_M1, dstFbBase >> 3);
-    viaPitchHelper_H6(pVia, dstPitch, srcPitch);
-    OUT_RING_H1(VIA_REG_SRCPOS_M1, (ys << 16) | (xs & 0xFFFF));
-    OUT_RING_H1(VIA_REG_DSTPOS_M1, (yd << 16) | (xd & 0xFFFF));
-    OUT_RING_H1(VIA_REG_DIMENSION_M1, ((h - 1) << 16) | (w - 1));
-    OUT_RING_H1(VIA_REG_GECMD_M1, cmd);
-}
-
-/*
  * Mark Sync using the 2D blitter for AGP. NoOp for PCI.
  * In the future one could even launch a NULL PCI DMA command
  * to have an interrupt generated, provided it is possible to
@@ -215,11 +145,17 @@ viaAccelMarkSync_H6(ScreenPtr pScreen)
     pVia->curMarker &= 0x7FFFFFFF;
 
     if (pVia->agpDMA) {
-        BEGIN_RING(2);
+        BEGIN_RING(16);
+
         OUT_RING_H1(VIA_REG_KEYCONTROL_M1, 0x00);
-        viaAccelSolidHelper_H6(pVia, 0, 0, 1, 1, pVia->markerOffset,
-                            VIA_GEM_32bpp, 4, pVia->curMarker,
-                            (0xF0 << 24) | VIA_GEC_BLT | VIA_GEC_FIXCOLOR_PAT);
+        OUT_RING_H1(VIA_REG_GEMODE_M1, VIA_GEM_32bpp);
+        OUT_RING_H1(VIA_REG_DSTBASE_M1, pVia->curMarker >> 3);
+        OUT_RING_H1(VIA_REG_PITCH_M1, 0);
+        OUT_RING_H1(VIA_REG_DSTPOS_M1, 0);
+        OUT_RING_H1(VIA_REG_DIMENSION_M1, 0);
+        OUT_RING_H1(VIA_REG_MONOPATFGC_M1, pVia->curMarker);
+        OUT_RING_H1(VIA_REG_GECMD_M1, (0xF0 << 24) | VIA_GEC_BLT | VIA_GEC_FIXCOLOR_PAT);
+
         ADVANCE_RING;
     }
     return pVia->curMarker;
@@ -259,19 +195,23 @@ void
 viaExaSolid_H6(PixmapPtr pPixmap, int x1, int y1, int x2, int y2)
 {
     ScrnInfoPtr pScrn = xf86Screens[pPixmap->drawable.pScreen->myNum];
+    CARD32 dstOffset = exaGetPixmapOffset(pPixmap);
+    CARD32 dstPitch = exaGetPixmapPitch(pPixmap);
+    int w = x2 - x1, h = y2 - y1;
     VIAPtr pVia = VIAPTR(pScrn);
     ViaTwodContext *tdc = &pVia->td;
-    CARD32 dstPitch, dstOffset;
 
     RING_VARS;
 
-    int w = x2 - x1, h = y2 - y1;
+    BEGIN_RING(14);
+    OUT_RING_H1(VIA_REG_GEMODE_M1, tdc->mode);
+    OUT_RING_H1(VIA_REG_DSTBASE_M1, dstOffset >> 3);
+    OUT_RING_H1(VIA_REG_PITCH_M1, (dstPitch >> 3) << 16);
+    OUT_RING_H1(VIA_REG_DSTPOS_M1, (y1 << 16) | (x1 & 0xFFFF));
+    OUT_RING_H1(VIA_REG_DIMENSION_M1, ((h - 1) << 16) | (w - 1));
+    OUT_RING_H1(VIA_REG_MONOPATFGC_M1, tdc->fgColor);
+    OUT_RING_H1(VIA_REG_GECMD_M1, tdc->cmd);
 
-    dstPitch = exaGetPixmapPitch(pPixmap);
-    dstOffset = exaGetPixmapOffset(pPixmap);
-
-    viaAccelSolidHelper_H6(pVia, x1, y1, w, h, dstOffset, tdc->mode,
-                            dstPitch, tdc->fgColor, tdc->cmd);
     ADVANCE_RING;
 }
 
@@ -322,19 +262,38 @@ viaExaCopy_H6(PixmapPtr pDstPixmap, int srcX, int srcY, int dstX, int dstY,
                 int width, int height)
 {
     ScrnInfoPtr pScrn = xf86Screens[pDstPixmap->drawable.pScreen->myNum];
+    CARD32 dstOffset = exaGetPixmapOffset(pDstPixmap), val;
+    CARD32 dstPitch = exaGetPixmapPitch(pDstPixmap);
     VIAPtr pVia = VIAPTR(pScrn);
     ViaTwodContext *tdc = &pVia->td;
-    CARD32 srcOffset = tdc->srcOffset;
-    CARD32 dstOffset = exaGetPixmapOffset(pDstPixmap);
-
-    RING_VARS;
 
     if (!width || !height)
         return;
 
-    viaAccelCopyHelper_H6(pVia, srcX, srcY, dstX, dstY, width, height,
-                            srcOffset, dstOffset, tdc->mode, tdc->srcPitch,
-                            exaGetPixmapPitch(pDstPixmap), tdc->cmd);
+    RING_VARS;
+
+    if (tdc->cmd & VIA_GEC_DECY) {
+        srcY += height - 1;
+        dstY += height - 1;
+    }
+
+    if (tdc->cmd & VIA_GEC_DECX) {
+        srcX += width - 1;
+        dstX += width - 1;
+    }
+    val = (dstPitch >> 3) << 16 | (tdc->srcPitch >> 3);
+
+    BEGIN_RING(16);
+    OUT_RING_H1(VIA_REG_GEMODE_M1, tdc->mode);
+    OUT_RING_H1(VIA_REG_SRCBASE_M1, tdc->srcOffset >> 3);
+    OUT_RING_H1(VIA_REG_DSTBASE_M1, dstOffset >> 3);
+    OUT_RING_H1(VIA_REG_PITCH_M1, val);
+
+    OUT_RING_H1(VIA_REG_SRCPOS_M1, (srcY << 16) | (srcX & 0xFFFF));
+    OUT_RING_H1(VIA_REG_DSTPOS_M1, (dstY << 16) | (dstX & 0xFFFF));
+    OUT_RING_H1(VIA_REG_DIMENSION_M1, ((height - 1) << 16) | (width - 1));
+    OUT_RING_H1(VIA_REG_GECMD_M1, tdc->cmd);
+
     ADVANCE_RING;
 }
 
