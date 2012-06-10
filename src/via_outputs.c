@@ -466,7 +466,7 @@ via_tv_init(ScrnInfoPtr pScrn)
         return FALSE;
     }
 
-    output = xf86OutputCreate(pScrn, &via_tv_funcs, "TV-0");
+    output = xf86OutputCreate(pScrn, &via_tv_funcs, "TV-1");
     pVia->FirstInit = TRUE;
     pBIOSInfo->tv = output;
     /* Save now */
@@ -619,7 +619,7 @@ via_dp_init(ScrnInfoPtr pScrn)
     xf86OutputPtr output = NULL;
 
     if (pVia->pI2CBus2)
-        output = xf86OutputCreate(pScrn, &via_dp_funcs, "DP-0");
+        output = xf86OutputCreate(pScrn, &via_dp_funcs, "DP-1");
     if (output) {
         output->possible_crtcs = 0x1;
         output->possible_clones = 0;
@@ -795,7 +795,7 @@ via_analog_init(ScrnInfoPtr pScrn)
     xf86OutputPtr output = NULL;
 
     if (pVia->pI2CBus1) {
-        output = xf86OutputCreate(pScrn, &via_analog_funcs, "VGA-0");
+        output = xf86OutputCreate(pScrn, &via_analog_funcs, "VGA-1");
 
         output->possible_crtcs = 0x3;
         output->possible_clones = 0;
