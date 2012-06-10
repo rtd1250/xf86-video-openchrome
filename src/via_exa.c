@@ -771,6 +771,8 @@ viaExaTexUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
     return TRUE;
 }
 
+#define EXAOPT_MIGRATION_HEURISTIC  0
+
 Bool
 viaInitExa(ScreenPtr pScreen)
 {
@@ -894,6 +896,10 @@ viaInitExa(ScreenPtr pScreen)
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                    "[EXA] Disabling EXA accelerated composite.\n");
     }
+
+    /* Evil hack that will go away */
+    if (!xf86GetOptValString(pScrn->options, EXAOPT_MIGRATION_HEURISTIC))
+        xf86ReplaceStrOption(pScrn->options, "MigrationHeuristic", "greedy");
 
     if (!exaDriverInit(pScreen, pExa)) {
         free(pExa);
