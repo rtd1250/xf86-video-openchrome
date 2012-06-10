@@ -95,12 +95,16 @@ endif
 via_driver.lo: version.h
 version.h: $(openchrome_drv_la_SOURCES)
 	@if [ -d ../.git ]; then \
-	    echo '#define BUILDCOMMENT "(developement build, at revision '\
-        "`git log -1 --pretty=format:%h | head -1`"')"' > $@.tmp; \
+        echo '#define BUILDCOMMENT "(developement build, branch' \
+                     "`git branch -v | sed 's/no branch/no_branch/' | \
+                      awk '/^\*/ { print $$2 }'`" \
+                     'at revision' \
+                     "`git log -1 --pretty=format:%h | head -1`"')"' \
+                    > $@.tmp; \
     else \
         if [ -d .svn ]; then \
-	        echo '#define BUILDCOMMENT "(development build, at revision '\
-	        "`svnversion -nc .. | sed -e s/^[^:]*://`"')"' > $@.tmp; \
+	        echo '#define BUILDCOMMENT "(developement build, at revision '\
+	                "`svnversion -nc .. | sed -e s/^[^:]*://`"')"' > $@.tmp; \
         else \
 	        date +'#define BUILDCOMMENT "(development build, compiled on %c)"' \
         	> $@.tmp; \
