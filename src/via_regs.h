@@ -95,7 +95,6 @@ struct ViaCardIdStruct {
     CARD8  Outputs; /* whether it supports CRT, LCD, and TV */
 };
 
-void ViaDoubleCheckCLE266Revision(ScrnInfoPtr pScrn);
 void ViaCheckCardId(ScrnInfoPtr pScrn);
 
 #define BIOS_BSIZE              1024
