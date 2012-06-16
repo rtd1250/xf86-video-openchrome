@@ -26,6 +26,8 @@
 #ifndef _VIA_BIOS_H_
 #define _VIA_BIOS_H_ 1
 
+#include "via_vgahw.h"
+
 #define     VIA_PANEL6X4                    0
 #define     VIA_PANEL8X6                    1
 #define     VIA_PANEL10X7                   2
@@ -188,16 +190,18 @@ Bool ViaVbeModePreInit(ScrnInfoPtr pScrn);
 void ViaVbeDPMS(ScrnInfoPtr pScrn, int mode);
 void ViaVbeDoDPMS(ScrnInfoPtr pScrn, int mode);
 int ViaVbePanelPower(vbeInfoPtr pVbe, int mode);
+Bool ViaVbeSetPanelMode(ScrnInfoPtr pScrn, Bool expand);
 
 /* via_ums.c */
 Bool VIAMapMem(ScrnInfoPtr pScrn);
 void VIAUnmapMem(ScrnInfoPtr pScrn);
 Bool ums_create(ScrnInfoPtr pScrn);
 Bool UMSPreInit(ScrnInfoPtr pScrn);
+Bool UMSAccelInit(ScreenPtr pScreen);
+void viaDisableVQ(ScrnInfoPtr pScrn);
 
 /* via_output.c */
 void ViaOutputsDetect(ScrnInfoPtr pScrn);
-void via_analog_init(ScrnInfoPtr pScrn);
 CARD32 ViaGetMemoryBandwidth(ScrnInfoPtr pScrn);
 CARD32 ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaModePrimaryLegacy(xf86CrtcPtr crtc, DisplayModePtr mode);
@@ -211,6 +215,8 @@ void ViaTVPrintRegs(ScrnInfoPtr pScrn);
 #endif
 void ViaModeSecondCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaModeFirstCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode);
+void ViaSetSecondaryDotclock(ScrnInfoPtr pScrn, CARD32 clock);
+void ViaSetUseExternalClock(vgaHWPtr hwp);
 
 /* via_display.c */
 Bool UMSCrtcInit(ScrnInfoPtr pScrn);
@@ -222,6 +228,7 @@ void ViaSecondCRTCHorizontalOffset(ScrnInfoPtr pScrn);
 void ViaSecondCRTCHorizontalQWCount(ScrnInfoPtr pScrn, int width);
 void ViaSecondCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaShadowCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
+void ViaGammaDisable(ScrnInfoPtr pScrn);
 
 /* via_lvds.c */
 void via_lvds_init(ScrnInfoPtr pScrn);

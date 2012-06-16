@@ -29,17 +29,12 @@
 
 #include "xf86.h"
 #include "xf86_OSproc.h"
-#include "xf86fbman.h"
 
 #ifdef XF86DRI
 #include "xf86drm.h"
-#endif
-
-#include "via_driver.h"
-#ifdef XF86DRI
 #include "via_drm.h"
 #endif
-#include "via_vgahw.h"
+#include "via_driver.h"
 
 #include <math.h>
 #include <unistd.h>

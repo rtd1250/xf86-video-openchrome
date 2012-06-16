@@ -32,7 +32,6 @@
 #endif
 
 #include "via_driver.h"
-#include "via_vgahw.h"
 #include "via_mode.h"
 #include <unistd.h>
 

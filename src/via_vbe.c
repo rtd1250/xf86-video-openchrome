@@ -133,7 +133,7 @@ ViaVbeSetActiveDevices(ScrnInfoPtr pScrn, int mode, int refresh)
 /*
  * Sets the panel mode (expand or center).
  */
-static Bool
+Bool
 ViaVbeSetPanelMode(ScrnInfoPtr pScrn, Bool expand)
 {
     VIAPtr pVia = VIAPTR(pScrn);

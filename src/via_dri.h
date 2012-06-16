@@ -73,4 +73,7 @@ typedef struct {
     int dummy;
 } VIADRIContextRec, *VIADRIContextPtr;
 
+Bool VIADRIKernelInit(ScrnInfoPtr pScrn);
+void kickVblank(ScrnInfoPtr pScrn);
+
 #endif /* _VIA_DRI_H_ */

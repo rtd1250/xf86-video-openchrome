@@ -36,7 +36,6 @@
 #endif
 
 #include "via_driver.h"
-#include "via_vgahw.h"
 #include <unistd.h>
 
 /*
@@ -911,7 +910,7 @@ ViaGetMemoryBandwidth(ScrnInfoPtr pScrn)
  * Standard vga call really.
  * Needs to be called to reset the dotclock (after SR40:2/1 reset)
  */
-static void
+void
 ViaSetUseExternalClock(vgaHWPtr hwp)
 {
     CARD8 data;
@@ -976,7 +975,7 @@ ViaSetPrimaryDotclock(ScrnInfoPtr pScrn, CARD32 clock)
 /*
  *
  */
-static void
+void
 ViaSetSecondaryDotclock(ScrnInfoPtr pScrn, CARD32 clock)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);

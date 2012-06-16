@@ -176,7 +176,7 @@ drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
             obj->ptr = NULL;
         }
     } else
-        obj->ptr = (unsigned char *) obj->map_offset + obj->offset;
+        obj->ptr = (void *) (obj->map_offset + obj->offset);
     return obj->ptr;
 }
 
@@ -216,7 +216,7 @@ drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
                 struct drm_gem_close close;
 
                 close.handle = obj->handle;
-                if (ioctl(pVia->drmmode.fd, DRM_IOCTL_GEM_CLOSE, &close) < 0)
+                if (drmIoctl(pVia->drmmode.fd, DRM_IOCTL_GEM_CLOSE, &close) < 0)
                     ErrorF("DRM failed to free for handle %lld.\n", obj->handle);
 #endif
             }

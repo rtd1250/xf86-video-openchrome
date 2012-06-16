@@ -29,7 +29,6 @@
 #endif
 
 #include "via_driver.h"
-#include "via_vgahw.h"
 
 /*
  * Now that via_bios is no longer such a behemoth and the relevant code has

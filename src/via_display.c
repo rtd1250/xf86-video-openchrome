@@ -28,7 +28,6 @@
 #endif
 
 #include "via_driver.h"
-#include "via_vgahw.h"
 
 /*
  * Enables the second display channel.

@@ -34,7 +34,6 @@
 
 #include "compiler.h"
 #include "xf86Pci.h"
-#include "xf86fbman.h"
 #include "regionstr.h"
 
 #ifdef XF86DRI

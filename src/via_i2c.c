@@ -32,18 +32,15 @@
 #endif
 
 #include "via_driver.h"
-#include "via_vgahw.h"
 
 #define SDA_READ  0x04
 #define SCL_READ  0x08
 #define SDA_WRITE 0x10
 #define SCL_WRITE 0x20
 
-
 /*
  * CRT I2C
  */
-
 static void
 ViaI2C1PutBits(I2CBusPtr Bus, int clock, int data)
 {
