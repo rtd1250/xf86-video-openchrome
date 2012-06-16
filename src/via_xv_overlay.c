@@ -32,6 +32,7 @@
 
 #ifdef XF86DRI
 #include "xf86drm.h"
+#include "via_drmclient.h"
 #include "via_drm.h"
 #endif
 #include "via_driver.h"

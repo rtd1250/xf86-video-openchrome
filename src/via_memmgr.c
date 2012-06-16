@@ -90,11 +90,8 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
 
     obj = xnfcalloc(1, sizeof(*obj));
     if (obj) {
-        obj->map_offset = (unsigned long) pVia->FBBase;
-
         switch (domain) {
         case TTM_PL_FLAG_TT:
-            obj->map_offset = (unsigned long) pVia->agpMappedAddr;
         case TTM_PL_FLAG_VRAM:
             if (pVia->directRenderingType == DRI_NONE) {
                 if (Success != viaOffScreenLinear(obj, pScrn, size)) {
@@ -175,8 +172,19 @@ drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
             DEBUG(ErrorF("mmap failed with error %d\n", -errno));
             obj->ptr = NULL;
         }
-    } else
-        obj->ptr = (void *) (obj->map_offset + obj->offset);
+    } else {
+        switch (obj->domain) {
+        case TTM_PL_FLAG_TT:
+            obj->ptr = (pVia->agpMappedAddr + obj->offset);
+            break;
+        case TTM_PL_FLAG_VRAM:
+            obj->ptr = (pVia->FBBase + obj->offset);
+            break;
+        default:
+            obj->ptr = NULL;
+            break;
+        }
+    }
     return obj->ptr;
 }
 

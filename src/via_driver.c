@@ -1241,6 +1241,10 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     xf86DrvMsg(pScrn->scrnIndex, from, "Hardware acceleration is %s.\n",
                !pVia->NoAccel ? "enabled" : "disabled");
 
+    /* Disable EXA for KMS case */
+    if (pVia->KMS)
+        pVia->NoAccel = TRUE;
+
     if (!pVia->NoAccel) {
         from = X_DEFAULT;
         if ((s = (char *)xf86GetOptValString(VIAOptions, OPTION_ACCELMETHOD))) {
@@ -1800,7 +1804,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     if (!drm_bo_map(pScrn, pVia->drmmode.front_bo))
         return FALSE;
 
-    if (!UMSAccelInit(pScrn->pScreen))
+    if (!pVia->NoAccel && !UMSAccelInit(pScrn->pScreen))
         return FALSE;
 
     miClearVisualTypes();

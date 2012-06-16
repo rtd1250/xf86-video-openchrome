@@ -33,10 +33,6 @@
 #ifndef _VIA_DEFINES_
 #define _VIA_DEFINES_
 
-#ifndef __KERNEL__
-#include "via_drmclient.h"
-#endif
-
 #define VIA_NR_SAREA_CLIPRECTS		8
 #define VIA_NR_XVMC_PORTS		10
 #define VIA_NR_XVMC_LOCKS		5
@@ -86,7 +82,7 @@
 #define DRM_IOCTL_VIA_FB_INIT	  DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_FB_INIT, drm_via_fb_t)
 #define DRM_IOCTL_VIA_MAP_INIT	  DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_MAP_INIT, drm_via_init_t)
 #define DRM_IOCTL_VIA_DEC_FUTEX   DRM_IOW( DRM_COMMAND_BASE + DRM_VIA_DEC_FUTEX, drm_via_futex_t)
-#define DRM_IOCTL_VIA_GEM_CREATE  DRM_IOW( DRM_COMMAND_BASE + DRM_VIA_GEM_CREATE, struct drm_gem_create)
+#define DRM_IOCTL_VIA_GEM_CREATE  DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_GEM_CREATE, struct drm_gem_create)
 #define DRM_IOCTL_VIA_DMA_INIT	  DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_DMA_INIT, drm_via_dma_init_t)
 #define DRM_IOCTL_VIA_CMDBUFFER	  DRM_IOW( DRM_COMMAND_BASE + DRM_VIA_CMDBUFFER, drm_via_cmdbuffer_t)
 #define DRM_IOCTL_VIA_FLUSH	  DRM_IO(  DRM_COMMAND_BASE + DRM_VIA_FLUSH)
@@ -285,14 +281,14 @@ struct drm_gem_create {
 	uint64_t size;
 
 	/*
-	 * Place the memory at the proper alignment.
+	 * Place the memory at the proper byte alignment.
 	 */
-	uint64_t alignment;
+	uint32_t alignment;
 
 	/**
 	 * Format of data i.e tile pitch, for linear it is zero
 	 */
-	uint64_t pitch;
+	uint32_t pitch;
 
 	/**
 	 * Give hints where to allocate this object.
@@ -300,7 +296,7 @@ struct drm_gem_create {
 	uint32_t domains;
 
 	/**
-	 * chmod values applied to a buffer. 
+	 * chmod values applied to a buffer.
 	 */
 	uint32_t mode_t;
 
@@ -310,7 +306,7 @@ struct drm_gem_create {
 	uint64_t offset;
 
 	/**
-	 * Handle need to mmap the buffer.
+	 * Returned handle need to mmap the buffer.
 	 */
 	uint64_t map_handle;
 
@@ -327,6 +323,7 @@ struct drm_gem_create {
 	uint32_t pad1;
 	uint64_t pad2;
 	uint64_t pad3;
+	uint64_t pad4;
 };
 
 #endif				/* _VIA_DRM_H_ */

@@ -26,6 +26,7 @@
 #ifndef _VIA_XVMC_H
 #define _VIA_XVMC_H 1
 
+#include "via_drmclient.h"
 #include "via_drm.h"
 
 /*

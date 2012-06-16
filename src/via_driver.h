@@ -62,6 +62,7 @@
 #include "dri.h"
 #include "GL/glxint.h"
 #include "via_dri.h"
+#include "via_drmclient.h"
 #include "via_drm.h"
 #endif
 #include "exa.h"

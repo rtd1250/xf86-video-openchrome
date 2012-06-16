@@ -20,11 +20,12 @@
 #
 # Process this file with autoconf to produce a configure script
 
+# Initialize Autoconf
 AC_PREREQ(2.57)
 AC_INIT([xf86-video-openchrome],
-        0.3.0,
+        [0.3.0],
         [http://www.openchrome.org/trac/report/1],
-        xf86-video-openchrome)
+        [xf86-video-openchrome])
 
 AC_DEFINE_UNQUOTED([VIA_MAJOR_VERSION],
                    [$(echo $PACKAGE_VERSION | sed -e 's/^\([[0-9]]*\)\.[[0-9]]*\.[[0-9]]*/\1/')],
@@ -40,20 +41,20 @@ AC_CONFIG_SRCDIR([Makefile.am])
 AM_CONFIG_HEADER([config.h])
 AC_CONFIG_AUX_DIR(.)
 
+AM_INIT_AUTOMAKE([foreign dist-bzip2])
+AM_MAINTAINER_MODE
+
 # Require X.Org macros 1.8 or later for MAN_SUBSTS set by XORG_MANPAGE_SECTIONS
 m4_ifndef([XORG_MACROS_VERSION],
           [m4_fatal([must install xorg-macros 1.8 or later before running autoconf/autogen])])
+
 XORG_MACROS_VERSION(1.8)
 XORG_DEFAULT_OPTIONS
 
-AM_INIT_AUTOMAKE([dist-bzip2])
-
-AM_MAINTAINER_MODE
-
-# Checks for programs.
+# Initialize libtool
 AC_DISABLE_STATIC
 AC_PROG_LIBTOOL
-AC_PROG_CC
+AC_SYS_LARGEFILE
 
 AH_TOP([#include "xorg-server.h"])
 
