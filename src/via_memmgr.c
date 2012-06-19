@@ -219,13 +219,13 @@ drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
                 drm.index = obj->handle;
                 if (drmCommandWrite(pVia->drmmode.fd, DRM_VIA_FREEMEM,
                                     &drm, sizeof(drm_via_mem_t)) < 0)
-                    ErrorF("DRM failed to free for handle %lld.\n", obj->handle);
+                    ErrorF("DRM failed to free for handle %lu.\n", obj->handle);
             } else  if (pVia->directRenderingType == DRI_2) {
                 struct drm_gem_close close;
 
                 close.handle = obj->handle;
                 if (drmIoctl(pVia->drmmode.fd, DRM_IOCTL_GEM_CLOSE, &close) < 0)
-                    ErrorF("DRM failed to free for handle %lld.\n", obj->handle);
+                    ErrorF("DRM failed to free for handle %lu.\n", obj->handle);
 #endif
             }
             break;

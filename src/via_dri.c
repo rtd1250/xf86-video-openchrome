@@ -341,7 +341,7 @@ VIADRIAgpInit(ScrnInfoPtr pScrn)
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                "[drm] agpSize = 0x%08x\n", pVia->agpSize);
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-               "[drm] agp physical addr = 0x%08lx\n", pVia->agpMappedAddr);
+               "[drm] agp physical addr = %p\n", pVia->agpMappedAddr);
     return TRUE;
 }
 

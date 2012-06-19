@@ -1424,7 +1424,7 @@ via_lvds_get_modes(xf86OutputPtr output)
                     p->type = M_T_DRIVER | M_T_PREFERRED;
                 } else {
                     xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                                "Out of memory. Size: %d bytes\n", sizeof(DisplayModeRec));
+                                "Out of memory. Size: %zu bytes\n", sizeof(DisplayModeRec));
                 }
             } else {
                 xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
