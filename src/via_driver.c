@@ -864,11 +864,12 @@ xf86CrtcConfigFuncsRec via_xf86crtc_config_funcs = {
 static Bool
 VIAPreInit(ScrnInfoPtr pScrn, int flags)
 {
+    XF86OptionPtr option = xf86NewOption("MigrationHeuristic", "greedy");
     EntityInfoPtr pEnt;
     VIAPtr pVia;
     VIABIOSInfoPtr pBIOSInfo;
     MessageType from = X_DEFAULT;
-    char *mod = NULL, *s = NULL;
+    char *s = NULL;
 #ifdef XF86DRI
     char *busId = NULL;
     drmVersionPtr drmVer;
@@ -941,12 +942,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 #ifndef XSERVER_LIBPCIACCESS
     xf86RegisterResources(pEnt->index, NULL, ResNone);
 #endif
-
-#if 0
-    xf86SetOperatingState(RES_SHARED_VGA, pEnt->index, ResUnusedOpr);
-    xf86SetOperatingState(resVgaMemShared, pEnt->index, ResDisableOpr);
-#endif
-
     if (pEnt->device->chipset && *pEnt->device->chipset) {
         from = X_CONFIG;
         pScrn->chipset = pEnt->device->chipset;
@@ -975,11 +970,11 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     } else {
         /* Read PCI bus 0, dev 0, function 0, index 0xF6 to get chip revision */
 #ifdef XSERVER_LIBPCIACCESS
-	struct pci_device *bridge = pci_device_get_parent_bridge(pVia->PciInfo);
-	uint8_t rev = 0;
+        struct pci_device *bridge = pci_device_get_parent_bridge(pVia->PciInfo);
+        uint8_t rev = 0;
 
-	pci_device_cfg_read_u8(bridge, &rev, 0xF6);
-	pVia->ChipRev = rev;
+        pci_device_cfg_read_u8(bridge, &rev, 0xF6);
+        pVia->ChipRev = rev;
 #else
         pVia->ChipRev = pciReadByte(pciTag(0, 0, 0), 0xF6);
 #endif
@@ -1119,7 +1114,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     /* We use a programmable clock */
     pScrn->progClock = TRUE;
 
-    xf86CollectOptions(pScrn, NULL);
+    xf86CollectOptions(pScrn, option);
 
     /* Set the bits per RGB for 8bpp mode */
     if (pScrn->depth == 8)
@@ -1142,8 +1137,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
                 xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
                            "Already using \"legacy\" as ModeSwitchMethod, "
                            "did not force anything.\n");
-            }
-            else {
+            } else {
                 pVia->UseLegacyModeSwitch = TRUE;
                 xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
                            "Forced ModeSwitchMethod to \"legacy\".\n");
@@ -1154,8 +1148,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
                 pVia->UseLegacyModeSwitch = FALSE;
                 xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
                            "Forced ModeSwitchMethod to \"new\".\n");
-            }
-            else {
+            } else {
                 xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
                            "Already using \"new\" as ModeSwitchMethod, "
                            "did not force anything.\n");
@@ -1191,7 +1184,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
                        "Valid options are \"SWRandR\" and \"HWRandR\".\n");
         }
     }
-
 
     /* When rotating, switch shadow framebuffer on and acceleration off. */
     if ((s = xf86GetOptValString(VIAOptions, OPTION_ROTATE))) {
@@ -1238,12 +1230,13 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         pVia->NoAccel = TRUE;
         from = X_DEFAULT;
     }
-    xf86DrvMsg(pScrn->scrnIndex, from, "Hardware acceleration is %s.\n",
-               !pVia->NoAccel ? "enabled" : "disabled");
 
     /* Disable EXA for KMS case */
     if (pVia->KMS)
         pVia->NoAccel = TRUE;
+
+    xf86DrvMsg(pScrn->scrnIndex, from, "Hardware acceleration is %s.\n",
+               !pVia->NoAccel ? "enabled" : "disabled");
 
     if (!pVia->NoAccel) {
         from = X_DEFAULT;

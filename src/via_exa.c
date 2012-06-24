@@ -897,10 +897,6 @@ viaInitExa(ScreenPtr pScreen)
                    "[EXA] Disabling EXA accelerated composite.\n");
     }
 
-    /* Evil hack that will go away */
-    if (!xf86GetOptValString(pScrn->options, EXAOPT_MIGRATION_HEURISTIC))
-        xf86ReplaceStrOption(pScrn->options, "MigrationHeuristic", "greedy");
-
     if (!exaDriverInit(pScreen, pExa)) {
         free(pExa);
         return FALSE;
