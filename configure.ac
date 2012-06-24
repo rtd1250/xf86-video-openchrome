@@ -24,7 +24,7 @@
 AC_PREREQ(2.57)
 AC_INIT([xf86-video-openchrome],
         [0.3.0],
-        [http://www.openchrome.org/trac/report/1],
+        [https://bugs.freedesktop.org/enter_bug.cgi?product=xorg&component=Driver/openchromep],
         [xf86-video-openchrome])
 
 AC_DEFINE_UNQUOTED([VIA_MAJOR_VERSION],
