@@ -288,21 +288,21 @@ VIAAvailableOptions(int chipid, int busid)
 }
 
 static Bool
-VIASwitchMode(int scrnIndex, DisplayModePtr mode, int flags)
+VIASwitchMode(SWITCH_MODE_ARGS_DECL)
 {
-    ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
+    SCRN_INFO_PTR(arg);
 
     return xf86SetSingleMode(pScrn, mode, RR_Rotate_0);
 }
 
 static void
-VIAAdjustFrame(int scrnIndex, int x, int y, int flags)
+VIAAdjustFrame(ADJUST_FRAME_ARGS_DECL)
 {
-    ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
+    SCRN_INFO_PTR(arg);
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
     int i;
 
-    DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIAAdjustFrame %dx%d\n", x, y));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAAdjustFrame %dx%d\n", x, y));
 
     for (i = 0; i < xf86_config->num_crtc; i++) {
         xf86CrtcPtr crtc = xf86_config->crtc[i];
@@ -312,14 +312,14 @@ VIAAdjustFrame(int scrnIndex, int x, int y, int flags)
 }
 
 static Bool
-VIAEnterVT(int scrnIndex, int flags)
+VIAEnterVT(VT_FUNC_ARGS_DECL)
 {
-    ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
+    SCRN_INFO_PTR(arg);
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     int i;
 
-    DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIAEnterVT\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAEnterVT\n"));
 
     for (i = 0; i < xf86_config->num_crtc; i++) {
         xf86CrtcPtr crtc = xf86_config->crtc[i];
@@ -348,7 +348,7 @@ VIAEnterVT(int scrnIndex, int flags)
             kickVblank(pScrn);
             VIADRIRingBufferInit(pScrn);
             viaDRIOffscreenRestore(pScrn);
-            DRIUnlock(screenInfo.screens[scrnIndex]);
+            DRIUnlock(xf86ScrnToScreen(pScrn));
         }
 #endif
     }
@@ -356,20 +356,20 @@ VIAEnterVT(int scrnIndex, int flags)
 }
 
 static void
-VIALeaveVT(int scrnIndex, int flags)
+VIALeaveVT(VT_FUNC_ARGS_DECL)
 {
-    ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
+    SCRN_INFO_PTR(arg);
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     int i;
 
-    DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIALeaveVT\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIALeaveVT\n"));
 
 #ifdef XF86DRI
     if (pVia->directRenderingType == DRI_1) {
         volatile drm_via_sarea_t *saPriv = (drm_via_sarea_t *) DRIGetSAREAPrivate(pScrn->pScreen);
 
-        DRILock(screenInfo.screens[scrnIndex], 0);
+        DRILock(xf86ScrnToScreen(pScrn), 0);
         saPriv->ctxOwner = ~0;
 
         viaAccelSync(pScrn);
@@ -437,12 +437,12 @@ VIAFreeRec(ScrnInfoPtr pScrn)
  * get called routinely at the end of a server generation.
  */
 static void
-VIAFreeScreen(int scrnIndex, int flags)
+VIAFreeScreen(FREE_SCREEN_ARGS_DECL)
 {
-    ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
+    SCRN_INFO_PTR(arg);
     VIAPtr pVia = VIAPTR(pScrn);
 
-    DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIAFreeScreen\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAFreeScreen\n"));
 
     if (pVia->directRenderingType != DRI_2)
         VIAUnmapMem(pScrn);
@@ -450,7 +450,7 @@ VIAFreeScreen(int scrnIndex, int flags)
     VIAFreeRec(pScrn);
 
     if (!pVia->KMS && xf86LoaderCheckSymbol("vgaHWFreeHWRec"))
-        vgaHWFreeHWRec(xf86Screens[scrnIndex]);
+        vgaHWFreeHWRec(pScrn);
 }
 
 static void
@@ -1644,10 +1644,10 @@ LoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
 }
 
 static void *
-viaShadowWindow(ScreenPtr screen, CARD32 row, CARD32 offset, int mode,
+viaShadowWindow(ScreenPtr pScreen, CARD32 row, CARD32 offset, int mode,
 				CARD32 *size, void *closure)
 {
-    ScrnInfoPtr pScrn = xf86Screens[screen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
     int stride;
 
@@ -1659,7 +1659,7 @@ viaShadowWindow(ScreenPtr screen, CARD32 row, CARD32 offset, int mode,
 static Bool
 VIACreateScreenResources(ScreenPtr pScreen)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
     PixmapPtr rootPixmap;
     void *surface;
@@ -1693,14 +1693,14 @@ VIACreateScreenResources(ScreenPtr pScreen)
 }
 
 static Bool
-VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
+VIACloseScreen(CLOSE_SCREEN_ARGS_DECL)
 {
-    ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     xf86CrtcConfigPtr   xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     int i;
 
-    DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "VIACloseScreen\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIACloseScreen\n"));
 
     if (pVia->directRenderingType != DRI_2)
         viaExitVideo(pScrn);
@@ -1754,12 +1754,12 @@ VIACloseScreen(int scrnIndex, ScreenPtr pScreen)
 }
 
 static Bool
-VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
+VIAScreenInit(SCREEN_INIT_ARGS_DECL)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
-    int pitch, i;
+    int pitch;
 
     pScrn->pScreen = pScreen;
     pScrn->displayWidth = pScrn->virtualX;
@@ -1931,7 +1931,7 @@ VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     xf86DPMSInit(pScreen, xf86DPMSSet, 0);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- DPMS set up\n"));
 
-    if (!VIAEnterVT(scrnIndex, 1))
+    if (!VIAEnterVT(VT_FUNC_ARGS(1)))
         return FALSE;
 
     if (pVia->directRenderingType != DRI_2) {

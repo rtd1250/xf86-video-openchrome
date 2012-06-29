@@ -134,7 +134,7 @@ viaAccelTransparentHelper_H6(VIAPtr pVia, CARD32 keyControl,
 int
 viaAccelMarkSync_H6(ScreenPtr pScreen)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
 
     RING_VARS;
@@ -167,7 +167,7 @@ viaAccelMarkSync_H6(ScreenPtr pScreen)
 Bool
 viaExaPrepareSolid_H6(PixmapPtr pPixmap, int alu, Pixel planeMask, Pixel fg)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pPixmap->drawable.pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pPixmap->drawable.pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
     ViaTwodContext *tdc = &pVia->td;
 
@@ -194,7 +194,7 @@ viaExaPrepareSolid_H6(PixmapPtr pPixmap, int alu, Pixel planeMask, Pixel fg)
 void
 viaExaSolid_H6(PixmapPtr pPixmap, int x1, int y1, int x2, int y2)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pPixmap->drawable.pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pPixmap->drawable.pScreen);
     CARD32 dstOffset = exaGetPixmapOffset(pPixmap);
     CARD32 dstPitch = exaGetPixmapPitch(pPixmap);
     int w = x2 - x1, h = y2 - y1;
@@ -224,7 +224,7 @@ Bool
 viaExaPrepareCopy_H6(PixmapPtr pSrcPixmap, PixmapPtr pDstPixmap, int xdir,
                         int ydir, int alu, Pixel planeMask)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pDstPixmap->drawable.pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pDstPixmap->drawable.pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
     ViaTwodContext *tdc = &pVia->td;
 
@@ -261,7 +261,7 @@ void
 viaExaCopy_H6(PixmapPtr pDstPixmap, int srcX, int srcY, int dstX, int dstY,
                 int width, int height)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pDstPixmap->drawable.pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pDstPixmap->drawable.pScreen);
     CARD32 dstOffset = exaGetPixmapOffset(pDstPixmap), val;
     CARD32 dstPitch = exaGetPixmapPitch(pDstPixmap);
     VIAPtr pVia = VIAPTR(pScrn);
@@ -301,7 +301,7 @@ Bool
 viaExaCheckComposite_H6(int op, PicturePtr pSrcPicture,
                         PicturePtr pMaskPicture, PicturePtr pDstPicture)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pDstPicture->pDrawable->pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pDstPicture->pDrawable->pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
     Via3DState *v3d = &pVia->v3d;
 
@@ -391,7 +391,7 @@ viaIsAGP(VIAPtr pVia, PixmapPtr pPix, unsigned long *offset)
 static Bool
 viaExaIsOffscreen(PixmapPtr pPix)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pPix->drawable.pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pPix->drawable.pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
 
     return ((unsigned long)pPix->devPrivate.ptr -
@@ -404,7 +404,7 @@ viaExaPrepareComposite_H6(int op, PicturePtr pSrcPicture,
                             PixmapPtr pSrc, PixmapPtr pMask, PixmapPtr pDst)
 {
     CARD32 height, width;
-    ScrnInfoPtr pScrn = xf86Screens[pDst->drawable.pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pDst->drawable.pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
     Via3DState *v3d = &pVia->v3d;
     int curTex = 0;
@@ -512,7 +512,7 @@ void
 viaExaComposite_H6(PixmapPtr pDst, int srcX, int srcY, int maskX, int maskY,
                     int dstX, int dstY, int width, int height)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pDst->drawable.pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pDst->drawable.pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
     Via3DState *v3d = &pVia->v3d;
     CARD32 col;

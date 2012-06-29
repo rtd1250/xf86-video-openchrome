@@ -311,7 +311,7 @@ mpegDisable(VIAPtr pVia, CARD32 val)
 void
 ViaInitXVMC(ScreenPtr pScreen)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
     ViaXvMCPtr vXvMC = &(pVia->xvmc);
     volatile ViaXvMCSAreaPriv *saPriv;
@@ -500,7 +500,7 @@ ViaXvMCCreateContext(ScrnInfoPtr pScrn, XvMCContextPtr pContext,
                            (pVia->Chipset == VIA_PM800) ||
                            (pVia->Chipset == VIA_P4M900)));
     contextRec->chipId = pVia->ChipId;
-    contextRec->screen = pScrn->pScreen->myNum;
+    contextRec->screen = pScrn->scrnIndex;
     contextRec->depth = pScrn->bitsPerPixel;
     contextRec->stride = pVia->Bpp * pScrn->virtualX;
 

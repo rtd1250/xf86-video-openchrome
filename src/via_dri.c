@@ -368,7 +368,7 @@ VIADRIFBInit(ScrnInfoPtr pScrn)
 static Bool
 VIAInitVisualConfigs(ScreenPtr pScreen)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
     int numConfigs = 0;
     __GLXvisualConfig *pConfigs = 0;
@@ -493,7 +493,7 @@ VIAInitVisualConfigs(ScreenPtr pScreen)
 Bool
 VIADRI1ScreenInit(ScreenPtr pScreen)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
     int major, minor, patch;
     DRIInfoPtr pDRIInfo;
@@ -510,7 +510,7 @@ VIADRI1ScreenInit(ScreenPtr pScreen)
     if (!xf86LoaderCheckSymbol("drmAvailable"))
         return FALSE;
     if (!xf86LoaderCheckSymbol("DRIQueryVersion")) {
-        xf86DrvMsg(pScreen->myNum, X_ERROR,
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                    "[dri] VIADRI1ScreenInit failed (libdri.a is too old).\n");
         return FALSE;
     }
@@ -518,7 +518,7 @@ VIADRI1ScreenInit(ScreenPtr pScreen)
     /* Check the DRI version. */
     DRIQueryVersion(&major, &minor, &patch);
     if (major != DRIINFO_MAJOR_VERSION || minor < DRIINFO_MINOR_VERSION) {
-        xf86DrvMsg(pScreen->myNum, X_ERROR,
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                     "[dri] VIADRI1ScreenInit failed -- FALSE mismatch.\n"
                     "[dri] libdri is %d.%d.%d, but %d.%d.x is needed.\n"
                     "[dri] Disabling DRI.\n",
@@ -599,7 +599,7 @@ VIADRI1ScreenInit(ScreenPtr pScreen)
     pDRIInfo->bufferRequests = DRI_ALL_WINDOWS;
 
     if (!DRIScreenInit(pScreen, pDRIInfo, &pVia->drmmode.fd)) {
-        xf86DrvMsg(pScreen->myNum, X_ERROR,
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                    "[dri] DRIScreenInit failed.  Disabling DRI.\n");
         free(pDRIInfo->devPrivate);
         pDRIInfo->devPrivate = NULL;
@@ -623,7 +623,7 @@ VIADRI1ScreenInit(ScreenPtr pScreen)
     }
     pVIADRI->regs.size = VIA_MMIO_REGSIZE;
     pVIADRI->regs.handle = pVia->registerHandle;
-    xf86DrvMsg(pScreen->myNum, X_INFO, "[drm] mmio Registers = 0x%08lx\n",
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] mmio Registers = 0x%08lx\n",
                (unsigned long)pVIADRI->regs.handle);
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[dri] mmio mapped.\n");
@@ -633,7 +633,7 @@ VIADRI1ScreenInit(ScreenPtr pScreen)
 void
 VIADRICloseScreen(ScreenPtr pScreen)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
     VIADRIPtr pVIADRI;
 
@@ -642,9 +642,9 @@ VIADRICloseScreen(ScreenPtr pScreen)
         drmUnmap(pVia->agpMappedAddr, pVia->agpSize);
         drmRmMap(pVia->drmmode.fd, pVia->agpHandle);
         drmAgpUnbind(pVia->drmmode.fd, pVia->agpHandle);
-        xf86DrvMsg(pScreen->myNum, X_INFO, "[drm] Freeing agp memory\n");
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] Freeing agp memory\n");
         drmAgpFree(pVia->drmmode.fd, pVia->agpHandle);
-        xf86DrvMsg(pScreen->myNum, X_INFO, "[drm] Releasing agp module\n");
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] Releasing agp module\n");
         drmAgpRelease(pVia->drmmode.fd);
     }
 
@@ -691,7 +691,7 @@ VIADestroyContext(ScreenPtr pScreen, drm_context_t hwContext,
 Bool
 VIADRIFinishScreenInit(ScreenPtr pScreen)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
     VIADRIPtr pVIADRI;
 
@@ -754,7 +754,7 @@ VIADRISwapContext(ScreenPtr pScreen, DRISyncType syncType,
                   DRIContextType newContextType, void *newContext)
 {
 #if 0
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
 #endif
     return;
@@ -765,7 +765,7 @@ VIADRIInitBuffers(WindowPtr pWin, RegionPtr prgn, CARD32 index)
 {
 #if 0
     ScreenPtr pScreen = pWin->drawable.pScreen;
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
 #endif
     return;
@@ -777,7 +777,7 @@ VIADRIMoveBuffers(WindowPtr pParent, DDXPointRec ptOldOrg,
 {
 #if 0
     ScreenPtr pScreen = pParent->drawable.pScreen;
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
 #endif
     return;
@@ -832,19 +832,20 @@ VIADRIKernelInit(ScrnInfoPtr pScrn)
 static Bool
 VIADRIMapInit(ScreenPtr pScreen, VIAPtr pVia)
 {
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     int flags = DRM_READ_ONLY;
 
     if (drmAddMap(pVia->drmmode.fd, pVia->MmioBase, VIA_MMIO_REGSIZE,
                   DRM_REGISTERS, flags, &pVia->registerHandle) < 0) {
         return FALSE;
     }
-    xf86DrvMsg(pScreen->myNum, X_INFO, "[drm] register handle = 0x%08lx\n",
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] register handle = 0x%08lx\n",
                (unsigned long)pVia->registerHandle);
     if (drmAddMap(pVia->drmmode.fd, pVia->FrameBufferBase, pVia->videoRambytes,
                   DRM_FRAME_BUFFER, 0, &pVia->frameBufferHandle) < 0) {
         return FALSE;
     }
-    xf86DrvMsg(pScreen->myNum, X_INFO, "[drm] framebuffer handle = 0x%08lx\n",
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "[drm] framebuffer handle = 0x%08lx\n",
                (unsigned long)pVia->frameBufferHandle);
 
     return TRUE;

@@ -523,7 +523,7 @@ cpuValid(const char *cpuinfo, char **flags)
 vidCopyFunc
 viaVidCopyInit(char *copyType, ScreenPtr pScreen)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
 
 #ifdef linux
     char buf[BSIZ];
@@ -653,7 +653,7 @@ viaVidCopyInit(char *copyType, ScreenPtr pScreen)
 vidCopyFunc
 viaVidCopyInit(char *copyType, ScreenPtr pScreen)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                "Using default xfree86 memcpy for video.\n");

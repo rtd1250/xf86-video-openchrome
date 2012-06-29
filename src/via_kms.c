@@ -962,7 +962,7 @@ drmmode_handle_uevents(int fd, void *closure)
     if (!dev)
         return;
 
-    RRGetInfo(screenInfo.screens[scrn->scrnIndex], TRUE);
+    RRGetInfo(xf86ScrnToScreen(scrn), TRUE);
     udev_device_unref(dev);
 }
 #endif

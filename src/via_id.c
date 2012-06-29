@@ -239,6 +239,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"FIC CE2A1",                             VIA_VX800,   0x1509, 0x3002, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Quanta DreamBook Light IL1",            VIA_VX800,   0x152d, 0x0771, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Lenovo S12",                            VIA_VX800,   0x17aa, 0x388c, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
+    {"Fujitsu Futro S100",                    VIA_VX800,   0xA0A0, 0x0702, VIA_DEVICE_CRT},
 
     /*** VX855 ***/
     {"VIA VT8562C",                           VIA_VX855,   0x1106, 0x5122, VIA_DEVICE_CRT},

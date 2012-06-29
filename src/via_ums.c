@@ -557,7 +557,7 @@ VIAInitialize3DEngine(ScrnInfoPtr pScrn)
 Bool
 UMSAccelInit(ScreenPtr pScreen)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
     Bool ret = FALSE;
 

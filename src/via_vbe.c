@@ -41,9 +41,9 @@
 #define VBE_DEFAULT_REFRESH	6000
 
 void
-ViaVbeAdjustFrame(int scrnIndex, int x, int y)
+ViaVbeAdjustFrame(ScrnInfoPtr pScrn, int x, int y)
 {
-    VIAPtr pVia = VIAPTR(xf86Screens[scrnIndex]);
+    VIAPtr pVia = VIAPTR(pScrn);
 
     VBESetDisplayStart(pVia->pVbe, x, y, TRUE);
 }

@@ -183,7 +183,7 @@ typedef struct _VIABIOSINFO {
 
 /* Function prototypes */
 /* via_vbe.c */
-void ViaVbeAdjustFrame(int scrnIndex, int x, int y);
+void ViaVbeAdjustFrame(ScrnInfoPtr pScrn, int x, int y);
 Bool ViaVbeSetMode(ScrnInfoPtr pScrn, DisplayModePtr pMode);
 Bool ViaVbeSaveRestore(ScrnInfoPtr pScrn, vbeSaveRestoreFunction function);
 Bool ViaVbeModePreInit(ScrnInfoPtr pScrn);

@@ -588,9 +588,9 @@ viaExitVideo(ScrnInfoPtr pScrn)
 void
 viaInitVideo(ScreenPtr pScreen)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
-    VIAPtr pVia = VIAPTR(pScrn);
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     XF86VideoAdaptorPtr *adaptors, *newAdaptors;
+    VIAPtr pVia = VIAPTR(pScrn);
     int num_adaptors, num_new;
 
     DBG_DD(ErrorF(" via_xv.c : viaInitVideo, Screen[%d]\n", pScrn->scrnIndex));
@@ -672,10 +672,10 @@ viaInitVideo(ScreenPtr pScreen)
 static unsigned
 viaSetupAdaptors(ScreenPtr pScreen, XF86VideoAdaptorPtr ** adaptors)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
+    int i, j, usedPorts, numPorts;
     viaPortPrivRec *viaPortPriv;
     DevUnion *pdevUnion;
-    int i, j, usedPorts, numPorts;
 
     DBG_DD(ErrorF(" via_xv.c : viaSetupAdaptors (viaSetupImageVideo): \n"));
 

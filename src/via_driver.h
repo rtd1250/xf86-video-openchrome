@@ -34,6 +34,7 @@
 #define DEBUG(x)
 #endif
 
+#include "compat-api.h"
 #include "vgaHW.h"
 #include "xf86.h"
 

@@ -940,15 +940,13 @@ static void
 iga1_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
-    int scrnIndex = pScrn->scrnIndex;
     VIAPtr pVia = VIAPTR(pScrn);
 
     if (pVia->pVbe) {
-        ViaVbeAdjustFrame(scrnIndex, x, y);
+        ViaVbeAdjustFrame(pScrn, x, y);
     } else {
         ViaFirstCRTCSetStartingAddress(pScrn, x, y);
     }
-
     VIAVidAdjustFrame(pScrn, x, y);
 }
 
@@ -1344,11 +1342,10 @@ static void
 iga2_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
-    int scrnIndex = pScrn->scrnIndex;
     VIAPtr pVia = VIAPTR(pScrn);
 
     if (pVia->pVbe) {
-        ViaVbeAdjustFrame(scrnIndex, x, y);
+        ViaVbeAdjustFrame(pScrn, x, y);
     } else {
         ViaSecondCRTCSetStartingAddress(pScrn, x, y);
     }

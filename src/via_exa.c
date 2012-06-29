@@ -496,7 +496,7 @@ viaAccelSync(ScrnInfoPtr pScrn)
 static void
 viaAccelWaitMarker(ScreenPtr pScreen, int marker)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
     CARD32 uMarker = marker;
 
@@ -603,7 +603,7 @@ static Bool
 viaExaDownloadFromScreen(PixmapPtr pSrc, int x, int y, int w, int h,
                          char *dst, int dst_pitch)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pSrc->drawable.pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pSrc->drawable.pScreen);
     unsigned wBytes = (pSrc->drawable.bitsPerPixel * w + 7) >> 3;
     unsigned srcPitch = exaGetPixmapPitch(pSrc), srcOffset;
     char *bounceAligned = NULL;
@@ -658,7 +658,7 @@ static Bool
 viaExaTexUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
                         int src_pitch)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pDst->drawable.pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pDst->drawable.pScreen);
     unsigned dstPitch = exaGetPixmapPitch(pDst), dstOffset;
     unsigned wBytes = (w * pDst->drawable.bitsPerPixel + 7) >> 3;
     int i, sync[2], yOffs, bufH, bufOffs, height, format;
@@ -776,7 +776,7 @@ viaExaTexUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
 Bool
 viaInitExa(ScreenPtr pScreen)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     ExaDriverPtr pExa = exaDriverAlloc();
     Bool nPOTSupported = TRUE;
     VIAPtr pVia = VIAPTR(pScrn);
@@ -917,7 +917,7 @@ viaInitExa(ScreenPtr pScreen)
 void
 viaFinishInitAccel(ScreenPtr pScreen)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
 #ifdef XF86DRI
     int size, ret;
@@ -976,7 +976,7 @@ viaFinishInitAccel(ScreenPtr pScreen)
 void
 viaExitAccel(ScreenPtr pScreen)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
 
     viaAccelSync(pScrn);
