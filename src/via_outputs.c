@@ -831,13 +831,15 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
     /* TV encoder */
     via_tv_init(pScrn);
 
-    switch (pVia->Chipset) {
-    case VIA_CX700:
-    case VIA_VX800:
-    case VIA_VX855:
-    case VIA_VX900:
-        via_dp_init(pScrn);
-        break;
+    if (pVia->ActiveDevice & VIA_DEVICE_DFP) {
+        switch (pVia->Chipset) {
+        case VIA_CX700:
+        case VIA_VX800:
+        case VIA_VX855:
+        case VIA_VX900:
+            via_dp_init(pScrn);
+            break;
+        }
     }
 }
 
