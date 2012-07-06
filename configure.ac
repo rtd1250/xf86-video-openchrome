@@ -20,30 +20,41 @@
 #
 # Process this file with autoconf to produce a configure script
 
+# Initialize Autoconf
 AC_PREREQ(2.57)
 AC_INIT([xf86-video-openchrome],
-        0.2.906,
-        [http://www.openchrome.org/trac/report/1],
-        xf86-video-openchrome)
+        [0.3.0],
+        [https://bugs.freedesktop.org/enter_bug.cgi?product=xorg&component=Driver/openchromep],
+        [xf86-video-openchrome])
+
+AC_DEFINE_UNQUOTED([VIA_MAJOR_VERSION],
+                   [$(echo $PACKAGE_VERSION | sed -e 's/^\([[0-9]]*\)\.[[0-9]]*\.[[0-9]]*/\1/')],
+                   [Major version])
+AC_DEFINE_UNQUOTED([VIA_MINOR_VERSION],
+                   [$(echo $PACKAGE_VERSION | sed -e 's/^[[0-9]]*\.\([[0-9]]*\)\.[[0-9]]*/\1/')],
+                   [Minor version])
+AC_DEFINE_UNQUOTED([VIA_PATCHLEVEL],
+                   [$(echo $PACKAGE_VERSION | sed -e 's/^[[0-9]]*\.[[0-9]]*\.\([[0-9]]*\)/\1/')],
+                   [Patch version])
 
 AC_CONFIG_SRCDIR([Makefile.am])
 AM_CONFIG_HEADER([config.h])
 AC_CONFIG_AUX_DIR(.)
 
+AM_INIT_AUTOMAKE([foreign dist-bzip2])
+AM_MAINTAINER_MODE
+
 # Require X.Org macros 1.8 or later for MAN_SUBSTS set by XORG_MANPAGE_SECTIONS
 m4_ifndef([XORG_MACROS_VERSION],
           [m4_fatal([must install xorg-macros 1.8 or later before running autoconf/autogen])])
+
 XORG_MACROS_VERSION(1.8)
 XORG_DEFAULT_OPTIONS
 
-AM_INIT_AUTOMAKE([dist-bzip2])
-
-AM_MAINTAINER_MODE
-
-# Checks for programs.
+# Initialize libtool
 AC_DISABLE_STATIC
 AC_PROG_LIBTOOL
-AC_PROG_CC
+AC_SYS_LARGEFILE
 
 AH_TOP([#include "xorg-server.h"])
 
@@ -86,28 +97,40 @@ PKG_CHECK_MODULES(XEXT, [xextproto >= 7.0.99.1],
  HAVE_XEXTPROTO_71="yes"; AC_DEFINE(HAVE_XEXTPROTO_71, 1, [xextproto 7.1 available]),
  HAVE_XEXTPROTO_71="no")
 AM_CONDITIONAL(HAVE_XEXTPROTO_71, [ test "$HAVE_XEXTPROTO_71" = "yes" ])
-sdkdir=$(pkg-config --variable=sdkdir xorg-server)
 
 # Checks for libraries.
 
 # Checks for header files.
 AC_HEADER_STDC
+
+save_CPPFLAGS="$CPPFLAGS"
+CPPFLAGS="$XORG_CFLAGS $CPPFLAGS"
 AC_CHECK_HEADER(xf86Modes.h,[XMODES=yes],[XMODES=no],[#include "xorg-server.h"])
 AC_CHECK_DECL(XSERVER_LIBPCIACCESS,
              [XSERVER_LIBPCIACCESS=yes],[XSERVER_LIBPCIACCESS=no],
-             [#include "xorg/xorg-server.h"])
+             [#include "xorg-server.h"])
+CPPFLAGS="$save_CPPFLAGS"
 
 if test x$XSERVER_LIBPCIACCESS = xyes; then
        PKG_CHECK_MODULES([PCIACCESS], [pciaccess >= 0.8.0])
 fi
 
 if test "$DRI" != no; then
-        AC_CHECK_FILE([${sdkdir}/dri.h],
-                      [have_dri_h="yes"], [have_dri_h="no"])
-        AC_CHECK_FILE([${sdkdir}/sarea.h],
-                      [have_sarea_h="yes"], [have_sarea_h="no"])
-        AC_CHECK_FILE([${sdkdir}/dristruct.h],
-                      [have_dristruct_h="yes"], [have_dristruct_h="no"])
+        PKG_CHECK_MODULES(DRI, [libdrm >= 2.2 xf86driproto])
+        save_CPPFLAGS="$CPPFLAGS"
+        CPPFLAGS="$XORG_CFLAGS $DRI_CFLAGS"
+        AC_CHECK_HEADER([dri.h],
+                      [have_dri_h="yes"], [have_dri_h="no"],[-])
+        AC_CHECK_HEADER([sarea.h],
+                      [have_sarea_h="yes"], [have_sarea_h="no"],[-])
+AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[
+#include <xorg-server.h>
+#include <dristruct.h>
+                      ]])],
+                      [have_dristruct_h="yes"], [have_dristruct_h="no"],[-])
+        AC_CHECK_HEADER([damage.h],
+                      [have_damage_h="yes"], [have_damage_h="no"],[-])
+        CPPFLAGS="$save_CPPFLAGS"
 fi
 
 AC_MSG_CHECKING([whether to include DRI support])
@@ -124,9 +147,24 @@ AC_MSG_RESULT([$DRI])
 
 AM_CONDITIONAL(DRI, test x$DRI = xyes)
 if test "$DRI" = yes; then
-        PKG_CHECK_MODULES(DRI, [libdrm xf86driproto])
         AC_DEFINE(XF86DRI,1,[Enable DRI driver support])
         AC_DEFINE(XF86DRI_DEVEL,1,[Enable developmental DRI driver support])
+        if test "$have_damage_h" = yes; then
+                AC_DEFINE(DAMAGE,1,[Use Damage extension])
+        fi
+
+        save_CFLAGS="$CFLAGS"
+        CFLAGS="$XORG_CFLAGS $DRI_CFLAGS $CFLAGS"
+AC_CHECK_HEADER(xf86drmMode.h,[DRM_MODE=yes],[DRM_MODE=no],[#include <stdint.h>
+#include <stdlib.h>])
+        if test "x$DRM_MODE" = xyes; then
+            PKG_CHECK_MODULES(LIBUDEV, [libudev], [LIBUDEV=yes], [LIBUDEV=no])
+            if test "x$LIBUDEV" = xyes; then
+                AC_DEFINE(HAVE_LIBUDEV, 1,[libudev support])
+            fi
+        fi
+        CFLAGS="$save_CFLAGS"
+
         case "$host_cpu" in
             i*86)
                 XVMC=yes ;;
@@ -192,8 +230,8 @@ XORG_RELEASE_VERSION
 
 AC_OUTPUT([
 	Makefile
-	libxvmc/Makefile
-	man/Makefile
+	src/xvmc/Makefile
 	src/Makefile
+	man/Makefile
 	tools/Makefile
 ])

@@ -22,7 +22,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _VIA_H_
+#ifndef _VIA_ENG_REGS_H_
 #define _VIA_H_ 1
 
 #include <errno.h>
@@ -31,11 +31,6 @@
 #include <math.h>
 #include <assert.h>
 #include <stdlib.h>
-
-/* Video Engines */
-#define VIDEO_ENGINE_UNK	0 /* Unknown video engine */
-#define VIDEO_ENGINE_CLE	1 /* CLE First generation video engine */
-#define VIDEO_ENGINE_CME	2 /* CME Second generation video engine */
 
 /* Video status flag */
 
@@ -66,7 +61,7 @@
 #define SW_USE_V1               0x00000010  /*[ 4] : 1:Capture 1 use V1, 0:Capture 1 use V3             */
 #define SW_USE_V3               0x00000000  /*[ 4] : 1:Capture 1 use V1, 0:Capture 1 use V3             */
 #define SW_USE_HQV              0x00000020  /*[ 5] : 1:Capture 1 use HQV,0:Capture 1 not use HQV        */
-     
+
 /*
 #define VIDEO1_INUSE            0x00000010  //[ 4] : 1:Video 1 is used with S/W flip
 #define VIDEO1_USE_HQV          0x00000020  //[ 5] : 1:Video 1 use HQV with S/W flip
@@ -90,76 +85,93 @@
 /*
  *      video registers
  */
-#define V_FLAGS				    0x00
-#define V_CAP_STATUS            0x04
-#define V_FLIP_STATUS           0x04
-#define V_ALPHA_WIN_START       0x08
-#define V_ALPHA_WIN_END         0x0C
-#define V_ALPHA_CONTROL         0x10
-#define V_CRT_STARTADDR         0x14
-#define V_CRT_STARTADDR_2       0x18
-#define V_ALPHA_STRIDE          0x1C
-#define V_COLOR_KEY             0x20
-#define V_ALPHA_STARTADDR       0x24
-#define V_CHROMAKEY_LOW         0x28
-#define V_CHROMAKEY_HIGH        0x2C
-#define V1_CONTROL              0x30
-#define V12_QWORD_PER_LINE      0x34
-#define V1_STARTADDR_1          0x38
+#define V_FLAGS			0x200
+#define V_CAP_STATUS            0x204
+#define V_FLIP_STATUS           0x204
+#define V_ALPHA_WIN_START       0x208
+#define V_ALPHA_WIN_END         0x20C
+#define V_ALPHA_CONTROL         0x210
+#define V_CRT_STARTADDR         0x214
+#define V_CRT_STARTADDR_2       0x218
+#define V_ALPHA_STRIDE          0x21C
+#define V_COLOR_KEY             0x220
+#define V_ALPHA_STARTADDR       0x224
+#define V_CHROMAKEY_LOW         0x228
+#define V_CHROMAKEY_HIGH        0x22C
+#define V1_CONTROL              0x230
+#define V12_QWORD_PER_LINE      0x234
+#define V1_STARTADDR_1          0x238
 #define V1_STARTADDR_Y1         V1_STARTADDR_1
-#define V1_STRIDE               0x3C
-#define V1_WIN_START_Y          0x40
-#define V1_WIN_START_X          0x42
-#define V1_WIN_END_Y            0x44
-#define V1_WIN_END_X            0x46
-#define V1_STARTADDR_2          0x48
+#define V1_STRIDE               0x23C
+#define V1_WIN_START_Y          0x240
+#define V1_WIN_START_X          0x242
+#define V1_WIN_END_Y            0x244
+#define V1_WIN_END_X            0x246
+#define V1_STARTADDR_2          0x248
 #define V1_STARTADDR_Y2         V1_STARTADDR_2
-#define V1_ZOOM_CONTROL         0x4C
-#define V1_MINI_CONTROL         0x50
-#define V1_STARTADDR_0          0x54
+#define V1_ZOOM_CONTROL         0x24C
+#define V1_MINI_CONTROL         0x250
+#define V1_STARTADDR_0          0x254
 #define V1_STARTADDR_Y0         V1_STARTADDR_0
-#define V_FIFO_CONTROL          0x58
-#define V1_STARTADDR_3          0x5C
+#define V_FIFO_CONTROL          0x258
+#define V1_STARTADDR_3          0x25C
 #define V1_STARTADDR_Y3         V1_STARTADDR_3
-#define HI_CONTROL              0x60
-#define SND_COLOR_KEY           0x64
-#define ALPHA_V3_PREFIFO_CONTROL   0x68
-#define V1_SOURCE_HEIGHT        0x6C
-#define HI_TRANSPARENT_COLOR    0x70
-#define V_DISPLAY_TEMP          0x74  /* No use */
-#define ALPHA_V3_FIFO_CONTROL   0x78
-#define V3_SOURCE_WIDTH         0x7C
-#define V3_COLOR_KEY            0x80
-#define V1_ColorSpaceReg_1      0x84
-#define V1_ColorSpaceReg_2      0x88
-#define V1_STARTADDR_CB0        0x8C
-#define V1_OPAQUE_CONTROL       0x90  /* To be deleted */
-#define V3_OPAQUE_CONTROL       0x94  /* To be deleted */
-#define V_COMPOSE_MODE          0x98
-#define V3_STARTADDR_2          0x9C
-#define V3_CONTROL              0xA0
-#define V3_STARTADDR_0          0xA4
-#define V3_STARTADDR_1          0xA8
-#define V3_STRIDE               0xAC
-#define V3_WIN_START_Y          0xB0
-#define V3_WIN_START_X          0xB2
-#define V3_WIN_END_Y            0xB4
-#define V3_WIN_END_X            0xB6
-#define V3_ALPHA_QWORD_PER_LINE 0xB8
-#define V3_ZOOM_CONTROL         0xBC
-#define V3_MINI_CONTROL         0xC0
-#define V3_ColorSpaceReg_1      0xC4
-#define V3_ColorSpaceReg_2      0xC8
-#define V3_DISPLAY_TEMP         0xCC  /* No use */
-#define V1_STARTADDR_CB1        0xE4
-#define V1_STARTADDR_CB2        0xE8
-#define V1_STARTADDR_CB3        0xEC
-#define V1_STARTADDR_CR0        0xF0
-#define V1_STARTADDR_CR1        0xF4
-#define V1_STARTADDR_CR2        0xF8
-#define V1_STARTADDR_CR3        0xFC
+#define HI_CONTROL              0x260
+#define SND_COLOR_KEY           0x264
+#define ALPHA_V3_PREFIFO_CONTROL   0x268
+#define V1_SOURCE_HEIGHT        0x26C
+#define HI_TRANSPARENT_COLOR    0x270
+#define V_DISPLAY_TEMP          0x274  /* No use */
+#define ALPHA_V3_FIFO_CONTROL   0x278
+#define V3_SOURCE_WIDTH         0x27C
+#define V3_COLOR_KEY            0x280
+#define V1_ColorSpaceReg_1      0x284
+#define V1_ColorSpaceReg_2      0x288
+#define V1_STARTADDR_CB0        0x28C
+#define V1_OPAQUE_CONTROL       0x290  /* To be deleted */
+#define V3_OPAQUE_CONTROL       0x294  /* To be deleted */
+#define V_COMPOSE_MODE          0x298
+#define V3_STARTADDR_2          0x29C
+#define V3_CONTROL              0x2A0
+#define V3_STARTADDR_0          0x2A4
+#define V3_STARTADDR_1          0x2A8
+#define V3_STRIDE               0x2AC
+#define V3_WIN_START_Y          0x2B0
+#define V3_WIN_START_X          0x2B2
+#define V3_WIN_END_Y            0x2B4
+#define V3_WIN_END_X            0x2B6
+#define V3_ALPHA_QWORD_PER_LINE 0x2B8
+#define V3_ZOOM_CONTROL         0x2BC
+#define V3_MINI_CONTROL         0x2C0
+#define V3_ColorSpaceReg_1      0x2C4
+#define V3_ColorSpaceReg_2      0x2C8
+#define V3_DISPLAY_TEMP         0x2CC  /* No use */
+#define V1_STARTADDR_CB1        0x2E4
+#define V1_STARTADDR_CB2        0x2E8
+#define V1_STARTADDR_CB3        0x2EC
+#define V1_STARTADDR_CR0        0x2F0
+#define V1_STARTADDR_CR1        0x2F4
+#define V1_STARTADDR_CR2        0x2F8
+#define V1_STARTADDR_CR3        0x2FC
+/*CN400 and older Hardware Icon engine register*/
+#define HI_POSSTART		0x208
+#define HI_CENTEROFFSET		0x20C
+#define HI_FBOFFSET		0x224
+#define HI_CONTROL		0x260
+#define HI_TRANSPARENT_COLOR	0x270
+#define HI_INVTCOLOR		0x274
+/* VT3324 primary Hardware Icon engine register */
+#define PRIM_HI_POSEND		0x290
+#define V327_HI_INVTCOLOR	0x2E4
+#define PRIM_HI_FIFO		0x2E8
+#define PRIM_HI_TRANSCOLOR	0x2EC
+#define PRIM_HI_CTRL		0x2F0
+#define PRIM_HI_FBOFFSET	0x2F4
+#define PRIM_HI_POSSTART	0x2F8
+#define PRIM_HI_CENTEROFFSET	0x2FC
+#define PRIM_HI_INVTCOLOR	0x120C
 
-/* Video Capture Engine Registers 
+/* Video Capture Engine Registers
  * Capture Port 1
  */
 #define CAP0_MASKS          0x100
@@ -167,15 +179,15 @@
 #define CAP0_CONTROL        0x110
 #define CAP0_H_RANGE        0x114
 #define CAP0_V_RANGE        0x118
-#define CAP0_SCAL_CONTROL   0x11C 
+#define CAP0_SCAL_CONTROL   0x11C
 #define CAP0_VBI_H_RANGE    0x120
 #define CAP0_VBI_V_RANGE    0x124
 #define CAP0_VBI_STARTADDR  0x128
-#define CAP0_VBI_STRIDE     0x12C 
+#define CAP0_VBI_STRIDE     0x12C
 #define CAP0_ANCIL_COUNT    0x130
 #define CAP0_MAXCOUNT       0x134
 #define CAP0_VBIMAX_COUNT   0x138
-#define CAP0_DATA_COUNT     0x13C 
+#define CAP0_DATA_COUNT     0x13C
 #define CAP0_FB_STARTADDR0  0x140
 #define CAP0_FB_STARTADDR1  0x144
 #define CAP0_FB_STARTADDR2  0x148
@@ -190,33 +202,33 @@
 #define CAP1_ANCIL_COUNT    0x174 /*To be deleted*/
 #define CAP1_MAXCOUNT       0x178
 #define CAP1_VBIMAX_COUNT   0x17C /*To be deleted*/
-#define CAP1_DATA_COUNT     0x180 
+#define CAP1_DATA_COUNT     0x180
 #define CAP1_FB_STARTADDR0  0x184
 #define CAP1_FB_STARTADDR1  0x188
-#define CAP1_STRIDE         0x18C 
+#define CAP1_STRIDE         0x18C
 
 /* SUBPICTURE Registers */
-#define SUBP_CONTROL_STRIDE     0x1C0
-#define SUBP_STARTADDR          0x1C4
-#define RAM_TABLE_CONTROL       0x1C8
-#define RAM_TABLE_READ          0x1CC
+#define SUBP_CONTROL_STRIDE     0x3C0
+#define SUBP_STARTADDR          0x3C4
+#define RAM_TABLE_CONTROL       0x3C8
+#define RAM_TABLE_READ          0x3CC
 
-/* HQV Registers*/ 
-#define HQV_CONTROL             0x1D0
-#define HQV_SRC_STARTADDR_Y     0x1D4
-#define HQV_SRC_STARTADDR_U     0x1D8
-#define HQV_SRC_STARTADDR_V     0x1DC
-#define HQV_SRC_FETCH_LINE      0x1E0
-#define HQV_FILTER_CONTROL      0x1E4
-#define HQV_MINIFY_CONTROL      0x1E8
-#define HQV_DST_STARTADDR0      0x1EC
-#define HQV_DST_STARTADDR1      0x1F0
-#define HQV_DST_STARTADDR2      0x1FC
-#define HQV_DST_STRIDE          0x1F4
-#define HQV_SRC_STRIDE          0x1F8
+/* HQV Registers*/
+#define HQV_CONTROL             0x3D0
+#define HQV_SRC_STARTADDR_Y     0x3D4
+#define HQV_SRC_STARTADDR_U     0x3D8
+#define HQV_SRC_STARTADDR_V     0x3DC
+#define HQV_SRC_FETCH_LINE      0x3E0
+#define HQV_FILTER_CONTROL      0x3E4
+#define HQV_MINIFY_CONTROL      0x3E8
+#define HQV_DST_STARTADDR0      0x3EC
+#define HQV_DST_STARTADDR1      0x3F0
+#define HQV_DST_STARTADDR2      0x3FC
+#define HQV_DST_STRIDE          0x3F4
+#define HQV_SRC_STRIDE          0x3F8
 
-#define HQV_H_SCALE_CONTROL     0x1B0
-#define HQV_V_SCALE_CONTROL     0x1B4
+#define HQV_H_SCALE_CONTROL     0x3B0
+#define HQV_V_SCALE_CONTROL     0x3B4
 
 #define PRO_HQV1_OFFSET         0x1000
 /*
@@ -594,40 +606,40 @@
 #define HQV_VDEBLOCK_FILTER 0x80000000
 #define HQV_HDEBLOCK_FILTER 0x00008000
 
-/* new added registers for VT3409.For some registers have different meanings 
+/* new added registers for VT3409.For some registers have different meanings
  * but the same address,we add postfix _409 to distinguish */
-#define HQV_COLOR_ADJUSTMENT_PRE_CTRL1      0x160
-#define HQV_COLOR_ADJUSTMENT_PRE_CTRL2      0x164
-#define HQV_COLOR_ADJUSTMENT_PRE_CTRL3      0x168
-#define HQV_COLOR_ADJUSTMENT_PRE_CTRL4      0x16C
-#define HQV_SRC_DATA_OFFSET_CTRL1_409       0x170 
-#define HQV_SRC_DATA_OFFSET_CTRL2_409       0x174  
-#define HQV_SRC_DATA_OFFSET_CTRL3_409       0x178  
-#define HQV_SRC_DATA_OFFSET_CTRL4_409       0x17C  
-#define HQV_DST_DATA_OFFSET_CTRL1           0x180
-#define HQV_DST_DATA_OFFSET_CTRL2           0x184  
-#define HQV_DST_DATA_OFFSET_CTRL3           0x188  
-#define HQV_DST_DATA_OFFSET_CTRL4           0x18C
-#define HQV_SHARPNESS_DECODER_HANDSHAKE_CTRL_410 0x1A4 
-#define HQV_RESIDUE_PIXEL_FRAME_STARTADDR   0x1BC
-#define HQV_BACKGROUND_DATA_OFFSET          0x1CC
-#define HQV_SUBP_HSCALE_CTRL                0x1E0
-#define HQV_SUBP_VSCALE_CTRL                0x1E8
+#define HQV_COLOR_ADJUSTMENT_PRE_CTRL1              0x360
+#define HQV_COLOR_ADJUSTMENT_PRE_CTRL2              0x364
+#define HQV_COLOR_ADJUSTMENT_PRE_CTRL3              0x368
+#define HQV_COLOR_ADJUSTMENT_PRE_CTRL4              0x36C
+#define HQV_SRC_DATA_OFFSET_CTRL1_409               0x370
+#define HQV_SRC_DATA_OFFSET_CTRL2_409               0x374
+#define HQV_SRC_DATA_OFFSET_CTRL3_409               0x378
+#define HQV_SRC_DATA_OFFSET_CTRL4_409               0x37C
+#define HQV_DST_DATA_OFFSET_CTRL1                   0x380
+#define HQV_DST_DATA_OFFSET_CTRL2                   0x384
+#define HQV_DST_DATA_OFFSET_CTRL3                   0x388
+#define HQV_DST_DATA_OFFSET_CTRL4                   0x38C
+#define HQV_SHARPNESS_DECODER_HANDSHAKE_CTRL_410    0x3A4
+#define HQV_RESIDUE_PIXEL_FRAME_STARTADDR           0x3BC
+#define HQV_BACKGROUND_DATA_OFFSET                  0x3CC
+#define HQV_SUBP_HSCALE_CTRL                        0x3E0
+#define HQV_SUBP_VSCALE_CTRL                        0x3E8
 
 /* Add new HQV Registers for VT3353: */
-#define HQV_SRC_DATA_OFFSET_CONTROL1        0x180
-#define HQV_SRC_DATA_OFFSET_CONTROL2        0x184
-#define HQV_SRC_DATA_OFFSET_CONTROL3        0x188
-#define HQV_SRC_DATA_OFFSET_CONTROL4        0x18C
-#define HQV_HW_TUNING_PERFORMANCE           0x190
-#define HQV_EXTENDED_CONTROL                0x194
-#define HQV_STATIC_RECORD_FB_STARTADDR      0x198
-#define HQV_STATIC_RECORD_FB_STRIDE         0x19C
-#define HQV_COLOR_ADJUSTMENT_CONTROL1       0x1A0
-#define HQV_COLOR_ADJUSTMENT_CONTROL2       0x1A4
-#define HQV_COLOR_ADJUSTMENT_CONTROL3       0x1A8
-#define HQV_COLOR_ADJUSTMENT_CONTROL5       0x1AC
-#define HQV_DEFAULT_VIDEO_COLOR             0x1B8
+#define HQV_SRC_DATA_OFFSET_CONTROL1        0x380
+#define HQV_SRC_DATA_OFFSET_CONTROL2        0x384
+#define HQV_SRC_DATA_OFFSET_CONTROL3        0x388
+#define HQV_SRC_DATA_OFFSET_CONTROL4        0x38C
+#define HQV_HW_TUNING_PERFORMANCE           0x390
+#define HQV_EXTENDED_CONTROL                0x394
+#define HQV_STATIC_RECORD_FB_STARTADDR      0x398
+#define HQV_STATIC_RECORD_FB_STRIDE         0x39C
+#define HQV_COLOR_ADJUSTMENT_CONTROL1       0x3A0
+#define HQV_COLOR_ADJUSTMENT_CONTROL2       0x3A4
+#define HQV_COLOR_ADJUSTMENT_CONTROL3       0x3A8
+#define HQV_COLOR_ADJUSTMENT_CONTROL5       0x3AC
+#define HQV_DEFAULT_VIDEO_COLOR             0x3B8
 
 #define CHROMA_KEY_LOW          0x00FFFFFF
 #define CHROMA_KEY_HIGH         0x00FFFFFF
@@ -643,15 +655,9 @@
  *      Macros for Video MMIO
  */
 #ifndef V4L2
-#define VIDInB(port)            *((volatile CARD8 *)(pVia->VidMapBase + (port)))
-#define VIDInW(port)            *((volatile CARD16 *)(pVia->VidMapBase + (port)))
-#define VIDInD(port)            *((volatile CARD32 *)(pVia->VidMapBase + (port)))
-#define VIDOutB(port, data)     *((volatile CARD8 *)(pVia->VidMapBase + (port))) = (data)
-#define VIDOutW(port, data)     *((volatile CARD16 *)(pVia->VidMapBase + (port))) = (data)
-#define VIDOutD(port, data)     *((volatile CARD32 *)(pVia->VidMapBase + (port))) = (data)
 #define MPGOutD(port, data)     *((volatile CARD32 *)(pVia->MpegMapBase +(port))) = (data)
 #define MPGInD(port)            *((volatile CARD32 *)(pVia->MpegMapBase +(port)))
-#endif 
+#endif
 
 /*
  *      Macros for GE MMIO
@@ -664,9 +670,9 @@
 /*
  *	MPEG 1/2 Slice Engine (at 0xC00 relative to base)
  */
- 
+
 #define MPG_CONTROL		0x00
-#define 	MPG_CONTROL_STRUCT	0x03
+#define MPG_CONTROL_STRUCT	0x03
 #define			MPG_CONTROL_STRUCT_TOP		0x01
 #define			MPG_CONTROL_STRUCT_BOTTOM	0x02
 #define			MPG_CONTROL_STRUCT_FRAME	0x03
@@ -696,27 +702,25 @@
 #define MPG_MATRIX_DATA		0x60
 
 #define MPG_SLICE_CTRL_1	0x90
-#define		MPG_SLICE_MBAMAX		0x2FFF
-#define		MPG_SLICE_PREDICTIVE_DCT	0x4000
-#define		MPG_SLICE_TOP_FIRST		0x8000
-#define 	MPG_SLICE_MACROBLOCK_WIDTH(x)	((x)<<18)	/* in 64's */
+#define	MPG_SLICE_MBAMAX		0x2FFF
+#define	MPG_SLICE_PREDICTIVE_DCT	0x4000
+#define	MPG_SLICE_TOP_FIRST		0x8000
+#define	MPG_SLICE_MACROBLOCK_WIDTH(x)	((x)<<18)	/* in 64's */
 #define	MPG_SLICE_CTRL_2	0x94
-#define		MPG_SLICE_CONCEAL_MVEC		0x0000001
-#define		MPG_SLICE_QSCALE_TYPE		0x0000002
-#define		MPG_SLICE_DCPRECISION		0x000000C
-#define		MPG_SLICE_MACROBQUOT		0x0FFFFF0
-#define		MPG_SLICE_INTRAVLC		0x1000000
+#define	MPG_SLICE_CONCEAL_MVEC		0x0000001
+#define	MPG_SLICE_QSCALE_TYPE		0x0000002
+#define	MPG_SLICE_DCPRECISION		0x000000C
+#define	MPG_SLICE_MACROBQUOT		0x0FFFFF0
+#define	MPG_SLICE_INTRAVLC		0x1000000
 #define	MPG_SLICE_CTRL_3	0x98
-#define		MPG_SLICE_FHMVR			0x0000003
-#define		MPG_SLICE_FVMVR			0x000000C
-#define		MPG_SLICE_BHMVR			0x0000030
-#define		MPG_SLICE_BVMVR			0x00000C0
-#define		MPG_SLICE_SECOND_FIELD		0x0100000
-#define		MPG_SLICE_RESET			0x0400000
+#define	MPG_SLICE_FHMVR			0x0000003
+#define	MPG_SLICE_FVMVR			0x000000C
+#define	MPG_SLICE_BHMVR			0x0000030
+#define	MPG_SLICE_BVMVR			0x00000C0
+#define	MPG_SLICE_SECOND_FIELD		0x0100000
+#define	MPG_SLICE_RESET			0x0400000
 #define MPG_SLICE_LENGTH	0x9C
 #define	MPG_SLICE_DATA		0xA0
-
-#define VBE_DEFAULT_REFRESH                     6000
 
 #ifdef XSERVER_LIBPCIACCESS
 #define VIA_MEMBASE(p,n)  (p)->regions[(n)].base_addr
@@ -734,4 +738,4 @@
 #define CHIP_REVISION(p)  (p)->chipRev
 #endif
 
-#endif /* _VIA_H_ */
+#endif /* _VIA_ENG_REGS_H_ */

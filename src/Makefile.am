@@ -24,6 +24,8 @@
 # _ladir passes a dummy rpath to libtool so the thing will actually link
 # TODO: -nostdlib/-Bstatic/-lgcc platform magic, not installing the .a, etc.
 
+SUBDIRS = xvmc
+
 BUILT_SOURCES = version.h
 EXTRA_DIST = version.h
 CONFIG_CLEAN_FILES= version.h
@@ -34,45 +36,42 @@ openchrome_drv_ladir = @moduledir@/drivers
 
 openchrome_drv_la_SOURCES = \
          compat-api.h \
-         via.h \
+         via_eng_regs.h \
          via_3d.c \
          via_3d.h \
          via_3d_reg.h \
          via_rop.h \
-         via_accel.c \
+         via_exa.c \
+         via_exa_h2.c \
+         via_exa_h6.c \
          via_bandwidth.c \
-         via_bios.h \
+         via_ums.h \
          via_ch7xxx.c \
          via_ch7xxx.h \
-         via_cursor.c \
-         via_crtc.c \
-         via_dga.c \
          via_display.c \
          via_dmabuffer.h \
          via_driver.c \
          via_driver.h \
          via_i2c.c \
          via_id.c \
-         via_id.h \
          via_lvds.c \
          via_memcpy.c \
-         via_memcpy.h \
-         via_memory.c \
-         via_mode.c \
+         via_memmgr.h \
+         via_memmgr.c \
+         via_outputs.c \
          via_mode.h \
-         via_panel.c \
          via_priv.h \
          via_regs.h \
-         via_shadow.c \
-         via_swov.c \
-         via_swov.h \
-         via_timing.c \
-         via_timing.h \
+         via_xv_overlay.c \
+         via_xv_overlay.h \
+         via_ums.c \
+         via_kms.h \
+         via_kms.c \
          via_vbe.c \
          via_vgahw.c \
          via_vgahw.h \
-         via_video.c \
-         via_video.h \
+         via_xv.c \
+         via_xv.h \
          via_vt162x.c \
          via_vt162x.h \
          via_xvpriv.h
@@ -97,12 +96,16 @@ endif
 via_driver.lo: version.h
 version.h: $(openchrome_drv_la_SOURCES)
 	@if [ -d ../.git ]; then \
-	    echo '#define BUILDCOMMENT "(developement build, at revision '\
-        "`git log -1 --pretty=format:%h | head -1`"')"' > $@.tmp; \
+        echo '#define BUILDCOMMENT "(developement build, branch' \
+                     "`git branch -v | sed 's/no branch/no_branch/' | \
+                      awk '/^\*/ { print $$2 }'`" \
+                     'at revision' \
+                     "`git log -1 --pretty=format:%h | head -1`"')"' \
+                    > $@.tmp; \
     else \
         if [ -d .svn ]; then \
-	        echo '#define BUILDCOMMENT "(development build, at revision '\
-	        "`svnversion -nc .. | sed -e s/^[^:]*://`"')"' > $@.tmp; \
+	        echo '#define BUILDCOMMENT "(developement build, at revision '\
+	                "`svnversion -nc .. | sed -e s/^[^:]*://`"')"' > $@.tmp; \
         else \
 	        date +'#define BUILDCOMMENT "(development build, compiled on %c)"' \
         	> $@.tmp; \

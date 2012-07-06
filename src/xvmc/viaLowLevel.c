@@ -79,16 +79,16 @@ typedef struct
     *((volatile CARD32 *)(((CARD8 *)(xl)->mmioAddress) + 0xc00 + (reg)))
 
 #define VIDIN(ctx,reg)							\
-    *((volatile CARD32 *)(((CARD8 *)(ctx)->mmioAddress) + 0x200 + (reg)))
+    *((volatile CARD32 *)(((CARD8 *)(ctx)->mmioAddress) + (reg)))
 
 #define REGIN(ctx,reg)							\
     *((volatile CARD32 *)(((CARD8 *)(ctx)->mmioAddress) + 0x0000 + (reg)))
 
-#define HQV_CONTROL             0x1D0
-#define HQV_SRC_STARTADDR_Y     0x1D4
-#define HQV_SRC_STARTADDR_U     0x1D8
-#define HQV_SRC_STARTADDR_V     0x1DC
-#define HQV_MINIFY_DEBLOCK      0x1E8
+#define HQV_CONTROL             0x3D0
+#define HQV_SRC_STARTADDR_Y     0x3D4
+#define HQV_SRC_STARTADDR_U     0x3D8
+#define HQV_SRC_STARTADDR_V     0x3DC
+#define HQV_MINIFY_DEBLOCK      0x3E8
 
 #define HQV_SW_FLIP         0x00000010
 #define HQV_FLIP_STATUS     0x00000001
@@ -101,15 +101,15 @@ typedef struct
 #define HQV_DEBLOCK_HOR     0x00008000
 #define HQV_DEBLOCK_VER     0x80000000
 
-#define V_COMPOSE_MODE          0x98
+#define V_COMPOSE_MODE          0x298
 #define V1_COMMAND_FIRE         0x80000000
 #define V3_COMMAND_FIRE         0x40000000
 
 /* SUBPICTURE Registers */
-#define SUBP_CONTROL_STRIDE     0x1C0
-#define SUBP_STARTADDR          0x1C4
-#define RAM_TABLE_CONTROL       0x1C8
-#define RAM_TABLE_READ          0x1CC
+#define SUBP_CONTROL_STRIDE     0x3C0
+#define SUBP_STARTADDR          0x3C4
+#define RAM_TABLE_CONTROL       0x3C8
+#define RAM_TABLE_READ          0x3CC
 
 /* SUBP_CONTROL_STRIDE              0x3c0 */
 #define SUBP_HQV_ENABLE             0x00010000
@@ -187,7 +187,7 @@ typedef struct
 
 /*
  * We want to have two concurrent types of thread taking the hardware
- * lock simulataneously. One is the video out thread that needs immediate 
+ * lock simulataneously. One is the video out thread that needs immediate
  * access to flip an image. The other is everything else which may have
  * the lock for quite some time. This is only so the video out thread can
  * sneak in and display an image while other resources are busy.
@@ -311,7 +311,7 @@ viaMpegIsBusy(XvMCLowLevel * xl, CARD32 mask, CARD32 idle)
     CARD32 tmp = viaMpegGetStatus(xl);
 
     /*
-     * Error detected. 
+     * Error detected.
      * FIXME: Are errors really shown when error concealment is on?
      */
 
@@ -370,8 +370,8 @@ syncVideo(XvMCLowLevel * xl, unsigned int doSleep)
     /*
      * Wait for HQV completion. Nothing strange here. We assume that the HQV
      * Handles syncing to the V1 / V3 engines by itself. It should be safe to
-     * always wait for SUBPIC_FLIP completion although subpictures are not always
-     * used. 
+     * always wait for SUBPIC_FLIP completion although subpictures are not
+     * always used.
      */
 
     struct timeval now, then;
@@ -610,9 +610,9 @@ viaVideoSetSWFLipLocked(void *xlp, unsigned yOffs, unsigned uOffs,
 {
     XvMCLowLevel *xl = (XvMCLowLevel *) xlp;
 
-    pciCommand(xl, HQV_SRC_STARTADDR_Y | 0x200, yOffs, LL_MODE_VIDEO);
-    pciCommand(xl, HQV_SRC_STARTADDR_U | 0x200, uOffs, 0);
-    pciCommand(xl, HQV_SRC_STARTADDR_V | 0x200, vOffs, 0);
+    pciCommand(xl, HQV_SRC_STARTADDR_Y, yOffs, LL_MODE_VIDEO);
+    pciCommand(xl, HQV_SRC_STARTADDR_U, uOffs, 0);
+    pciCommand(xl, HQV_SRC_STARTADDR_V, vOffs, 0);
 }
 
 void
@@ -648,7 +648,7 @@ viaVideoSWFlipLocked(void *xlp, unsigned flags, int progressiveSequence)
 	orWd &= ~HQV_FIELD_UV;
     }
 
-    pciCommand(xl, HQV_CONTROL | 0x200, (VIDIN(xl,
+    pciCommand(xl, HQV_CONTROL, (VIDIN(xl,
 		HQV_CONTROL) & andWd) | orWd, 0);
 }
 
@@ -850,7 +850,7 @@ viaVideoSubPictureOffLocked(void *xlp)
 
     stride = VIDIN(xl, SUBP_CONTROL_STRIDE);
 
-    pciCommand(xl, SUBP_CONTROL_STRIDE | 0x200, stride & ~SUBP_HQV_ENABLE,
+    pciCommand(xl, SUBP_CONTROL_STRIDE, stride & ~SUBP_HQV_ENABLE,
 	LL_MODE_VIDEO);
 }
 
@@ -863,14 +863,14 @@ viaVideoSubPictureLocked(void *xlp, ViaXvMCSubPicture * pViaSubPic)
     XvMCLowLevel *xl = (XvMCLowLevel *) xlp;
 
     for (i = 0; i < VIA_SUBPIC_PALETTE_SIZE; ++i) {
-	pciCommand(xl, RAM_TABLE_CONTROL | 0x200, pViaSubPic->palette[i],
+	pciCommand(xl, RAM_TABLE_CONTROL, pViaSubPic->palette[i],
 	    LL_MODE_VIDEO);
     }
 
-    pciCommand(xl, SUBP_STARTADDR | 0x200, pViaSubPic->offset, 0);
+    pciCommand(xl, SUBP_STARTADDR, pViaSubPic->offset, 0);
     cWord = (pViaSubPic->stride & SUBP_STRIDE_MASK) | SUBP_HQV_ENABLE;
     cWord |= (pViaSubPic->ia44) ? SUBP_IA44 : SUBP_AI44;
-    pciCommand(xl, SUBP_CONTROL_STRIDE | 0x200, cWord, 0);
+    pciCommand(xl, SUBP_CONTROL_STRIDE, cWord, 0);
 }
 
 void

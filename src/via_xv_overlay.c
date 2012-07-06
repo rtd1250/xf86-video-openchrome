@@ -29,21 +29,13 @@
 
 #include "xf86.h"
 #include "xf86_OSproc.h"
-#include "xf86fbman.h"
 
-#include "via.h"
 #ifdef XF86DRI
 #include "xf86drm.h"
-#endif
-
-#include "via_driver.h"
-#include "via_priv.h"
-#include "via_swov.h"
-#ifdef XF86DRI
+#include "via_drmclient.h"
 #include "via_drm.h"
 #endif
-#include "via_vgahw.h"
-#include "via_id.h"
+#include "via_driver.h"
 
 #include <math.h>
 #include <unistd.h>
@@ -62,7 +54,7 @@
  * Old via_regrec code.
  */
 #define VIDREG_BUFFER_SIZE  100  /* Number of entries in the VidRegBuffer. */
-#define IN_VIDEO_DISPLAY     (*((unsigned long volatile *)(pVia->VidMapBase+V_FLAGS))&VBI_STATUS)
+#define IN_VIDEO_DISPLAY (*((unsigned long volatile *)(pVia->MapBase + V_FLAGS)) & VBI_STATUS)
 #define VIA_FIRETIMEOUT 40000
 
 enum HQV_CME_Regs {
@@ -99,7 +91,7 @@ viaWaitVideoCommandFire(VIAPtr pVia)
  */
     unsigned count = 50000;
     CARD32 volatile *pdwState =
-            (CARD32 volatile *)(pVia->VidMapBase + V_COMPOSE_MODE);
+            (CARD32 volatile *)(pVia->MapBase + V_COMPOSE_MODE);
 
     while (--count && ((*pdwState & V1_COMMAND_FIRE)
                        || (*pdwState & V3_COMMAND_FIRE))) ;
@@ -119,7 +111,7 @@ viaWaitHQVFlip(VIAPtr pVia)
         && !(pVia->swov.gdwVideoFlagSW & VIDEO_1_INUSE))
         proReg = PRO_HQV1_OFFSET;
 
-    pdwState = (CARD32 volatile *)(pVia->VidMapBase + (HQV_CONTROL + proReg));
+    pdwState = (CARD32 volatile *)(pVia->MapBase + (HQV_CONTROL + proReg));
 
     if (pVia->VideoEngine == VIDEO_ENGINE_CME) {
 		while (--count && (*pdwState & HQV_SUBPIC_FLIP));
@@ -132,12 +124,12 @@ static void
 viaWaitHQVFlipClear(VIAPtr pVia, unsigned long dwData)
 {
     CARD32 volatile *pdwState =
-            (CARD32 volatile *)(pVia->VidMapBase + HQV_CONTROL);
+            (CARD32 volatile *)(pVia->MapBase + HQV_CONTROL);
     *pdwState = dwData;
     unsigned count = 50000;
 
     while (--count && (*pdwState & HQV_FLIP_STATUS)) {
-        VIDOutD(HQV_CONTROL, *pdwState | HQV_FLIP_STATUS);
+        VIASETREG(HQV_CONTROL, *pdwState | HQV_FLIP_STATUS);
     }
 }
 
@@ -158,7 +150,7 @@ viaWaitHQVDone(VIAPtr pVia)
         && !(pVia->swov.gdwVideoFlagSW & VIDEO_1_INUSE))
         proReg = PRO_HQV1_OFFSET;
 
-    pdwState = (CARD32 volatile *)(pVia->VidMapBase + (HQV_CONTROL + proReg));
+    pdwState = (CARD32 volatile *)(pVia->MapBase + (HQV_CONTROL + proReg));
     if (pVia->swov.MPEG_ON) {
         while (--count && (*pdwState & HQV_SW_FLIP)) ;
     }
@@ -175,13 +167,13 @@ FlushVidRegBuffer(VIAPtr pVia)
     viaWaitVideoCommandFire(pVia);
 
     for (i = 0; i < pVia->VidRegCursor; i += 2) {
-        VIDOutD(pVia->VidRegBuffer[i], pVia->VidRegBuffer[i + 1]);
+        VIASETREG(pVia->VidRegBuffer[i], pVia->VidRegBuffer[i + 1]);
         DBG_DD(ErrorF("FlushVideoRegs: [%i] %08lx %08lx\n",
                       i >> 1, pVia->VidRegBuffer[i] + 0x200,
                       pVia->VidRegBuffer[i + 1]));
     }
 
-    /* BUG: (?) VIA never resets the cursor. 
+    /* BUG: (?) VIA never resets the cursor.
      * My fix is commented out for now, in case they had a reason for that. /A
      */
     /* pVia->VidRegCursor = 0; */
@@ -228,7 +220,7 @@ SaveVideoRegister(VIAPtr pVia, CARD32 index, CARD32 data)
  * HQVDisablePatch     FALSE      TRUE       TRUE      TRUE      FALSE
  *
  * This is now up to date with CLEXF40040. All unused entries were removed.
- * The functions depending on this struct are untouched. 
+ * The functions depending on this struct are untouched.
  */
 void
 VIAVidHWDiffInit(ScrnInfoPtr pScrn)
@@ -361,7 +353,7 @@ typedef struct _YCBCRREC
     CARD32 dwCR;
 } YCBCRREC;
 
-/* 
+/*
  * Verify that using V1 bit definitions on V3
  * is not broken in OverlayGetV1V3Format().
  */
@@ -654,24 +646,23 @@ viaOverlayHQVCalcZoomWidth(VIAPtr pVia,
 
         *pHQVfilterCtl |= HQVfilter[d];
 
-       	/* Scale to arbitrary size, on top of previous scaling by (1 << d). */
+	/* Scale to arbitrary size, on top of previous scaling by (1 << d). */
 
-       	if (sw1 < dstWidth) {
-            	/* CLE bug
-           	*pZoomCtl = sw1 * 0x0800 / dstWidth;*/
-           	*pZoomCtl = (sw1 - 2) * 0x0800 / dstWidth;
-           	*pZoomCtl = ((*pZoomCtl & 0x7ff) << 16) | V1_X_ZOOM_ENABLE;
-   		}
-
-    	if (videoFlag & VIDEO_1_INUSE) {
-        	pVia->swov.overlayRecordV1.dwFetchAlignment = falign;
-        	pVia->swov.overlayRecordV1.dwminifyH = mdiv;
-    	} else {
-        	pVia->swov.overlayRecordV3.dwFetchAlignment = falign;
-        	pVia->swov.overlayRecordV3.dwminifyH = mdiv;
-    	}
-
+	if (sw1 < dstWidth) {
+		/* CLE bug
+		*pZoomCtl = sw1 * 0x0800 / dstWidth;*/
+		*pZoomCtl = (sw1 - 2) * 0x0800 / dstWidth;
+		*pZoomCtl = ((*pZoomCtl & 0x7ff) << 16) | V1_X_ZOOM_ENABLE;
 	}
+
+	if (videoFlag & VIDEO_1_INUSE) {
+		pVia->swov.overlayRecordV1.dwFetchAlignment = falign;
+		pVia->swov.overlayRecordV1.dwminifyH = mdiv;
+	} else {
+		pVia->swov.overlayRecordV3.dwFetchAlignment = falign;
+		pVia->swov.overlayRecordV3.dwminifyH = mdiv;
+	}
+    }
     return zoom_ok;
 }
 
@@ -708,7 +699,7 @@ viaOverlayHQVCalcZoomHeight(VIAPtr pVia,
 	    *pHQVzoomflag = 1;
 	    *pHQVfilterCtl |= HQV_V_TAP4_121;
     } else { /* srcHeight > dstHeight - Zoom out */
-		if (hwDiff->dwNewScaleCtl) {
+	if (hwDiff->dwNewScaleCtl) {
             /*setting :src/(destination+0.5)*/
             tmp = srcHeight * 0x2000 / ((dstHeight << 1) + 1);
             tmp += (((tmp * 0x1000) & 0xfff) > 1) ? 1 : 0;
@@ -717,7 +708,7 @@ viaOverlayHQVCalcZoomHeight(VIAPtr pVia,
             }
 
             *pHQVscaleCtlV = (tmp & 0x1ffff) | HQV_V_SCALE_ENABLE| HQV_V_SCALE_DOWN;
-		} else {
+	} else {
 	        /* HQV rounding patch, instead of:
 	         * //tmp = dstHeight*0x0800 / srcHeight; */
 	        tmp = dstHeight * 0x0800 * 0x400 / srcHeight;
@@ -726,7 +717,6 @@ viaOverlayHQVCalcZoomHeight(VIAPtr pVia,
 	                         | HQV_V_MINIFY_DOWN);
 
 	        /* Scale down the picture by a factor (1 << d) = {2, 4, 8 or 16} */
-	
 	        sh1 = srcHeight;
 	        for (d = 1; d < 5; d++) {
 	            sh1 >>= 1;
@@ -751,9 +741,8 @@ viaOverlayHQVCalcZoomHeight(VIAPtr pVia,
 	            *pZoomCtl |= ((tmp & 0x3ff) | V1_Y_ZOOM_ENABLE);
 	            *pMiniCtl |= V1_Y_INTERPOLY | V1_YCBCR_INTERPOLY;
 	        }
-		}
+	}
     }
-
     return zoom_ok;
 }
 
@@ -1019,8 +1008,8 @@ viaSetColorSpace(VIAPtr pVia, int hue, int saturation, int brightness,
         case PCI_CHIP_VT3204:
         case PCI_CHIP_VT3259:
         case PCI_CHIP_VT3314:
-            VIDOutD(V3_ColorSpaceReg_1, col1);
-            VIDOutD(V3_ColorSpaceReg_2, col2);
+            VIASETREG(V3_ColorSpaceReg_1, col1);
+            VIASETREG(V3_ColorSpaceReg_2, col2);
             DBG_DD(ErrorF("000002C4 %08lx\n", col1));
             DBG_DD(ErrorF("000002C8 %08lx\n", col2));
             break;
@@ -1032,10 +1021,10 @@ viaSetColorSpace(VIAPtr pVia, int hue, int saturation, int brightness,
         case PCI_CHIP_VT3409:
         case PCI_CHIP_VT3410:
         case PCI_CHIP_CLE3122:
-            VIDOutD(V1_ColorSpaceReg_2, col2);
-            VIDOutD(V1_ColorSpaceReg_1, col1);
-            VIDOutD(V3_ColorSpaceReg_2, col2);
-            VIDOutD(V3_ColorSpaceReg_1, col1);
+            VIASETREG(V1_ColorSpaceReg_2, col2);
+            VIASETREG(V1_ColorSpaceReg_1, col1);
+            VIASETREG(V3_ColorSpaceReg_2, col2);
+            VIASETREG(V3_ColorSpaceReg_1, col1);
 
             DBG_DD(ErrorF("00000288 %08lx\n", col2));
             DBG_DD(ErrorF("00000284 %08lx\n", col1));
@@ -1122,9 +1111,9 @@ ViaSetVidCtl(VIAPtr pVia, unsigned int videoFlag)
  * Fill the buffer with 0x8000 (YUV2 black).
  */
 static void
-ViaYUVFillBlack(VIAPtr pVia, int offset, int num)
+ViaYUVFillBlack(VIAPtr pVia, void *buf, int num)
 {
-    CARD16 *ptr = (CARD16 *) (pVia->FBBase + offset);
+    CARD16 *ptr = (CARD16 *) buf;
 
     while (num-- > 0)
 #if X_BYTE_ORDER == X_LITTLE_ENDIAN
@@ -1145,6 +1134,7 @@ AddHQVSurface(ScrnInfoPtr pScrn, unsigned int numbuf, CARD32 fourcc)
     unsigned int i, width, height, pitch, fbsize, addr;
     unsigned long retCode;
     BOOL isplanar;
+    void *buf;
 
     VIAPtr pVia = VIAPTR(pScrn);
     CARD32 AddrReg[3] = { HQV_DST_STARTADDR0, HQV_DST_STARTADDR1,
@@ -1156,27 +1146,27 @@ AddHQVSurface(ScrnInfoPtr pScrn, unsigned int numbuf, CARD32 fourcc)
         proReg = PRO_HQV1_OFFSET;
 
     isplanar = ((fourcc == FOURCC_YV12) || (fourcc == FOURCC_I420) ||
-				(fourcc == FOURCC_XVMC));
+                (fourcc == FOURCC_XVMC));
 
     width = pVia->swov.SWDevice.gdwSWSrcWidth;
     height = pVia->swov.SWDevice.gdwSWSrcHeight;
     pitch = pVia->swov.SWDevice.dwPitch;
     fbsize = pitch * height * (isplanar ? 2 : 1);
 
-    VIAFreeLinear(&pVia->swov.HQVMem);
-    retCode = VIAAllocLinear(&pVia->swov.HQVMem, pScrn, fbsize * numbuf);
-    if (retCode != Success)
-        return retCode;
-    addr = pVia->swov.HQVMem.base;
+    pVia->swov.HQVMem = drm_bo_alloc(pScrn, fbsize * numbuf, 1, TTM_PL_FLAG_VRAM);
+    if (!pVia->swov.HQVMem)
+        return BadAlloc;
+    addr = pVia->swov.HQVMem->offset;
+    buf = drm_bo_map(pScrn, pVia->swov.HQVMem);
 
-    ViaYUVFillBlack(pVia, addr, fbsize);
+    ViaYUVFillBlack(pVia, buf, fbsize);
 
     for (i = 0; i < numbuf; i++) {
         pVia->swov.overlayRecordV1.dwHQVAddr[i] = addr;
-        VIDOutD(AddrReg[i] + proReg, addr);
+        VIASETREG(AddrReg[i] + proReg, addr);
         addr += fbsize;
     }
-
+    drm_bo_unmap(pScrn, pVia->swov.HQVMem);
     return Success;
 }
 
@@ -1192,6 +1182,7 @@ CreateSurface(ScrnInfoPtr pScrn, CARD32 FourCC, CARD16 Width,
     unsigned long pitch, fbsize, addr;
     unsigned long retCode;
     BOOL isplanar;
+    void *buf;
 
     pVia->swov.SrcFourCC = FourCC;
     pVia->swov.gdwVideoFlagSW = ViaInitVideoStatusFlag(pVia);
@@ -1216,19 +1207,18 @@ CreateSurface(ScrnInfoPtr pScrn, CARD32 FourCC, CARD16 Width,
     }
 
     if (doalloc) {
-        VIAFreeLinear(&pVia->swov.SWfbMem);
-        retCode = VIAAllocLinear(&pVia->swov.SWfbMem, pScrn, fbsize * 2);
-        if (retCode != Success)
-            return retCode;
-        addr = pVia->swov.SWfbMem.base;
+        pVia->swov.SWfbMem = drm_bo_alloc(pScrn, fbsize * 2, 1, TTM_PL_FLAG_VRAM);
+        if (!pVia->swov.SWfbMem)
+            return BadAlloc;
+        addr = pVia->swov.SWfbMem->offset;
+        buf = drm_bo_map(pScrn, pVia->swov.SWfbMem);
 
-        ViaYUVFillBlack(pVia, addr, fbsize);
+        ViaYUVFillBlack(pVia, buf, fbsize);
 
         pVia->swov.SWDevice.dwSWPhysicalAddr[0] = addr;
         pVia->swov.SWDevice.dwSWPhysicalAddr[1] = addr + fbsize;
-        pVia->swov.SWDevice.lpSWOverlaySurface[0] = pVia->FBBase + addr;
-        pVia->swov.SWDevice.lpSWOverlaySurface[1] =
-                pVia->swov.SWDevice.lpSWOverlaySurface[0] + fbsize;
+        pVia->swov.SWDevice.lpSWOverlaySurface[0] = buf;
+        pVia->swov.SWDevice.lpSWOverlaySurface[1] = buf + fbsize;
 
         if (isplanar) {
             pVia->swov.SWDevice.dwSWCrPhysicalAddr[0] =
@@ -1309,11 +1299,6 @@ ViaSwovSurfaceCreate(ScrnInfoPtr pScrn, viaPortPrivPtr pPriv,
     }
 
     if (retCode == Success) {
-        pVia->swov.SWDevice.lpSWOverlaySurface[0] = pVia->FBBase
-                + pVia->swov.SWDevice.dwSWPhysicalAddr[0];
-        pVia->swov.SWDevice.lpSWOverlaySurface[1] = pVia->FBBase
-                + pVia->swov.SWDevice.dwSWPhysicalAddr[1];
-
         DBG_DD(ErrorF(" lpSWOverlaySurface[0]: %p\n",
                       pVia->swov.SWDevice.lpSWOverlaySurface[0]));
         DBG_DD(ErrorF(" lpSWOverlaySurface[1]: %p\n",
@@ -1345,24 +1330,28 @@ ViaSwovSurfaceDestroy(ScrnInfoPtr pScrn, viaPortPrivPtr pPriv)
             case FOURCC_RV15:
                 pVia->swov.SrcFourCC = 0;
 
-                VIAFreeLinear(&pVia->swov.SWfbMem);
-                if ((pVia->swov.gdwVideoFlagSW & SW_USE_HQV))
-                    VIAFreeLinear(&pVia->swov.HQVMem);
+                drm_bo_unmap(pScrn, pVia->swov.SWfbMem);
+                drm_bo_free(pScrn, pVia->swov.SWfbMem);
+                if ((pVia->swov.gdwVideoFlagSW & SW_USE_HQV)) {
+                    drm_bo_unmap(pScrn, pVia->swov.HQVMem);
+                    drm_bo_free(pScrn, pVia->swov.HQVMem);
+                }
                 pVia->swov.gdwVideoFlagSW = 0;
                 break;
 
             case FOURCC_HQVSW:
-                VIAFreeLinear(&pVia->swov.HQVMem);
+                drm_bo_free(pScrn, pVia->swov.HQVMem);
                 pVia->swov.gdwVideoFlagSW = 0;
                 break;
 
             case FOURCC_YV12:
             case FOURCC_I420:
-                VIAFreeLinear(&pVia->swov.SWfbMem);
+                drm_bo_unmap(pScrn, pVia->swov.SWfbMem);
+                drm_bo_free(pScrn, pVia->swov.SWfbMem);
             case FOURCC_XVMC:
                 pVia->swov.SrcFourCC = 0;
 
-                VIAFreeLinear(&pVia->swov.HQVMem);
+                drm_bo_free(pScrn, pVia->swov.HQVMem);
                 pVia->swov.gdwVideoFlagSW = 0;
                 break;
         }
@@ -1395,21 +1384,21 @@ SetFIFO_V3(VIAPtr pVia, CARD8 depth, CARD8 prethreshold, CARD8 threshold)
         case PCI_CHIP_VT3409:
         case PCI_CHIP_VT3410:
             SaveVideoRegister(pVia, ALPHA_V3_FIFO_CONTROL,
-                              (VIDInD(ALPHA_V3_FIFO_CONTROL) & ALPHA_FIFO_MASK)
+                              (VIAGETREG(ALPHA_V3_FIFO_CONTROL) & ALPHA_FIFO_MASK)
                                | ((depth - 1) & 0xff) | ((threshold & 0xff) << 8));
             SaveVideoRegister(pVia, ALPHA_V3_PREFIFO_CONTROL,
-                              (VIDInD(ALPHA_V3_PREFIFO_CONTROL)
+                              (VIAGETREG(ALPHA_V3_PREFIFO_CONTROL)
                               & ~V3_FIFO_MASK_3314) | (prethreshold & 0xff));
             break;
         default :
             SaveVideoRegister(pVia, ALPHA_V3_FIFO_CONTROL,
-                              (VIDInD(ALPHA_V3_FIFO_CONTROL) & ALPHA_FIFO_MASK)
+                              (VIAGETREG(ALPHA_V3_FIFO_CONTROL) & ALPHA_FIFO_MASK)
                               | ((depth - 1) & 0xff) | ((threshold & 0xff) << 8));
             SaveVideoRegister(pVia, ALPHA_V3_PREFIFO_CONTROL,
-                              (VIDInD(ALPHA_V3_PREFIFO_CONTROL) & ~V3_FIFO_MASK)
+                              (VIAGETREG(ALPHA_V3_PREFIFO_CONTROL) & ~V3_FIFO_MASK)
                               | (prethreshold & 0x7f));
             break;
-    } 
+    }
 }
 
 static void
@@ -1525,7 +1514,7 @@ SetupFIFOs(VIAPtr pVia, unsigned long videoFlag,
 {
     if (miniCtl & V1_Y_INTERPOLY) {
         if (pVia->swov.SrcFourCC == FOURCC_YV12
-			|| pVia->swov.SrcFourCC == FOURCC_I420
+            || pVia->swov.SrcFourCC == FOURCC_I420
             || pVia->swov.SrcFourCC == FOURCC_XVMC) {
             if (videoFlag & VIDEO_HQV_INUSE) {
                 if (videoFlag & VIDEO_1_INUSE)
@@ -1559,7 +1548,7 @@ SetupFIFOs(VIAPtr pVia, unsigned long videoFlag,
         }
     } else {
         if (pVia->swov.SrcFourCC == FOURCC_YV12
-			|| pVia->swov.SrcFourCC == FOURCC_I420
+            || pVia->swov.SrcFourCC == FOURCC_I420
             || pVia->swov.SrcFourCC == FOURCC_XVMC) {
             if (videoFlag & VIDEO_HQV_INUSE) {
                 if (videoFlag & VIDEO_1_INUSE)
@@ -1625,8 +1614,8 @@ SetChromaKey(VIAPtr pVia, unsigned long videoFlag,
     chromaLow &= CHROMA_KEY_LOW;
     chromaHigh &= CHROMA_KEY_HIGH;
 
-    chromaLow |= (VIDInD(V_CHROMAKEY_LOW) & ~CHROMA_KEY_LOW);
-    chromaHigh |= (VIDInD(V_CHROMAKEY_HIGH) & ~CHROMA_KEY_HIGH);
+    chromaLow |= (VIAGETREG(V_CHROMAKEY_LOW) & ~CHROMA_KEY_LOW);
+    chromaHigh |= (VIAGETREG(V_CHROMAKEY_HIGH) & ~CHROMA_KEY_HIGH);
 
     if (pVia->VideoEngine == VIDEO_ENGINE_CME)
         chromaLow |= 0x40000000;
@@ -1690,7 +1679,7 @@ SetFetch(VIAPtr pVia, unsigned long videoFlag, CARD32 fetch)
     if (videoFlag & VIDEO_1_INUSE) {
         SaveVideoRegister(pVia, V12_QWORD_PER_LINE, fetch);
     } else {
-        fetch |= VIDInD(V3_ALPHA_QWORD_PER_LINE) & ~V3_FETCH_COUNT;
+        fetch |= VIAGETREG(V3_ALPHA_QWORD_PER_LINE) & ~V3_FETCH_COUNT;
         SaveVideoRegister(pVia, V3_ALPHA_QWORD_PER_LINE, fetch);
     }
 }
@@ -1768,7 +1757,7 @@ SetVideoWindow(ScrnInfoPtr pScrn, unsigned long videoFlag,
      * If the resolution is smaller than the panel's physical size,
      * the video display in Y direction will be cut.
      * So, we need to adjust the Y top and bottom position.
-     */
+     *
     if (videoFlag & VIDEO_1_INUSE) {
         if (pBIOSInfo->SetDVI && pBIOSInfo->scaleY) {
             top = (pUpdate->DstTop * pBIOSInfo->Panel->NativeMode->Height
@@ -1776,7 +1765,7 @@ SetVideoWindow(ScrnInfoPtr pScrn, unsigned long videoFlag,
             bottom = (pUpdate->DstBottom * pBIOSInfo->Panel->NativeMode->Height
                       / pScrn->currentMode->VDisplay);
         }
-    }
+    }*/
 
     if (top < 0)
         top = 0;
@@ -1811,7 +1800,7 @@ SetVideoWindow(ScrnInfoPtr pScrn, unsigned long videoFlag,
  * Upd_Video()
  */
 static Bool
-Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
+Upd_Video(xf86CrtcPtr crtc, unsigned long videoFlag,
           unsigned long startAddr, LPDDUPDATEOVERLAY pUpdate,
           unsigned long srcPitch,
           unsigned long oriSrcWidth, unsigned long oriSrcHeight,
@@ -1820,12 +1809,12 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
           unsigned long colorKeyLow, unsigned long colorKeyHigh,
           unsigned long chromaKeyLow, unsigned long chromaKeyHigh)
 {
+    drmmode_crtc_private_ptr iga = crtc->driver_private;
+    ScrnInfoPtr pScrn = crtc->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAHWDiff *hwDiff = &pVia->HWDiff;
-
-    int i;
     unsigned long vidCtl = 0, compose;
     unsigned long srcWidth, srcHeight, dstWidth, dstHeight;
     unsigned long zoomCtl = 0, miniCtl = 0;
@@ -1837,13 +1826,14 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
     unsigned long hqvSrcFetch = 0, hqvOffset = 0;
     unsigned long dwOffset = 0, fetch = 0, tmp = 0;
     unsigned long proReg = 0;
+    int i;
 
     DBG_DD(ErrorF("videoflag=%ld\n", videoFlag));
 
     if (pVia->ChipId == PCI_CHIP_VT3259 && !(videoFlag & VIDEO_1_INUSE))
         proReg = PRO_HQV1_OFFSET;
 
-    compose = ((VIDInD(V_COMPOSE_MODE)
+    compose = ((VIAGETREG(V_COMPOSE_MODE)
                 & ~(SELECT_VIDEO_IF_COLOR_KEY
                     | V1_COMMAND_FIRE | V3_COMMAND_FIRE))
                | V_COMMAND_LOAD_VBI);
@@ -1857,12 +1847,13 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
                   pUpdate->DstTop, pUpdate->DstBottom));
 
     dstWidth = pUpdate->DstRight - pUpdate->DstLeft;
-    if (pBIOSInfo->Panel->IsActive && pBIOSInfo->Panel->Scale) {
-        /* FIXME: We need to determine if the panel is using V1 or V3 */
+	/*if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected &&
+		pBIOSInfo->Panel->Scale) {
+        * FIXME: We need to determine if the panel is using V1 or V3 *
         float hfactor = (float)pBIOSInfo->Panel->NativeMode->Width
                         / pScrn->currentMode->HDisplay;
         dstWidth *= hfactor;
-    }
+    }*/
 
     pVia->swov.overlayRecordV1.dwWidth = dstWidth;
     pVia->swov.overlayRecordV1.dwHeight = dstHeight =
@@ -1879,15 +1870,12 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
         vidCtl |= V1_PREFETCH_ON_3336;
     }
 
-    /* 
-     * FIXME:
-     * Enable video on secondary (change Panel to SecondCRTC?)
+    /*
+     * Enable video on secondary
      */
-    if ((pVia->VideoEngine == VIDEO_ENGINE_CME
-         || pVia->Chipset == VIA_VM800)
-        &&  (pBIOSInfo->SecondCRTC->IsActive==TRUE)) {
-
-        /* VAL_VIDEO_ON_SND_DISPLAY */
+    if ((pVia->VideoEngine == VIDEO_ENGINE_CME ||
+         pVia->Chipset == VIA_VM800) && iga->index) {
+        /* V1_ON_SND_DISPLAY */
         vidCtl |= V1_ON_SND_DISPLAY;
         /* SECOND_DISPLAY_COLOR_KEY_ENABLE */
         compose |= SECOND_DISPLAY_COLOR_KEY_ENABLE | 0x1;
@@ -1909,7 +1897,7 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
     pVia->swov.overlayRecordV1.dwOffset = dwOffset;
 
     if (pVia->swov.SrcFourCC == FOURCC_YV12
-		|| pVia->swov.SrcFourCC == FOURCC_I420
+        || pVia->swov.SrcFourCC == FOURCC_I420
         || pVia->swov.SrcFourCC == FOURCC_XVMC) {
 
         YCBCRREC YCbCr;
@@ -1962,7 +1950,7 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
                           pVia->swov.overlayRecordV1.dwHQVAddr[0] + hqvOffset,
                           pVia->swov.overlayRecordV1.dwHQVAddr[1] + hqvOffset,
                           pVia->swov.overlayRecordV1.dwHQVAddr[2] + hqvOffset);
-    
+
             if (pVia->VideoEngine == VIDEO_ENGINE_CME)
                 SaveVideoRegister(pVia, 0x1cc + proReg, dwOffset);
 
@@ -2102,7 +2090,7 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
 
             if (haveHQVzoomH) {
                 miniCtl = V1_X_INTERPOLY;
-                /* Disable X interpolation if the height exceeds 
+                /* Disable X interpolation if the height exceeds
                  * the maximum supported by the hardware */
                 if (srcHeight >= pVia->swov.maxHInterp)
                     miniCtl &= ~V1_X_INTERPOLY;
@@ -2111,7 +2099,7 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
 
             if (haveHQVzoomV) {
                 miniCtl |= V1_Y_INTERPOLY | V1_YCBCR_INTERPOLY;
-                /* Disable Y interpolation if the width exceeds 
+                /* Disable Y interpolation if the width exceeds
                  * the maximum supported by the hardware */
                 if (srcWidth >= pVia->swov.maxWInterp)
                     miniCtl &= ~V1_Y_INTERPOLY;
@@ -2129,13 +2117,13 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
                 hqvFilterCtl &= 0xfffdffff;
             SetMiniAndZoom(pVia, videoFlag, 0, 0);
         }
-		if (hwDiff->dwNewScaleCtl) {
-        	SaveVideoRegister(pVia, HQV_H_SCALE_CONTROL + proReg, hqvScaleCtlH);
-        	SaveVideoRegister(pVia, HQV_V_SCALE_CONTROL + proReg, hqvScaleCtlV);
-		} else {
-        	SaveVideoRegister(pVia, HQV_MINIFY_CONTROL + proReg, hqvMiniCtl);
-		}
-       	SaveVideoRegister(pVia, HQV_FILTER_CONTROL + proReg, hqvFilterCtl);
+	if (hwDiff->dwNewScaleCtl) {
+		SaveVideoRegister(pVia, HQV_H_SCALE_CONTROL + proReg, hqvScaleCtlH);
+		SaveVideoRegister(pVia, HQV_V_SCALE_CONTROL + proReg, hqvScaleCtlV);
+	} else {
+		SaveVideoRegister(pVia, HQV_MINIFY_CONTROL + proReg, hqvMiniCtl);
+	}
+	SaveVideoRegister(pVia, HQV_FILTER_CONTROL + proReg, hqvFilterCtl);
     } else
         SetMiniAndZoom(pVia, videoFlag, miniCtl, zoomCtl);
 
@@ -2150,8 +2138,8 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
     if (pVia->VideoEngine == VIDEO_ENGINE_CME) {
         SaveVideoRegister(pVia, HQV_CME_REG(hwDiff, HQV_SDO_CTRL1),0);
         SaveVideoRegister(pVia, HQV_CME_REG(hwDiff, HQV_SDO_CTRL3),((pUpdate->SrcRight - 1 ) << 16) | (pUpdate->SrcBottom - 1));
-        if ((pVia->Chipset == VIA_VX800) || 
-            (pVia->Chipset == VIA_VX855) || 
+        if ((pVia->Chipset == VIA_VX800) ||
+            (pVia->Chipset == VIA_VX855) ||
             (pVia->Chipset == VIA_VX900)) {
             SaveVideoRegister(pVia, HQV_CME_REG(hwDiff, HQV_SDO_CTRL2),0);
             SaveVideoRegister(pVia, HQV_CME_REG(hwDiff, HQV_SDO_CTRL4),((pUpdate->SrcRight - 1 ) << 16) | (pUpdate->SrcBottom - 1));
@@ -2197,15 +2185,15 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
                     viaWaitHQVFlipClear(pVia,
                                         ((hqvCtl & ~HQV_SW_FLIP) |
                                          HQV_FLIP_STATUS) & ~HQV_ENABLE);
-                    VIDOutD(HQV_CONTROL + proReg, hqvCtl);
+                    VIASETREG(HQV_CONTROL + proReg, hqvCtl);
                     viaWaitHQVFlip(pVia);
                 }
                 DBG_DD(ErrorF(" done.\n"));
             } else {               /* CLE_C0 */
                 CARD32 volatile *HQVCtrl =
-                        (CARD32 volatile *)(pVia->VidMapBase + HQV_CONTROL +
+                        (CARD32 volatile *)(pVia->MapBase + HQV_CONTROL +
                                             proReg);
-    
+
                 /* Check that HQV is idle */
                 DBG_DD(ErrorF("HQV control wf - %08lx\n", *HQVCtrl));
                 while (!(*HQVCtrl & HQV_IDLE)) {
@@ -2213,8 +2201,8 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
                     usleep(1);
                 }
 
-                VIDOutD(HQV_CONTROL + proReg, hqvCtl & ~HQV_SW_FLIP);
-                VIDOutD(HQV_CONTROL + proReg, hqvCtl | HQV_SW_FLIP);
+                VIASETREG(HQV_CONTROL + proReg, hqvCtl & ~HQV_SW_FLIP);
+                VIASETREG(HQV_CONTROL + proReg, hqvCtl | HQV_SW_FLIP);
 
                 DBG_DD(ErrorF("HQV control wf5 - %08lx\n", *HQVCtrl));
                 DBG_DD(ErrorF(" Wait flips5"));
@@ -2234,8 +2222,8 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
             }
 
             if (videoFlag & VIDEO_1_INUSE) {
-                VIDOutD(V1_CONTROL, vidCtl);
-                VIDOutD(V_COMPOSE_MODE, compose | V1_COMMAND_FIRE);
+                VIASETREG(V1_CONTROL, vidCtl);
+                VIASETREG(V_COMPOSE_MODE, compose | V1_COMMAND_FIRE);
                 if (pVia->swov.gdwUseExtendedFIFO) {
                     /* Set Display FIFO */
                     DBG_DD(ErrorF(" Wait flips7"));
@@ -2248,8 +2236,8 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
                 }
             } else {
                 DBG_DD(ErrorF(" Wait flips 10"));
-                VIDOutD(V3_CONTROL, vidCtl);
-                VIDOutD(V_COMPOSE_MODE, compose | V3_COMMAND_FIRE);
+                VIASETREG(V3_CONTROL, vidCtl);
+                VIASETREG(V_COMPOSE_MODE, compose | V3_COMMAND_FIRE);
             }
             DBG_DD(ErrorF(" Done flips"));
         } else {
@@ -2282,8 +2270,9 @@ Upd_Video(ScrnInfoPtr pScrn, unsigned long videoFlag,
  *  Note: updates the overlay image parameter.
  */
 Bool
-VIAVidUpdateOverlay(ScrnInfoPtr pScrn, LPDDUPDATEOVERLAY pUpdate)
+VIAVidUpdateOverlay(xf86CrtcPtr crtc, LPDDUPDATEOVERLAY pUpdate)
 {
+    ScrnInfoPtr pScrn = crtc->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
     OVERLAYRECORD *ovlV1 = &pVia->swov.overlayRecordV1;
 
@@ -2341,7 +2330,7 @@ VIAVidUpdateOverlay(ScrnInfoPtr pScrn, LPDDUPDATEOVERLAY pUpdate)
     ResetVidRegBuffer(pVia);
 
     /* For SW decode HW overlay use */
-    startAddr = VIDInD(HQV_SRC_STARTADDR_Y + proReg);
+    startAddr = VIAGETREG(HQV_SRC_STARTADDR_Y + proReg);
 
     if (flags & DDOVER_KEYDEST) {
         haveColorKey = 1;
@@ -2430,7 +2419,7 @@ VIAVidUpdateOverlay(ScrnInfoPtr pScrn, LPDDUPDATEOVERLAY pUpdate)
 
     /* Update the overlay */
 
-    if (!Upd_Video(pScrn, videoFlag, startAddr, pUpdate,
+    if (!Upd_Video(crtc, videoFlag, startAddr, pUpdate,
                    pVia->swov.SWDevice.dwPitch, ovlV1->dwV1OriWidth,
                    ovlV1->dwV1OriHeight, deinterlaceMode, haveColorKey,
                    haveChromaKey, colorKeyLow, colorKeyHigh, chromaKeyLow,
@@ -2479,14 +2468,14 @@ ViaOverlayHide(ScrnInfoPtr pScrn)
 
     if (videoFlag & VIDEO_HQV_INUSE)
         SaveVideoRegister(pVia, HQV_CONTROL + proReg,
-                          VIDInD(HQV_CONTROL + proReg) & ~HQV_ENABLE);
+                          VIAGETREG(HQV_CONTROL + proReg) & ~HQV_ENABLE);
 
     if (videoFlag & VIDEO_1_INUSE)
-        SaveVideoRegister(pVia, V1_CONTROL, VIDInD(V1_CONTROL) & ~V1_ENABLE);
+        SaveVideoRegister(pVia, V1_CONTROL, VIAGETREG(V1_CONTROL) & ~V1_ENABLE);
     else
-        SaveVideoRegister(pVia, V3_CONTROL, VIDInD(V3_CONTROL) & ~V3_ENABLE);
+        SaveVideoRegister(pVia, V3_CONTROL, VIAGETREG(V3_CONTROL) & ~V3_ENABLE);
 
-    FireVideoCommand(pVia, videoFlag, VIDInD(V_COMPOSE_MODE));
+    FireVideoCommand(pVia, videoFlag, VIAGETREG(V_COMPOSE_MODE));
     FlushVidRegBuffer(pVia);
 
     if (pVia->HWDiff.dwHQVDisablePatch)

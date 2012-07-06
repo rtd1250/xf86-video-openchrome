@@ -28,18 +28,18 @@
 #endif
 
 #include "via_driver.h"
-#include "via_vgahw.h"
 #include "via_vt162x.h"
-#include "via_id.h"
 
 static void
-ViaSetTVClockSource(ScrnInfoPtr pScrn)
+ViaSetTVClockSource(xf86CrtcPtr crtc)
 {
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaSetTVClockSource\n"));
+	drmmode_crtc_private_ptr iga = crtc->driver_private;
+	ScrnInfoPtr pScrn = crtc->scrn;
+	VIAPtr pVia = VIAPTR(pScrn);
+	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+	vgaHWPtr hwp = VGAHWPTR(pScrn);
 
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
+	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaSetTVClockSource\n"));
 
     switch(pBIOSInfo->TVEncoder) {
         case VIA_VT1625:
@@ -48,7 +48,8 @@ ViaSetTVClockSource(ScrnInfoPtr pScrn)
                 case VIA_CX700:
                 case VIA_VX800:
                 case VIA_VX855:
-                    if (pBIOSInfo->FirstCRTC->IsActive) {
+					/* IGA1 */
+                    if (!iga->index) {
                         if(pBIOSInfo->TVDIPort == VIA_DI_PORT_DVP1)
                             ViaCrtcMask(hwp, 0x6C, 0xB0, 0xF0);
                         else if(pBIOSInfo->TVDIPort == VIA_DI_PORT_DVP0)
@@ -62,7 +63,7 @@ ViaSetTVClockSource(ScrnInfoPtr pScrn)
                     }
                     break;
                 default:
-                    if (pBIOSInfo->FirstCRTC->IsActive)
+                    if (!iga->index)
                         ViaCrtcMask(hwp, 0x6C, 0x21, 0x21);
                     else
                         ViaCrtcMask(hwp, 0x6C, 0xA1, 0xA1);
@@ -70,10 +71,10 @@ ViaSetTVClockSource(ScrnInfoPtr pScrn)
             }
             break;
         default:
-            if (pBIOSInfo->FirstCRTC->IsActive)
-                ViaCrtcMask(hwp, 0x6C, 0x50, 0xF0);
-            else
-                ViaCrtcMask(hwp, 0x6C, 0x05, 0x0F);
+			if (!iga->index)
+				ViaCrtcMask(hwp, 0x6C, 0x50, 0xF0);
+			else
+				ViaCrtcMask(hwp, 0x6C, 0x05, 0x0F);
             break;
     }
 
@@ -603,12 +604,13 @@ VT1621ModeI2C(ScrnInfoPtr pScrn, DisplayModePtr mode)
 }
 
 static void
-VT1621ModeCrtc(ScrnInfoPtr pScrn, DisplayModePtr mode)
+VT1621ModeCrtc(xf86CrtcPtr crtc, DisplayModePtr mode)
 {
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-    struct VT1621TableRec Table = VT1621Table[VT1621ModeIndex(pScrn, mode)];
+	ScrnInfoPtr pScrn = crtc->scrn;
+	vgaHWPtr hwp = VGAHWPTR(pScrn);
+	VIAPtr pVia = VIAPTR(pScrn);
+	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+	struct VT1621TableRec Table = VT1621Table[VT1621ModeIndex(pScrn, mode)];
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1621ModeCrtc\n"));
 
@@ -736,12 +738,13 @@ VT1622ModeI2C(ScrnInfoPtr pScrn, DisplayModePtr mode)
  * Also suited for VT1622A, VT1623, VT1625.
  */
 static void
-VT1622ModeCrtc(ScrnInfoPtr pScrn, DisplayModePtr mode)
+VT1622ModeCrtc(xf86CrtcPtr crtc, DisplayModePtr mode)
 {
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-    struct VT162XTableRec Table;
+	ScrnInfoPtr pScrn = crtc->scrn;
+	vgaHWPtr hwp = VGAHWPTR(pScrn);
+	VIAPtr pVia = VIAPTR(pScrn);
+	VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+	struct VT162XTableRec Table;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1622ModeCrtc\n"));
 
@@ -786,7 +789,7 @@ VT1622ModeCrtc(ScrnInfoPtr pScrn, DisplayModePtr mode)
     }
     pBIOSInfo->ClockExternal = TRUE;
     ViaCrtcMask(hwp, 0x6A, 0x40, 0x40);
-    ViaSetTVClockSource(pScrn);
+    ViaSetTVClockSource(crtc);
 }
 
 

@@ -30,8 +30,6 @@
 #endif
 
 #include "via_driver.h"
-#include "via.h"
-#include "via_id.h"
 
 /*
  * There's no reason for this to be known outside of via_id.o;
@@ -57,7 +55,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Asustek Terminator A7VT",               VIA_KM400,   0x1043, 0x813E, VIA_DEVICE_CRT | VIA_DEVICE_TV},
     {"Mitac 8375X",                           VIA_KM400,   0x1071, 0x8375, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV}, /* aka "UMAX 585T" */
     {"Soltek SL-75MIV2",                      VIA_KM400,   0x1106, 0x0000, VIA_DEVICE_CRT}, /* VIA/0x0000 */
-    {"VIA VT3205 (KM400)",                    VIA_KM400,   0x1106, 0x3205, VIA_DEVICE_CRT | VIA_DEVICE_TV}, /* borrowed by Soltek SL-B7C-FGR */ 
+    {"VIA VT3205 (KM400)",                    VIA_KM400,   0x1106, 0x3205, VIA_DEVICE_CRT | VIA_DEVICE_TV}, /* borrowed by Soltek SL-B7C-FGR */
     {"VIA VT7205 (KM400A)",                   VIA_KM400,   0x1106, 0x7205, VIA_DEVICE_CRT}, /* borrowed by Biostar iDEQ 200V/Chaintech 7VIF4 */
     {"Shuttle FX43",                          VIA_KM400,   0x1297, 0xF643, VIA_DEVICE_CRT | VIA_DEVICE_TV},
     {"Giga-byte 7VM400(A)M",                  VIA_KM400,   0x1458, 0xD000, VIA_DEVICE_CRT},
@@ -89,7 +87,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Mitac 8399",                            VIA_K8M800,  0x1071, 0x8399, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV}, /* aka "Pogolinux Konabook 3100" */
     {"Mitac 8889",                            VIA_K8M800,  0x1071, 0x8889, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV},
     {"MSI K8M Neo-V (broken pci id)",         VIA_K8M800,  0x1106, 0x0204, VIA_DEVICE_CRT},
-    {"VIA VT3108 (K8M800)",                   VIA_K8M800,  0x1106, 0x3108, VIA_DEVICE_CRT}, /* borrowed by Asustek A8V-MX */ 
+    {"VIA VT3108 (K8M800)",                   VIA_K8M800,  0x1106, 0x3108, VIA_DEVICE_CRT}, /* borrowed by Asustek A8V-MX */
     {"Shuttle FX21",                          VIA_K8M800,  0x1297, 0x3052, VIA_DEVICE_CRT},
     {"Shuttle FX83",                          VIA_K8M800,  0x1297, 0xF683, VIA_DEVICE_CRT | VIA_DEVICE_TV},
     {"Sharp Actius AL27",                     VIA_K8M800,  0x13BD, 0x1044, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
@@ -253,30 +251,29 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"HP T5550 Thin Client",                  VIA_VX900,   0x1106, 0x7122, VIA_DEVICE_CRT},
     {"ASRock PV530",                          VIA_VX900,   0x1849, 0x7122, VIA_DEVICE_CRT},
 
-
     /* keep this */
     {NULL,                                    VIA_UNKNOWN, 0x0000, 0x0000, VIA_DEVICE_NONE}
 };
 
-
-void
+static void
 ViaDoubleCheckCLE266Revision(ScrnInfoPtr pScrn)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     /* Crtc 0x4F is only defined in CLE266Cx */
     CARD8 tmp = hwp->readCrtc(hwp, 0x4F);
-    
+
     hwp->writeCrtc(hwp, 0x4F, 0x55);
-    
     if (hwp->readCrtc(hwp, 0x4F) == 0x55) {
-	if (CLE266_REV_IS_AX(pVia->ChipRev))
-	    xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "CLE266 Revision seems"
-		       " to be Cx, yet %d was detected previously.\n", pVia->ChipRev);
+        if (CLE266_REV_IS_AX(pVia->ChipRev))
+	        xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "CLE266 Revision seems"
+		                " to be Cx, yet %d was detected previously.\n",
+                        pVia->ChipRev);
     } else {
-	if (CLE266_REV_IS_CX(pVia->ChipRev))
-	    xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "CLE266 Revision seems"
-		       " to be Ax, yet %d was detected previously.\n", pVia->ChipRev);
+        if (CLE266_REV_IS_CX(pVia->ChipRev))
+	        xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "CLE266 Revision seems"
+		                " to be Ax, yet %d was detected previously.\n",
+                        pVia->ChipRev);
     }
     hwp->writeCrtc(hwp, 0x4F, tmp);
 }
@@ -286,25 +283,26 @@ ViaCheckCardId(ScrnInfoPtr pScrn)
 {
     struct ViaCardIdStruct *Id;
     VIAPtr pVia = VIAPTR(pScrn);
-    
+
     if ((SUBVENDOR_ID(pVia->PciInfo) == VENDOR_ID(pVia->PciInfo)) &&
-       (SUBSYS_ID(pVia->PciInfo) == DEVICE_ID(pVia->PciInfo)))
+        (SUBSYS_ID(pVia->PciInfo) == DEVICE_ID(pVia->PciInfo)))
         xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
                    "Manufacturer plainly copied main PCI IDs to subsystem/card IDs.\n");
 
     for (Id = ViaCardId; Id->String; Id++) {
-	if ((Id->Chip == pVia->Chipset) && 
-           (Id->Vendor == SUBVENDOR_ID(pVia->PciInfo)) &&
-           (Id->Device == SUBSYS_ID(pVia->PciInfo))) {
-	    xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "Detected %s. Card-Ids (%4X|%4X)\n", Id->String, SUBVENDOR_ID(pVia->PciInfo), SUBSYS_ID(pVia->PciInfo));
-	    pVia->Id = Id;
-	    return;
-	}
+        if ((Id->Chip == pVia->Chipset) &&
+            (Id->Vendor == SUBVENDOR_ID(pVia->PciInfo)) &&
+            (Id->Device == SUBSYS_ID(pVia->PciInfo))) {
+            xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "Detected %s. Card-Ids (%4X|%4X)\n", Id->String, SUBVENDOR_ID(pVia->PciInfo), SUBSYS_ID(pVia->PciInfo));
+            pVia->Id = Id;
+            return;
+	    }
     }
-    
-    xf86DrvMsg(pScrn->scrnIndex, X_ERROR, 
-	       "Unknown Card-Ids (%4X|%4X|%4X), Chipset: %s; please report to openchrome-users@openchrome.org\n", 
+
+    xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+	       "Unknown Card-Ids (%4X|%4X|%4X), Chipset: %s; please report to openchrome-users@openchrome.org\n",
                DEVICE_ID(pVia->PciInfo), SUBVENDOR_ID(pVia->PciInfo), SUBSYS_ID(pVia->PciInfo), pScrn->chipset);
     pVia->Id = NULL;
-}
 
+    ViaDoubleCheckCLE266Revision(pScrn);
+}

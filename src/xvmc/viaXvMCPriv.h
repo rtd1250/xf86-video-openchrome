@@ -55,8 +55,8 @@ extern Status _xvmc_destroy_subpicture(Display * dpy,
 #define VIA_SUBPIC_PALETTE_SIZE 16     /*Number of colors in subpicture palette */
 #define VIA_CBUFFERSIZE 4096	       /*Hardware command buffer size */
 #define VIA_MAX_BUFS 2		       /*Number of YUV buffers per surface */
-#define VIA_MAX_RENDSURF 3	       /*Maximum numbers of surfaces per context 
-				        * that can answer RENDERING to a rendering 
+#define VIA_MAX_RENDSURF 3	       /*Maximum numbers of surfaces per context
+				        * that can answer RENDERING to a rendering
 				        * query */
 
 typedef enum
@@ -99,7 +99,7 @@ typedef struct
     unsigned rendSurf[VIA_MAX_RENDSURF];	/* Which surfaces answer rendering to
 						 * a rendering query */
     int decoderOn;		       /* Decoder switched on ? */
-    int intraLoaded;		       /* Intra quantiser matrix loaded in 
+    int intraLoaded;		       /* Intra quantiser matrix loaded in
 				        * decoder? */
     int nonIntraLoaded;		       /* Non-Intra quantiser matrix loaded
 				        * in decoder */
@@ -109,7 +109,7 @@ typedef struct
     int attribChanged;		       /* Attributes have changed and need to
 				        * be uploaded to Xv at next frame
 				        * display */
-    drmLockPtr hwLock;		       /* Virtual address Pointer to the 
+    drmLockPtr hwLock;		       /* Virtual address Pointer to the
 				        * heavyweight drm hardware lock */
     unsigned xvMCPort;		       /* XvMC private port. Corresponds to
 				        * an Xv port, but not by number */
@@ -118,9 +118,9 @@ typedef struct
     XvAttribute attribDesc[VIA_NUM_XVMC_ATTRIBUTES];	/* Attribute decriptions */
     int useAGP;			       /* Use the AGP ringbuffer to upload data to the chip */
     void *xl;			       /* Lowlevel context. Opaque to us. */
-    int haveXv;			       /* Have I initialized the Xv 
+    int haveXv;			       /* Have I initialized the Xv
 				        * connection for this surface? */
-    XvImage *xvImage;		       /* Fake Xv Image used for command 
+    XvImage *xvImage;		       /* Fake Xv Image used for command
 				        * buffer transport to the X server */
     GC  gc;			       /* X GC needed for displaying */
     Drawable draw;		       /* Drawable to undisplay from */
@@ -162,14 +162,14 @@ typedef struct
     unsigned srfNo;		       /* XvMC private surface numbers */
     unsigned numBuffers;	       /* Number of picture buffers */
     unsigned curBuf;		       /* Which is the current buffer? */
-    unsigned offsets[VIA_MAX_BUFS];    /* Offsets of picture buffers 
+    unsigned offsets[VIA_MAX_BUFS];    /* Offsets of picture buffers
 				        * into the frame-buffer area */
     unsigned yStride;		       /* Stride of YUV420 Y component. */
     unsigned width;		       /* Dimensions */
     unsigned height;
     int progressiveSequence;	       /* Mpeg progressive picture? Hmm? */
     ViaXvMCContext *privContext;       /* XvMC context private part. */
-    ViaXvMCSubPicture *privSubPic;     /* Subpicture to be blended when 
+    ViaXvMCSubPicture *privSubPic;     /* Subpicture to be blended when
 				        * displaying. NULL if none. */
     int needsSync;
     int syncMode;

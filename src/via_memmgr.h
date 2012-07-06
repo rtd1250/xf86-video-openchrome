@@ -1,5 +1,5 @@
 /*
- * Copyright 2004 Thomas Hellstrom, All Rights Reserved.
+ * Copyright 2011 James Simmons, All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -20,12 +20,35 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-#ifndef _VIA_MEMCPY_H_
-#define _VIA_MEMCPY_H_
+#ifndef _VIA_MEMMGR_H_
+#define _VIA_MEMMGR_H_
 #include "xf86.h"
 
-typedef void (*vidCopyFunc)(unsigned char *, const unsigned char *, 
-			    int, int, int, int);
-extern vidCopyFunc viaVidCopyInit( char *copyType, ScreenPtr pScreen );
+#define TTM_PL_FLAG_SYSTEM	1
+#define TTM_PL_FLAG_TT		2
+#define TTM_PL_FLAG_VRAM	4
+
+struct buffer_object {
+    off_t           map_offset;
+    unsigned long   handle;
+    unsigned long   offset;             /* Offset into fb */
+    unsigned long   pitch;
+    unsigned long   size;
+    void            *ptr;
+    int             domain;
+};
+
+/* In via_memory.c */
+Bool drm_bo_manager_init(ScrnInfoPtr pScrn);
+
+struct buffer_object *
+drm_bo_alloc_surface(ScrnInfoPtr pScrn, unsigned int *pitch, unsigned int height,
+                    int format, unsigned int alignment, int domain);
+struct buffer_object *
+drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment,
+                int domain);
+void *drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj);
+void drm_bo_unmap(ScrnInfoPtr pScrn, struct buffer_object *obj);
+void drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *);
 
 #endif
