@@ -182,6 +182,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     /*** P4M900, VN896, CN896 ***/
     {"VIA Epia SN",                           VIA_P4M900,  0x0908, 0x1975, VIA_DEVICE_CRT},
     {"Hewlett Packard 2133 Mini-Note",        VIA_P4M900,  0x103C, 0x3030, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
+    {"Hewlett Packard Compaq dx2040",         VIA_P4M900,  0x103C, 0x3633, VIA_DEVICE_CRT},
     {"Asustek P5VD2-VM",                      VIA_P4M900,  0x1043, 0x81CE, VIA_DEVICE_CRT},
     {"Asustek P5VD2-VM SE",                   VIA_P4M900,  0x1043, 0x8252, VIA_DEVICE_CRT},
     {"Foxconn P4M9007MB-8RS2H",               VIA_P4M900,  0x105B, 0x0C87, VIA_DEVICE_CRT},
