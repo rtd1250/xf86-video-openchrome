@@ -76,8 +76,7 @@ static Bool VIAProbe(DriverPtr drv, int flags);
 
 static Bool VIASetupDefaultOptions(ScrnInfoPtr pScrn);
 static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags);
-static Bool VIAScreenInit(int scrnIndex, ScreenPtr pScreen, int argc,
-                          char **argv);
+static Bool VIAScreenInit(SCREEN_INIT_ARGS_DECL);
 static const OptionInfoRec *VIAAvailableOptions(int chipid, int busid);
 
 #ifdef XSERVER_LIBPCIACCESS
@@ -312,9 +311,8 @@ VIAAdjustFrame(ADJUST_FRAME_ARGS_DECL)
 }
 
 static Bool
-VIAEnterVT(VT_FUNC_ARGS_DECL)
+VIAEnterVT_internal(ScrnInfoPtr pScrn, int flags)
 {
-    SCRN_INFO_PTR(arg);
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     int i;
@@ -353,6 +351,13 @@ VIAEnterVT(VT_FUNC_ARGS_DECL)
 #endif
     }
     return TRUE;
+}
+
+static Bool
+VIAEnterVT(VT_FUNC_ARGS_DECL)
+{
+    SCRN_INFO_PTR(arg);
+    return VIAEnterVT_internal(pScrn, 0);
 }
 
 static void
@@ -1715,7 +1720,7 @@ VIACloseScreen(CLOSE_SCREEN_ARGS_DECL)
 
     /* Is the display currently visible? */
     if (pScrn->vtSema)
-        VIALeaveVT(scrnIndex, 0);
+        VIALeaveVT(VT_FUNC_ARGS(0));
 
     xf86_cursors_fini(pScreen);
 
@@ -1750,7 +1755,7 @@ VIACloseScreen(CLOSE_SCREEN_ARGS_DECL)
 
     pScrn->vtSema = FALSE;
     pScreen->CloseScreen = pVia->CloseScreen;
-    return (*pScreen->CloseScreen) (scrnIndex, pScreen);
+    return (*pScreen->CloseScreen) (CLOSE_SCREEN_ARGS);
 }
 
 static Bool
@@ -1931,7 +1936,7 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
     xf86DPMSInit(pScreen, xf86DPMSSet, 0);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- DPMS set up\n"));
 
-    if (!VIAEnterVT(VT_FUNC_ARGS(1)))
+    if (!VIAEnterVT_internal(pScrn, 1))
         return FALSE;
 
     if (pVia->directRenderingType != DRI_2) {

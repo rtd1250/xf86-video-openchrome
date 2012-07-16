@@ -34,7 +34,6 @@
 #define DEBUG(x)
 #endif
 
-#include "compat-api.h"
 #include "vgaHW.h"
 #include "xf86.h"
 
@@ -83,6 +82,7 @@
 #endif
 #include <errno.h>
 
+#include "compat-api.h"
 #define VIA_AGP_UPL_SIZE    (1024*128)
 #define VIA_DMA_DL_SIZE     (1024*128)
 #define VIA_SCRATCH_SIZE    (4*1024*1024)

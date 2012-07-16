@@ -64,7 +64,7 @@
 #define VT_FUNC_ARGS_DECL int arg, int flags
 #define VT_FUNC_ARGS(flags) pScrn->scrnIndex, (flags)
 
-#define XF86_ENABLEDISABLEFB_ARG(x) ((x)->scrnIndex)
+#define XF86_SCRN_ARG(x) ((x)->scrnIndex)
 #else
 #define SCRN_ARG_TYPE ScrnInfoPtr
 #define SCRN_INFO_PTR(arg1) ScrnInfoPtr pScrn = (arg1)
@@ -89,8 +89,7 @@
 #define VT_FUNC_ARGS_DECL ScrnInfoPtr arg
 #define VT_FUNC_ARGS(flags) pScrn
 
-#define XF86_ENABLEDISABLEFB_ARG(x) (x)
-
+#define XF86_SCRN_ARG(x) (x)
 #endif
 
 #endif
