@@ -80,6 +80,7 @@ if DRI
 openchrome_drv_la_SOURCES += \
          via_dri.c \
          via_dri.h \
+         via_drm.h \
          via_drmclient.h \
          via_xvmc.c \
          via_xvmc.h 
@@ -87,6 +88,7 @@ else
 EXTRA_DIST += \
          via_dri.c \
          via_dri.h \
+         via_drm.h \
          via_drmclient.h \
          via_xvmc.c \
          via_xvmc.h 
@@ -117,6 +119,6 @@ version.h: $(openchrome_drv_la_SOURCES)
 	@echo "created $@"
 
 dist-hook:
-	rm version.h;
+	@[ -e version.h ] && rm version.h; \
 	echo '#define BUILDCOMMENT "(openchrome '$(VERSION)' release)"' \
 	> version.h
