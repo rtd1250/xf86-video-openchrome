@@ -479,7 +479,6 @@ static Bool
 ViaPanelGetSizeFromDDCv1(xf86OutputPtr output, int *width, int *height)
 {
     ScrnInfoPtr pScrn = output->scrn;
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     xf86MonPtr pMon;
 
@@ -612,7 +611,6 @@ ViaPanelGetNativeModeFromScratchPad(xf86OutputPtr output)
 {
     ViaPanelInfoPtr panel = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     CARD8 index;
 
@@ -636,9 +634,6 @@ VIAGetPanelSize(xf86OutputPtr output)
     xf86OutputStatus status = XF86OutputStatusDisconnected;
     ViaPanelInfoPtr Panel = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
     char *PanelSizeString[7] = { "640x480", "800x480", "800x600", "1024x768", "1280x768"
                                  "1280x1024", "1400x1050", "1600x1200" };
     int width = 0;
@@ -709,7 +704,6 @@ static Bool
 ViaPanelGetIndex(xf86OutputPtr output, DisplayModePtr mode)
 {
     ScrnInfoPtr pScrn = output->scrn;
-    VIABIOSInfoPtr pBIOSInfo = VIAPTR(pScrn)->pBIOSInfo;
     ViaPanelInfoPtr Panel = output->driver_private;
     int i;
 
@@ -846,8 +840,6 @@ via_lvds_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
 					DisplayModePtr adjusted_mode)
 {
     ViaPanelInfoPtr Panel = output->driver_private;
-    ScrnInfoPtr pScrn = output->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
 
     xf86SetModeCrtc(adjusted_mode, 0);
     if (!Panel->Center && (mode->HDisplay < Panel->NativeWidth ||
@@ -1231,8 +1223,6 @@ via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
      */
     if (pVia->pVbe) {
         if (!pVia->useLegacyVBE) {
-            VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-
             /*
              * FIXME: Should we always set the panel expansion?
              * Does it depend on the resolution?
@@ -1257,8 +1247,6 @@ via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
             break;
         }
     } else {
-        VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-
         if (!pVia->UseLegacyModeSwitch) {
             if (Panel->Scale) {
                 ViaPanelScale(pScrn, mode->HDisplay, mode->VDisplay,
@@ -1309,7 +1297,6 @@ via_lvds_detect(xf86OutputPtr output)
     ViaPanelInfoPtr panel = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
     if (!pVia->UseLegacyModeSwitch) {
@@ -1495,7 +1482,6 @@ void
 via_lvds_init(ScrnInfoPtr pScrn)
 {
     ViaPanelInfoPtr Panel = (ViaPanelInfoPtr) xnfcalloc(sizeof(ViaPanelInfoRec), 1);
-    xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
     OptionInfoPtr  Options = xnfalloc(sizeof(ViaPanelOptions));
     MessageType from = X_DEFAULT;
     VIAPtr pVia = VIAPTR(pScrn);

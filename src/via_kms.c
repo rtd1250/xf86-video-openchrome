@@ -322,7 +322,6 @@ drmmode_load_cursor_argb (xf86CrtcPtr crtc, CARD32 *image)
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
     xf86CursorInfoPtr cursor_info = xf86_config->cursor_info;
     uint32_t handle = drmmode_crtc->cursor_bo->handle, *ptr;
-    int i;
 
     /* cursor should be mapped already */
     ptr = drm_bo_map(crtc->scrn, drmmode_crtc->cursor_bo);
@@ -927,7 +926,7 @@ static const xf86CrtcConfigFuncsRec drmmode_xf86crtc_config_funcs = {
 
 Bool KMSCrtcInit(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
 {
-    int ret, i;
+    int i;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "KMSCrtcInit\n"));
     xf86CrtcConfigInit(pScrn, &drmmode_xf86crtc_config_funcs);

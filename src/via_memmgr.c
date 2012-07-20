@@ -53,7 +53,6 @@ viaOffScreenLinear(struct buffer_object *obj, ScrnInfoPtr pScrn,
                    unsigned long size)
 {
     int depth = pScrn->bitsPerPixel >> 3;
-    VIAPtr pVia = VIAPTR(pScrn);
     FBLinearPtr linear;
 
     linear = xf86AllocateOffscreenLinear(pScrn->pScreen,

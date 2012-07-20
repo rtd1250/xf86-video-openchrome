@@ -382,7 +382,6 @@ static const xf86OutputFuncsRec via_tv_funcs = {
 static Bool
 via_tv_init(ScrnInfoPtr pScrn)
 {
-    xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
     xf86OutputPtr output = NULL;
@@ -612,9 +611,7 @@ static const xf86OutputFuncsRec via_dp_funcs = {
 void
 via_dp_init(ScrnInfoPtr pScrn)
 {
-    xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
     xf86OutputPtr output = NULL;
 
     if (pVia->pI2CBus2)
@@ -788,7 +785,6 @@ static const xf86OutputFuncsRec via_analog_funcs = {
 void
 via_analog_init(ScrnInfoPtr pScrn)
 {
-    xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
     xf86OutputPtr output = NULL;

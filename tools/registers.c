@@ -1071,7 +1071,6 @@ static int parse_ioreg(u_int16_t *reg, u_int8_t *index, char *str)
 {
 	char *dot;
 	char buf[255];
-	unsigned long ul;
 
 	memset(buf, 0, sizeof(*buf));
 	strncpy(buf, str, sizeof(buf)-1);

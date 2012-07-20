@@ -1762,7 +1762,6 @@ static Bool
 VIAScreenInit(SCREEN_INIT_ARGS_DECL)
 {
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
-    xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     int pitch;
 

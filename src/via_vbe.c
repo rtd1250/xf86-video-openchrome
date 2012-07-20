@@ -190,7 +190,6 @@ ViaVbeSetMode(ScrnInfoPtr pScrn, DisplayModePtr pMode)
     VbeModeInfoData *data;
 
     pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
     int mode;
     int refreshRate;
 

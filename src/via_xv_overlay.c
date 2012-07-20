@@ -1132,7 +1132,6 @@ static long
 AddHQVSurface(ScrnInfoPtr pScrn, unsigned int numbuf, CARD32 fourcc)
 {
     unsigned int i, width, height, pitch, fbsize, addr;
-    unsigned long retCode;
     BOOL isplanar;
     void *buf;
 
@@ -1180,7 +1179,6 @@ CreateSurface(ScrnInfoPtr pScrn, CARD32 FourCC, CARD16 Width,
 {
     VIAPtr pVia = VIAPTR(pScrn);
     unsigned long pitch, fbsize, addr;
-    unsigned long retCode;
     BOOL isplanar;
     void *buf;
 
@@ -1743,7 +1741,6 @@ SetVideoWindow(ScrnInfoPtr pScrn, unsigned long videoFlag,
                LPDDUPDATEOVERLAY pUpdate)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
     CARD32 left = pUpdate->DstLeft;
     CARD32 top = pUpdate->DstTop;
     CARD32 right = pUpdate->DstRight - 1;
@@ -1812,7 +1809,6 @@ Upd_Video(xf86CrtcPtr crtc, unsigned long videoFlag,
     drmmode_crtc_private_ptr iga = crtc->driver_private;
     ScrnInfoPtr pScrn = crtc->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAHWDiff *hwDiff = &pVia->HWDiff;
     unsigned long vidCtl = 0, compose;

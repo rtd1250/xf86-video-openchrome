@@ -475,7 +475,6 @@ ViaFirstCRTCSetStartingAddress(ScrnInfoPtr pScrn, int x, int y)
     VIAPtr pVia = VIAPTR(pScrn);
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     CARD32 Base;
-    CARD32 tmp;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaFirstCRTCSetStartingAddress\n"));
 
@@ -989,10 +988,9 @@ iga1_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
     ScrnInfoPtr pScrn = crtc->scrn;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
     int SR1A, SR1B, CR67, CR6A;
     LOCO colors[size];
-    int i, index;
+    int i;
 
     for (i = 0; i < size; i++) {
         colors[i].red = red[i] >> 8;
@@ -1391,10 +1389,9 @@ iga2_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
     ScrnInfoPtr pScrn = crtc->scrn;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
     int SR1A, SR1B, CR67, CR6A;
     LOCO colors[size];
-    int i, index;
+    int i;
 
     for (i = 0; i < size; i++) {
         colors[i].red = red[i] >> 8;

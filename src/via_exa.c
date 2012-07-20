@@ -920,7 +920,7 @@ viaFinishInitAccel(ScreenPtr pScreen)
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
 #ifdef XF86DRI
-    int size, ret;
+    int size;
 
     if (pVia->directRenderingType && pVia->useEXA) {
 

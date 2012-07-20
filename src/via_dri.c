@@ -899,7 +899,6 @@ viaDRIOffscreenSave(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     unsigned long srcSize = pVia->driOffScreenMem->size;
-    VIADRIPtr pVIADRI = pVia->pDRIInfo->devPrivate;
     int err;
 
     if (pVia->driOffScreenSave)
@@ -933,7 +932,6 @@ void
 viaDRIOffscreenRestore(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    VIADRIPtr pVIADRI = pVia->pDRIInfo->devPrivate;
 
     if (pVia->driOffScreenSave) {
         void *src, *dst = drm_bo_map(pScrn, pVia->driOffScreenMem);
