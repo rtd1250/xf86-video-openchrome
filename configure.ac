@@ -116,7 +116,7 @@ if test x$XSERVER_LIBPCIACCESS = xyes; then
 fi
 
 if test "$DRI" != no; then
-        PKG_CHECK_MODULES(DRI, [libdrm >= 2.2 xf86driproto])
+        PKG_CHECK_MODULES(DRI, [libdrm >= 2.0 xf86driproto])
         save_CPPFLAGS="$CPPFLAGS"
         CPPFLAGS="$XORG_CFLAGS $DRI_CFLAGS"
         AC_CHECK_HEADER([dri.h],
