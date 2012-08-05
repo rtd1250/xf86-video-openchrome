@@ -44,8 +44,7 @@
 static void
 ViaI2C1PutBits(I2CBusPtr Bus, int clock, int data)
 {
-    SCRN_INFO_PTR(Bus->scrnIndex);
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    vgaHWPtr hwp = Bus->DriverPrivate.ptr;
     CARD8 value = 0x01; /* Enable */
 
     if (clock)
@@ -60,8 +59,7 @@ ViaI2C1PutBits(I2CBusPtr Bus, int clock, int data)
 static void
 ViaI2C1GetBits(I2CBusPtr Bus, int *clock, int *data)
 {
-    SCRN_INFO_PTR(Bus->scrnIndex);
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    vgaHWPtr hwp = Bus->DriverPrivate.ptr;
     CARD8 value = hwp->readSeq(hwp, 0x26);
 
     *clock = (value & SCL_READ) != 0;
@@ -69,38 +67,36 @@ ViaI2C1GetBits(I2CBusPtr Bus, int *clock, int *data)
 }
 
 static I2CBusPtr
-ViaI2CBus1Init(int scrnIndex)
+ViaI2CBus1Init(ScrnInfoPtr pScrn)
 {
     I2CBusPtr pI2CBus = xf86CreateI2CBusRec();
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
 
-    DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "ViaI2CBus1Init\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaI2CBus1Init\n"));
 
     if (!pI2CBus)
         return NULL;
 
     pI2CBus->BusName = "I2C bus 1";
-    pI2CBus->scrnIndex = scrnIndex;
+    pI2CBus->scrnIndex = pScrn->scrnIndex;
     pI2CBus->I2CPutBits = ViaI2C1PutBits;
     pI2CBus->I2CGetBits = ViaI2C1GetBits;
+    pI2CBus->DriverPrivate.ptr = hwp;
 
     if (!xf86I2CBusInit(pI2CBus)) {
         xf86DestroyI2CBusRec(pI2CBus, TRUE, FALSE);
         return NULL;
     }
-
     return pI2CBus;
 }
-
 
 /*
  * First data bus I2C: tends to have TV-encoders.
  */
-
 static void
 ViaI2C2PutBits(I2CBusPtr Bus, int clock, int data)
 {
-    SCRN_INFO_PTR(Bus->scrnIndex);
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    vgaHWPtr hwp = Bus->DriverPrivate.ptr;
     CARD8 value = 0x01; /* Enable */
 
     if (clock)
@@ -115,8 +111,7 @@ ViaI2C2PutBits(I2CBusPtr Bus, int clock, int data)
 static void
 ViaI2C2GetBits(I2CBusPtr Bus, int *clock, int *data)
 {
-    SCRN_INFO_PTR(Bus->scrnIndex);
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    vgaHWPtr hwp = Bus->DriverPrivate.ptr;
     CARD8 value = hwp->readSeq(hwp, 0x31);
 
     *clock = (value & SCL_READ) != 0;
@@ -124,39 +119,37 @@ ViaI2C2GetBits(I2CBusPtr Bus, int *clock, int *data)
 }
 
 static I2CBusPtr
-ViaI2CBus2Init(int scrnIndex)
+ViaI2CBus2Init(ScrnInfoPtr pScrn)
 {
     I2CBusPtr pI2CBus = xf86CreateI2CBusRec();
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
 
-    DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "ViaI2cBus2Init\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaI2cBus2Init\n"));
 
     if (!pI2CBus)
         return NULL;
 
     pI2CBus->BusName = "I2C bus 2";
-    pI2CBus->scrnIndex = scrnIndex;
+    pI2CBus->scrnIndex = pScrn->scrnIndex;
     pI2CBus->I2CPutBits = ViaI2C2PutBits;
     pI2CBus->I2CGetBits = ViaI2C2GetBits;
+    pI2CBus->DriverPrivate.ptr = hwp;
 
     if (!xf86I2CBusInit(pI2CBus)) {
         xf86DestroyI2CBusRec(pI2CBus, TRUE, FALSE);
         return NULL;
     }
-
     return pI2CBus;
 }
-
 
 /*
  * A third I2C bus is implemented by a few IO pins.
  * Requires higher level functions to be used properly.
  */
-
 static Bool
 ViaI2C3Start(I2CBusPtr b, int timeout)
 {
-    SCRN_INFO_PTR(b->scrnIndex);
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    vgaHWPtr hwp = b->DriverPrivate.ptr;
 
     ViaSeqMask(hwp, 0x2C, 0xF0, 0xF0);
     b->I2CUDelay(b, b->RiseFallTime);
@@ -189,7 +182,6 @@ ViaI2C3Address(I2CDevPtr d, I2CSlaveAddr addr)
 
         b->I2CStop(d);
     }
-
     return FALSE;
 }
 
@@ -197,8 +189,7 @@ static void
 ViaI2C3Stop(I2CDevPtr d)
 {
     I2CBusPtr b = d->pI2CBus;
-    SCRN_INFO_PTR(b->scrnIndex);
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    vgaHWPtr hwp = b->DriverPrivate.ptr;
 
     ViaSeqMask(hwp, 0x2C, 0xC0, 0xF0);
     b->I2CUDelay(b, b->RiseFallTime);
@@ -216,8 +207,7 @@ ViaI2C3Stop(I2CDevPtr d)
 static void
 ViaI2C3PutBit(I2CBusPtr b, Bool sda, int timeout)
 {
-    SCRN_INFO_PTR(b->scrnIndex);
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    vgaHWPtr hwp = b->DriverPrivate.ptr;
 
     if (sda)
         ViaSeqMask(hwp, 0x2C, 0x50, 0x50);
@@ -237,8 +227,7 @@ static Bool
 ViaI2C3PutByte(I2CDevPtr d, I2CByte data)
 {
     I2CBusPtr b = d->pI2CBus;
-    SCRN_INFO_PTR(b->scrnIndex);
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    vgaHWPtr hwp = b->DriverPrivate.ptr;
     Bool ret;
     int i;
 
@@ -265,8 +254,7 @@ ViaI2C3PutByte(I2CDevPtr d, I2CByte data)
 static Bool
 ViaI2C3GetBit(I2CBusPtr b, int timeout)
 {
-    SCRN_INFO_PTR(b->scrnIndex);
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    vgaHWPtr hwp = b->DriverPrivate.ptr;
     Bool ret;
 
     ViaSeqMask(hwp, 0x2c, 0x80, 0xC0);
@@ -291,8 +279,7 @@ static Bool
 ViaI2C3GetByte(I2CDevPtr d, I2CByte * data, Bool last)
 {
     I2CBusPtr b = d->pI2CBus;
-    SCRN_INFO_PTR(b->scrnIndex);
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    vgaHWPtr hwp = b->DriverPrivate.ptr;
     int i;
 
     *data = 0x00;
@@ -315,17 +302,18 @@ ViaI2C3GetByte(I2CDevPtr d, I2CByte * data, Bool last)
 }
 
 static I2CBusPtr
-ViaI2CBus3Init(int scrnIndex)
+ViaI2CBus3Init(ScrnInfoPtr pScrn)
 {
     I2CBusPtr pI2CBus = xf86CreateI2CBusRec();
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
 
-    DEBUG(xf86DrvMsg(scrnIndex, X_INFO, "ViaI2CBus3Init\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaI2CBus3Init\n"));
 
     if (!pI2CBus)
         return NULL;
 
     pI2CBus->BusName = "I2C bus 3";
-    pI2CBus->scrnIndex = scrnIndex;
+    pI2CBus->scrnIndex = pScrn->scrnIndex;
     pI2CBus->I2CAddress = ViaI2C3Address;
 #ifdef X_NEED_I2CSTART
     pI2CBus->I2CStart = ViaI2C3Start;
@@ -333,6 +321,7 @@ ViaI2CBus3Init(int scrnIndex)
     pI2CBus->I2CStop = ViaI2C3Stop;
     pI2CBus->I2CPutByte = ViaI2C3PutByte;
     pI2CBus->I2CGetByte = ViaI2C3GetByte;
+    pI2CBus->DriverPrivate.ptr = hwp;
 
     pI2CBus->HoldTime = 10;
     pI2CBus->BitTimeout = 10;
@@ -343,10 +332,8 @@ ViaI2CBus3Init(int scrnIndex)
         xf86DestroyI2CBusRec(pI2CBus, TRUE, FALSE);
         return NULL;
     }
-
     return pI2CBus;
 }
-
 
 #ifdef HAVE_DEBUG
 static void
@@ -372,11 +359,11 @@ ViaI2CInit(ScrnInfoPtr pScrn)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaI2CInit\n"));
 
     if (pVia->I2CDevices & VIA_I2C_BUS1)
-        pVia->pI2CBus1 = ViaI2CBus1Init(pScrn->scrnIndex);
+        pVia->pI2CBus1 = ViaI2CBus1Init(pScrn);
     if (pVia->I2CDevices & VIA_I2C_BUS2)
-        pVia->pI2CBus2 = ViaI2CBus2Init(pScrn->scrnIndex);
+        pVia->pI2CBus2 = ViaI2CBus2Init(pScrn);
     if (pVia->I2CDevices & VIA_I2C_BUS3)
-        pVia->pI2CBus3 = ViaI2CBus3Init(pScrn->scrnIndex);
+        pVia->pI2CBus3 = ViaI2CBus3Init(pScrn);
 
 #ifdef HAVE_DEBUG
     if (pVia->I2CScan) {
