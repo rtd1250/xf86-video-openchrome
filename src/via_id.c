@@ -243,6 +243,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Fujitsu Futro S100",                    VIA_VX800,   0xA0A0, 0x0702, VIA_DEVICE_CRT},
 
     /*** VX855 ***/
+    {"Dell Optiplex FX130",                   VIA_VX855,   0x1028, 0x0509, VIA_DEVICE_CRT},
     {"VIA VT8562C",                           VIA_VX855,   0x1106, 0x5122, VIA_DEVICE_CRT},
     {"OLPC XO 1.5",                           VIA_VX855,   0x152D, 0x0833, VIA_DEVICE_LCD},
 
