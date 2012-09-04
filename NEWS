@@ -1,3 +1,9 @@
+openchrome 0.3.1 (04/09/2012)
+-----------------------------
+
+This is a bugfix release. It mainly fixes a crash at startup with X server 1.13.
+
+
 openchrome 0.3.0 (20/07/2012)
 -----------------------------
 
