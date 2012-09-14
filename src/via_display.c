@@ -978,7 +978,7 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
         if (!ViaVbeSetMode(pScrn, adjusted_mode))
             return;
     }
-    iga1_crtc_set_origin(crtc, 0, 0);
+    iga1_crtc_set_origin(crtc, crtc->x, crtc->y);
 }
 
 static void
@@ -1379,7 +1379,7 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
                 ViaDisplayDisableSimultaneous(pScrn);
         }
     }
-    iga2_crtc_set_origin(crtc, 0, 0);
+    iga2_crtc_set_origin(crtc, crtc->x, crtc->y);
 }
 
 static void
