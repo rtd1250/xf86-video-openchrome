@@ -251,6 +251,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Simmtronics SIMM-PC VX900i",            VIA_VX900,   0x1019, 0x3126, VIA_DEVICE_CRT},
     {"Foxconn L740",                          VIA_VX900,   0x105B, 0x0CFD, VIA_DEVICE_LCD | VIA_DEVICE_CRT},
     {"HP T5550 Thin Client",                  VIA_VX900,   0x1106, 0x7122, VIA_DEVICE_CRT},
+    {"Biostar Viotech 3200+",                 VIA_VX900,   0x1565, 0x120A, VIA_DEVICE_CRT},
     {"ASRock PV530",                          VIA_VX900,   0x1849, 0x7122, VIA_DEVICE_CRT},
 
     /* keep this */
