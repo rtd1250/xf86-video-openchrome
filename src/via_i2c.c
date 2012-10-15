@@ -82,6 +82,10 @@ ViaI2CBus1Init(ScrnInfoPtr pScrn)
     pI2CBus->I2CPutBits = ViaI2C1PutBits;
     pI2CBus->I2CGetBits = ViaI2C1GetBits;
     pI2CBus->DriverPrivate.ptr = hwp;
+    pI2CBus->ByteTimeout = 2200;
+    pI2CBus->StartTimeout = 550;
+    pI2CBus->HoldTime = 40;
+    pI2CBus->BitTimeout = 40;
 
     if (!xf86I2CBusInit(pI2CBus)) {
         xf86DestroyI2CBusRec(pI2CBus, TRUE, FALSE);
