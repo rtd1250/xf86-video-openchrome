@@ -269,14 +269,14 @@ ViaDoubleCheckCLE266Revision(ScrnInfoPtr pScrn)
     hwp->writeCrtc(hwp, 0x4F, 0x55);
     if (hwp->readCrtc(hwp, 0x4F) == 0x55) {
         if (CLE266_REV_IS_AX(pVia->ChipRev))
-	        xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "CLE266 Revision seems"
-		                " to be Cx, yet %d was detected previously.\n",
-                        pVia->ChipRev);
+            xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "CLE266 Revision seems"
+                       " to be Cx, yet %d was detected previously.\n",
+                       pVia->ChipRev);
     } else {
         if (CLE266_REV_IS_CX(pVia->ChipRev))
-	        xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "CLE266 Revision seems"
-		                " to be Ax, yet %d was detected previously.\n",
-                        pVia->ChipRev);
+            xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "CLE266 Revision seems"
+                       " to be Ax, yet %d was detected previously.\n",
+                       pVia->ChipRev);
     }
     hwp->writeCrtc(hwp, 0x4F, tmp);
 }
@@ -299,7 +299,7 @@ ViaCheckCardId(ScrnInfoPtr pScrn)
             xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "Detected %s. Card-Ids (%4X|%4X)\n", Id->String, SUBVENDOR_ID(pVia->PciInfo), SUBSYS_ID(pVia->PciInfo));
             pVia->Id = Id;
             return;
-	    }
+        }
     }
 
     xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
