@@ -303,7 +303,7 @@ ViaCheckCardId(ScrnInfoPtr pScrn)
     }
 
     xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-	       "Unknown Card-Ids (%4X|%4X|%4X), Chipset: %s; please report to openchrome-users@openchrome.org\n",
+               "Unknown Card-Ids (%4X|%4X|%4X), Chipset: %s; please report to openchrome-users@lists.freedesktop.org\n",
                DEVICE_ID(pVia->PciInfo), SUBVENDOR_ID(pVia->PciInfo), SUBSYS_ID(pVia->PciInfo), pScrn->chipset);
     pVia->Id = NULL;
 
