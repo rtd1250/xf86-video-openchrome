@@ -97,6 +97,16 @@ struct io_reg graphic_regs = {
 	},
 };
 
+
+static struct bit_desc crtc_32_desc[] = {
+	{ 0x01, "Real-Time Flipping", },
+	{ 0x02, "Digital Video Port (DVP) Grammar Correction", },
+	{ 0x04, "Display End Blanking Enable", },
+	{ 0x08, "CRT SYNC Driving Selection (0: Low, 1: High)", },
+	{ 0xE0, "HSYNC Delay Number by VCLK", },
+	{ 0 },
+};
+
 struct io_reg crtc_regs = {
 	.io_port_addr = 0x3d4,
 	.io_port_data = 0x3d5,
@@ -131,9 +141,9 @@ struct io_reg crtc_regs = {
 		/* CRT Controller Extended Register */
 		[0x30] = { "Display Fetch Blocking Control", },
 		[0x31] = { "Half Line Position", },
-		[0x32] = { "Mode Control", },
+		[0x32] = { "Mode Control", crtc_32_desc, },
 		[0x33] = { "Hsync Adjuster", },
-		[0x34] = { "Starting Address Overflow", },
+		[0x34] = { "Starting Address Overflow, Bits [23:16]", },
 		[0x35] = { "Extended Overflow", },
 		[0x36] = { "Power Management Control 3", },
 		[0x37] = { "DAC Control", },
@@ -318,6 +328,16 @@ static struct bit_desc seq_19_desc[] = {
 	{ 0 },
 };
 
+
+static struct bit_desc seq_1a_desc[] = {
+	{ 0x01, "LUT Shadow Access", },
+	{ 0x04, "PCI Burst Write Wait State Select (0: 0 Wait state, 1: 1 Wait state)", },
+	{ 0x08, "Extended Mode Memory Access Enable (0: Disable, 1: Enable)", },
+	{ 0x40, "Software Reset (0: Default value, 1: Reset)", },
+	{ 0x80, "Read Cache Enable (0: Disable, 1: Enable)", },
+	{ 0 },
+};
+
 static struct bit_desc seq_1b_desc[] = {
 	{ 0x01, "Primary Display's LUT Off", },
 	{ 0x18, "Primary Display Engine VCK Gating", },
@@ -477,8 +497,8 @@ struct io_reg sequencer_regs = {
 		[0x17] = { "Display FIFO Control", },
 		[0x18] = { "Display Arbiter Control 0", },
 		[0x19] = { "Power Management", seq_19_desc, },
-		[0x1a] = { "PCI Bus Control", },
-		[0x1b] = { "Power Management Control 0", seq_1b_desc,  },
+		[0x1a] = { "PCI Bus Control", seq_1a_desc, },
+		[0x1b] = { "Power Management Control 0", seq_1b_desc, },
 		[0x1c] = { "Horizontal Display Fetch Count Data", },
 		[0x1d] = { "Horizontal Display Fetch Count Control", },
 		[0x1e] = { "Power Management Control", seq_1e_desc, },
@@ -506,7 +526,7 @@ struct io_reg sequencer_regs = {
 		[0x3f] = { "Power Management Control 2", seq_3f_desc, },
 		[0x40] = { "PLL Control", seq_40_desc, },
 		[0x41] = { "Typical Arbiter Control 1", },
-		[0x42] = { "Typical Arbiter Control 1", },
+		[0x42] = { "Typical Arbiter Control 2", },
 		[0x43] = { "Graphics Bonding Option", seq_43_desc, },
 		[0x44] = { "VCK Clock Synthesizer Value 0", },
 		[0x45] = { "VCK Clock Synthesizer Value 1", },
@@ -543,14 +563,14 @@ struct io_reg sequencer_regs = {
 		[0x65] = { "Power Management Control 6", },
 		[0x66] = { "GTI Control 0", },
 		[0x67] = { "GTI Control 1", },
-		[0x68] = { "GTI Control 1", },
-		[0x69] = { "GTI Control 1", },
-		[0x6a] = { "GTI Control 1", },
-		[0x6b] = { "GTI Control 1", },
-		[0x6c] = { "GTI Control 1", },
-		[0x6d] = { "GTI Control 1", },
-		[0x6e] = { "GTI Control 1", },
-		[0x6f] = { "GTI Control 1", },
+		[0x68] = { "GTI Control 2", },
+		[0x69] = { "GTI Control 3", },
+		[0x6a] = { "GTI Control 4", },
+		[0x6b] = { "GTI Control 5", },
+		[0x6c] = { "GTI Control 6", },
+		[0x6d] = { "GTI Control 7", },
+		[0x6e] = { "GTI Control 8", },
+		[0x6f] = { "GTI Control 9", },
 		[0x70] = { "GARB Control 0", },
 		[0x71] = { "Typical Arbiter Control 2", },
 		[0x72] = { "Typical Arbiter Control 3", },
@@ -809,7 +829,7 @@ static void dump_registers(struct io_reg *ior)
 {
 	u_int8_t idx;
 
-	printf("%s register dump:\n", ior->name);
+	printf("%s register dump (IO Port address: 0x%03x): \n", ior->name, ior->io_port_addr);
 	for (idx = 0; idx < 0xff; idx++) {
 		u_int8_t val;
 		struct bit_desc *desc = ior->index[idx].bit_desc;
@@ -819,7 +839,7 @@ static void dump_registers(struct io_reg *ior)
 
 		outb(idx, ior->io_port_addr);
 		val = inb(ior->io_port_data);
-		printf("    0x%02x = 0x%02x (%s)\n", idx, val,	
+		printf("   %03x.%02x = 0x%02x (%s)\n", ior->io_port_data, idx, val,	
 			ior->index[idx].name);
 		
 		if (!desc) 
@@ -1110,8 +1130,8 @@ static void usage(void)
 	printf("-d | --dump  : Dump all registers.\n");
 	printf("-p | --pll   : Display PLL.\n");
 	printf("-m | --mode  : Display modes.\n");
-	printf("-r | --read  : Read register.\n");
-	printf("-w | --write : Write register.\n");
+	printf("-r | --read  : Read register. Example : $0 -r 3d5.17\n");
+	printf("-w | --write : Write register. Example : $0 -w 3d5.17 0xa3\n");
 	printf("-g | --gpio  : Display GPIO state.\n");
 }
 
