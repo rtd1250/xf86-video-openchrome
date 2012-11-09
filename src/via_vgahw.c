@@ -309,9 +309,7 @@ VIARestore(ScrnInfoPtr pScrn)
          standard vga regs, or system will hang. *=*/
     /*=* TODO Check is reset IGA2 channel before disable IGA2 channel
          is necessary or it may cause some line garbage. *=*/
-    hwp->writeCrtc(hwp, 0x6A, 0x00);
-    hwp->writeCrtc(hwp, 0x6B, 0x00);
-    hwp->writeCrtc(hwp, 0x6C, 0x00);
+    ViaDisplayInit(pScrn);
 
     /* Gamma must be disabled before restoring palette */
     ViaGammaDisable(pScrn);

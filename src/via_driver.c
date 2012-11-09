@@ -683,7 +683,6 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
 
     switch (pVia->Chipset) {
         case VIA_CLE266:
-            pVia->UseLegacyModeSwitch = TRUE;
             pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP0;
             break;
         case VIA_KM400:

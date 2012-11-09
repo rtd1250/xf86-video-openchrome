@@ -1718,9 +1718,6 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
     clockRanges->doubleScanAllowed = FALSE;
     pScrn->clockRanges = clockRanges;
 
-    /* Setup IGA registers */
-    ViaDisplayInit(pScrn);
-
     /*
      * Now handle the outputs
      */
