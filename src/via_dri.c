@@ -119,7 +119,7 @@ VIADRIIrqInit(ScrnInfoPtr pScrn, VIADRIPtr pVIADRI)
 
     pVIADRI->irqEnabled = drmGetInterruptFromBusID
             (pVia->drmmode.fd,
-#ifdef XSERVER_LIBPCIACCESS
+#ifdef HAVE_PCIACCESS
              ((pVia->PciInfo->domain << 8) | pVia->PciInfo->bus),
              pVia->PciInfo->dev, pVia->PciInfo->func
 #else

@@ -722,7 +722,7 @@
 #define MPG_SLICE_LENGTH	0x9C
 #define	MPG_SLICE_DATA		0xA0
 
-#ifdef XSERVER_LIBPCIACCESS
+#ifdef HAVE_PCIACCESS
 #define VIA_MEMBASE(p,n)  (p)->regions[(n)].base_addr
 #define VENDOR_ID(p)      (p)->vendor_id
 #define DEVICE_ID(p)      (p)->device_id

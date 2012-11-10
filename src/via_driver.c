@@ -67,10 +67,10 @@ static const ViaDRMVersion drmCompat = { 3, 1, 0 };
 /* Prototypes. */
 static void VIAIdentify(int flags);
 
-#ifdef XSERVER_LIBPCIACCESS
+#ifdef HAVE_PCIACCESS
 static Bool via_pci_probe(DriverPtr drv, int entity_num,
                           struct pci_device *dev, intptr_t match_data);
-#else /* !XSERVER_LIBPCIACCESS */
+#else /* !HAVE_PCIACCESS */
 static Bool VIAProbe(DriverPtr drv, int flags);
 #endif
 
@@ -79,7 +79,7 @@ static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags);
 static Bool VIAScreenInit(SCREEN_INIT_ARGS_DECL);
 static const OptionInfoRec *VIAAvailableOptions(int chipid, int busid);
 
-#ifdef XSERVER_LIBPCIACCESS
+#ifdef HAVE_PCIACCESS
 
 #define VIA_DEVICE_MATCH(d,i) \
     { 0x1106, (d), PCI_MATCH_ANY, PCI_MATCH_ANY, 0, 0, (i) }
@@ -100,13 +100,13 @@ static const struct pci_id_match via_device_match[] = {
     { 0, 0, 0 },
 };
 
-#endif /* XSERVER_LIBPCIACCESS */
+#endif /* HAVE_PCIACCESS */
 
 _X_EXPORT DriverRec VIA = {
     VIA_VERSION,
     DRIVER_NAME,
     VIAIdentify,
-#ifdef XSERVER_LIBPCIACCESS
+#ifdef HAVE_PCIACCESS
     NULL,
 #else
     VIAProbe,
@@ -115,7 +115,7 @@ _X_EXPORT DriverRec VIA = {
     NULL,
     0,
     NULL,
-#ifdef XSERVER_LIBPCIACCESS
+#ifdef HAVE_PCIACCESS
     via_device_match,
     via_pci_probe
 #endif
@@ -262,7 +262,7 @@ VIASetup(pointer module, pointer opts, int *errmaj, int *errmin)
     if (!setupDone) {
         setupDone = TRUE;
         xf86AddDriver(&VIA, module,
-#ifdef XSERVER_LIBPCIACCESS
+#ifdef HAVE_PCIACCESS
                      HaveDriverFuncs
 #else
                      0
@@ -465,7 +465,7 @@ VIAIdentify(int flags)
                       VIAChipsets);
 }
 
-#ifdef XSERVER_LIBPCIACCESS
+#ifdef HAVE_PCIACCESS
 static Bool
 via_pci_probe(DriverPtr driver, int entity_num,
               struct pci_device *device, intptr_t match_data)
@@ -502,7 +502,7 @@ via_pci_probe(DriverPtr driver, int entity_num,
     }
     return scrn != NULL;
 }
-#else /* !XSERVER_LIBPCIACCESS */
+#else /* !HAVE_PCIACCESS */
 static Bool
 VIAProbe(DriverPtr drv, int flags)
 {
@@ -611,7 +611,7 @@ VIAProbe(DriverPtr drv, int flags)
     return foundScreen;
 
 } /* VIAProbe */
-#endif /* !XSERVER_LIBPCIACCESS */
+#endif /* !HAVE_PCIACCESS */
 
 static int
 LookupChipSet(PciChipsets *pset, int chipSet)
@@ -894,7 +894,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     pVia = VIAPTR(pScrn);
     pVia->IsSecondary = FALSE;
     pEnt = xf86GetEntityInfo(pScrn->entityList[0]);
-#ifndef XSERVER_LIBPCIACCESS
+#ifndef HAVE_PCIACCESS
     if (pEnt->resources) {
         free(pEnt);
         VIAFreeRec(pScrn);
@@ -943,7 +943,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     }
 
     pVia->PciInfo = xf86GetPciInfoForEntity(pEnt->index);
-#ifndef XSERVER_LIBPCIACCESS
+#ifndef HAVE_PCIACCESS
     xf86RegisterResources(pEnt->index, NULL, ResNone);
 #endif
     if (pEnt->device->chipset && *pEnt->device->chipset) {
@@ -973,7 +973,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
                    pVia->ChipRev);
     } else {
         /* Read PCI bus 0, dev 0, function 0, index 0xF6 to get chip revision */
-#ifdef XSERVER_LIBPCIACCESS
+#ifdef HAVE_PCIACCESS
         struct pci_device *bridge = pci_device_get_parent_bridge(pVia->PciInfo);
         uint8_t rev = 0;
 

@@ -60,7 +60,7 @@ VIAUnmapMem(ScrnInfoPtr pScrn)
 
     ViaMMIODisable(pScrn);
 
-#ifdef XSERVER_LIBPCIACCESS
+#ifdef HAVE_PCIACCESS
     if (pVia->MapBase)
         pci_device_unmap_range(pVia->PciInfo, (pointer) pVia->MapBase,
                                VIA_MMIO_REGSIZE);
@@ -116,7 +116,7 @@ VIAMapMMIO(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
 
-#ifdef XSERVER_LIBPCIACCESS
+#ifdef HAVE_PCIACCESS
     pVia->MmioBase = pVia->PciInfo->regions[1].base_addr;
     int err;
 #else
@@ -129,7 +129,7 @@ VIAMapMMIO(ScrnInfoPtr pScrn)
                "mapping MMIO @ 0x%lx with size 0x%x\n",
                pVia->MmioBase, VIA_MMIO_REGSIZE);
 
-#ifdef XSERVER_LIBPCIACCESS
+#ifdef HAVE_PCIACCESS
     err = pci_device_map_range(pVia->PciInfo,
                                pVia->MmioBase,
                                VIA_MMIO_REGSIZE,
@@ -152,7 +152,7 @@ VIAMapMMIO(ScrnInfoPtr pScrn)
                "mapping BitBlt MMIO @ 0x%lx with size 0x%x\n",
                pVia->MmioBase + VIA_MMIO_BLTBASE, VIA_MMIO_BLTSIZE);
 
-#ifdef XSERVER_LIBPCIACCESS
+#ifdef HAVE_PCIACCESS
     err = pci_device_map_range(pVia->PciInfo,
                                pVia->MmioBase + VIA_MMIO_BLTBASE,
                                VIA_MMIO_BLTSIZE,
@@ -214,7 +214,7 @@ VIAMapFB(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
 
-#ifdef XSERVER_LIBPCIACCESS
+#ifdef HAVE_PCIACCESS
     if (pVia->Chipset == VIA_VX900) {
         pVia->FrameBufferBase = pVia->PciInfo->regions[2].base_addr;
     } else {
@@ -236,34 +236,33 @@ VIAMapFB(ScrnInfoPtr pScrn)
 
     if (pVia->videoRambytes) {
 
-#ifndef XSERVER_LIBPCIACCESS
-         *
+#ifndef HAVE_PCIACCESS
+        /*
          * FIXME: This is a hack to get rid of offending wrongly sized
          * MTRR regions set up by the VIA BIOS. Should be taken care of
          * in the OS support layer.
-         *
-
+         */
         unsigned char *tmp;
 
         tmp = xf86MapPciMem(pScrn->scrnIndex, VIDMEM_MMIO, pVia->PciTag,
                             pVia->FrameBufferBase, pVia->videoRambytes);
         xf86UnMapVidMem(pScrn->scrnIndex, (pointer) tmp, pVia->videoRambytes);
 
-         *
+        /*
          * And, as if this wasn't enough, 2.6 series kernels don't
          * remove MTRR regions on the first attempt. So try again.
-         *
+         */
 
         tmp = xf86MapPciMem(pScrn->scrnIndex, VIDMEM_MMIO, pVia->PciTag,
                             pVia->FrameBufferBase, pVia->videoRambytes);
         xf86UnMapVidMem(pScrn->scrnIndex, (pointer) tmp, pVia->videoRambytes);
 
-         *
+        /*
          * End of hack.
-         *
+         */
 #endif
 
-#ifdef XSERVER_LIBPCIACCESS
+#ifdef HAVE_PCIACCESS
         err = pci_device_map_range(pVia->PciInfo, pVia->FrameBufferBase,
                                    pVia->videoRambytes,
                                    (PCI_DEV_MAP_FLAG_WRITABLE |
@@ -294,7 +293,7 @@ VIAMapFB(ScrnInfoPtr pScrn)
                    pVia->FBBase, pVia->FBFreeStart, pVia->FBFreeEnd);
     }
 
-#ifdef XSERVER_LIBPCIACCESS
+#ifdef HAVE_PCIACCESS
     pScrn->memPhysBase = pVia->PciInfo->regions[0].base_addr;
 #else
     pScrn->memPhysBase = pVia->PciInfo->memBase[0];
@@ -678,7 +677,7 @@ UMSPreInit(ScrnInfoPtr pScrn)
     VIAPtr pVia = VIAPTR(pScrn);
     CARD8 videoRam;
     vgaHWPtr hwp;
-#ifdef XSERVER_LIBPCIACCESS
+#ifdef HAVE_PCIACCESS
     struct pci_device *vgaDevice = pci_device_find_by_slot(0, 0, 0, 3);
     struct pci_device *bridge = pci_device_find_by_slot(0, 0, 0, 0);
 #endif
@@ -701,7 +700,7 @@ UMSPreInit(ScrnInfoPtr pScrn)
 
     switch (pVia->Chipset) {
         case VIA_CLE266:
-#ifdef XSERVER_LIBPCIACCESS
+#ifdef HAVE_PCIACCESS
             pci_device_cfg_read_u8(bridge, &videoRam, 0xE1);
 #else
             videoRam = pciReadByte(pciTag(0, 0, 0), 0xE1) & 0x70;
@@ -709,7 +708,7 @@ UMSPreInit(ScrnInfoPtr pScrn)
             pScrn->videoRam = (1 << ((videoRam & 0x70) >> 4)) << 10;
             break;
         case VIA_KM400:
-#ifdef XSERVER_LIBPCIACCESS
+#ifdef HAVE_PCIACCESS
             pci_device_cfg_read_u8(bridge, &videoRam, 0xE1);
 #else
             videoRam = pciReadByte(pciTag(0, 0, 0), 0xE1) & 0x70;
@@ -725,7 +724,7 @@ UMSPreInit(ScrnInfoPtr pScrn)
         case VIA_PM800:
         case VIA_VM800:
         case VIA_K8M800:
-#ifdef XSERVER_LIBPCIACCESS
+#ifdef HAVE_PCIACCESS
             pci_device_cfg_read_u8(vgaDevice, &videoRam, 0xA1);
 #else
             videoRam = pciReadByte(pciTag(0, 0, 3), 0xA1) & 0x70;
@@ -739,7 +738,7 @@ UMSPreInit(ScrnInfoPtr pScrn)
         case VIA_VX800:
         case VIA_VX855:
         case VIA_VX900:
-#ifdef XSERVER_LIBPCIACCESS
+#ifdef HAVE_PCIACCESS
             pci_device_cfg_read_u8(vgaDevice, &videoRam, 0xA1);
 #else
             videoRam = pciReadByte(pciTag(0, 0, 3), 0xA1) & 0x70;
@@ -802,7 +801,7 @@ UMSPreInit(ScrnInfoPtr pScrn)
     pVia->videoRambytes = pScrn->videoRam << 10;
 
     /* maybe throw in some more sanity checks here */
-#ifndef XSERVER_LIBPCIACCESS
+#ifndef HAVE_PCIACCESS
     pVia->PciTag = pciTag(pVia->PciInfo->bus, pVia->PciInfo->device,
                           pVia->PciInfo->func);
 #endif
