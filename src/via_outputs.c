@@ -755,8 +755,43 @@ via_analog_detect(xf86OutputPtr output)
         xf86OutputSetEDID(output, mon);
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "DDC pI2CBus1 detected a CRT\n"));
         status = XF86OutputStatusConnected;
-    } else
-        ViaDisplayDisableCRT(pScrn);
+    } else {
+        vgaHWPtr hwp = VGAHWPTR(pScrn);
+        CARD8 SR01 = hwp->readSeq(hwp, 0x01);
+        CARD8 SR40 = hwp->readSeq(hwp, 0x40);
+        CARD8 CR36 = hwp->readCrtc(hwp, 0x36);
+
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "Test for CRT with VSYNC\n"));
+        /* We have to power on the display to detect it */
+        ViaSeqMask(hwp, 0x01, 0x00, 0x20);
+        ViaCrtcMask(hwp, 0x36, 0x00, 0xF0);
+
+        /* Wait for vblank */
+        usleep(16);
+
+        /* Detect the load on pins */
+        ViaSeqMask(hwp, 0x40, 0x80, 0x80);
+
+        if ((VIA_CX700 == pVia->Chipset) ||
+            (VIA_VX800 == pVia->Chipset) ||
+            (VIA_VX855 == pVia->Chipset) ||
+            (VIA_VX900 == pVia->Chipset))
+            ViaSeqMask(hwp, 0x40, 0x00, 0x80);
+
+        if (ViaVgahwIn(hwp, 0x3C2) & 0x20)
+            status = XF86OutputStatusConnected;
+
+        if ((VIA_CX700 == pVia->Chipset) ||
+            (VIA_VX800 == pVia->Chipset) ||
+            (VIA_VX855 == pVia->Chipset) ||
+            (VIA_VX900 == pVia->Chipset))
+            ViaSeqMask(hwp, 0x40, 0x00, 0x80);
+
+        /* Restore previous state */
+        hwp->writeSeq(hwp, 0x40, SR40);
+        hwp->writeSeq(hwp, 0x01, SR01);
+        hwp->writeCrtc(hwp, 0x36, CR36);
+    }
     return status;
 }
 

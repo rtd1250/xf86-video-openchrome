@@ -40,7 +40,7 @@
 #define PIOOFFSET 0
 #endif
 
-static CARD8
+CARD8
 ViaVgahwIn(vgaHWPtr hwp, int address)
 {
     if (hwp->MMIOBase)
