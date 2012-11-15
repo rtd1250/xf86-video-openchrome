@@ -305,33 +305,46 @@ viaExaCheckComposite_H6(int op, PicturePtr pSrcPicture,
     VIAPtr pVia = VIAPTR(pScrn);
     Via3DState *v3d = &pVia->v3d;
 
+    if (!pSrcPicture->pDrawable) {
+        return FALSE;
+    }
     /* Reject small composites early. They are done much faster in software. */
     if (!pSrcPicture->repeat &&
         pSrcPicture->pDrawable->width *
-        pSrcPicture->pDrawable->height < VIA_MIN_COMPOSITE)
-        return FALSE;
+        pSrcPicture->pDrawable->height < VIA_MIN_COMPOSITE) {
 
-    if (pMaskPicture &&
+#ifdef VIA_DEBUG_COMPOSITE
+        viaExaPrintCompositeInfo("Source picture too small", op,  pSrcPicture, pMaskPicture, pDstPicture);
+#endif
+        return FALSE;
+    }
+
+    if (pMaskPicture && pMaskPicture->pDrawable &&
         !pMaskPicture->repeat &&
         pMaskPicture->pDrawable->width *
-        pMaskPicture->pDrawable->height < VIA_MIN_COMPOSITE)
+        pMaskPicture->pDrawable->height < VIA_MIN_COMPOSITE) {
+#ifdef VIA_DEBUG_COMPOSITE
+        viaExaPrintCompositeInfo("Mask picture too small", op,  pSrcPicture, pMaskPicture, pDstPicture);
+#endif
         return FALSE;
+    }
 
-    if (pMaskPicture && pMaskPicture->repeat != RepeatNormal)
+    if (pMaskPicture && pMaskPicture->repeat && pMaskPicture->repeatType != RepeatNormal) {
+#ifdef VIA_DEBUG_COMPOSITE
+        viaExaPrintCompositeInfo("Repeat is different than normal", op,  pSrcPicture, pMaskPicture, pDstPicture);
+#endif
         return FALSE;
-
+    }
     if (pMaskPicture && pMaskPicture->componentAlpha) {
 #ifdef VIA_DEBUG_COMPOSITE
-        ErrorF("Component Alpha operation\n");
+        viaExaPrintCompositeInfo("Component Alpha operation", op,  pSrcPicture, pMaskPicture, pDstPicture);
 #endif
         return FALSE;
     }
 
     if (!v3d->opSupported(op)) {
 #ifdef VIA_DEBUG_COMPOSITE
-#warning Composite verbose debug turned on.
-        ErrorF("Operator not supported\n");
-        viaExaPrintComposite(op, pSrcPicture, pMaskPicture, pDstPicture);
+        viaExaPrintCompositeInfo("Operator not supported", op, pSrcPicture, pMaskPicture, pDstPicture);
 #endif
         return FALSE;
     }
@@ -345,8 +358,7 @@ viaExaCheckComposite_H6(int op, PicturePtr pSrcPicture,
 
     if (!v3d->dstSupported(pDstPicture->format)) {
 #ifdef VIA_DEBUG_COMPOSITE
-        ErrorF("Destination format not supported:\n");
-        viaExaPrintComposite(op, pSrcPicture, pMaskPicture, pDstPicture);
+        viaExaPrintCompositeInfo("Destination format not supported", op, pSrcPicture, pMaskPicture, pDstPicture);
 #endif
         return FALSE;
     }
@@ -355,16 +367,14 @@ viaExaCheckComposite_H6(int op, PicturePtr pSrcPicture,
         if (pMaskPicture && (PICT_FORMAT_A(pMaskPicture->format) == 0 ||
                              !v3d->texSupported(pMaskPicture->format))) {
 #ifdef VIA_DEBUG_COMPOSITE
-            ErrorF("Mask format not supported:\n");
-            viaExaPrintComposite(op, pSrcPicture, pMaskPicture, pDstPicture);
+            viaExaPrintCompositeInfo("Mask format not supported", op, pSrcPicture, pMaskPicture, pDstPicture);
 #endif
             return FALSE;
         }
         return TRUE;
     }
 #ifdef VIA_DEBUG_COMPOSITE
-    ErrorF("Src format not supported:\n");
-    viaExaPrintComposite(op, pSrcPicture, pMaskPicture, pDstPicture);
+    viaExaPrintCompositeInfo("Src format not supported",op, pSrcPicture, pMaskPicture, pDstPicture);
 #endif
     return FALSE;
 }

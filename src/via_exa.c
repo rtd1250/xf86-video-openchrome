@@ -416,40 +416,54 @@ viaExaCompositePictDesc(PicturePtr pict, char *string, int n)
             break;
     }
 
-    snprintf(size, 20, "%dx%d%s", pict->pDrawable->width,
-             pict->pDrawable->height, pict->repeat ? " R" : "");
+    if (pict->pDrawable) {
+       snprintf(size, 20, "%dx%d%s", pict->pDrawable->width,
+                pict->pDrawable->height, pict->repeat ? " R" : "");
 
-    snprintf(string, n, "0x%lx: fmt %s (%s)", (long)pict->pDrawable, format,
-             size);
+       snprintf(string, n, "0x%lx: fmt %s (%s)", (long)pict->pDrawable, format,
+                size);
+    }
 }
 
 void
-viaExaPrintComposite(CARD8 op, PicturePtr pSrc, PicturePtr pMask,
+viaExaPrintCompositeInfo(char *info, CARD8 op, PicturePtr pSrc, PicturePtr pMask,
                         PicturePtr pDst)
 {
     char sop[20];
     char srcdesc[40], maskdesc[40], dstdesc[40];
 
     switch (op) {
-        case PictOpSrc:
-            sprintf(sop, "Src");
-            break;
-        case PictOpOver:
-            sprintf(sop, "Over");
-            break;
-        default:
-            sprintf(sop, "0x%x", (int)op);
-            break;
+	case PictOpClear:
+		sprintf(sop, "PictOpClear ");
+		break;
+	case PictOpSrc:
+		sprintf(sop, "PictOpSrc ");
+		break;
+	case PictOpDst:
+		sprintf(sop, "PictOpDst ");
+		break;
+	case PictOpOver:
+		sprintf(sop, "PictOpOver ");
+		break;
+	case PictOpOutReverse:
+		sprintf(sop, "PictOpOutReverse ");
+		break;
+	case PictOpAdd:
+		sprintf(sop, "PictOpAdd ");
+		break;
+	default:
+		sprintf(sop, "PictOp%d ", op);
     }
 
     viaExaCompositePictDesc(pSrc, srcdesc, 40);
     viaExaCompositePictDesc(pMask, maskdesc, 40);
     viaExaCompositePictDesc(pDst, dstdesc, 40);
 
-    ErrorF("Composite fallback: op %s, \n"
+    ErrorF("Composite fallback: %s, \n"
+           "                    op %s, \n"
            "                    src  %s, \n"
            "                    mask %s, \n"
-           "                    dst  %s, \n", sop, srcdesc, maskdesc, dstdesc);
+           "                    dst  %s, \n", info, sop, srcdesc, maskdesc, dstdesc);
 }
 #endif /* VIA_DEBUG_COMPOSITE */
 

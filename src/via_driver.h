@@ -26,6 +26,7 @@
 #ifndef _VIA_DRIVER_H_
 #define _VIA_DRIVER_H_ 1
 
+//#define VIA_DEBUG_COMPOSITE 1
 #define HAVE_DEBUG 1
 
 #ifdef HAVE_DEBUG
@@ -426,7 +427,7 @@ void viaAccelTextureBlit(ScrnInfoPtr, unsigned long, unsigned, unsigned,
 			 unsigned, unsigned, int);
 #ifdef VIA_DEBUG_COMPOSITE
 void viaExaCompositePictDesc(PicturePtr pict, char *string, int n);
-void viaExaPrintComposite(CARD8 op, PicturePtr pSrc, PicturePtr pMask,
+void viaExaPrintCompositeInfo(char *info, CARD8 op, PicturePtr pSrc, PicturePtr pMask,
                             PicturePtr pDst);
 #endif
 

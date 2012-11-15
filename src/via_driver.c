@@ -649,7 +649,7 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
 
     pVia->shadowFB = FALSE;
     pVia->NoAccel = FALSE;
-    pVia->noComposite = TRUE;
+    pVia->noComposite = FALSE;
     pVia->useEXA = TRUE;
     pVia->exaScratchSize = VIA_SCRATCH_SIZE / 1024;
     pVia->drmmode.hwcursor = TRUE;
