@@ -210,21 +210,43 @@ VT162xDACSenseI2C(I2CDevPtr pDev)
 }
 
 /*
- * VT1625 moves DACa through DACd from bits 0-3 to 2-5.
+ * VT1625/VT1625S sense connected TV outputs.
+ *
+ * The lower six bits of the return byte stand for each of the six DACs:
+ *  - bit 0: DACf (Cb)
+ *  - bit 1: DACe (Cr)
+ *  - bit 2: DACd (Y)
+ *  - bit 3: DACc (Composite)
+ *  - bit 4: DACb (S-Video C)
+ *  - bit 5: DACa (S-Video Y)
+ *
+ * If a bit is 0 it means a cable is connected. Note the VT1625S only has
+ * four DACs, corresponding to bit 0-3 above.
  */
 static CARD8
 VT1625DACSenseI2C(I2CDevPtr pDev)
 {
-    CARD8 save, sense;
+    CARD8 power, status, overflow, dacPresent;
 
-    xf86I2CReadByte(pDev, 0x0E, &save);
-    xf86I2CWriteByte(pDev, 0x0E, 0x00);
-    xf86I2CWriteByte(pDev, 0x0E, 0x80);
-    xf86I2CWriteByte(pDev, 0x0E, 0x00);
-    xf86I2CReadByte(pDev, 0x0F, &sense);
-    xf86I2CWriteByte(pDev, 0x0E, save);
+    xf86I2CReadByte(pDev, 0x0E, &power);     // save power state
 
-    return (sense & 0x3F);
+    // VT1625S will always report 0 for bits 4 and 5 of the status register as
+    // it only has four DACs instead of six. This will result in a false
+    // positive for the S-Video cable. It will also do this on the power
+    // register, which is abused to check which DACs are actually present.
+    xf86I2CWriteByte(pDev, 0x0E, 0xFF);
+    xf86I2CReadByte(pDev, 0x0E, &dacPresent);
+
+    xf86I2CWriteByte(pDev, 0x0E, 0x00);      // power on DACs/circuits
+    xf86I2CReadByte(pDev, 0x1C, &overflow);  // save overflow reg
+                                             // (DAC sense bit should be off)
+    xf86I2CWriteByte(pDev, 0x1C, 0x80);      // enable DAC sense bit
+    xf86I2CWriteByte(pDev, 0x1C, overflow);  // disable DAC sense bit
+    xf86I2CReadByte(pDev, 0x0F, &status);    // read connection status
+    xf86I2CWriteByte(pDev, 0x0E, power);     // restore power state
+    status |= ~dacPresent;
+
+    return (status & 0x3F);
 }
 
 /*
