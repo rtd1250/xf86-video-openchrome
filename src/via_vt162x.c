@@ -909,7 +909,7 @@ ViaVT162xInit(ScrnInfoPtr pScrn)
             pBIOSInfo->TVPower = VT1625Power;
             pBIOSInfo->TVModes = VT1625Modes;
             pBIOSInfo->TVPrintRegs = VT162xPrintRegs;
-            pBIOSInfo->TVNumRegs = 0x6C;
+            pBIOSInfo->TVNumRegs = 0x82;
             break;
         default:
             break;
