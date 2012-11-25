@@ -30,12 +30,12 @@
 #include "xf86_OSproc.h"
 #include "xf86fbman.h"
 
-#ifdef XF86DRI
+#ifdef HAVE_DRI
 #include "xf86drm.h"
 #endif
 
 #include "via_driver.h"
-#ifdef XF86DRI
+#ifdef HAVE_DRI
 #include "via_drm.h"
 #endif
 
@@ -98,7 +98,7 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
                     ret = -ENOMEM;
                 } else
                     DEBUG(ErrorF("%lu bytes of Linear memory allocated at %lx, handle %lu\n", obj->size, obj->offset, obj->handle));
-#ifdef XF86DRI
+#ifdef HAVE_DRI
             } else if (pVia->directRenderingType == DRI_1) {
                 drm_via_mem_t drm;
 
@@ -173,9 +173,11 @@ drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
         }
     } else {
         switch (obj->domain) {
+#ifdef HAVE_DRI
         case TTM_PL_FLAG_TT:
             obj->ptr = (pVia->agpMappedAddr + obj->offset);
             break;
+#endif
         case TTM_PL_FLAG_VRAM:
             obj->ptr = (pVia->FBBase + obj->offset);
             break;
@@ -211,7 +213,7 @@ drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
                 FBLinearPtr linear = (FBLinearPtr) obj->handle;
 
                 xf86FreeOffscreenLinear(linear);
-#ifdef XF86DRI
+#ifdef HAVE_DRI
             } else if (pVia->directRenderingType == DRI_1) {
                 drm_via_mem_t drm;
 
@@ -245,7 +247,7 @@ drm_bo_manager_init(ScrnInfoPtr pScrn)
     if (pVia->directRenderingType == DRI_2)
         return ret;
     ret = ums_create(pScrn);
-#ifdef XF86DRI
+#ifdef HAVE_DRI
     if (pVia->directRenderingType == DRI_1)
         ret = VIADRIKernelInit(pScrn);
 #endif

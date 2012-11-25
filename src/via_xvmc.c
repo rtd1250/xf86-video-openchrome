@@ -36,7 +36,7 @@
 #include "xf86Pci.h"
 #include "regionstr.h"
 
-#ifdef XF86DRI
+#ifdef HAVE_DRI
 
 #include "via_drmclient.h"
 #include "via_drm.h"
@@ -994,4 +994,4 @@ viaXvMCPutImageSize(ScrnInfoPtr pScrn)
     return 0;
 }
 
-#endif /* XF86DRI */
+#endif /* HAVE_DRI */

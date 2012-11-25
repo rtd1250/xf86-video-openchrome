@@ -369,7 +369,7 @@ viaExaCheckComposite_H2(int op, PicturePtr pSrcPicture,
 static Bool
 viaIsAGP(VIAPtr pVia, PixmapPtr pPix, unsigned long *offset)
 {
-#ifdef XF86DRI
+#ifdef HAVE_DRI
     unsigned long offs;
 
     if (pVia->directRenderingType && !pVia->IsPCI) {

@@ -27,7 +27,9 @@
 #ifndef DRMMODE_DISPLAY_H
 #define DRMMODE_DISPLAY_H
 
+#ifdef HAVE_DRI
 #include "xf86drmMode.h"
+#endif
 #ifdef HAVE_UDEV
 #include "libudev.h"
 #endif
@@ -35,14 +37,16 @@
 typedef struct {
     int fd;
     unsigned fb_id;
+#ifdef HAVE_DRI
     drmModeResPtr mode_res;
     drmModeFBPtr mode_fb;
+    drmEventContext event_context;
+#endif
     ScrnInfoPtr scrn;
 #ifdef HAVE_UDEV
     struct udev_monitor *uevent_monitor;
     InputHandlerProc uevent_handler;
 #endif
-    drmEventContext event_context;
     struct buffer_object *front_bo;
 
     Bool hwcursor;
@@ -50,19 +54,21 @@ typedef struct {
 
 typedef struct {
     drmmode_ptr drmmode;
+#ifdef HAVE_DRI
     drmModeCrtcPtr mode_crtc;
+#endif
     struct buffer_object *cursor_bo;
     unsigned rotate_fb_id;
     int index;
 } drmmode_crtc_private_rec, *drmmode_crtc_private_ptr;
 
+#ifdef HAVE_DRI
 typedef struct {
     drmModePropertyPtr mode_prop;
     uint64_t value;
     int num_atoms; /* if range prop, num_atoms == 1; if enum prop, num_atoms == num_enums + 1 */
     Atom *atoms;
 } drmmode_prop_rec, *drmmode_prop_ptr;
-
 
 typedef struct {
     drmmode_ptr drmmode;
@@ -76,6 +82,7 @@ typedef struct {
     int enc_mask;
     int enc_clone_mask;
 } drmmode_output_private_rec, *drmmode_output_private_ptr;
+#endif
 
 extern xf86CrtcPtr window_belongs_to_crtc(ScrnInfoPtr pScrn, int x, int y, int w, int h);
 extern Bool KMSCrtcInit(ScrnInfoPtr pScrn, drmmode_ptr drmmode);

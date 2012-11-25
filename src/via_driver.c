@@ -47,7 +47,7 @@
 #endif
 #include "xf86Crtc.h"
 
-#ifdef XF86DRI
+#ifdef HAVE_DRI
 #include "dri.h"
 #endif
 
@@ -341,7 +341,7 @@ VIAEnterVT_internal(ScrnInfoPtr pScrn, int flags)
         if (!pVia->IsSecondary)
             viaRestoreVideo(pScrn);
 
-#ifdef XF86DRI
+#ifdef HAVE_DRI
         if (pVia->directRenderingType == DRI_1) {
             kickVblank(pScrn);
             VIADRIRingBufferInit(pScrn);
@@ -370,7 +370,7 @@ VIALeaveVT(VT_FUNC_ARGS_DECL)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIALeaveVT\n"));
 
-#ifdef XF86DRI
+#ifdef HAVE_DRI
     if (pVia->directRenderingType == DRI_1) {
         volatile drm_via_sarea_t *saPriv = (drm_via_sarea_t *) DRIGetSAREAPrivate(pScrn->pScreen);
 
@@ -805,6 +805,7 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
     if (!drmmode->front_bo)
         goto fail;
 
+#ifdef HAVE_DRI
     if (pVia->KMS) {
         if (drmModeAddFB(drmmode->fd, width, height, scrn->depth,
                         scrn->bitsPerPixel, pitch,
@@ -812,6 +813,7 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
                         &drmmode->fb_id))
             goto fail;
     }
+#endif
 
     new_pixels = drm_bo_map(scrn, drmmode->front_bo);
     if (!new_pixels)
@@ -839,8 +841,10 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
 
     if (xf86SetDesiredModes(scrn)) {
         if (old_front) {
+#ifdef HAVE_DRI
             if (old_fb_id && pVia->KMS)
                 drmModeRmFB(drmmode->fd, old_fb_id);
+#endif
             drm_bo_unmap(scrn, old_front);
             drm_bo_free(scrn, old_front);
         }
@@ -874,7 +878,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     VIABIOSInfoPtr pBIOSInfo;
     MessageType from = X_DEFAULT;
     char *s = NULL;
-#ifdef XF86DRI
+#ifdef HAVE_DRI
     char *busId = NULL;
     drmVersionPtr drmVer;
 #endif
@@ -988,7 +992,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 
     pVia->directRenderingType = DRI_NONE;
     pVia->KMS = FALSE;
-#ifdef XF86DRI
+#ifdef HAVE_DRI
     busId = DRICreatePCIBusID(pVia->PciInfo);
     pVia->drmmode.fd = drmOpen("via", busId);
     if (pVia->drmmode.fd != -1) {
@@ -1732,17 +1736,19 @@ VIACloseScreen(CLOSE_SCREEN_ARGS_DECL)
     }
 
     if (pVia->drmmode.front_bo) {
+#ifdef HAVE_DRI
         if (pVia->KMS && pVia->drmmode.fb_id)
             drmModeRmFB(pVia->drmmode.fd, pVia->drmmode.fb_id);
+#endif
         pVia->drmmode.fb_id = 0;
 
         drm_bo_free(pScrn, pVia->drmmode.front_bo);
     }
 
-#ifdef XF86DRI
+#ifdef HAVE_DRI
     if (pVia->directRenderingType == DRI_1)
         VIADRICloseScreen(pScreen);
-#endif
+
     if (pVia->KMS) {
         drmmode_uevent_fini(pScrn, &pVia->drmmode);
 
@@ -1751,6 +1757,7 @@ VIACloseScreen(CLOSE_SCREEN_ARGS_DECL)
                         "drmDropMaster failed: %s\n",
                         strerror(errno));
     }
+#endif
 
     pScrn->vtSema = FALSE;
     pScreen->CloseScreen = pVia->CloseScreen;
@@ -1768,6 +1775,7 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
     pScrn->displayWidth = pScrn->virtualX;
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAScreenInit\n"));
 
+#ifdef HAVE_DRI
     if (pVia->KMS) {
         if (drmSetMaster(pVia->drmmode.fd)) {
             xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
@@ -1776,7 +1784,6 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
         }
     }
 
-#ifdef XF86DRI
     if (pVia->drmmode.fd != -1) {
         if (pVia->directRenderingType == DRI_1) {
             /* DRI2 or DRI1 support */
@@ -1938,7 +1945,7 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
         return FALSE;
 
     if (pVia->directRenderingType != DRI_2) {
-#ifdef XF86DRI
+#ifdef HAVE_DRI
         if (pVia->directRenderingType == DRI_1) {
             if (!VIADRIFinishScreenInit(pScreen)) {
                 xf86DrvMsg(pScrn->scrnIndex, X_INFO, "direct rendering disabled\n");

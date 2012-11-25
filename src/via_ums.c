@@ -587,10 +587,10 @@ UMSAccelInit(ScreenPtr pScreen)
     pVia->curMarker = 0;
     pVia->lastMarkerRead = 0;
 
-#ifdef XF86DRI
+#ifdef HAVE_DRI
     pVia->dBounce = NULL;
     pVia->scratchAddr = NULL;
-#endif /* XF86DRI */
+#endif /* HAVE_DRI */
     ret = TRUE;
 err:
     if (!ret) {
@@ -617,7 +617,7 @@ ums_create(ScrnInfoPtr pScrn)
     long size;
     int maxY;
 
-#ifdef XF86DRI
+#ifdef HAVE_DRI
     if (pVia->directRenderingType == DRI_1) {
         pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart) >> 2;
         if ((pVia->driSize > (pVia->maxDriSize * 1024)) && pVia->maxDriSize > 0)
