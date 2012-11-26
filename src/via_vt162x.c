@@ -872,6 +872,7 @@ ViaVT162xInit(ScrnInfoPtr pScrn)
             pBIOSInfo->TVModeCrtc = VT1621ModeCrtc;
             pBIOSInfo->TVPower = VT1621Power;
             pBIOSInfo->TVModes = VT1621Modes;
+            pBIOSInfo->TVNumModes = sizeof(VT1621Modes) / sizeof(DisplayModeRec);
             pBIOSInfo->TVPrintRegs = VT162xPrintRegs;
             pBIOSInfo->TVNumRegs = 0x68;
             break;
@@ -884,6 +885,7 @@ ViaVT162xInit(ScrnInfoPtr pScrn)
             pBIOSInfo->TVModeCrtc = VT1622ModeCrtc;
             pBIOSInfo->TVPower = VT1622Power;
             pBIOSInfo->TVModes = VT1622Modes;
+            pBIOSInfo->TVNumModes = sizeof(VT1622Modes) / sizeof(DisplayModeRec);
             pBIOSInfo->TVPrintRegs = VT162xPrintRegs;
             pBIOSInfo->TVNumRegs = 0x68;
             break;
@@ -896,6 +898,7 @@ ViaVT162xInit(ScrnInfoPtr pScrn)
             pBIOSInfo->TVModeCrtc = VT1622ModeCrtc;
             pBIOSInfo->TVPower = VT1622Power;
             pBIOSInfo->TVModes = VT1623Modes;
+            pBIOSInfo->TVNumModes = sizeof(VT1623Modes) / sizeof(DisplayModeRec);
             pBIOSInfo->TVPrintRegs = VT162xPrintRegs;
             pBIOSInfo->TVNumRegs = 0x6C;
             break;
@@ -908,6 +911,7 @@ ViaVT162xInit(ScrnInfoPtr pScrn)
             pBIOSInfo->TVModeCrtc = VT1622ModeCrtc;
             pBIOSInfo->TVPower = VT1625Power;
             pBIOSInfo->TVModes = VT1625Modes;
+            pBIOSInfo->TVNumModes = sizeof(VT1625Modes) / sizeof(DisplayModeRec);
             pBIOSInfo->TVPrintRegs = VT162xPrintRegs;
             pBIOSInfo->TVNumRegs = 0x82;
             break;

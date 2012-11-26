@@ -177,6 +177,7 @@ typedef struct _VIABIOSINFO {
     void (*TVPower) (ScrnInfoPtr pScrn, Bool On);
     void (*LCDPower) (ScrnInfoPtr pScrn, Bool On);
     DisplayModePtr TVModes;
+    int            TVNumModes;
     void (*TVPrintRegs) (ScrnInfoPtr pScrn);
 
 } VIABIOSInfoRec, *VIABIOSInfoPtr;

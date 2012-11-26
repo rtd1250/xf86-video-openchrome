@@ -614,6 +614,7 @@ ViaCH7xxxInit(ScrnInfoPtr pScrn)
             pBIOSInfo->TVModeCrtc = CH7xxxModeCrtc;
             pBIOSInfo->TVPower = CH7xxxTVPower;
             pBIOSInfo->TVModes = CH7011Modes;
+            pBIOSInfo->TVNumModes = sizeof(CH7011Modes) / sizeof(DisplayModeRec);
             pBIOSInfo->LCDPower = NULL;
             pBIOSInfo->TVNumRegs = CH_7011_MAX_NUM_REG;
 #ifdef HAVE_DEBUG
@@ -630,6 +631,7 @@ ViaCH7xxxInit(ScrnInfoPtr pScrn)
             pBIOSInfo->TVModeCrtc = CH7xxxModeCrtc;
             pBIOSInfo->TVPower = CH7xxxTVPower;
             pBIOSInfo->TVModes = CH7019Modes;
+            pBIOSInfo->TVNumModes = sizeof(CH7019Modes) / sizeof(DisplayModeRec);
             pBIOSInfo->LCDPower = CH7019LCDPower;
             pBIOSInfo->TVNumRegs = CH_7019_MAX_NUM_REG;
 #ifdef HAVE_DEBUG
