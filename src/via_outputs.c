@@ -466,6 +466,14 @@ via_tv_init(ScrnInfoPtr pScrn)
 
     output = xf86OutputCreate(pScrn, &via_tv_funcs, "TV-1");
     pVia->FirstInit = TRUE;
+
+    if (output) {
+        /* Allow tv output on both crtcs, set bit 0 and 1. */
+        output->possible_crtcs = 0x3;
+    } else {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "via_tv_init: Failed to create output for TV-1.\n");
+    }
+
     pBIOSInfo->tv = output;
     /* Save now */
     pBIOSInfo->TVSave(pScrn);

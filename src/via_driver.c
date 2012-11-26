@@ -1542,8 +1542,10 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         }
     }
 
-    if (!xf86InitialConfiguration(pScrn, TRUE))
+    if (!xf86InitialConfiguration(pScrn, TRUE)) {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Initial configuration failed\n");
         return FALSE;
+    }
 
     if (!pScrn->modes) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "No valid modes found\n");
