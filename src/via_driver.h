@@ -363,7 +363,6 @@ typedef struct _VIA {
     CARD32              VideoStatus;
     VIAHWDiff           HWDiff;
     unsigned long       dwV1, dwV3;
-    unsigned long       OverlaySupported;
     unsigned long       dwFrameNum;
 
     CARD32*             VidRegBuffer; /* Temporary buffer for video overlay registers. */

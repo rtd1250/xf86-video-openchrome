@@ -193,8 +193,6 @@ ViaVbeSetMode(ScrnInfoPtr pScrn, DisplayModePtr pMode)
     int mode;
     int refreshRate;
 
-    pVia->OverlaySupported = FALSE;
-
     data = (VbeModeInfoData *) pMode->Private;
 
     mode = data->mode | (1 << 15);

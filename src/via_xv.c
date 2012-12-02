@@ -357,8 +357,7 @@ DecideOverlaySupport(xf86CrtcPtr crtc)
                 memEfficiency = (float)SINGLE_3205_133;
                 break;
             default:
-                /*Unknow DRAM Type */
-                DBG_DD(ErrorF("Unknow DRAM Type!\n"));
+                ErrorF("Unknow DRAM Type!\n");
                 mClock = 166;
                 memEfficiency = (float)SINGLE_3205_133;
                 break;
@@ -367,6 +366,11 @@ DecideOverlaySupport(xf86CrtcPtr crtc)
         width = mode->HDisplay;
         height = mode->VDisplay;
         refresh = mode->VRefresh;
+
+        if (refresh==0) {
+            refresh=60;
+            ErrorF("Unable to fetch vertical refresh value, needed for bandwidth calculation.\n");
+        }
 
         /*
          * Approximative, VERY conservative formula in some cases.
@@ -388,10 +392,10 @@ DecideOverlaySupport(xf86CrtcPtr crtc)
             DBG_DD(ErrorF(" via_xv.c : mClk= %f : \n", mClock));
             DBG_DD(ErrorF(" via_xv.c : memEfficiency= %f : \n",
                 memEfficiency));
-            DBG_DD(ErrorF(" via_xv.c : needBandwidth= %f : \n",
-                needBandWidth));
-            DBG_DD(ErrorF(" via_xv.c : totalBandwidth= %f : \n",
-                totalBandWidth));
+            ErrorF(" via_xv.c : needBandwidth= %f : \n",
+                needBandWidth);
+            ErrorF(" via_xv.c : totalBandwidth= %f : \n",
+                totalBandWidth);
             if (needBandWidth < totalBandWidth)
                 return TRUE;
         }
@@ -1274,8 +1278,7 @@ viaPutImage(ScrnInfoPtr pScrn,
             }
 
             /* If there is bandwidth issue, block the H/W overlay */
-            if (!pVia->OverlaySupported &&
-                    !(pVia->OverlaySupported = DecideOverlaySupport(crtc))) {
+            if (!(DecideOverlaySupport(crtc))) {
                 DBG_DD(ErrorF
                         (" via_xv.c : Xv Overlay rejected due to insufficient "
                                 "memory bandwidth.\n"));

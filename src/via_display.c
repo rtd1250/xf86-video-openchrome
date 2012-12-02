@@ -957,8 +957,6 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     ScrnInfoPtr pScrn = crtc->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
 
-    pVia->OverlaySupported = FALSE;
-
     if (!pVia->pVbe) {
         if (!vgaHWInit(pScrn, adjusted_mode))
             return;
@@ -1356,8 +1354,6 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 {
     ScrnInfoPtr pScrn = crtc->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
-
-    pVia->OverlaySupported = FALSE;
 
     if (pVia->pVbe) {
         if (!ViaVbeSetMode(pScrn, adjusted_mode))
