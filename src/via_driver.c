@@ -418,18 +418,19 @@ VIAFreeRec(ScrnInfoPtr pScrn)
 
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
-    if (pBIOSInfo)
+    if (pBIOSInfo->TVI2CDev)
+        xf86DestroyI2CDevRec(pBIOSInfo->TVI2CDev, TRUE);
+
+    if (pBIOSInfo) {
+        pVia->pBIOSInfo = NULL;
         free(pBIOSInfo);
+    }
 
     if (VIAPTR(pScrn)->pVbe)
         vbeFree(VIAPTR(pScrn)->pVbe);
 
     if (pVia->VideoRegs)
         free(pVia->VideoRegs);
-
-    if (((VIARec *) (pScrn->driverPrivate))->pBIOSInfo->TVI2CDev)
-        xf86DestroyI2CDevRec((((VIARec *) (pScrn->driverPrivate))->pBIOSInfo->TVI2CDev), TRUE);
-    free(((VIARec *) (pScrn->driverPrivate))->pBIOSInfo);
 
     VIAUnmapMem(pScrn);
 
