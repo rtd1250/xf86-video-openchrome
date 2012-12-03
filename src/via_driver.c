@@ -418,10 +418,10 @@ VIAFreeRec(ScrnInfoPtr pScrn)
 
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
-    if (pBIOSInfo->TVI2CDev)
-        xf86DestroyI2CDevRec(pBIOSInfo->TVI2CDev, TRUE);
-
     if (pBIOSInfo) {
+        if (pBIOSInfo->TVI2CDev)
+            xf86DestroyI2CDevRec(pBIOSInfo->TVI2CDev, TRUE);
+
         pVia->pBIOSInfo = NULL;
         free(pBIOSInfo);
     }
