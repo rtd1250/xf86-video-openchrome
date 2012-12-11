@@ -1006,13 +1006,12 @@ viaSetColorSpace(VIAPtr pVia, int hue, int saturation, int brightness,
     switch (pVia->ChipId) {
         case PCI_CHIP_VT3205:
         case PCI_CHIP_VT3204:
-        case PCI_CHIP_VT3259:
         case PCI_CHIP_VT3314:
             VIASETREG(V3_ColorSpaceReg_1, col1);
             VIASETREG(V3_ColorSpaceReg_2, col2);
             DBG_DD(ErrorF("000002C4 %08lx\n", col1));
             DBG_DD(ErrorF("000002C8 %08lx\n", col2));
-            break;
+        case PCI_CHIP_VT3259:
         case PCI_CHIP_VT3327:
         case PCI_CHIP_VT3336:
         case PCI_CHIP_VT3324:
@@ -1021,11 +1020,8 @@ viaSetColorSpace(VIAPtr pVia, int hue, int saturation, int brightness,
         case PCI_CHIP_VT3409:
         case PCI_CHIP_VT3410:
         case PCI_CHIP_CLE3122:
-            VIASETREG(V1_ColorSpaceReg_2, col2);
             VIASETREG(V1_ColorSpaceReg_1, col1);
-            VIASETREG(V3_ColorSpaceReg_2, col2);
-            VIASETREG(V3_ColorSpaceReg_1, col1);
-
+            VIASETREG(V1_ColorSpaceReg_2, col2);
             DBG_DD(ErrorF("00000288 %08lx\n", col2));
             DBG_DD(ErrorF("00000284 %08lx\n", col1));
             break;
@@ -1041,9 +1037,9 @@ ViaInitVideoStatusFlag(VIAPtr pVia)
     switch (pVia->ChipId) {
         case PCI_CHIP_VT3205:
         case PCI_CHIP_VT3204:
-        case PCI_CHIP_VT3259:
         case PCI_CHIP_VT3314:
             return VIDEO_HQV_INUSE | SW_USE_HQV | VIDEO_3_INUSE;
+        case PCI_CHIP_VT3259:
         case PCI_CHIP_VT3327:
         case PCI_CHIP_VT3336:
         case PCI_CHIP_VT3324:
@@ -1059,7 +1055,7 @@ ViaInitVideoStatusFlag(VIAPtr pVia)
             DBG_DD(ErrorF("Unknown DeviceID\n"));
             break;
     }
-    return 0UL;
+    return 0;
 }
 
 static unsigned long
@@ -1098,7 +1094,6 @@ ViaSetVidCtl(VIAPtr pVia, unsigned int videoFlag)
                     return V3_ENABLE | V3_EXPIRE_NUM_F;
                 else
                     return V3_ENABLE | V3_EXPIRE_NUM;
-                break;
             default:
                 DBG_DD(ErrorF("Unknown DeviceID\n"));
                 break;
