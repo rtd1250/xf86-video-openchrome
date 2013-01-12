@@ -873,10 +873,10 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
     /*
      * FIXME: xf86I2CProbeAddress(pVia->pI2CBus3, 0x40)
      * disables the panel on P4M900
-     * See via_tv_detect.
      */
     /* TV encoder */
-    via_tv_init(pScrn);
+    if (pVia->ActiveDevice & VIA_DEVICE_TV)
+        via_tv_init(pScrn);
 
     if (pVia->ActiveDevice & VIA_DEVICE_DFP) {
         switch (pVia->Chipset) {
@@ -1195,7 +1195,7 @@ ViaModePrimaryLegacy(xf86CrtcPtr crtc, DisplayModePtr mode)
     /* Enable MMIO & PCI burst (1 wait state) */
     ViaSeqMask(hwp, 0x1A, 0x06, 0x06);
 
-	if (pBIOSInfo->analog->status == XF86OutputStatusConnected)
+    if (pBIOSInfo->analog->status == XF86OutputStatusConnected)
         ViaCrtcMask(hwp, 0x36, 0x30, 0x30);
     else
         ViaSeqMask(hwp, 0x16, 0x00, 0x40);

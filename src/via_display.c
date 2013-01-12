@@ -395,7 +395,7 @@ ViaFirstCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
     hwp->writeCrtc(hwp, 0x18, 0xFF);
     ViaCrtcMask(hwp, 0x07, 0x10, 0x10);
     ViaCrtcMask(hwp, 0x09, 0x40, 0x40);
-    ViaCrtcMask(hwp, 0x33, 0x07, 0x06);
+    ViaCrtcMask(hwp, 0x33, 0x06, 0x07);
     ViaCrtcMask(hwp, 0x35, 0x10, 0x10);
 
     /* zero Maximum scan line */
