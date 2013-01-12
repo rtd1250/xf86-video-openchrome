@@ -72,6 +72,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Biostar P4M800-M7",                     VIA_KM400,   0x1565, 0x1202, VIA_DEVICE_CRT},
     {"Uniwill 755CI",                         VIA_KM400,   0x1584, 0x800A, VIA_DEVICE_CRT | VIA_DEVICE_LCD | VIA_DEVICE_TV}, /* aka "Gericom Hummer Advance", "Maxdata M-Book 1200X" */
     {"Packard Bell Quasar2 (MSI MS6786)",     VIA_KM400,   0x1631, 0xD002, VIA_DEVICE_CRT},
+    {"Nec Powermate VL5",                     VIA_KM400,   0x1631, 0xD003, VIA_DEVICE_CRT},
     {"Epox EP-8KMM3I",                        VIA_KM400,   0x1695, 0x9023, VIA_DEVICE_CRT},
     {"ASRock Inc. K7VM2/3/4",                 VIA_KM400,   0x1849, 0x7205, VIA_DEVICE_CRT},
     {"ACorp KM400QP",                         VIA_KM400,   0x1915, 0x1100, VIA_DEVICE_CRT | VIA_DEVICE_TV},
