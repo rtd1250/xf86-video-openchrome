@@ -298,6 +298,7 @@ via_lvds_create_resources(xf86OutputPtr output)
 {
 }
 
+#ifdef RANDR_12_INTERFACE
 static Bool
 via_lvds_set_property(xf86OutputPtr output, Atom property,
 						RRPropertyValuePtr value)
@@ -310,6 +311,7 @@ via_lvds_get_property(xf86OutputPtr output, Atom property)
 {
     return FALSE;
 }
+#endif
 
 static void
 ViaLCDPowerSequence(vgaHWPtr hwp, VIALCDPowerSeqRec Sequence)
@@ -1435,8 +1437,10 @@ via_lvds_destroy(xf86OutputPtr output)
 
 static const xf86OutputFuncsRec via_lvds_funcs = {
     .create_resources   = via_lvds_create_resources,
+#ifdef RANDR_12_INTERFACE
     .set_property       = via_lvds_set_property,
     .get_property       = via_lvds_get_property,
+#endif
     .dpms               = via_lvds_dpms,
     .save               = via_lvds_save,
     .restore            = via_lvds_restore,

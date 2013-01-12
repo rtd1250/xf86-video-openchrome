@@ -44,13 +44,6 @@ AC_CONFIG_AUX_DIR(.)
 AM_INIT_AUTOMAKE([foreign dist-bzip2])
 AM_MAINTAINER_MODE
 
-# Require X.Org macros 1.8 or later for MAN_SUBSTS set by XORG_MANPAGE_SECTIONS
-m4_ifndef([XORG_MACROS_VERSION],
-          [m4_fatal([must install xorg-macros 1.8 or later before running autoconf/autogen])])
-
-XORG_MACROS_VERSION(1.8)
-XORG_DEFAULT_OPTIONS
-
 # Initialize libtool
 AC_DISABLE_STATIC
 AC_PROG_LIBTOOL
@@ -87,7 +80,7 @@ XORG_DRIVER_CHECK_EXT(XF86DRI, xextproto x11)
 XORG_DRIVER_CHECK_EXT(DPMSExtension, xextproto)
 
 # Checks for pkg-config packages
-PKG_CHECK_MODULES(XORG, [xorg-server xproto fontsproto libdrm $REQUIRED_MODULES])
+PKG_CHECK_MODULES(XORG, [xorg-server xproto fontsproto libdrm glproto $REQUIRED_MODULES])
 PKG_CHECK_MODULES(XEXT, [xextproto >= 7.0.99.1],
  HAVE_XEXTPROTO_71="yes"; AC_DEFINE(HAVE_XEXTPROTO_71, 1, [xextproto 7.1 available]),
  HAVE_XEXTPROTO_71="no")
@@ -179,6 +172,7 @@ AC_DEFINE(X_NEED_I2CSTART,1,[Compatibility define for older Xen])
 DRIVER_MAN_SUFFIX="4"
 AC_SUBST([DRIVER_MAN_SUFFIX])
 
+XORG_MANPAGE_SECTIONS
 XORG_RELEASE_VERSION
 
 AC_OUTPUT([

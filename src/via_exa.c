@@ -36,6 +36,9 @@
 #include <X11/Xarch.h>
 #include "miline.h"
 
+#include <GL/gl.h>
+#include <sys/mman.h>
+
 #include "via_driver.h"
 #include "via_regs.h"
 #include "via_dmabuffer.h"

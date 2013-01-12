@@ -161,6 +161,7 @@ via_tv_create_resources(xf86OutputPtr output)
 {
 }
 
+#ifdef RANDR_12_INTERFACE
 static Bool
 via_tv_set_property(xf86OutputPtr output, Atom property,
 					RRPropertyValuePtr value)
@@ -173,6 +174,7 @@ via_tv_get_property(xf86OutputPtr output, Atom property)
 {
     return FALSE;
 }
+#endif
 
 static void
 via_tv_dpms(xf86OutputPtr output, int mode)
@@ -369,8 +371,10 @@ via_tv_destroy(xf86OutputPtr output)
 
 static const xf86OutputFuncsRec via_tv_funcs = {
     .create_resources   = via_tv_create_resources,
+#ifdef RANDR_12_INTERFACE
     .set_property       = via_tv_set_property,
     .get_property       = via_tv_get_property,
+#endif
     .dpms               = via_tv_dpms,
     .save               = via_tv_save,
     .restore            = via_tv_restore,
@@ -498,6 +502,7 @@ via_dp_create_resources(xf86OutputPtr output)
 {
 }
 
+#ifdef RANDR_12_INTERFACE
 static Bool
 via_dp_set_property(xf86OutputPtr output, Atom property,
 						RRPropertyValuePtr value)
@@ -510,6 +515,7 @@ via_dp_get_property(xf86OutputPtr output, Atom property)
 {
     return FALSE;
 }
+#endif
 
 static void
 via_dp_dpms(xf86OutputPtr output, int mode)
@@ -609,8 +615,10 @@ via_dp_destroy(xf86OutputPtr output)
 
 static const xf86OutputFuncsRec via_dp_funcs = {
     .create_resources   = via_dp_create_resources,
+#ifdef RANDR_12_INTERFACE
     .set_property       = via_dp_set_property,
     .get_property       = via_dp_get_property,
+#endif
     .dpms               = via_dp_dpms,
     .save               = via_dp_save,
     .restore            = via_dp_restore,
@@ -669,6 +677,7 @@ via_analog_create_resources(xf86OutputPtr output)
 {
 }
 
+#ifdef RANDR_12_INTERFACE
 static Bool
 via_analog_set_property(xf86OutputPtr output, Atom property,
 						RRPropertyValuePtr value)
@@ -681,6 +690,7 @@ via_analog_get_property(xf86OutputPtr output, Atom property)
 {
     return FALSE;
 }
+#endif
 
 static void
 via_analog_dpms(xf86OutputPtr output, int mode)
@@ -818,8 +828,10 @@ via_analog_destroy(xf86OutputPtr output)
 
 static const xf86OutputFuncsRec via_analog_funcs = {
     .create_resources	= via_analog_create_resources,
+#ifdef RANDR_12_INTERFACE
     .set_property       = via_analog_set_property,
     .get_property       = via_analog_get_property,
+#endif
     .dpms               = via_analog_dpms,
     .save               = via_analog_save,
     .restore            = via_analog_restore,

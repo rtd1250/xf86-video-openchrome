@@ -1225,7 +1225,9 @@ static const xf86CrtcFuncsRec iga1_crtc_funcs = {
     .show_cursor            = iga1_crtc_show_cursor,
     .hide_cursor            = iga1_crtc_hide_cursor,
     .load_cursor_argb       = iga_crtc_load_cursor_argb,
+#ifdef RANDR_12_INTERFACE
     .set_origin             = iga1_crtc_set_origin,
+#endif
     .destroy                = iga_crtc_destroy,
 };
 
@@ -1630,7 +1632,9 @@ static const xf86CrtcFuncsRec iga2_crtc_funcs = {
     .show_cursor            = iga2_crtc_show_cursor,
     .hide_cursor            = iga2_crtc_hide_cursor,
     .load_cursor_argb       = iga_crtc_load_cursor_argb,
+#ifdef RANDR_12_INTERFACE
     .set_origin             = iga2_crtc_set_origin,
+#endif
     .destroy                = iga_crtc_destroy,
 };
 
