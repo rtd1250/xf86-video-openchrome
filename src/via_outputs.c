@@ -350,17 +350,15 @@ via_tv_detect(xf86OutputPtr output)
 static DisplayModePtr
 via_tv_get_modes(xf86OutputPtr output)
 {
+    DisplayModePtr modes = NULL, mode = NULL;
     ScrnInfoPtr pScrn = output->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
+    int i;
 
-    DisplayModePtr modes = NULL;
-    DisplayModePtr mode = NULL;
-
-    for (int i = 0; i < pVia->pBIOSInfo->TVNumModes; i++) {
+    for (i = 0; i < pVia->pBIOSInfo->TVNumModes; i++) {
         mode = xf86DuplicateMode(&pVia->pBIOSInfo->TVModes[i]);
         modes = xf86ModesAdd(modes, mode);
     }
-
     return modes;
 }
 
