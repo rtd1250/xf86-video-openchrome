@@ -309,5 +309,6 @@ ViaCheckCardId(ScrnInfoPtr pScrn)
                DEVICE_ID(pVia->PciInfo), SUBVENDOR_ID(pVia->PciInfo), SUBSYS_ID(pVia->PciInfo), pScrn->chipset);
     pVia->Id = NULL;
 
-    ViaDoubleCheckCLE266Revision(pScrn);
+    if (pVia->Chipset == VIA_CLE266)
+        ViaDoubleCheckCLE266Revision(pScrn);
 }
