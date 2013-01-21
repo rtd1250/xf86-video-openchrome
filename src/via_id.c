@@ -254,6 +254,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"HP T5550 Thin Client",                  VIA_VX900,   0x1106, 0x7122, VIA_DEVICE_CRT},
     {"Biostar Viotech 3200+",                 VIA_VX900,   0x1565, 0x120A, VIA_DEVICE_CRT},
     {"ASRock PV530",                          VIA_VX900,   0x1849, 0x7122, VIA_DEVICE_CRT},
+    {"Fujitsu Futro A300",                    VIA_VX900,   0xA0A0, 0x080F, VIA_DEVICE_CRT},
 
     /* keep this */
     {NULL,                                    VIA_UNKNOWN, 0x0000, 0x0000, VIA_DEVICE_NONE}
