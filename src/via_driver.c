@@ -685,6 +685,7 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
     switch (pVia->Chipset) {
         case VIA_CLE266:
             pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP0;
+            pVia->UseLegacyModeSwitch = TRUE;
             break;
         case VIA_KM400:
             /* IRQ is not broken on KM400A, but testing (pVia->ChipRev < 0x80)
@@ -726,7 +727,6 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
             pVia->dmaXV = FALSE;
             pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP0;
             break;
-
         case VIA_VX800:
         case VIA_VX855:
         case VIA_VX900:
