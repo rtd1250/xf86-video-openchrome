@@ -1301,6 +1301,14 @@ via_lvds_detect(xf86OutputPtr output)
     VIAPtr pVia = VIAPTR(pScrn);
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
+    /* Hardcode panel size for the XO */
+    if (pVia->Id->String == "OLPC XO 1.5") {
+        panel->NativeWidth = 1200;
+        panel->NativeHeight = 900;
+        status = XF86OutputStatusConnected;
+        return status;
+    }
+
     if (!pVia->UseLegacyModeSwitch) {
         /* First try to get the mode from EDID. */
         if (!panel->NativeWidth || !panel->NativeHeight) {
