@@ -82,7 +82,7 @@
 #define DRM_IOCTL_VIA_FB_INIT	  DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_FB_INIT, drm_via_fb_t)
 #define DRM_IOCTL_VIA_MAP_INIT	  DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_MAP_INIT, drm_via_init_t)
 #define DRM_IOCTL_VIA_DEC_FUTEX   DRM_IOW( DRM_COMMAND_BASE + DRM_VIA_DEC_FUTEX, drm_via_futex_t)
-#define DRM_IOCTL_VIA_GEM_CREATE  DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_GEM_CREATE, struct drm_gem_create)
+#define DRM_IOCTL_VIA_GEM_CREATE  DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_GEM_CREATE, struct drm_via_gem_create)
 #define DRM_IOCTL_VIA_DMA_INIT	  DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_DMA_INIT, drm_via_dma_init_t)
 #define DRM_IOCTL_VIA_CMDBUFFER	  DRM_IOW( DRM_COMMAND_BASE + DRM_VIA_CMDBUFFER, drm_via_cmdbuffer_t)
 #define DRM_IOCTL_VIA_FLUSH	  DRM_IO(  DRM_COMMAND_BASE + DRM_VIA_FLUSH)
@@ -272,7 +272,7 @@ typedef struct drm_via_dmablit {
 	drm_via_blitsync_t sync;
 } drm_via_dmablit_t;
 
-struct drm_gem_create {
+struct drm_via_gem_create {
 	/**
 	 * Requested size for the object.
 	 *

@@ -119,7 +119,7 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
                                 obj->size, obj->offset, obj->handle));
                 }
             } else if (pVia->directRenderingType == DRI_2) {
-                struct drm_gem_create args;
+                struct drm_via_gem_create args;
 
                 /* Some day this will be moved to libdrm. */
                 args.domains = domain;
@@ -127,7 +127,7 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
                 args.pitch = 0;
                 args.size = size;
                 ret = drmCommandWriteRead(pVia->drmmode.fd, DRM_VIA_GEM_CREATE,
-                                        &args, sizeof(struct drm_gem_create));
+                                        &args, sizeof(struct drm_via_gem_create));
                 if (!ret) {
                     /* Okay the X server expects to know the offset because
                      * of non-KMS. Once we have KMS working the offset
