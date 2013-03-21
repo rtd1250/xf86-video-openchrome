@@ -1873,7 +1873,6 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
     if (!pVia->NoAccel && !viaInitExa(pScreen))
         return FALSE;
 
-    miInitializeBackingStore(pScreen);
     xf86SetBackingStore(pScreen);
 #if 0
     xf86SetSilkenMouse(pScreen);
