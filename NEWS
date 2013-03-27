@@ -1,3 +1,17 @@
+openchrome 0.3.2 (27/03/2013)
+-----------------------------
+
+This is a bugfix release.
+- EXA fixes. Compositing is now enabled again.
+- TV out fixes and enhancements.
+- Fix memory detection on P4M800.
+- Fix for lockup when probing some I2C bus on P4M900.
+- VGA out probing with Vblank.
+- Fix building with autoconf 1.13.1.
+- Fix for X server 1.14.
+- Various bug fixes and improvements.
+
+
 openchrome 0.3.1 (04/09/2012)
 -----------------------------
 
