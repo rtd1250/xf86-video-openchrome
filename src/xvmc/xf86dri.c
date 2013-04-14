@@ -314,8 +314,11 @@ uniDRIGetClientDriverName(dpy, screen, ddxDriverMajorVersion,
     *ddxDriverPatchVersion = rep.ddxDriverPatchVersion;
 
     if (rep.length) {
-	if (!(*clientDriverName =
-		(char *)Xcalloc(rep.clientDriverNameLength + 1, 1))) {
+	if (rep.clientDriverNameLength < INT_MAX)
+	    *clientDriverName = Xcalloc(rep.clientDriverNameLength + 1, 1);
+	else
+	    *clientDriverName = NULL;
+	if (*clientDriverName == NULL) {
 	    _XEatData(dpy, ((rep.clientDriverNameLength + 3) & ~3));
 	    UnlockDisplay(dpy);
 	    SyncHandle();
