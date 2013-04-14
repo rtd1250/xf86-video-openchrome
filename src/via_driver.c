@@ -806,16 +806,6 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
     if (!drmmode->front_bo)
         goto fail;
 
-#ifdef HAVE_DRI
-    if (pVia->KMS) {
-        if (drmModeAddFB(drmmode->fd, width, height, scrn->depth,
-                        scrn->bitsPerPixel, pitch,
-                        drmmode->front_bo->handle,
-                        &drmmode->fb_id))
-            goto fail;
-    }
-#endif
-
     new_pixels = drm_bo_map(scrn, drmmode->front_bo);
     if (!new_pixels)
         goto fail;
