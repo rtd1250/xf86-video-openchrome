@@ -835,101 +835,11 @@ drmmode_clones_init(ScrnInfoPtr scrn, drmmode_ptr drmmode)
     }
 }
 
-static Bool
-drmmode_xf86crtc_resize (ScrnInfoPtr scrn, int width, int height)
-{
-    xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(scrn);
-    drmmode_crtc_private_ptr drmmode_crtc = xf86_config->crtc[0]->driver_private;
-    drmmode_ptr drmmode = drmmode_crtc->drmmode;
-    int	i, pitch, old_width, old_height, old_pitch;
-    int cpp = (scrn->bitsPerPixel + 7) / 8;
-    struct buffer_object *old_front = NULL;
-    ScreenPtr screen = scrn->pScreen;
-    uint32_t old_fb_id;
-    void *new_pixels;
-    PixmapPtr ppix;
-    Bool ret;
-
-    if (scrn->virtualX == width && scrn->virtualY == height)
-        return TRUE;
-
-    xf86DrvMsg(scrn->scrnIndex, X_INFO,
-                "Allocate new frame buffer %dx%d stride\n",
-                width, height);
-
-    old_width = scrn->virtualX;
-    old_height = scrn->virtualY;
-    old_pitch = drmmode->front_bo->pitch;
-    old_fb_id = drmmode->fb_id;
-    old_front = drmmode->front_bo;
-
-    pitch = width * cpp;
-    drmmode->front_bo = drm_bo_alloc_surface(scrn, &pitch, height, 0, 16,
-                                                TTM_PL_FLAG_VRAM);
-    if (!drmmode->front_bo)
-        goto fail;
-
-    scrn->virtualX = width;
-    scrn->virtualY = height;
-    scrn->displayWidth = pitch / cpp;
-
-    ret = drmModeAddFB(drmmode->fd, width, height, scrn->depth,
-                        scrn->bitsPerPixel, pitch,
-                        drmmode->front_bo->handle,
-                        &drmmode->fb_id);
-    if (ret)
-        goto fail;
-
-    new_pixels  = drm_bo_map(scrn, drmmode->front_bo);
-    if (!new_pixels)
-        goto fail;
-
-    ppix = screen->GetScreenPixmap(screen);
-    screen->ModifyPixmapHeader(ppix, width, height, -1, -1,
-                                pitch, new_pixels);
-
-#if XORG_VERSION_CURRENT < XORG_VERSION_NUMERIC(1,9,99,1,0)
-    scrn->pixmapPrivate.ptr = ppix->devPrivate.ptr;
-#endif
-
-    for (i = 0; i < xf86_config->num_crtc; i++) {
-        xf86CrtcPtr crtc = xf86_config->crtc[i];
-
-        if (!crtc->enabled)
-            continue;
-
-        drmmode_set_mode_major(crtc, &crtc->mode, crtc->rotation,
-                                crtc->x, crtc->y);
-    }
-
-    if (old_fb_id) {
-        drmModeRmFB(drmmode->fd, old_fb_id);
-        drm_bo_free(scrn, old_front);
-    }
-    return TRUE;
-
- fail:
-    if (drmmode->front_bo)
-        drm_bo_free(scrn, drmmode->front_bo);
-    drmmode->front_bo = old_front;
-    scrn->virtualX = old_width;
-    scrn->virtualY = old_height;
-    scrn->displayWidth = old_pitch / cpp;
-    drmmode->fb_id = old_fb_id;
-
-    return FALSE;
-}
-
-static const xf86CrtcConfigFuncsRec drmmode_xf86crtc_config_funcs = {
-    drmmode_xf86crtc_resize
-};
-
 Bool KMSCrtcInit(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
 {
     int i;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "KMSCrtcInit\n"));
-    xf86CrtcConfigInit(pScrn, &drmmode_xf86crtc_config_funcs);
 
     drmmode->scrn = pScrn;
     drmmode->mode_res = drmModeGetResources(drmmode->fd);
