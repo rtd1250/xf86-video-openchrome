@@ -1682,6 +1682,9 @@ VIACreateScreenResources(ScreenPtr pScreen)
 
     rootPixmap = pScreen->GetScreenPixmap(pScreen);
 
+#ifdef HAVE_DRI
+    drmmode_uevent_init(pScrn, &pVia->drmmode);
+#endif
     surface = drm_bo_map(pScrn, pVia->drmmode.front_bo);
     if (!surface)
         return FALSE;
@@ -1728,6 +1731,9 @@ VIACloseScreen(CLOSE_SCREEN_ARGS_DECL)
     if (pScrn->vtSema)
         VIALeaveVT(VT_FUNC_ARGS(0));
 
+#ifdef HAVE_DRI
+    drmmode_uevent_fini(pScrn, &pVia->drmmode);
+#endif
     xf86_cursors_fini(pScreen);
 
     for (i = 0; i < xf86_config->num_crtc; i++) {
