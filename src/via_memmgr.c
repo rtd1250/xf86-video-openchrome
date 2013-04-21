@@ -68,15 +68,36 @@ viaOffScreenLinear(struct buffer_object *obj, ScrnInfoPtr pScrn,
 }
 
 struct buffer_object *
-drm_bo_alloc_surface(ScrnInfoPtr pScrn, unsigned int *pitch, unsigned int height,
+drm_bo_alloc_surface(ScrnInfoPtr pScrn, unsigned int width, unsigned int height,
                     int format, unsigned int alignment, int domain)
 {
     struct buffer_object *obj = NULL;
+    int pitch;
 
-    *pitch = ALIGN_TO(*pitch, alignment);
-    obj = drm_bo_alloc(pScrn, *pitch * height, alignment, domain);
-    if (obj)
-        obj->pitch = *pitch;
+    switch (format) {
+    case DRM_FORMAT_C8:
+        pitch = width;
+        break;
+
+    case DRM_FORMAT_XRGB1555:
+    case DRM_FORMAT_RGB565:
+        pitch = width * 2;
+        break;
+
+    case DRM_FORMAT_RGB888:
+        pitch = width * 3;
+        break;
+
+    case DRM_FORMAT_XRGB2101010:
+    case DRM_FORMAT_XRGB8888:
+        pitch = width * 4;
+        break;
+    }
+
+    pitch = ALIGN_TO(pitch, alignment);
+    obj = drm_bo_alloc(pScrn, pitch * height, alignment, domain);
+    if (!obj->pitch)
+        obj->pitch = pitch;
     return obj;
 }
 
@@ -135,6 +156,7 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
                     obj->map_offset = args.map_handle;
                     obj->offset = args.offset;
                     obj->handle = args.handle;
+                    obj->pitch = args.pitch;
                     obj->size = args.size;
                     obj->domain = domain;
                     DEBUG(ErrorF("%lu bytes of DRI2 memory allocated at %lx, handle %lu\n",

@@ -61,6 +61,7 @@
 #include "xf86dri.h"
 #include "sarea.h"
 #include "dri.h"
+#include "drm_fourcc.h"
 #include "GL/glxint.h"
 #include "via_dri.h"
 #include "via_drmclient.h"

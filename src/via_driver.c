@@ -772,13 +772,42 @@ VIAGetRec(ScrnInfoPtr pScrn)
     return ret;
 } /* VIAGetRec */
 
+static int
+map_legacy_formats(int bpp, int depth)
+{
+	int fmt = DRM_FORMAT_XRGB8888;
+
+	switch (bpp) {
+	case 8:
+		fmt = DRM_FORMAT_C8;
+		break;
+	case 16:
+		if (depth == 15)
+			fmt = DRM_FORMAT_XRGB1555;
+		else
+			fmt = DRM_FORMAT_RGB565;
+		break;
+	case 24:
+		fmt = DRM_FORMAT_RGB888;
+		break;
+	case 32:
+		if (depth == 24)
+			fmt = DRM_FORMAT_XRGB8888;
+		else if (depth == 30)
+			fmt = DRM_FORMAT_XRGB2101010;
+	default:
+		break;
+	}
+	return fmt;
+}
+
 static Bool
 via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
 {
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(scrn);
     drmmode_crtc_private_ptr drmmode_crtc = xf86_config->crtc[0]->driver_private;
+    int old_width, old_height, old_dwidth, format;
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
-    int old_width, old_height, old_dwidth, pitch;
     int cpp = (scrn->bitsPerPixel + 7) >> 3;
     struct buffer_object *old_front = NULL;
     ScreenPtr screen = scrn->pScreen;
@@ -790,28 +819,28 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
     if (scrn->virtualX == width && scrn->virtualY == height)
         return TRUE;
 
-    xf86DrvMsg(scrn->scrnIndex, X_INFO,
-                "Allocate new frame buffer %dx%d stride\n",
-                width, height);
-
     old_width = scrn->virtualX;
     old_height = scrn->virtualY;
     old_dwidth = scrn->displayWidth;
     old_fb_id = drmmode->fb_id;
     old_front = drmmode->front_bo;
 
-    pitch = width * cpp;
-    drmmode->front_bo = drm_bo_alloc_surface(scrn, &pitch, height, 0,
+    format = map_legacy_formats(scrn->bitsPerPixel, scrn->depth);
+    drmmode->front_bo = drm_bo_alloc_surface(scrn, width, height, format,
                                             16, TTM_PL_FLAG_VRAM);
     if (!drmmode->front_bo)
         goto fail;
+
+    xf86DrvMsg(scrn->scrnIndex, X_INFO,
+                "Allocate new frame buffer %dx%d stride %d\n",
+                width, height, drmmode->front_bo->pitch);
 
     new_pixels = drm_bo_map(scrn, drmmode->front_bo);
     if (!new_pixels)
         goto fail;
 
     if (pVia->shadowFB) {
-        new_pixels = malloc(height * pitch);
+        new_pixels = malloc(height * drmmode->front_bo->pitch);
         if (!new_pixels)
             goto fail;
         free(pVia->ShadowPtr);
@@ -819,10 +848,11 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
     }
     scrn->virtualX = width;
     scrn->virtualY = height;
-    scrn->displayWidth = pitch / cpp;
+    scrn->displayWidth = drmmode->front_bo->pitch / cpp;
 
     ppix = screen->GetScreenPixmap(screen);
-    if (!screen->ModifyPixmapHeader(ppix, width, height, -1, -1, pitch,
+    if (!screen->ModifyPixmapHeader(ppix, width, height, -1, -1,
+                                    drmmode->front_bo->pitch,
                                     new_pixels))
         goto fail;
 
@@ -1768,7 +1798,7 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
 {
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
-    int pitch;
+    int format;
 
     pScrn->pScreen = pScreen;
     pScrn->displayWidth = pScrn->virtualX;
@@ -1797,9 +1827,9 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
     if (!drm_bo_manager_init(pScrn))
         return FALSE;
 
-    pitch = pScrn->virtualX * pScrn->bitsPerPixel >> 3;
-    pVia->drmmode.front_bo = drm_bo_alloc_surface(pScrn, &pitch, pScrn->virtualY,
-                                                    0, 16, TTM_PL_FLAG_VRAM);
+    format = map_legacy_formats(pScrn->bitsPerPixel, pScrn->depth);
+    pVia->drmmode.front_bo = drm_bo_alloc_surface(pScrn, pScrn->virtualX, pScrn->virtualY,
+                                                    format, 16, TTM_PL_FLAG_VRAM);
     if (!pVia->drmmode.front_bo)
         return FALSE;
 
