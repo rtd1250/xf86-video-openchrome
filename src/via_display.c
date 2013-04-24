@@ -908,16 +908,26 @@ iga1_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
     ScrnInfoPtr pScrn = crtc->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
     CARD32 temp;
+    ModeStatus modestatus;
 
     if (pVia->pVbe)
         return TRUE;
 
     if ((mode->Clock < pScrn->clockRanges->minClock) ||
-        (mode->Clock > pScrn->clockRanges->maxClock))
+        (mode->Clock > pScrn->clockRanges->maxClock)) {
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                   "Clock for mode \"%s\" outside of allowed range (%u (%u - %u))\n",
+                   mode->name, mode->Clock, pScrn->clockRanges->minClock,
+                   pScrn->clockRanges->maxClock);
         return FALSE;
+    }
 
-    if (ViaFirstCRTCModeValid(pScrn, mode) != MODE_OK)
+    modestatus = ViaFirstCRTCModeValid(pScrn, mode);
+    if (modestatus != MODE_OK) {
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Not using mode \"%s\" : %s.\n",
+                   mode->name, xf86ModeStatusToString(modestatus));
         return FALSE;
+    }
 
     temp = mode->CrtcHDisplay * mode->CrtcVDisplay * mode->VRefresh *
             (pScrn->bitsPerPixel >> 3);
@@ -1309,16 +1319,26 @@ iga2_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
     ScrnInfoPtr pScrn = crtc->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
     CARD32 temp;
+    ModeStatus modestatus;
 
     if (pVia->pVbe)
         return TRUE;
 
     if ((mode->Clock < pScrn->clockRanges->minClock) ||
-        (mode->Clock > pScrn->clockRanges->maxClock))
+        (mode->Clock > pScrn->clockRanges->maxClock)) {
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                   "Clock for mode \"%s\" outside of allowed range (%u (%u - %u))\n",
+                   mode->name, mode->Clock, pScrn->clockRanges->minClock,
+                   pScrn->clockRanges->maxClock);
         return FALSE;
+    }
 
-    if (ViaSecondCRTCModeValid(pScrn, mode) != MODE_OK)
+    modestatus = ViaFirstCRTCModeValid(pScrn, mode);
+    if (modestatus != MODE_OK) {
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Not using mode \"%s\" : %s.\n",
+                   mode->name, xf86ModeStatusToString(modestatus));
         return FALSE;
+    }
 
     temp = mode->CrtcHDisplay * mode->CrtcVDisplay * mode->VRefresh *
             (pScrn->bitsPerPixel >> 3);
