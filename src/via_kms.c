@@ -160,120 +160,79 @@ static Bool
 drmmode_set_mode_major(xf86CrtcPtr crtc, DisplayModePtr mode,
                         Rotation rotation, int x, int y)
 {
-    ScrnInfoPtr pScrn = crtc->scrn;
-    xf86CrtcConfigPtr   xf86_config = XF86_CRTC_CONFIG_PTR(crtc->scrn);
+    xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(crtc->scrn);
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
-    int saved_x, saved_y;
-    Rotation saved_rotation;
-    DisplayModeRec saved_mode;
-    uint32_t *output_ids;
-    int output_count = 0;
-    Bool ret = TRUE;
-    int i;
-    int fb_id;
+    ScrnInfoPtr pScrn = crtc->scrn;
+    int output_count = 0, ret, i;
+    uint32_t *output_ids = NULL;
     drmModeModeInfo kmode;
-    int height;
 
-    height = pScrn->virtualY;
+    if (!mode || !xf86CrtcRotate(crtc))
+        return FALSE;
+
+    output_ids = calloc(sizeof(uint32_t), xf86_config->num_output);
+    if (!output_ids)
+        return FALSE;
+
+    for (i = 0; i < xf86_config->num_output; i++) {
+        xf86OutputPtr output = xf86_config->output[i];
+        drmmode_output_private_ptr drmmode_output;
+
+        if (output->crtc != crtc)
+            continue;
+
+        drmmode_output = output->driver_private;
+        output_ids[output_count] = drmmode_output->mode_output->connector_id;
+        output_count++;
+    }
+
+    xf86SetModeDefaultName(mode);
+    drmmode_ConvertToKMode(crtc->scrn, &kmode, mode);
 
     if (drmmode->fb_id == 0) {
-        ret = drmModeAddFB(drmmode->fd, pScrn->virtualX, height,
+        ret = drmModeAddFB(drmmode->fd, pScrn->virtualX, pScrn->virtualY,
                             pScrn->depth, pScrn->bitsPerPixel,
                             drmmode->front_bo->pitch,
                             drmmode->front_bo->handle,
                             &drmmode->fb_id);
         if (ret < 0) {
             ErrorF("failed to add fb %d\n", ret);
-            return FALSE;
+            goto done;
         }
     }
 
-    saved_mode = crtc->mode;
-    saved_x = crtc->x;
-    saved_y = crtc->y;
-    saved_rotation = crtc->rotation;
-
-    if (mode) {
-        crtc->mode = *mode;
-        crtc->x = x;
-        crtc->y = y;
-        crtc->rotation = rotation;
-#if XORG_VERSION_CURRENT >= XORG_VERSION_NUMERIC(1,5,99,0,0)
-        crtc->transformPresent = FALSE;
-#endif
-    }
-
-    output_ids = calloc(sizeof(uint32_t), xf86_config->num_output);
-    if (!output_ids) {
-        ret = FALSE;
+    ret = drmModeSetCrtc(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id,
+                         drmmode->fb_id, x, y, output_ids, output_count, &kmode);
+    if (ret) {
+        xf86DrvMsg(crtc->scrn->scrnIndex, X_ERROR, "failed to set mode: %s",
+                   strerror(-ret));
         goto done;
     }
 
-    if (mode) {
-        for (i = 0; i < xf86_config->num_output; i++) {
-            xf86OutputPtr output = xf86_config->output[i];
-            drmmode_output_private_ptr drmmode_output;
+    if (crtc->scrn->pScreen)
+        xf86CrtcSetScreenSubpixelOrder(crtc->scrn->pScreen);
 
-            if (output->crtc != crtc)
-                continue;
+    /* go through all the outputs and force DPMS them back on? */
+    for (i = 0; i < xf86_config->num_output; i++) {
+        xf86OutputPtr output = xf86_config->output[i];
 
-            drmmode_output = output->driver_private;
-            output_ids[output_count] = drmmode_output->mode_output->connector_id;
-            output_count++;
-        }
+        if (output->crtc != crtc)
+            continue;
 
-        if (!xf86CrtcRotate(crtc)) {
-            goto done;
-        }
+        output->funcs->dpms(output, DPMSModeOn);
+    }
 
 #if XORG_VERSION_CURRENT >= XORG_VERSION_NUMERIC(1,7,0,0,0)
-        crtc->funcs->gamma_set(crtc, crtc->gamma_red, crtc->gamma_green,
-                                crtc->gamma_blue, crtc->gamma_size);
+    crtc->funcs->gamma_set(crtc, crtc->gamma_red, crtc->gamma_green,
+                           crtc->gamma_blue, crtc->gamma_size);
 #endif
-        drmmode_ConvertToKMode(crtc->scrn, &kmode, mode);
-
-        fb_id = drmmode->fb_id;
-        if (drmmode_crtc->rotate_fb_id) {
-            fb_id = drmmode_crtc->rotate_fb_id;
-            x = y = 0;
-        }
-        ret = drmModeSetCrtc(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id,
-                            fb_id, x, y, output_ids, output_count, &kmode);
-        if (ret)
-            xf86DrvMsg(crtc->scrn->scrnIndex, X_ERROR, "failed to set mode: %s",
-                        strerror(-ret));
-        else
-            ret = TRUE;
-
-        if (crtc->scrn->pScreen)
-            xf86CrtcSetScreenSubpixelOrder(crtc->scrn->pScreen);
-
-        /* go through all the outputs and force DPMS them back on? */
-        for (i = 0; i < xf86_config->num_output; i++) {
-            xf86OutputPtr output = xf86_config->output[i];
-
-            if (output->crtc != crtc)
-			    continue;
-
-            output->funcs->dpms(output, DPMSModeOn);
-        }
-    }
 
     if (pScrn->pScreen && drmmode->hwcursor)
         xf86_reload_cursors(pScrn->pScreen);
 done:
-    if (!ret) {
-        crtc->x = saved_x;
-        crtc->y = saved_y;
-        crtc->rotation = saved_rotation;
-        crtc->mode = saved_mode;
-    }
-#if defined(XF86_CRTC_VERSION) && XF86_CRTC_VERSION >= 3
-    else
-        crtc->active = TRUE;
-#endif
-	return ret;
+    free(output_ids);
+    return (ret < 0 ? FALSE : TRUE);
 }
 
 static void
