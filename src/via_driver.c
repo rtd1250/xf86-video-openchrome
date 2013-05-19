@@ -805,54 +805,44 @@ static Bool
 via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
 {
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(scrn);
-    drmmode_crtc_private_ptr drmmode_crtc = xf86_config->crtc[0]->driver_private;
+    struct buffer_object *old_front = NULL, *new_front = NULL;
     int old_width, old_height, old_dwidth, format;
-    drmmode_ptr drmmode = drmmode_crtc->drmmode;
-    int cpp = (scrn->bitsPerPixel + 7) >> 3;
-    struct buffer_object *old_front = NULL;
+    int cpp = (scrn->bitsPerPixel + 7) >> 3, i;
     ScreenPtr screen = scrn->pScreen;
     VIAPtr pVia = VIAPTR(scrn);
     void *new_pixels = NULL;
     uint32_t old_fb_id;
+    Bool ret = FALSE;
     PixmapPtr ppix;
 
     if (scrn->virtualX == width && scrn->virtualY == height)
         return TRUE;
 
-    old_width = scrn->virtualX;
-    old_height = scrn->virtualY;
-    old_dwidth = scrn->displayWidth;
-    old_fb_id = drmmode->fb_id;
-    old_front = drmmode->front_bo;
-
     format = map_legacy_formats(scrn->bitsPerPixel, scrn->depth);
-    drmmode->front_bo = drm_bo_alloc_surface(scrn, width, height, format,
+    new_front = drm_bo_alloc_surface(scrn, width, height, format,
                                             16, TTM_PL_FLAG_VRAM);
-    if (!drmmode->front_bo)
+    if (!new_front)
         goto fail;
 
     xf86DrvMsg(scrn->scrnIndex, X_INFO,
                 "Allocate new frame buffer %dx%d stride %d\n",
-                width, height, drmmode->front_bo->pitch);
+                width, height, new_front->pitch);
 
-    new_pixels = drm_bo_map(scrn, drmmode->front_bo);
+    new_pixels = drm_bo_map(scrn, new_front);
     if (!new_pixels)
         goto fail;
 
     if (pVia->shadowFB) {
-        new_pixels = malloc(height * drmmode->front_bo->pitch);
+        new_pixels = malloc(height * new_front->pitch);
         if (!new_pixels)
             goto fail;
         free(pVia->ShadowPtr);
         pVia->ShadowPtr = new_pixels;
     }
-    scrn->virtualX = width;
-    scrn->virtualY = height;
-    scrn->displayWidth = drmmode->front_bo->pitch / cpp;
 
     ppix = screen->GetScreenPixmap(screen);
     if (!screen->ModifyPixmapHeader(ppix, width, height, -1, -1,
-                                    drmmode->front_bo->pitch,
+                                    new_front->pitch,
                                     new_pixels))
         goto fail;
 
@@ -860,25 +850,52 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
     scrn->pixmapPrivate.ptr = ppix->devPrivate.ptr;
 #endif
 
-    if (xf86SetDesiredModes(scrn)) {
-        if (old_front) {
+    scrn->virtualX = width;
+    scrn->virtualY = height;
+    scrn->displayWidth = new_front->pitch / cpp;
+
+    for (i = 0; i < xf86_config->num_crtc; i++) {
+        xf86CrtcPtr crtc = xf86_config->crtc[i];
+        drmmode_crtc_private_ptr drmmode_crtc;
+        drmmode_ptr drmmode;
+
+        if (!crtc->enabled || !crtc->driver_private)
+            continue;
+
+        drmmode_crtc = crtc->driver_private;
+        drmmode = drmmode_crtc->drmmode;
+
+        old_front = drmmode->front_bo;
+        old_fb_id = drmmode->fb_id;
+
+        drmmode->front_bo = new_front;
+        drmmode->fb_id = 0;
+
+        ret = xf86CrtcSetMode(crtc, &crtc->mode, crtc->rotation,
+	                          crtc->x, crtc->y);
+        if (!ret) {
+            drmmode->front_bo = old_front;
+            drmmode->fb_id = old_fb_id;
+            break;
 #ifdef HAVE_DRI
-            if (old_fb_id && pVia->KMS)
+        } else {
+            if (pVia->KMS && old_fb_id)
                 drmModeRmFB(drmmode->fd, old_fb_id);
 #endif
-            drm_bo_unmap(scrn, old_front);
-            drm_bo_free(scrn, old_front);
         }
-        return TRUE;
+    }
+
+    if (ret) {
+        drm_bo_unmap(scrn, old_front);
+        drm_bo_free(scrn, old_front);
+        return ret;
     }
 
 fail:
-    if (drmmode->front_bo) {
-        drm_bo_unmap(scrn, drmmode->front_bo);
-        drm_bo_free(scrn, drmmode->front_bo);
+    if (new_front) {
+        drm_bo_unmap(scrn, new_front);
+        drm_bo_free(scrn, new_front);
     }
-    drmmode->front_bo = old_front;
-    drmmode->fb_id = old_fb_id;
     scrn->virtualY = old_height;
     scrn->virtualX = old_width;
     scrn->displayWidth = old_dwidth;

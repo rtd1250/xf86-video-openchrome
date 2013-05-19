@@ -470,8 +470,11 @@ ViaFirstCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 }
 
 void
-ViaFirstCRTCSetStartingAddress(ScrnInfoPtr pScrn, int x, int y)
+ViaFirstCRTCSetStartingAddress(xf86CrtcPtr crtc, int x, int y)
 {
+    drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
+    drmmode_ptr drmmode = drmmode_crtc->drmmode;
+    ScrnInfoPtr pScrn = crtc->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     CARD32 Base;
@@ -479,7 +482,7 @@ ViaFirstCRTCSetStartingAddress(ScrnInfoPtr pScrn, int x, int y)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaFirstCRTCSetStartingAddress\n"));
 
     Base = (y * pScrn->displayWidth + x) * (pScrn->bitsPerPixel / 8);
-    Base = (Base + pVia->drmmode.front_bo->offset) >> 1;
+    Base = (Base + drmmode->front_bo->offset) >> 1;
 
     hwp->writeCrtc(hwp, 0x0C, (Base & 0xFF00) >> 8);
     hwp->writeCrtc(hwp, 0x0D, Base & 0xFF);
@@ -491,14 +494,16 @@ ViaFirstCRTCSetStartingAddress(ScrnInfoPtr pScrn, int x, int y)
 }
 
 void
-ViaSecondCRTCSetStartingAddress(ScrnInfoPtr pScrn, int x, int y)
+ViaSecondCRTCSetStartingAddress(xf86CrtcPtr crtc, int x, int y)
 {
-    VIAPtr pVia = VIAPTR(pScrn);
+    drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
+    drmmode_ptr drmmode = drmmode_crtc->drmmode;
+    ScrnInfoPtr pScrn = crtc->scrn;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     CARD32 Base, tmp;
 
     Base = (y * pScrn->displayWidth + x) * (pScrn->bitsPerPixel / 8);
-    Base = (Base + pVia->drmmode.front_bo->offset) >> 3;
+    Base = (Base + drmmode->front_bo->offset) >> 3;
 
     tmp = hwp->readCrtc(hwp, 0x62) & 0x01;
     tmp |= (Base & 0x7F) << 1;
@@ -954,7 +959,7 @@ iga1_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
     if (pVia->pVbe) {
         ViaVbeAdjustFrame(pScrn, x, y);
     } else {
-        ViaFirstCRTCSetStartingAddress(pScrn, x, y);
+        ViaFirstCRTCSetStartingAddress(crtc, x, y);
     }
     VIAVidAdjustFrame(pScrn, x, y);
 }
@@ -1365,7 +1370,7 @@ iga2_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
     if (pVia->pVbe) {
         ViaVbeAdjustFrame(pScrn, x, y);
     } else {
-        ViaSecondCRTCSetStartingAddress(pScrn, x, y);
+        ViaSecondCRTCSetStartingAddress(crtc, x, y);
     }
     VIAVidAdjustFrame(pScrn, x, y);
 }
