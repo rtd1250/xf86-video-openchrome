@@ -874,18 +874,25 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
         ret = xf86CrtcSetMode(crtc, &crtc->mode, crtc->rotation,
 	                          crtc->x, crtc->y);
         if (!ret) {
+            xf86DrvMsg(scrn->scrnIndex, X_INFO,
+                "SetMode !ret so we reset front_bo\n");
             drmmode->front_bo = old_front;
             drmmode->fb_id = old_fb_id;
             break;
 #ifdef HAVE_DRI
         } else {
+            xf86DrvMsg(scrn->scrnIndex, X_INFO,
+                "SetMode ret so we cleanup old front_bo\n");
             if (pVia->KMS && old_fb_id)
                 drmModeRmFB(drmmode->fd, old_fb_id);
 #endif
         }
     }
 
+
     if (ret) {
+        xf86DrvMsg(scrn->scrnIndex, X_INFO,
+                   "More cleanup old front_bo\n");
         drm_bo_unmap(scrn, old_front);
         drm_bo_free(scrn, old_front);
         return ret;

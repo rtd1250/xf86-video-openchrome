@@ -1295,6 +1295,7 @@ ViaPanelLookUpModeIndex(int width, int height)
 static xf86OutputStatus
 via_lvds_detect(xf86OutputPtr output)
 {
+    static const char xoId[] = "OLPC XO 1.5";
     xf86OutputStatus status = XF86OutputStatusDisconnected;
     ViaPanelInfoPtr panel = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
@@ -1302,7 +1303,7 @@ via_lvds_detect(xf86OutputPtr output)
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
     /* Hardcode panel size for the XO */
-    if (pVia->Id->String == "OLPC XO 1.5") {
+    if(strcmp(pVia->Id->String, xoId) == 0) {
         panel->NativeWidth = 1200;
         panel->NativeHeight = 900;
         status = XF86OutputStatusConnected;
