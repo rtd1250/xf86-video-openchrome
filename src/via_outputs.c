@@ -885,7 +885,7 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
      * disables the panel on P4M900
      */
     /* TV encoder */
-    if (pVia->ActiveDevice & VIA_DEVICE_TV)
+    if ((pVia->Chipset != VIA_P4M900) || (pVia->ActiveDevice & VIA_DEVICE_TV))
         via_tv_init(pScrn);
 
     if (pVia->ActiveDevice & VIA_DEVICE_DFP) {
