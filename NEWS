@@ -1,3 +1,11 @@
+openchrome 0.3.3 (23/05/2013)
+-----------------------------
+
+This is a bugfix release.
+- Fix integer overflow in libchromeXvMC (CVE-2013-1994).
+- Various bug fixes and improvements.
+
+
 openchrome 0.3.2 (27/03/2013)
 -----------------------------
 
