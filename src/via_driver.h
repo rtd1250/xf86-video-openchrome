@@ -525,9 +525,6 @@ void viaHideCursor(ScrnInfoPtr pScrn);
 Bool viaHWCursorInit(ScreenPtr pScreen);
 void ViaDisplaySetStreamOnCRT(ScrnInfoPtr pScrn, Bool primary);
 void ViaDisplaySetStreamOnDFP(ScrnInfoPtr pScrn, Bool primary);
-void ViaDisplaySetStreamOnDVO(ScrnInfoPtr pScrn, int port, Bool primary);
 void ViaDisplayEnableSimultaneous(ScrnInfoPtr pScrn);
-void ViaDisplayEnableCRT(ScrnInfoPtr pScrn);
-void ViaDisplayEnableDVO(ScrnInfoPtr pScrn, int port);
 
 #endif /* _VIA_DRIVER_H_ */
