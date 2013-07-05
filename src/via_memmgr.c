@@ -34,6 +34,7 @@
 #include "xf86drm.h"
 #endif
 
+#include "drm_fourcc.h"
 #include "via_driver.h"
 #ifdef HAVE_DRI
 #include "via_drm.h"

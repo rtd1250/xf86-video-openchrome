@@ -41,6 +41,7 @@
 
 #include "version.h"
 #include "via_driver.h"
+#include "drm_fourcc.h"
 
 #if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 6
 #include "xf86RAC.h"
