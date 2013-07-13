@@ -807,8 +807,8 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
 {
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(scrn);
     struct buffer_object *old_front = NULL, *new_front = NULL;
+    int cpp = (scrn->bitsPerPixel + 7) >> 3, fd, i;
     int old_width, old_height, old_dwidth, format;
-    int cpp = (scrn->bitsPerPixel + 7) >> 3, i;
     ScreenPtr screen = scrn->pScreen;
     VIAPtr pVia = VIAPTR(scrn);
     void *new_pixels = NULL;
@@ -850,7 +850,6 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
 #if XORG_VERSION_CURRENT < XORG_VERSION_NUMERIC(1,9,99,1,0)
     scrn->pixmapPrivate.ptr = ppix->devPrivate.ptr;
 #endif
-
     scrn->virtualX = width;
     scrn->virtualY = height;
     scrn->displayWidth = new_front->pitch / cpp;
@@ -860,44 +859,38 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
         drmmode_crtc_private_ptr drmmode_crtc;
         drmmode_ptr drmmode;
 
-        if (!crtc->enabled || !crtc->driver_private)
+        if (!xf86CrtcInUse(crtc) || !crtc->driver_private)
             continue;
 
         drmmode_crtc = crtc->driver_private;
         drmmode = drmmode_crtc->drmmode;
 
-        old_front = drmmode->front_bo;
-        old_fb_id = drmmode->fb_id;
+        if (drmmode->front_bo != new_front) {
+            old_front = drmmode->front_bo;
+            old_fb_id = drmmode->fb_id;
+            fd = drmmode->fd;
 
-        drmmode->front_bo = new_front;
-        drmmode->fb_id = 0;
+            drmmode->front_bo = new_front;
+            drmmode->fb_id = 0;
+        }
 
-        ret = xf86CrtcSetMode(crtc, &crtc->mode, crtc->rotation,
+        ret = xf86CrtcSetMode(crtc, &crtc->desiredMode, crtc->rotation,
 	                          crtc->x, crtc->y);
         if (!ret) {
-            xf86DrvMsg(scrn->scrnIndex, X_INFO,
-                "SetMode !ret so we reset front_bo\n");
             drmmode->front_bo = old_front;
             drmmode->fb_id = old_fb_id;
-            break;
-#ifdef HAVE_DRI
-        } else {
-            xf86DrvMsg(scrn->scrnIndex, X_INFO,
-                "SetMode ret so we cleanup old front_bo\n");
-            if (pVia->KMS && old_fb_id)
-                drmModeRmFB(drmmode->fd, old_fb_id);
-#endif
+            xf86DrvMsg(scrn->scrnIndex, X_INFO, "xf86CrtcSetMode failed\n");
+            goto fail;
         }
     }
 
-
-    if (ret) {
-        xf86DrvMsg(scrn->scrnIndex, X_INFO,
-                   "More cleanup old front_bo\n");
-        drm_bo_unmap(scrn, old_front);
-        drm_bo_free(scrn, old_front);
-        return ret;
-    }
+#ifdef HAVE_DRI
+    if (pVia->KMS && old_fb_id)
+        drmModeRmFB(fd, old_fb_id);
+#endif
+    drm_bo_unmap(scrn, old_front);
+    drm_bo_free(scrn, old_front);
+    return ret;
 
 fail:
     if (new_front) {
