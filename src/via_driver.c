@@ -807,7 +807,7 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
 {
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(scrn);
     struct buffer_object *old_front = NULL, *new_front = NULL;
-    int cpp = (scrn->bitsPerPixel + 7) >> 3, fd, i, j;
+    int cpp = (scrn->bitsPerPixel + 7) >> 3, fd, i;
     int old_width, old_height, old_dwidth, format;
     ScreenPtr screen = scrn->pScreen;
     VIAPtr pVia = VIAPTR(scrn);
@@ -859,18 +859,8 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
         drmmode_crtc_private_ptr drmmode_crtc;
         drmmode_ptr drmmode;
 
-        if (!xf86CrtcInUse(crtc)) {
-            for (j = 0; j < xf86_config->num_output; j++) {
-                xf86OutputPtr output = xf86_config->output[j];
-
-                if (!output->crtc) {
-                    output->crtc = crtc;
-                    ret = TRUE;
-                }
-            }
-            if (!ret)
-                continue;
-        }
+        if (!xf86CrtcInUse(crtc) || !crtc->driver_private)
+            continue;
 
         drmmode_crtc = crtc->driver_private;
         drmmode = drmmode_crtc->drmmode;
