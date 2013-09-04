@@ -239,6 +239,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"Siragon ML-6200",                       VIA_VX800,   0x1106, 0x2211, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Guillemot-Hercules ECafe EC900B",       VIA_VX800,   0x1106, 0x3349, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"VIA OpenBook",                          VIA_VX800,   0x1170, 0x0311, VIA_DEVICE_CRT | VIA_DEVICE_LCD}, /* VIA OpenBook eNote VBE8910 */
+    {"Samsung Q1EX",                          VIA_VX800,   0x144d, 0xc040, VIA_DEVICE_LCD},
     {"Samsung NC20",                          VIA_VX800,   0x144d, 0xc04e, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"FIC CE2A1",                             VIA_VX800,   0x1509, 0x3002, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Quanta DreamBook Light IL1",            VIA_VX800,   0x152d, 0x0771, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
