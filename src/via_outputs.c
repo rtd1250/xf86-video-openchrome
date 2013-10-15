@@ -775,7 +775,7 @@ via_analog_detect(xf86OutputPtr output)
     xf86MonPtr mon;
 
     mon = xf86OutputGetEDID(output, pVia->pI2CBus1);
-    if (mon && !DIGITAL(mon->features.input_type)) {
+    if (mon) {
         xf86OutputSetEDID(output, mon);
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "DDC pI2CBus1 detected a CRT\n"));
         status = XF86OutputStatusConnected;
