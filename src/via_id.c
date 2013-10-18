@@ -180,6 +180,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"MSI K9VGM-V",                           VIA_K8M890,  0x1462, 0x7253, VIA_DEVICE_CRT},
     {"Averatec 226x",                         VIA_K8M890,  0x14FF, 0xA002, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Fujitsu/Siemens Amilo La 1703",         VIA_K8M890,  0x1734, 0x10D9, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
+    {"Lenovo M3120C",                         VIA_K8M890,  0x17AA, 0x3020, VIA_DEVICE_CRT},
 
     /*** P4M900, VN896, CN896 ***/
     {"VIA Epia SN",                           VIA_P4M900,  0x0908, 0x1975, VIA_DEVICE_CRT},
