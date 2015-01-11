@@ -50,6 +50,8 @@
 
 #ifdef HAVE_DRI
 #include "dri.h"
+#else
+#include "drm_fourcc.h"
 #endif
 
 /* RandR support */

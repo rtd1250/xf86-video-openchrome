@@ -38,6 +38,8 @@
 #include "via_driver.h"
 #ifdef HAVE_DRI
 #include "via_drm.h"
+#else
+#include "drm_fourcc.h"
 #endif
 
 /*
