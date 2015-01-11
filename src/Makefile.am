@@ -72,6 +72,8 @@ openchrome_drv_la_SOURCES = \
          via_xv.h \
          via_vt162x.c \
          via_vt162x.h \
+         via_vt1632.c \
+         via_vt1632.h \
          via_xvpriv.h
 
 if DRI

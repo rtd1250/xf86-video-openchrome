@@ -86,6 +86,8 @@
 #endif
 #include <errno.h>
 
+#include "via_vt1632.h"
+
 #include "compat-api.h"
 #define VIA_AGP_UPL_SIZE    (1024*128)
 #define VIA_DMA_DL_SIZE     (1024*128)
