@@ -898,7 +898,7 @@ static void get_vck_clock(enum pll pll, unsigned int f_ref_khz)
 	dtz |= (val & 0x1) << 1;
 	dn = val >> 1;
 
-	printf("%s PLL: dm=%d, dtx=%d, dr=%d, dn=%d ", name, dm, dtz, dr, dn);
+	printf("%s PLL: dm=%u, dtx=%u, dr=%u, dn=%u ", name, dm, dtz, dr, dn);
 
 	f_vco = f_ref_khz * (dm + 2) / (dn + 2);
 	if (dr)
@@ -958,7 +958,7 @@ static int get_gpio_state(struct gpio_state *s)
 
 static void dump_gpio_state(const char *pfx, const struct gpio_state *gs)
 {
-	int i;
+	unsigned int i;
 
 	for (i = 2; i < 6; i++) {
 		printf("%sGPIO %u: function=", pfx, i);
