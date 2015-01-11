@@ -166,7 +166,7 @@ static Bool
 via_tv_set_property(xf86OutputPtr output, Atom property,
 					RRPropertyValuePtr value)
 {
-    return FALSE;
+    return TRUE;
 }
 
 static Bool
@@ -505,7 +505,7 @@ static Bool
 via_dp_set_property(xf86OutputPtr output, Atom property,
 						RRPropertyValuePtr value)
 {
-    return FALSE;
+    return TRUE;
 }
 
 static Bool
@@ -680,7 +680,7 @@ static Bool
 via_analog_set_property(xf86OutputPtr output, Atom property,
 						RRPropertyValuePtr value)
 {
-    return FALSE;
+    return TRUE;
 }
 
 static Bool
