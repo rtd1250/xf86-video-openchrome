@@ -305,11 +305,37 @@ ViaI2C3GetByte(I2CDevPtr d, I2CByte * data, Bool last)
     return TRUE;
 }
 
+static void
+ViaI2C3SimplePutBits(I2CBusPtr Bus, int clock, int data)
+{
+    vgaHWPtr hwp = Bus->DriverPrivate.ptr;
+    CARD8 value = 0xC0;
+
+    if (clock)
+        value |= SCL_WRITE;
+
+    if (data)
+        value |= SDA_WRITE;
+
+    ViaSeqMask(hwp, 0x2C, value, 0xC0 | SCL_WRITE | SDA_WRITE);
+}
+
+static void
+ViaI2C3SimpleGetBits(I2CBusPtr Bus, int *clock, int *data)
+{
+    vgaHWPtr hwp = Bus->DriverPrivate.ptr;
+    CARD8 value = hwp->readSeq(hwp, 0x2C);
+
+    *clock = (value & SCL_READ) != 0;
+    *data = (value & SDA_READ) != 0;
+}
+
 static I2CBusPtr
 ViaI2CBus3Init(ScrnInfoPtr pScrn)
 {
     I2CBusPtr pI2CBus = xf86CreateI2CBusRec();
     vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaI2CBus3Init\n"));
 
@@ -318,19 +344,32 @@ ViaI2CBus3Init(ScrnInfoPtr pScrn)
 
     pI2CBus->BusName = "I2C bus 3";
     pI2CBus->scrnIndex = pScrn->scrnIndex;
-    pI2CBus->I2CAddress = ViaI2C3Address;
-#ifdef X_NEED_I2CSTART
-    pI2CBus->I2CStart = ViaI2C3Start;
-#endif
-    pI2CBus->I2CStop = ViaI2C3Stop;
-    pI2CBus->I2CPutByte = ViaI2C3PutByte;
-    pI2CBus->I2CGetByte = ViaI2C3GetByte;
     pI2CBus->DriverPrivate.ptr = hwp;
 
-    pI2CBus->HoldTime = 10;
-    pI2CBus->BitTimeout = 10;
-    pI2CBus->ByteTimeout = 10;
-    pI2CBus->StartTimeout = 10;
+    switch (pVia->Chipset) {
+        case VIA_VM800:
+            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "using alternative PutBits/GetBits functions for I2C Bus 3\n"));
+            pI2CBus->I2CPutBits = ViaI2C3SimplePutBits;
+            pI2CBus->I2CGetBits = ViaI2C3SimpleGetBits;
+            break;
+        ;;
+        default:
+            pI2CBus->I2CAddress = ViaI2C3Address;
+#ifdef X_NEED_I2CSTART
+            pI2CBus->I2CStart = ViaI2C3Start;
+#endif
+            pI2CBus->I2CStop = ViaI2C3Stop;
+            pI2CBus->I2CPutByte = ViaI2C3PutByte;
+            pI2CBus->I2CGetByte = ViaI2C3GetByte;
+            pI2CBus->DriverPrivate.ptr = hwp;
+
+            pI2CBus->BitTimeout = 10;
+            pI2CBus->ByteTimeout = 10;
+            pI2CBus->HoldTime = 10;
+            pI2CBus->StartTimeout = 10;
+            break;
+        ;;
+    }
 
     if (!xf86I2CBusInit(pI2CBus)) {
         xf86DestroyI2CBusRec(pI2CBus, TRUE, FALSE);
