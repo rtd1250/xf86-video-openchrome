@@ -392,12 +392,12 @@ DecideOverlaySupport(xf86CrtcPtr crtc)
             DBG_DD(ErrorF(" via_xv.c : mClk= %f : \n", mClock));
             DBG_DD(ErrorF(" via_xv.c : memEfficiency= %f : \n",
                 memEfficiency));
+            if (needBandWidth < totalBandWidth)
+                return TRUE;
             ErrorF(" via_xv.c : needBandwidth= %f : \n",
                 needBandWidth);
             ErrorF(" via_xv.c : totalBandwidth= %f : \n",
                 totalBandWidth);
-            if (needBandWidth < totalBandWidth)
-                return TRUE;
         }
         return FALSE;
     }
