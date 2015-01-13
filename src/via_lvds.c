@@ -1468,7 +1468,8 @@ static const xf86OutputFuncsRec via_lvds_funcs = {
  * using name with format "9999x9999".
  */
 static void
-ViaPanelGetNativeModeFromOption(ScrnInfoPtr pScrn, ViaPanelInfoPtr panel, char *name)
+ViaPanelGetNativeModeFromOption(ScrnInfoPtr pScrn, ViaPanelInfoPtr panel,
+								const char *name)
 {
     char aux[strlen(name) + 1];
     CARD8 length, index;
@@ -1500,7 +1501,7 @@ via_lvds_init(ScrnInfoPtr pScrn)
     VIAPtr pVia = VIAPTR(pScrn);
     xf86OutputPtr output = NULL;
     Bool ForcePanel = FALSE;
-    char *s = NULL;
+    const char *s = NULL;
 
     if (!Panel)
         return;
