@@ -50,10 +50,10 @@ via_vt1632_dump_registers(ScrnInfoPtr pScrn, I2CDevPtr pDev)
 	int i;
 	CARD8 tmp;
 
-	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_DEBUG, "VT1632: dumping registers:\n"));
+	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1632: dumping registers:\n"));
 	for (i = 0; i <= 0x0f; i++) {
 		xf86I2CReadByte(pDev, i, &tmp);
-		DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_DEBUG, "VT1632: 0x%02x: 0x%02x\n", i, tmp));
+		DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1632: 0x%02x: 0x%02x\n", i, tmp));
 	}
 }
 
@@ -66,10 +66,10 @@ via_vt1632_power(xf86OutputPtr output, BOOL on)
 
 
 	if (on == TRUE) {
-		DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_DEBUG, "VT1632: power on\n"));
+		DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1632: power on\n"));
 		xf86I2CMaskByte(Private->VT1632I2CDev, 0x08, 0x01, 0x01);
 	} else {
-		DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_DEBUG, "VT1632: power off\n"));
+		DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1632: power off\n"));
 		xf86I2CMaskByte(Private->VT1632I2CDev, 0x08, 0x00, 0x01);
 	}
 }
@@ -80,7 +80,7 @@ via_vt1632_save(xf86OutputPtr output)
 	struct ViaVT1632PrivateData * Private = output->driver_private;
 	ScrnInfoPtr pScrn = output->scrn;
 
-	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_DEBUG,
+	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
 		"VT1632: saving state of registers 0x08, 0x09, 0x0A and 0x0C\n"));
 
 	xf86I2CReadByte(Private->VT1632I2CDev, 0x08, &Private->Register08);
@@ -95,7 +95,7 @@ via_vt1632_restore(xf86OutputPtr output)
 	struct ViaVT1632PrivateData * Private = output->driver_private;
 	ScrnInfoPtr pScrn = output->scrn;
 
-	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_DEBUG,
+	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
 		"VT1632: restoring register 0x08, 0x09, 0x0A and 0x0C\n"));
 	xf86I2CWriteByte(Private->VT1632I2CDev, 0x08, Private->Register08);
 	xf86I2CWriteByte(Private->VT1632I2CDev, 0x09, Private->Register09);
@@ -124,7 +124,7 @@ via_vt1632_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 	struct ViaVT1632PrivateData * Private = output->driver_private;
 	ScrnInfoPtr pScrn = output->scrn;
 
-	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_DEBUG,
+	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
 		"VT1632: enabling DVI encoder\n"));
 	xf86I2CWriteByte(Private->VT1632I2CDev, 0x0C, 0x89);
 	xf86I2CWriteByte(Private->VT1632I2CDev, 0x08,
