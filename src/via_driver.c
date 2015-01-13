@@ -1028,7 +1028,9 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         pVia->ChipRev = pciReadByte(pciTag(0, 0, 0), 0xF6);
 #endif
     }
-    free(pEnt);
+
+    if (pEnt)
+        free(pEnt);
     xf86DrvMsg(pScrn->scrnIndex, from, "Chipset revision: %d\n", pVia->ChipRev);
 
     pVia->directRenderingType = DRI_NONE;
@@ -1106,7 +1108,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
      */
 
     if (!xf86SetDepthBpp(pScrn, 0, 0, 0, Support32bppFb)) {
-        free(pEnt);
         VIAFreeRec(pScrn);
         return FALSE;
     } else {
@@ -1121,7 +1122,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
                 xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                            "Given depth (%d) is not supported by this driver\n",
                            pScrn->depth);
-                free(pEnt);
                 VIAFreeRec(pScrn);
                 return FALSE;
         }
@@ -1137,7 +1137,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         rgb zeros = { 0, 0, 0 };
 
         if (!xf86SetWeight(pScrn, zeros, zeros)) {
-            free(pEnt);
             VIAFreeRec(pScrn);
             return FALSE;
         } else {
@@ -1154,7 +1153,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Given default visual"
                        " (%s) is not supported at depth %d.\n",
                        xf86GetVisualName(pScrn->defaultVisual), pScrn->depth);
-            free(pEnt);
             VIAFreeRec(pScrn);
             return FALSE;
         }

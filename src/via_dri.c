@@ -478,6 +478,14 @@ VIAInitVisualConfigs(ScreenPtr pScreen)
         if (i != numConfigs) {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "[dri] Incorrect "
                        "initialization of visuals.  Disabling DRI.\n");
+
+            if (pConfigs)
+                free(pConfigs);
+            if (pVIAConfigs)
+                free(pVIAConfigs);
+            if (pVIAConfigPtrs)
+                free(pVIAConfigPtrs);
+
             return FALSE;
         }
     }

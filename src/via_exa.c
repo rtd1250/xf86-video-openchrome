@@ -217,9 +217,10 @@ viaSetupCBuffer(ScrnInfoPtr pScrn, ViaCommandBuffer *cb, unsigned size)
 static void
 viaTearDownCBuffer(ViaCommandBuffer *cb)
 {
-    if (cb && cb->buf)
+    if (cb && cb->buf) {
         free(cb->buf);
-    cb->buf = NULL;
+        cb->buf = NULL;
+    }
 }
 
 /*
