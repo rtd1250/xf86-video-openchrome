@@ -871,7 +871,7 @@ static Bool
 via_dvi_set_property(xf86OutputPtr output, Atom property,
 						RRPropertyValuePtr value)
 {
-    return FALSE;
+    return TRUE;
 }
 
 static Bool
