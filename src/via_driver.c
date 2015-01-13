@@ -918,7 +918,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     VIAPtr pVia;
     VIABIOSInfoPtr pBIOSInfo;
     MessageType from = X_DEFAULT;
-    char *s = NULL;
+    const char *s = NULL;
 #ifdef HAVE_DRI
     char *busId = NULL;
     drmVersionPtr drmVer;
