@@ -861,6 +861,191 @@ via_analog_init(ScrnInfoPtr pScrn)
     }
 }
 
+static void
+via_dvi_create_resources(xf86OutputPtr output)
+{
+}
+
+#ifdef RANDR_12_INTERFACE
+static Bool
+via_dvi_set_property(xf86OutputPtr output, Atom property,
+						RRPropertyValuePtr value)
+{
+    return FALSE;
+}
+
+static Bool
+via_dvi_get_property(xf86OutputPtr output, Atom property)
+{
+    return FALSE;
+}
+#endif
+
+static void
+via_dvi_dpms(xf86OutputPtr output, int mode)
+{
+    ScrnInfoPtr pScrn = output->scrn;
+
+    switch (mode) {
+    case DPMSModeOn:
+        ViaDFPPower(pScrn, TRUE);
+        break;
+
+    case DPMSModeStandby:
+    case DPMSModeSuspend:
+    case DPMSModeOff:
+        ViaDFPPower(pScrn, FALSE);
+        break;
+    }
+
+}
+
+static void
+via_dvi_save(xf86OutputPtr output)
+{
+	via_vt1632_save(output);
+}
+
+static void
+via_dvi_restore(xf86OutputPtr output)
+{
+	via_vt1632_restore(output);
+}
+
+static int
+via_dvi_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
+{
+	return via_vt1632_mode_valid(output, pMode);
+}
+
+static Bool
+via_dvi_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
+						DisplayModePtr adjusted_mode)
+{
+    return TRUE;
+}
+
+static void
+via_dvi_prepare(xf86OutputPtr output)
+{
+}
+
+static void
+via_dvi_commit(xf86OutputPtr output)
+{
+}
+
+static void
+via_dvi_mode_set(xf86OutputPtr output, DisplayModePtr mode,
+				DisplayModePtr adjusted_mode)
+{
+    ScrnInfoPtr pScrn = output->scrn;
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+	via_vt1632_power(output, FALSE);
+	ViaModeSecondCRTC(pScrn, mode);
+	via_vt1632_mode_set(output, mode, adjusted_mode);
+	via_vt1632_power(output, TRUE);
+}
+
+static xf86OutputStatus
+via_dvi_detect(xf86OutputPtr output)
+{
+    xf86OutputStatus status = XF86OutputStatusDisconnected;
+    ScrnInfoPtr pScrn = output->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+    xf86MonPtr mon;
+
+    mon = xf86OutputGetEDID(output, pVia->pI2CBus2);
+    if (mon && DIGITAL(mon->features.input_type)) {
+        xf86OutputSetEDID(output, mon);
+        status = XF86OutputStatusConnected;
+    } else {
+		status = via_vt1632_detect(output);
+	}
+    return status;
+}
+
+static void
+via_dvi_destroy(xf86OutputPtr output)
+{
+}
+
+static const xf86OutputFuncsRec via_dvi_funcs = {
+    .create_resources   = via_dvi_create_resources,
+#ifdef RANDR_12_INTERFACE
+    .set_property       = via_dvi_set_property,
+    .get_property       = via_dvi_get_property,
+#endif
+    .dpms               = via_dvi_dpms,
+    .save               = via_dvi_save,
+    .restore            = via_dvi_restore,
+    .mode_valid         = via_dvi_mode_valid,
+    .mode_fixup         = via_dvi_mode_fixup,
+    .prepare            = via_dvi_prepare,
+    .commit             = via_dvi_commit,
+    .mode_set           = via_dvi_mode_set,
+    .detect             = via_dvi_detect,
+    .get_modes          = xf86OutputGetEDIDModes,
+    .destroy            = via_dvi_destroy,
+};
+
+void
+via_dvi_init(ScrnInfoPtr pScrn)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+    xf86OutputPtr output = NULL;
+	struct ViaVT1632PrivateData *private_data = NULL;
+	I2CBusPtr pBus = NULL;
+	I2CDevPtr pDev = NULL;
+
+	if (!pVia->pI2CBus2 || !pVia->pI2CBus3) {
+		return;
+	}
+
+	pDev = xf86CreateI2CDevRec();
+	if (!pDev) {
+		return;
+	}
+
+	pDev->DevName = "VT1632";
+	pDev->SlaveAddr = 0x10;
+
+	if (xf86I2CProbeAddress(pVia->pI2CBus3, pDev->SlaveAddr)) {
+		pDev->pI2CBus = pVia->pI2CBus3;
+	} else if (xf86I2CProbeAddress(pVia->pI2CBus2, pDev->SlaveAddr)) {
+		pDev->pI2CBus = pVia->pI2CBus2;
+	} else {
+		xf86DestroyI2CDevRec(pDev, TRUE);
+		return;
+	}
+
+	if (!xf86I2CDevInit(pDev)) {
+		xf86DestroyI2CDevRec(pDev, TRUE);
+		return;
+	}
+
+	if (!via_vt1632_probe(pScrn, pDev)) {
+		xf86DestroyI2CDevRec(pDev, TRUE);
+		return;
+	}
+
+	private_data = via_vt1632_init(pScrn, pDev);
+	if (!private_data) {
+		xf86DestroyI2CDevRec(pDev, TRUE);
+		return;
+	}
+
+	output = xf86OutputCreate(pScrn, &via_dvi_funcs, "DVI-1");
+	if (output) {
+		output->driver_private = private_data;
+		output->possible_crtcs = 0x2;
+		output->possible_clones = 0;
+		output->interlaceAllowed = FALSE;
+		output->doubleScanAllowed = FALSE;
+	}
+}
+
 /*
  *
  */
@@ -1373,190 +1558,5 @@ ViaModeSecondCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaSetUseExternalClock(hwp);
 
     hwp->disablePalette(hwp);
-}
-
-static void
-via_dvi_create_resources(xf86OutputPtr output)
-{
-}
-
-#ifdef RANDR_12_INTERFACE
-static Bool
-via_dvi_set_property(xf86OutputPtr output, Atom property,
-						RRPropertyValuePtr value)
-{
-    return FALSE;
-}
-
-static Bool
-via_dvi_get_property(xf86OutputPtr output, Atom property)
-{
-    return FALSE;
-}
-#endif
-
-static void
-via_dvi_dpms(xf86OutputPtr output, int mode)
-{
-    ScrnInfoPtr pScrn = output->scrn;
-
-    switch (mode) {
-    case DPMSModeOn:
-        ViaDFPPower(pScrn, TRUE);
-        break;
-
-    case DPMSModeStandby:
-    case DPMSModeSuspend:
-    case DPMSModeOff:
-        ViaDFPPower(pScrn, FALSE);
-        break;
-    }
-
-}
-
-static void
-via_dvi_save(xf86OutputPtr output)
-{
-	via_vt1632_save(output);
-}
-
-static void
-via_dvi_restore(xf86OutputPtr output)
-{
-	via_vt1632_restore(output);
-}
-
-static int
-via_dvi_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
-{
-	return via_vt1632_mode_valid(output, pMode);
-}
-
-static Bool
-via_dvi_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
-						DisplayModePtr adjusted_mode)
-{
-    return TRUE;
-}
-
-static void
-via_dvi_prepare(xf86OutputPtr output)
-{
-}
-
-static void
-via_dvi_commit(xf86OutputPtr output)
-{
-}
-
-static void
-via_dvi_mode_set(xf86OutputPtr output, DisplayModePtr mode,
-				DisplayModePtr adjusted_mode)
-{
-    ScrnInfoPtr pScrn = output->scrn;
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-	via_vt1632_power(output, FALSE);
-	ViaModeSecondCRTC(pScrn, mode);
-	via_vt1632_mode_set(output, mode, adjusted_mode);
-	via_vt1632_power(output, TRUE);
-}
-
-static xf86OutputStatus
-via_dvi_detect(xf86OutputPtr output)
-{
-    xf86OutputStatus status = XF86OutputStatusDisconnected;
-    ScrnInfoPtr pScrn = output->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
-    xf86MonPtr mon;
-
-    mon = xf86OutputGetEDID(output, pVia->pI2CBus2);
-    if (mon && DIGITAL(mon->features.input_type)) {
-        xf86OutputSetEDID(output, mon);
-        status = XF86OutputStatusConnected;
-    } else {
-		status = via_vt1632_detect(output);
-	}
-    return status;
-}
-
-static void
-via_dvi_destroy(xf86OutputPtr output)
-{
-}
-
-static const xf86OutputFuncsRec via_dvi_funcs = {
-    .create_resources   = via_dvi_create_resources,
-#ifdef RANDR_12_INTERFACE
-    .set_property       = via_dvi_set_property,
-    .get_property       = via_dvi_get_property,
-#endif
-    .dpms               = via_dvi_dpms,
-    .save               = via_dvi_save,
-    .restore            = via_dvi_restore,
-    .mode_valid         = via_dvi_mode_valid,
-    .mode_fixup         = via_dvi_mode_fixup,
-    .prepare            = via_dvi_prepare,
-    .commit             = via_dvi_commit,
-    .mode_set           = via_dvi_mode_set,
-    .detect             = via_dvi_detect,
-    .get_modes          = xf86OutputGetEDIDModes,
-    .destroy            = via_dvi_destroy,
-};
-
-void
-via_dvi_init(ScrnInfoPtr pScrn)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-    xf86OutputPtr output = NULL;
-	struct ViaVT1632PrivateData *private_data = NULL;
-	I2CBusPtr pBus = NULL;
-	I2CDevPtr pDev = NULL;
-
-	if (!pVia->pI2CBus2 || !pVia->pI2CBus3) {
-		return;
-	}
-
-	pDev = xf86CreateI2CDevRec();
-	if (!pDev) {
-		return;
-	}
-
-	pDev->DevName = "VT1632";
-	pDev->SlaveAddr = 0x10;
-
-	if (xf86I2CProbeAddress(pVia->pI2CBus3, pDev->SlaveAddr)) {
-		pDev->pI2CBus = pVia->pI2CBus3;
-	} else if (xf86I2CProbeAddress(pVia->pI2CBus2, pDev->SlaveAddr)) {
-		pDev->pI2CBus = pVia->pI2CBus2;
-	} else {
-		xf86DestroyI2CDevRec(pDev, TRUE);
-		return;
-	}
-
-	if (!xf86I2CDevInit(pDev)) {
-		xf86DestroyI2CDevRec(pDev, TRUE);
-		return;
-	}
-
-	if (!via_vt1632_probe(pScrn, pDev)) {
-		xf86DestroyI2CDevRec(pDev, TRUE);
-		return;
-	}
-
-	private_data = via_vt1632_init(pScrn, pDev);
-	if (!private_data) {
-		xf86DestroyI2CDevRec(pDev, TRUE);
-		return;
-	}
-
-	output = xf86OutputCreate(pScrn, &via_dvi_funcs, "DVI-1");
-	if (output) {
-		output->driver_private = private_data;
-		output->possible_crtcs = 0x2;
-		output->possible_clones = 0;
-		output->interlaceAllowed = FALSE;
-		output->doubleScanAllowed = FALSE;
-	}
 }
 
