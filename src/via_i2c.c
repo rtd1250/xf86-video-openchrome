@@ -352,7 +352,6 @@ ViaI2CBus3Init(ScrnInfoPtr pScrn)
             pI2CBus->I2CPutBits = ViaI2C3SimplePutBits;
             pI2CBus->I2CGetBits = ViaI2C3SimpleGetBits;
             break;
-        ;;
         default:
             pI2CBus->I2CAddress = ViaI2C3Address;
 #ifdef X_NEED_I2CSTART
@@ -368,7 +367,6 @@ ViaI2CBus3Init(ScrnInfoPtr pScrn)
             pI2CBus->HoldTime = 10;
             pI2CBus->StartTimeout = 10;
             break;
-        ;;
     }
 
     if (!xf86I2CBusInit(pI2CBus)) {
