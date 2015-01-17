@@ -295,6 +295,9 @@ ViaCheckCardId(ScrnInfoPtr pScrn)
     struct ViaCardIdStruct *Id;
     VIAPtr pVia = VIAPTR(pScrn);
 
+    if (pVia->Chipset == VIA_CLE266)
+        ViaDoubleCheckCLE266Revision(pScrn);
+
     if ((SUBVENDOR_ID(pVia->PciInfo) == VENDOR_ID(pVia->PciInfo)) &&
         (SUBSYS_ID(pVia->PciInfo) == DEVICE_ID(pVia->PciInfo)))
         xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
@@ -315,7 +318,4 @@ ViaCheckCardId(ScrnInfoPtr pScrn)
                "Unknown Card-Ids (%4X|%4X|%4X), Chipset: %s; please report to openchrome-users@lists.freedesktop.org\n",
                DEVICE_ID(pVia->PciInfo), SUBVENDOR_ID(pVia->PciInfo), SUBSYS_ID(pVia->PciInfo), pScrn->chipset);
     pVia->Id = Id;
-
-    if (pVia->Chipset == VIA_CLE266)
-        ViaDoubleCheckCLE266Revision(pScrn);
 }
