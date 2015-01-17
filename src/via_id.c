@@ -301,13 +301,16 @@ ViaCheckCardId(ScrnInfoPtr pScrn)
     if ((SUBVENDOR_ID(pVia->PciInfo) == VENDOR_ID(pVia->PciInfo)) &&
         (SUBSYS_ID(pVia->PciInfo) == DEVICE_ID(pVia->PciInfo)))
         xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                   "Manufacturer plainly copied main PCI IDs to subsystem/card IDs.\n");
+                   "Manufacturer plainly copied main PCI IDs to"
+                   " subsystem/card IDs.\n");
 
     for (Id = ViaCardId; Id->String; Id++) {
         if ((Id->Chip == pVia->Chipset) &&
             (Id->Vendor == SUBVENDOR_ID(pVia->PciInfo)) &&
             (Id->Device == SUBSYS_ID(pVia->PciInfo))) {
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "Detected %s. Card-Ids (%4X|%4X)\n", Id->String, SUBVENDOR_ID(pVia->PciInfo), SUBSYS_ID(pVia->PciInfo));
+            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                       "Detected %s. Card-Ids (%4X|%4X)\n", Id->String,
+                       SUBVENDOR_ID(pVia->PciInfo), SUBSYS_ID(pVia->PciInfo));
             pVia->ActiveDevice = Id->Outputs;
             pVia->Id = Id;
             return;
@@ -315,7 +318,9 @@ ViaCheckCardId(ScrnInfoPtr pScrn)
     }
 
     xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-               "Unknown Card-Ids (%4X|%4X|%4X), Chipset: %s; please report to openchrome-users@lists.freedesktop.org\n",
-               DEVICE_ID(pVia->PciInfo), SUBVENDOR_ID(pVia->PciInfo), SUBSYS_ID(pVia->PciInfo), pScrn->chipset);
+               "Unknown Card-Ids (%4X|%4X|%4X), Chipset: %s; please report to"
+               " openchrome-users@lists.freedesktop.org\n",
+               DEVICE_ID(pVia->PciInfo), SUBVENDOR_ID(pVia->PciInfo),
+               SUBSYS_ID(pVia->PciInfo), pScrn->chipset);
     pVia->Id = Id;
 }
