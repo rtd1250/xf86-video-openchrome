@@ -916,7 +916,7 @@ viaDRIOffscreenSave(ScrnInfoPtr pScrn)
     if (pVia->driOffScreenSave) {
         void *dst, *src = drm_bo_map(pScrn, pVia->driOffScreenMem);
 
-        dst = pVia->driOffScreenSave;
+        dst = (void *) ALIGN_TO((unsigned long) pVia->driOffScreenSave, 16);
         if ((pVia->drmVerMajor == 2) && (pVia->drmVerMinor >= 8)) {
             err = viaDRIFBMemcpy(pVia->drmmode.fd, pVia->driOffScreenMem, dst, FALSE);
             if (!err)
