@@ -239,7 +239,7 @@ static MODULESETUPPROTO(VIASetup);
 
 static XF86ModuleVersionInfo VIAVersRec = {
     "openchrome",
-    "http://openchrome.org/",
+    "http://www.freedesktop.org/wiki/Openchrome/",
     MODINFOSTRING1,
     MODINFOSTRING2,
 #ifdef XORG_VERSION_CURRENT
