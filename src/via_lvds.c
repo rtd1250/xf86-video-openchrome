@@ -1,5 +1,6 @@
 /*
- * Copyright 2007 The Openchrome Project [openchrome.org]
+ * Copyright 2007-2015 The Openchrome Project
+ *                     [http://www.freedesktop.org/wiki/Openchrome]
  * Copyright 1998-2007 VIA Technologies, Inc. All Rights Reserved.
  * Copyright 2001-2007 S3 Graphics, Inc. All Rights Reserved.
  *
