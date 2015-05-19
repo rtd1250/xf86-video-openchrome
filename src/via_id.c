@@ -244,6 +244,7 @@ static struct ViaCardIdStruct ViaCardId[] = {
     {"VIA OpenBook",                          VIA_VX800,   0x1170, 0x0311, VIA_DEVICE_CRT | VIA_DEVICE_LCD}, /* VIA OpenBook eNote VBE8910 */
     {"Samsung Q1EX",                          VIA_VX800,   0x144d, 0xc040, VIA_DEVICE_LCD},
     {"Samsung NC20",                          VIA_VX800,   0x144d, 0xc04e, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
+    {"Itona DS35S",                           VIA_VX800,   0x1458, 0xD000, VIA_DEVICE_CRT},
     {"FIC CE2A1",                             VIA_VX800,   0x1509, 0x3002, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Quanta DreamBook Light IL1",            VIA_VX800,   0x152d, 0x0771, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
     {"Lenovo S12",                            VIA_VX800,   0x17aa, 0x388c, VIA_DEVICE_CRT | VIA_DEVICE_LCD},
