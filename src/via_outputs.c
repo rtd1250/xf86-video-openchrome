@@ -1006,8 +1006,17 @@ via_dvi_init(ScrnInfoPtr pScrn)
     struct ViaVT1632PrivateData *private_data = NULL;
     I2CBusPtr pBus = NULL;
     I2CDevPtr pDev = NULL;
+    I2CSlaveAddr addr = 0x10;
 
     if (!pVia->pI2CBus2 || !pVia->pI2CBus3) {
+        return;
+    }
+
+    if (xf86I2CProbeAddress(pVia->pI2CBus3, addr)) {
+        pBus = pVia->pI2CBus3;
+    } else if (xf86I2CProbeAddress(pVia->pI2CBus2, addr)) {
+        pBus = pVia->pI2CBus2;
+    } else {
         return;
     }
 
@@ -1016,18 +1025,9 @@ via_dvi_init(ScrnInfoPtr pScrn)
         return;
     }
 
-    pDev->DevName = "VT1632";
-    pDev->SlaveAddr = 0x10;
-
-    if (xf86I2CProbeAddress(pVia->pI2CBus3, pDev->SlaveAddr)) {
-        pDev->pI2CBus = pVia->pI2CBus3;
-    } else if (xf86I2CProbeAddress(pVia->pI2CBus2, pDev->SlaveAddr)) {
-        pDev->pI2CBus = pVia->pI2CBus2;
-    } else {
-        xf86DestroyI2CDevRec(pDev, TRUE);
-        return;
-    }
-
+    pDev->DevName = "VT1632A";
+    pDev->SlaveAddr = addr;
+    pDev->pI2CBus = pBus;
     if (!xf86I2CDevInit(pDev)) {
         xf86DestroyI2CDevRec(pDev, TRUE);
         return;
