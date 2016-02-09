@@ -131,7 +131,7 @@ static SymTabRec VIAChipsets[] = {
     {VIA_KM400,    "KM400/KN400"},
     {VIA_K8M800,   "K8M800/K8N800"},
     {VIA_PM800,    "PM800/PM880/CN400"},
-    {VIA_VM800,    "VM800/P4M800Pro/VN800/CN700"},
+    {VIA_P4M800PRO,    "P4M800 Pro/VN800/CN700"},
     {VIA_CX700,    "CX700/VX700"},
     {VIA_K8M890,   "K8M890/K8N890"},
     {VIA_P4M890,   "P4M890"},
@@ -148,7 +148,7 @@ static PciChipsets VIAPciChipsets[] = {
     {VIA_KM400,    PCI_CHIP_VT3205,    VIA_RES_SHARED},
     {VIA_K8M800,   PCI_CHIP_VT3204,    VIA_RES_SHARED},
     {VIA_PM800,    PCI_CHIP_VT3259,    VIA_RES_SHARED},
-    {VIA_VM800,    PCI_CHIP_VT3314,    VIA_RES_SHARED},
+    {VIA_P4M800PRO,    PCI_CHIP_VT3314,    VIA_RES_SHARED},
     {VIA_CX700,    PCI_CHIP_VT3324,    VIA_RES_SHARED},
     {VIA_K8M890,   PCI_CHIP_VT3336,    VIA_RES_SHARED},
     {VIA_P4M890,   PCI_CHIP_VT3327,    VIA_RES_SHARED},
@@ -707,7 +707,7 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
             /* FIXME The video playing (XV) is not working correctly after turn on new mode switch */
             pVia->VideoEngine = VIDEO_ENGINE_CME;
             break;
-        case VIA_VM800:
+        case VIA_P4M800PRO:
             /* New mode switch resolve bug with gamma set #282 */
             /* and with Xv after hibernate #240                */
             break;

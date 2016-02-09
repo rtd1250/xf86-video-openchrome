@@ -1081,7 +1081,7 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
     if ((pVia->Chipset != VIA_P4M900) || (pVia->ActiveDevice & VIA_DEVICE_TV))
         via_tv_init(pScrn);
 
-    if (pVia->Chipset == VIA_VM800) {
+    if (pVia->Chipset == VIA_P4M800PRO) {
         via_dvi_init(pScrn);
     }
 
@@ -1529,7 +1529,7 @@ ViaModeFirstCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode)
         case VIA_KM400:
         case VIA_K8M800:
         case VIA_PM800:
-        case VIA_VM800:
+        case VIA_P4M800PRO:
             ViaSeqMask(hwp, 0x1A, 0x06, 0x06);
             break;
         default:

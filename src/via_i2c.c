@@ -347,7 +347,7 @@ ViaI2CBus3Init(ScrnInfoPtr pScrn)
     pI2CBus->DriverPrivate.ptr = hwp;
 
     switch (pVia->Chipset) {
-        case VIA_VM800:
+        case VIA_P4M800PRO:
             DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "using alternative PutBits/GetBits functions for I2C Bus 3\n"));
             pI2CBus->I2CPutBits = ViaI2C3SimplePutBits;
             pI2CBus->I2CGetBits = ViaI2C3SimpleGetBits;

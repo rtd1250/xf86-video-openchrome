@@ -726,7 +726,7 @@ UMSPreInit(ScrnInfoPtr pScrn)
             pScrn->videoRam = (1 << ((videoRam & 0x70) >> 4)) << 10;
             break;
         case VIA_PM800:
-        case VIA_VM800:
+        case VIA_P4M800PRO:
         case VIA_K8M800:
 #ifdef HAVE_PCIACCESS
             pci_device_cfg_read_u8(vgaDevice, &videoRam, 0xA1);

@@ -275,7 +275,7 @@ VIAVidHWDiffInit(ScrnInfoPtr pScrn)
             HWDiff->dwNewScaleCtl = VID_HWDIFF_FALSE;
             HWDiff->HQVCmeRegs = hqv_cme_regs;
             break;
-        case VIA_VM800:
+        case VIA_P4M800PRO:
         case VIA_P4M900:
             HWDiff->dwThreeHQVBuffer = VID_HWDIFF_TRUE;
             HWDiff->dwHQVFetchByteUnit = VID_HWDIFF_TRUE;
@@ -1857,7 +1857,7 @@ Upd_Video(xf86CrtcPtr crtc, unsigned long videoFlag,
      * Enable video on secondary
      */
     if ((pVia->VideoEngine == VIDEO_ENGINE_CME ||
-         pVia->Chipset == VIA_VM800) && iga->index) {
+         pVia->Chipset == VIA_P4M800PRO) && iga->index) {
         /* V1_ON_SND_DISPLAY */
         vidCtl |= V1_ON_SND_DISPLAY;
         /* SECOND_DISPLAY_COLOR_KEY_ENABLE */

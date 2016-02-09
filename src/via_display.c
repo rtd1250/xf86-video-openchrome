@@ -1798,7 +1798,7 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
     case VIA_KM400:
     case VIA_K8M800:
     case VIA_PM800:
-    case VIA_VM800:
+    case VIA_P4M800PRO:
         max_pitch = 3344;
         max_height = 2508;
         break;
