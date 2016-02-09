@@ -1404,8 +1404,8 @@ ViaModePrimaryLegacy(xf86CrtcPtr crtc, DisplayModePtr mode)
     pBIOSInfo->Clock = ViaModeDotClockTranslate(pScrn, mode);
     pBIOSInfo->ClockExternal = FALSE;
 
-    /* Enable MMIO & PCI burst (1 wait state) */
-    ViaSeqMask(hwp, 0x1A, 0x06, 0x06);
+    /* Enable Extended Mode Memory Access. */
+    ViaSeqMask(hwp, 0x1A, 0x08, 0x08);
 
     if (pBIOSInfo->analog->status == XF86OutputStatusConnected)
         ViaCrtcMask(hwp, 0x36, 0x30, 0x30);
@@ -1523,19 +1523,8 @@ ViaModeFirstCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode)
     pBIOSInfo->Clock = ViaModeDotClockTranslate(pScrn, mode);
     pBIOSInfo->ClockExternal = FALSE;
 
-    /* Enable MMIO & PCI burst (1 wait state) */
-    switch (pVia->Chipset) {
-        case VIA_CLE266:
-        case VIA_KM400:
-        case VIA_K8M800:
-        case VIA_PM800:
-        case VIA_P4M800PRO:
-            ViaSeqMask(hwp, 0x1A, 0x06, 0x06);
-            break;
-        default:
-            ViaSeqMask(hwp, 0x1A, 0x0C, 0x0C);
-            break;
-    }
+    /* Enable Extended Mode Memory Access. */
+    ViaSeqMask(hwp, 0x1A, 0x08, 0x08);
 
     ViaSetPrimaryFIFO(pScrn, mode);
 

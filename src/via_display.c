@@ -324,7 +324,7 @@ ViaFirstCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
             ViaSeqMask(hwp, 0x16, 0x08, 0xBF);
             ViaSeqMask(hwp, 0x17, 0x1F, 0xFF);
             ViaSeqMask(hwp, 0x18, 0x4E, 0xFF);
-            ViaSeqMask(hwp, 0x1A, 0x08, 0xFD);
+            ViaSeqMask(hwp, 0x1A, 0x08, 0xF9);
             break;
     }
 
@@ -594,7 +594,7 @@ ViaSecondCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
             ViaSeqMask(hwp, 0x16, 0x08, 0xBF);
             ViaSeqMask(hwp, 0x17, 0x1F, 0xFF);
             ViaSeqMask(hwp, 0x18, 0x4E, 0xFF);
-            ViaSeqMask(hwp, 0x1A, 0x08, 0xFD);
+            ViaSeqMask(hwp, 0x1A, 0x08, 0xF9);
             break;
     }
 
