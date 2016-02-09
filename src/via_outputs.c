@@ -1081,9 +1081,7 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
     if ((pVia->Chipset != VIA_P4M900) || (pVia->ActiveDevice & VIA_DEVICE_TV))
         via_tv_init(pScrn);
 
-    if (pVia->Chipset == VIA_P4M800PRO) {
-        via_dvi_init(pScrn);
-    }
+    via_dvi_init(pScrn);
 
     if (pVia->ActiveDevice & VIA_DEVICE_DFP) {
         switch (pVia->Chipset) {
