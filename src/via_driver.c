@@ -133,8 +133,8 @@ static SymTabRec VIAChipsets[] = {
     {VIA_PM800,         "PM800 / PN800 / PM880 / CN400"},
     {VIA_P4M800PRO,     "P4M800 Pro / VN800 / CN700"},
     {VIA_CX700,         "CX700 / VX700"},
-    {VIA_K8M890,        "K8M890 / K8N890"},
     {VIA_P4M890,        "P4M890 / CN800"},
+    {VIA_K8M890,        "K8M890 / K8N890"},
     {VIA_P4M900,        "P4M900 / VN896 / CN896"},
     {VIA_VX800,         "VX800 / VX820"},
     {VIA_VX855,         "VX855 / VX875"},
@@ -150,8 +150,8 @@ static PciChipsets VIAPciChipsets[] = {
     {VIA_PM800,         PCI_CHIP_VT3259,    VIA_RES_SHARED},
     {VIA_P4M800PRO,     PCI_CHIP_VT3314,    VIA_RES_SHARED},
     {VIA_CX700,         PCI_CHIP_VT3324,    VIA_RES_SHARED},
-    {VIA_K8M890,        PCI_CHIP_VT3336,    VIA_RES_SHARED},
     {VIA_P4M890,        PCI_CHIP_VT3327,    VIA_RES_SHARED},
+    {VIA_K8M890,        PCI_CHIP_VT3336,    VIA_RES_SHARED},
     {VIA_P4M900,        PCI_CHIP_VT3364,    VIA_RES_SHARED},
     {VIA_VX800,         PCI_CHIP_VT3353,    VIA_RES_SHARED},
     {VIA_VX855,         PCI_CHIP_VT3409,    VIA_RES_SHARED},
@@ -716,13 +716,13 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
             pVia->swov.maxWInterp = 1920;
             pVia->swov.maxHInterp = 1080;
             break;
+        case VIA_P4M890:
+            pVia->VideoEngine = VIDEO_ENGINE_CME;
+            pVia->dmaXV = FALSE;
+            break;
         case VIA_K8M890:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
             pVia->agpEnable = FALSE;
-            pVia->dmaXV = FALSE;
-            break;
-        case VIA_P4M890:
-            pVia->VideoEngine = VIDEO_ENGINE_CME;
             pVia->dmaXV = FALSE;
             break;
         case VIA_P4M900:

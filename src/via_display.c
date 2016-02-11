@@ -313,8 +313,8 @@ ViaFirstCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
     }
 
     switch (pVia->ChipId) {
-        case VIA_K8M890:
         case VIA_CX700:
+        case VIA_K8M890:
         case VIA_P4M900:
         case VIA_VX800:
         case VIA_VX855:
@@ -418,8 +418,8 @@ ViaFirstCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
     /* FIXME: check if this is really necessary here */
     switch (pVia->ChipId) {
-        case VIA_K8M890:
         case VIA_CX700:
+        case VIA_K8M890:
         case VIA_P4M900:
         case VIA_VX800:
         case VIA_VX855:
@@ -455,8 +455,8 @@ ViaFirstCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaSeqMask(hwp, 0x1D, temp >> 9, 0x03);
 
     switch (pVia->ChipId) {
-        case VIA_K8M890:
         case VIA_CX700:
+        case VIA_K8M890:
         case VIA_P4M900:
         case VIA_VX800:
         case VIA_VX855:
@@ -583,8 +583,8 @@ ViaSecondCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
     }
 
     switch (pVia->ChipId) {
-        case VIA_K8M890:
         case VIA_CX700:
+        case VIA_K8M890:
         case VIA_P4M900:
         case VIA_VX800:
         case VIA_VX855:
@@ -669,8 +669,8 @@ ViaSecondCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x5F, temp, 0x1F);
 
     switch (pVia->ChipId) {
-        case VIA_K8M890:
         case VIA_CX700:
+        case VIA_K8M890:
         case VIA_P4M900:
         case VIA_VX800:
         case VIA_VX855:
@@ -1804,8 +1804,8 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
         break;
 
     case VIA_CX700:
-    case VIA_K8M890:
     case VIA_P4M890:
+    case VIA_K8M890:
     case VIA_P4M900:
         max_pitch = 8192/(pScrn->bitsPerPixel >> 3)-1;
         max_height = max_pitch;

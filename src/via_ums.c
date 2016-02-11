@@ -38,8 +38,8 @@ ViaMMIODisable(ScrnInfoPtr pScrn)
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
     switch (pVia->Chipset) {
-        case VIA_K8M890:
         case VIA_CX700:
+        case VIA_K8M890:
         case VIA_P4M900:
         case VIA_VX800:
         case VIA_VX855:
@@ -95,8 +95,8 @@ ViaMMIOEnable(ScrnInfoPtr pScrn)
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
     switch (pVia->Chipset) {
-        case VIA_K8M890:
         case VIA_CX700:
+        case VIA_K8M890:
         case VIA_P4M900:
         case VIA_VX800:
         case VIA_VX855:
@@ -735,8 +735,8 @@ UMSPreInit(ScrnInfoPtr pScrn)
 #endif
             pScrn->videoRam = (1 << ((videoRam & 0x70) >> 4)) << 10;
             break;
-        case VIA_K8M890:
         case VIA_P4M890:
+        case VIA_K8M890:
         case VIA_P4M900:
         case VIA_CX700:
         case VIA_VX800:

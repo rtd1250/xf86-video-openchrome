@@ -105,8 +105,8 @@ viaFlushPCI(ViaCommandBuffer *cb)
                                 (loop++ < MAXLOOP)) ;
                         break;
 
-                    case VIA_K8M890:
                     case VIA_P4M890:
+                    case VIA_K8M890:
                     case VIA_P4M900:
                         while ((VIAGETREG(VIA_REG_STATUS) &
                                 (VIA_CMD_RGTR_BUSY | VIA_2D_ENG_BUSY)) &&
