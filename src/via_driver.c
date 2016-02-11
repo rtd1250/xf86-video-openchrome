@@ -128,16 +128,16 @@ _X_EXPORT DriverRec VIA = {
 /* Supported chipsets */
 static SymTabRec VIAChipsets[] = {
     {VIA_CLE266,        "CLE266"},
-    {VIA_KM400,         "KM400/KN400"},
-    {VIA_K8M800,        "K8M800/K8N800"},
-    {VIA_PM800,         "PM800/PM880/CN400"},
-    {VIA_P4M800PRO,     "P4M800 Pro/VN800/CN700"},
-    {VIA_CX700,         "CX700/VX700"},
-    {VIA_K8M890,        "K8M890/K8N890"},
-    {VIA_P4M890,        "P4M890"},
-    {VIA_P4M900,        "P4M900/VN896/CN896"},
-    {VIA_VX800,         "VX800/VX820"},
-    {VIA_VX855,         "VX855/VX875"},
+    {VIA_KM400,         "KM400 / KM400A / KN400 / P4M800"},
+    {VIA_K8M800,        "K8M800 / K8N800"},
+    {VIA_PM800,         "PM800 / PN800 / PM880 / CN400"},
+    {VIA_P4M800PRO,     "P4M800 Pro / VN800 / CN700"},
+    {VIA_CX700,         "CX700 / VX700"},
+    {VIA_K8M890,        "K8M890 / K8N890"},
+    {VIA_P4M890,        "P4M890 / CN800"},
+    {VIA_P4M900,        "P4M900 / VN896 / CN896"},
+    {VIA_VX800,         "VX800 / VX820"},
+    {VIA_VX855,         "VX855 / VX875"},
     {VIA_VX900,         "VX900"},
     {-1,                NULL}
 };
