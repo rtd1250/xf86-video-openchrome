@@ -1670,7 +1670,11 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
     drmmode_crtc_private_ptr iga1_rec = NULL, iga2_rec = NULL;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
+#if XORG_VERSION_CURRENT >= XORG_VERSION_NUMERIC(1,8,0,0,0)
     ClockRangePtr clockRanges;
+#else
+    ClockRangesPtr clockRanges;
+#endif
     int max_pitch, max_height;
     VIABIOSInfoPtr pBIOSInfo;
     xf86CrtcPtr iga1, iga2;
@@ -1734,7 +1738,12 @@ UMSCrtcInit(ScrnInfoPtr pScrn)
      * Set up ClockRanges, which describe what clock ranges are
      * available, and what sort of modes they can be used for.
      */
+
+#if XORG_VERSION_CURRENT >= XORG_VERSION_NUMERIC(1,8,0,0,0)
     clockRanges = xnfalloc(sizeof(ClockRange));
+#else
+    clockRanges = xnfalloc(sizeof(ClockRanges));
+#endif
     clockRanges->next = NULL;
     clockRanges->minClock = 20000;
     clockRanges->maxClock = 230000;
