@@ -1008,20 +1008,39 @@ via_dvi_init(ScrnInfoPtr pScrn)
     I2CDevPtr pDev = NULL;
     I2CSlaveAddr addr = 0x10;
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered via_dvi_init.\n"));
+
     if (!pVia->pI2CBus2 || !pVia->pI2CBus3) {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                    "I2C Bus 2 or I2C Bus 3 does not exist.\n");
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "Exiting via_dvi_init.\n"));
         return;
     }
 
     if (xf86I2CProbeAddress(pVia->pI2CBus3, addr)) {
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                    "VT1632A found on I2C Bus 3.\n");
         pBus = pVia->pI2CBus3;
     } else if (xf86I2CProbeAddress(pVia->pI2CBus2, addr)) {
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                    "VT1632A found on I2C Bus 2.\n");
         pBus = pVia->pI2CBus2;
     } else {
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                    "VT1632A not found on I2C Bus 2 or I2C Bus 3.\n");
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "Exiting via_dvi_init.\n"));
         return;
     }
 
     pDev = xf86CreateI2CDevRec();
     if (!pDev) {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                    "Failed to create I2C bus structure.\n");
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "Exiting via_dvi_init.\n"));
         return;
     }
 
@@ -1030,17 +1049,25 @@ via_dvi_init(ScrnInfoPtr pScrn)
     pDev->pI2CBus = pBus;
     if (!xf86I2CDevInit(pDev)) {
         xf86DestroyI2CDevRec(pDev, TRUE);
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                    "Failed to initialize a device on I2C bus.\n");
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "Exiting via_dvi_init.\n"));
         return;
     }
 
     if (!via_vt1632_probe(pScrn, pDev)) {
         xf86DestroyI2CDevRec(pDev, TRUE);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "Exiting via_dvi_init.\n"));
         return;
     }
 
     private_data = via_vt1632_init(pScrn, pDev);
     if (!private_data) {
         xf86DestroyI2CDevRec(pDev, TRUE);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "Exiting via_dvi_init.\n"));
         return;
     }
 
