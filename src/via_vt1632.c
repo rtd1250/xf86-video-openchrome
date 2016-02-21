@@ -31,17 +31,17 @@
 static Bool
 xf86I2CMaskByte(I2CDevPtr d, I2CByte subaddr, I2CByte value, I2CByte mask)
 {
-	I2CByte tmp;
-	Bool ret;
+    I2CByte tmp;
+    Bool ret;
 
-	ret = xf86I2CReadByte(d, subaddr, &tmp);
-	if (!ret)
-		return FALSE;
+    ret = xf86I2CReadByte(d, subaddr, &tmp);
+    if (!ret)
+        return FALSE;
 
-	tmp &= ~mask;
-	tmp |= (value & mask);
+    tmp &= ~mask;
+    tmp |= (value & mask);
 
-	return xf86I2CWriteByte(d, subaddr, tmp);
+    return xf86I2CWriteByte(d, subaddr, tmp);
 }
 
 static void
@@ -67,17 +67,17 @@ via_vt1632_dump_registers(ScrnInfoPtr pScrn, I2CDevPtr pDev)
 void
 via_vt1632_power(xf86OutputPtr output, BOOL on)
 {
-	struct ViaVT1632PrivateData * Private = output->driver_private;
-	ScrnInfoPtr pScrn = output->scrn;
+    struct ViaVT1632PrivateData * Private = output->driver_private;
+    ScrnInfoPtr pScrn = output->scrn;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_vt1632_power.\n"));
 
-	if (on == TRUE) {
-		xf86I2CMaskByte(Private->VT1632I2CDev, 0x08, 0x01, 0x01);
-	} else {
-		xf86I2CMaskByte(Private->VT1632I2CDev, 0x08, 0x00, 0x01);
-	}
+    if (on == TRUE) {
+        xf86I2CMaskByte(Private->VT1632I2CDev, 0x08, 0x01, 0x01);
+    } else {
+        xf86I2CMaskByte(Private->VT1632I2CDev, 0x08, 0x00, 0x01);
+    }
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1632A: Power %s.\n",
                 on ? "On" : "Off");
@@ -88,8 +88,8 @@ via_vt1632_power(xf86OutputPtr output, BOOL on)
 void
 via_vt1632_save(xf86OutputPtr output)
 {
-	struct ViaVT1632PrivateData * Private = output->driver_private;
-	ScrnInfoPtr pScrn = output->scrn;
+    struct ViaVT1632PrivateData * Private = output->driver_private;
+    ScrnInfoPtr pScrn = output->scrn;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_vt1632_save.\n"));
@@ -97,10 +97,10 @@ via_vt1632_save(xf86OutputPtr output)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "VT1632A: Saving the content of registers "
                         "0x08, 0x09, 0x0A, and 0x0C.\n"));
-	xf86I2CReadByte(Private->VT1632I2CDev, 0x08, &Private->Register08);
-	xf86I2CReadByte(Private->VT1632I2CDev, 0x09, &Private->Register09);
-	xf86I2CReadByte(Private->VT1632I2CDev, 0x0A, &Private->Register0A);
-	xf86I2CReadByte(Private->VT1632I2CDev, 0x0C, &Private->Register0C);
+    xf86I2CReadByte(Private->VT1632I2CDev, 0x08, &Private->Register08);
+    xf86I2CReadByte(Private->VT1632I2CDev, 0x09, &Private->Register09);
+    xf86I2CReadByte(Private->VT1632I2CDev, 0x0A, &Private->Register0A);
+    xf86I2CReadByte(Private->VT1632I2CDev, 0x0C, &Private->Register0C);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_vt1632_save.\n"));
@@ -109,8 +109,8 @@ via_vt1632_save(xf86OutputPtr output)
 void
 via_vt1632_restore(xf86OutputPtr output)
 {
-	struct ViaVT1632PrivateData * Private = output->driver_private;
-	ScrnInfoPtr pScrn = output->scrn;
+    struct ViaVT1632PrivateData * Private = output->driver_private;
+    ScrnInfoPtr pScrn = output->scrn;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_vt1632_restore.\n"));
@@ -118,10 +118,10 @@ via_vt1632_restore(xf86OutputPtr output)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "VT1632A: Restoring registers 0x08, 0x09, "
                         "0x0A, and 0x0C.\n"));
-	xf86I2CWriteByte(Private->VT1632I2CDev, 0x08, Private->Register08);
-	xf86I2CWriteByte(Private->VT1632I2CDev, 0x09, Private->Register09);
-	xf86I2CWriteByte(Private->VT1632I2CDev, 0x0A, Private->Register0A);
-	xf86I2CWriteByte(Private->VT1632I2CDev, 0x0C, Private->Register0C);
+    xf86I2CWriteByte(Private->VT1632I2CDev, 0x08, Private->Register08);
+    xf86I2CWriteByte(Private->VT1632I2CDev, 0x09, Private->Register09);
+    xf86I2CWriteByte(Private->VT1632I2CDev, 0x0A, Private->Register0A);
+    xf86I2CWriteByte(Private->VT1632I2CDev, 0x0C, Private->Register0C);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_vt1632_restore.\n"));
@@ -131,7 +131,7 @@ int
 via_vt1632_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
 {
     struct ViaVT1632PrivateData * Private = output->driver_private;
-	ScrnInfoPtr pScrn = output->scrn;
+    ScrnInfoPtr pScrn = output->scrn;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
                         "Entered via_vt1632_mode_valid.\n"));
@@ -155,47 +155,47 @@ via_vt1632_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
 
 void
 via_vt1632_mode_set(xf86OutputPtr output, DisplayModePtr mode,
-		DisplayModePtr adjusted_mode)
+                    DisplayModePtr adjusted_mode)
 {
-	struct ViaVT1632PrivateData * Private = output->driver_private;
-	ScrnInfoPtr pScrn = output->scrn;
+    struct ViaVT1632PrivateData * Private = output->driver_private;
+    ScrnInfoPtr pScrn = output->scrn;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
                         "Entered via_vt1632_mode_set.\n"));
 
-	xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-		        "VT1632A: Enabling DVI.\n");
-	xf86I2CWriteByte(Private->VT1632I2CDev, 0x0C, 0x89);
-	xf86I2CWriteByte(Private->VT1632I2CDev, 0x08,
-		VIA_VT1632_VEN | VIA_VT1632_HEN | VIA_VT1632_EDGE |
-		VIA_VT1632_PDB);
-	via_vt1632_dump_registers(pScrn, Private->VT1632I2CDev);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "VT1632A: Enabling DVI.\n");
+    xf86I2CWriteByte(Private->VT1632I2CDev, 0x0C, 0x89);
+    xf86I2CWriteByte(Private->VT1632I2CDev, 0x08,
+                        VIA_VT1632_VEN | VIA_VT1632_HEN | VIA_VT1632_EDGE |
+                        VIA_VT1632_PDB);
+    via_vt1632_dump_registers(pScrn, Private->VT1632I2CDev);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting via_vt1632_mode_set.\n"));
+                "Exiting via_vt1632_mode_set.\n"));
 }
 
 xf86OutputStatus
 via_vt1632_detect(xf86OutputPtr output)
 {
-	struct ViaVT1632PrivateData * Private = output->driver_private;
-	xf86OutputStatus status = XF86OutputStatusDisconnected;
-	ScrnInfoPtr pScrn = output->scrn;
-	CARD8 tmp;
+    struct ViaVT1632PrivateData * Private = output->driver_private;
+    xf86OutputStatus status = XF86OutputStatusDisconnected;
+    ScrnInfoPtr pScrn = output->scrn;
+    CARD8 tmp;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
                         "Entered via_vt1632_detect.\n"));
 
-	xf86I2CReadByte(Private->VT1632I2CDev, 0x09, &tmp);
-	if (tmp && 0x02) {
-		xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
+    xf86I2CReadByte(Private->VT1632I2CDev, 0x09, &tmp);
+    if (tmp && 0x02) {
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
                     "VT1632A: DVI device is detected.\n");
-		status = XF86OutputStatusConnected;
-	}
+        status = XF86OutputStatusConnected;
+    }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_vt1632_detect.\n"));
-	return status;
+    return status;
 }
 
 BOOL
@@ -252,20 +252,20 @@ via_vt1632_init(ScrnInfoPtr pScrn, I2CDevPtr pDev)
     }
     Private->VT1632I2CDev = pDev;
 
-	xf86I2CReadByte(pDev, 0x06, &buf);
-	Private->DotclockMin = buf * 1000;
+    xf86I2CReadByte(pDev, 0x06, &buf);
+    Private->DotclockMin = buf * 1000;
 
-	xf86I2CReadByte(pDev, 0x07, &buf);
-	Private->DotclockMax = (buf + 65) * 1000;
+    xf86I2CReadByte(pDev, 0x07, &buf);
+    Private->DotclockMax = (buf + 65) * 1000;
 
-	xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1632A: Dot Clock Range: %d "
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1632A: Dot Clock Range: %d "
                 "to %d MHz.\n",
                 Private->DotclockMin / 1000,
                 Private->DotclockMax / 1000);
 
-	via_vt1632_dump_registers(pScrn, pDev);
+    via_vt1632_dump_registers(pScrn, pDev);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_vt1632_init.\n"));
-	return Private;
+    return Private;
 }
