@@ -660,6 +660,9 @@ via_dp_init(ScrnInfoPtr pScrn)
     VIAPtr pVia = VIAPTR(pScrn);
     xf86OutputPtr output = NULL;
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered via_dp_init.\n"));
+
     if (pVia->pI2CBus2)
         output = xf86OutputCreate(pScrn, &via_dp_funcs, "DP-1");
     if (output) {
@@ -668,6 +671,9 @@ via_dp_init(ScrnInfoPtr pScrn)
         output->interlaceAllowed = TRUE;
         output->doubleScanAllowed = FALSE;
     }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting via_dp_init.\n"));
 }
 
 /*
