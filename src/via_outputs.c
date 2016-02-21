@@ -400,6 +400,9 @@ via_tv_init(ScrnInfoPtr pScrn)
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
     xf86OutputPtr output = NULL;
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered via_tv_init.\n"));
+
     /* preset some pBIOSInfo TV related values -- move up */
     pBIOSInfo->TVEncoder = VIA_NONETV;
     pBIOSInfo->TVI2CDev = NULL;
@@ -430,8 +433,14 @@ via_tv_init(ScrnInfoPtr pScrn)
     else if (pVia->pI2CBus3 && xf86I2CProbeAddress(pVia->pI2CBus3, 0xEA))
         pBIOSInfo->TVI2CDev = ViaCH7xxxDetect(pScrn, pVia->pI2CBus3, 0xEA);
 
-    if (!pBIOSInfo->TVI2CDev)
+    if (!pBIOSInfo->TVI2CDev) {
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                    "Did not detect a TV encoder.\n");
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "Exiting via_tv_init.\n"));
+
         return FALSE;
+    }
 
     switch (pBIOSInfo->TVEncoder) {
         case VIA_VT1621:
@@ -446,6 +455,10 @@ via_tv_init(ScrnInfoPtr pScrn)
             ViaCH7xxxInit(pScrn);
             break;
         default:
+            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                        "Was not able to initialize a known TV encoder.\n");
+            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                                "Exiting via_tv_init.\n"));
             return FALSE;
             break;
     }
@@ -456,10 +469,8 @@ via_tv_init(ScrnInfoPtr pScrn)
         || !pBIOSInfo->TVPower || !pBIOSInfo->TVModes
         || !pBIOSInfo->TVPrintRegs) {
 
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                   "via_tv_init: TVEncoder was not properly initialised.\n");
-
         xf86DestroyI2CDevRec(pBIOSInfo->TVI2CDev, TRUE);
+
         pBIOSInfo->TVI2CDev = NULL;
         pBIOSInfo->TVOutput = TVOUTPUT_NONE;
         pBIOSInfo->TVEncoder = VIA_NONETV;
@@ -475,6 +486,10 @@ via_tv_init(ScrnInfoPtr pScrn)
         pBIOSInfo->TVPrintRegs = NULL;
         pBIOSInfo->TVNumRegs = 0;
 
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                   "TV encoder was not properly initialized.\n");
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "Exiting via_tv_init.\n"));
         return FALSE;
     }
 
@@ -486,7 +501,7 @@ via_tv_init(ScrnInfoPtr pScrn)
         output->possible_crtcs = 0x3;
     } else {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                   "via_tv_init: Failed to create output for TV-1.\n");
+                   "Failed to register TV-1.\n");
     }
 
     pBIOSInfo->tv = output;
@@ -497,6 +512,9 @@ via_tv_init(ScrnInfoPtr pScrn)
     if (VIAPTR(pScrn)->PrintTVRegs)
         pBIOSInfo->TVPrintRegs(pScrn);
 #endif
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting via_tv_init.\n"));
     return TRUE;
 }
 
