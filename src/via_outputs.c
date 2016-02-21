@@ -605,8 +605,8 @@ via_dp_detect(xf86OutputPtr output)
     mon = xf86OutputGetEDID(output, pVia->pI2CBus2);
     if (mon && DIGITAL(mon->features.input_type)) {
         xf86OutputSetEDID(output, mon);
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                         "DDC pI2CBus2 detected a DP\n"));
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                    "I2C Bus 2 detected a DP.\n");
         status = XF86OutputStatusConnected;
     }
     return status;
@@ -783,8 +783,8 @@ via_analog_detect(xf86OutputPtr output)
     mon = xf86OutputGetEDID(output, pVia->pI2CBus1);
     if (mon) {
         xf86OutputSetEDID(output, mon);
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                         "DDC pI2CBus1 detected a CRT\n"));
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                    "I2C Bus 1 detected a VGA monitor.\n");
         status = XF86OutputStatusConnected;
     } else {
         vgaHWPtr hwp = VGAHWPTR(pScrn);
