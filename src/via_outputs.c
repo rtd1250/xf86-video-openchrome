@@ -876,6 +876,9 @@ via_analog_init(ScrnInfoPtr pScrn)
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
     xf86OutputPtr output = NULL;
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered via_analog_init.\n"));
+
     if (pVia->pI2CBus1) {
         output = xf86OutputCreate(pScrn, &via_analog_funcs, "VGA-1");
 
@@ -885,6 +888,9 @@ via_analog_init(ScrnInfoPtr pScrn)
         output->doubleScanAllowed = FALSE;
         pBIOSInfo->analog = output;
     }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting via_analog_init.\n"));
 }
 
 static void
