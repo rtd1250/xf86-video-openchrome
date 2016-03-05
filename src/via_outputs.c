@@ -804,50 +804,78 @@ via_analog_detect(xf86OutputPtr output)
     VIAPtr pVia = VIAPTR(pScrn);
     xf86MonPtr mon;
 
+    /* Probe I2C Bus 1 to see if a VGA monitor is connected. */
+    xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                "Probing for a VGA monitor on I2C Bus 1.\n");
     mon = xf86OutputGetEDID(output, pVia->pI2CBus1);
-    if (mon) {
+    if (mon && (!mon->features.input_type)) {
         xf86OutputSetEDID(output, mon);
-        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                    "I2C Bus 1 detected a VGA monitor.\n");
         status = XF86OutputStatusConnected;
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                    "Detected a VGA monitor on I2C Bus 1.\n");
     } else {
-        vgaHWPtr hwp = VGAHWPTR(pScrn);
-        CARD8 SR01 = hwp->readSeq(hwp, 0x01);
-        CARD8 SR40 = hwp->readSeq(hwp, 0x40);
-        CARD8 CR36 = hwp->readCrtc(hwp, 0x36);
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                    "Did not detect a VGA monitor on I2C Bus 1.\n");
 
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                         "Test for CRT with VSYNC\n"));
-        /* We have to power on the display to detect it */
-        ViaSeqMask(hwp, 0x01, 0x00, 0x20);
-        ViaCrtcMask(hwp, 0x36, 0x00, 0xF0);
-
-        /* Wait for vblank */
-        usleep(16);
-
-        /* Detect the load on pins */
-        ViaSeqMask(hwp, 0x40, 0x80, 0x80);
-
-        if ((VIA_CX700 == pVia->Chipset) ||
-            (VIA_VX800 == pVia->Chipset) ||
-            (VIA_VX855 == pVia->Chipset) ||
-            (VIA_VX900 == pVia->Chipset))
-            ViaSeqMask(hwp, 0x40, 0x00, 0x80);
-
-        if (ViaVgahwIn(hwp, 0x3C2) & 0x20)
+        /* Probe I2C Bus 2 to see if a VGA monitor is connected. */
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                    "Probing for a VGA monitor on I2C Bus 2.\n");
+        mon = xf86OutputGetEDID(output, pVia->pI2CBus2);
+        if (mon && (!mon->features.input_type)) {
+            xf86OutputSetEDID(output, mon);
             status = XF86OutputStatusConnected;
+            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                        "Detected a VGA monitor on I2C Bus 2.\n");
+        } else {
+            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                        "Did not detect a VGA monitor on I2C Bus 2.\n");
 
-        if ((VIA_CX700 == pVia->Chipset) ||
-            (VIA_VX800 == pVia->Chipset) ||
-            (VIA_VX855 == pVia->Chipset) ||
-            (VIA_VX900 == pVia->Chipset))
-            ViaSeqMask(hwp, 0x40, 0x00, 0x80);
+            /* Perform manual detection of a VGA monitor since */
+            /* it was not detected via I2C buses. */
+            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                        "Now perform manual detection of a VGA "
+                        "monitor.\n");
+            vgaHWPtr hwp = VGAHWPTR(pScrn);
+            CARD8 SR01 = hwp->readSeq(hwp, 0x01);
+            CARD8 SR40 = hwp->readSeq(hwp, 0x40);
+            CARD8 CR36 = hwp->readCrtc(hwp, 0x36);
 
-        /* Restore previous state */
-        hwp->writeSeq(hwp, 0x40, SR40);
-        hwp->writeSeq(hwp, 0x01, SR01);
-        hwp->writeCrtc(hwp, 0x36, CR36);
+            /* We have to power on the display to detect it */
+            ViaSeqMask(hwp, 0x01, 0x00, 0x20);
+            ViaCrtcMask(hwp, 0x36, 0x00, 0xF0);
+
+            /* Wait for vblank */
+            usleep(16);
+
+            /* Detect the load on pins */
+            ViaSeqMask(hwp, 0x40, 0x80, 0x80);
+
+            if ((VIA_CX700 == pVia->Chipset) ||
+                (VIA_VX800 == pVia->Chipset) ||
+                (VIA_VX855 == pVia->Chipset) ||
+                (VIA_VX900 == pVia->Chipset))
+                ViaSeqMask(hwp, 0x40, 0x00, 0x80);
+
+            if (ViaVgahwIn(hwp, 0x3C2) & 0x20) {
+                status = XF86OutputStatusConnected;
+                xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                            "Detected a VGA monitor using manual "
+                            "detection method.\n");
+            }
+
+            if ((VIA_CX700 == pVia->Chipset) ||
+                (VIA_VX800 == pVia->Chipset) ||
+                (VIA_VX855 == pVia->Chipset) ||
+                (VIA_VX900 == pVia->Chipset))
+                ViaSeqMask(hwp, 0x40, 0x00, 0x80);
+
+            /* Restore previous state */
+            hwp->writeSeq(hwp, 0x40, SR40);
+            hwp->writeSeq(hwp, 0x01, SR01);
+            hwp->writeCrtc(hwp, 0x36, CR36);
+        }
     }
+
     return status;
 }
 
