@@ -913,15 +913,21 @@ via_analog_init(ScrnInfoPtr pScrn)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_analog_init.\n"));
 
-    if (pVia->pI2CBus1) {
-        output = xf86OutputCreate(pScrn, &via_analog_funcs, "VGA-1");
-
-        output->possible_crtcs = 0x3;
-        output->possible_clones = 0;
-        output->interlaceAllowed = TRUE;
-        output->doubleScanAllowed = FALSE;
-        pBIOSInfo->analog = output;
+    if (!pVia->pI2CBus1 || !pVia->pI2CBus2) {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                    "I2C Bus 1 or I2C Bus 2 does not exist.\n");
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "Exiting via_analog_init.\n"));
+        return;
     }
+
+    output = xf86OutputCreate(pScrn, &via_analog_funcs, "VGA-1");
+
+    output->possible_crtcs = 0x3;
+    output->possible_clones = 0;
+    output->interlaceAllowed = TRUE;
+    output->doubleScanAllowed = FALSE;
+    pBIOSInfo->analog = output;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_analog_init.\n"));
