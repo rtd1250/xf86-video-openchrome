@@ -25,8 +25,6 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include "xf86Crtc.h"
-#include "xf86fbman.h"
 
 #include "globals.h"
 #include "via_driver.h"
