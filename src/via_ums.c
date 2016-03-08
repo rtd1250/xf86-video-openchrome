@@ -707,20 +707,21 @@ UMSPreInit(ScrnInfoPtr pScrn)
             pScrn->videoRam = (1 << ((videoRam & 0x70) >> 4)) << 10;
             break;
         case VIA_KM400:
-            /* P4M800 */
+#ifdef HAVE_PCIACCESS
+            /* P4M800 Host Bridge PCI Device ID */
             if (DEVICE_ID(bridge) == 0x0296) {
-#ifdef HAVE_PCIACCESS
                 pci_device_cfg_read_u8(vgaDevice, &videoRam, 0xA1);
-#else
-                videoRam = pciReadByte(pciTag(0, 0, 3), 0xA1) & 0x70;
-#endif
             } else {
-#ifdef HAVE_PCIACCESS
                 pci_device_cfg_read_u8(bridge, &videoRam, 0xE1);
-#else
-                videoRam = pciReadByte(pciTag(0, 0, 0), 0xE1) & 0x70;
-#endif
             }
+#else
+            /* P4M800 Host Bridge PCI Device ID */
+            if (pciReadWord(pciTag(0, 0, 0), 0x02) == 0x0296) {
+                videoRam = pciReadByte(pciTag(0, 0, 3), 0xA1) & 0x70;
+            } else {
+                videoRam = pciReadByte(pciTag(0, 0, 0), 0xE1) & 0x70;
+            }
+#endif
             pScrn->videoRam = (1 << ((videoRam & 0x70) >> 4)) << 10;
             break;
         case VIA_PM800:
