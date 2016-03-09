@@ -1476,6 +1476,8 @@ static const xf86OutputFuncsRec via_lvds_funcs = {
     .create_resources   = via_lvds_create_resources,
 #ifdef RANDR_12_INTERFACE
     .set_property       = via_lvds_set_property,
+#endif
+#ifdef RANDR_13_INTERFACE
     .get_property       = via_lvds_get_property,
 #endif
     .dpms               = via_lvds_dpms,
