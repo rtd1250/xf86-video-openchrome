@@ -375,6 +375,8 @@ static const xf86OutputFuncsRec via_tv_funcs = {
     .create_resources   = via_tv_create_resources,
 #ifdef RANDR_12_INTERFACE
     .set_property       = via_tv_set_property,
+#endif
+#ifdef RANDR_13_INTERFACE
     .get_property       = via_tv_get_property,
 #endif
     .dpms               = via_tv_dpms,
@@ -639,6 +641,8 @@ static const xf86OutputFuncsRec via_dp_funcs = {
     .create_resources   = via_dp_create_resources,
 #ifdef RANDR_12_INTERFACE
     .set_property       = via_dp_set_property,
+#endif
+#ifdef RANDR_13_INTERFACE
     .get_property       = via_dp_get_property,
 #endif
     .dpms               = via_dp_dpms,
@@ -888,6 +892,8 @@ static const xf86OutputFuncsRec via_analog_funcs = {
     .create_resources   = via_analog_create_resources,
 #ifdef RANDR_12_INTERFACE
     .set_property       = via_analog_set_property,
+#endif
+#ifdef RANDR_13_INTERFACE
     .get_property       = via_analog_get_property,
 #endif
     .dpms               = via_analog_dpms,
@@ -1047,6 +1053,8 @@ static const xf86OutputFuncsRec via_dvi_funcs = {
     .create_resources   = via_dvi_create_resources,
 #ifdef RANDR_12_INTERFACE
     .set_property       = via_dvi_set_property,
+#endif
+#ifdef RANDR_13_INTERFACE
     .get_property       = via_dvi_get_property,
 #endif
     .dpms               = via_dvi_dpms,
