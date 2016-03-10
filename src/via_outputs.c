@@ -622,6 +622,9 @@ via_dp_detect(xf86OutputPtr output)
     VIAPtr pVia = VIAPTR(pScrn);
     xf86MonPtr mon;
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered via_dp_detect.\n"));
+
     mon = xf86OutputGetEDID(output, pVia->pI2CBus2);
     if (mon && DIGITAL(mon->features.input_type)) {
         xf86OutputSetEDID(output, mon);
@@ -629,6 +632,9 @@ via_dp_detect(xf86OutputPtr output)
                     "I2C Bus 2 detected a DP.\n");
         status = XF86OutputStatusConnected;
     }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting via_dp_detect.\n"));
     return status;
 }
 
