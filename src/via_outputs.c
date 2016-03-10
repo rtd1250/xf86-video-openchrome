@@ -1012,13 +1012,7 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
     /* VGA */
     via_analog_init(pScrn);
 
-    /*
-     * FIXME: xf86I2CProbeAddress(pVia->pI2CBus3, 0x40)
-     * disables the panel on P4M900
-     */
-    /* TV encoder */
-    if ((pVia->Chipset != VIA_P4M900) || (pVia->ActiveDevice & VIA_DEVICE_TV))
-        via_tv_init(pScrn);
+    via_tv_init(pScrn);
 
     via_dvi_init(pScrn);
 
