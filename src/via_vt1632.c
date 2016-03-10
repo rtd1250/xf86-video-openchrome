@@ -262,8 +262,8 @@ via_vt1632_init(ScrnInfoPtr pScrn, I2CDevPtr pDev)
     xf86I2CReadByte(pDev, 0x07, &buf);
     Private->DotclockMax = (buf + 65) * 1000;
 
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1632A: Dot Clock Range: %d "
-                "to %d MHz.\n",
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1632A Dot Clock Range: "
+                "%d to %d MHz\n",
                 Private->DotclockMin / 1000,
                 Private->DotclockMax / 1000);
 
