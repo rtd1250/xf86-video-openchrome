@@ -211,13 +211,17 @@ via_vt1632_probe(ScrnInfoPtr pScrn, I2CDevPtr pDev) {
     VendorID = buf;
     xf86I2CReadByte(pDev, 1, &buf);
     VendorID |= buf << 8;
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Vendor ID: 0x%04x\n", VendorID));
 
     xf86I2CReadByte(pDev, 2, &buf);
     DeviceID = buf;
     xf86I2CReadByte(pDev, 3, &buf);
     DeviceID |= buf << 8;
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Device ID: %04x\n", DeviceID));
 
-    if (VendorID != 0x1106 || DeviceID != 0x3192) {
+    if ((VendorID != 0x1106) || (DeviceID != 0x3192)) {
         xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                     "VT1632A DVI transmitter not detected.\n");
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
