@@ -932,16 +932,19 @@ via_dvi_init(ScrnInfoPtr pScrn)
     }
 
     if (xf86I2CProbeAddress(pVia->pI2CBus3, addr)) {
-        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                    "VT1632A found on I2C Bus 3.\n");
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                            "Will probe I2C Bus 3 for a possible "
+                            "external TMDS transmitter.\n"));
         pBus = pVia->pI2CBus3;
     } else if (xf86I2CProbeAddress(pVia->pI2CBus2, addr)) {
-        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                    "VT1632A found on I2C Bus 2.\n");
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                            "Will probe I2C Bus 2 for a possible "
+                            "external TMDS transmitter.\n"));
         pBus = pVia->pI2CBus2;
     } else {
         xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                    "VT1632A not found on I2C Bus 2 or I2C Bus 3.\n");
+                    "Did not find a possible external TMDS transmitter "
+                    "on I2C Bus 2 or I2C Bus 3.\n");
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                             "Exiting via_dvi_init.\n"));
         return;
@@ -950,7 +953,7 @@ via_dvi_init(ScrnInfoPtr pScrn)
     pDev = xf86CreateI2CDevRec();
     if (!pDev) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                    "Failed to create I2C bus structure.\n");
+                    "Failed to create an I2C bus structure.\n");
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                             "Exiting via_dvi_init.\n"));
         return;
@@ -991,6 +994,9 @@ via_dvi_init(ScrnInfoPtr pScrn)
         output->interlaceAllowed = FALSE;
         output->doubleScanAllowed = FALSE;
     }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting via_dvi_init.\n"));
 }
 
 void
