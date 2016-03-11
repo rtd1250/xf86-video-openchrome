@@ -993,16 +993,14 @@ via_dvi_init(ScrnInfoPtr pScrn)
     }
 }
 
-/*
- *
- */
 void
 ViaOutputsDetect(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaOutputsDetect\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered ViaOutputsDetect.\n"));
 
     pBIOSInfo->analog = NULL;
 
@@ -1012,10 +1010,14 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
     /* VGA */
     via_analog_init(pScrn);
 
+    /* TV */
     via_tv_init(pScrn);
 
+    /* External TMDS Transmitter (DVI) */
     via_dvi_init(pScrn);
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting ViaOutputsDetect.\n"));
 }
 
 #ifdef HAVE_DEBUG
