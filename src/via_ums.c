@@ -51,11 +51,11 @@ ViaMMIODisable(ScrnInfoPtr pScrn)
 }
 
 void
-VIAUnmapMem(ScrnInfoPtr pScrn)
+VIAUnmapMMIO(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAUnmapMem\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAUnmapMMIO\n"));
 
     ViaMMIODisable(pScrn);
 

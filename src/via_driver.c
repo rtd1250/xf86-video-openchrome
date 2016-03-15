@@ -436,7 +436,7 @@ VIAFreeRec(ScrnInfoPtr pScrn)
     if (pVia->VideoRegs)
         free(pVia->VideoRegs);
 
-    VIAUnmapMem(pScrn);
+    VIAUnmapMMIO(pScrn);
 
     free(pScrn->driverPrivate);
     pScrn->driverPrivate = NULL;
@@ -455,7 +455,7 @@ VIAFreeScreen(FREE_SCREEN_ARGS_DECL)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAFreeScreen\n"));
 
     if (pVia->directRenderingType != DRI_2)
-        VIAUnmapMem(pScrn);
+        VIAUnmapMMIO(pScrn);
 
     VIAFreeRec(pScrn);
 
