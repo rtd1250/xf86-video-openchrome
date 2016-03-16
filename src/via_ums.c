@@ -55,7 +55,8 @@ VIAUnmapMMIO(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAUnmapMMIO\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered VIAUnmapMMIO.\n"));
 
     ViaMMIODisable(pScrn);
 
@@ -84,6 +85,9 @@ VIAUnmapMMIO(ScrnInfoPtr pScrn)
         xf86UnMapVidMem(pScrn->scrnIndex, (pointer) pVia->FBBase,
                         pVia->videoRambytes);
 #endif
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting VIAUnmapMMIO.\n"));
 }
 
 static void
