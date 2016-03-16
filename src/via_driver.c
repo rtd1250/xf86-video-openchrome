@@ -454,9 +454,6 @@ VIAFreeScreen(FREE_SCREEN_ARGS_DECL)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAFreeScreen\n"));
 
-    if (pVia->directRenderingType != DRI_2)
-        VIAUnmapMMIO(pScrn);
-
     VIAFreeRec(pScrn);
 
     if (!pVia->KMS && xf86LoaderCheckSymbol("vgaHWFreeHWRec"))
