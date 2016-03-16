@@ -1599,7 +1599,7 @@ via_lvds_init(ScrnInfoPtr pScrn)
         output->interlaceAllowed = FALSE;
         output->doubleScanAllowed = FALSE;
 
-        if (!(pVia->IsOLPCXO15)) {
+        if (pVia->IsOLPCXO15) {
             output->mm_height = 152;
             output->mm_width = 114;
         }
