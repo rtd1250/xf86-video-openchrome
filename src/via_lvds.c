@@ -1331,7 +1331,7 @@ via_lvds_detect(xf86OutputPtr output)
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
     /* Hardcode panel size for the XO */
-    if(strcmp(pVia->Id->String, xoId) == 0) {
+    if(strcmp(pVia->Id->String, xoId)) {
         panel->NativeWidth = 1200;
         panel->NativeHeight = 900;
         status = XF86OutputStatusConnected;
@@ -1427,7 +1427,7 @@ via_lvds_get_modes(xf86OutputPtr output)
             if (Panel->NativeWidth && Panel->NativeHeight) {
                 VIAPtr pVia = VIAPTR(pScrn);
 
-                if (!xf86NameCmp(pVia->Id->String, "OLPC XO 1.5"))
+                if (xf86NameCmp(pVia->Id->String, "OLPC XO 1.5"))
                     p = xf86DuplicateMode(&OLPCMode);
                 else
                     p = xf86CVTMode(Panel->NativeWidth, Panel->NativeHeight,
