@@ -1549,7 +1549,15 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                "...Finished parsing config file options.\n");
 
-    ViaCheckCardId(pScrn);
+    /* Checking for OLPC XO-1.5. */
+    if ((pVia->Chipset == VIA_VX855) &&
+        (SUBVENDOR_ID(pVia->PciInfo) == 0x152D) &&
+        (SUBSYS_ID(pVia->PciInfo) == 0x0833)) {
+
+        pVia->IsOLPCXO15      = TRUE;
+    } else {
+        pVia->IsOLPCXO15      = FALSE;
+    }
 
     /* I2CDevices Option for I2C Initialization */
     if ((s = xf86GetOptValString(VIAOptions, OPTION_I2CDEVICES))) {
@@ -1562,8 +1570,9 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             pVia->I2CDevices |= VIA_I2C_BUS3;
     }
 
-    if (!xf86NameCmp(pVia->Id->String, "OLPC XO 1.5"))
+    if (pVia->IsOLPCXO15) {
         pVia->I2CDevices &= ~VIA_I2C_BUS2;
+    }
 
     /* CRTC handling */
     xf86CrtcConfigInit(pScrn, &via_xf86crtc_config_funcs);

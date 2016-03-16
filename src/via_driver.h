@@ -319,7 +319,9 @@ typedef struct _VIA {
 
     /* BIOS Info Ptr */
     VIABIOSInfoPtr      pBIOSInfo;
-    struct ViaCardIdStruct* Id;
+
+    /* OLPC XO-1.5 */
+    Bool                IsOLPCXO15;
 
     /* I2C & DDC */
     I2CBusPtr           pI2CBus1;

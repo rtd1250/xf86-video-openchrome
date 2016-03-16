@@ -1323,7 +1323,6 @@ ViaPanelLookUpModeIndex(int width, int height)
 static xf86OutputStatus
 via_lvds_detect(xf86OutputPtr output)
 {
-    static const char xoId[] = "OLPC XO 1.5";
     xf86OutputStatus status = XF86OutputStatusDisconnected;
     ViaPanelInfoPtr panel = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
@@ -1331,7 +1330,7 @@ via_lvds_detect(xf86OutputPtr output)
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
     /* Hardcode panel size for the XO */
-    if(strcmp(pVia->Id->String, xoId)) {
+    if (pVia->IsOLPCXO15) {
         panel->NativeWidth = 1200;
         panel->NativeHeight = 900;
         status = XF86OutputStatusConnected;
@@ -1427,11 +1426,13 @@ via_lvds_get_modes(xf86OutputPtr output)
             if (Panel->NativeWidth && Panel->NativeHeight) {
                 VIAPtr pVia = VIAPTR(pScrn);
 
-                if (xf86NameCmp(pVia->Id->String, "OLPC XO 1.5"))
+                if (pVia->IsOLPCXO15) {
                     p = xf86DuplicateMode(&OLPCMode);
-                else
+                } else {
                     p = xf86CVTMode(Panel->NativeWidth, Panel->NativeHeight,
                                     60.0f, FALSE, FALSE);
+                }
+
                 if (p) {
                     p->CrtcHDisplay = p->HDisplay;
                     p->CrtcHSyncStart = p->HSyncStart;
@@ -1585,14 +1586,7 @@ via_lvds_init(ScrnInfoPtr pScrn)
                    "Panel size is not selected from config file.\n");
     }
 
-    if (ForcePanel) {
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Enabling panel from config.\n");
-        output = xf86OutputCreate(pScrn, &via_lvds_funcs, "LVDS-1");
-    } else if (pVia->Id && (pVia->Id->Outputs & VIA_DEVICE_LCD)) {
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                    "Enabling panel from PCI-subsystem ID information.\n");
-        output = xf86OutputCreate(pScrn, &via_lvds_funcs, "LVDS-1");
-    }
+    output = xf86OutputCreate(pScrn, &via_lvds_funcs, "LVDS-1");
 
     if (output)  {
         output->driver_private = Panel;
@@ -1605,7 +1599,7 @@ via_lvds_init(ScrnInfoPtr pScrn)
         output->interlaceAllowed = FALSE;
         output->doubleScanAllowed = FALSE;
 
-        if (!xf86NameCmp(pVia->Id->String, "OLPC XO 1.5")) {
+        if (!(pVia->IsOLPCXO15)) {
             output->mm_height = 152;
             output->mm_width = 114;
         }
