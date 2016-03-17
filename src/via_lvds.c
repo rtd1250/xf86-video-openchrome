@@ -42,7 +42,6 @@
 enum ViaPanelOpts {
     OPTION_BUSWIDTH,
     OPTION_CENTER,
-    OPTION_FORCEPANEL,
     OPTION_PANELSIZE
 };
 
@@ -50,7 +49,6 @@ static OptionInfoRec ViaPanelOptions[] =
 {
     {OPTION_BUSWIDTH,   "BusWidth",     OPTV_ANYSTR,    {0},    FALSE},
     {OPTION_CENTER,     "Center",       OPTV_BOOLEAN,   {0},    FALSE},
-    {OPTION_FORCEPANEL, "ForcePanel",   OPTV_BOOLEAN,   {0},    FALSE}, /* last resort */
     {OPTION_PANELSIZE,  "PanelSize",    OPTV_ANYSTR,    {0},    FALSE},
     {-1,                NULL,           OPTV_NONE,      {0},    FALSE}
 };
@@ -1531,7 +1529,6 @@ via_lvds_init(ScrnInfoPtr pScrn)
     MessageType from = X_DEFAULT;
     VIAPtr pVia = VIAPTR(pScrn);
     xf86OutputPtr output = NULL;
-    Bool ForcePanel = FALSE;
     const char *s = NULL;
 
     if (!Panel)
@@ -1560,13 +1557,6 @@ via_lvds_init(ScrnInfoPtr pScrn)
             ? X_CONFIG : X_DEFAULT;
     xf86DrvMsg(pScrn->scrnIndex, from, "LVDS-0 : DVI Center is %s.\n",
                Panel->Center ? "enabled" : "disabled");
-
-    /* Force the use of the Panel? */
-    from = xf86GetOptValBool(Options, OPTION_FORCEPANEL,
-                             &ForcePanel)
-            ? X_CONFIG : X_DEFAULT;
-    xf86DrvMsg(pScrn->scrnIndex, from, "LVDS Panel will %sbe forced.\n",
-               ForcePanel ? "" : "not ");
 
     /* Panel Size Option */
     if ((s = xf86GetOptValString(Options, OPTION_PANELSIZE))) {
