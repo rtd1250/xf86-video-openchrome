@@ -379,38 +379,34 @@ via_lvds_dpms(xf86OutputPtr output, int mode)
     ScrnInfoPtr pScrn = output->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
 
-    if (pVia->pVbe) {
-        ViaVbePanelPower(pVia->pVbe, (mode == DPMSModeOn));
-    } else {
-        switch (mode) {
-        case DPMSModeOn:
-            switch (pVia->Chipset) {
-            case VIA_P4M900:
-            case VIA_CX700:
-            case VIA_VX800:
-            case VIA_VX855:
-            case VIA_VX900:
-                ViaLVDSPower(pScrn, TRUE);
-                break;
-            }
-            ViaLCDPower(output, TRUE);
-            break;
-
-        case DPMSModeStandby:
-        case DPMSModeSuspend:
-        case DPMSModeOff:
-            switch (pVia->Chipset) {
-            case VIA_P4M900:
-            case VIA_CX700:
-            case VIA_VX800:
-            case VIA_VX855:
-            case VIA_VX900:
-                ViaLVDSPower(pScrn, FALSE);
-                break;
-            }
-            ViaLCDPower(output, FALSE);
+    switch (mode) {
+    case DPMSModeOn:
+        switch (pVia->Chipset) {
+        case VIA_P4M900:
+        case VIA_CX700:
+        case VIA_VX800:
+        case VIA_VX855:
+        case VIA_VX900:
+            ViaLVDSPower(pScrn, TRUE);
             break;
         }
+        ViaLCDPower(output, TRUE);
+        break;
+
+    case DPMSModeStandby:
+    case DPMSModeSuspend:
+    case DPMSModeOff:
+        switch (pVia->Chipset) {
+        case VIA_P4M900:
+        case VIA_CX700:
+        case VIA_VX800:
+        case VIA_VX855:
+        case VIA_VX900:
+            ViaLVDSPower(pScrn, FALSE);
+            break;
+        }
+        ViaLCDPower(output, FALSE);
+        break;
     }
 }
 
@@ -809,44 +805,12 @@ via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
     ScrnInfoPtr pScrn = output->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
 
-    /*
-     * FIXME: pVia->IsSecondary is not working here.  We should be able
-     * to detect when the display is using the secondary head.
-     * TODO: This should be enabled for other chipsets as well.
-     */
-    if (pVia->pVbe) {
-        if (!pVia->useLegacyVBE) {
-            /*
-             * FIXME: Should we always set the panel expansion?
-             * Does it depend on the resolution?
-             */
-            if (!ViaVbeSetPanelMode(pScrn, !Panel->Center)) {
-                xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                            "Unable to set the panel mode.\n");
-            }
-        }
-
-        switch (pVia->Chipset) {
-        case VIA_P4M900:
-        case VIA_VX800:
-        case VIA_VX855:
-        case VIA_VX900:
-            /*
-             * Since we are using virtual, we need to adjust
-             * the offset to match the framebuffer alignment.
-             */
-            if (pScrn->displayWidth != adjusted_mode->CrtcHDisplay)
-                ViaSecondCRTCHorizontalOffset(pScrn);
-            break;
-        }
+    if (Panel->Scale) {
+        ViaPanelScale(pScrn, mode->HDisplay, mode->VDisplay,
+                        Panel->NativeWidth,
+                        Panel->NativeHeight);
     } else {
-        if (Panel->Scale) {
-            ViaPanelScale(pScrn, mode->HDisplay, mode->VDisplay,
-                            Panel->NativeWidth,
-                            Panel->NativeHeight);
-        } else {
-            ViaPanelScaleDisable(pScrn);
-        }
+        ViaPanelScaleDisable(pScrn);
     }
 }
 

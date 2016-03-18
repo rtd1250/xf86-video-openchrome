@@ -166,7 +166,6 @@ typedef enum
     OPTION_PRINTTVREGS,
     OPTION_I2CSCAN,
 #endif
-    OPTION_VBEMODES,
     OPTION_NOACCEL,
     OPTION_ACCELMETHOD,
     OPTION_EXA_NOCOMPOSITE,
@@ -191,7 +190,6 @@ typedef enum
     OPTION_AGP_DMA,
     OPTION_2D_DMA,
     OPTION_XV_DMA,
-    OPTION_VBE_SAVERESTORE,
     OPTION_MAX_DRIMEM,
     OPTION_AGPMEM,
     OPTION_DISABLE_XV_BW_CHECK
@@ -203,7 +201,6 @@ static OptionInfoRec VIAOptions[] = {
     {OPTION_PRINTTVREGS,         "PrintTVRegs",      OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_I2CSCAN,             "I2CScan",          OPTV_BOOLEAN, {0}, FALSE},
 #endif
-    {OPTION_VBEMODES,            "VBEModes",         OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_NOACCEL,             "NoAccel",          OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_ACCELMETHOD,         "AccelMethod",      OPTV_STRING,  {0}, FALSE},
     {OPTION_EXA_NOCOMPOSITE,     "ExaNoComposite",   OPTV_BOOLEAN, {0}, FALSE},
@@ -224,7 +221,6 @@ static OptionInfoRec VIAOptions[] = {
     {OPTION_AGP_DMA,             "EnableAGPDMA",     OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_2D_DMA,              "NoAGPFor2D",       OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_XV_DMA,              "NoXVDMA",          OPTV_BOOLEAN, {0}, FALSE},
-    {OPTION_VBE_SAVERESTORE,     "VbeSaveRestore",   OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_DISABLE_XV_BW_CHECK, "DisableXvBWCheck", OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_MAX_DRIMEM,          "MaxDRIMem",        OPTV_INTEGER, {0}, FALSE},
     {OPTION_AGPMEM,              "AGPMem",           OPTV_INTEGER, {0}, FALSE},
@@ -426,9 +422,6 @@ VIAFreeRec(ScrnInfoPtr pScrn)
         pVia->pBIOSInfo = NULL;
         free(pBIOSInfo);
     }
-
-    if (VIAPTR(pScrn)->pVbe)
-        vbeFree(VIAPTR(pScrn)->pVbe);
 
     if (pVia->VideoRegs)
         free(pVia->VideoRegs);
@@ -659,8 +652,6 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
     pVia->agpEnable = TRUE;
     pVia->dma2d = TRUE;
     pVia->dmaXV = TRUE;
-    pVia->useVBEModes = FALSE;
-    pVia->vbeSR = FALSE;
 #ifdef HAVE_DEBUG
     pVia->disableXvBWCheck = FALSE;
 #endif
@@ -677,7 +668,6 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
     /* line buffer (limited to 800) is too small to do interpolation. */
     pVia->swov.maxWInterp = 800;
     pVia->swov.maxHInterp = 600;
-    pVia->useLegacyVBE = TRUE;
 
     pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP1;
 
@@ -716,7 +706,6 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
         case VIA_P4M900:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
             pVia->agpEnable = FALSE;
-            pVia->useLegacyVBE = FALSE;
             /* FIXME: this needs to be tested */
             pVia->dmaXV = FALSE;
             pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP0;
@@ -1336,19 +1325,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     xf86DrvMsg(pScrn->scrnIndex, from, "PCI DMA will %sbe used for XV "
                "image transfer if DRI is enabled.\n",
                (pVia->dmaXV) ? "" : "not ");
-
-    //pVia->useVBEModes = FALSE;
-    from = xf86GetOptValBool(VIAOptions, OPTION_VBEMODES, &pVia->useVBEModes)
-            ? X_CONFIG : X_DEFAULT;
-    xf86DrvMsg(pScrn->scrnIndex, from, "Will %senable VBE modes.\n",
-               (pVia->useVBEModes) ? "" : "not ");
-
-    //pVia->vbeSR = FALSE;
-    from = xf86GetOptValBool(VIAOptions, OPTION_VBE_SAVERESTORE, &pVia->vbeSR)
-            ? X_CONFIG : X_DEFAULT;
-    xf86DrvMsg(pScrn->scrnIndex, from, "VBE VGA register save & restore "
-               "will %sbe used\n\tif VBE modes are enabled.\n",
-               (pVia->vbeSR) ? "" : "not ");
 
 #ifdef HAVE_DEBUG
     //pVia->disableXvBWCheck = FALSE;

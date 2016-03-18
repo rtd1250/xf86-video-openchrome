@@ -54,7 +54,6 @@
 #include "xf86Crtc.h"
 #include "xf86RandR12.h"
 #include "xf86cmap.h"
-#include "vbe.h"
 
 #ifdef HAVE_DRI
 #define _XF86DRI_SERVER_
@@ -214,15 +213,6 @@ typedef struct _twodContext {
     int clipY2;
 } ViaTwodContext;
 
-typedef struct{
-    /* textMode */
-    CARD8 *state, *pstate; /* SVGA state */
-    int statePage, stateSize, stateMode;
-
-    /* vbe version */
-    int major, minor;
-} ViaVbeModeInfo;
-
 typedef struct _VIA {
     VIARegRec           SavedReg;
     int                 Bpp, Bpl;
@@ -255,7 +245,6 @@ typedef struct _VIA {
     Bool                NoAccel;
     Bool                shadowFB;
     Rotation            rotate;
-    Bool                vbeSR;
     int                 agpMem;
 
 	CreateScreenResourcesProcPtr CreateScreenResources;
@@ -270,12 +259,6 @@ typedef struct _VIA {
     int                 ChipId;
     int                 ChipRev;
     int                 EntityIndex;
-
-    /* vbe */
-    vbeInfoPtr          pVbe;
-    ViaVbeModeInfo      vbeMode;
-    Bool                useVBEModes;
-    Bool                useLegacyVBE;
 
     /* Support for shadowFB and rotation */
     unsigned char*      ShadowPtr;

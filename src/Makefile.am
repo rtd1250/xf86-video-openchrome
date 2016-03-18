@@ -65,7 +65,6 @@ openchrome_drv_la_SOURCES = \
          via_xv_overlay.c \
          via_xv_overlay.h \
          via_ums.c \
-         via_vbe.c \
          via_vgahw.c \
          via_vgahw.h \
          via_xv.c \
