@@ -977,17 +977,14 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
         if (!vgaHWInit(pScrn, adjusted_mode))
             return;
 
-        if (pVia->UseLegacyModeSwitch) {
-            ViaModePrimaryLegacy(crtc, adjusted_mode);
-        } else {
-            ViaCRTCInit(pScrn);
-            ViaModeFirstCRTC(pScrn, adjusted_mode);
+        ViaCRTCInit(pScrn);
+        ViaModeFirstCRTC(pScrn, adjusted_mode);
 
-            if (pVia->pBIOSInfo->SimultaneousEnabled)
-                ViaDisplayEnableSimultaneous(pScrn);
-            else
-                ViaDisplayDisableSimultaneous(pScrn);
-        }
+        if (pVia->pBIOSInfo->SimultaneousEnabled)
+            ViaDisplayEnableSimultaneous(pScrn);
+        else
+            ViaDisplayDisableSimultaneous(pScrn);
+
     } else {
         if (!ViaVbeSetMode(pScrn, adjusted_mode))
             return;
@@ -1390,18 +1387,14 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
         if (!vgaHWInit(pScrn, adjusted_mode))
             return;
 
-        if (pVia->UseLegacyModeSwitch) {
-            ViaModeSecondaryLegacy(crtc, adjusted_mode);
-        } else {
-            ViaCRTCInit(pScrn);
-            ViaModeSecondCRTC(pScrn, adjusted_mode);
-            ViaSecondDisplayChannelEnable(pScrn);
+        ViaCRTCInit(pScrn);
+        ViaModeSecondCRTC(pScrn, adjusted_mode);
+        ViaSecondDisplayChannelEnable(pScrn);
 
-            if (pVia->pBIOSInfo->SimultaneousEnabled)
-                ViaDisplayEnableSimultaneous(pScrn);
-            else
-                ViaDisplayDisableSimultaneous(pScrn);
-        }
+        if (pVia->pBIOSInfo->SimultaneousEnabled)
+            ViaDisplayEnableSimultaneous(pScrn);
+        else
+            ViaDisplayDisableSimultaneous(pScrn);
     }
     iga2_crtc_set_origin(crtc, crtc->x, crtc->y);
 }

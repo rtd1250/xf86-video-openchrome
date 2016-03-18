@@ -218,21 +218,9 @@ via_tv_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
     VIAPtr pVia = VIAPTR(pScrn);
     int ret = MODE_OK;
 
-    if (pVia->UseLegacyModeSwitch) {
-        VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+    if (!ViaModeDotClockTranslate(pScrn, pMode))
+        return MODE_NOCLOCK;
 
-        if (pBIOSInfo->TVModeValid) {
-            ret = pBIOSInfo->TVModeValid(pScrn, pMode);
-            if (ret != MODE_OK) {
-                xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "Mode \"%s\" is not supported by TV encoder.\n",
-                            pMode->name);
-            }
-        }
-    } else {
-        if (!ViaModeDotClockTranslate(pScrn, pMode))
-            return MODE_NOCLOCK;
-    }
     return ret;
 }
 
@@ -1303,116 +1291,6 @@ ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode)
     }
 
     return 0;
-}
-
-/*
- *
- */
-void
-ViaModePrimaryLegacy(xf86CrtcPtr crtc, DisplayModePtr mode)
-{
-    ScrnInfoPtr pScrn = crtc->scrn;
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModePrimaryLegacy\n"));
-    DEBUG(ViaPrintMode(pScrn, mode));
-
-    /* Turn off Screen */
-    ViaCrtcMask(hwp, 0x17, 0x00, 0x80);
-
-    /* Clean Second Path Status */
-    hwp->writeCrtc(hwp, 0x6A, 0x00);
-    hwp->writeCrtc(hwp, 0x6B, 0x00);
-    hwp->writeCrtc(hwp, 0x6C, 0x00);
-    hwp->writeCrtc(hwp, 0x93, 0x00);
-
-    ViaCRTCInit(pScrn);
-    ViaFirstCRTCSetMode(pScrn, mode);
-    pBIOSInfo->Clock = ViaModeDotClockTranslate(pScrn, mode);
-    pBIOSInfo->ClockExternal = FALSE;
-
-    /* Enable Extended Mode Memory Access. */
-    ViaSeqMask(hwp, 0x1A, 0x08, 0x08);
-
-    if (pBIOSInfo->analog->status == XF86OutputStatusConnected)
-        ViaCrtcMask(hwp, 0x36, 0x30, 0x30);
-    else
-        ViaSeqMask(hwp, 0x16, 0x00, 0x40);
-
-    if ((pBIOSInfo->tv && pBIOSInfo->tv->status == XF86OutputStatusConnected)) {
-        /* Quick 'n dirty workaround for non-primary case until TVCrtcMode
-         * is removed -- copy from clock handling code below */
-        if ((pVia->Chipset == VIA_CLE266) && CLE266_REV_IS_AX(pVia->ChipRev))
-            ViaSetPrimaryDotclock(pScrn, 0x471C);  /* CLE266Ax uses 2x XCLK */
-        else if (pVia->Chipset != VIA_CLE266 && pVia->Chipset != VIA_KM400)
-            ViaSetPrimaryDotclock(pScrn, 0x529001);
-        else
-            ViaSetPrimaryDotclock(pScrn, 0x871C);
-        ViaSetUseExternalClock(hwp);
-
-        ViaTVSetMode(crtc, mode);
-    } else
-        ViaTVPower(pScrn, FALSE);
-
-    ViaSetPrimaryFIFO(pScrn, mode);
-
-    if (pBIOSInfo->ClockExternal) {
-        if ((pVia->Chipset == VIA_CLE266) && CLE266_REV_IS_AX(pVia->ChipRev))
-            ViaSetPrimaryDotclock(pScrn, 0x471C);  /* CLE266Ax uses 2x XCLK */
-        else if (pVia->Chipset != VIA_CLE266 && pVia->Chipset != VIA_KM400)
-            ViaSetPrimaryDotclock(pScrn, 0x529001);
-        else
-            ViaSetPrimaryDotclock(pScrn, 0x871C);
-        if (pVia->Chipset == VIA_CLE266 || pVia->Chipset == VIA_KM400)
-            ViaCrtcMask(hwp, 0x6B, 0x01, 0x01);
-    } else {
-        ViaSetPrimaryDotclock(pScrn, pBIOSInfo->Clock);
-        ViaSetUseExternalClock(hwp);
-        ViaCrtcMask(hwp, 0x6B, 0x00, 0x01);
-    }
-
-    /* Enable CRT Controller (3D5.17 Hardware Reset) */
-    ViaCrtcMask(hwp, 0x17, 0x80, 0x80);
-
-    hwp->disablePalette(hwp);
-}
-
-/*
- *
- */
-void
-ViaModeSecondaryLegacy(xf86CrtcPtr crtc, DisplayModePtr mode)
-{
-    ScrnInfoPtr pScrn = crtc->scrn;
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModeSecondaryLegacy\n"));
-    DEBUG(ViaPrintMode(pScrn, mode));
-
-    /* Turn off Screen */
-    ViaCrtcMask(hwp, 0x17, 0x00, 0x80);
-
-    ViaSecondCRTCSetMode(pScrn, mode);
-
-    if (pBIOSInfo->tv && pBIOSInfo->tv->status == XF86OutputStatusConnected)
-        ViaTVSetMode(crtc, mode);
-
-    /* CLE266A2 apparently doesn't like this */
-    if (!(pVia->Chipset == VIA_CLE266 && pVia->ChipRev == 0x02))
-        ViaCrtcMask(hwp, 0x6C, 0x00, 0x1E);
-
-    ViaSetSecondaryFIFO(pScrn, mode);
-
-    ViaSetSecondaryDotclock(pScrn, pBIOSInfo->Clock);
-    ViaSetUseExternalClock(hwp);
-
-    ViaCrtcMask(hwp, 0x17, 0x80, 0x80);
-
-    hwp->disablePalette(hwp);
 }
 
 void

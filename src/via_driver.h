@@ -391,7 +391,6 @@ typedef struct _VIA {
     Bool                I2CScan;
 #endif /* HAVE_DEBUG */
 
-    Bool                UseLegacyModeSwitch;
     video_via_regs*     VideoRegs;
 } VIARec, *VIAPtr;
 

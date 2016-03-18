@@ -194,8 +194,7 @@ typedef enum
     OPTION_VBE_SAVERESTORE,
     OPTION_MAX_DRIMEM,
     OPTION_AGPMEM,
-    OPTION_DISABLE_XV_BW_CHECK,
-    OPTION_MODE_SWITCH_METHOD
+    OPTION_DISABLE_XV_BW_CHECK
 } VIAOpts;
 
 static OptionInfoRec VIAOptions[] = {
@@ -227,7 +226,6 @@ static OptionInfoRec VIAOptions[] = {
     {OPTION_XV_DMA,              "NoXVDMA",          OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_VBE_SAVERESTORE,     "VbeSaveRestore",   OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_DISABLE_XV_BW_CHECK, "DisableXvBWCheck", OPTV_BOOLEAN, {0}, FALSE},
-    {OPTION_MODE_SWITCH_METHOD,  "ModeSwitchMethod", OPTV_ANYSTR,  {0}, FALSE},
     {OPTION_MAX_DRIMEM,          "MaxDRIMem",        OPTV_INTEGER, {0}, FALSE},
     {OPTION_AGPMEM,              "AGPMem",           OPTV_INTEGER, {0}, FALSE},
     {OPTION_I2CDEVICES,          "I2CDevices",       OPTV_ANYSTR,  {0}, FALSE},
@@ -681,13 +679,11 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
     pVia->swov.maxHInterp = 600;
     pVia->useLegacyVBE = TRUE;
 
-    pVia->UseLegacyModeSwitch = FALSE;
     pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP1;
 
     switch (pVia->Chipset) {
         case VIA_CLE266:
             pBIOSInfo->TVDIPort = VIA_DI_PORT_DVP0;
-            pVia->UseLegacyModeSwitch = TRUE;
             break;
         case VIA_KM400:
             /* IRQ is not broken on KM400A, but testing (pVia->ChipRev < 0x80)
@@ -699,13 +695,9 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
             pVia->DRIIrqEnable = FALSE;
             break;
         case VIA_PM800:
-            /* Use new mode switch to resolve many resolution and display bugs (switch to console) */
-            /* FIXME The video playing (XV) is not working correctly after turn on new mode switch */
             pVia->VideoEngine = VIDEO_ENGINE_CME;
             break;
         case VIA_P4M800PRO:
-            /* New mode switch resolve bug with gamma set #282 */
-            /* and with Xv after hibernate #240                */
             break;
         case VIA_CX700:
             pVia->VideoEngine = VIDEO_ENGINE_CME;
@@ -1176,36 +1168,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     if (xf86GetOptValInteger(VIAOptions, OPTION_VIDEORAM, &pScrn->videoRam))
         xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
                    "Setting amount of VideoRAM to %d kB\n", pScrn->videoRam);
-
-    if ((s = xf86GetOptValString(VIAOptions, OPTION_MODE_SWITCH_METHOD))) {
-        if (!xf86NameCmp(s, "legacy")) {
-            if (pVia->UseLegacyModeSwitch) {
-                xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                           "Already using \"legacy\" as ModeSwitchMethod, "
-                           "did not force anything.\n");
-            } else {
-                pVia->UseLegacyModeSwitch = TRUE;
-                xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                           "Forced ModeSwitchMethod to \"legacy\".\n");
-            }
-        }
-        else if (!xf86NameCmp(s, "new")) {
-            if (pVia->UseLegacyModeSwitch) {
-                pVia->UseLegacyModeSwitch = FALSE;
-                xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                           "Forced ModeSwitchMethod to \"new\".\n");
-            } else {
-                xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                           "Already using \"new\" as ModeSwitchMethod, "
-                           "did not force anything.\n");
-            }
-        } else {
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "\"%s\" is not a valid"
-                       "value for Option \"ModeSwitchMethod\".\n", s);
-            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                       "Valid options are \"legacy\" or \"new\".\n");
-        }
-    }
 
     /* When rotating, switch shadow framebuffer on and acceleration off. */
     if ((s = xf86GetOptValString(VIAOptions, OPTION_ROTATION_TYPE))) {
