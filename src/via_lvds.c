@@ -839,6 +839,8 @@ via_lvds_detect(xf86OutputPtr output)
     ScrnInfoPtr pScrn = output->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
     vgaHWPtr hwp = VGAHWPTR(pScrn);
+    CARD8 cr3b = 0x00;
+    CARD8 cr3b_mask = 0x00;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_lvds_detect.\n"));
@@ -876,17 +878,32 @@ via_lvds_detect(xf86OutputPtr output)
                 status = XF86OutputStatusConnected;
             }
         } else {
-            if (!panel->NativeWidth || !panel->NativeHeight)
+            /* Apparently this is the way VIA Technologies passes */
+            /* the presence of a flat panel to the device driver */
+            /* via BIOS setup. */
+            if (pVia->Chipset == VIA_CLE266) {
+                cr3b_mask = 0x08;
+            } else {
+                cr3b_mask = 0x02;
+            }            
+
+            cr3b = hwp->readCrtc(hwp, 0x3B) & cr3b_mask;
+
+            if (cr3b) {
                 ViaPanelGetNativeModeFromScratchPad(output);
 
-            if (panel->NativeWidth && panel->NativeHeight)
-                status = XF86OutputStatusConnected;
+                if (panel->NativeWidth && panel->NativeHeight) {
+                    status = XF86OutputStatusConnected;
+                }
+            }
         }
 
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                            "Detected Flat Panel Screen Resolution: "
-                            "%dx%d\n",
-                            panel->NativeWidth, panel->NativeHeight));
+        if (status == XF86OutputStatusConnected) {
+            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                                "Detected Flat Panel Screen Resolution: "
+                                "%dx%d\n",
+                                panel->NativeWidth, panel->NativeHeight));
+        }
     } else {
         status = XF86OutputStatusConnected;
     }
@@ -1015,12 +1032,30 @@ via_lvds_init(ScrnInfoPtr pScrn)
     ViaPanelInfoPtr Panel = (ViaPanelInfoPtr) xnfcalloc(sizeof(ViaPanelInfoRec), 1);
     OptionInfoPtr  Options = xnfalloc(sizeof(ViaPanelOptions));
     MessageType from = X_DEFAULT;
+    const char *s = NULL;
     VIAPtr pVia = VIAPTR(pScrn);
     xf86OutputPtr output = NULL;
-    const char *s = NULL;
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    CARD8 cr3b = 0x00;
+    CARD8 cr3b_mask = 0x00;
 
     if (!Panel)
         return;
+
+    /* Apparently this is the way VIA Technologies passes */
+    /* the presence of a flat panel to the device driver */
+    /* via BIOS setup. */
+    if (pVia->Chipset == VIA_CLE266) {
+        cr3b_mask = 0x08;
+    } else {
+        cr3b_mask = 0x02;
+    }            
+
+    cr3b = hwp->readCrtc(hwp, 0x3B) & cr3b_mask;
+
+    if (!cr3b) {
+        return;
+    }
 
     memcpy(Options, ViaPanelOptions, sizeof(ViaPanelOptions));
     xf86ProcessOptions(pScrn->scrnIndex, pScrn->options, Options);
