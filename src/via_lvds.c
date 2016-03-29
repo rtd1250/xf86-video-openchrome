@@ -840,11 +840,22 @@ via_lvds_detect(xf86OutputPtr output)
     VIAPtr pVia = VIAPTR(pScrn);
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered via_lvds_detect.\n"));
+
     /* Hardcode panel size for the XO */
     if (pVia->IsOLPCXO15) {
         panel->NativeWidth = 1200;
         panel->NativeHeight = 900;
         status = XF86OutputStatusConnected;
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                            "Setting up OLPC XO-1.5 flat panel.\n"));
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                            "Detected Flat Panel Screen Resolution: "
+                            "%dx%d\n",
+                            panel->NativeWidth, panel->NativeHeight));
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "Exiting via_lvds_detect.\n"));
         return status;
     }
 
@@ -855,7 +866,10 @@ via_lvds_detect(xf86OutputPtr output)
         ret = ViaPanelGetSizeFromDDCv1(output, &width, &height);
         if (ret) {
             panel->NativeModeIndex = ViaPanelLookUpModeIndex(width, height);
-            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaPanelLookUpModeIndex, Width %d, Height %d, NativeModeIndex%d\n", width, height, panel->NativeModeIndex));
+            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                                "ViaPanelLookUpModeIndex: Width %d, "
+                                "Height %d, NativeModeIndex%d\n", 
+                                width, height, panel->NativeModeIndex));
             if (panel->NativeModeIndex != VIA_PANEL_INVALID) {
                 panel->NativeWidth = width;
                 panel->NativeHeight = height;
@@ -868,12 +882,17 @@ via_lvds_detect(xf86OutputPtr output)
             if (panel->NativeWidth && panel->NativeHeight)
                 status = XF86OutputStatusConnected;
         }
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "NativeMode: %d %d\n",
-                        panel->NativeWidth, panel->NativeHeight));
+
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                            "Detected Flat Panel Screen Resolution: "
+                            "%dx%d\n",
+                            panel->NativeWidth, panel->NativeHeight));
     } else {
         status = XF86OutputStatusConnected;
     }
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting via_lvds_detect.\n"));
     return status;
 }
 
