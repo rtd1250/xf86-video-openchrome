@@ -862,48 +862,6 @@ via_lvds_detect(xf86OutputPtr output)
                 status = XF86OutputStatusConnected;
             }
         } else {
-            CARD8 CR6A = hwp->readCrtc(hwp, 0x6A);
-            CARD8 CR6B = hwp->readCrtc(hwp, 0x6B);
-            CARD8 CR97 = hwp->readCrtc(hwp, 0x97);
-            CARD8 CR99 = hwp->readCrtc(hwp, 0x99);
-
-            /* First test CRTC2 is out of reset and if its enabled or
-             * simultaneous mode is enabled. Also avoid the secondary
-             * DFP source */
-            if ((((CR6A & 0xC0) == 0xC0) || (((CR6A & 0xC0) == 0x40) &&
-                (CR6B & 0x08))) && (CR97 & 0x10) && (CR99 & 0x10)) {
-                    /* Use Vertical addreess register of IGA 2 */
-                    panel->NativeWidth  = (hwp->readCrtc(hwp, 0x51) |
-                                                ((hwp->readCrtc(hwp, 0x55) & 0x70) << 4)) + 1;
-                    panel->NativeHeight = (hwp->readCrtc(hwp, 0x59) |
-                                                ((hwp->readCrtc(hwp, 0x5D) & 0x38) << 5)) + 1;
-                    panel->NativeModeIndex = VIA_PANEL6X4;
-
-                    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Panel Mode probed %dx%d from IGA 2\n",
-                               panel->NativeWidth, panel->NativeHeight);
-
-                    status = XF86OutputStatusConnected;
-            } else if (!(CR97 & 0x10) && !(CR99 & 0x10)) {
-                    CARD8 val;
-
-                    /* IGA1 Horizontal Overscan register */
-                    panel->NativeWidth = (hwp->readCrtc(hwp, 0x01) + 1) * 8;
-                    /* IGA1 default Vertical Overscan register is
-                     * incorrect on some devices so use VBlank start */
-                    panel->NativeHeight = (hwp->readCrtc(hwp, 0x15) + 1);
-                    val = hwp->readCrtc(hwp, 0x07);
-                    panel->NativeHeight |= ((val >> 3) & 0x1) << 8;
-                    panel->NativeHeight |= ((val >> 5) & 0x1) << 9;
-                    val = hwp->readCrtc(hwp, 0x35);
-                    panel->NativeHeight |= ((val >> 3) & 0x1) << 10;
-                    panel->NativeModeIndex = VIA_PANEL6X4;
-
-                    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Panel Mode probed %dx%d from IGA 1\n",
-                                panel->NativeWidth,
-                                panel->NativeHeight);
-                    status = XF86OutputStatusConnected;
-            }
-
             if (!panel->NativeWidth || !panel->NativeHeight)
                 ViaPanelGetNativeModeFromScratchPad(output);
 
