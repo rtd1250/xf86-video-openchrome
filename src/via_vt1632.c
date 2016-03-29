@@ -219,7 +219,7 @@ via_vt1632_probe(ScrnInfoPtr pScrn, I2CDevPtr pDev) {
     xf86I2CReadByte(pDev, 3, &buf);
     DeviceID |= buf << 8;
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Device ID: %04x\n", DeviceID));
+                        "Device ID: 0x%04x\n", DeviceID));
 
     if ((VendorID != 0x1106) || (DeviceID != 0x3192)) {
         xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
