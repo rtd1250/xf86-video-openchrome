@@ -41,15 +41,13 @@
  */
 enum ViaPanelOpts {
     OPTION_BUSWIDTH,
-    OPTION_CENTER,
-    OPTION_PANELSIZE
+    OPTION_CENTER
 };
 
 static OptionInfoRec ViaPanelOptions[] =
 {
     {OPTION_BUSWIDTH,   "BusWidth",     OPTV_ANYSTR,    {0},    FALSE},
     {OPTION_CENTER,     "Center",       OPTV_BOOLEAN,   {0},    FALSE},
-    {OPTION_PANELSIZE,  "PanelSize",    OPTV_ANYSTR,    {0},    FALSE},
     {-1,                NULL,           OPTV_NONE,      {0},    FALSE}
 };
 
@@ -997,34 +995,6 @@ static const xf86OutputFuncsRec via_lvds_funcs = {
     .destroy            = via_lvds_destroy,
 };
 
-/*
- * Sets the panel dimensions from the configuration
- * using name with format "9999x9999".
- */
-static void
-ViaPanelGetNativeModeFromOption(ScrnInfoPtr pScrn, ViaPanelInfoPtr panel,
-								const char *name)
-{
-    char aux[strlen(name) + 1];
-    CARD8 length, index;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                     "ViaPanelGetNativeModeFromOption\n"));
-
-    panel->NativeModeIndex = VIA_PANEL_INVALID;
-    length = sizeof(ViaPanelNativeModes) / sizeof(ViaPanelModeRec);
-
-    for (index = 0; index < length; index++) {
-        sprintf(aux, "%dx%d", ViaPanelNativeModes[index].Width,
-                ViaPanelNativeModes[index].Height);
-        if (!xf86NameCmp(name, aux)) {
-            panel->NativeModeIndex = index;
-            panel->NativeWidth = ViaPanelNativeModes[index].Width;
-            panel->NativeHeight = ViaPanelNativeModes[index].Height;
-            break;
-        }
-    }
-}
 
 void
 via_lvds_init(ScrnInfoPtr pScrn)
@@ -1080,24 +1050,6 @@ via_lvds_init(ScrnInfoPtr pScrn)
             ? X_CONFIG : X_DEFAULT;
     xf86DrvMsg(pScrn->scrnIndex, from, "LVDS-0 : DVI Center is %s.\n",
                Panel->Center ? "enabled" : "disabled");
-
-    /* Panel Size Option */
-    if ((s = xf86GetOptValString(Options, OPTION_PANELSIZE))) {
-        ViaPanelGetNativeModeFromOption(pScrn, Panel, s);
-        if (Panel->NativeModeIndex != VIA_PANEL_INVALID) {
-            DEBUG(xf86DrvMsg
-                  (pScrn->scrnIndex, X_CONFIG, "LVDS Panel mode index is %d\n",
-                   Panel->NativeModeIndex));
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                       "Selected Panel Size is %dx%d\n", Panel->NativeWidth,
-                       Panel->NativeHeight);
-        } else
-            xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                        "%s is not a valid panel size.\n", s);
-    } else {
-        xf86DrvMsg(pScrn->scrnIndex, X_DEFAULT,
-                   "Panel size is not selected from config file.\n");
-    }
 
     output = xf86OutputCreate(pScrn, &via_lvds_funcs, "LVDS-1");
 
