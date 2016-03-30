@@ -343,8 +343,6 @@ typedef struct _VIA {
     Bool                dma2d;
     Bool                dmaXV;
 
-    CARD8               ActiveDevice;	/* Option */
-
     /* Video */
     int                 VideoEngine;
     swovRec             swov;

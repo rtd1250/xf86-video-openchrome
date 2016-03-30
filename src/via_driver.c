@@ -175,7 +175,6 @@ typedef enum
     OPTION_ROTATION_TYPE,
     OPTION_ROTATE,
     OPTION_VIDEORAM,
-    OPTION_ACTIVEDEVICE,
     OPTION_I2CDEVICES,
     OPTION_BUSWIDTH,
     OPTION_CENTER,
@@ -209,7 +208,6 @@ static OptionInfoRec VIAOptions[] = {
     {OPTION_ROTATION_TYPE,       "RotationType",     OPTV_ANYSTR,  {0}, FALSE},
     {OPTION_ROTATE,              "Rotate",           OPTV_ANYSTR,  {0}, FALSE},
     {OPTION_VIDEORAM,            "VideoRAM",         OPTV_INTEGER, {0}, FALSE},
-    {OPTION_ACTIVEDEVICE,        "ActiveDevice",     OPTV_ANYSTR,  {0}, FALSE},
     {OPTION_TVDOTCRAWL,          "TVDotCrawl",       OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_TVDEFLICKER,         "TVDeflicker",      OPTV_INTEGER, {0}, FALSE},
     {OPTION_TVTYPE,              "TVType",           OPTV_ANYSTR,  {0}, FALSE},
@@ -656,7 +654,6 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
 #endif
     pVia->maxDriSize = 0;
     pVia->agpMem = AGP_SIZE / 1024;
-    pVia->ActiveDevice = 0x00;
     pVia->I2CDevices = VIA_I2C_BUS1 | VIA_I2C_BUS2 | VIA_I2C_BUS3;
     pVia->VideoEngine = VIDEO_ENGINE_CLE;
 #ifdef HAVE_DEBUG
@@ -1356,19 +1353,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             ? X_CONFIG : X_DEFAULT;
     xf86DrvMsg(pScrn->scrnIndex, from,
                "Will try to allocate %d kB of AGP memory.\n", pVia->agpMem);
-
-    /* ActiveDevice Option for device selection */
-    //pVia->ActiveDevice = 0x00;
-    if ((s = xf86GetOptValString(VIAOptions, OPTION_ACTIVEDEVICE))) {
-        if (strstr(s, "CRT"))
-            pVia->ActiveDevice |= VIA_DEVICE_CRT;
-        if (strstr(s, "LCD"))
-            pVia->ActiveDevice |= VIA_DEVICE_LCD;
-        if (strstr(s, "DFP"))
-            pVia->ActiveDevice |= VIA_DEVICE_DFP;
-        if (strstr(s, "TV"))
-            pVia->ActiveDevice |= VIA_DEVICE_TV;
-    }
 
     pBIOSInfo = pVia->pBIOSInfo;
     pBIOSInfo->TVDotCrawl = FALSE;
