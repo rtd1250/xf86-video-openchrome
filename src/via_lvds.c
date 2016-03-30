@@ -914,9 +914,9 @@ via_lvds_detect(xf86OutputPtr output)
 static DisplayModePtr
 via_lvds_get_modes(xf86OutputPtr output)
 {
-    ViaPanelInfoPtr Panel = output->driver_private;
+    ViaPanelInfoPtr pPanel = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
-    DisplayModePtr p = NULL;
+    DisplayModePtr pDisplay_Mode = NULL;
 
     if (output->status == XF86OutputStatusConnected) {
         if (!output->MonInfo) {
@@ -924,32 +924,32 @@ via_lvds_get_modes(xf86OutputPtr output)
              * Generates a display mode for the native panel resolution,
              * using CVT.
              */
-            if (Panel->NativeWidth && Panel->NativeHeight) {
+            if (pPanel->NativeWidth && pPanel->NativeHeight) {
                 VIAPtr pVia = VIAPTR(pScrn);
 
                 if (pVia->IsOLPCXO15) {
-                    p = xf86DuplicateMode(&OLPCMode);
+                    pDisplay_Mode = xf86DuplicateMode(&OLPCMode);
                 } else {
-                    p = xf86CVTMode(Panel->NativeWidth, Panel->NativeHeight,
+                    pDisplay_Mode = xf86CVTMode(pPanel->NativeWidth, pPanel->NativeHeight,
                                     60.0f, FALSE, FALSE);
                 }
 
-                if (p) {
-                    p->CrtcHDisplay = p->HDisplay;
-                    p->CrtcHSyncStart = p->HSyncStart;
-                    p->CrtcHSyncEnd = p->HSyncEnd;
-                    p->CrtcHTotal = p->HTotal;
-                    p->CrtcHSkew = p->HSkew;
-                    p->CrtcVDisplay = p->VDisplay;
-                    p->CrtcVSyncStart = p->VSyncStart;
-                    p->CrtcVSyncEnd = p->VSyncEnd;
-                    p->CrtcVTotal = p->VTotal;
+                if (pDisplay_Mode) {
+                    pDisplay_Mode->CrtcHDisplay = pDisplay_Mode->HDisplay;
+                    pDisplay_Mode->CrtcHSyncStart = pDisplay_Mode->HSyncStart;
+                    pDisplay_Mode->CrtcHSyncEnd = pDisplay_Mode->HSyncEnd;
+                    pDisplay_Mode->CrtcHTotal = pDisplay_Mode->HTotal;
+                    pDisplay_Mode->CrtcHSkew = pDisplay_Mode->HSkew;
+                    pDisplay_Mode->CrtcVDisplay = pDisplay_Mode->VDisplay;
+                    pDisplay_Mode->CrtcVSyncStart = pDisplay_Mode->VSyncStart;
+                    pDisplay_Mode->CrtcVSyncEnd = pDisplay_Mode->VSyncEnd;
+                    pDisplay_Mode->CrtcVTotal = pDisplay_Mode->VTotal;
 
-                    p->CrtcVBlankStart = min(p->CrtcVSyncStart, p->CrtcVDisplay);
-                    p->CrtcVBlankEnd = max(p->CrtcVSyncEnd, p->CrtcVTotal);
-                    p->CrtcHBlankStart = min(p->CrtcHSyncStart, p->CrtcHDisplay);
-                    p->CrtcHBlankEnd = max(p->CrtcHSyncEnd, p->CrtcHTotal);
-                    p->type = M_T_DRIVER | M_T_PREFERRED;
+                    pDisplay_Mode->CrtcVBlankStart = min(pDisplay_Mode->CrtcVSyncStart, pDisplay_Mode->CrtcVDisplay);
+                    pDisplay_Mode->CrtcVBlankEnd = max(pDisplay_Mode->CrtcVSyncEnd, pDisplay_Mode->CrtcVTotal);
+                    pDisplay_Mode->CrtcHBlankStart = min(pDisplay_Mode->CrtcHSyncStart, pDisplay_Mode->CrtcHDisplay);
+                    pDisplay_Mode->CrtcHBlankEnd = max(pDisplay_Mode->CrtcHSyncEnd, pDisplay_Mode->CrtcHTotal);
+                    pDisplay_Mode->type = M_T_DRIVER | M_T_PREFERRED;
                 } else {
                     xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                                 "Out of memory. Size: %zu bytes\n", sizeof(DisplayModeRec));
@@ -957,13 +957,13 @@ via_lvds_get_modes(xf86OutputPtr output)
             } else {
                 xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
                             "Invalid panel dimension (%dx%d)\n",
-                            Panel->NativeWidth, Panel->NativeHeight);
+                            pPanel->NativeWidth, pPanel->NativeHeight);
             }
         } else {
-            p = xf86OutputGetEDIDModes(output);
+            pDisplay_Mode = xf86OutputGetEDIDModes(output);
         }
     }
-    return p;
+    return pDisplay_Mode;
 }
 
 static void
