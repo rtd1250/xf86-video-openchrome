@@ -918,6 +918,9 @@ via_lvds_get_modes(xf86OutputPtr output)
     ScrnInfoPtr pScrn = output->scrn;
     DisplayModePtr pDisplay_Mode = NULL;
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered via_lvds_get_modes.\n"));
+
     if (output->status == XF86OutputStatusConnected) {
         if (!output->MonInfo) {
             /*
@@ -956,13 +959,16 @@ via_lvds_get_modes(xf86OutputPtr output)
                 }
             } else {
                 xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                            "Invalid panel dimension (%dx%d)\n",
+                            "Invalid Flat Panel Screen Resolution: "
+                            "%dx%d\n",
                             pPanel->NativeWidth, pPanel->NativeHeight);
             }
         } else {
             pDisplay_Mode = xf86OutputGetEDIDModes(output);
         }
     }
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting via_lvds_get_modes.\n"));
     return pDisplay_Mode;
 }
 
