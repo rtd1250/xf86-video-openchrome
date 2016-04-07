@@ -30,6 +30,36 @@
 #include "via_driver.h"
 
 static void
+ViaMMIOEnable(ScrnInfoPtr pScrn)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered ViaMMIOEnable.\n"));
+
+    switch (pVia->Chipset) {
+        case VIA_CX700:
+        case VIA_K8M890:
+        case VIA_P4M900:
+        case VIA_VX800:
+        case VIA_VX855:
+        case VIA_VX900:
+            ViaSeqMask(hwp, 0x1A, 0x08, 0x08);
+            break;
+        default:
+            if (pVia->IsSecondary)
+                ViaSeqMask(hwp, 0x1A, 0x38, 0x38);
+            else
+                ViaSeqMask(hwp, 0x1A, 0x68, 0x68);
+            break;
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting ViaMMIOEnable.\n"));
+}
+
+static void
 ViaMMIODisable(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
@@ -94,36 +124,6 @@ VIAUnmapMMIO(ScrnInfoPtr pScrn)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting VIAUnmapMMIO.\n"));
-}
-
-static void
-ViaMMIOEnable(ScrnInfoPtr pScrn)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered ViaMMIOEnable.\n"));
-
-    switch (pVia->Chipset) {
-        case VIA_CX700:
-        case VIA_K8M890:
-        case VIA_P4M900:
-        case VIA_VX800:
-        case VIA_VX855:
-        case VIA_VX900:
-            ViaSeqMask(hwp, 0x1A, 0x08, 0x08);
-            break;
-        default:
-            if (pVia->IsSecondary)
-                ViaSeqMask(hwp, 0x1A, 0x38, 0x38);
-            else
-                ViaSeqMask(hwp, 0x1A, 0x68, 0x68);
-            break;
-    }
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting ViaMMIOEnable.\n"));
 }
 
 static Bool
