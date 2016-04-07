@@ -160,12 +160,6 @@ VIAMapMMIO(ScrnInfoPtr pScrn)
     }
 #endif
 
-    if (!pVia->MapBase || !pVia->BltBase) {
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                   "BitBLT could not be mapped.\n");
-        goto fail;
-    }
-
     /* Memory mapped IO for mpeg engine. */
     pVia->MpegMapBase = pVia->MapBase + 0xc00;
 
