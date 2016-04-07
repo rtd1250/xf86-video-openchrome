@@ -91,6 +91,9 @@ VIAMapMMIO(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered VIAMapMMIO.\n"));
+
 #ifdef HAVE_PCIACCESS
     pVia->MmioBase = pVia->PciInfo->regions[1].base_addr;
     int err;
@@ -98,59 +101,69 @@ VIAMapMMIO(ScrnInfoPtr pScrn)
     pVia->MmioBase = pVia->PciInfo->memBase[1];
 #endif
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAMapMMIO\n"));
-
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-               "mapping MMIO @ 0x%lx with size 0x%x\n",
-               pVia->MmioBase, VIA_MMIO_REGSIZE);
+                "Mapping MMIO at address 0x%lx with "
+                "size %d.\n",
+                pVia->MmioBase, VIA_MMIO_REGSIZE);
 
 #ifdef HAVE_PCIACCESS
     err = pci_device_map_range(pVia->PciInfo,
                                pVia->MmioBase,
-                               VIA_MMIO_REGSIZE,
-                               PCI_DEV_MAP_FLAG_WRITABLE,
+                               VIA_MMIO_REGSIZE, PCI_DEV_MAP_FLAG_WRITABLE,
                                (void **)&pVia->MapBase);
 
     if (err) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                   "Unable to map mmio BAR. %s (%d)\n", strerror(err), err);
-        return FALSE;
+                    "Unable to map MMIO.\n"
+                    "Error: %s (%d)\n",
+                    strerror(err), err);
+        goto fail;
     }
 #else
-    pVia->MapBase = xf86MapPciMem(pScrn->scrnIndex, VIDMEM_MMIO, pVia->PciTag,
-                                  pVia->MmioBase, VIA_MMIO_REGSIZE);
-    if (!pVia->MapBase)
-        return FALSE;
+    pVia->MapBase = xf86MapPciMem(pScrn->scrnIndex,
+                                    VIDMEM_MMIO, pVia->PciTag,
+                                    pVia->MmioBase, VIA_MMIO_REGSIZE);
+    if (!pVia->MapBase) {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                   "Unable to map MMIO.\n");
+        goto fail;
+    }
 #endif
 
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-               "mapping BitBlt MMIO @ 0x%lx with size 0x%x\n",
+               "Mapping 2D Host BitBLT space at address 0x%lx with "
+               "size %d.\n",
                pVia->MmioBase + VIA_MMIO_BLTBASE, VIA_MMIO_BLTSIZE);
 
 #ifdef HAVE_PCIACCESS
     err = pci_device_map_range(pVia->PciInfo,
                                pVia->MmioBase + VIA_MMIO_BLTBASE,
-                               VIA_MMIO_BLTSIZE,
-                               PCI_DEV_MAP_FLAG_WRITABLE,
+                               VIA_MMIO_BLTSIZE, PCI_DEV_MAP_FLAG_WRITABLE,
                                (void **)&pVia->BltBase);
 
     if (err) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                   "Unable to map blt BAR. %s (%d)\n", strerror(err), err);
-        return FALSE;
+                    "Unable to map 2D Host BitBLT space.\n"
+                    "Error: %s (%d)\n",
+                    strerror(err), err);
+        goto fail;
     }
 #else
-    pVia->BltBase = xf86MapPciMem(pScrn->scrnIndex, VIDMEM_MMIO, pVia->PciTag,
-                                  pVia->MmioBase + VIA_MMIO_BLTBASE,
-                                  VIA_MMIO_BLTSIZE);
-    if (!pVia->BltBase)
-        return FALSE;
+    pVia->BltBase = xf86MapPciMem(pScrn->scrnIndex,
+                                    VIDMEM_MMIO, pVia->PciTag,
+                                    pVia->MmioBase + VIA_MMIO_BLTBASE,
+                                    VIA_MMIO_BLTSIZE);
+    if (!pVia->BltBase) {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                   "Unable to map 2D Host BitBLT space.\n");
+        goto fail;
+    }
 #endif
 
     if (!pVia->MapBase || !pVia->BltBase) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                   "BitBlit could not be mapped.\n");
-        return FALSE;
+                   "BitBLT could not be mapped.\n");
+        goto fail;
     }
 
     /* Memory mapped IO for mpeg engine. */
@@ -181,7 +194,15 @@ VIAMapMMIO(ScrnInfoPtr pScrn)
 
         vgaHWGetIOBase(hwp);
     }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting VIAMapMMIO.\n"));
     return TRUE;
+
+fail:
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting VIAMapMMIO.\n"));
+    return FALSE;
 }
 
 void
