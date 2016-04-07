@@ -86,46 +86,6 @@ ViaMMIODisable(ScrnInfoPtr pScrn)
                         "Exiting ViaMMIODisable.\n"));
 }
 
-void
-VIAUnmapMMIO(ScrnInfoPtr pScrn)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered VIAUnmapMMIO.\n"));
-
-    ViaMMIODisable(pScrn);
-
-#ifdef HAVE_PCIACCESS
-    if (pVia->MapBase)
-        pci_device_unmap_range(pVia->PciInfo, (pointer) pVia->MapBase,
-                               VIA_MMIO_REGSIZE);
-
-    if (pVia->BltBase)
-        pci_device_unmap_range(pVia->PciInfo, (pointer) pVia->BltBase,
-                               VIA_MMIO_BLTSIZE);
-
-    if (pVia->FBBase)
-        pci_device_unmap_range(pVia->PciInfo, (pointer) pVia->FBBase,
-                               pVia->videoRambytes);
-#else
-    if (pVia->MapBase)
-        xf86UnMapVidMem(pScrn->scrnIndex, (pointer) pVia->MapBase,
-                        VIA_MMIO_REGSIZE);
-
-    if (pVia->BltBase)
-        xf86UnMapVidMem(pScrn->scrnIndex, (pointer) pVia->BltBase,
-                        VIA_MMIO_BLTSIZE);
-
-    if (pVia->FBBase)
-        xf86UnMapVidMem(pScrn->scrnIndex, (pointer) pVia->FBBase,
-                        pVia->videoRambytes);
-#endif
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting VIAUnmapMMIO.\n"));
-}
-
 static Bool
 VIAMapMMIO(ScrnInfoPtr pScrn)
 {
@@ -222,6 +182,46 @@ VIAMapMMIO(ScrnInfoPtr pScrn)
         vgaHWGetIOBase(hwp);
     }
     return TRUE;
+}
+
+void
+VIAUnmapMMIO(ScrnInfoPtr pScrn)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered VIAUnmapMMIO.\n"));
+
+    ViaMMIODisable(pScrn);
+
+#ifdef HAVE_PCIACCESS
+    if (pVia->MapBase)
+        pci_device_unmap_range(pVia->PciInfo, (pointer) pVia->MapBase,
+                               VIA_MMIO_REGSIZE);
+
+    if (pVia->BltBase)
+        pci_device_unmap_range(pVia->PciInfo, (pointer) pVia->BltBase,
+                               VIA_MMIO_BLTSIZE);
+
+    if (pVia->FBBase)
+        pci_device_unmap_range(pVia->PciInfo, (pointer) pVia->FBBase,
+                               pVia->videoRambytes);
+#else
+    if (pVia->MapBase)
+        xf86UnMapVidMem(pScrn->scrnIndex, (pointer) pVia->MapBase,
+                        VIA_MMIO_REGSIZE);
+
+    if (pVia->BltBase)
+        xf86UnMapVidMem(pScrn->scrnIndex, (pointer) pVia->BltBase,
+                        VIA_MMIO_BLTSIZE);
+
+    if (pVia->FBBase)
+        xf86UnMapVidMem(pScrn->scrnIndex, (pointer) pVia->FBBase,
+                        pVia->videoRambytes);
+#endif
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting VIAUnmapMMIO.\n"));
 }
 
 static Bool
