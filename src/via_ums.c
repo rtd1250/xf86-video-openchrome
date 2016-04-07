@@ -35,6 +35,9 @@ ViaMMIODisable(ScrnInfoPtr pScrn)
     VIAPtr pVia = VIAPTR(pScrn);
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered ViaMMIODisable.\n"));
+
     switch (pVia->Chipset) {
         case VIA_CX700:
         case VIA_K8M890:
@@ -48,6 +51,9 @@ ViaMMIODisable(ScrnInfoPtr pScrn)
             ViaSeqMask(hwp, 0x1A, 0x00, 0x60);
             break;
     }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting ViaMMIODisable.\n"));
 }
 
 void
@@ -96,6 +102,9 @@ ViaMMIOEnable(ScrnInfoPtr pScrn)
     VIAPtr pVia = VIAPTR(pScrn);
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered ViaMMIOEnable.\n"));
+
     switch (pVia->Chipset) {
         case VIA_CX700:
         case VIA_K8M890:
@@ -112,6 +121,9 @@ ViaMMIOEnable(ScrnInfoPtr pScrn)
                 ViaSeqMask(hwp, 0x1A, 0x68, 0x68);
             break;
     }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting ViaMMIOEnable.\n"));
 }
 
 static Bool
