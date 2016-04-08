@@ -106,7 +106,7 @@ VIAMapMMIO(ScrnInfoPtr pScrn)
 #endif
 
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                "Mapping MMIO at address 0x%lx with size %x.\n",
+                "Mapping MMIO at address 0x%lx with size 0x%x.\n",
                 pVia->MmioBase, VIA_MMIO_REGSIZE);
 
 #ifdef HAVE_PCIACCESS
@@ -135,7 +135,7 @@ VIAMapMMIO(ScrnInfoPtr pScrn)
 
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                "Mapping 2D Host BitBLT space at address 0x%lx with "
-               "size %x.\n",
+               "size 0x%x.\n",
                pVia->MmioBase + VIA_MMIO_BLTBASE, VIA_MMIO_BLTSIZE);
 
 #ifdef HAVE_PCIACCESS
