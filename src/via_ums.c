@@ -241,6 +241,15 @@ static Bool
 VIAMapFB(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
+#ifdef HAVE_PCIACCESS
+    int err;
+#endif
+#ifndef HAVE_PCIACCESS
+    unsigned char *tmp;
+#endif
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered VIAMapFB.\n"));
 
 #ifdef HAVE_PCIACCESS
     if (pVia->Chipset == VIA_VX900) {
@@ -248,7 +257,6 @@ VIAMapFB(ScrnInfoPtr pScrn)
     } else {
         pVia->FrameBufferBase = pVia->PciInfo->regions[0].base_addr;
     }
-    int err;
 #else
     if (pVia->Chipset == VIA_VX900) {
         pVia->FrameBufferBase = pVia->PciInfo->memBase[2];
@@ -257,21 +265,17 @@ VIAMapFB(ScrnInfoPtr pScrn)
     }
 #endif
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAMapFB\n"));
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-               "mapping framebuffer @ 0x%lx with size 0x%lx\n",
+               "Mapping a frame buffer at address 0x%lx with size 0x%lx.\n",
                pVia->FrameBufferBase, pVia->videoRambytes);
 
     if (pVia->videoRambytes) {
-
 #ifndef HAVE_PCIACCESS
         /*
          * FIXME: This is a hack to get rid of offending wrongly sized
          * MTRR regions set up by the VIA BIOS. Should be taken care of
          * in the OS support layer.
          */
-        unsigned char *tmp;
-
         tmp = xf86MapPciMem(pScrn->scrnIndex, VIDMEM_MMIO, pVia->PciTag,
                             pVia->FrameBufferBase, pVia->videoRambytes);
         xf86UnMapVidMem(pScrn->scrnIndex, (pointer) tmp, pVia->videoRambytes);
@@ -298,8 +302,10 @@ VIAMapFB(ScrnInfoPtr pScrn)
                                    (void **)&pVia->FBBase);
         if (err) {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                       "Unable to map mmio BAR. %s (%d)\n", strerror(err), err);
-            return FALSE;
+                        "Unable to map a frame buffer.\n"
+                        "Error: %s (%d)\n",
+                        strerror(err), err);
+            goto fail;
         }
 #else
         pVia->FBBase = xf86MapPciMem(pScrn->scrnIndex, VIDMEM_FRAMEBUFFER,
@@ -308,8 +314,8 @@ VIAMapFB(ScrnInfoPtr pScrn)
 
         if (!pVia->FBBase) {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                       "Internal error: could not map framebuffer\n");
-            return FALSE;
+                       "Unable to map a frame buffer.\n");
+            goto fail;
         }
 #endif
 
@@ -317,7 +323,7 @@ VIAMapFB(ScrnInfoPtr pScrn)
         pVia->FBFreeEnd = pVia->videoRambytes;
 
         xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                   "Frame buffer start: %p, free start: 0x%x end: 0x%x\n",
+                   "Frame buffer start address: %p, free start: 0x%x end: 0x%x\n",
                    pVia->FBBase, pVia->FBFreeStart, pVia->FBFreeEnd);
     }
 
@@ -327,10 +333,18 @@ VIAMapFB(ScrnInfoPtr pScrn)
     pScrn->memPhysBase = pVia->PciInfo->memBase[0];
 #endif
     pScrn->fbOffset = 0;
-    if (pVia->IsSecondary)
+    if (pVia->IsSecondary) {
         pScrn->fbOffset = pScrn->videoRam << 10;
+    }
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting VIAMapFB.\n"));
     return TRUE;
+
+fail:
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting VIAMapFB.\n"));
+    return FALSE;
 }
 
 /*
