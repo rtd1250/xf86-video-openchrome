@@ -180,8 +180,6 @@ VIAMapMMIO(ScrnInfoPtr pScrn)
 
     ViaMMIOEnable(pScrn);
 
-    vgaHWSetMmioFuncs(hwp, pVia->MapBase, 0x8000);
-
     /* Unlock CRTC. */
     ViaCrtcMask(hwp, 0x47, 0x00, 0x01);
 
