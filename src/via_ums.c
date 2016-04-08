@@ -90,20 +90,23 @@ static Bool
 VIAMapMMIO(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    CARD8 val;
+#ifdef HAVE_PCIACCESS
+    int err;
+#endif
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered VIAMapMMIO.\n"));
 
 #ifdef HAVE_PCIACCESS
     pVia->MmioBase = pVia->PciInfo->regions[1].base_addr;
-    int err;
 #else
     pVia->MmioBase = pVia->PciInfo->memBase[1];
 #endif
 
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                "Mapping MMIO at address 0x%lx with "
-                "size %d.\n",
+                "Mapping MMIO at address 0x%lx with size %x.\n",
                 pVia->MmioBase, VIA_MMIO_REGSIZE);
 
 #ifdef HAVE_PCIACCESS
@@ -132,7 +135,7 @@ VIAMapMMIO(ScrnInfoPtr pScrn)
 
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                "Mapping 2D Host BitBLT space at address 0x%lx with "
-               "size %d.\n",
+               "size %x.\n",
                pVia->MmioBase + VIA_MMIO_BLTBASE, VIA_MMIO_BLTSIZE);
 
 #ifdef HAVE_PCIACCESS
@@ -160,34 +163,29 @@ VIAMapMMIO(ScrnInfoPtr pScrn)
     }
 #endif
 
-    /* Memory mapped IO for mpeg engine. */
+    /* MMIO for MPEG engine. */
     pVia->MpegMapBase = pVia->MapBase + 0xc00;
 
     /* Set up MMIO vgaHW. */
-    {
-        vgaHWPtr hwp = VGAHWPTR(pScrn);
-        CARD8 val;
+    vgaHWSetMmioFuncs(hwp, pVia->MapBase, 0x8000);
 
-        vgaHWSetMmioFuncs(hwp, pVia->MapBase, 0x8000);
+    val = hwp->readEnable(hwp);
+    hwp->writeEnable(hwp, val | 0x01);
 
-        val = hwp->readEnable(hwp);
-        hwp->writeEnable(hwp, val | 0x01);
+    val = hwp->readMiscOut(hwp);
+    hwp->writeMiscOut(hwp, val | 0x01);
 
-        val = hwp->readMiscOut(hwp);
-        hwp->writeMiscOut(hwp, val | 0x01);
+    /* Unlock extended I/O space. */
+    ViaSeqMask(hwp, 0x10, 0x01, 0x01);
 
-        /* Unlock extended IO space. */
-        ViaSeqMask(hwp, 0x10, 0x01, 0x01);
+    ViaMMIOEnable(pScrn);
 
-        ViaMMIOEnable(pScrn);
+    vgaHWSetMmioFuncs(hwp, pVia->MapBase, 0x8000);
 
-        vgaHWSetMmioFuncs(hwp, pVia->MapBase, 0x8000);
+    /* Unlock CRTC. */
+    ViaCrtcMask(hwp, 0x47, 0x00, 0x01);
 
-        /* Unlock CRTC. */
-        ViaCrtcMask(hwp, 0x47, 0x00, 0x01);
-
-        vgaHWGetIOBase(hwp);
-    }
+    vgaHWGetIOBase(hwp);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting VIAMapMMIO.\n"));
