@@ -443,24 +443,30 @@ viaDisableVQ(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaDisableVQ.\n"));
+
     switch (pVia->Chipset) {
-        case VIA_K8M890:
-        case VIA_P4M900:
-        case VIA_VX800:
-        case VIA_VX855:
-        case VIA_VX900:
-            VIASETREG(0x41c, 0x00100000);
-            VIASETREG(0x420, 0x74301000);
-            break;
-        default:
-            VIASETREG(VIA_REG_TRANSET, 0x00fe0000);
-            VIASETREG(VIA_REG_TRANSPACE, 0x00000004);
-            VIASETREG(VIA_REG_TRANSPACE, 0x40008c0f);
-            VIASETREG(VIA_REG_TRANSPACE, 0x44000000);
-            VIASETREG(VIA_REG_TRANSPACE, 0x45080c04);
-            VIASETREG(VIA_REG_TRANSPACE, 0x46800408);
-            break;
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        VIASETREG(0x41c, 0x00100000);
+        VIASETREG(0x420, 0x74301000);
+        break;
+    default:
+        VIASETREG(VIA_REG_TRANSET, 0x00fe0000);
+        VIASETREG(VIA_REG_TRANSPACE, 0x00000004);
+        VIASETREG(VIA_REG_TRANSPACE, 0x40008c0f);
+        VIASETREG(VIA_REG_TRANSPACE, 0x44000000);
+        VIASETREG(VIA_REG_TRANSPACE, 0x45080c04);
+        VIASETREG(VIA_REG_TRANSPACE, 0x46800408);
+        break;
     }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaDisableVQ.\n"));
 }
 
 /*
