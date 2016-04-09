@@ -866,8 +866,12 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
     if (pVia->KMS && old_fb_id)
         drmModeRmFB(fd, old_fb_id);
 #endif
-    drm_bo_unmap(scrn, old_front);
-    drm_bo_free(scrn, old_front);
+
+    if (old_front) {
+        drm_bo_unmap(scrn, old_front);
+        drm_bo_free(scrn, old_front);
+    }
+
     return ret;
 
 fail:
@@ -875,6 +879,7 @@ fail:
         drm_bo_unmap(scrn, new_front);
         drm_bo_free(scrn, new_front);
     }
+
     scrn->virtualY = old_height;
     scrn->virtualX = old_width;
     scrn->displayWidth = old_dwidth;

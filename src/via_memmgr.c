@@ -219,8 +219,10 @@ drm_bo_unmap(ScrnInfoPtr pScrn, struct buffer_object *obj)
 {
     VIAPtr pVia = VIAPTR(pScrn);
 
-    if (pVia->directRenderingType == DRI_2)
+    if (pVia->directRenderingType == DRI_2) {
         munmap(obj->ptr, obj->size);
+    }
+
     obj->ptr = NULL;
 }
 
