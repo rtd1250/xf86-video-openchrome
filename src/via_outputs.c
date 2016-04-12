@@ -1302,13 +1302,11 @@ ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode)
 void
 ViaDFPPower(ScrnInfoPtr pScrn, Bool On)
 {
-#ifdef HAVE_DEBUG
-    if (On)
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDFPPower: On.\n");
-    else
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDFPPower: Off.\n");
-#endif
+
     vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered ViaDFPPower.\n"));
 
     /* Display Channel Select */
     ViaCrtcMask(hwp, 0xD2, 0x30, 0x30);
@@ -1319,6 +1317,13 @@ ViaDFPPower(ScrnInfoPtr pScrn, Bool On)
     else
         /* Power off TMDS */
         ViaCrtcMask(hwp, 0xD2, 0x08, 0x08);
+
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "Integrated TMDS (DVI) Power: %s\n",
+                On ? "On" : "Off");
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting ViaDFPPower.\n"));
 }
 
 void
