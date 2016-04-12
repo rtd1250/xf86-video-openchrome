@@ -40,13 +40,11 @@
  * Option handling.
  */
 enum ViaPanelOpts {
-    OPTION_BUSWIDTH,
     OPTION_CENTER
 };
 
 static OptionInfoRec ViaPanelOptions[] =
 {
-    {OPTION_BUSWIDTH,   "BusWidth",     OPTV_ANYSTR,    {0},    FALSE},
     {OPTION_CENTER,     "Center",       OPTV_BOOLEAN,   {0},    FALSE},
     {-1,                NULL,           OPTV_NONE,      {0},    FALSE}
 };
@@ -1037,18 +1035,6 @@ via_lvds_init(ScrnInfoPtr pScrn)
     xf86ProcessOptions(pScrn->scrnIndex, pScrn->options, Options);
 
     Panel->NativeModeIndex = VIA_PANEL_INVALID;
-    Panel->BusWidth = VIA_DI_12BIT;
-    if ((s = xf86GetOptValString(Options, OPTION_BUSWIDTH))) {
-        from = X_CONFIG;
-        if (!xf86NameCmp(s, "12BIT")) {
-            Panel->BusWidth = VIA_DI_12BIT;
-        } else if (!xf86NameCmp(s, "24BIT")) {
-            Panel->BusWidth = VIA_DI_24BIT;
-        }
-    }
-    xf86DrvMsg(pScrn->scrnIndex, from,
-               "LVDS-0 : Digital output bus width is %d bits.\n",
-               (Panel->BusWidth == VIA_DI_12BIT) ? 12 : 24);
 
     /* LCD Center/Expend Option */
     Panel->Center = FALSE;

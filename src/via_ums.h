@@ -138,7 +138,6 @@ typedef struct ViaPanelInfo {
     Bool        ForcePanel;
     int         PanelIndex;
     Bool        Center;
-    CARD8       BusWidth;		/* Digital Output Bus Width */
     Bool        SetDVI;
     /* LCD Simultaneous Expand Mode HWCursor Y Scale */
     Bool        scaleY;
