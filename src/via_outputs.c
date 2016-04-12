@@ -1308,15 +1308,13 @@ viaTMDSPower(ScrnInfoPtr pScrn, Bool On)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaTMDSPower.\n"));
 
-    /* Display Channel Select */
-    ViaCrtcMask(hwp, 0xD2, 0x30, 0x30);
-
-    if (On)
+    if (On) {
         /* Power on TMDS */
         ViaCrtcMask(hwp, 0xD2, 0x00, 0x08);
-    else
+    } else {
         /* Power off TMDS */
         ViaCrtcMask(hwp, 0xD2, 0x08, 0x08);
+    }
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "Integrated TMDS (DVI) Power: %s\n",
