@@ -1458,9 +1458,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
                pVia->I2CScan ? "" : "not ");
 #endif /* HAVE_DEBUG */
 
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-               "...Finished parsing config file options.\n");
-
     /* Checking for OLPC XO-1.5. */
     if ((pVia->Chipset == VIA_VX855) &&
         (SUBVENDOR_ID(pVia->PciInfo) == 0x152D) &&
