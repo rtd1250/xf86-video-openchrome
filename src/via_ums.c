@@ -606,6 +606,9 @@ UMSAccelInit(ScreenPtr pScreen)
     VIAPtr pVia = VIAPTR(pScrn);
     Bool ret = FALSE;
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered UMSAccelInit.\n"));
+
     pVia->VQStart = 0;
     pVia->vq_bo = drm_bo_alloc(pScrn, VIA_VQ_SIZE, 16, TTM_PL_FLAG_VRAM);
     if (!pVia->vq_bo)
@@ -614,7 +617,12 @@ UMSAccelInit(ScreenPtr pScreen)
     pVia->VQStart = pVia->vq_bo->offset;
     pVia->VQEnd = pVia->vq_bo->offset + pVia->vq_bo->size;
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Initializing the 2D engine.\n"));
     VIAInitialize2DEngine(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Initializing the 3D engine.\n"));
     VIAInitialize3DEngine(pScrn);
 
     pVia->exa_sync_bo = drm_bo_alloc(pScrn, 32, 32, TTM_PL_FLAG_VRAM);
@@ -649,6 +657,9 @@ err:
         if (pVia->vq_bo)
             drm_bo_free(pScrn, pVia->vq_bo);
     }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting UMSAccelInit.\n"));
     return ret;
 }
 
