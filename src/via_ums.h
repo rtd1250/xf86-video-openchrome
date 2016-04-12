@@ -193,7 +193,7 @@ CARD32 ViaGetMemoryBandwidth(ScrnInfoPtr pScrn);
 CARD32 ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaModePrimaryLegacy(xf86CrtcPtr crtc, DisplayModePtr mode);
 void ViaModeSecondaryLegacy(xf86CrtcPtr crtc, DisplayModePtr mode);
-void ViaDFPPower(ScrnInfoPtr pScrn, Bool On);
+void viaTMDSPower(ScrnInfoPtr pScrn, Bool On);
 void ViaTVPower(ScrnInfoPtr pScrn, Bool On);
 void ViaTVSave(ScrnInfoPtr pScrn);
 void ViaTVRestore(ScrnInfoPtr pScrn);

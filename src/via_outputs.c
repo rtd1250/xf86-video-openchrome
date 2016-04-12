@@ -794,13 +794,13 @@ via_dvi_dpms(xf86OutputPtr output, int mode)
 
     switch (mode) {
     case DPMSModeOn:
-        ViaDFPPower(pScrn, TRUE);
+        viaTMDSPower(pScrn, TRUE);
         break;
 
     case DPMSModeStandby:
     case DPMSModeSuspend:
     case DPMSModeOff:
-        ViaDFPPower(pScrn, FALSE);
+        viaTMDSPower(pScrn, FALSE);
         break;
     }
 
@@ -1300,13 +1300,13 @@ ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode)
 }
 
 void
-ViaDFPPower(ScrnInfoPtr pScrn, Bool On)
+viaTMDSPower(ScrnInfoPtr pScrn, Bool On)
 {
 
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered ViaDFPPower.\n"));
+                        "Entered viaTMDSPower.\n"));
 
     /* Display Channel Select */
     ViaCrtcMask(hwp, 0xD2, 0x30, 0x30);
@@ -1323,7 +1323,7 @@ ViaDFPPower(ScrnInfoPtr pScrn, Bool On)
                 On ? "On" : "Off");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting ViaDFPPower.\n"));
+                        "Exiting viaTMDSPower.\n"));
 }
 
 void
