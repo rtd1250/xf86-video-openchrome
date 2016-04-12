@@ -79,7 +79,7 @@ static Bool VIAProbe(DriverPtr drv, int flags);
 #endif
 
 static Bool VIASetupDefaultOptions(ScrnInfoPtr pScrn);
-static Bool VIAPreInit(ScrnInfoPtr pScrn, int flags);
+static Bool viaPreInit(ScrnInfoPtr pScrn, int flags);
 static Bool VIAScreenInit(SCREEN_INIT_ARGS_DECL);
 static const OptionInfoRec *VIAAvailableOptions(int chipid, int busid);
 
@@ -470,7 +470,7 @@ via_pci_probe(DriverPtr driver, int entity_num,
 
         entity = xf86GetEntityInfo(entity_num);
 
-        scrn->PreInit = VIAPreInit;
+        scrn->PreInit = viaPreInit;
         scrn->ScreenInit = VIAScreenInit;
         scrn->SwitchMode = VIASwitchMode;
         scrn->AdjustFrame = VIAAdjustFrame;
@@ -542,7 +542,7 @@ VIAProbe(DriverPtr drv, int flags)
 				pScrn->driverName = DRIVER_NAME;
 				pScrn->name = "CHROME";
 				pScrn->Probe = VIAProbe;
-				pScrn->PreInit = VIAPreInit;
+				pScrn->PreInit = viaPreInit;
 				pScrn->ScreenInit = VIAScreenInit;
 				pScrn->SwitchMode = VIASwitchMode;
 				pScrn->AdjustFrame = VIAAdjustFrame;
@@ -889,7 +889,7 @@ xf86CrtcConfigFuncsRec via_xf86crtc_config_funcs = {
 };
 
 static Bool
-VIAPreInit(ScrnInfoPtr pScrn, int flags)
+viaPreInit(ScrnInfoPtr pScrn, int flags)
 {
     XF86OptionPtr option = xf86NewOption("MigrationHeuristic", "greedy");
     EntityInfoPtr pEnt;
@@ -902,7 +902,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     drmVersionPtr drmVer;
 #endif
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAPreInit\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "viaPreInit\n"));
 
     if (pScrn->numEntities > 1)
         return FALSE;
