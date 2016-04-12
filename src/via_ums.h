@@ -135,7 +135,6 @@ typedef struct ViaPanelInfo {
 
     /* Panel/LCD entries */
     CARD16      ResolutionIndex;
-    Bool        ForcePanel;
     int         PanelIndex;
     Bool        Center;
     Bool        SetDVI;
