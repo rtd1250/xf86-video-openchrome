@@ -167,7 +167,6 @@ typedef enum
     OPTION_I2CSCAN,
 #endif
     OPTION_NOACCEL,
-    OPTION_ACCELMETHOD,
     OPTION_EXA_NOCOMPOSITE,
     OPTION_EXA_SCRATCH_SIZE,
     OPTION_SWCURSOR,
@@ -199,7 +198,6 @@ static OptionInfoRec VIAOptions[] = {
     {OPTION_I2CSCAN,             "I2CScan",          OPTV_BOOLEAN, {0}, FALSE},
 #endif
     {OPTION_NOACCEL,             "NoAccel",          OPTV_BOOLEAN, {0}, FALSE},
-    {OPTION_ACCELMETHOD,         "AccelMethod",      OPTV_STRING,  {0}, FALSE},
     {OPTION_EXA_NOCOMPOSITE,     "ExaNoComposite",   OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_EXA_SCRATCH_SIZE,    "ExaScratchSize",   OPTV_INTEGER, {0}, FALSE},
     {OPTION_SWCURSOR,            "SWCursor",         OPTV_BOOLEAN, {0}, FALSE},
@@ -1237,18 +1235,8 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 
     if (!pVia->NoAccel) {
         from = X_DEFAULT;
-        if ((s = (char *)xf86GetOptValString(VIAOptions, OPTION_ACCELMETHOD))) {
-            if (!xf86NameCmp(s, "EXA")) {
-                from = X_CONFIG;
-                pVia->useEXA = TRUE;
-            } else if (!xf86NameCmp(s, "XAA")) {
-                from = X_CONFIG;
-                pVia->useEXA = TRUE;
-            }
-        }
         xf86DrvMsg(pScrn->scrnIndex, from,
-                   "Using %s acceleration architecture.\n",
-                   pVia->useEXA ? "EXA" : "XAA");
+                   "Using EXA acceleration architecture.\n");
 
         //pVia->noComposite = FALSE;
         if (pVia->useEXA) {
