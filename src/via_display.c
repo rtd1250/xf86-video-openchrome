@@ -1351,8 +1351,16 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     ScrnInfoPtr pScrn = crtc->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
 
-    if (!vgaHWInit(pScrn, adjusted_mode))
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered iga2_crtc_mode_set.\n"));
+
+    if (!vgaHWInit(pScrn, adjusted_mode)) {
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "vgaHWInit failed.\n"));
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "Exiting iga2_crtc_mode_set.\n"));
         return;
+    }
 
     ViaCRTCInit(pScrn);
     ViaModeSecondCRTC(pScrn, adjusted_mode);
@@ -1364,6 +1372,9 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
         ViaDisplayDisableSimultaneous(pScrn);
 
     iga2_crtc_set_origin(crtc, crtc->x, crtc->y);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting iga2_crtc_mode_set.\n"));
 }
 
 static void
