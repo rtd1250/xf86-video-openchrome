@@ -392,6 +392,11 @@ typedef struct
     ScrnInfoPtr pPrimaryScrn;
 } VIAEntRec, *VIAEntPtr;
 
+
+/* In via_display.c. */
+const xf86CrtcFuncsRec iga1_crtc_funcs;
+const xf86CrtcFuncsRec iga2_crtc_funcs;
+
 /* In via_exa.c. */
 Bool viaInitExa(ScreenPtr pScreen);
 Bool viaAccelSetMode(int bpp, ViaTwodContext * tdc);
