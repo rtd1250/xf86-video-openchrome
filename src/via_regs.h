@@ -86,8 +86,6 @@ enum VIACHIPTAGS {
 #define CLE266_REV_IS_AX(x) ((x) < 0x10)
 #define CLE266_REV_IS_CX(x) ((x) >= 0x10)
 
-void ViaCheckCardId(ScrnInfoPtr pScrn);
-
 #define BIOS_BSIZE              1024
 #define BIOS_BASE               0xc0000
 
