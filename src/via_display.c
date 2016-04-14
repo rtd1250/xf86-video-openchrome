@@ -1207,7 +1207,7 @@ iga_crtc_destroy(xf86CrtcPtr crtc)
         free(crtc->driver_private);
 }
 
-extern const xf86CrtcFuncsRec iga1_crtc_funcs = {
+const xf86CrtcFuncsRec iga1_crtc_funcs = {
     .dpms                   = iga1_crtc_dpms,
     .save                   = iga1_crtc_save,
     .restore                = iga1_crtc_restore,
@@ -1610,7 +1610,7 @@ iga2_crtc_hide_cursor(xf86CrtcPtr crtc)
 	}
 }
 
-extern const xf86CrtcFuncsRec iga2_crtc_funcs = {
+const xf86CrtcFuncsRec iga2_crtc_funcs = {
     .dpms                   = iga2_crtc_dpms,
     .save                   = iga2_crtc_save,
     .restore                = iga2_crtc_restore,
