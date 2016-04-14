@@ -1144,7 +1144,7 @@ ViaSetDotclock(ScrnInfoPtr pScrn, CARD32 clock, int base, int probase)
 /*
  *
  */
-static void
+void
 ViaSetPrimaryDotclock(ScrnInfoPtr pScrn, CARD32 clock)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);

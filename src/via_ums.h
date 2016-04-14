@@ -200,6 +200,7 @@ void ViaTVPrintRegs(ScrnInfoPtr pScrn);
 #endif
 void ViaModeSecondCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaModeFirstCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode);
+void ViaSetPrimaryDotclock(ScrnInfoPtr pScrn, CARD32 clock);
 void ViaSetSecondaryDotclock(ScrnInfoPtr pScrn, CARD32 clock);
 void ViaSetUseExternalClock(vgaHWPtr hwp);
 
