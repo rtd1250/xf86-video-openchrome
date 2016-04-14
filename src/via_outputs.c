@@ -1335,6 +1335,9 @@ ViaModeFirstCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode)
     /* Turn off Screen */
     ViaCrtcMask(hwp, 0x17, 0x00, 0x80);
 
+    /* Disable IGA1 */
+    ViaSeqMask(hwp, 0x59, 0x00, 0x80);
+
     ViaFirstCRTCSetMode(pScrn, mode);
     pBIOSInfo->Clock = ViaModeDotClockTranslate(pScrn, mode);
     pBIOSInfo->ClockExternal = FALSE;
@@ -1349,6 +1352,9 @@ ViaModeFirstCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x6B, 0x00, 0x01);
 
     hwp->disablePalette(hwp);
+
+    /* Enable IGA1 */
+    ViaSeqMask(hwp, 0x59, 0x80, 0x80);
 
     /* Turn on Screen */
     ViaCrtcMask(hwp, 0x17, 0x80, 0x80);
