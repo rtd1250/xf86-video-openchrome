@@ -86,14 +86,6 @@ enum VIACHIPTAGS {
 #define CLE266_REV_IS_AX(x) ((x) < 0x10)
 #define CLE266_REV_IS_CX(x) ((x) >= 0x10)
 
-struct ViaCardIdStruct {
-    char*  String;  /* full identification string */
-    CARD8  Chip;    /* which family of unichrome */
-    CARD16 Vendor;  /* PCI subsystem Vendor ID */
-    CARD16 Device;  /* PCI subsystem Device ID */
-    CARD8  Outputs; /* whether it supports CRT, LCD, and TV */
-};
-
 void ViaCheckCardId(ScrnInfoPtr pScrn);
 
 #define BIOS_BSIZE              1024
