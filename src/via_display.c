@@ -265,7 +265,7 @@ ViaModeFirstCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode)
     /* Disable IGA1 */
     ViaSeqMask(hwp, 0x59, 0x00, 0x80);
 
-    ViaFirstCRTCSetMode(pScrn, mode);
+    viaIGA1SetDisplayRegister(pScrn, mode);
     pBIOSInfo->Clock = ViaModeDotClockTranslate(pScrn, mode);
     pBIOSInfo->ClockExternal = FALSE;
 
@@ -288,13 +288,13 @@ ViaModeFirstCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode)
 }
 
 void
-ViaFirstCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
+viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     CARD16 temp;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaFirstCRTCSetMode\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "viaIGA1SetDisplayRegister\n"));
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Setting up %s\n", mode->name));
 
