@@ -265,9 +265,10 @@ ViaLVDSPowerChannel(ScrnInfoPtr pScrn, Bool on)
 static void
 ViaLVDSPower(ScrnInfoPtr pScrn, Bool on)
 {
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaLVDSPower %d\n", on));
     VIAPtr pVia = VIAPTR(pScrn);
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered ViaLVDSPower.\n"));
     /*
      * VX800, CX700 have HW issue, so we'd better use SW power sequence
      * Fix Ticket #308
@@ -286,6 +287,13 @@ ViaLVDSPower(ScrnInfoPtr pScrn, Bool on)
 
     ViaLVDSDFPPower(pScrn, on);
     ViaLVDSPowerChannel(pScrn, on);
+
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "Integrated LVDS Flat Panel Power: %s\n",
+                on ? "On" : "Off");
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting ViaLVDSPower.\n"));
 }
 
 static void
