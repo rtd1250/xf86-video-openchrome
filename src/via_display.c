@@ -587,30 +587,6 @@ ViaSecondCRTCHorizontalOffset(ScrnInfoPtr pScrn)
 }
 
 void
-ViaModeSecondCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    DisplayModePtr realMode = mode;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModeSecondCRTC\n"));
-
-    viaIGA2SetDisplayRegister(pScrn, realMode);
-    ViaSetSecondaryFIFO(pScrn, realMode);
-    pBIOSInfo->Clock = ViaModeDotClockTranslate(pScrn, realMode);
-
-    /* Fix LCD scaling */
-    ViaSecondCRTCHorizontalQWCount(pScrn, mode->CrtcHDisplay);
-
-    pBIOSInfo->ClockExternal = FALSE;
-    ViaSetSecondaryDotclock(pScrn, pBIOSInfo->Clock);
-    ViaSetUseExternalClock(hwp);
-
-    hwp->disablePalette(hwp);
-}
-
-void
 viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
     VIAPtr pVia = VIAPTR(pScrn);
@@ -746,6 +722,30 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
     ViaSecondCRTCHorizontalOffset(pScrn);
     ViaSecondCRTCHorizontalQWCount(pScrn, mode->CrtcHDisplay);
+}
+
+void
+ViaModeSecondCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    DisplayModePtr realMode = mode;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModeSecondCRTC\n"));
+
+    viaIGA2SetDisplayRegister(pScrn, realMode);
+    ViaSetSecondaryFIFO(pScrn, realMode);
+    pBIOSInfo->Clock = ViaModeDotClockTranslate(pScrn, realMode);
+
+    /* Fix LCD scaling */
+    ViaSecondCRTCHorizontalQWCount(pScrn, mode->CrtcHDisplay);
+
+    pBIOSInfo->ClockExternal = FALSE;
+    ViaSetSecondaryDotclock(pScrn, pBIOSInfo->Clock);
+    ViaSetUseExternalClock(hwp);
+
+    hwp->disablePalette(hwp);
 }
 
 /*

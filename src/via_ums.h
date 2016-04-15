@@ -211,8 +211,8 @@ void ViaModeFirstCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaSecondCRTCSetStartingAddress(xf86CrtcPtr crtc, int x, int y);
 void ViaSecondCRTCHorizontalOffset(ScrnInfoPtr pScrn);
 void ViaSecondCRTCHorizontalQWCount(ScrnInfoPtr pScrn, int width);
-void ViaModeSecondCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode);
+void ViaModeSecondCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaShadowCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaGammaDisable(ScrnInfoPtr pScrn);
 
