@@ -330,7 +330,7 @@ ViaLCDPowerSequence(vgaHWPtr hwp, VIALCDPowerSeqRec Sequence)
 }
 
 static void
-ViaLCDPower(xf86OutputPtr output, Bool On)
+ViaLCDPower(xf86OutputPtr output, Bool Power_On)
 {
     ViaPanelInfoPtr Panel = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
@@ -343,13 +343,13 @@ ViaLCDPower(xf86OutputPtr output, Bool On)
                         "Entered ViaLCDPower.\n"));
 
     /* Enable LCD */
-    if (On)
+    if (Power_On)
         ViaCrtcMask(hwp, 0x6A, 0x08, 0x08);
     else
         ViaCrtcMask(hwp, 0x6A, 0x00, 0x08);
 
     if (pBIOSInfo->LCDPower)
-        pBIOSInfo->LCDPower(pScrn, On);
+        pBIOSInfo->LCDPower(pScrn, Power_On);
 
     /* Find Panel Size Index for PowerSeq Table */
     if (pVia->Chipset == VIA_CLE266) {
@@ -366,7 +366,7 @@ ViaLCDPower(xf86OutputPtr output, Bool On)
         i = 2;
 
     usleep(1);
-    if (On)
+    if (Power_On)
         ViaLCDPowerSequence(hwp, powerOn[i]);
     else
         ViaLCDPowerSequence(hwp, powerOff[i]);
@@ -374,7 +374,7 @@ ViaLCDPower(xf86OutputPtr output, Bool On)
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "Integrated LVDS Flat Panel Power: %s\n",
-                On ? "On" : "Off");
+                Power_On ? "On" : "Off");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting ViaLCDPower.\n"));
