@@ -199,7 +199,6 @@ void ViaTVRestore(ScrnInfoPtr pScrn);
 void ViaTVPrintRegs(ScrnInfoPtr pScrn);
 #endif
 void ViaModeSecondCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode);
-void ViaModeFirstCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaSetPrimaryDotclock(ScrnInfoPtr pScrn, CARD32 clock);
 void ViaSetSecondaryDotclock(ScrnInfoPtr pScrn, CARD32 clock);
 void ViaSetUseExternalClock(vgaHWPtr hwp);
@@ -208,6 +207,7 @@ void ViaSetUseExternalClock(vgaHWPtr hwp);
 Bool UMSCrtcInit(ScrnInfoPtr pScrn);
 void ViaCRTCInit(ScrnInfoPtr pScrn);
 void ViaFirstCRTCSetStartingAddress(xf86CrtcPtr crtc, int x, int y);
+void ViaModeFirstCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaFirstCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaSecondCRTCSetStartingAddress(xf86CrtcPtr crtc, int x, int y);
 void ViaSecondCRTCHorizontalOffset(ScrnInfoPtr pScrn);

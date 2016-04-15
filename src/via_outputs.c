@@ -1325,42 +1325,6 @@ viaTMDSPower(ScrnInfoPtr pScrn, Bool On)
 }
 
 void
-ViaModeFirstCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode)
-{
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModeFirstCRTC\n");
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-
-    /* Turn off Screen */
-    ViaCrtcMask(hwp, 0x17, 0x00, 0x80);
-
-    /* Disable IGA1 */
-    ViaSeqMask(hwp, 0x59, 0x00, 0x80);
-
-    ViaFirstCRTCSetMode(pScrn, mode);
-    pBIOSInfo->Clock = ViaModeDotClockTranslate(pScrn, mode);
-    pBIOSInfo->ClockExternal = FALSE;
-
-    /* Enable Extended Mode Memory Access. */
-    ViaSeqMask(hwp, 0x1A, 0x08, 0x08);
-
-    ViaSetPrimaryFIFO(pScrn, mode);
-
-    ViaSetPrimaryDotclock(pScrn, pBIOSInfo->Clock);
-    ViaSetUseExternalClock(hwp);
-    ViaCrtcMask(hwp, 0x6B, 0x00, 0x01);
-
-    hwp->disablePalette(hwp);
-
-    /* Enable IGA1 */
-    ViaSeqMask(hwp, 0x59, 0x80, 0x80);
-
-    /* Turn on Screen */
-    ViaCrtcMask(hwp, 0x17, 0x80, 0x80);
-}
-
-void
 ViaModeSecondCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
     VIAPtr pVia = VIAPTR(pScrn);
