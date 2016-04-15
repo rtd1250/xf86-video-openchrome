@@ -339,12 +339,8 @@ ViaLCDPower(xf86OutputPtr output, Bool On)
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
     int i;
 
-#ifdef HAVE_DEBUG
-    if (On)
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaLCDPower: On.\n");
-    else
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaLCDPower: Off.\n");
-#endif
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered ViaLCDPower.\n"));
 
     /* Enable LCD */
     if (On)
@@ -375,6 +371,13 @@ ViaLCDPower(xf86OutputPtr output, Bool On)
     else
         ViaLCDPowerSequence(hwp, powerOff[i]);
     usleep(1);
+
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "Integrated LVDS Flat Panel Power: %s\n",
+                On ? "On" : "Off");
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting ViaLCDPower.\n"));
 }
 
 static void
