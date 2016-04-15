@@ -596,7 +596,7 @@ ViaModeSecondCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModeSecondCRTC\n"));
 
-    ViaSecondCRTCSetMode(pScrn, realMode);
+    viaIGA2SetDisplayRegister(pScrn, realMode);
     ViaSetSecondaryFIFO(pScrn, realMode);
     pBIOSInfo->Clock = ViaModeDotClockTranslate(pScrn, realMode);
 
@@ -611,7 +611,7 @@ ViaModeSecondCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode)
 }
 
 void
-ViaSecondCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
+viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     vgaHWPtr hwp = VGAHWPTR(pScrn);
@@ -622,7 +622,7 @@ ViaSecondCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "mode->name: %s\n", mode->name);
 
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaSecondCRTCSetMode\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "viaIGA2SetDisplayRegister\n"));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Setting up %s\n", mode->name));
     /* bpp */
     switch (pScrn->bitsPerPixel) {
