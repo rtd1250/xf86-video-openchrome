@@ -263,7 +263,7 @@ ViaLVDSPowerChannel(ScrnInfoPtr pScrn, Bool on)
 }
 
 static void
-ViaLVDSPower(ScrnInfoPtr pScrn, Bool on)
+ViaLVDSPower(ScrnInfoPtr pScrn, Bool Power_On)
 {
     VIAPtr pVia = VIAPTR(pScrn);
 
@@ -276,21 +276,21 @@ ViaLVDSPower(ScrnInfoPtr pScrn, Bool on)
     switch (pVia->Chipset) {
     case VIA_VX800:
     case VIA_CX700:
-        ViaLVDSSoftwarePowerFirstSequence(pScrn, on);
-        ViaLVDSSoftwarePowerSecondSequence(pScrn, on);
+        ViaLVDSSoftwarePowerFirstSequence(pScrn, Power_On);
+        ViaLVDSSoftwarePowerSecondSequence(pScrn, Power_On);
         break;
     default:
-        ViaLVDSHardwarePowerFirstSequence(pScrn, on);
-        ViaLVDSHardwarePowerSecondSequence(pScrn, on);
+        ViaLVDSHardwarePowerFirstSequence(pScrn, Power_On);
+        ViaLVDSHardwarePowerSecondSequence(pScrn, Power_On);
         break;
     }
 
-    ViaLVDSDFPPower(pScrn, on);
-    ViaLVDSPowerChannel(pScrn, on);
+    ViaLVDSDFPPower(pScrn, Power_On);
+    ViaLVDSPowerChannel(pScrn, Power_On);
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "Integrated LVDS Flat Panel Power: %s\n",
-                on ? "On" : "Off");
+                Power_On ? "On" : "Off");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting ViaLVDSPower.\n"));
