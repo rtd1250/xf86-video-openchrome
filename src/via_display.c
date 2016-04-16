@@ -471,7 +471,7 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 }
 
 void
-ViaFirstCRTCSetStartingAddress(xf86CrtcPtr crtc, int x, int y)
+viaIGA1SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y)
 {
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
@@ -480,7 +480,7 @@ ViaFirstCRTCSetStartingAddress(xf86CrtcPtr crtc, int x, int y)
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     CARD32 Base;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaFirstCRTCSetStartingAddress\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "viaIGA1SetFBStartingAddress\n"));
 
     Base = (y * pScrn->displayWidth + x) * (pScrn->bitsPerPixel / 8);
     Base = (Base + drmmode->front_bo->offset) >> 1;
@@ -1003,7 +1003,7 @@ iga1_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
     ScrnInfoPtr pScrn = crtc->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
 
-    ViaFirstCRTCSetStartingAddress(crtc, x, y);
+    viaIGA1SetFBStartingAddress(crtc, x, y);
     VIAVidAdjustFrame(pScrn, x, y);
 }
 
