@@ -495,9 +495,9 @@ ViaFirstCRTCSetStartingAddress(xf86CrtcPtr crtc, int x, int y)
 }
 
 void
-ViaModeFirstCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode)
+viaIGA1SetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModeFirstCRTC\n");
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "viaIGA1SetMode\n");
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
@@ -1027,7 +1027,7 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     }
 
     ViaCRTCInit(pScrn);
-    ViaModeFirstCRTC(pScrn, adjusted_mode);
+    viaIGA1SetMode(pScrn, adjusted_mode);
 
     if (pVia->pBIOSInfo->SimultaneousEnabled)
         ViaDisplayEnableSimultaneous(pScrn);

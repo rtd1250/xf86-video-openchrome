@@ -207,7 +207,7 @@ Bool UMSCrtcInit(ScrnInfoPtr pScrn);
 void ViaCRTCInit(ScrnInfoPtr pScrn);
 void ViaFirstCRTCSetStartingAddress(xf86CrtcPtr crtc, int x, int y);
 void viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode);
-void ViaModeFirstCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode);
+void viaIGA1SetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaSecondCRTCSetStartingAddress(xf86CrtcPtr crtc, int x, int y);
 void ViaSecondCRTCHorizontalOffset(ScrnInfoPtr pScrn);
 void ViaSecondCRTCHorizontalQWCount(ScrnInfoPtr pScrn, int width);
