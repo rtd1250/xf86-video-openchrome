@@ -531,7 +531,7 @@ viaIGA1SetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 }
 
 void
-ViaSecondCRTCSetStartingAddress(xf86CrtcPtr crtc, int x, int y)
+viaIGA2SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y)
 {
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
@@ -1400,7 +1400,7 @@ iga2_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
     ScrnInfoPtr pScrn = crtc->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
 
-    ViaSecondCRTCSetStartingAddress(crtc, x, y);
+    viaIGA2SetFBStartingAddress(crtc, x, y);
     VIAVidAdjustFrame(pScrn, x, y);
 }
 
