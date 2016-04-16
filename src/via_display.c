@@ -725,14 +725,14 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 }
 
 void
-ViaModeSecondCRTC(ScrnInfoPtr pScrn, DisplayModePtr mode)
+viaIGA2SetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     DisplayModePtr realMode = mode;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaModeSecondCRTC\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "viaIGA2SetMode\n"));
 
     viaIGA2SetDisplayRegister(pScrn, realMode);
     ViaSetSecondaryFIFO(pScrn, realMode);
@@ -1423,7 +1423,7 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     }
 
     ViaCRTCInit(pScrn);
-    ViaModeSecondCRTC(pScrn, adjusted_mode);
+    viaIGA2SetMode(pScrn, adjusted_mode);
     ViaSecondDisplayChannelEnable(pScrn);
 
     if (pVia->pBIOSInfo->SimultaneousEnabled)
