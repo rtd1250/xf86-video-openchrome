@@ -1492,7 +1492,7 @@ viaPreInit(ScrnInfoPtr pScrn, int flags)
             return FALSE;
         }
     } else {
-        if (!UMSCrtcInit(pScrn)) {
+        if (!umsCrtcInit(pScrn)) {
             VIAFreeRec(pScrn);
             return FALSE;
         }
