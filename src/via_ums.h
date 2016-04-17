@@ -186,6 +186,7 @@ Bool ums_create(ScrnInfoPtr pScrn);
 Bool UMSPreInit(ScrnInfoPtr pScrn);
 Bool UMSAccelInit(ScreenPtr pScreen);
 void viaDisableVQ(ScrnInfoPtr pScrn);
+Bool umsCrtcInit(ScrnInfoPtr pScrn);
 
 /* via_output.c */
 void ViaOutputsDetect(ScrnInfoPtr pScrn);
@@ -203,7 +204,6 @@ void ViaSetSecondaryDotclock(ScrnInfoPtr pScrn, CARD32 clock);
 void ViaSetUseExternalClock(vgaHWPtr hwp);
 
 /* via_display.c */
-Bool umsCrtcInit(ScrnInfoPtr pScrn);
 void ViaCRTCInit(ScrnInfoPtr pScrn);
 void viaIGA1SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y);
 void viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode);
