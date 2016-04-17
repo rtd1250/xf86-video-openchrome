@@ -563,14 +563,24 @@ viaIGA1SetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 void
 viaIGA2SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y)
 {
-    drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
-    drmmode_ptr drmmode = drmmode_crtc->drmmode;
     ScrnInfoPtr pScrn = crtc->scrn;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
+    drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
+    drmmode_ptr drmmode = drmmode_crtc->drmmode;
     CARD32 Base, tmp;
+    CARD8 cr62, cr63, cr64, cra3;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA2SetFBStartingAddress.\n"));
 
     Base = (y * pScrn->displayWidth + x) * (pScrn->bitsPerPixel / 8);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Base Address: 0x%x\n",
+                        Base));
     Base = (Base + drmmode->front_bo->offset) >> 3;
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "DRI Base Address: 0x%x\n",
+                Base);
 
     tmp = hwp->readCrtc(hwp, 0x62) & 0x01;
     tmp |= (Base & 0x7F) << 1;
@@ -579,6 +589,25 @@ viaIGA2SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y)
     hwp->writeCrtc(hwp, 0x63, (Base & 0x7F80) >> 7);
     hwp->writeCrtc(hwp, 0x64, (Base & 0x7F8000) >> 15);
     hwp->writeCrtc(hwp, 0xA3, (Base & 0x03800000) >> 23);
+
+#ifdef HAVE_DEBUG
+    cr62 = hwp->readCrtc(hwp, 0x62);
+    cr63 = hwp->readCrtc(hwp, 0x63);
+    cr64 = hwp->readCrtc(hwp, 0x64);
+    cra3 = hwp->readCrtc(hwp, 0xA3);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "CR62: 0x%02x\n", cr62));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "CR63: 0x%02x\n", cr63));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "CR64: 0x%02x\n", cr64));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "CRA3: 0x%02x\n", cra3));
+#endif
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA2SetFBStartingAddress.\n"));
 }
 
 void
