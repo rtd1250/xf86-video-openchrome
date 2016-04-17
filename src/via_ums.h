@@ -204,6 +204,12 @@ void ViaSetSecondaryDotclock(ScrnInfoPtr pScrn, CARD32 clock);
 void ViaSetUseExternalClock(vgaHWPtr hwp);
 
 /* via_display.c */
+void ViaSecondDisplayChannelEnable(ScrnInfoPtr pScrn);
+void ViaSecondDisplayChannelDisable(ScrnInfoPtr pScrn);
+void ViaDisplayInit(ScrnInfoPtr pScrn);
+void ViaDisplayEnableSimultaneous(ScrnInfoPtr pScrn);
+void ViaDisplayDisableSimultaneous(ScrnInfoPtr pScrn);
+void ViaGammaDisable(ScrnInfoPtr pScrn);
 void ViaCRTCInit(ScrnInfoPtr pScrn);
 void viaIGA1SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y);
 void viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode);
@@ -214,7 +220,6 @@ void ViaSecondCRTCHorizontalQWCount(ScrnInfoPtr pScrn, int width);
 void viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void viaIGA2SetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaShadowCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
-void ViaGammaDisable(ScrnInfoPtr pScrn);
 
 /* via_lvds.c */
 void via_lvds_init(ScrnInfoPtr pScrn);
@@ -231,12 +236,5 @@ void ViaVT162xInit(ScrnInfoPtr pScrn);
 /* via_ch7xxx.c */
 I2CDevPtr ViaCH7xxxDetect(ScrnInfoPtr pScrn, I2CBusPtr pBus, CARD8 Address);
 void ViaCH7xxxInit(ScrnInfoPtr pScrn);
-
-/* via_display.c */
-void ViaSecondDisplayChannelEnable(ScrnInfoPtr pScrn);
-void ViaSecondDisplayChannelDisable(ScrnInfoPtr pScrn);
-void ViaDisplayInit(ScrnInfoPtr pScrn);
-void ViaDisplayEnableSimultaneous(ScrnInfoPtr pScrn);
-void ViaDisplayDisableSimultaneous(ScrnInfoPtr pScrn);
 
 #endif /* _VIA_BIOS_H_ */
