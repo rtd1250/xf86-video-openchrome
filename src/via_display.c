@@ -543,10 +543,6 @@ viaIGA1SetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
     pBIOSInfo->Clock = ViaModeDotClockTranslate(pScrn, mode);
     pBIOSInfo->ClockExternal = FALSE;
-
-    /* Enable Extended Mode Memory Access. */
-    ViaSeqMask(hwp, 0x1A, 0x08, 0x08);
-
     ViaSetPrimaryDotclock(pScrn, pBIOSInfo->Clock);
     ViaSetUseExternalClock(hwp);
     ViaCrtcMask(hwp, 0x6B, 0x00, 0x01);
