@@ -611,23 +611,6 @@ viaIGA2SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y)
 }
 
 void
-ViaSecondCRTCHorizontalQWCount(ScrnInfoPtr pScrn, int width)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    CARD16 temp;
-
-    /* fetch count */
-    temp = (width * (pScrn->bitsPerPixel >> 3)) >> 3;
-    /* Make sure that this is 32-byte aligned. */
-    if (temp & 0x03) {
-        temp += 0x03;
-        temp &= ~0x03;
-    }
-    hwp->writeCrtc(hwp, 0x65, (temp >> 1) & 0xFF);
-    ViaCrtcMask(hwp, 0x67, temp >> 7, 0x0C);
-}
-
-void
 viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
     VIAPtr pVia = VIAPTR(pScrn);
@@ -756,6 +739,18 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     hwp->writeCrtc(hwp, 0x66, temp & 0xFF);
     ViaCrtcMask(hwp, 0x67, temp >> 8, 0x03);
 
+    /* Fix LCD scaling. */
+    /* fetch count */
+    temp = (mode->CrtcHDisplay * (pScrn->bitsPerPixel >> 3)) >> 3;
+    /* Make sure that this is 32-byte aligned. */
+    if (temp & 0x03) {
+        temp += 0x03;
+        temp &= ~0x03;
+    }
+
+    hwp->writeCrtc(hwp, 0x65, (temp >> 1) & 0xFF);
+    ViaCrtcMask(hwp, 0x67, temp >> 7, 0x0C);
+
     switch (pVia->ChipId) {
         case VIA_CX700:
         case VIA_K8M890:
@@ -771,9 +766,6 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
             ViaCrtcMask(hwp, 0x33, 0, 0xC8);
             break;
     }
-
-    /* Fix LCD scaling */
-    ViaSecondCRTCHorizontalQWCount(pScrn, mode->CrtcHDisplay);
 }
 
 void
