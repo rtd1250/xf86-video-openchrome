@@ -1000,23 +1000,11 @@ umsCrtcInit(ScrnInfoPtr pScrn)
     switch (pVia->Chipset) {
     case VIA_CLE266:
     case VIA_KM400:
-    case VIA_K8M800:
-    case VIA_PM800:
-    case VIA_P4M800PRO:
         max_pitch = 3344;
         max_height = 2508;
         break;
-
-    case VIA_CX700:
-    case VIA_P4M890:
-    case VIA_K8M890:
-    case VIA_P4M900:
-        max_pitch = 8192/(pScrn->bitsPerPixel >> 3)-1;
-        max_height = max_pitch;
-        break;
-
     default:
-        max_pitch = 16384/(pScrn->bitsPerPixel >> 3)-1;
+        max_pitch = 16384 / (pScrn->bitsPerPixel >> 3) - 1;
         max_height = max_pitch;
         break;
     }
