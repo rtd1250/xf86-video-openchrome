@@ -215,7 +215,6 @@ void viaIGA1SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y);
 void viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void viaIGA1SetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void viaIGA2SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y);
-void ViaSecondCRTCHorizontalOffset(ScrnInfoPtr pScrn);
 void ViaSecondCRTCHorizontalQWCount(ScrnInfoPtr pScrn, int width);
 void viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void viaIGA2SetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
