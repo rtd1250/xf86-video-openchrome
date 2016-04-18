@@ -539,13 +539,13 @@ viaIGA1SetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaSeqMask(hwp, 0x59, 0x00, 0x80);
 
     viaIGA1SetDisplayRegister(pScrn, mode);
+    ViaSetPrimaryFIFO(pScrn, mode);
+
     pBIOSInfo->Clock = ViaModeDotClockTranslate(pScrn, mode);
     pBIOSInfo->ClockExternal = FALSE;
 
     /* Enable Extended Mode Memory Access. */
     ViaSeqMask(hwp, 0x1A, 0x08, 0x08);
-
-    ViaSetPrimaryFIFO(pScrn, mode);
 
     ViaSetPrimaryDotclock(pScrn, pBIOSInfo->Clock);
     ViaSetUseExternalClock(hwp);
