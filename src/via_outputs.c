@@ -614,18 +614,26 @@ via_analog_mode_set(xf86OutputPtr output, DisplayModePtr mode,
                     DisplayModePtr adjusted_mode)
 {
     ScrnInfoPtr pScrn = output->scrn;
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    drmmode_crtc_private_ptr iga = output->crtc->driver_private;
+    CARD8 value = 0x00; /* Value for IGA 1 */
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered via_analog_mode_set.\n"));
 
     if (output->crtc) {
-        drmmode_crtc_private_ptr iga = output->crtc->driver_private;
-        CARD8 value = 0x00; /* Value for IGA 1 */
-        vgaHWPtr hwp = VGAHWPTR(pScrn);
-
         /* IGA 2 */
-        if (iga->index)
+        if (iga->index) {
             value = 0x40;
+        }
+
         ViaSeqMask(hwp, 0x16, value, 0x40);
     }
+
     ViaDisplayEnableCRT(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting via_analog_mode_set.\n"));
 }
 
 static xf86OutputStatus
