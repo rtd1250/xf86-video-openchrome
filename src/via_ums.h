@@ -182,10 +182,10 @@ typedef struct _VIABIOSINFO {
 
 /* via_ums.c */
 void VIAUnmapMMIO(ScrnInfoPtr pScrn);
+void viaDisableVQ(ScrnInfoPtr pScrn);
+Bool UMSAccelInit(ScreenPtr pScreen);
 Bool ums_create(ScrnInfoPtr pScrn);
 Bool UMSPreInit(ScrnInfoPtr pScrn);
-Bool UMSAccelInit(ScreenPtr pScreen);
-void viaDisableVQ(ScrnInfoPtr pScrn);
 Bool umsCrtcInit(ScrnInfoPtr pScrn);
 
 /* via_output.c */
