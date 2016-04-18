@@ -600,14 +600,14 @@ VIAInitialize3DEngine(ScrnInfoPtr pScrn)
  * and initializes engines and acceleration method.
  */
 Bool
-UMSAccelInit(ScreenPtr pScreen)
+umsAccelInit(ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
     Bool ret = FALSE;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered UMSAccelInit.\n"));
+                        "Entered umsAccelInit.\n"));
 
     pVia->VQStart = 0;
     pVia->vq_bo = drm_bo_alloc(pScrn, VIA_VQ_SIZE, 16, TTM_PL_FLAG_VRAM);
@@ -659,7 +659,7 @@ err:
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting UMSAccelInit.\n"));
+                        "Exiting umsAccelInit.\n"));
     return ret;
 }
 
