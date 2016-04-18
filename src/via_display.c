@@ -772,6 +772,7 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
             break;
     }
 
+    /* Fix LCD scaling */
     ViaSecondCRTCHorizontalQWCount(pScrn, mode->CrtcHDisplay);
 }
 
@@ -788,10 +789,6 @@ viaIGA2SetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
     viaIGA2SetDisplayRegister(pScrn, realMode);
     ViaSetSecondaryFIFO(pScrn, realMode);
     pBIOSInfo->Clock = ViaModeDotClockTranslate(pScrn, realMode);
-
-    /* Fix LCD scaling */
-    ViaSecondCRTCHorizontalQWCount(pScrn, mode->CrtcHDisplay);
-
     pBIOSInfo->ClockExternal = FALSE;
     ViaSetSecondaryDotclock(pScrn, pBIOSInfo->Clock);
     ViaSetUseExternalClock(hwp);
