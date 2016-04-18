@@ -328,6 +328,9 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
             break;
     }
 
+    /* Linear Mode */
+    ViaCrtcMask(hwp, 0x43, 0x00, 0x04);
+
     /* Crtc registers */
     /* horizontal total : 4100 */
     temp = (mode->CrtcHTotal >> 3) - 5;
