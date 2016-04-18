@@ -185,7 +185,7 @@ void VIAUnmapMMIO(ScrnInfoPtr pScrn);
 void viaDisableVQ(ScrnInfoPtr pScrn);
 Bool UMSAccelInit(ScreenPtr pScreen);
 Bool ums_create(ScrnInfoPtr pScrn);
-Bool UMSPreInit(ScrnInfoPtr pScrn);
+Bool umsPreInit(ScrnInfoPtr pScrn);
 Bool umsCrtcInit(ScrnInfoPtr pScrn);
 
 /* via_output.c */

@@ -728,7 +728,7 @@ ums_create(ScrnInfoPtr pScrn)
 }
 
 Bool
-UMSPreInit(ScrnInfoPtr pScrn)
+umsPreInit(ScrnInfoPtr pScrn)
 {
     MessageType from = X_PROBED;
     VIAPtr pVia = VIAPTR(pScrn);

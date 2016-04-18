@@ -1069,7 +1069,7 @@ viaPreInit(ScrnInfoPtr pScrn, int flags)
     free(busId);
 #endif
 
-    if (!UMSPreInit(pScrn)) {
+    if (!umsPreInit(pScrn)) {
         VIAFreeRec(pScrn);
         return FALSE;
     }
