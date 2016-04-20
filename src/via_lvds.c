@@ -561,29 +561,6 @@ ViaGetResolutionIndex(ScrnInfoPtr pScrn, ViaPanelInfoPtr Panel,
     return FALSE;
 }
 
-static int
-ViaGetVesaMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
-{
-    int i;
-
-    for (i = 0; ViaVesaModes[i].Width; i++)
-        if ((ViaVesaModes[i].Width == mode->CrtcHDisplay)
-            && (ViaVesaModes[i].Height == mode->CrtcVDisplay)) {
-            switch (pScrn->bitsPerPixel) {
-                case 8:
-                    return ViaVesaModes[i].mode_8b;
-                case 16:
-                    return ViaVesaModes[i].mode_16b;
-                case 24:
-                case 32:
-                    return ViaVesaModes[i].mode_32b;
-                default:
-                    return 0xFFFF;
-            }
-        }
-    return 0xFFFF;
-}
-
 /*
  * Gets the native panel resolution from scratch pad registers.
  */
