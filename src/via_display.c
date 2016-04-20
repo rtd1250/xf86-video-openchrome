@@ -657,6 +657,10 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
             break;
     }
 
+    /* LVDS Channel 1 and 2 should be controlled by PMS
+     * (Power Management System?). */
+    ViaSeqMask(hwp, 0x2A, 0x0F, 0x0F);
+
     /* Linear Mode */
     ViaCrtcMask(hwp, 0x62, 0x00, 0x01);
 

@@ -236,16 +236,6 @@ ViaLVDSHardwarePowerSecondSequence(ScrnInfoPtr pScrn, Bool on)
 }
 
 static void
-ViaLVDSDFPPower(ScrnInfoPtr pScrn, Bool on)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    /* Switch DFP High/Low pads on or off for channels active at EnterVT(). */
-    ViaSeqMask(hwp, 0x2A, on ? pVia->SavedReg.SR2A : 0, 0x0F);
-}
-
-static void
 ViaLVDSPowerChannel(ScrnInfoPtr pScrn, Bool on)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
@@ -285,7 +275,6 @@ ViaLVDSPower(ScrnInfoPtr pScrn, Bool Power_On)
         break;
     }
 
-    ViaLVDSDFPPower(pScrn, Power_On);
     ViaLVDSPowerChannel(pScrn, Power_On);
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
