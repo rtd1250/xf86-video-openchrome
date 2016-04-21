@@ -661,8 +661,8 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
      * (Power Management Status). */
     ViaSeqMask(hwp, 0x2A, 0x0F, 0x0F);
 
-    /* Use IGA2 for DVP1 Data Source Selection 0 */
-    ViaCrtcMask(hwp, 0x9b, 0x10, 0x10);
+    /* Use IGA2 for DVP1 Data Source Selection 0. */
+    ViaCrtcMask(hwp, 0x9B, 0x10, 0x10);
 
     /* Linear Mode */
     ViaCrtcMask(hwp, 0x62, 0x00, 0x01);
