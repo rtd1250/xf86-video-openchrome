@@ -658,7 +658,7 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     }
 
     /* LVDS Channel 1 and 2 should be controlled by PMS
-     * (Power Management System?). */
+     * (Power Management Status). */
     ViaSeqMask(hwp, 0x2A, 0x0F, 0x0F);
 
     /* Use IGA2 for DVP1 Data Source Selection 0 */
