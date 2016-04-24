@@ -748,8 +748,8 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x5C, (temp >> 3) & 0x80, 0x80);
 
     /* For UniChrome Pro and Chrome9. */
-    if ((pVia->ChipId != VIA_CLE266)
-        && (pVia->ChipId != VIA_KM400)) {
+    if ((pVia->Chipset != VIA_CLE266)
+        && (pVia->Chipset != VIA_KM400)) {
 
         /* 3X5.5D[7]: Horizontal Retrace Start Bits[11] */
         ViaCrtcMask(hwp, 0x5D, (temp >> 4) & 0x80, 0x80);
