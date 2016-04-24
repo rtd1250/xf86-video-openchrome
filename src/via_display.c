@@ -966,9 +966,9 @@ ViaFirstCRTCModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
 }
 
 static ModeStatus
-ViaSecondCRTCModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
+viaIGA2ModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaSecondCRTCModeValid\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "viaIGA2ModeValid\n"));
 
     if (mode->CrtcHTotal > 4096)
         return MODE_BAD_HVALUE;
