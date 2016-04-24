@@ -968,7 +968,8 @@ ViaFirstCRTCModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
 static ModeStatus
 viaIGA2ModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "viaIGA2ModeValid\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA2ModeValid.\n"));
 
     if (mode->CrtcHTotal > 4096)
         return MODE_BAD_HVALUE;
@@ -1006,6 +1007,8 @@ viaIGA2ModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
     if ((mode->CrtcVSyncEnd - mode->CrtcVSyncStart) > 32)
         return MODE_VSYNC_WIDE;
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA2ModeValid.\n"));
     return MODE_OK;
 }
 
