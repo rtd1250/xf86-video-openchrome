@@ -922,9 +922,9 @@ viaIGA2SetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
  * Checks for limitations imposed by the available VGA timing registers.
  */
 static ModeStatus
-ViaFirstCRTCModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
+viaIGA1ModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaFirstCRTCModeValid\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "viaIGA1ModeValid\n"));
 
     if (mode->CrtcHTotal > 4100)
         return MODE_BAD_HVALUE;
@@ -1147,7 +1147,7 @@ iga1_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
         return FALSE;
     }
 
-    modestatus = ViaFirstCRTCModeValid(pScrn, mode);
+    modestatus = viaIGA1ModeValid(pScrn, mode);
     if (modestatus != MODE_OK) {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Not using mode \"%s\" : %s.\n",
                    mode->name, xf86ModeStatusToString(modestatus));
@@ -1544,7 +1544,7 @@ iga2_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
         return FALSE;
     }
 
-    modestatus = ViaFirstCRTCModeValid(pScrn, mode);
+    modestatus = viaIGA1ModeValid(pScrn, mode);
     if (modestatus != MODE_OK) {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Not using mode \"%s\" : %s.\n",
                    mode->name, xf86ModeStatusToString(modestatus));
