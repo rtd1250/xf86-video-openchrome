@@ -760,7 +760,7 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     /* Horizontal Retrace End: 511 (max) */
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "IGA2 CrtcHSyncEnd: %d\n", mode->CrtcHSyncEnd));
-    temp = mode->CrtcHSyncEnd;
+    temp = mode->CrtcHSyncEnd - mode->CrtcHSyncStart;
 
     /* 3X5.57[7:0]: Horizontal Retrace End Bits[7:0] */
     hwp->writeCrtc(hwp, 0x57, temp & 0xFF);
@@ -838,7 +838,7 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     /* Vertical Retrace End: 511 (max) */
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "IGA2 CrtcVSyncEnd: %d\n", mode->CrtcVSyncEnd));
-    temp = mode->CrtcVSyncEnd;
+    temp = mode->CrtcVSyncEnd - mode->CrtcVSyncStart;
 
     /*3X5.5F[4:0]: Vertical Retrace End[4:0] */
     ViaCrtcMask(hwp, 0x5F, temp & 0x1F, 0x1F);
