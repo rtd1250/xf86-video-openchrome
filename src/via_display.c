@@ -527,6 +527,56 @@ viaIGA1SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y)
                         "Exiting viaIGA1SetFBStartingAddress.\n"));
 }
 
+/*
+ * Checks for limitations imposed by the available VGA timing registers.
+ */
+static ModeStatus
+viaIGA1ModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
+{
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA1ModeValid.\n"));
+
+    if (mode->CrtcHTotal > 4100)
+        return MODE_BAD_HVALUE;
+
+    if (mode->CrtcHDisplay > 2048)
+        return MODE_BAD_HVALUE;
+
+    if (mode->CrtcHBlankStart > 2048)
+        return MODE_BAD_HVALUE;
+
+    if ((mode->CrtcHBlankEnd - mode->CrtcHBlankStart) > 1025)
+        return MODE_HBLANK_WIDE;
+
+    if (mode->CrtcHSyncStart > 4095)
+        return MODE_BAD_HVALUE;
+
+    if ((mode->CrtcHSyncEnd - mode->CrtcHSyncStart) > 256)
+        return MODE_HSYNC_WIDE;
+
+    if (mode->CrtcVTotal > 2049)
+        return MODE_BAD_VVALUE;
+
+    if (mode->CrtcVDisplay > 2048)
+        return MODE_BAD_VVALUE;
+
+    if (mode->CrtcVSyncStart > 2047)
+        return MODE_BAD_VVALUE;
+
+    if ((mode->CrtcVSyncEnd - mode->CrtcVSyncStart) > 16)
+        return MODE_VSYNC_WIDE;
+
+    if (mode->CrtcVBlankStart > 2048)
+        return MODE_BAD_VVALUE;
+
+    if ((mode->CrtcVBlankEnd - mode->CrtcVBlankStart) > 257)
+        return MODE_VBLANK_WIDE;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA1ModeValid.\n"));
+    return MODE_OK;
+}
+
 void
 viaIGA1SetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
@@ -916,56 +966,6 @@ viaIGA2SetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaSetUseExternalClock(hwp);
 
     hwp->disablePalette(hwp);
-}
-
-/*
- * Checks for limitations imposed by the available VGA timing registers.
- */
-static ModeStatus
-viaIGA1ModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
-{
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaIGA1ModeValid.\n"));
-
-    if (mode->CrtcHTotal > 4100)
-        return MODE_BAD_HVALUE;
-
-    if (mode->CrtcHDisplay > 2048)
-        return MODE_BAD_HVALUE;
-
-    if (mode->CrtcHBlankStart > 2048)
-        return MODE_BAD_HVALUE;
-
-    if ((mode->CrtcHBlankEnd - mode->CrtcHBlankStart) > 1025)
-        return MODE_HBLANK_WIDE;
-
-    if (mode->CrtcHSyncStart > 4095)
-        return MODE_BAD_HVALUE;
-
-    if ((mode->CrtcHSyncEnd - mode->CrtcHSyncStart) > 256)
-        return MODE_HSYNC_WIDE;
-
-    if (mode->CrtcVTotal > 2049)
-        return MODE_BAD_VVALUE;
-
-    if (mode->CrtcVDisplay > 2048)
-        return MODE_BAD_VVALUE;
-
-    if (mode->CrtcVSyncStart > 2047)
-        return MODE_BAD_VVALUE;
-
-    if ((mode->CrtcVSyncEnd - mode->CrtcVSyncStart) > 16)
-        return MODE_VSYNC_WIDE;
-
-    if (mode->CrtcVBlankStart > 2048)
-        return MODE_BAD_VVALUE;
-
-    if ((mode->CrtcVBlankEnd - mode->CrtcVBlankStart) > 257)
-        return MODE_VBLANK_WIDE;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaIGA1ModeValid.\n"));
-    return MODE_OK;
 }
 
 static ModeStatus
