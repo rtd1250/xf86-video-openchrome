@@ -989,7 +989,7 @@ viaIGA2ModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
     if (mode->CrtcVBlankEnd > 2048)
         return MODE_VBLANK_WIDE;
 
-    if (mode->CrtcVSyncStart > 2047)
+    if (mode->CrtcVSyncStart > 2048)
         return MODE_BAD_VVALUE;
 
     if ((mode->CrtcVSyncEnd - mode->CrtcVSyncStart) > 32)
