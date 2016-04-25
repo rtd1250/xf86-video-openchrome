@@ -1008,7 +1008,8 @@ viaIGA2SetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     DisplayModePtr realMode = mode;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "viaIGA2SetMode\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA2SetMode.\n"));
 
     viaIGA2SetDisplayRegister(pScrn, realMode);
     ViaSetSecondaryFIFO(pScrn, realMode);
@@ -1018,6 +1019,9 @@ viaIGA2SetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaSetUseExternalClock(hwp);
 
     hwp->disablePalette(hwp);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA2SetMode.\n"));
 }
 
 /*
