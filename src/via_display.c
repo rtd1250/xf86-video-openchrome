@@ -1552,7 +1552,7 @@ iga2_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
         return FALSE;
     }
 
-    modestatus = viaIGA1ModeValid(pScrn, mode);
+    modestatus = viaIGA2ModeValid(pScrn, mode);
     if (modestatus != MODE_OK) {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Not using mode \"%s\" : %s.\n",
                    mode->name, xf86ModeStatusToString(modestatus));
