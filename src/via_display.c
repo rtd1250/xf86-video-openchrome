@@ -951,6 +951,8 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 static ModeStatus
 viaIGA2ModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
+    VIAPtr pVia = VIAPTR(pScrn);
+
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaIGA2ModeValid.\n"));
 
@@ -966,7 +968,10 @@ viaIGA2ModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
     if (mode->CrtcHBlankEnd > 4096)
         return MODE_HBLANK_WIDE;
 
-    if (mode->CrtcHSyncStart > 2047)
+    if ((((pVia->Chipset == VIA_CLE266) || (pVia->Chipset == VIA_KM400))
+            && (mode->CrtcHSyncStart > 2048))
+        || (((pVia->Chipset != VIA_CLE266) && (pVia->Chipset != VIA_KM400))
+            && (mode->CrtcHSyncStart > 4096)))
         return MODE_BAD_HVALUE;
 
     if ((mode->CrtcHSyncEnd - mode->CrtcHSyncStart) > 512)
