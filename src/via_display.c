@@ -690,7 +690,7 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
             break;
     }
 
-    switch (pVia->ChipId) {
+    switch (pVia->Chipset) {
         case VIA_CX700:
         case VIA_K8M890:
         case VIA_P4M900:
@@ -928,7 +928,7 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x67, temp >> 7, 0x0C);
 
 
-    switch (pVia->ChipId) {
+    switch (pVia->Chipset) {
         case VIA_CX700:
         case VIA_K8M890:
         case VIA_P4M900:
