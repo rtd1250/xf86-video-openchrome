@@ -885,10 +885,10 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
 
     /* Set IGA2 vertical synchronization end. */
-    /* Vertical Retrace End: 511 (max) */
+    /* Vertical Retrace End: 32 (max) */
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "IGA2 CrtcVSyncEnd: %d\n", mode->CrtcVSyncEnd));
-    temp = mode->CrtcVSyncEnd - mode->CrtcVSyncStart;
+    temp = mode->CrtcVSyncEnd - mode->CrtcVSyncStart - 1;
 
     /*3X5.5F[4:0]: Vertical Retrace End[4:0] */
     ViaCrtcMask(hwp, 0x5F, temp & 0x1F, 0x1F);
