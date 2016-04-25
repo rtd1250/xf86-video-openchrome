@@ -312,7 +312,7 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
             break;
     }
 
-    switch (pVia->ChipId) {
+    switch (pVia->Chipset) {
         case VIA_CX700:
         case VIA_K8M890:
         case VIA_P4M900:
@@ -420,7 +420,7 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     hwp->writeCrtc(hwp, 0x16, temp);
 
     /* FIXME: check if this is really necessary here */
-    switch (pVia->ChipId) {
+    switch (pVia->Chipset) {
         case VIA_CX700:
         case VIA_K8M890:
         case VIA_P4M900:
@@ -457,7 +457,7 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     hwp->writeSeq(hwp, 0x1C, ((temp >> 1)+1) & 0xFF);
     ViaSeqMask(hwp, 0x1D, temp >> 9, 0x03);
 
-    switch (pVia->ChipId) {
+    switch (pVia->Chipset) {
         case VIA_CX700:
         case VIA_K8M890:
         case VIA_P4M900:
