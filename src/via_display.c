@@ -1677,6 +1677,7 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
         return;
     }
 
+    /* Turn off IGA2 during mode setting. */
     viaIGA2Screen(pScrn, FALSE);
 
     ViaCRTCInit(pScrn);
@@ -1690,6 +1691,7 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 
     iga2_crtc_set_origin(crtc, crtc->x, crtc->y);
 
+    /* Turn on IGA2 now that mode setting is done. */
     viaIGA2Screen(pScrn, TRUE);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
