@@ -1085,6 +1085,9 @@ iga1_crtc_dpms(xf86CrtcPtr crtc, int mode)
     VIAPtr pVia = VIAPTR(pScrn);
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered iga1_crtc_dpms.\n"));
+
     switch (mode) {
     case DPMSModeOn:
         viaIGA1DPMSControl(pScrn, 0x00);
@@ -1115,12 +1118,14 @@ iga1_crtc_dpms(xf86CrtcPtr crtc, int mode)
         break;
 
 	default:
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Invalid DPMS mode %d\n",
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Invalid DPMS Mode: %d\n",
                     mode);
         break;
     }
     //vgaHWSaveScreen(pScrn->pScreen, mode);
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting iga1_crtc_dpms.\n"));
 }
 
 static void
