@@ -56,22 +56,6 @@ viaIGA2DisplayChannel(ScrnInfoPtr pScrn, Bool Channel_State)
 }
 
 /*
- * Disables the second display channel.
- */
-void
-ViaSecondDisplayChannelDisable(ScrnInfoPtr pScrn)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                     "ViaSecondDisplayChannelDisable\n"));
-
-    ViaCrtcMask(hwp, 0x6A, 0x00, 1 << 6);
-    ViaCrtcMask(hwp, 0x6A, 0x00, 1 << 7);
-    ViaCrtcMask(hwp, 0x6A, 1 << 6, 1 << 6);
-}
-
-/*
  * Initial settings for displays.
  */
 void
@@ -82,7 +66,7 @@ ViaDisplayInit(ScrnInfoPtr pScrn)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDisplayInit\n"));
 
-    ViaSecondDisplayChannelDisable(pScrn);
+    viaIGA2DisplayChannel(pScrn, FALSE);
     ViaCrtcMask(hwp, 0x6A, 0x00, 0x3D);
 
     hwp->writeCrtc(hwp, 0x6B, 0x00);
