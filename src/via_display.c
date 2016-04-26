@@ -49,6 +49,26 @@ viaIGA1DPMSControl(ScrnInfoPtr pScrn, CARD8 DPMS_Control)
 }
 
 /*
+ * Controls IGA2 screen state.
+ */
+void
+viaIGA2Screen(ScrnInfoPtr pScrn, Bool Screen_State)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA2Screen.\n"));
+
+    /* 3X5.6B[2]: IGA2 Screen Off
+     * 0 = Screen on
+     * 1 = Screen off */
+    ViaCrtcMask(hwp, 0x6B, Screen_State ? 0x00 : 0x04, 0x04);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA2Screen.\n"));
+}
+
+/*
  * Controls IGA2 display channel state.
  */
 void
@@ -1520,6 +1540,8 @@ iga2_crtc_dpms(xf86CrtcPtr crtc, int mode)
 
     switch (mode) {
     case DPMSModeOn:
+        viaIGA2Screen(pScrn, TRUE);
+
         if (pBIOSInfo->SimultaneousEnabled)
             ViaDisplayEnableSimultaneous(pScrn);
         break;
@@ -1527,6 +1549,8 @@ iga2_crtc_dpms(xf86CrtcPtr crtc, int mode)
     case DPMSModeStandby:
     case DPMSModeSuspend:
     case DPMSModeOff:
+        viaIGA2Screen(pScrn, FALSE);
+
         if (pBIOSInfo->SimultaneousEnabled)
             ViaDisplayDisableSimultaneous(pScrn);
         break;
