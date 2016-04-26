@@ -1671,6 +1671,8 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
         return;
     }
 
+    viaIGA2Screen(pScrn, FALSE);
+
     ViaCRTCInit(pScrn);
     viaIGA2SetMode(pScrn, adjusted_mode);
     viaIGA2DisplayChannel(pScrn, TRUE);
@@ -1681,6 +1683,8 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
         ViaDisplayDisableSimultaneous(pScrn);
 
     iga2_crtc_set_origin(crtc, crtc->x, crtc->y);
+
+    viaIGA2Screen(pScrn, TRUE);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting iga2_crtc_mode_set.\n"));
