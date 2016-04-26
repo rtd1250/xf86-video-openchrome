@@ -305,6 +305,8 @@ VIARestore(ScrnInfoPtr pScrn)
     /* Unlock extended registers. */
     hwp->writeSeq(hwp, 0x10, 0x01);
 
+    viaIGA2DisplayChannel(pScrn, FALSE);
+
     /*=* CR6A, CR6B, CR6C must be reset before restoring
          standard vga regs, or system will hang. *=*/
     /*=* TODO Check is reset IGA2 channel before disable IGA2 channel

@@ -67,9 +67,7 @@ viaDisplayInit(ScrnInfoPtr pScrn)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaDisplayInit.\n"));
 
-    viaIGA2DisplayChannel(pScrn, FALSE);
     ViaCrtcMask(hwp, 0x6A, 0x00, 0x3D);
-
     hwp->writeCrtc(hwp, 0x6B, 0x00);
     hwp->writeCrtc(hwp, 0x6C, 0x00);
     hwp->writeCrtc(hwp, 0x79, 0x00);
