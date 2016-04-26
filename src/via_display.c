@@ -59,12 +59,12 @@ viaIGA2DisplayChannel(ScrnInfoPtr pScrn, Bool Channel_State)
  * Initial settings for displays.
  */
 void
-ViaDisplayInit(ScrnInfoPtr pScrn)
+viaDisplayInit(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDisplayInit\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "viaDisplayInit\n"));
 
     viaIGA2DisplayChannel(pScrn, FALSE);
     ViaCrtcMask(hwp, 0x6A, 0x00, 0x3D);
