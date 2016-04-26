@@ -31,7 +31,7 @@
 #include "via_driver.h"
 
 /*
- * Enables the second display channel.
+ * Controls IGA2 display channel state.
  */
 void
 viaIGA2DisplayChannel(ScrnInfoPtr pScrn, Bool Channel_State)
