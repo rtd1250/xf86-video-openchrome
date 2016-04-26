@@ -31,6 +31,24 @@
 #include "via_driver.h"
 
 /*
+ * Controls IGA1 DPMS State.
+ */
+void
+viaIGA1DPMSControl(ScrnInfoPtr pScrn, CARD8 DPMS_Control)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA1DPMSControl.\n"));
+
+    /* 3X5.36[5:4]: DPMS Control */
+    ViaCrtcMask(hwp, 0x36, (DPMS_Control << 4) & 0x30, 0x30);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA1DPMSControl.\n"));
+}
+
+/*
  * Controls IGA2 display channel state.
  */
 void
@@ -1069,13 +1087,29 @@ iga1_crtc_dpms(xf86CrtcPtr crtc, int mode)
 
     switch (mode) {
     case DPMSModeOn:
+        viaIGA1DPMSControl(pScrn, 0x00);
+
         if (pBIOSInfo->SimultaneousEnabled)
             ViaDisplayEnableSimultaneous(pScrn);
         break;
 
     case DPMSModeStandby:
+        viaIGA1DPMSControl(pScrn, 0x01);
+
+        if (pBIOSInfo->SimultaneousEnabled)
+            ViaDisplayDisableSimultaneous(pScrn);
+        break;
+
     case DPMSModeSuspend:
+        viaIGA1DPMSControl(pScrn, 0x02);
+
+        if (pBIOSInfo->SimultaneousEnabled)
+            ViaDisplayDisableSimultaneous(pScrn);
+        break;
+
     case DPMSModeOff:
+        viaIGA1DPMSControl(pScrn, 0x03);
+
         if (pBIOSInfo->SimultaneousEnabled)
             ViaDisplayDisableSimultaneous(pScrn);
         break;
