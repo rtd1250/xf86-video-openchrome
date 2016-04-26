@@ -1265,6 +1265,9 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
         return;
     }
 
+    /* Turn off IGA1 during mode setting. */
+    viaIGA1DPMSControl(pScrn, 0x03);
+
     ViaCRTCInit(pScrn);
     viaIGA1SetMode(pScrn, adjusted_mode);
 
@@ -1274,6 +1277,9 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
         ViaDisplayDisableSimultaneous(pScrn);
 
     iga1_crtc_set_origin(crtc, crtc->x, crtc->y);
+
+    /* Turn on IGA1 now that mode setting is done. */
+    viaIGA1DPMSControl(pScrn, 0x00);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting iga1_crtc_mode_set.\n"));
