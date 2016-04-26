@@ -204,7 +204,7 @@ void ViaSetSecondaryDotclock(ScrnInfoPtr pScrn, CARD32 clock);
 void ViaSetUseExternalClock(vgaHWPtr hwp);
 
 /* via_display.c */
-void viaIGA2DisplayChannelEnable(ScrnInfoPtr pScrn);
+void viaIGA2DisplayChannel(ScrnInfoPtr pScrn, Bool Channel_State);
 void ViaSecondDisplayChannelDisable(ScrnInfoPtr pScrn);
 void ViaDisplayInit(ScrnInfoPtr pScrn);
 void ViaDisplayEnableSimultaneous(ScrnInfoPtr pScrn);

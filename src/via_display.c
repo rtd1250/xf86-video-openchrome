@@ -34,15 +34,25 @@
  * Enables the second display channel.
  */
 void
-viaIGA2DisplayChannelEnable(ScrnInfoPtr pScrn)
+viaIGA2DisplayChannel(ScrnInfoPtr pScrn, Bool Channel_State)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                     "viaIGA2DisplayChannelEnable\n"));
-    ViaCrtcMask(hwp, 0x6A, 0x00, 1 << 6);
-    ViaCrtcMask(hwp, 0x6A, 1 << 7, 1 << 7);
-    ViaCrtcMask(hwp, 0x6A, 1 << 6, 1 << 6);
+                        "Entered viaIGA2DisplayChannel.\n"));
+
+    /* 3X5.6A[7]: Second Display Channel Enable
+     * 3X5.6A[6]: Second Display Channel Reset (0 for reset) */
+    ViaCrtcMask(hwp, 0x6A, 0x00, 0x40);
+    ViaCrtcMask(hwp, 0x6A, Channel_State ? 0x80 : 0x00, 0x80);
+    ViaCrtcMask(hwp, 0x6A, 0x40, 0x40);
+
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "IGA2 Display Channel: %s\n",
+                Channel_State ? "On" : "Off");
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA2DisplayChannel.\n"));
 }
 
 /*
@@ -1608,7 +1618,7 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 
     ViaCRTCInit(pScrn);
     viaIGA2SetMode(pScrn, adjusted_mode);
-    viaIGA2DisplayChannelEnable(pScrn);
+    viaIGA2DisplayChannel(pScrn, TRUE);
 
     if (pVia->pBIOSInfo->SimultaneousEnabled)
         ViaDisplayEnableSimultaneous(pScrn);
