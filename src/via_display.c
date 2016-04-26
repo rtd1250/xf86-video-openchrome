@@ -64,7 +64,8 @@ viaDisplayInit(ScrnInfoPtr pScrn)
     VIAPtr pVia = VIAPTR(pScrn);
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "viaDisplayInit\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaDisplayInit.\n"));
 
     viaIGA2DisplayChannel(pScrn, FALSE);
     ViaCrtcMask(hwp, 0x6A, 0x00, 0x3D);
@@ -76,6 +77,9 @@ viaDisplayInit(ScrnInfoPtr pScrn)
     /* (IGA1 Timing Plus 2, added in VT3259 A3 or later) */
     if (pVia->Chipset != VIA_CLE266 && pVia->Chipset != VIA_KM400)
         ViaCrtcMask(hwp, 0x47, 0x00, 0xC8);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaDisplayInit.\n"));
 }
 
 /*
