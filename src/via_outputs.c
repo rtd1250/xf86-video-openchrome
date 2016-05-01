@@ -996,13 +996,13 @@ via_dvi_init(ScrnInfoPtr pScrn)
 }
 
 void
-ViaOutputsDetect(ScrnInfoPtr pScrn)
+viaOutputDetect(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered ViaOutputsDetect.\n"));
+                        "Entered viaOutputDetect.\n"));
 
     pBIOSInfo->analog = NULL;
 
@@ -1025,7 +1025,7 @@ ViaOutputsDetect(ScrnInfoPtr pScrn)
 */
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting ViaOutputsDetect.\n"));
+                        "Exiting viaOutputDetect.\n"));
 }
 
 #ifdef HAVE_DEBUG

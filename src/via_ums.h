@@ -189,7 +189,7 @@ Bool umsPreInit(ScrnInfoPtr pScrn);
 Bool umsCrtcInit(ScrnInfoPtr pScrn);
 
 /* via_output.c */
-void ViaOutputsDetect(ScrnInfoPtr pScrn);
+void viaOutputDetect(ScrnInfoPtr pScrn);
 CARD32 ViaGetMemoryBandwidth(ScrnInfoPtr pScrn);
 CARD32 ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void viaTMDSPower(ScrnInfoPtr pScrn, Bool On);
