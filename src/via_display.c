@@ -285,6 +285,71 @@ ViaCRTCInit(ScrnInfoPtr pScrn)
     ViaCRTCSetAttributeRegisters(pScrn);
 }
 
+/*
+ * Initialize common IGA (Integrated Graphics Accelerator) registers.
+ */
+void
+viaIGAInitCommon(ScrnInfoPtr pScrn)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    CARD8 temp;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGAInitCommon.\n"));
+
+    /* Unlock VIA Technologies extended VGA registers. */
+    /* 3C5.10[0] - Unlock Accessing of I/O Space
+     *             0: Disable
+     *             1: Enable */
+    ViaSeqMask(hwp, 0x10, 0x01, 0x01);
+
+    ViaCRTCSetGraphicsRegisters(pScrn);
+    ViaCRTCSetAttributeRegisters(pScrn);
+
+    temp = hwp->readSeq(hwp, 0x15);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR15: 0x%02X\n", temp));
+
+    /* Be careful with 3C5.15[5].
+     * It must be set to 1 for correct operation. */
+    /* 3C5.15[7]   - 8/6 Bits LUT
+     *               0: 6-bit
+     *               1: 8-bit
+     * 3C5.15[6]   - Text Column Control
+     *               0: 80 column
+     *               1: 132 column
+     * 3C5.15[5]   - Wrap Around Disable
+     *               0: Disable (For Mode 0-13)
+     *               1: Enable
+     * 3C5.15[4]   - Hi Color Mode Select
+     *               0: 555
+     *               1: 565
+     * 3C5.15[3:2] - Display Color Depth Select
+     *               00: 8bpp
+     *               01: 16bpp
+     *               10: 30bpp
+     *               11: 32bpp
+     * 3C5.15[1]   - Extended Display Mode Enable
+     *               0: Disable
+     *               1: Enable
+     * 3C5.15[0]   - Reserved */
+    ViaSeqMask(hwp, 0x15, 0x22, 0x62);
+
+    temp = hwp->readSeq(hwp, 0x1A);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR1A: 0x%02X\n", temp));
+    /* 3C5.1A[7]: Read Cache Enable
+     *            0 = Disable
+     *            1 = Enable
+     * 3C5.1A[3]: Extended Mode Memory Access Enable
+     *            0 = Disable
+     *            1 = Enable */
+    ViaSeqMask(hwp, 0x1A, 0x88, 0x88);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGAInitCommon.\n"));
+}
+
 void
 viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
@@ -1268,6 +1333,7 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     /* Turn off IGA1 during mode setting. */
     viaIGA1DPMSControl(pScrn, 0x03);
 
+    viaIGAInitCommon(pScrn);
     ViaCRTCInit(pScrn);
     viaIGA1SetMode(pScrn, adjusted_mode);
 
@@ -1680,6 +1746,7 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     /* Turn off IGA2 during mode setting. */
     viaIGA2Screen(pScrn, FALSE);
 
+    viaIGAInitCommon(pScrn);
     ViaCRTCInit(pScrn);
     viaIGA2SetMode(pScrn, adjusted_mode);
     viaIGA2DisplayChannel(pScrn, TRUE);
