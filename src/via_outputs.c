@@ -1095,7 +1095,10 @@ viaProbePinStrapping(ScrnInfoPtr pScrn)
         }
 
         break;
-    default:
+
+    case VIA_K8M800:
+    case VIA_PM800:
+    case VIA_P4M800PRO:
 
         /* 3C5.13[3] - DVP0D8 pin strapping
          *             0: AGP / PCI Express pins are used for
@@ -1150,6 +1153,9 @@ viaProbePinStrapping(ScrnInfoPtr pScrn)
                         "DVP0 (Digital Video Port 0).\n");
         }
 
+        break;
+
+    default:
         break;
     }
 
