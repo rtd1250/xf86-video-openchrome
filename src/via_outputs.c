@@ -995,6 +995,215 @@ via_dvi_init(ScrnInfoPtr pScrn)
                         "Exiting via_dvi_init.\n"));
 }
 
+/*
+ * Read off the VIA Technologies IGP pin strapping for
+ * display detection purposes.
+ */
+void
+viaProbePinStrapping(ScrnInfoPtr pScrn)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
+    CARD8 sr12, sr13, sr5a;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaProbePinStrapping.\n"));
+
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "Probing VIA Technologies IGP pin strapping.\n");
+
+    if ((pVia->Chipset == VIA_CX700)
+        || (pVia->Chipset == VIA_VX800)
+        || (pVia->Chipset == VIA_VX855)
+        || (pVia->Chipset == VIA_VX900)) {
+
+        sr5a = hwp->readSeq(hwp, 0x5A);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "SR5A: 0x%02X\n", sr5a));
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "Setting 3C5.5A[0] to 0.\n");
+        ViaSeqMask(hwp, 0x5A, sr5a & 0xFE, 0x01);
+    }
+
+    sr12 = hwp->readSeq(hwp, 0x12);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR12: 0x%02X\n", sr12));
+    sr13 = hwp->readSeq(hwp, 0x13);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR13: 0x%02X\n", sr13));
+
+    switch (pVia->Chipset) {
+    case VIA_CLE266:
+    case VIA_KM400:
+
+        /* 3C5.12[4] - FPD17 pin strapping
+         *             0: TMDS transmitter (DVI) / capture device
+         *             1: Flat panel */
+        if (sr12 && 0x10) {
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "A flat panel is connected to "
+                        "flat panel interface.\n");
+
+            /* 3C5.12[3:0] - FPD16-13 pin strapping
+             *               0 ~ 15: Flat panel code defined
+             *                       by VIA Technologies */
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Detected Flat Panel Type from Strapping Pins: %d\n", sr12 & 0x0F);
+        } else {
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "TMDS transmitter (DVI) / capture device is "
+                        "connected to flat panel interface.\n");
+        }
+
+        /* 3C5.12[5] - FPD18 pin strapping
+         *             0: TMDS transmitter (DVI)
+         *             1: TV encoder */
+        if (sr12 && 0x20) {
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "A TMDS transmitter (DVI) is connected to "
+                        "DVI port.\n");
+        } else {
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "A TV encoder is connected to "
+                        "DVI port.\n");
+
+            /* 3C5.13[4:3] - FPD21-20 pin strapping
+             *               00: PAL
+             *               01: NTSC
+             *               10: PAL-N
+             *               11: PAL-NC */
+            if (sr13 && 0x04) {
+                xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "NTSC for the TV encoder.\n");
+            } else {
+                if (!(sr13 && 0x08)) {
+                    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                                "PAL for the TV encoder.\n");
+                } else {
+                    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                                "PAL%s for the TV encoder.\n",
+                                sr13 && 0x04 ? "-NC" : "-N");
+                }
+            }
+
+            /* 3C5.12[6] - FPD19 pin strapping
+             *             0: 525 lines (NTSC)
+             *             1: 625 lines (PAL) */
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "%s lines for the TV encoder.\n",
+                        sr12 && 0x40 ? "625" : "525");
+        }
+
+        break;
+    default:
+
+        /* 3C5.13[3] - DVP0D8 pin strapping
+         *             0: AGP / PCI Express pins are used for
+         *                AGP / PCI Express
+         *             1: AGP / PCI Express pins are used by
+         *                FPDP (Flat Panel Display Port) */
+        if (sr13 && 0x08) {
+
+            /* 3C5.12[4] - DVP0D4 pin strapping
+             *             0: Dual 12-bit FPDP (Flat Panel Display Port)
+             *             1: 24-bit FPDP  (Flat Panel Display Port) */
+            if (sr12 && 0x10) {
+                xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "24-bit FPDP (Flat Panel Display Port) "
+                            "detected.\n");
+
+                /* 3C5.12[3:0] - DVP0D3-0 pin strapping
+                 *               0 ~ 15: Flat panel code defined
+                 *                       by VIA Technologies */
+                xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "Detected Flat Panel Type from "
+                            "Strapping Pins: %d\n", sr12 & 0x0F);
+            } else {
+                xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "Dual 12-bit FPDP (Flat Panel Display Port) "
+                            "detected.\n");
+
+                /* 3C5.12[5] - DVP0D5 pin strapping
+                 *             0: LVDS transmitter or TMDS transmitter (DVI)
+                 *             1: TV encoder */
+                if (sr12 && 0x20) {
+                    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                                "LVDS transmitter or TMDS transmitter "
+                                "(DVI) is connected to "
+                                "FPDP (Flat Panel Display Port).\n");
+                } else {
+                    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                                "TV encoder is connected to "
+                                "FPDP (Flat Panel Display Port).\n");
+                }
+            }
+        }
+
+        /* 3C5.12[6] - DVP0D6 pin strapping
+         *             0: Disable a TV encoder support for DVP0
+         *                (Digital Video Port 0)
+         *             1: Enable a TV encoder support for DVP0
+         *                (Digital Video Port 0) */
+        if (sr12 && 0x40) {
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "TV encoder is connected to "
+                        "DVP0 (Digital Video Port 0).\n");
+        }
+
+        break;
+    }
+
+    if ((pVia->Chipset == VIA_CX700)
+        || (pVia->Chipset == VIA_VX800)
+        || (pVia->Chipset == VIA_VX855)
+        || (pVia->Chipset == VIA_VX900)) {
+
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "Setting 3C5.5A[0] to 1.\n");
+        ViaSeqMask(hwp, 0x5A, sr5a | 0x01, 0x01);
+
+        sr12 = hwp->readSeq(hwp, 0x12);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "SR12: 0x%02X\n", sr12));
+        sr13 = hwp->readSeq(hwp, 0x13);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "SR13: 0x%02X\n", sr13));
+
+        /* 3C5.13[7:6] - Integrated LVDS / DVI Mode Select
+         *               (DVP1D15-14 pin strapping)
+         *               00: LVDS1 + LVDS2
+         *               01: DVI + LVDS2
+         *               10: Dual LVDS Channel (High Resolution Panel)
+         *               11: One DVI only (decrease the clock jitter) */
+        switch (sr13 && 0xC0) {
+        case 0x00:
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "LVDS1 + LVDS2 detected.\n");
+            break;
+        case 0x40:
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Single Link DVI + LVDS2 detected.\n");
+            break;
+        case 0x80:
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Dual Channel LVDS detected.\n");
+            break;
+        case 0xC0:
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Single Link DVI detected.\n");
+            break;
+        default:
+            break;
+        }
+
+        hwp->writeSeq(hwp, 0x5A, sr5a);
+
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaProbePinStrapping.\n"));
+}
+
 void
 viaOutputDetect(ScrnInfoPtr pScrn)
 {
@@ -1005,6 +1214,10 @@ viaOutputDetect(ScrnInfoPtr pScrn)
                         "Entered viaOutputDetect.\n"));
 
     pBIOSInfo->analog = NULL;
+
+    /* Read off the VIA Technologies IGP pin strapping for
+       display detection purposes. */
+    viaProbePinStrapping(pScrn);
 
     /* LVDS */
     via_lvds_init(pScrn);
