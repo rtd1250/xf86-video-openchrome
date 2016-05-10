@@ -1004,7 +1004,7 @@ umsCrtcInit(ScrnInfoPtr pScrn)
         max_height = 2508;
         break;
     default:
-        max_pitch = 16384 / (pScrn->bitsPerPixel >> 3) - 1;
+        max_pitch = 16384 / (pScrn->bitsPerPixel >> 3);
         max_height = max_pitch;
         break;
     }
