@@ -1,5 +1,6 @@
 /*
- * Copyright 2005-2015 The Openchrome Project
+ * Copyright 2015-2016 Kevin Brace
+ * Copyright 2005-2016 The OpenChrome Project
  *                     [http://www.freedesktop.org/wiki/Openchrome]
  * Copyright 2004-2005 The Unichrome Project  [unichrome.sf.net]
  * Copyright 1998-2003 VIA Technologies, Inc. All Rights Reserved.
@@ -709,6 +710,558 @@ viaIGA1SetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 }
 
 void
+viaIGA1Save(ScrnInfoPtr pScrn)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIARegPtr Regs = &pVia->SavedReg;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA1Save.\n"));
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Saving sequencer registers.\n"));
+
+    /* Unlock extended registers. */
+    hwp->writeSeq(hwp, 0x10, 0x01);
+
+    Regs->SR14 = hwp->readSeq(hwp, 0x14);
+    Regs->SR15 = hwp->readSeq(hwp, 0x15);
+    Regs->SR16 = hwp->readSeq(hwp, 0x16);
+    Regs->SR17 = hwp->readSeq(hwp, 0x17);
+    Regs->SR18 = hwp->readSeq(hwp, 0x18);
+    Regs->SR19 = hwp->readSeq(hwp, 0x19);
+
+    /* PCI Bus Control */
+    Regs->SR1A = hwp->readSeq(hwp, 0x1A);
+
+    Regs->SR1B = hwp->readSeq(hwp, 0x1B);
+    Regs->SR1C = hwp->readSeq(hwp, 0x1C);
+    Regs->SR1D = hwp->readSeq(hwp, 0x1D);
+    Regs->SR1E = hwp->readSeq(hwp, 0x1E);
+    Regs->SR1F = hwp->readSeq(hwp, 0x1F);
+
+    Regs->SR22 = hwp->readSeq(hwp, 0x22);
+
+    /* Registers 3C5.23 through 3C5.25 are not used by Chrome9.
+     * Registers 3C5.27 through 3C5.29 are not used by Chrome9. */
+    switch (pVia->Chipset) {
+    case VIA_CLE266:
+    case VIA_KM400:
+    case VIA_PM800:
+    case VIA_K8M800:
+    case VIA_P4M800PRO:
+    case VIA_CX700:
+    case VIA_P4M890:
+        Regs->SR23 = hwp->readSeq(hwp, 0x23);
+        Regs->SR24 = hwp->readSeq(hwp, 0x24);
+        Regs->SR25 = hwp->readSeq(hwp, 0x25);
+
+        Regs->SR27 = hwp->readSeq(hwp, 0x27);
+        Regs->SR28 = hwp->readSeq(hwp, 0x28);
+        Regs->SR29 = hwp->readSeq(hwp, 0x29);
+        break;
+    default:
+        break;
+    }
+
+    Regs->SR26 = hwp->readSeq(hwp, 0x26);
+
+    Regs->SR2A = hwp->readSeq(hwp, 0x2A);
+    Regs->SR2B = hwp->readSeq(hwp, 0x2B);
+    Regs->SR2D = hwp->readSeq(hwp, 0x2D);
+    Regs->SR2E = hwp->readSeq(hwp, 0x2E);
+
+    /* Save PCI Configuration Memory Base Shadow 0 and 1.
+     * These registers are available only in UniChrome, UniChrome Pro,
+     * and UniChrome Pro II. */
+    switch (pVia->Chipset) {
+    case VIA_CLE266:
+    case VIA_KM400:
+    case VIA_PM800:
+    case VIA_K8M800:
+    case VIA_P4M800PRO:
+    case VIA_CX700:
+    case VIA_P4M890:
+        Regs->SR2F = hwp->readSeq(hwp, 0x2F);
+        Regs->SR30 = hwp->readSeq(hwp, 0x30);
+        break;
+    default:
+        break;
+    }
+
+    /* Save PLL settings and several miscellaneous registers.
+     * For UniChrome, register 3C5.44 through 3C5.4B are saved.
+     * For UniChrome Pro and Chrome9, register 3C5.44 through 3C5.4C
+     * are saved. */
+    Regs->SR44 = hwp->readSeq(hwp, 0x44);
+    Regs->SR45 = hwp->readSeq(hwp, 0x45);
+    Regs->SR46 = hwp->readSeq(hwp, 0x46);
+    Regs->SR47 = hwp->readSeq(hwp, 0x47);
+    Regs->SR48 = hwp->readSeq(hwp, 0x48);
+    Regs->SR49 = hwp->readSeq(hwp, 0x49);
+    Regs->SR4A = hwp->readSeq(hwp, 0x4A);
+    Regs->SR4B = hwp->readSeq(hwp, 0x4B);
+
+    switch (pVia->Chipset) {
+    case VIA_PM800:
+    case VIA_K8M800:
+    case VIA_P4M800PRO:
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+
+        Regs->SR4C = hwp->readSeq(hwp, 0x4C);
+
+    /* Save register 3C5.4D.
+     * According to CX700 (UniChrome Pro II) documentation, this register
+     * is called Dual Channel Memory Control.
+     * According to VX800 / VX855 / VX900 (Chrome 9 HC3 / HCM / HD)
+     * documentations, this register is called Preemptive Arbiter Control.
+     * It is likely that this register is also supported in UniChrome Pro. */
+        Regs->SR4D = hwp->readSeq(hwp, 0x4D);
+
+        Regs->SR4E = hwp->readSeq(hwp, 0x4E);
+        Regs->SR4F = hwp->readSeq(hwp, 0x4F);
+        break;
+    default:
+        break;
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Finished saving sequencer registers.\n"));
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Saving IGA1 registers.\n"));
+
+    /* UniChrome Pro or later */
+    switch (pVia->Chipset) {
+    case VIA_PM800:
+    case VIA_K8M800:
+    case VIA_P4M800PRO:
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+
+        /* Display Fetch Blocking Control */
+        Regs->CR30 = hwp->readCrtc(hwp, 0x30);
+
+        /* Half Line Position */
+        Regs->CR31 = hwp->readCrtc(hwp, 0x31);
+        break;
+    default:
+        break;
+    }
+
+    Regs->CR32 = hwp->readCrtc(hwp, 0x32);
+    Regs->CR33 = hwp->readCrtc(hwp, 0x33);
+    Regs->CR35 = hwp->readCrtc(hwp, 0x35);
+    Regs->CR36 = hwp->readCrtc(hwp, 0x36);
+
+    /* UniChrome Pro or later */
+    switch (pVia->Chipset) {
+    case VIA_PM800:
+    case VIA_K8M800:
+    case VIA_P4M800PRO:
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+
+        /* DAC Control Register */
+        Regs->CR37 = hwp->readCrtc(hwp, 0x37);
+        break;
+    default:
+        break;
+    }
+
+    Regs->CR38 = hwp->readCrtc(hwp, 0x38);
+    Regs->CR39 = hwp->readCrtc(hwp, 0x39);
+    Regs->CR3A = hwp->readCrtc(hwp, 0x3A);
+    Regs->CR3B = hwp->readCrtc(hwp, 0x3B);
+    Regs->CR3C = hwp->readCrtc(hwp, 0x3C);
+    Regs->CR3D = hwp->readCrtc(hwp, 0x3D);
+    Regs->CR3E = hwp->readCrtc(hwp, 0x3E);
+    Regs->CR3F = hwp->readCrtc(hwp, 0x3F);
+
+    Regs->CR40 = hwp->readCrtc(hwp, 0x40);
+
+    /* UniChrome Pro or later */
+    switch (pVia->Chipset) {
+    case VIA_PM800:
+    case VIA_K8M800:
+    case VIA_P4M800PRO:
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+
+        Regs->CR43 = hwp->readCrtc(hwp, 0x43);
+        Regs->CR45 = hwp->readCrtc(hwp, 0x45);
+        break;
+    default:
+        break;
+    }
+
+    Regs->CR46 = hwp->readCrtc(hwp, 0x46);
+    Regs->CR47 = hwp->readCrtc(hwp, 0x47);
+
+    /* Starting Address */
+    /* Start Address High */
+    Regs->CR0C = hwp->readCrtc(hwp, 0x0C);
+
+    /* Start Address Low */
+    Regs->CR0D = hwp->readCrtc(hwp, 0x0D);
+
+    /* UniChrome Pro or later */
+    switch (pVia->Chipset) {
+    case VIA_PM800:
+    case VIA_K8M800:
+    case VIA_P4M800PRO:
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+
+        /* Starting Address Overflow[28:24] */
+        Regs->CR48 = hwp->readCrtc(hwp, 0x48);
+        break;
+    default:
+        break;
+    }
+
+    /* Starting Address Overflow[23:16] */
+    Regs->CR34 = hwp->readCrtc(hwp, 0x34);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Finished saving IGA1 registers.\n"));
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA1Save.\n"));
+}
+
+void
+viaIGA1Restore(ScrnInfoPtr pScrn)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIARegPtr Regs = &pVia->SavedReg;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA1Restore.\n"));
+
+    /* Unlock extended registers. */
+    hwp->writeSeq(hwp, 0x10, 0x01);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Restoring sequencer registers.\n"));
+
+    hwp->writeSeq(hwp, 0x14, Regs->SR14);
+    hwp->writeSeq(hwp, 0x15, Regs->SR15);
+    hwp->writeSeq(hwp, 0x16, Regs->SR16);
+    hwp->writeSeq(hwp, 0x17, Regs->SR17);
+    hwp->writeSeq(hwp, 0x18, Regs->SR18);
+    hwp->writeSeq(hwp, 0x19, Regs->SR19);
+
+    /* PCI Bus Control */
+    hwp->writeSeq(hwp, 0x1A, Regs->SR1A);
+
+    hwp->writeSeq(hwp, 0x1B, Regs->SR1B);
+    hwp->writeSeq(hwp, 0x1C, Regs->SR1C);
+    hwp->writeSeq(hwp, 0x1D, Regs->SR1D);
+    hwp->writeSeq(hwp, 0x1E, Regs->SR1E);
+    hwp->writeSeq(hwp, 0x1F, Regs->SR1F);
+
+    hwp->writeSeq(hwp, 0x22, Regs->SR22);
+
+    /* Registers 3C5.23 through 3C5.25 are not used by Chrome9.
+     * Registers 3C5.27 through 3C5.29 are not used by Chrome9. */
+    switch (pVia->Chipset) {
+    case VIA_CLE266:
+    case VIA_KM400:
+    case VIA_PM800:
+    case VIA_K8M800:
+    case VIA_P4M800PRO:
+    case VIA_CX700:
+    case VIA_P4M890:
+
+        hwp->writeSeq(hwp, 0x23, Regs->SR23);
+        hwp->writeSeq(hwp, 0x24, Regs->SR24);
+        hwp->writeSeq(hwp, 0x25, Regs->SR25);
+
+        hwp->writeSeq(hwp, 0x27, Regs->SR27);
+        hwp->writeSeq(hwp, 0x28, Regs->SR28);
+        hwp->writeSeq(hwp, 0x29, Regs->SR29);
+        break;
+    default:
+        break;
+    }
+
+    hwp->writeSeq(hwp, 0x26, Regs->SR26);
+
+    hwp->writeSeq(hwp, 0x2A, Regs->SR2A);
+    hwp->writeSeq(hwp, 0x2B, Regs->SR2B);
+
+    hwp->writeSeq(hwp, 0x2D, Regs->SR2D);
+    hwp->writeSeq(hwp, 0x2E, Regs->SR2E);
+
+    /* Restore PCI Configuration Memory Base Shadow 0 and 1.
+     * These registers are available only in UniChrome, UniChrome Pro,
+     * and UniChrome Pro II. */
+    switch (pVia->Chipset) {
+    case VIA_CLE266:
+    case VIA_KM400:
+    case VIA_PM800:
+    case VIA_K8M800:
+    case VIA_P4M800PRO:
+    case VIA_CX700:
+    case VIA_P4M890:
+
+        hwp->writeSeq(hwp, 0x2F, Regs->SR2F);
+        hwp->writeSeq(hwp, 0x30, Regs->SR30);
+        break;
+    default:
+        break;
+    }
+
+    /* Restore PLL settings and several miscellaneous registers.
+     * For UniChrome, register 3C5.44 through 3C5.4B are restored.
+     * For UniChrome Pro and Chrome 9, register 3C5.44 through 3C5.4C
+     * are restored. */
+    switch (pVia->Chipset) {
+    case VIA_CLE266:
+    case VIA_KM400:
+        /* Engine Clock (ECK) PLL settings */
+        hwp->writeSeq(hwp, 0x48, Regs->SR48);
+        hwp->writeSeq(hwp, 0x49, Regs->SR49);
+
+        /* Memory Clock (MCK) PLL settings */
+        hwp->writeSeq(hwp, 0x4a, Regs->SR4A);
+        hwp->writeSeq(hwp, 0x4b, Regs->SR4B);
+
+        /* Primary Display Clock (VCK) PLL settings */
+        hwp->writeSeq(hwp, 0x46, Regs->SR46);
+        hwp->writeSeq(hwp, 0x47, Regs->SR47);
+
+        /* Secondary Display Clock (LCDCK) PLL settings */
+        hwp->writeSeq(hwp, 0x44, Regs->SR44);
+        hwp->writeSeq(hwp, 0x45, Regs->SR45);
+        break;
+    default:
+        /* Engine Clock (ECK) PLL settings */
+        hwp->writeSeq(hwp, 0x47, Regs->SR47);
+        hwp->writeSeq(hwp, 0x48, Regs->SR48);
+        hwp->writeSeq(hwp, 0x49, Regs->SR49);
+
+        /* Reset ECK PLL. */
+        hwp->writeSeq(hwp, 0x40, hwp->readSeq(hwp, 0x40) | 0x01); /* Set SR40[0] to 1 */
+        hwp->writeSeq(hwp, 0x40, hwp->readSeq(hwp, 0x40) & (~0x01)); /* Set SR40[0] to 0 */
+
+
+        /* Primary Display Clock (VCK) PLL settings */
+        hwp->writeSeq(hwp, 0x44, Regs->SR44);
+        hwp->writeSeq(hwp, 0x45, Regs->SR45);
+        hwp->writeSeq(hwp, 0x46, Regs->SR46);
+
+        /* Reset VCK PLL. */
+        hwp->writeSeq(hwp, 0x40, hwp->readSeq(hwp, 0x40) | 0x02); /* Set SR40[1] to 1 */
+        hwp->writeSeq(hwp, 0x40, hwp->readSeq(hwp, 0x40) & (~0x02)); /* Set SR40[1] to 0 */
+
+
+        /* Secondary Display Clock (LCDCK) PLL settings */
+        hwp->writeSeq(hwp, 0x4A, Regs->SR4A);
+        hwp->writeSeq(hwp, 0x4B, Regs->SR4B);
+        hwp->writeSeq(hwp, 0x4C, Regs->SR4C);
+
+        /* Reset LCDCK PLL. */
+        hwp->writeSeq(hwp, 0x40, hwp->readSeq(hwp, 0x40) | 0x04); /* Set SR40[2] to 1 */
+        hwp->writeSeq(hwp, 0x40, hwp->readSeq(hwp, 0x40) & (~0x04)); /* Set SR40[2] to 0 */
+        break;
+    }
+
+    switch (pVia->Chipset) {
+    case VIA_PM800:
+    case VIA_K8M800:
+    case VIA_P4M800PRO:
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+
+    /* Restore register 3C5.4D.
+     * According to CX700 (UniChrome Pro II) documentation, this register
+     * is called Dual Channel Memory Control.
+     * According to VX800 / VX855 / VX900 (Chrome 9 HC3 / HCM / HD)
+     * documentations, this register is called Preemptive Arbiter Control.
+     * It is likely that this register is also supported in UniChrome Pro. */
+        hwp->writeSeq(hwp, 0x4D, Regs->SR4D);
+
+        hwp->writeSeq(hwp, 0x4E, Regs->SR4E);
+        hwp->writeSeq(hwp, 0x4F, Regs->SR4F);
+        break;
+    default:
+        break;
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Finished restoring sequencer registers.\n"));
+
+/* Reset dot clocks. */
+    ViaSeqMask(hwp, 0x40, 0x06, 0x06);
+    ViaSeqMask(hwp, 0x40, 0x00, 0x06);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Restoring IGA1 registers.\n"));
+
+/* UniChrome Pro or later */
+    switch (pVia->Chipset) {
+    case VIA_PM800:
+    case VIA_K8M800:
+    case VIA_P4M800PRO:
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+
+        /* Display Fetch Blocking Control */
+        hwp->writeCrtc(hwp, 0x30, Regs->CR30);
+
+        /* Half Line Position */
+        hwp->writeCrtc(hwp, 0x31, Regs->CR31);
+        break;
+    default:
+        break;
+    }
+
+    /* Restore CRTC controller extended registers. */
+    /* Mode Control */
+    hwp->writeCrtc(hwp, 0x32, Regs->CR32);
+
+    /* HSYNCH Adjuster */
+    hwp->writeCrtc(hwp, 0x33, Regs->CR33);
+
+    /* Extended Overflow */
+    hwp->writeCrtc(hwp, 0x35, Regs->CR35);
+
+    /* Power Management 3 (Monitor Control) */
+    hwp->writeCrtc(hwp, 0x36, Regs->CR36);
+
+/* UniChrome Pro or later */
+    switch (pVia->Chipset) {
+    case VIA_PM800:
+    case VIA_K8M800:
+    case VIA_P4M800PRO:
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+
+        /* DAC control Register */
+        hwp->writeCrtc(hwp, 0x37, Regs->CR37);
+        break;
+    default:
+        break;
+    }
+
+    hwp->writeCrtc(hwp, 0x38, Regs->CR38);
+    hwp->writeCrtc(hwp, 0x39, Regs->CR39);
+    hwp->writeCrtc(hwp, 0x3A, Regs->CR3A);
+    hwp->writeCrtc(hwp, 0x3B, Regs->CR3B);
+    hwp->writeCrtc(hwp, 0x3C, Regs->CR3C);
+    hwp->writeCrtc(hwp, 0x3D, Regs->CR3D);
+    hwp->writeCrtc(hwp, 0x3E, Regs->CR3E);
+    hwp->writeCrtc(hwp, 0x3F, Regs->CR3F);
+
+    hwp->writeCrtc(hwp, 0x40, Regs->CR40);
+
+    /* UniChrome Pro or later */
+    switch (pVia->Chipset) {
+    case VIA_PM800:
+    case VIA_K8M800:
+    case VIA_P4M800PRO:
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+
+        hwp->writeCrtc(hwp, 0x43, Regs->CR43);
+        hwp->writeCrtc(hwp, 0x45, Regs->CR45);
+        break;
+    default:
+        break;
+    }
+
+    hwp->writeCrtc(hwp, 0x46, Regs->CR46);
+    hwp->writeCrtc(hwp, 0x47, Regs->CR47);
+
+    /* Starting Address */
+    /* Start Address High */
+    hwp->writeCrtc(hwp, 0x0C, Regs->CR0C);
+
+    /* Start Address Low */
+    hwp->writeCrtc(hwp, 0x0D, Regs->CR0D);
+
+    /* UniChrome Pro or later */
+    switch (pVia->Chipset) {
+    case VIA_PM800:
+    case VIA_K8M800:
+    case VIA_P4M800PRO:
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+
+        /* Starting Address Overflow[28:24] */
+        hwp->writeCrtc(hwp, 0x48, Regs->CR48);
+        break;
+    default:
+        break;
+    }
+
+    /* CR34 is fire bits. Must be written after CR0C, CR0D, and CR48.
+     * Starting Address Overflow[23:16] */
+    hwp->writeCrtc(hwp, 0x34, Regs->CR34);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Finished restoring IGA1 registers.\n"));
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA1Restore.\n"));
+}
+
+void
 viaIGA2SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
@@ -1122,6 +1675,298 @@ viaIGA2SetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
                         "Exiting viaIGA2SetMode.\n"));
 }
 
+void
+viaIGA2Save(ScrnInfoPtr pScrn)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIARegPtr Regs = &pVia->SavedReg;
+    int i;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA2Save.\n"));
+
+    /* Unlock extended registers. */
+    hwp->writeSeq(hwp, 0x10, 0x01);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Saving IGA2 registers.\n"));
+
+    for (i = 0; i < (0x88 - 0x50 + 1); i++) {
+        Regs->EXCR[i + (0x50 - 0x50)] = hwp->readCrtc(hwp, i + 0x50);
+
+    }
+
+    for (i = 0; i < (0x92 - 0x8A + 1); i++) {
+        Regs->EXCR[i + (0x8A - 0x50)] = hwp->readCrtc(hwp, i + 0x8A);
+
+    }
+
+    for (i = 0; i < (0xA3 - 0x94 + 1); i++) {
+        Regs->EXCR[i + (0x94 - 0x50)] = hwp->readCrtc(hwp, i + 0x94);
+
+    }
+
+    Regs->EXCR[0xA4 - 0x50] = hwp->readCrtc(hwp, 0xA4);
+
+    for (i = 0; i < (0xAC - 0xA5 + 1); i++) {
+        Regs->EXCR[i + (0xA5 - 0x50)] = hwp->readCrtc(hwp, i + 0xA5);
+
+    }
+
+    /* Chrome 9 */
+    switch (pVia->Chipset) {
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        Regs->EXCR[0xAF - 0x50] = hwp->readCrtc(hwp, 0xAF);
+        break;
+    default:
+        break;
+    }
+
+    /* Chrome 9, Chrome 9 HC, and Chrome 9 HC3 */
+    switch (pVia->Chipset) {
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+        for (i = 0; i < (0xCD - 0xB0 + 1); i++) {
+            Regs->EXCR[i + (0xB0 - 0x50)] = hwp->readCrtc(hwp, i + 0xB0);
+
+        }
+
+        break;
+    default:
+        break;
+    }
+
+    switch (pVia->Chipset) {
+
+    /* UniChrome Pro and UniChrome Pro II */
+    case VIA_PM800:
+    case VIA_K8M800:
+    case VIA_P4M800PRO:
+    case VIA_CX700:
+    case VIA_P4M890:
+        for (i = 0; i < (0xD7 - 0xD0 + 1); i++) {
+            Regs->EXCR[i + (0xD0 - 0x50)] = hwp->readCrtc(hwp, i + 0xD0);
+
+        }
+
+        break;
+
+    /* Chrome 9 */
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        for (i = 0; i < (0xEC - 0xD0 + 1); i++) {
+            Regs->EXCR[i + (0xD0 - 0x50)] = hwp->readCrtc(hwp, i + 0xD0);
+
+        }
+
+        break;
+    default:
+        break;
+    }
+
+    /* Chrome 9 */
+    switch (pVia->Chipset) {
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        for (i = 0; i < (0xF5 - 0xF0 + 1); i++) {
+            Regs->EXCR[i + (0xF0 - 0x50)] = hwp->readCrtc(hwp, i + 0xF0);
+
+        }
+
+        break;
+    default:
+        break;
+    }
+
+    /* Chrome 9 HCM and Chrome 9 HD */
+    if ((pVia->Chipset == VIA_VX855) || (pVia->Chipset == VIA_VX900)) {
+        for (i = 0; i < (0xFC - 0xF6 + 1); i++) {
+            Regs->EXCR[i + (0xF6 - 0x50)] = hwp->readCrtc(hwp, i + 0xF6);
+
+        }
+    }
+
+    /* Chrome 9 HD */
+    if (pVia->Chipset == VIA_VX900) {
+        Regs->EXCR[0xFD - 0x50] = hwp->readCrtc(hwp, 0xFD);
+
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Finished saving IGA2 registers.\n"));
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA2Save.\n"));
+}
+
+void
+viaIGA2Restore(ScrnInfoPtr pScrn)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIARegPtr Regs = &pVia->SavedReg;
+    int i;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA2Restore.\n"));
+
+    /* Unlock extended registers. */
+    hwp->writeSeq(hwp, 0x10, 0x01);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Restoring IGA2 registers.\n"));
+
+    for (i = 0; i < (0x5F - 0x50 + 1); i++) {
+        hwp->writeCrtc(hwp, i + 0x50, Regs->EXCR[i + (0x50 - 0x50)]);
+
+    }
+
+    for (i = 0; i < (0x69 - 0x62 + 1); i++) {
+        hwp->writeCrtc(hwp, i + 0x62, Regs->EXCR[i + (0x62 - 0x50)]);
+
+    }
+
+    for (i = 0; i < (0x88 - 0x6D + 1); i++) {
+        hwp->writeCrtc(hwp, i + 0x6D, Regs->EXCR[i + (0x6D - 0x50)]);
+
+    }
+
+    for (i = 0; i < (0x92 - 0x8A + 1); i++) {
+        hwp->writeCrtc(hwp, i + 0x8A, Regs->EXCR[i + (0x8A - 0x50)]);
+
+    }
+
+    for (i = 0; i < (0xA3 - 0x94 + 1); i++) {
+        hwp->writeCrtc(hwp, i + 0x94, Regs->EXCR[i + (0x94 - 0x50)]);
+
+    }
+
+    /* UniChrome Pro and UniChrome Pro II */
+    switch (pVia->Chipset) {
+    case VIA_PM800:
+    case VIA_K8M800:
+    case VIA_P4M800PRO:
+    case VIA_CX700:
+    case VIA_P4M890:
+        hwp->writeCrtc(hwp, 0xA4, Regs->EXCR[0xA4 - 0x50]);
+        break;
+    default:
+        break;
+    }
+
+    for (i = 0; i < (0xAC - 0xA5 + 1); i++) {
+        hwp->writeCrtc(hwp, i + 0xA5, Regs->EXCR[i + (0xA5 - 0x50)]);
+
+    }
+
+    /* Chrome 9 */
+    switch (pVia->Chipset) {
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        hwp->writeCrtc(hwp, 0xAF, Regs->EXCR[0xAF - 0x50]);
+        break;
+    default:
+        break;
+    }
+
+    /* Chrome 9, Chrome 9 HC, and Chrome 9 HC3 */
+    switch (pVia->Chipset) {
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+        for (i = 0; i < (0xCD - 0xB0 + 1); i++) {
+            hwp->writeCrtc(hwp, i + 0xB0, Regs->EXCR[i + (0xB0 - 0x50)]);
+
+        }
+
+        break;
+    default:
+        break;
+    }
+
+    switch (pVia->Chipset) {
+    /* UniChrome Pro and UniChrome Pro II */
+    case VIA_PM800:
+    case VIA_K8M800:
+    case VIA_P4M800PRO:
+    case VIA_CX700:
+    case VIA_P4M890:
+        for (i = 0; i < (0xD7 - 0xD0 + 1); i++) {
+            hwp->writeCrtc(hwp, i + 0xD0, Regs->EXCR[i + (0xD0 - 0x50)]);
+
+        }
+
+        break;
+
+    /* Chrome 9 */
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        for (i = 0; i < (0xEC - 0xD0 + 1); i++) {
+            hwp->writeCrtc(hwp, i + 0xD0, Regs->EXCR[i + (0xD0 - 0x50)]);
+
+        }
+
+        break;
+    default:
+        break;
+    }
+
+    /* Chrome 9 */
+    switch (pVia->Chipset) {
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        for (i = 0; i < (0xF5 - 0xF0 + 1); i++) {
+            hwp->writeCrtc(hwp, i + 0xF0, Regs->EXCR[i + (0xF0 - 0x50)]);
+
+        }
+
+        break;
+    default:
+        break;
+    }
+
+    /* Chrome 9 HCM and Chrome 9 HD */
+    if ((pVia->Chipset == VIA_VX855) || (pVia->Chipset == VIA_VX900)) {
+        for (i = 0; i < (0xFC - 0xF6 + 1); i++) {
+            hwp->writeCrtc(hwp, i + 0xF6, Regs->EXCR[i + (0xF6 - 0x50)]);
+
+        }
+    }
+
+    /* Chrome 9 HD */
+    if (pVia->Chipset == VIA_VX900) {
+        hwp->writeCrtc(hwp, 0xFD, Regs->EXCR[0xFD - 0x50]);
+
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Finished restoring IGA2 registers.\n"));
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA2Restore.\n"));
+}
+
 /*
  * Not tested yet
  */
@@ -1220,8 +2065,25 @@ iga1_crtc_save(xf86CrtcPtr crtc)
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
 
-    VIASave(pScrn);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered iga1_crtc_save.\n"));
+
+    vgaHWProtect(pScrn, TRUE);
+
+    /* Save the standard VGA registers. */
+    if (xf86IsPrimaryPci(pVia->PciInfo)) {
+        vgaHWSave(pScrn, &hwp->SavedReg, VGA_SR_ALL);
+    } else {
+        vgaHWSave(pScrn, &hwp->SavedReg, VGA_SR_MODE);
+    }
+
+    viaIGA1Save(pScrn);
+
+    vgaHWProtect(pScrn, FALSE);
     vgaHWUnlock(hwp);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting iga1_crtc_save.\n"));
 }
 
 static void
@@ -1230,23 +2092,32 @@ iga1_crtc_restore(xf86CrtcPtr crtc)
     ScrnInfoPtr pScrn = crtc->scrn;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
+    CARD8 tmp;
 
-    VIARestore(pScrn);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered iga1_crtc_restore.\n"));
 
-    /* A soft reset helps to avoid a 3D hang on VT switch. */
-    switch (pVia->Chipset) {
-    case VIA_K8M890:
-    case VIA_P4M900:
-    case VIA_VX800:
-    case VIA_VX855:
-    case VIA_VX900:
-        break;
+    vgaHWProtect(pScrn, TRUE);
 
-    default:
-        hwp->writeSeq(hwp, 0x1A, pVia->SavedReg.SR1A | 0x40);
-        break;
+    /* Restore the standard VGA registers. */
+    if (xf86IsPrimaryPci(pVia->PciInfo)) {
+        vgaHWRestore(pScrn, &hwp->SavedReg, VGA_SR_ALL);
+    } else {
+        vgaHWRestore(pScrn, &hwp->SavedReg, VGA_SR_MODE);
     }
+
+    /* Gamma must be disabled before restoring palette. */
+    ViaGammaDisable(pScrn);
+
+    viaIGA1Restore(pScrn);
+
+    ViaDisablePrimaryFIFO(pScrn);
+
+    vgaHWProtect(pScrn, FALSE);
     vgaHWLock(hwp);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting iga1_crtc_restore.\n"));
 }
 
 static Bool
@@ -1648,8 +2519,13 @@ iga2_crtc_save(xf86CrtcPtr crtc)
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
 
-    VIASave(pScrn);
-    vgaHWUnlock(hwp);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered iga2_crtc_save.\n"));
+
+    viaIGA2Save(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting iga2_crtc_save.\n"));
 }
 
 static void
@@ -1658,9 +2534,15 @@ iga2_crtc_restore(xf86CrtcPtr crtc)
     ScrnInfoPtr pScrn = crtc->scrn;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
+    CARD8 tmp;
 
-    VIARestore(pScrn);
-    vgaHWLock(hwp);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered iga2_crtc_restore.\n"));
+
+    viaIGA2Restore(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting iga2_crtc_restore.\n"));
 }
 
 static Bool

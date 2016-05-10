@@ -1,4 +1,7 @@
 /*
+ * Copyright 2016 Kevin Brace
+ * Copyright 2005-2016 The OpenChrome Project
+ *                     [http://www.freedesktop.org/wiki/Openchrome]
  * Copyright 2004-2005 The Unichrome Project  [unichrome.sf.net]
  * Copyright 1998-2003 VIA Technologies, Inc. All Rights Reserved.
  * Copyright 2001-2003 S3 Graphics, Inc. All Rights Reserved.
@@ -217,9 +220,13 @@ void viaIGAInitCommon(ScrnInfoPtr pScrn);
 void viaIGA1SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y);
 void viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void viaIGA1SetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
+void viaIGA1Save(ScrnInfoPtr pScrn);
+void viaIGA1Restore(ScrnInfoPtr pScrn);
 void viaIGA2SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y);
 void viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void viaIGA2SetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
+void viaIGA2Save(ScrnInfoPtr pScrn);
+void viaIGA2Restore(ScrnInfoPtr pScrn);
 void ViaShadowCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
 
 /* via_lvds.c */
