@@ -2178,8 +2178,14 @@ iga1_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
     ScrnInfoPtr pScrn = crtc->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered iga1_crtc_set_origin.\n"));
+
     viaIGA1SetFBStartingAddress(crtc, x, y);
     VIAVidAdjustFrame(pScrn, x, y);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting iga1_crtc_set_origin.\n"));
 }
 
 static void
