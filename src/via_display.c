@@ -50,23 +50,23 @@ viaIGA1DPMSControl(ScrnInfoPtr pScrn, CARD8 DPMS_Control)
 }
 
 /*
- * Controls IGA2 screen state.
+ * Controls IGA2 display output on or off state.
  */
 void
-viaIGA2Screen(ScrnInfoPtr pScrn, Bool Screen_State)
+viaIGA2DisplayOutput(ScrnInfoPtr pScrn, Bool OutputEnable)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaIGA2Screen.\n"));
+                        "Entered viaIGA2DisplayOutput.\n"));
 
-    /* 3X5.6B[2]: IGA2 Screen Off
-     * 0 = Screen on
-     * 1 = Screen off */
-    ViaCrtcMask(hwp, 0x6B, Screen_State ? 0x00 : 0x04, 0x04);
+    /* 3X5.6B[2] - IGA2 Screen Off
+     *             0: Screen on
+     *             1: Screen off */
+    ViaCrtcMask(hwp, 0x6B, OutputEnable ? 0x00 : 0x04, 0x04);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaIGA2Screen.\n"));
+                        "Exiting viaIGA2DisplayOutput.\n"));
 }
 
 /*
@@ -2486,7 +2486,7 @@ iga2_crtc_dpms(xf86CrtcPtr crtc, int mode)
 
     switch (mode) {
     case DPMSModeOn:
-        viaIGA2Screen(pScrn, TRUE);
+        viaIGA2DisplayOutput(pScrn, TRUE);
 
         if (pBIOSInfo->SimultaneousEnabled)
             ViaDisplayEnableSimultaneous(pScrn);
@@ -2495,7 +2495,7 @@ iga2_crtc_dpms(xf86CrtcPtr crtc, int mode)
     case DPMSModeStandby:
     case DPMSModeSuspend:
     case DPMSModeOff:
-        viaIGA2Screen(pScrn, FALSE);
+        viaIGA2DisplayOutput(pScrn, FALSE);
 
         if (pBIOSInfo->SimultaneousEnabled)
             ViaDisplayDisableSimultaneous(pScrn);
@@ -2626,7 +2626,7 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     }
 
     /* Turn off IGA2 during mode setting. */
-    viaIGA2Screen(pScrn, FALSE);
+    viaIGA2DisplayOutput(pScrn, FALSE);
 
     viaIGAInitCommon(pScrn);
     ViaCRTCInit(pScrn);
@@ -2641,7 +2641,7 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     iga2_crtc_set_origin(crtc, crtc->x, crtc->y);
 
     /* Turn on IGA2 now that mode setting is done. */
-    viaIGA2Screen(pScrn, TRUE);
+    viaIGA2DisplayOutput(pScrn, TRUE);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting iga2_crtc_mode_set.\n"));
