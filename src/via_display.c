@@ -519,23 +519,6 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     temp = mode->CrtcVBlankEnd - 1;
     hwp->writeCrtc(hwp, 0x16, temp);
 
-    /* FIXME: check if this is really necessary here */
-    switch (pVia->Chipset) {
-        case VIA_CX700:
-        case VIA_K8M890:
-        case VIA_P4M900:
-        case VIA_VX800:
-        case VIA_VX855:
-        case VIA_VX900:
-            break;
-        default:
-            /* some leftovers */
-            hwp->writeCrtc(hwp, 0x08, 0x00);
-            ViaCrtcMask(hwp, 0x32, 0, 0xFF);  /* ? */
-            ViaCrtcMask(hwp, 0x33, 0, 0xC8);
-            break;
-    }
-
     /* offset */
     temp = (pScrn->displayWidth * (pScrn->bitsPerPixel >> 3)) >> 3;
     /* Make sure that this is 32-byte aligned. */
