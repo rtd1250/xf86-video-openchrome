@@ -1609,29 +1609,6 @@ viaIGA2ModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
 }
 
 void
-viaIGA2SetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaIGA2SetMode.\n"));
-
-    viaIGA2SetDisplayRegister(pScrn, mode);
-    ViaSetSecondaryFIFO(pScrn, mode);
-    pBIOSInfo->Clock = ViaModeDotClockTranslate(pScrn, mode);
-    pBIOSInfo->ClockExternal = FALSE;
-    ViaSetSecondaryDotclock(pScrn, pBIOSInfo->Clock);
-    ViaSetUseExternalClock(hwp);
-
-    hwp->disablePalette(hwp);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaIGA2SetMode.\n"));
-}
-
-void
 viaIGA2Save(ScrnInfoPtr pScrn)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
@@ -2604,7 +2581,9 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
                     DisplayModePtr adjusted_mode, int x, int y)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
+    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered iga2_crtc_mode_set.\n"));
@@ -2622,7 +2601,16 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 
     viaIGAInitCommon(pScrn);
     ViaCRTCInit(pScrn);
-    viaIGA2SetMode(pScrn, adjusted_mode);
+
+    viaIGA2SetDisplayRegister(pScrn, adjusted_mode);
+    ViaSetSecondaryFIFO(pScrn, adjusted_mode);
+    pBIOSInfo->Clock = ViaModeDotClockTranslate(pScrn, adjusted_mode);
+    pBIOSInfo->ClockExternal = FALSE;
+    ViaSetSecondaryDotclock(pScrn, pBIOSInfo->Clock);
+    ViaSetUseExternalClock(hwp);
+
+    hwp->disablePalette(hwp);
+
     viaIGA2DisplayChannel(pScrn, TRUE);
 
     if (pVia->pBIOSInfo->SimultaneousEnabled)
