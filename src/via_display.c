@@ -436,11 +436,23 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     /* Linear Mode */
     ViaCrtcMask(hwp, 0x43, 0x00, 0x04);
 
-    /* Crtc registers */
-    /* horizontal total : 4100 */
+
+    /* Set IGA1 horizontal total.*/
+    /* Due to IGA1 horizontal total being only 9 bits wide,
+     * the adjusted horizontal total needs to be shifted by
+     * 3 bit positions to the right.
+     * In addition to that, this particular register requires the
+     * value to be 5 less than the actual value being written. */
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "IGA1 CrtcHTotal: %d\n", mode->CrtcHTotal));
     temp = (mode->CrtcHTotal >> 3) - 5;
+
+    /* 3X5.00[7:0] - Horizontal Total Bits [7:0] */
     hwp->writeCrtc(hwp, 0x00, temp & 0xFF);
+
+    /* 3X5.36[3] - Horizontal Total Bit [8] */
     ViaCrtcMask(hwp, 0x36, temp >> 5, 0x08);
+
 
     /* horizontal address : 2048 */
     temp = (mode->CrtcHDisplay >> 3) - 1;
