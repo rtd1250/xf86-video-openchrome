@@ -392,26 +392,29 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
     ViaSeqMask(hwp, 0x15, 0x02, 0x02);
 
-    /* bpp */
+    /* Set the color depth for IGA1. */
     switch (pScrn->bitsPerPixel) {
-        case 8:
-            /* Only CLE266.AX use 6bits LUT. */
-            if (pVia->Chipset == VIA_CLE266 && pVia->ChipRev < 15)
-                ViaSeqMask(hwp, 0x15, 0x22, 0xFE);
-            else
-                ViaSeqMask(hwp, 0x15, 0xA2, 0xFE);
-            break;
-        case 16:
-            ViaSeqMask(hwp, 0x15, 0xB6, 0xFE);
-            break;
-        case 24:
-        case 32:
-            ViaSeqMask(hwp, 0x15, 0xAE, 0xFE);
-            break;
-        default:
-            xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Unhandled bitdepth: %d\n",
-                       pScrn->bitsPerPixel);
-            break;
+    case 8:
+        /* Only CLE266.AX use 6bits LUT. */
+        if (pVia->Chipset == VIA_CLE266 && pVia->ChipRev < 15) {
+            ViaSeqMask(hwp, 0x15, 0x22, 0xFE);
+        } else {
+            ViaSeqMask(hwp, 0x15, 0xA2, 0xFE);
+        }
+
+        break;
+    case 16:
+        ViaSeqMask(hwp, 0x15, 0xB6, 0xFE);
+        break;
+    case 24:
+    case 32:
+        ViaSeqMask(hwp, 0x15, 0xAE, 0xFE);
+        break;
+    default:
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                    "Unsupported color depth: %d\n",
+                    pScrn->bitsPerPixel);
+        break;
     }
 
     switch (pVia->Chipset) {
