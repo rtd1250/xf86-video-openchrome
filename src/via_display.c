@@ -666,38 +666,6 @@ viaIGA1ModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
 }
 
 void
-viaIGA1SetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
-{
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "viaIGA1SetMode\n");
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-
-    /* Turn off Screen */
-    ViaCrtcMask(hwp, 0x17, 0x00, 0x80);
-
-    /* Disable IGA1 */
-    ViaSeqMask(hwp, 0x59, 0x00, 0x80);
-
-    viaIGA1SetDisplayRegister(pScrn, mode);
-    ViaSetPrimaryFIFO(pScrn, mode);
-
-    pBIOSInfo->Clock = ViaModeDotClockTranslate(pScrn, mode);
-    pBIOSInfo->ClockExternal = FALSE;
-    ViaSetPrimaryDotclock(pScrn, pBIOSInfo->Clock);
-    ViaSetUseExternalClock(hwp);
-    ViaCrtcMask(hwp, 0x6B, 0x00, 0x01);
-
-    hwp->disablePalette(hwp);
-
-    /* Enable IGA1 */
-    ViaSeqMask(hwp, 0x59, 0x80, 0x80);
-
-    /* Turn on Screen */
-    ViaCrtcMask(hwp, 0x17, 0x80, 0x80);
-}
-
-void
 viaIGA1Save(ScrnInfoPtr pScrn)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
@@ -2178,11 +2146,13 @@ iga1_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
 
 static void
 iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
-					DisplayModePtr adjusted_mode,
-					int x, int y)
+                    DisplayModePtr adjusted_mode,
+                    int x, int y)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
+    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered iga1_crtc_mode_set.\n"));
@@ -2200,7 +2170,29 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 
     viaIGAInitCommon(pScrn);
     ViaCRTCInit(pScrn);
-    viaIGA1SetMode(pScrn, adjusted_mode);
+
+    /* Turn off Screen */
+    ViaCrtcMask(hwp, 0x17, 0x00, 0x80);
+
+    /* Disable IGA1 */
+    ViaSeqMask(hwp, 0x59, 0x00, 0x80);
+
+    viaIGA1SetDisplayRegister(pScrn, adjusted_mode);
+    ViaSetPrimaryFIFO(pScrn, adjusted_mode);
+
+    pBIOSInfo->Clock = ViaModeDotClockTranslate(pScrn, adjusted_mode);
+    pBIOSInfo->ClockExternal = FALSE;
+    ViaSetPrimaryDotclock(pScrn, pBIOSInfo->Clock);
+    ViaSetUseExternalClock(hwp);
+    ViaCrtcMask(hwp, 0x6B, 0x00, 0x01);
+
+    hwp->disablePalette(hwp);
+
+    /* Enable IGA1 */
+    ViaSeqMask(hwp, 0x59, 0x80, 0x80);
+
+    /* Turn on Screen */
+    ViaCrtcMask(hwp, 0x17, 0x80, 0x80);
 
     if (pVia->pBIOSInfo->SimultaneousEnabled)
         ViaDisplayEnableSimultaneous(pScrn);
