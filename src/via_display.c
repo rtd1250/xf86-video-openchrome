@@ -1313,21 +1313,6 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
             break;
     }
 
-    switch (pVia->Chipset) {
-        case VIA_CX700:
-        case VIA_K8M890:
-        case VIA_P4M900:
-        case VIA_VX800:
-        case VIA_VX855:
-        case VIA_VX900:
-            break;
-        default:
-            ViaSeqMask(hwp, 0x16, 0x08, 0xBF);
-            ViaSeqMask(hwp, 0x17, 0x1F, 0xFF);
-            ViaSeqMask(hwp, 0x18, 0x4E, 0xFF);
-            ViaSeqMask(hwp, 0x1A, 0x08, 0xF9);
-            break;
-    }
 
     /* LVDS Channel 1 and 2 should be controlled by PMS
      * (Power Management Status). */
