@@ -358,9 +358,11 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     VIAPtr pVia = VIAPTR(pScrn);
     CARD16 temp;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "viaIGA1SetDisplayRegister\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA1SetDisplayRegister.\n"));
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Setting up %s\n", mode->name));
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "IGA1 Requested Screen Mode: %s\n", mode->name);
 
     ViaCrtcMask(hwp, 0x11, 0x00, 0x80); /* modify starting address */
     ViaCrtcMask(hwp, 0x03, 0x80, 0x80); /* enable vertical retrace access */
@@ -554,6 +556,9 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
             ViaCrtcMask(hwp, 0x33, 0, 0xC8);
             break;
     }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA1SetDisplayRegister.\n"));
 }
 
 void
