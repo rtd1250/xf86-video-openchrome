@@ -454,9 +454,19 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x36, temp >> 5, 0x08);
 
 
-    /* horizontal address : 2048 */
+    /* Set IGA1 horizontal display end. */
+    /* Due to IGA1 horizontal display end being only 8 bits wide,
+     * the adjusted horizontal display end needs to be shifted by
+     * 3 bit positions to the right.
+     * In addition to that, this particular register requires the
+     * value to be 1 less than the actual value being written. */
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "IGA1 CrtcHDisplay: %d\n", mode->CrtcHDisplay));
     temp = (mode->CrtcHDisplay >> 3) - 1;
+
+    /* 3X5.01[7:0] - Horizontal Display End Bits [7:0] */
     hwp->writeCrtc(hwp, 0x01, temp & 0xFF);
+
 
     /* horizontal blanking start : 2048 */
     /* temp = (mode->CrtcHDisplay >> 3) - 1; */
