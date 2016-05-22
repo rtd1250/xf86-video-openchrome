@@ -514,9 +514,18 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x33, temp >> 4, 0x10);
 
 
-    /* horizontal sync end : start + 256 */
-    temp = mode->CrtcHSyncEnd >> 3;
+    /* Set IGA1 horizontal synchronization end. */
+    /* After shifting horizontal synchronization end by 3 bit positions
+     * to the right, the 5 least significant bits are actually used.
+     * In addition to that, this particular register requires the
+     * value to be 1 less than the actual value being written. */
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "IGA1 CrtcHSyncEnd: %d\n", mode->CrtcHSyncEnd));
+    temp = (mode->CrtcHSyncEnd >> 3) - 1;
+
+    /* 3X5.05[4:0] - Horizontal Retrace End Bits [4:0] */
     ViaCrtcMask(hwp, 0x05, temp, 0x1F);
+
 
     /* vertical total : 2049 */
     temp = mode->CrtcVTotal - 2;
