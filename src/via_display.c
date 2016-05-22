@@ -468,11 +468,17 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     hwp->writeCrtc(hwp, 0x01, temp & 0xFF);
 
 
-    /* horizontal blanking start : 2048 */
-    /* temp = (mode->CrtcHDisplay >> 3) - 1; */
-    temp = (mode->CrtcHBlankStart >> 3) - 1;
-    hwp->writeCrtc(hwp, 0x02, temp & 0xFF);
-    /* If HblankStart has more bits anywhere, add them here */
+    /* Set IGA1 horizontal blank start. */
+    /* Due to IGA1 horizontal blank start being only 8 bits wide,
+     * the adjusted horizontal blank start needs to be shifted by
+     * 3 bit positions to the right. */
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "IGA1 CrtcHBlankStart: %d\n", mode->CrtcHBlankStart));
+    temp = mode->CrtcHBlankStart >> 3;
+
+    /* 3X5.02[7:0] - Horizontal Blanking Start Bits [7:0] */
+     hwp->writeCrtc(hwp, 0x02, temp & 0xFF);
+
 
     /* horizontal blanking end : start + 1025 */
     /* temp = (mode->CrtcHTotal >> 3) - 1; */
