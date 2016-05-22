@@ -480,14 +480,24 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
      hwp->writeCrtc(hwp, 0x02, temp & 0xFF);
 
 
-    /* horizontal blanking end : start + 1025 */
-    /* temp = (mode->CrtcHTotal >> 3) - 1; */
+    /* Set IGA1 horizontal blank end. */
+    /* After shifting horizontal blank end by 3 bit positions to the
+     * right, the 7 least significant bits are actually used.
+     * In addition to that, this particular register requires the
+     * value to be 1 less than the actual value being written. */
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "IGA1 CrtcHBlankEnd: %d\n", mode->CrtcHBlankEnd));
     temp = (mode->CrtcHBlankEnd >> 3) - 1;
+
+    /* 3X5.03[4:0] - Horizontal Blanking End Bits [4:0] */
     ViaCrtcMask(hwp, 0x03, temp, 0x1F);
+
+    /* 3X5.05[7] - Horizontal Blanking End Bit [5] */
     ViaCrtcMask(hwp, 0x05, temp << 2, 0x80);
+
+    /* 3X5.33[5] - Horizontal Blanking End Bit [6] */
     ViaCrtcMask(hwp, 0x33, temp >> 1, 0x20);
 
-    /* CrtcHSkew ??? */
 
     /* horizontal sync start : 4095 */
     temp = mode->CrtcHSyncStart >> 3;
