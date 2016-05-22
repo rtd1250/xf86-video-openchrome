@@ -499,10 +499,20 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x33, temp >> 1, 0x20);
 
 
-    /* horizontal sync start : 4095 */
+    /* Set IGA1 horizontal synchronization start. */
+    /* Due to IGA1 horizontal synchronization start being only 9 bits wide,
+     * the adjusted horizontal synchronization start needs to be shifted by
+     * 3 bit positions to the right. */
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "IGA1 CrtcHSyncStart: %d\n", mode->CrtcHSyncStart));
     temp = mode->CrtcHSyncStart >> 3;
+
+    /* 3X5.04[7:0] - Horizontal Retrace Start Bits [7:0] */
     hwp->writeCrtc(hwp, 0x04, temp & 0xFF);
+
+    /* 3X5.33[4] - Horizontal Retrace Start Bit [8] */
     ViaCrtcMask(hwp, 0x33, temp >> 4, 0x10);
+
 
     /* horizontal sync end : start + 256 */
     temp = mode->CrtcHSyncEnd >> 3;
