@@ -217,6 +217,7 @@ void ViaDisplayDisableSimultaneous(ScrnInfoPtr pScrn);
 void ViaGammaDisable(ScrnInfoPtr pScrn);
 void ViaCRTCInit(ScrnInfoPtr pScrn);
 void viaIGAInitCommon(ScrnInfoPtr pScrn);
+void viaIGA1Init(ScrnInfoPtr pScrn);
 void viaIGA1SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y);
 void viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void viaIGA1Save(ScrnInfoPtr pScrn);

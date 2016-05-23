@@ -504,6 +504,67 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
                         "Exiting viaIGAInitCommon.\n"));
 }
 
+/*
+ * Initialize IGA1 (Integrated Graphics Accelerator) registers.
+ */
+void
+viaIGA1Init(ScrnInfoPtr pScrn)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+#ifdef HAVE_DEBUG
+    CARD8 temp;
+#endif
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA1Init.\n"));
+
+#ifdef HAVE_DEBUG
+    temp = hwp->readSeq(hwp, 0x1B);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR1B: 0x%02X\n", temp));
+    temp = hwp->readSeq(hwp, 0x2D);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR2D: 0x%02X\n", temp));
+#endif
+
+    /* 3C5.1B[7:6] - Secondary Display Engine (Gated Clock <LCK>)
+     *               0x: Clock always off
+     *               10: Clock always on
+     *               11: Clock on/off according to the
+     *                   Power Management Status (PMS)
+     * 3C5.1B[5:4] - Primary Display Engine (Gated Clock <VCK>)
+     *               0x: Clock always off
+     *               10: Clock always on
+     *               11: Clock on/off according to the PMS
+     * 3C5.1B[3:1] - Reserved
+     * 3C5.1B[0]   - Primary Display’s LUT On/Off
+     *               0: On
+     *               1: Off */
+    ViaSeqMask(hwp, 0x1B, 0x30, 0x31);
+
+    /* 3C5.2D[7:6] - E3_ECK_N Selection
+     *               00: E3_ECK_N
+     *               01: E3_ECK
+     *               10: delayed E3_ECK_N
+     *               11: delayed E3_ECK
+     * 3C5.2D[5:4] - VCK (Primary Display Clock) PLL Power Control
+     *               0x: PLL power-off
+     *               10: PLL always on
+     *               11: PLL on/off according to the PMS
+     * 3C5.2D[3:2] - LCK (Secondary Display Clock) PLL Power Control
+     *               0x: PLL power-off
+     *               10: PLL always on
+     *               11: PLL on/off according to the PMS
+     * 3C5.2D[1:0] - ECK (Engine Clock) PLL Power Control
+     *               0x: PLL power-off
+     *               10: PLL always on
+     *               11: PLL on/off according to the PMS */
+    ViaSeqMask(hwp, 0x2D, 0x30, 0x30);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA1Init.\n"));
+}
+
 void
 viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
@@ -2344,6 +2405,7 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     viaIGA1DPMSControl(pScrn, 0x03);
 
     viaIGAInitCommon(pScrn);
+    viaIGA1Init(pScrn);
     ViaCRTCInit(pScrn);
 
     /* Turn off Screen */
