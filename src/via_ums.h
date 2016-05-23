@@ -222,6 +222,7 @@ void viaIGA1SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y);
 void viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void viaIGA1Save(ScrnInfoPtr pScrn);
 void viaIGA1Restore(ScrnInfoPtr pScrn);
+void viaIGA2Init(ScrnInfoPtr pScrn);
 void viaIGA2SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y);
 void viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void viaIGA2Save(ScrnInfoPtr pScrn);
