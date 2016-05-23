@@ -293,7 +293,9 @@ void
 viaIGAInitCommon(ScrnInfoPtr pScrn)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
+#ifdef HAVE_DEBUG
     CARD8 temp;
+#endif
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaIGAInitCommon.\n"));
@@ -307,11 +309,34 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
     ViaCRTCSetGraphicsRegisters(pScrn);
     ViaCRTCSetAttributeRegisters(pScrn);
 
+#ifdef HAVE_DEBUG
     temp = hwp->readSeq(hwp, 0x15);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "SR15: 0x%02X\n", temp));
+    temp = hwp->readSeq(hwp, 0x19);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR19: 0x%02X\n", temp));
+    temp = hwp->readSeq(hwp, 0x1A);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR1A: 0x%02X\n", temp));
+    temp = hwp->readSeq(hwp, 0x1E);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR1E: 0x%02X\n", temp));
+    temp = hwp->readSeq(hwp, 0x2A);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR2A: 0x%02X\n", temp));
+    temp = hwp->readSeq(hwp, 0x2D);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR2D: 0x%02X\n", temp));
+    temp = hwp->readSeq(hwp, 0x2E);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR2E: 0x%02X\n", temp));
+    temp = hwp->readSeq(hwp, 0x3F);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR3F: 0x%02X\n", temp));
+#endif
 
-    /* Be careful with 3C5.15[5].
+    /* Be careful with 3C5.15[5] - Wrap Around Disable.
      * It must be set to 1 for correct operation. */
     /* 3C5.15[7]   - 8/6 Bits LUT
      *               0: 6-bit
@@ -336,16 +361,144 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
      * 3C5.15[0]   - Reserved */
     ViaSeqMask(hwp, 0x15, 0x22, 0x62);
 
-    temp = hwp->readSeq(hwp, 0x1A);
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "SR1A: 0x%02X\n", temp));
-    /* 3C5.1A[7]: Read Cache Enable
-     *            0 = Disable
-     *            1 = Enable
-     * 3C5.1A[3]: Extended Mode Memory Access Enable
-     *            0 = Disable
-     *            1 = Enable */
+    /* 3C5.19[7] - Reserved
+     * 3C5.19[6] - MIU/AGP Interface Clock Control
+     *             0: Clocks always on
+     *             1: Enable clock gating
+     * 3C5.19[5] - P-Arbiter Interface Clock Control
+     *             0: Clocks always on
+     *             1: Enable clock gating
+     * 3C5.19[4] - AGP Interface Clock Control
+     *             0: Clocks always on
+     *             1: Enable clock gating
+     * 3C5.19[3] - Typical Arbiter Interface Clock Control
+     *             0: Clocks always on
+     *             1: Enable clock gating
+     * 3C5.19[2] - MC Interface Clock Control
+     *             0: Clocks always on
+     *             1: Enable clock gating
+     * 3C5.19[1] - Display Interface Clock Control
+     *             0: Clocks always on
+     *             1: Enable clock gating
+     * 3C5.19[0] - CPU Interface Clock Control
+     *             0: Clocks always on
+     *             1: Enable clock gating */
+    ViaSeqMask(hwp, 0x19, 0x7F, 0x7F);
+
+    /* 3C5.1A[7] - Read Cache Enable
+     *             0: Disable
+     *             1: Enable
+     * 3C5.1A[6] - Software Reset
+     *             0: Default value
+     *             1: Reset
+     * 3C5.1A[5] - DVI Sense
+     *             0: No connect
+     *             1: Connected
+     * 3C5.1A[4] - Second DVI Sense
+     *             0: No connect
+     *             1: Connected
+     * 3C5.1A[3] - Extended Mode Memory Access Enable
+     *             0: Disable
+     *             1: Enable
+     * 3C5.1A[2] - PCI Burst Write Wait State Select
+     *             0: 0 Wait state
+     *             1: 1 Wait state
+     * 3C5.1A[1] - Reserved
+     * 3C5.1A[0] - LUT Shadow Access
+     *             0: 3C6/3C7/3C8/3C9 addresses map to
+     *                Primary Display’s LUT
+     *             1: 3C6/3C7/3C8/3C9 addresses map to
+     *                Secondary Display’s LUT */
     ViaSeqMask(hwp, 0x1A, 0x88, 0x88);
+
+    /* 3C5.1E[7:6] - Video Capture Port Power Control
+     *               0x: Pad always off
+     *               10: Depend on the other control signal
+     *               11: Pad on/off according to the PMS
+     * 3C5.1E[5:4] - Digital Video Port 1 Power Control
+     *               0x: Pad always off
+     *               10: Depend on the other control signal
+     *               11: Pad on/off according to the PMS
+     * 3C5.1E[3]   - Spread Spectrum On/Off
+     *               0: Off
+     *               1: On
+     * 3C5.1E[2]   - Reserved
+     * 3C5.1E[1]   - Replace ECK by MCK
+     *               For BIST purpose.
+     * 3C5.1E[0]   - On/Off ROC ECK
+     *               0: Off
+     *               1: On */
+    ViaSeqMask(hwp, 0x1E, 0xF0, 0xF0);
+
+    /* 3C5.2A[7]   - Reserved
+     * 3C5.2A[6]   - The Spread Spectrum Type Control
+     *               0: Original Type
+     *               1: FIFO Type
+     * 3C5.2A[5:4] - Reserved
+     * 3C5.2A[3:2] - LVDS Channel 2 I/O Pad Control
+     *               0x: Pad always off
+     *               10: Depend on the other control signal
+     *               11: Pad on/off according to the PMS
+     * 3C5.2A[1:0] - LVDS Channel 1 and DVI I/O Pad Control
+     *               0x: Pad always off
+     *               10: Depend on the other control signal
+     *               11: Pad on/off according to the PMS */
+    ViaSeqMask(hwp, 0x2A, 0x0F, 0x0F);
+
+    /* 3C5.2D[7:6] - E3_ECK_N Selection
+     *               00: E3_ECK_N
+     *               01: E3_ECK
+     *               10: delayed E3_ECK_N
+     *               11: delayed E3_ECK
+     * 3C5.2D[5:4] - VCK (Primary Display Clock) PLL Power Control
+     *               0x: PLL power-off
+     *               10: PLL always on
+     *               11: PLL on/off according to the PMS
+     * 3C5.2D[3:2] - LCK (Secondary Display Clock) PLL Power Control
+     *               0x: PLL power-off
+     *               10: PLL always on
+     *               11: PLL on/off according to the PMS
+     * 3C5.2D[1:0] - ECK (Engine Clock) PLL Power Control
+     *               0x: PLL power-off
+     *               10: PLL always on
+     *               11: PLL on/off according to the PMS */
+    ViaSeqMask(hwp, 0x2D, 0x03, 0xC3);
+
+    /* 3C5.2E[7:6] - Capturer (Gated Clock <ECK>)
+     *               0x: Clock off
+     *               10: Clock always on
+     *               11: Clock on/off according to the engine IDLE status
+     * 3C5.2E[5:4] - Video Processor (Gated Clock <ECK>)
+     *               0x: Clock off
+     *               10: Clock always on
+     *               11: Clock on/off according to the engine IDLE status
+     * 3C5.2E[3:2] - PCI Master/DMA (Gated Clock <ECK/CPUCK>)
+     *               0x: Clock off
+     *               10: Clock always on
+     *               11: Clock on/off according to the engine IDLE status
+     * 3C5.2E[1:0] - Video Playback Engine (V3/V4 Gated Clock <VCK>)
+     *               0x: Clock off
+     *               10: Clock always on
+     *               11: Clock on/off according to the engine IDLE status */
+    ViaSeqMask(hwp, 0x2E, 0xFF, 0xFF);
+
+    /* 3C5.3F[7:6] - CR Clock Control (Gated Clock <ECK>)
+     *               0x: Clock off
+     *               10: Clock always on
+     *               11: Clock on/off according to the engine IDLE status
+     * 3C5.3F[5:4] - 3D Clock Control (Gated Clock <ECK>)
+     *               0x: Clock off
+     *               10: Clock always on
+     *               11: Clock on/off according to the engine IDLE status
+     * 3C5.3F[3:2] - 2D Clock Control (Gated Clock <ECK/CPUCK>)
+     *               0x: Clock off
+     *               10: Clock always on
+     *               11: Clock on/off according to the engine IDLE status
+     * 3C5.3F[1:0] - Video Clock Control (Gated Clock <ECK>)
+     *               0x: Clock off
+     *               10: Clock always on
+     *               11: Clock on/off according to each engine IDLE status */
+    ViaSeqMask(hwp, 0x3F, 0xFF, 0xFF);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaIGAInitCommon.\n"));
