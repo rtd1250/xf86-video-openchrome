@@ -500,6 +500,22 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
      *               11: Clock on/off according to each engine IDLE status */
     ViaSeqMask(hwp, 0x3F, 0xFF, 0xFF);
 
+    /* 3X5.36[7]   - DPMS VSYNC Output
+     * 3X5.36[6]   - DPMS HSYNC Output
+     * 3X5.36[5:4] - DPMS Control
+     *               00: On
+     *               01: Stand-by
+     *               10: Suspend
+     *               11: Off
+     *               When the DPMS state is off, both HSYNC and VSYNC
+     *               are grounded, saving monitor power consumption.
+     * 3X5.36[3]   - Horizontal Total Bit [8]
+     * 3X5.36[2:1] - Reserved
+     * 3X5.36[0]   - PCI Power Management Control
+     *               0: Disable
+     *               1: Enable */
+    ViaCrtcMask(hwp, 0x36, 0x01, 0x01);
+
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaIGAInitCommon.\n"));
 }
