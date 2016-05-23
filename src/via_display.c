@@ -334,6 +334,9 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
     temp = hwp->readSeq(hwp, 0x3F);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "SR3F: 0x%02X\n", temp));
+    temp = hwp->readCrtc(hwp, 0x36);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "CR36: 0x%02X\n", temp));
 #endif
 
     /* Be careful with 3C5.15[5] - Wrap Around Disable.
