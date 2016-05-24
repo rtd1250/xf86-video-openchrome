@@ -857,7 +857,6 @@ via_dvi_mode_set(xf86OutputPtr output, DisplayModePtr mode,
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
     via_vt1632_power(output, FALSE);
-    ViaModeSecondCRTC(pScrn, mode);
     via_vt1632_mode_set(output, mode, adjusted_mode);
     via_vt1632_power(output, TRUE);
 }
