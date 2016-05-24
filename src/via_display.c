@@ -623,8 +623,6 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     hwp->writeSeq(hwp, 0x03, 0x00);
     hwp->writeSeq(hwp, 0x04, 0x0E);
 
-    ViaSeqMask(hwp, 0x15, 0x02, 0x02);
-
     /* Set the color depth for IGA1. */
     switch (pScrn->bitsPerPixel) {
     case 8:
