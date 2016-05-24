@@ -628,20 +628,33 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     /* Set the color depth for IGA1. */
     switch (pScrn->bitsPerPixel) {
     case 8:
-        /* Only CLE266.AX use 6bits LUT. */
+        /* Only CLE266.AX uses 6-bit LUT. */
         if (pVia->Chipset == VIA_CLE266 && pVia->ChipRev < 15) {
-            ViaSeqMask(hwp, 0x15, 0x22, 0xFE);
+            /* 6-bit LUT */
+            ViaSeqMask(hwp, 0x15, 0x00, 0x9C);
         } else {
-            ViaSeqMask(hwp, 0x15, 0xA2, 0xFE);
+            /* 8-bit LUT */
+            ViaSeqMask(hwp, 0x15, 0x80, 0x9C);
         }
 
         break;
     case 16:
-        ViaSeqMask(hwp, 0x15, 0xB6, 0xFE);
+        /* 3C5.15[7]   - 8/6 Bits LUT
+         *               0: 6-bit
+         *               1: 8-bit
+         * 3C5.15[4]   - Hi Color Mode Select
+         *               0: 555
+         *               1: 565
+         * 3C5.15[3:2] - Display Color Depth Select
+         *               00: 8bpp
+         *               01: 16bpp
+         *               10: 30bpp
+         *               11: 32bpp */
+        ViaSeqMask(hwp, 0x15, 0x94, 0x9C);
         break;
     case 24:
     case 32:
-        ViaSeqMask(hwp, 0x15, 0xAE, 0xFE);
+        ViaSeqMask(hwp, 0x15, 0x9C, 0x9C);
         break;
     default:
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
