@@ -771,12 +771,25 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x05, temp, 0x1F);
 
 
-    /* vertical total : 2049 */
+    /* Set IGA1 vertical total. */
+    /* Vertical total requires the value to be 2 less
+     * than the actual value being written. */
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "IGA1 CrtcVTotal: %d\n", mode->CrtcVTotal));
     temp = mode->CrtcVTotal - 2;
+
+    /* 3X5.06[7:0] - Vertical Total Period Bits [7:0] */
     hwp->writeCrtc(hwp, 0x06, temp & 0xFF);
+
+    /* 3X5.07[0] - Vertical Total Period Bit [8] */
     ViaCrtcMask(hwp, 0x07, temp >> 8, 0x01);
+
+    /* 3X5.07[5] - Vertical Total Period Bit [9] */
     ViaCrtcMask(hwp, 0x07, temp >> 4, 0x20);
+
+    /* 3X5.35[0] - Vertical Total Period Bit [10] */
     ViaCrtcMask(hwp, 0x35, temp >> 10, 0x01);
+
 
     /* vertical address : 2048 */
     temp = mode->CrtcVDisplay - 1;
