@@ -811,12 +811,6 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x35, temp >> 8, 0x04);
 
 
-    /* Primary starting address -> 0x00, adjustframe does the rest */
-    hwp->writeCrtc(hwp, 0x0C, 0x00);
-    hwp->writeCrtc(hwp, 0x0D, 0x00);
-    ViaCrtcMask(hwp, 0x48, 0x00, 0x03); /* is this even possible on CLE266A ? */
-    hwp->writeCrtc(hwp, 0x34, 0x00);
-
     /* vertical sync start : 2047 */
     temp = mode->CrtcVSyncStart;
     hwp->writeCrtc(hwp, 0x10, temp & 0xFF);
