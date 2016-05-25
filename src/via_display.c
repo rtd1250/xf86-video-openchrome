@@ -791,12 +791,25 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x35, temp >> 10, 0x01);
 
 
-    /* vertical address : 2048 */
+    /* Set IGA1 vertical display end. */
+    /* Vertical display end requires the value to be 1 less
+     * than the actual value being written. */
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "IGA1 CrtcVDisplay: %d\n", mode->CrtcVDisplay));
     temp = mode->CrtcVDisplay - 1;
+
+    /* 3X5.12[7:0] - Vertical Active Data Period Bits [7:0] */
     hwp->writeCrtc(hwp, 0x12, temp & 0xFF);
+
+    /* 3X5.07[1] - Vertical Active Data Period Bit [8] */
     ViaCrtcMask(hwp, 0x07, temp >> 7, 0x02);
+
+    /* 3X5.07[6] - Vertical Active Data Period Bit [9] */
     ViaCrtcMask(hwp, 0x07, temp >> 3, 0x40);
+
+    /* 3X5.35[2] - Vertical Active Data Period Bit [10] */
     ViaCrtcMask(hwp, 0x35, temp >> 8, 0x04);
+
 
     /* Primary starting address -> 0x00, adjustframe does the rest */
     hwp->writeCrtc(hwp, 0x0C, 0x00);
