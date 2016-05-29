@@ -985,30 +985,6 @@ umsCrtcInit(ScrnInfoPtr pScrn)
     iga2_rec->index = 1;
     iga2->driver_private = iga2_rec;
 
-    /*
-     * CLE266A:
-     *   Max Line Pitch: 4080, (FB corruption when higher, driver problem?)
-     *   Max Height: 4096 (and beyond)
-     *
-     * CLE266A: primary AdjustFrame can use only 24 bits, so we are limited
-     * to 12x11 bits; 4080x2048 (~2:1), 3344x2508 (4:3), or 2896x2896 (1:1).
-     * TODO Test CLE266Cx, KM400, KM400A, K8M800, CN400 please.
-     *
-     * We should be able to limit the memory available for a mode to 32 MB,
-     * but miScanLineWidth fails to catch this properly (apertureSize).
-     */
-    switch (pVia->Chipset) {
-    case VIA_CLE266:
-    case VIA_KM400:
-        max_pitch = 3344;
-        max_height = 2508;
-        break;
-    default:
-        max_pitch = 16384 / (pScrn->bitsPerPixel >> 3);
-        max_height = max_pitch;
-        break;
-    }
-
     /* Init HI_X0 for cursor */
     switch (pVia->Chipset) {
     case VIA_CX700:
@@ -1038,6 +1014,21 @@ umsCrtcInit(ScrnInfoPtr pScrn)
         VIASETREG(ALPHA_V3_FIFO_CONTROL, 0xE0F0000);
         break;
     }
+
+    /*
+     * CLE266A:
+     *   Max Line Pitch: 4080, (FB corruption when higher, driver problem?)
+     *   Max Height: 4096 (and beyond)
+     *
+     * CLE266A: primary AdjustFrame can use only 24 bits, so we are limited
+     * to 12x11 bits; 4080x2048 (~2:1), 3344x2508 (4:3), or 2896x2896 (1:1).
+     * TODO Test CLE266Cx, KM400, KM400A, K8M800, CN400 please.
+     *
+     * We should be able to limit the memory available for a mode to 32 MB,
+     * but miScanLineWidth fails to catch this properly (apertureSize).
+     */
+    max_pitch = 8192 / ((pScrn->bitsPerPixel + 7) >> 3);
+    max_height = max_pitch;
 
     xf86CrtcSetSizeRange(pScrn, 320, 200, max_pitch, max_height);
 
