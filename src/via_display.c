@@ -829,6 +829,19 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x35, temp >> 7, 0x08);
 
 
+    /* Set IGA1 vertical blank end. */
+    /* Vertical blank end requires the value to be 1 less
+     * than the actual value being written, and 8 LSB
+     * (Least Significant Bits) are written straight into the
+     * relevant register. */
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "IGA1 CrtcVBlankEnd: %d\n", mode->CrtcVBlankEnd));
+    temp = mode->CrtcVBlankEnd - 1;
+
+    /* 3X5.16[7:0] - Vertical Blanking End Bits [7:0] */
+    hwp->writeCrtc(hwp, 0x16, temp & 0xFF);
+
+
     /* vertical sync start : 2047 */
     temp = mode->CrtcVSyncStart;
     hwp->writeCrtc(hwp, 0x10, temp & 0xFF);
@@ -849,11 +862,6 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     /* zero Maximum scan line */
     ViaCrtcMask(hwp, 0x09, 0x00, 0x1F);
     hwp->writeCrtc(hwp, 0x14, 0x00);
-
-    /* vertical blanking end : start + 257 */
-    /* temp = mode->CrtcVTotal - 1; */
-    temp = mode->CrtcVBlankEnd - 1;
-    hwp->writeCrtc(hwp, 0x16, temp);
 
     /* offset */
     temp = (pScrn->displayWidth * (pScrn->bitsPerPixel >> 3)) >> 3;
