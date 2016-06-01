@@ -811,6 +811,26 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x35, temp >> 8, 0x04);
 
 
+    /* Set IGA1 vertical blank start. */
+    /* Vertical blank start requires the value to be 1 less
+     * than the actual value being written. */
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "IGA1 CrtcVBlankStart: %d\n", mode->CrtcVBlankStart));
+    temp = mode->CrtcVBlankStart - 1;
+
+    /* 3X5.15[7:0] - Vertical Blanking Start Bits [7:0] */
+    hwp->writeCrtc(hwp, 0x15, temp & 0xFF);
+
+    /* 3X5.07[3] - Vertical Blanking Start Bit [8] */
+    ViaCrtcMask(hwp, 0x07, temp >> 5, 0x08);
+
+    /* 3X5.09[5] - Vertical Blanking Start Bit [9] */
+    ViaCrtcMask(hwp, 0x09, temp >> 4, 0x20);
+
+    /* 3X5.35[3] - Vertical Blanking Start Bit [10] */
+    ViaCrtcMask(hwp, 0x35, temp >> 7, 0x08);
+
+
     /* vertical sync start : 2047 */
     temp = mode->CrtcVSyncStart;
     hwp->writeCrtc(hwp, 0x10, temp & 0xFF);
@@ -831,14 +851,6 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     /* zero Maximum scan line */
     ViaCrtcMask(hwp, 0x09, 0x00, 0x1F);
     hwp->writeCrtc(hwp, 0x14, 0x00);
-
-    /* vertical blanking start : 2048 */
-    /* temp = mode->CrtcVDisplay - 1; */
-    temp = mode->CrtcVBlankStart - 1;
-    hwp->writeCrtc(hwp, 0x15, temp & 0xFF);
-    ViaCrtcMask(hwp, 0x07, temp >> 5, 0x08);
-    ViaCrtcMask(hwp, 0x09, temp >> 4, 0x20);
-    ViaCrtcMask(hwp, 0x35, temp >> 7, 0x08);
 
     /* vertical blanking end : start + 257 */
     /* temp = mode->CrtcVTotal - 1; */
