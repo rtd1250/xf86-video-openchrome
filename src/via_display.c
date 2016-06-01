@@ -812,11 +812,9 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
 
     /* Set IGA1 vertical blank start. */
-    /* Vertical blank start requires the value to be 1 less
-     * than the actual value being written. */
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "IGA1 CrtcVBlankStart: %d\n", mode->CrtcVBlankStart));
-    temp = mode->CrtcVBlankStart - 1;
+    temp = mode->CrtcVBlankStart;
 
     /* 3X5.15[7:0] - Vertical Blanking Start Bits [7:0] */
     hwp->writeCrtc(hwp, 0x15, temp & 0xFF);
