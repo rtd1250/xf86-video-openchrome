@@ -873,6 +873,22 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x11, temp & 0x0F, 0x0F);
 
 
+    /* Set IGA1 horizontal offset adjustment. */
+    temp = (pScrn->displayWidth * (pScrn->bitsPerPixel >> 3)) >> 3;
+
+    /* Make sure that this is 32-byte aligned. */
+    if (temp & 0x03) {
+        temp += 0x03;
+        temp &= ~0x03;
+    }
+
+    /* 3X5.13[7:0] - Primary Display Horizontal Offset Bits [7:0] */
+    hwp->writeCrtc(hwp, 0x13, temp & 0xFF);
+
+    /* 3X5.35[7:5] - Primary Display Horizontal Offset Bits [10:8] */
+    ViaCrtcMask(hwp, 0x35, temp >> 3, 0xE0);
+
+
     /* line compare: We are not doing splitscreen so 0x3FFF */
     hwp->writeCrtc(hwp, 0x18, 0xFF);
     ViaCrtcMask(hwp, 0x07, 0x10, 0x10);
@@ -883,16 +899,6 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     /* zero Maximum scan line */
     ViaCrtcMask(hwp, 0x09, 0x00, 0x1F);
     hwp->writeCrtc(hwp, 0x14, 0x00);
-
-    /* offset */
-    temp = (pScrn->displayWidth * (pScrn->bitsPerPixel >> 3)) >> 3;
-    /* Make sure that this is 32-byte aligned. */
-    if (temp & 0x03) {
-        temp += 0x03;
-        temp &= ~0x03;
-    }
-    hwp->writeCrtc(hwp, 0x13, temp & 0xFF);
-    ViaCrtcMask(hwp, 0x35, temp >> 3, 0xE0);
 
     /* fetch count */
     temp = (mode->CrtcHDisplay * (pScrn->bitsPerPixel >> 3)) >> 3;
