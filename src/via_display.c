@@ -842,12 +842,23 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     hwp->writeCrtc(hwp, 0x16, temp & 0xFF);
 
 
-    /* vertical sync start : 2047 */
+    /* Set IGA1 vertical synchronization start. */
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "IGA1 CrtcVSyncStart: %d\n", mode->CrtcVSyncStart));
     temp = mode->CrtcVSyncStart;
+
+    /* 3X5.10[7:0] - Vertical Retrace Start Bits [7:0] */
     hwp->writeCrtc(hwp, 0x10, temp & 0xFF);
+
+    /* 3X5.07[2] - Vertical Retrace Start Bit [8] */
     ViaCrtcMask(hwp, 0x07, temp >> 6, 0x04);
+
+    /* 3X5.07[7] - Vertical Retrace Start Bit [9] */
     ViaCrtcMask(hwp, 0x07, temp >> 2, 0x80);
+
+    /* 3X5.35[1] - Vertical Retrace Start Bit [10] */
     ViaCrtcMask(hwp, 0x35, temp >> 9, 0x02);
+
 
     /* vertical sync end : start + 16 -- other bits someplace? */
     ViaCrtcMask(hwp, 0x11, mode->CrtcVSyncEnd, 0x0F);
