@@ -860,8 +860,18 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x35, temp >> 9, 0x02);
 
 
-    /* vertical sync end : start + 16 -- other bits someplace? */
-    ViaCrtcMask(hwp, 0x11, mode->CrtcVSyncEnd, 0x0F);
+    /* Set IGA1 vertical synchronization end. */
+    /* Vertical synchronization end requires the value to be 1 less
+     * than the actual value being written, and 4 LSB
+     * (Least Significant Bits) are written straight into the
+     * relevant register. */
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "IGA1 CrtcVSyncEnd: %d\n", mode->CrtcVSyncEnd));
+    temp = mode->CrtcVSyncEnd - 1;
+
+    /*3X5.11[3:0] - Vertical Retrace End Bits [3:0] */
+    ViaCrtcMask(hwp, 0x11, temp & 0x0F, 0x0F);
+
 
     /* line compare: We are not doing splitscreen so 0x3FFF */
     hwp->writeCrtc(hwp, 0x18, 0xFF);
