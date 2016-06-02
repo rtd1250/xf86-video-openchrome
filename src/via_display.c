@@ -1744,11 +1744,11 @@ viaIGA2SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y)
 
     Base = (y * pScrn->displayWidth + x) * (pScrn->bitsPerPixel / 8);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Base Address: 0x%x\n",
+                        "Base Address: 0x%lx\n",
                         Base));
     Base = (Base + drmmode->front_bo->offset) >> 3;
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "DRI Base Address: 0x%x\n",
+                "DRI Base Address: 0x%lx\n",
                 Base);
 
     tmp = hwp->readCrtc(hwp, 0x62) & 0x01;
