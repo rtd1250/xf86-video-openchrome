@@ -580,6 +580,57 @@ viaIGA1Init(ScrnInfoPtr pScrn)
      *               11: PLL on/off according to the PMS */
     ViaSeqMask(hwp, 0x2D, 0x30, 0x30);
 
+    /* 3X5.32[7:5] - HSYNC Delay Number by VCLK
+     *               000: No delay
+     *               001: Delay + 4 VCKs
+     *               010: Delay + 8 VCKs
+     *               011: Delay + 12 VCKs
+     *               100: Delay + 16 VCKs
+     *               101: Delay + 20 VCKs
+     *               Others: Undefined
+     * 3X5.32[4]   - Reserved
+     * 3X5.32[3]   - CRT SYNC Driving Selection
+     *               0: Low
+     *               1: High
+     * 3X5.32[2]   - Display End Blanking Enable
+     *               0: Disable
+     *               1: Enable
+     * 3X5.32[1]   - Digital Video Port (DVP) Gamma Correction
+     *               If the gamma correction of primary display is
+     *               turned on, the gamma correction in DVP can be
+     *               enabled / disabled by this bit.
+     *               0: Disable
+     *               1: Enable
+     * 3X5.32[0]   - Real-Time Flipping
+     *               0: Flip by the frame
+     *               1: Flip by each scan line */
+    ViaCrtcMask(hwp, 0x32, 0x00, 0xEF);
+
+    /*
+     * 3X5.33[7]   - Primary Display Gamma Correction
+     *               0: Disable
+     *               1: Enable
+     * 3X5.33[6]   - Primary Display Interlace Mode
+     *               0: Disable
+     *               1: Enable
+     * 3X5.33[5]   - Horizontal Blanking End Bit [6]
+     * 3X5.33[4]   - Horizontal Synchronization Start Bit [8]
+     * 3X5.33[3]   - Prefetch Mode
+     *               0: Disable
+     *               1: Enable
+     * 3X5.33[2:0] - The Value will Shift the HSYNC to be Early than Planned
+     *               000: Shift to early time by 3 characters
+     *                    (VGA mode suggested value; default value)
+     *               001: Shift to early time by 4 characters
+     *               010: Shift to early time by 5 characters
+     *               011: Shift to early time by 6 characters
+     *               100: Shift to early time by 7 characters
+     *               101: Shift to early time by 0 character
+     *                    (Non-VGA mode suggested value)
+     *               110: Shift to early time by 1 character
+     *               111: Shift to early time by 2 characters */
+    ViaCrtcMask(hwp, 0x33, 0x00, 0xCF);
+
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaIGA1Init.\n"));
 }
@@ -702,7 +753,7 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
      * 3X5.32[0]   - Real-Time Flipping
      *               0: Flip by the frame
      *               1: Flip by each scan line */
-    ViaCrtcMask(hwp, 0x32, 0x00, 0xED);
+    ViaCrtcMask(hwp, 0x32, 0x00, 0xEC);
 
     /*
      * 3X5.33[7]   - Primary Display Gamma Correction
@@ -727,19 +778,13 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
      *                    (Non-VGA mode suggested value)
      *               110: Shift to early time by 1 character
      *               111: Shift to early time by 2 characters */
-    ViaCrtcMask(hwp, 0x33, 0x00, 0x48);
+    ViaCrtcMask(hwp, 0x33, 0x00, 0x4F);
 
     /* Set IGA1 to linear mode */
     /* 3X5.43[2]  - IGA1 Address Mode Selection
      *              0: Linear
      *              1: Tile */
     ViaCrtcMask(hwp, 0x43, 0x00, 0x04);
-
-    /* Disable IGA1 gamma correction. */
-    ViaCrtcMask(hwp, 0x33, 0x00, 0x80);
-
-    /* Disable DVP gamma correction */
-    ViaCrtcMask(hwp, 0x32, 0x00, 0x02);
 
 
     /* Set IGA1 horizontal total.*/
