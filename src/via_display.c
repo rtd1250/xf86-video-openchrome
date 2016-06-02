@@ -120,32 +120,6 @@ viaDisplayInit(ScrnInfoPtr pScrn)
 }
 
 /*
- * Enables simultaneous mode.
- */
-void
-ViaDisplayEnableSimultaneous(ScrnInfoPtr pScrn)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                     "ViaDisplayEnableSimultaneous\n"));
-    ViaCrtcMask(hwp, 0x6B, 0x08, 0x08);
-}
-
-/*
- * Disables simultaneous mode.
- */
-void
-ViaDisplayDisableSimultaneous(ScrnInfoPtr pScrn)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                     "ViaDisplayDisableSimultaneous\n"));
-    ViaCrtcMask(hwp, 0x6B, 0x00, 0x08);
-}
-
-/*
  * Sets the primary or secondary display stream on internal TMDS.
  */
 void
@@ -2471,30 +2445,18 @@ iga1_crtc_dpms(xf86CrtcPtr crtc, int mode)
     switch (mode) {
     case DPMSModeOn:
         viaIGA1DPMSControl(pScrn, 0x00);
-
-        if (pBIOSInfo->SimultaneousEnabled)
-            ViaDisplayEnableSimultaneous(pScrn);
         break;
 
     case DPMSModeStandby:
         viaIGA1DPMSControl(pScrn, 0x01);
-
-        if (pBIOSInfo->SimultaneousEnabled)
-            ViaDisplayDisableSimultaneous(pScrn);
         break;
 
     case DPMSModeSuspend:
         viaIGA1DPMSControl(pScrn, 0x02);
-
-        if (pBIOSInfo->SimultaneousEnabled)
-            ViaDisplayDisableSimultaneous(pScrn);
         break;
 
     case DPMSModeOff:
         viaIGA1DPMSControl(pScrn, 0x03);
-
-        if (pBIOSInfo->SimultaneousEnabled)
-            ViaDisplayDisableSimultaneous(pScrn);
         break;
 
 	default:
@@ -2688,11 +2650,6 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 
     /* Turn on Screen */
     ViaCrtcMask(hwp, 0x17, 0x80, 0x80);
-
-    if (pVia->pBIOSInfo->SimultaneousEnabled)
-        ViaDisplayEnableSimultaneous(pScrn);
-    else
-        ViaDisplayDisableSimultaneous(pScrn);
 
     iga1_crtc_set_origin(crtc, crtc->x, crtc->y);
 
@@ -2968,18 +2925,12 @@ iga2_crtc_dpms(xf86CrtcPtr crtc, int mode)
     switch (mode) {
     case DPMSModeOn:
         viaIGA2DisplayOutput(pScrn, TRUE);
-
-        if (pBIOSInfo->SimultaneousEnabled)
-            ViaDisplayEnableSimultaneous(pScrn);
         break;
 
     case DPMSModeStandby:
     case DPMSModeSuspend:
     case DPMSModeOff:
         viaIGA2DisplayOutput(pScrn, FALSE);
-
-        if (pBIOSInfo->SimultaneousEnabled)
-            ViaDisplayDisableSimultaneous(pScrn);
         break;
 
     default:
@@ -3131,11 +3082,6 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     hwp->disablePalette(hwp);
 
     viaIGA2DisplayChannel(pScrn, TRUE);
-
-    if (pVia->pBIOSInfo->SimultaneousEnabled)
-        ViaDisplayEnableSimultaneous(pScrn);
-    else
-        ViaDisplayDisableSimultaneous(pScrn);
 
     iga2_crtc_set_origin(crtc, crtc->x, crtc->y);
 

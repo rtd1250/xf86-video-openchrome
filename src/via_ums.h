@@ -154,9 +154,6 @@ typedef struct _VIABIOSINFO {
     Bool        ClockExternal;
     CARD32      Bandwidth; /* available memory bandwidth */
 
-    /* Simultaneous */
-    Bool SimultaneousEnabled;
-
     /* TV entries */
     int         TVEncoder;
     int         TVOutput;
@@ -212,8 +209,6 @@ void viaIGA1DPMSControl(ScrnInfoPtr pScrn, CARD8 DPMS_Control);
 void viaIGA2DisplayOutput(ScrnInfoPtr pScrn, Bool OutputEnable);
 void viaIGA2DisplayChannel(ScrnInfoPtr pScrn, Bool Channel_State);
 void viaDisplayInit(ScrnInfoPtr pScrn);
-void ViaDisplayEnableSimultaneous(ScrnInfoPtr pScrn);
-void ViaDisplayDisableSimultaneous(ScrnInfoPtr pScrn);
 void ViaGammaDisable(ScrnInfoPtr pScrn);
 void ViaCRTCInit(ScrnInfoPtr pScrn);
 void viaIGAInitCommon(ScrnInfoPtr pScrn);
