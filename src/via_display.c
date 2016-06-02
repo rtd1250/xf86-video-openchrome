@@ -889,6 +889,23 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x35, temp >> 3, 0xE0);
 
 
+    /* Set IGA1 alignment. */
+    temp = (mode->CrtcHDisplay * (pScrn->bitsPerPixel >> 3)) >> 3;
+
+    /* Make sure that this is 32-byte aligned. */
+    if (temp & 0x03) {
+        temp += 0x03;
+        temp &= ~0x03;
+    }
+
+    /* 3C5.1C[7:0] - Primary Display Horizontal Display
+     *               Fetch Count Data Bits [7:0] */
+    hwp->writeSeq(hwp, 0x1C, (temp >> 1) & 0xFF);
+
+    /* 3C5.1D[1:0] - Primary Display Horizontal Display
+     *               Fetch Count Data Bits [9:8] */
+    ViaSeqMask(hwp, 0x1D, temp >> 9, 0x03);
+
     /* line compare: We are not doing splitscreen so 0x3FFF */
     hwp->writeCrtc(hwp, 0x18, 0xFF);
     ViaCrtcMask(hwp, 0x07, 0x10, 0x10);
@@ -899,17 +916,6 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     /* zero Maximum scan line */
     ViaCrtcMask(hwp, 0x09, 0x00, 0x1F);
     hwp->writeCrtc(hwp, 0x14, 0x00);
-
-    /* fetch count */
-    temp = (mode->CrtcHDisplay * (pScrn->bitsPerPixel >> 3)) >> 3;
-    /* Make sure that this is 32-byte aligned. */
-    if (temp & 0x03) {
-        temp += 0x03;
-        temp &= ~0x03;
-    }
-
-    hwp->writeSeq(hwp, 0x1C, ((temp >> 1)+1) & 0xFF);
-    ViaSeqMask(hwp, 0x1D, temp >> 9, 0x03);
 
     switch (pVia->Chipset) {
         case VIA_CX700:
