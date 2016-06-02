@@ -1915,7 +1915,7 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     /* Horizontal Retrace End: 511 (max) */
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "IGA2 CrtcHSyncEnd: %d\n", mode->CrtcHSyncEnd));
-    temp = mode->CrtcHSyncEnd - mode->CrtcHSyncStart;
+    temp = mode->CrtcHSyncEnd - 1;
 
     /* 3X5.57[7:0]: Horizontal Retrace End Bits[7:0] */
     hwp->writeCrtc(hwp, 0x57, temp & 0xFF);
