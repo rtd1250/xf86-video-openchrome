@@ -518,6 +518,12 @@ viaIGA1Init(ScrnInfoPtr pScrn)
     temp = hwp->readSeq(hwp, 0x2D);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "SR2D: 0x%02X\n", temp));
+    temp = hwp->readCrtc(hwp, 0x32);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "CR32: 0x%02X\n", temp));
+    temp = hwp->readCrtc(hwp, 0x33);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "CR33: 0x%02X\n", temp));
 #endif
 
     /* 3C5.1B[7:6] - Secondary Display Engine (Gated Clock <LCK>)
