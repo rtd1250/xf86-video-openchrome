@@ -889,7 +889,7 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x35, temp >> 3, 0xE0);
 
 
-    /* Set IGA1 alignment. */
+    /* Set IGA1 horizontal display fetch (read) count. */
     temp = (mode->CrtcHDisplay * (pScrn->bitsPerPixel >> 3)) >> 3;
 
     /* Make sure that this is 32-byte aligned. */
@@ -898,13 +898,18 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
         temp &= ~0x03;
     }
 
+    /* Primary Display Horizontal Display Fetch Count Data needs to be
+     * 16-byte aligned. */
+    temp = temp >> 1;
+
     /* 3C5.1C[7:0] - Primary Display Horizontal Display
      *               Fetch Count Data Bits [7:0] */
-    hwp->writeSeq(hwp, 0x1C, (temp >> 1) & 0xFF);
+    hwp->writeSeq(hwp, 0x1C, temp & 0xFF);
 
     /* 3C5.1D[1:0] - Primary Display Horizontal Display
      *               Fetch Count Data Bits [9:8] */
-    ViaSeqMask(hwp, 0x1D, temp >> 9, 0x03);
+    ViaSeqMask(hwp, 0x1D, temp >> 8, 0x03);
+
 
     /* line compare: We are not doing splitscreen so 0x3FFF */
     hwp->writeCrtc(hwp, 0x18, 0xFF);
