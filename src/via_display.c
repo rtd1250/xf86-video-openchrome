@@ -1861,7 +1861,7 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     /* Horizontal Blanking Start: 2048 - 1 (max) */
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "IGA2 CrtcHBlankStart: %d\n", mode->CrtcHBlankStart));
-    temp = mode->CrtcHBlankStart - 1;
+    temp = mode->CrtcHBlankStart;
 
     /* 3X5.52[7:0]: Horizontal Blanking Start Bits[7:0] */
     hwp->writeCrtc(hwp, 0x52, temp & 0xFF);
