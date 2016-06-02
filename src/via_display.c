@@ -2033,22 +2033,6 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x67, temp >> 7, 0x0C);
 
 
-    switch (pVia->Chipset) {
-        case VIA_CX700:
-        case VIA_K8M890:
-        case VIA_P4M900:
-        case VIA_VX800:
-        case VIA_VX855:
-        case VIA_VX900:
-            break;
-        default:
-            /* some leftovers */
-            hwp->writeCrtc(hwp, 0x08, 0x00);
-            ViaCrtcMask(hwp, 0x32, 0, 0xFF);  /* ? */
-            ViaCrtcMask(hwp, 0x33, 0, 0xC8);
-            break;
-    }
-
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaIGA2SetDisplayRegister.\n"));
 }
