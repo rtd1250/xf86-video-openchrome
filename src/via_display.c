@@ -610,6 +610,60 @@ viaIGA1Init(ScrnInfoPtr pScrn)
 }
 
 void
+viaIGA1SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y)
+{
+    ScrnInfoPtr pScrn = crtc->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
+    drmmode_ptr drmmode = drmmode_crtc->drmmode;
+    CARD32 Base;
+    CARD8 cr0c, cr0d, cr34, cr48;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA1SetFBStartingAddress.\n"));
+
+    Base = (y * pScrn->displayWidth + x) * (pScrn->bitsPerPixel / 8);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Base Address: 0x%x\n",
+                        Base));
+    Base = (Base + drmmode->front_bo->offset) >> 1;
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "DRI Base Address: 0x%x\n",
+                Base);
+
+    hwp->writeCrtc(hwp, 0x0D, Base & 0xFF);
+    hwp->writeCrtc(hwp, 0x0C, (Base & 0xFF00) >> 8);
+
+    /* FIXME The proper starting address for CR48 is 0x1F - Bits[28:24] */
+    if (!(pVia->Chipset == VIA_CLE266 && CLE266_REV_IS_AX(pVia->ChipRev))) {
+        ViaCrtcMask(hwp, 0x48, Base >> 24, 0x0F);
+    }
+
+    /* CR34 are fire bits. Must be written after CR0C, CR0D, and CR48. */
+    hwp->writeCrtc(hwp, 0x34, (Base & 0xFF0000) >> 16);
+
+#ifdef HAVE_DEBUG
+    cr0d = hwp->readCrtc(hwp, 0x0D);
+    cr0c = hwp->readCrtc(hwp, 0x0C);
+    cr34 = hwp->readCrtc(hwp, 0x34);
+    cr48 = hwp->readCrtc(hwp, 0x48);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "CR0D: 0x%02x\n", cr0d));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "CR0C: 0x%02x\n", cr0c));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "CR34: 0x%02x\n", cr34));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "CR48: 0x%02x\n", cr48));
+#endif
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA1SetFBStartingAddress.\n"));
+}
+
+void
 viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
@@ -1004,60 +1058,6 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaIGA1SetDisplayRegister.\n"));
-}
-
-void
-viaIGA1SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y)
-{
-    ScrnInfoPtr pScrn = crtc->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
-    drmmode_ptr drmmode = drmmode_crtc->drmmode;
-    CARD32 Base;
-    CARD8 cr0c, cr0d, cr34, cr48;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaIGA1SetFBStartingAddress.\n"));
-
-    Base = (y * pScrn->displayWidth + x) * (pScrn->bitsPerPixel / 8);
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Base Address: 0x%x\n",
-                        Base));
-    Base = (Base + drmmode->front_bo->offset) >> 1;
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "DRI Base Address: 0x%x\n",
-                Base);
-
-    hwp->writeCrtc(hwp, 0x0D, Base & 0xFF);
-    hwp->writeCrtc(hwp, 0x0C, (Base & 0xFF00) >> 8);
-
-    /* FIXME The proper starting address for CR48 is 0x1F - Bits[28:24] */
-    if (!(pVia->Chipset == VIA_CLE266 && CLE266_REV_IS_AX(pVia->ChipRev))) {
-        ViaCrtcMask(hwp, 0x48, Base >> 24, 0x0F);
-    }
-
-    /* CR34 are fire bits. Must be written after CR0C, CR0D, and CR48. */
-    hwp->writeCrtc(hwp, 0x34, (Base & 0xFF0000) >> 16);
-
-#ifdef HAVE_DEBUG
-    cr0d = hwp->readCrtc(hwp, 0x0D);
-    cr0c = hwp->readCrtc(hwp, 0x0C);
-    cr34 = hwp->readCrtc(hwp, 0x34);
-    cr48 = hwp->readCrtc(hwp, 0x48);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "CR0D: 0x%02x\n", cr0d));
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "CR0C: 0x%02x\n", cr0c));
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "CR34: 0x%02x\n", cr34));
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "CR48: 0x%02x\n", cr48));
-#endif
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaIGA1SetFBStartingAddress.\n"));
 }
 
 /*
