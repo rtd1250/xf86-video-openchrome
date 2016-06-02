@@ -1954,7 +1954,7 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     /* Vertical Blanking Start: 2048 - 1 (max) */
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "IGA2 CrtcVBlankStart: %d\n", mode->CrtcVBlankStart));
-    temp = mode->CrtcVBlankStart - 1;
+    temp = mode->CrtcVBlankStart;
 
     /* 3X5.5A[7:0]: Vertical Blanking Start Bits[7:0] */
     hwp->writeCrtc(hwp, 0x5A, temp & 0xFF);
