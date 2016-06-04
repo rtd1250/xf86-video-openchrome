@@ -87,7 +87,7 @@ ViaMMIODisable(ScrnInfoPtr pScrn)
 }
 
 static Bool
-VIAMapMMIO(ScrnInfoPtr pScrn)
+viaMapMMIO(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     vgaHWPtr hwp = VGAHWPTR(pScrn);
@@ -97,7 +97,7 @@ VIAMapMMIO(ScrnInfoPtr pScrn)
 #endif
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered VIAMapMMIO.\n"));
+                        "Entered viaMapMMIO.\n"));
 
 #ifdef HAVE_PCIACCESS
     pVia->MmioBase = pVia->PciInfo->regions[1].base_addr;
@@ -186,12 +186,12 @@ VIAMapMMIO(ScrnInfoPtr pScrn)
     vgaHWGetIOBase(hwp);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting VIAMapMMIO.\n"));
+                        "Exiting viaMapMMIO.\n"));
     return TRUE;
 
 fail:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting VIAMapMMIO.\n"));
+                        "Exiting viaMapMMIO.\n"));
     return FALSE;
 }
 
@@ -868,7 +868,7 @@ umsPreInit(ScrnInfoPtr pScrn)
 #endif
 
     /* Detect the amount of installed RAM */
-    if (!VIAMapMMIO(pScrn))
+    if (!viaMapMMIO(pScrn))
         return FALSE;
 
     if (!VIAMapFB(pScrn))
