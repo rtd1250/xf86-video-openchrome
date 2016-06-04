@@ -557,17 +557,24 @@ via_analog_dpms(xf86OutputPtr output, int mode)
 {
     ScrnInfoPtr pScrn = output->scrn;
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered via_analog_dpms.\n"));
+
     switch (mode) {
     case DPMSModeOn:
         ViaDisplayEnableCRT(pScrn);
         break;
-
     case DPMSModeStandby:
     case DPMSModeSuspend:
     case DPMSModeOff:
         ViaDisplayDisableCRT(pScrn);
         break;
+    default:
+        break;
     }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting via_analog_dpms.\n"));
 }
 
 static void
