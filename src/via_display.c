@@ -641,9 +641,8 @@ viaIGA1SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y)
     hwp->writeCrtc(hwp, 0x0D, Base & 0xFF);
     hwp->writeCrtc(hwp, 0x0C, (Base & 0xFF00) >> 8);
 
-    /* FIXME The proper starting address for CR48 is 0x1F - Bits[28:24] */
     if (!(pVia->Chipset == VIA_CLE266 && CLE266_REV_IS_AX(pVia->ChipRev))) {
-        ViaCrtcMask(hwp, 0x48, Base >> 24, 0x0F);
+        ViaCrtcMask(hwp, 0x48, Base >> 24, 0x1F);
     }
 
     /* CR34 are fire bits. Must be written after CR0C, CR0D, and CR48. */
