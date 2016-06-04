@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2016 The Openchrome Project
+ * Copyright 2011-2016 The OpenChrome Project
  *                     [http://www.freedesktop.org/wiki/Openchrome]
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
