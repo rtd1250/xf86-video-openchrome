@@ -30,13 +30,13 @@
 #include "via_driver.h"
 
 static void
-ViaMMIOEnable(ScrnInfoPtr pScrn)
+viaMMIOEnable(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered ViaMMIOEnable.\n"));
+                        "Entered viaMMIOEnable.\n"));
 
     switch (pVia->Chipset) {
         case VIA_CX700:
@@ -56,7 +56,7 @@ ViaMMIOEnable(ScrnInfoPtr pScrn)
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting ViaMMIOEnable.\n"));
+                        "Exiting viaMMIOEnable.\n"));
 }
 
 static void
@@ -178,7 +178,7 @@ viaMapMMIO(ScrnInfoPtr pScrn)
     /* Unlock extended I/O space. */
     ViaSeqMask(hwp, 0x10, 0x01, 0x01);
 
-    ViaMMIOEnable(pScrn);
+    viaMMIOEnable(pScrn);
 
     /* Unlock CRTC. */
     ViaCrtcMask(hwp, 0x47, 0x00, 0x01);
