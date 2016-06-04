@@ -236,7 +236,7 @@ viaUnmapMMIO(ScrnInfoPtr pScrn)
 }
 
 static Bool
-VIAMapFB(ScrnInfoPtr pScrn)
+viaMapFB(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
 #ifdef HAVE_PCIACCESS
@@ -247,7 +247,7 @@ VIAMapFB(ScrnInfoPtr pScrn)
 #endif
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered VIAMapFB.\n"));
+                        "Entered viaMapFB.\n"));
 
 #ifdef HAVE_PCIACCESS
     if (pVia->Chipset == VIA_VX900) {
@@ -336,12 +336,12 @@ VIAMapFB(ScrnInfoPtr pScrn)
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting VIAMapFB.\n"));
+                        "Exiting viaMapFB.\n"));
     return TRUE;
 
 fail:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting VIAMapFB.\n"));
+                        "Exiting viaMapFB.\n"));
     return FALSE;
 }
 
@@ -871,7 +871,7 @@ umsPreInit(ScrnInfoPtr pScrn)
     if (!viaMapMMIO(pScrn))
         return FALSE;
 
-    if (!VIAMapFB(pScrn))
+    if (!viaMapFB(pScrn))
         return FALSE;
     return TRUE;
 }
