@@ -1766,13 +1766,13 @@ viaIGA2SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y)
     cra3 = hwp->readCrtc(hwp, 0xA3);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "CR62: 0x%02x\n", cr62));
+                        "CR62: 0x%02X\n", cr62));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "CR63: 0x%02x\n", cr63));
+                        "CR63: 0x%02X\n", cr63));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "CR64: 0x%02x\n", cr64));
+                        "CR64: 0x%02X\n", cr64));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "CRA3: 0x%02x\n", cra3));
+                        "CRA3: 0x%02X\n", cra3));
 #endif
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
