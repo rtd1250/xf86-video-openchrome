@@ -653,7 +653,9 @@ viaIGA1SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y)
     cr0d = hwp->readCrtc(hwp, 0x0D);
     cr0c = hwp->readCrtc(hwp, 0x0C);
     cr34 = hwp->readCrtc(hwp, 0x34);
-    cr48 = hwp->readCrtc(hwp, 0x48);
+    if (!(pVia->Chipset == VIA_CLE266 && CLE266_REV_IS_AX(pVia->ChipRev))) {
+        cr48 = hwp->readCrtc(hwp, 0x48);
+    }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "CR0D: 0x%02X\n", cr0d));
@@ -661,8 +663,11 @@ viaIGA1SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y)
                         "CR0C: 0x%02X\n", cr0c));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "CR34: 0x%02X\n", cr34));
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "CR48: 0x%02X\n", cr48));
+    if (!(pVia->Chipset == VIA_CLE266 && CLE266_REV_IS_AX(pVia->ChipRev))) {
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "CR48: 0x%02X\n", cr48));
+    }
+
 #endif
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
