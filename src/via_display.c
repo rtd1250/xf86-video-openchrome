@@ -3074,7 +3074,8 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 
     viaIGA2DisplayChannel(pScrn, TRUE);
 
-    iga2_crtc_set_origin(crtc, crtc->x, crtc->y);
+    viaIGA2SetFBStartingAddress(crtc, x, y);
+    VIAVidAdjustFrame(pScrn, x, y);
 
     /* Turn on IGA2 now that mode setting is done. */
     viaIGA2DisplayOutput(pScrn, TRUE);
