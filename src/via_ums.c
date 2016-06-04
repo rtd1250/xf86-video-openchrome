@@ -60,13 +60,13 @@ viaMMIOEnable(ScrnInfoPtr pScrn)
 }
 
 static void
-ViaMMIODisable(ScrnInfoPtr pScrn)
+viaMMIODisable(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered ViaMMIODisable.\n"));
+                        "Entered viaMMIODisable.\n"));
 
     switch (pVia->Chipset) {
         case VIA_CX700:
@@ -83,7 +83,7 @@ ViaMMIODisable(ScrnInfoPtr pScrn)
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting ViaMMIODisable.\n"));
+                        "Exiting viaMMIODisable.\n"));
 }
 
 static Bool
@@ -203,7 +203,7 @@ viaUnmapMMIO(ScrnInfoPtr pScrn)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaUnmapMMIO.\n"));
 
-    ViaMMIODisable(pScrn);
+    viaMMIODisable(pScrn);
 
 #ifdef HAVE_PCIACCESS
     if (pVia->MapBase)
