@@ -196,12 +196,12 @@ fail:
 }
 
 void
-VIAUnmapMMIO(ScrnInfoPtr pScrn)
+viaUnmapMMIO(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered VIAUnmapMMIO.\n"));
+                        "Entered viaUnmapMMIO.\n"));
 
     ViaMMIODisable(pScrn);
 
@@ -232,7 +232,7 @@ VIAUnmapMMIO(ScrnInfoPtr pScrn)
 #endif
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting VIAUnmapMMIO.\n"));
+                        "Exiting viaUnmapMMIO.\n"));
 }
 
 static Bool

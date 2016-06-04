@@ -420,7 +420,7 @@ VIAFreeRec(ScrnInfoPtr pScrn)
     if (pVia->VideoRegs)
         free(pVia->VideoRegs);
 
-    VIAUnmapMMIO(pScrn);
+    viaUnmapMMIO(pScrn);
 
     free(pScrn->driverPrivate);
     pScrn->driverPrivate = NULL;
