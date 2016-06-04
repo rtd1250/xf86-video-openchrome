@@ -474,7 +474,7 @@ viaDisableVQ(ScrnInfoPtr pScrn)
  * current screen depth. Also enable the virtual queue.
  */
 static void
-VIAInitialize2DEngine(ScrnInfoPtr pScrn)
+viaInitialize2DEngine(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     ViaTwodContext *tdc = &pVia->td;
@@ -619,7 +619,7 @@ umsAccelInit(ScreenPtr pScreen)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Initializing the 2D engine.\n"));
-    VIAInitialize2DEngine(pScrn);
+    viaInitialize2DEngine(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Initializing the 3D engine.\n"));
