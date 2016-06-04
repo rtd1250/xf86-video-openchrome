@@ -2641,7 +2641,8 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     /* Turn on Screen */
     ViaCrtcMask(hwp, 0x17, 0x80, 0x80);
 
-    iga1_crtc_set_origin(crtc, crtc->x, crtc->y);
+    viaIGA1SetFBStartingAddress(crtc, x, y);
+    VIAVidAdjustFrame(pScrn, x, y);
 
     /* Turn on IGA1 now that mode setting is done. */
     viaIGA1DPMSControl(pScrn, 0x00);
