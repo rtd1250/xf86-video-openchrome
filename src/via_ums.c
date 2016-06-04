@@ -533,7 +533,7 @@ viaInitialize2DEngine(ScrnInfoPtr pScrn)
 }
 
 static void
-VIAInitialize3DEngine(ScrnInfoPtr pScrn)
+viaInitialize3DEngine(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     int i;
@@ -623,7 +623,7 @@ umsAccelInit(ScreenPtr pScreen)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Initializing the 3D engine.\n"));
-    VIAInitialize3DEngine(pScrn);
+    viaInitialize3DEngine(pScrn);
 
     pVia->exa_sync_bo = drm_bo_alloc(pScrn, 32, 32, TTM_PL_FLAG_VRAM);
     if (!pVia->exa_sync_bo)
