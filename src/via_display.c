@@ -1798,6 +1798,18 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     /* Set the color depth for IGA2. */
     switch (pScrn->bitsPerPixel) {
         case 8:
+            /* Only CLE266.AX uses 6-bit LUT. */
+            if (pVia->Chipset == VIA_CLE266 && pVia->ChipRev < 15) {
+                /* 6-bit LUT */
+                /* 3X5.6A[5] - Second Display 8/6 Bits LUT
+                 *             0: 6-bit
+                 *             1: 8-bit */
+                ViaCrtcMask(hwp, 0x6A, 0x00, 0x20);
+            } else {
+                /* Set IGA2 display LUT to 8-bit */
+                ViaCrtcMask(hwp, 0x6A, 0x20, 0x20);
+            }
+
             ViaCrtcMask(hwp, 0x67, 0x00, 0xC0);
             break;
         case 16:
@@ -1813,7 +1825,6 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
                         pScrn->bitsPerPixel);
             break;
     }
-
 
     /* LVDS Channel 1 and 2 should be controlled by PMS
      * (Power Management Status). */
