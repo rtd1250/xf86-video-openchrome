@@ -1822,6 +1822,10 @@ viaIGA2Init(ScrnInfoPtr pScrn)
                             "CR6C: 0x%02X\n", temp));
     }
 
+    temp = hwp->readCrtc(hwp, 0x79);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "CR79: 0x%02X\n", temp));
+
 #endif
 
     /* 3C5.1B[7:6] - Secondary Display Engine (Gated Clock <LCK>)
@@ -1908,6 +1912,12 @@ viaIGA2Init(ScrnInfoPtr pScrn)
          *               1: LCDCK PLL reference clock */
         ViaCrtcMask(hwp, 0x6C, 0x00, 0x0F);
     }
+
+    /* Disable LCD scaling */
+    /* 3X5.79[0] - LCD Scaling Enable
+     *             0: Disable
+     *             1: Enable */
+    ViaCrtcMask(hwp, 0x79, 0x00, 0x01);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaIGA2Init.\n"));
