@@ -312,6 +312,9 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
     temp = hwp->readSeq(hwp, 0x3F);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "SR3F: 0x%02X\n", temp));
+    temp = hwp->readSeq(hwp, 0x65);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR65: 0x%02X\n", temp));
     temp = hwp->readCrtc(hwp, 0x36);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "CR36: 0x%02X\n", temp));
@@ -508,6 +511,20 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
      *               10: Clock always on
      *               11: Clock on/off according to each engine IDLE status */
     ViaSeqMask(hwp, 0x3F, 0xFF, 0xFF);
+
+    /* Set DVP1 data drive strength to 0b11 (highest). */
+    /* Set DVP1 clock drive strength to 0b11 (highest). */
+    /* 3C5.65[3:2] - DVP1 Clock Pads Driving Select
+     *               00: lowest
+     *               01: low
+     *               10: high
+     *               11: highest
+     * 3C5.65[1:0] - DVP1 Data Pads Driving Select
+     *               00: lowest
+     *               01: low
+     *               10: high
+     *               11: highest */
+    ViaSeqMask(hwp, 0x65, 0x0F, 0x0F);
 
     /* 3X5.36[7]   - DPMS VSYNC Output
      * 3X5.36[6]   - DPMS HSYNC Output
