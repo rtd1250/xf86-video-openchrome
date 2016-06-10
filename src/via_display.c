@@ -599,6 +599,15 @@ viaIGA1Init(ScrnInfoPtr pScrn)
     temp = hwp->readCrtc(hwp, 0x33);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "CR33: 0x%02X\n", temp));
+
+    /* For UniChrome Pro and Chrome9. */
+    if ((pVia->Chipset != VIA_CLE266)
+        && (pVia->Chipset != VIA_KM400)) {
+        temp = hwp->readCrtc(hwp, 0x47);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "CR47: 0x%02X\n", temp));
+    }
+
     temp = hwp->readCrtc(hwp, 0x6B);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "CR6B: 0x%02X\n", temp));
@@ -697,6 +706,27 @@ viaIGA1Init(ScrnInfoPtr pScrn)
      *               110: Shift to early time by 1 character
      *               111: Shift to early time by 2 characters */
     ViaCrtcMask(hwp, 0x33, 0x00, 0xCF);
+
+    /* For UniChrome Pro and Chrome9. */
+    if ((pVia->Chipset != VIA_CLE266)
+        && (pVia->Chipset != VIA_KM400)) {
+        /* 3X5.47[7] - IGA1 Timing Plus 2 VCK
+         * 3X5.47[6] - IGA1 Timing Plus 4 VCK
+         * 3X5.47[5] - Peep at the PCI-bus
+         *             0: Disable
+         *             1: Enable
+         * 3X5.47[4] - Reserved
+         * 3X5.47[3] - IGA1 Timing Plus 6 VCK
+         * 3X5.47[2] - DACOFF Backdoor Register
+         * 3X5.47[1] - LCD Simultaneous Mode Backdoor Register for
+         *             8/9 Dot Clocks
+         * 3X5.47[0] - LCD Simultaneous Mode Backdoor Register for
+         *             Clock Select and CRTC Register Protect
+         *
+         */
+        ViaCrtcMask(hwp, 0x47, 0x02, 0xEF);
+
+    }
 
     /* TV out uses division by 2 mode.
      * Other devices like analog (VGA), DVI, flat panel, etc.,
