@@ -294,6 +294,9 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
     temp = hwp->readSeq(hwp, 0x1A);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "SR1A: 0x%02X\n", temp));
+    temp = hwp->readSeq(hwp, 0x1B);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR1B: 0x%02X\n", temp));
     temp = hwp->readSeq(hwp, 0x1E);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "SR1E: 0x%02X\n", temp));
@@ -399,6 +402,14 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
      *                Secondary Display’s LUT */
     ViaSeqMask(hwp, 0x1A, 0x88, 0x88);
 
+    /* Set DVP0 data drive strength to 0b11 (highest). */
+    /* 3C5.1B[1]   - DVP0 Data Drive Strength Bit [0]
+     *              (It could be for DIP0 (Digital Interface Port 0) for
+     *              CLE266. Reserved for CX700 / VX700 / VX800 / VX855 /
+     *              VX900. These newer devices do not have DVP0.) */
+    ViaSeqMask(hwp, 0x1B, 0x02, 0x02);
+
+    /* Set DVP0 clock drive strength to 0b11 (highest). */
     /* 3C5.1E[7:6] - Video Capture Port Power Control
      *               0x: Pad always off
      *               10: Depend on the other control signal
@@ -410,19 +421,29 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
      * 3C5.1E[3]   - Spread Spectrum On/Off
      *               0: Off
      *               1: On
-     * 3C5.1E[2]   - Reserved
+     * 3C5.1E[2]   - DVP0 Clock Drive Strength Bit [0]
+     *               (It could be for DIP0 (Digital Interface Port 0) for
+     *               CLE266. Reserved for CX700 / VX700 / VX800 / VX855 /
+     *               VX900. These newer devices do not have DVP0.)
      * 3C5.1E[1]   - Replace ECK by MCK
      *               For BIST purpose.
      * 3C5.1E[0]   - On/Off ROC ECK
      *               0: Off
      *               1: On */
-    ViaSeqMask(hwp, 0x1E, 0xF0, 0xF0);
+    ViaSeqMask(hwp, 0x1E, 0xF4, 0xF4);
 
+    /* Set DVP0 data drive strength to 0b11 (highest). */
+    /* Set DVP0 clock drive strength to 0b11 (highest). */
     /* 3C5.2A[7]   - Reserved
      * 3C5.2A[6]   - The Spread Spectrum Type Control
      *               0: Original Type
      *               1: FIFO Type
-     * 3C5.2A[5:4] - Reserved
+     * 3C5.2A[5]   - DVP0 Data Drive Strength Bit [1]
+     *               (Reserved for CX700 / VX700 / VX800 / VX855 /
+     *               VX900. These devices do not have DVP0.)
+     * 3C5.2A[4]   - DVP0 Clock Drive Strength Bit [1]
+     *               (Reserved for CX700 / VX700 / VX800 / VX855 /
+     *               VX900. These devices do not have DVP0.)
      * 3C5.2A[3:2] - LVDS Channel 2 I/O Pad Control
      *               0x: Pad always off
      *               10: Depend on the other control signal
@@ -431,7 +452,7 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
      *               0x: Pad always off
      *               10: Depend on the other control signal
      *               11: Pad on/off according to the PMS */
-    ViaSeqMask(hwp, 0x2A, 0x0F, 0x0F);
+    ViaSeqMask(hwp, 0x2A, 0x3F, 0x3F);
 
     /* 3C5.2D[7:6] - E3_ECK_N Selection
      *               00: E3_ECK_N
