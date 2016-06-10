@@ -654,7 +654,7 @@ viaIGA1Init(ScrnInfoPtr pScrn)
      * 3X5.32[0]   - Real-Time Flipping
      *               0: Flip by the frame
      *               1: Flip by each scan line */
-    ViaCrtcMask(hwp, 0x32, 0x00, 0xEF);
+    ViaCrtcMask(hwp, 0x32, 0x04, 0xEF);
 
     /*
      * 3X5.33[7]   - Primary Display Gamma Correction
@@ -887,7 +887,7 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
      * 3X5.32[0]   - Real-Time Flipping
      *               0: Flip by the frame
      *               1: Flip by each scan line */
-    ViaCrtcMask(hwp, 0x32, 0x00, 0xEC);
+    ViaCrtcMask(hwp, 0x32, 0x04, 0xEC);
 
     /*
      * 3X5.33[7]   - Primary Display Gamma Correction
