@@ -267,6 +267,7 @@ void
 viaIGAInitCommon(ScrnInfoPtr pScrn)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
 #ifdef HAVE_DEBUG
     CARD8 temp;
 #endif
@@ -311,6 +312,16 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
     temp = hwp->readCrtc(hwp, 0x36);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "CR36: 0x%02X\n", temp));
+    temp = hwp->readCrtc(hwp, 0x6B);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "CR6B: 0x%02X\n", temp));
+
+    if (pVia->Chipset == VIA_CLE266) {
+        temp = hwp->readCrtc(hwp, 0x6C);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "CR6C: 0x%02X\n", temp));
+    }
+
 #endif
 
     /* Be careful with 3C5.15[5] - Wrap Around Disable.
@@ -493,6 +504,31 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
      *               1: Enable */
     ViaCrtcMask(hwp, 0x36, 0x01, 0x01);
 
+    /* 3X5.6B[3] - Simultaneous Display Enable
+     *             0: Disable
+     *             1: Enable */
+    ViaCrtcMask(hwp, 0x6B, 0x00, 0x08);
+
+    /* CLE266 only. */
+    if (pVia->Chipset == VIA_CLE266) {
+        /* The following register fields are for CLE266 only. */
+        /* 3X5.6C - Digital Interface Port 0 (DIP0) Control
+         * 3X5.6C[7]   - DIP0 Source
+         *               0: IGA1
+         *               1: IGA2
+         * 3X5.6C[4:2] - Appears to be related to DIP0 signal polarity
+         *               control. Used by CLE266A2 to workaround a bug when
+         *               it is utilizing an external TV encoder.
+         * 3X5.6C[1]   - Appears to be utilized when CLE266 is utilizing an
+         *               external TV encoder.
+         * 3X5.6C[0]   - Appears to be a bit to control internal / external
+         *               clock source or whether or not the VCK (IGA1 clock
+         *               source) comes from VCK PLL or from an external
+         *               source. This bit should be set to 1 when TV encoder
+         *               is in use. */
+        ViaCrtcMask(hwp, 0x6C, 0x00, 0x01);
+    }
+
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaIGAInitCommon.\n"));
 }
@@ -504,6 +540,7 @@ void
 viaIGA1Init(ScrnInfoPtr pScrn)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
 #ifdef HAVE_DEBUG
     CARD8 temp;
 #endif
@@ -524,6 +561,18 @@ viaIGA1Init(ScrnInfoPtr pScrn)
     temp = hwp->readCrtc(hwp, 0x33);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "CR33: 0x%02X\n", temp));
+    temp = hwp->readCrtc(hwp, 0x6B);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "CR6B: 0x%02X\n", temp));
+
+    /* For UniChrome Pro and Chrome9. */
+    if ((pVia->Chipset != VIA_CLE266)
+        && (pVia->Chipset != VIA_KM400)) {
+        temp = hwp->readCrtc(hwp, 0x6C);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "CR6C: 0x%02X\n", temp));
+    }
+
 #endif
 
     /* 3C5.1B[7:6] - Secondary Display Engine (Gated Clock <LCK>)
@@ -610,6 +659,32 @@ viaIGA1Init(ScrnInfoPtr pScrn)
      *               110: Shift to early time by 1 character
      *               111: Shift to early time by 2 characters */
     ViaCrtcMask(hwp, 0x33, 0x00, 0xCF);
+
+    /* TV out uses division by 2 mode.
+     * Other devices like analog (VGA), DVI, flat panel, etc.,
+     * use normal mode. */
+    /* 3X5.6B[7:6] - First Display Channel Clock Mode Selection
+     *               0x: Normal
+     *               1x: Division by 2 */
+    ViaCrtcMask(hwp, 0x6B, 0x00, 0xC0);
+
+    /* For UniChrome Pro and Chrome9. */
+    if ((pVia->Chipset != VIA_CLE266)
+        && (pVia->Chipset != VIA_KM400)) {
+        /* The following register fields are for UniChrome Pro and Chrome9. */
+        /* 3X5.6C[7:5] - VCK PLL Reference Clock Source Selection
+         *               000: From XI pin
+         *               001: From TVXI
+         *               01x: From TVPLL
+         *               100: DVP0TVCLKR
+         *               101: DVP1TVCLKR
+         *               110: CAP0 Clock
+         *               111: CAP1 Clock
+         * 3X5.6C[4]   - VCK Source Selection
+         *               0: VCK PLL output clock
+         *               1: VCK PLL reference clock */
+        ViaCrtcMask(hwp, 0x6C, 0x00, 0xF0);
+    }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaIGA1Init.\n"));
@@ -1679,6 +1754,7 @@ void
 viaIGA2Init(ScrnInfoPtr pScrn)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
 #ifdef HAVE_DEBUG
     CARD8 temp;
 #endif
@@ -1693,6 +1769,21 @@ viaIGA2Init(ScrnInfoPtr pScrn)
     temp = hwp->readSeq(hwp, 0x2D);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "SR2D: 0x%02X\n", temp));
+    temp = hwp->readCrtc(hwp, 0x6A);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "CR6A: 0x%02X\n", temp));
+    temp = hwp->readCrtc(hwp, 0x6B);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "CR6B: 0x%02X\n", temp));
+
+    /* For UniChrome Pro and Chrome9. */
+    if ((pVia->Chipset != VIA_CLE266)
+        && (pVia->Chipset != VIA_KM400)) {
+        temp = hwp->readCrtc(hwp, 0x6C);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "CR6C: 0x%02X\n", temp));
+    }
+
 #endif
 
     /* 3C5.1B[7:6] - Secondary Display Engine (Gated Clock <LCK>)
@@ -1728,6 +1819,57 @@ viaIGA2Init(ScrnInfoPtr pScrn)
      *               10: PLL always on
      *               11: PLL on/off according to the PMS */
     ViaSeqMask(hwp, 0x2D, 0x0C, 0x0C);
+
+    /* 3X5.6A[7] - Second Display Channel Enable
+     *             0: Disable
+     *             1: Enable
+     * 3X5.6A[6] - Second Display Channel Reset
+     *             0: Reset
+     * 3X5.6A[5] - Second Display 8/6 Bits LUT
+     *             0: 6-bit
+     *             1: 8-bit
+     * 3X5.6A[4] - Horizontal Count by 2
+     *             0: Disable
+     *             1: Enable
+     * 3X5.6A[1] - LCD Gamma Enable
+     *             0: Disable
+     *             1: Enable
+     * 3X5.6A[0] - LCD Pre-fetch Mode Enable
+     *             0: Disable
+     *             1: Enable */
+    ViaCrtcMask(hwp, 0x6A, 0x80, 0xB3);
+
+    /* TV out uses division by 2 mode.
+     * Other devices like analog (VGA), DVI, flat panel, etc.,
+     * use normal mode. */
+    /* 3X5.6B[5:4] - Second Display Channel Clock Mode Selection
+     *               0x: Normal
+     *               1x: Division by 2
+     * 3X5.6B[2]   - IGA2 Screen Off
+     *               0: Normal
+     *               1: Screen off
+     * 3X5.6B[1]   - IGA2 Screen Off Selection Method
+     *               0: IGA2 Screen off
+     *               1: IGA1 Screen off */
+    ViaCrtcMask(hwp, 0x6B, 0x00, 0x36);
+
+    /* For UniChrome Pro and Chrome9. */
+    if ((pVia->Chipset != VIA_CLE266)
+        && (pVia->Chipset != VIA_KM400)) {
+        /* The following register fields are for UniChrome Pro and Chrome9. */
+        /* 3X5.6C[3:1] - LCDCK PLL Reference Clock Source Selection
+         *               000: From XI pin
+         *               001: From TVXI
+         *               01x: From TVPLL
+         *               100: DVP0TVCLKR
+         *               101: DVP1TVCLKR
+         *               110: CAP0 Clock
+         *               111: CAP1 Clock
+         * 3X5.6C[0]   - LCDCK Source Selection
+         *               0: LCDCK PLL output clock
+         *               1: LCDCK PLL reference clock */
+        ViaCrtcMask(hwp, 0x6C, 0x00, 0x0F);
+    }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaIGA2Init.\n"));
