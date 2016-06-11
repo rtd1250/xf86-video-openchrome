@@ -438,8 +438,6 @@ VIAFreeScreen(FREE_SCREEN_ARGS_DECL)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAFreeScreen\n"));
 
-    VIAFreeRec(pScrn);
-
     if (!pVia->KMS && xf86LoaderCheckSymbol("vgaHWFreeHWRec"))
         vgaHWFreeHWRec(pScrn);
 }
