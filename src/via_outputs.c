@@ -1259,14 +1259,8 @@ viaOutputDetect(ScrnInfoPtr pScrn)
     /* TV */
     via_tv_init(pScrn);
 
-    /*
-     * via_dvi_init function to initialize VT1632A TMDS transmitter
-     * is disabled for now.
-     */
     /* External TMDS Transmitter (DVI) */
-/*
     via_dvi_init(pScrn);
-*/
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaOutputDetect.\n"));
