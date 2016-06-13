@@ -1223,17 +1223,16 @@ viaIGA1ModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
                         "Entered viaIGA1ModeValid.\n"));
 
     /* Note that horizontal total being written to VGA registers is
-     * shifted to the right by 3 bit positions, and then 5 is subtracted
-     * from it. Hence, to check if the screen can even be valid,
-     * opposite of that needs to happen. That being said, to check if the
-     * number is within an acceptable range, 1 is subtracted from 5, hence,
-     * 4 (5 - 1) is multiplied with 8 (i.e., 1 is shifted 3 bit positions to
-     * the left) and the resulting 32 is added to 2048 to calculate the
-     * maximum horizontal total IGA1 can handle. Ultimately, 2080 is the
-     * largest number VIA IGP's IGA1 can handle safely. This is how
-     * VIA Technologies gets to claim that IGA1 (i.e., VGA) is capable of
-     * 1920 dots in the horizontal (Y) direction. */
-    if (mode->CrtcHTotal > (2048 + ((1 << 3) * 4)))
+     * shifted to the right by 3 bit positions since only 9 bits are
+     * available, and then 5 is subtracted from it. Hence, to check if
+     * the screen can even be valid, opposite of that needs to happen.
+     * That being said, to check if the number is within an acceptable range,
+     * 1 is subtracted from 5, hence, 4 (5 - 1) is multiplied with 8 (i.e.,
+     * 1 is shifted 3 bit positions to the left), and the resulting 32 is
+     * added to 4096 (9 + 3 bits) to calculate the maximum horizontal total
+     * IGA1 can handle. Ultimately, 4128 is the largest number VIA IGP's
+     * IGA1 can handle. */
+    if (mode->CrtcHTotal > (4096 + ((1 << 3) * (5 - 1))))
         return MODE_BAD_HVALUE;
 
     if (mode->CrtcHDisplay > 2048)
