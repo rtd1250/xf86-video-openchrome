@@ -682,8 +682,9 @@ viaIGA1Init(ScrnInfoPtr pScrn)
      *               1: Flip by each scan line */
     ViaCrtcMask(hwp, 0x32, 0x04, 0xEF);
 
-    /*
-     * 3X5.33[7]   - Primary Display Gamma Correction
+    /* Keep interlace mode off.
+     * No shift for HSYNC.*/
+    /* 3X5.33[7]   - Primary Display Gamma Correction
      *               0: Disable
      *               1: Enable
      * 3X5.33[6]   - Primary Display Interlace Mode
@@ -705,7 +706,7 @@ viaIGA1Init(ScrnInfoPtr pScrn)
      *                    (Non-VGA mode suggested value)
      *               110: Shift to early time by 1 character
      *               111: Shift to early time by 2 characters */
-    ViaCrtcMask(hwp, 0x33, 0x00, 0xCF);
+    ViaCrtcMask(hwp, 0x33, 0x05, 0xCF);
 
     /* For UniChrome Pro and Chrome9. */
     if ((pVia->Chipset != VIA_CLE266)
@@ -936,8 +937,9 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
      *               1: Flip by each scan line */
     ViaCrtcMask(hwp, 0x32, 0x04, 0xEC);
 
-    /*
-     * 3X5.33[7]   - Primary Display Gamma Correction
+    /* Keep interlace mode off.
+     * No shift for HSYNC.*/
+    /* 3X5.33[7]   - Primary Display Gamma Correction
      *               0: Disable
      *               1: Enable
      * 3X5.33[6]   - Primary Display Interlace Mode
@@ -959,7 +961,7 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
      *                    (Non-VGA mode suggested value)
      *               110: Shift to early time by 1 character
      *               111: Shift to early time by 2 characters */
-    ViaCrtcMask(hwp, 0x33, 0x00, 0x4F);
+    ViaCrtcMask(hwp, 0x33, 0x05, 0x4F);
 
     /* Set IGA1 to linear mode */
     /* 3X5.43[2]  - IGA1 Address Mode Selection
