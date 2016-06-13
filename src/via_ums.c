@@ -326,10 +326,19 @@ viaMapFB(ScrnInfoPtr pScrn)
     }
 
 #ifdef HAVE_PCIACCESS
-    pScrn->memPhysBase = pVia->PciInfo->regions[0].base_addr;
+    if (pVia->Chipset == VIA_VX900) {
+        pScrn->memPhysBase = pVia->PciInfo->regions[2].base_addr;
+    } else {
+        pScrn->memPhysBase = pVia->PciInfo->regions[0].base_addr;
+    }
 #else
-    pScrn->memPhysBase = pVia->PciInfo->memBase[0];
+    if (pVia->Chipset == VIA_VX900) {
+        pScrn->memPhysBase = pVia->PciInfo->memBase[2];
+    } else {
+        pScrn->memPhysBase = pVia->PciInfo->memBase[0];
+    }
 #endif
+
     pScrn->fbOffset = 0;
     if (pVia->IsSecondary) {
         pScrn->fbOffset = pScrn->videoRam << 10;
