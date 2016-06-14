@@ -432,12 +432,12 @@ static void
 VIAFreeScreen(FREE_SCREEN_ARGS_DECL)
 {
     SCRN_INFO_PTR(arg);
-    VIAPtr pVia = VIAPTR(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAFreeScreen\n"));
 
-    if (!pVia->KMS && xf86LoaderCheckSymbol("vgaHWFreeHWRec"))
+    if (xf86LoaderCheckSymbol("vgaHWFreeHWRec")) {
         vgaHWFreeHWRec(pScrn);
+    }
 }
 
 static void
