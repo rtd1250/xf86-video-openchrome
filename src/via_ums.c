@@ -267,59 +267,61 @@ viaMapFB(ScrnInfoPtr pScrn)
                "Mapping a frame buffer at address 0x%lx with size 0x%lx.\n",
                pVia->FrameBufferBase, pVia->videoRambytes);
 
-    if (pVia->videoRambytes) {
+    if (!(pVia->videoRambytes)) {
+        goto fail;
+    }
+
 #ifdef HAVE_PCIACCESS
-        err = pci_device_map_range(pVia->PciInfo, pVia->FrameBufferBase,
-                                   pVia->videoRambytes,
-                                   (PCI_DEV_MAP_FLAG_WRITABLE |
-                                    PCI_DEV_MAP_FLAG_WRITE_COMBINE),
-                                   (void **)&pVia->FBBase);
-        if (err) {
-            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                        "Unable to map a frame buffer.\n"
-                        "Error: %s (%d)\n",
-                        strerror(err), err);
-            goto fail;
-        }
+    err = pci_device_map_range(pVia->PciInfo, pVia->FrameBufferBase,
+                               pVia->videoRambytes,
+                               (PCI_DEV_MAP_FLAG_WRITABLE |
+                                PCI_DEV_MAP_FLAG_WRITE_COMBINE),
+                               (void **)&pVia->FBBase);
+    if (err) {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                    "Unable to map a frame buffer.\n"
+                    "Error: %s (%d)\n",
+                    strerror(err), err);
+        goto fail;
+    }
 #else
-        /*
-         * FIXME: This is a hack to get rid of offending wrongly sized
-         * MTRR regions set up by the VIA BIOS. Should be taken care of
-         * in the OS support layer.
-         */
-        tmp = xf86MapPciMem(pScrn->scrnIndex, VIDMEM_MMIO, pVia->PciTag,
-                            pVia->FrameBufferBase, pVia->videoRambytes);
-        xf86UnMapVidMem(pScrn->scrnIndex, (pointer) tmp, pVia->videoRambytes);
+    /*
+     * FIXME: This is a hack to get rid of offending wrongly sized
+     * MTRR regions set up by the VIA BIOS. Should be taken care of
+     * in the OS support layer.
+     */
+    tmp = xf86MapPciMem(pScrn->scrnIndex, VIDMEM_MMIO, pVia->PciTag,
+                        pVia->FrameBufferBase, pVia->videoRambytes);
+    xf86UnMapVidMem(pScrn->scrnIndex, (pointer) tmp, pVia->videoRambytes);
 
-        /*
-         * And, as if this wasn't enough, 2.6 series kernels don't
-         * remove MTRR regions on the first attempt. So try again.
-         */
-        tmp = xf86MapPciMem(pScrn->scrnIndex, VIDMEM_MMIO, pVia->PciTag,
-                            pVia->FrameBufferBase, pVia->videoRambytes);
-        xf86UnMapVidMem(pScrn->scrnIndex, (pointer) tmp, pVia->videoRambytes);
-        /*
-         * End of hack.
-         */
+    /*
+     * And, as if this wasn't enough, 2.6 series kernels don't
+     * remove MTRR regions on the first attempt. So try again.
+     */
+    tmp = xf86MapPciMem(pScrn->scrnIndex, VIDMEM_MMIO, pVia->PciTag,
+                        pVia->FrameBufferBase, pVia->videoRambytes);
+    xf86UnMapVidMem(pScrn->scrnIndex, (pointer) tmp, pVia->videoRambytes);
+    /*
+     * End of hack.
+     */
 
-        pVia->FBBase = xf86MapPciMem(pScrn->scrnIndex, VIDMEM_FRAMEBUFFER,
-                                     pVia->PciTag, pVia->FrameBufferBase,
-                                     pVia->videoRambytes);
+    pVia->FBBase = xf86MapPciMem(pScrn->scrnIndex, VIDMEM_FRAMEBUFFER,
+                                 pVia->PciTag, pVia->FrameBufferBase,
+                                 pVia->videoRambytes);
 
-        if (!pVia->FBBase) {
-            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                       "Unable to map a frame buffer.\n");
-            goto fail;
-        }
+    if (!pVia->FBBase) {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                   "Unable to map a frame buffer.\n");
+        goto fail;
+    }
 #endif
 
-        pVia->FBFreeStart = 0;
-        pVia->FBFreeEnd = pVia->videoRambytes;
+    pVia->FBFreeStart = 0;
+    pVia->FBFreeEnd = pVia->videoRambytes;
 
-        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                   "Frame buffer start address: %p, free start: 0x%x end: 0x%x\n",
-                   pVia->FBBase, pVia->FBFreeStart, pVia->FBFreeEnd);
-    }
+    xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+               "Frame buffer start address: %p, free start: 0x%x end: 0x%x\n",
+               pVia->FBBase, pVia->FBFreeStart, pVia->FBFreeEnd);
 
 #ifdef HAVE_PCIACCESS
     if (pVia->Chipset == VIA_VX900) {
