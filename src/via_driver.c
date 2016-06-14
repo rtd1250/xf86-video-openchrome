@@ -1105,7 +1105,9 @@ viaPreInit(ScrnInfoPtr pScrn, int flags)
     free(busId);
 #endif
 
-    /* After umsPreInit function succeeds, all MMIOs are mapped. */
+    /* After umsPreInit function succeeds, PCI hardware resources are
+     * memory mapped. If there is an error from this point on, they will
+     * need to be explicitly relinquished. */
     if (!umsPreInit(pScrn)) {
         VIAFreeRec(pScrn);
         return FALSE;
