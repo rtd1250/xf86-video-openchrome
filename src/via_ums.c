@@ -268,30 +268,6 @@ viaMapFB(ScrnInfoPtr pScrn)
                pVia->FrameBufferBase, pVia->videoRambytes);
 
     if (pVia->videoRambytes) {
-#ifndef HAVE_PCIACCESS
-        /*
-         * FIXME: This is a hack to get rid of offending wrongly sized
-         * MTRR regions set up by the VIA BIOS. Should be taken care of
-         * in the OS support layer.
-         */
-        tmp = xf86MapPciMem(pScrn->scrnIndex, VIDMEM_MMIO, pVia->PciTag,
-                            pVia->FrameBufferBase, pVia->videoRambytes);
-        xf86UnMapVidMem(pScrn->scrnIndex, (pointer) tmp, pVia->videoRambytes);
-
-        /*
-         * And, as if this wasn't enough, 2.6 series kernels don't
-         * remove MTRR regions on the first attempt. So try again.
-         */
-
-        tmp = xf86MapPciMem(pScrn->scrnIndex, VIDMEM_MMIO, pVia->PciTag,
-                            pVia->FrameBufferBase, pVia->videoRambytes);
-        xf86UnMapVidMem(pScrn->scrnIndex, (pointer) tmp, pVia->videoRambytes);
-
-        /*
-         * End of hack.
-         */
-#endif
-
 #ifdef HAVE_PCIACCESS
         err = pci_device_map_range(pVia->PciInfo, pVia->FrameBufferBase,
                                    pVia->videoRambytes,
@@ -306,6 +282,26 @@ viaMapFB(ScrnInfoPtr pScrn)
             goto fail;
         }
 #else
+        /*
+         * FIXME: This is a hack to get rid of offending wrongly sized
+         * MTRR regions set up by the VIA BIOS. Should be taken care of
+         * in the OS support layer.
+         */
+        tmp = xf86MapPciMem(pScrn->scrnIndex, VIDMEM_MMIO, pVia->PciTag,
+                            pVia->FrameBufferBase, pVia->videoRambytes);
+        xf86UnMapVidMem(pScrn->scrnIndex, (pointer) tmp, pVia->videoRambytes);
+
+        /*
+         * And, as if this wasn't enough, 2.6 series kernels don't
+         * remove MTRR regions on the first attempt. So try again.
+         */
+        tmp = xf86MapPciMem(pScrn->scrnIndex, VIDMEM_MMIO, pVia->PciTag,
+                            pVia->FrameBufferBase, pVia->videoRambytes);
+        xf86UnMapVidMem(pScrn->scrnIndex, (pointer) tmp, pVia->videoRambytes);
+        /*
+         * End of hack.
+         */
+
         pVia->FBBase = xf86MapPciMem(pScrn->scrnIndex, VIDMEM_FRAMEBUFFER,
                                      pVia->PciTag, pVia->FrameBufferBase,
                                      pVia->videoRambytes);
