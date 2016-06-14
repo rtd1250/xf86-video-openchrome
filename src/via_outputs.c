@@ -1206,7 +1206,7 @@ viaProbePinStrapping(ScrnInfoPtr pScrn)
          *               01: DVI + LVDS2
          *               10: Dual LVDS Channel (High Resolution Panel)
          *               11: One DVI only (decrease the clock jitter) */
-        switch (sr13 && 0xC0) {
+        switch (sr13 & 0xC0) {
         case 0x00:
             xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "LVDS1 + LVDS2 detected.\n");
