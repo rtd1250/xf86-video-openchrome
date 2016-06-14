@@ -420,8 +420,6 @@ VIAFreeRec(ScrnInfoPtr pScrn)
     if (pVia->VideoRegs)
         free(pVia->VideoRegs);
 
-    viaUnmapMMIO(pScrn);
-
     free(pScrn->driverPrivate);
     pScrn->driverPrivate = NULL;
 } /* VIAFreeRec */
@@ -1107,6 +1105,7 @@ viaPreInit(ScrnInfoPtr pScrn, int flags)
     free(busId);
 #endif
 
+    /* After umsPreInit function succeeds, all MMIOs are mapped. */
     if (!umsPreInit(pScrn)) {
         VIAFreeRec(pScrn);
         return FALSE;
@@ -1124,8 +1123,7 @@ viaPreInit(ScrnInfoPtr pScrn, int flags)
      */
 
     if (!xf86SetDepthBpp(pScrn, 0, 0, 0, Support32bppFb)) {
-        VIAFreeRec(pScrn);
-        return FALSE;
+        goto fail;
     } else {
         switch (pScrn->depth) {
             case 8:
@@ -1138,8 +1136,7 @@ viaPreInit(ScrnInfoPtr pScrn, int flags)
                 xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                            "Given depth (%d) is not supported by this driver\n",
                            pScrn->depth);
-                VIAFreeRec(pScrn);
-                return FALSE;
+                goto fail;
         }
     }
 
@@ -1153,24 +1150,21 @@ viaPreInit(ScrnInfoPtr pScrn, int flags)
         rgb zeros = { 0, 0, 0 };
 
         if (!xf86SetWeight(pScrn, zeros, zeros)) {
-            VIAFreeRec(pScrn);
-            return FALSE;
+            goto fail;
         } else {
             /* TODO check weight returned is supported */
-            ;
         }
     }
 
     if (!xf86SetDefaultVisual(pScrn, -1)) {
-        return FALSE;
+        goto fail;
     } else {
         /* We don't currently support DirectColor at > 8bpp */
         if (pScrn->depth > 8 && pScrn->defaultVisual != TrueColor) {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Given default visual"
                        " (%s) is not supported at depth %d.\n",
                        xf86GetVisualName(pScrn->defaultVisual), pScrn->depth);
-            VIAFreeRec(pScrn);
-            return FALSE;
+            goto fail;
         }
     }
 
@@ -1184,8 +1178,7 @@ viaPreInit(ScrnInfoPtr pScrn, int flags)
         pScrn->rgbBits = 6;
 
     if (!VIASetupDefaultOptions(pScrn)) {
-        VIAFreeRec(pScrn);
-        return FALSE;
+        goto fail;
     }
 
     xf86ProcessOptions(pScrn->scrnIndex, pScrn->options, VIAOptions);
@@ -1526,31 +1519,28 @@ viaPreInit(ScrnInfoPtr pScrn, int flags)
 
     if (pVia->KMS) {
         if (!KMSCrtcInit(pScrn, &pVia->drmmode)) {
-            VIAFreeRec(pScrn);
-            return FALSE;
+            goto fail;
         }
     } else {
         if (!umsCrtcInit(pScrn)) {
-            VIAFreeRec(pScrn);
-            return FALSE;
+            goto fail;
         }
     }
 
     if (!xf86InitialConfiguration(pScrn, TRUE)) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Initial configuration failed\n");
-        return FALSE;
+        goto fail;
     }
 
     if (!pScrn->modes) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "No valid modes found\n");
-        return FALSE;
+        goto fail;
     }
 
     /* Initialize the colormap */
     Gamma zeros = { 0.0, 0.0, 0.0 };
     if (!xf86SetGamma(pScrn, zeros)) {
-        VIAFreeRec(pScrn);
-        return FALSE;
+        goto fail;
     }
 
     /* Set up screen parameters. */
@@ -1564,8 +1554,7 @@ viaPreInit(ScrnInfoPtr pScrn, int flags)
     xf86SetDpi(pScrn, 0, 0);
 
     if (xf86LoadSubModule(pScrn, "fb") == NULL) {
-        VIAFreeRec(pScrn);
-        return FALSE;
+        goto fail;
     }
 
     if (!pVia->NoAccel) {
@@ -1578,18 +1567,22 @@ viaPreInit(ScrnInfoPtr pScrn, int flags)
         if (!LoadSubModule(pScrn->module, "exa", NULL, NULL, NULL, &req,
                             &errmaj, &errmin)) {
             LoaderErrorMsg(NULL, "exa", errmaj, errmin);
-            VIAFreeRec(pScrn);
-            return FALSE;
+            goto fail;
         }
     }
 
     if (pVia->shadowFB) {
         if (!xf86LoadSubModule(pScrn, "shadow")) {
-            VIAFreeRec(pScrn);
-            return FALSE;
+            goto fail;
         }
     }
+
     return TRUE;
+
+fail:
+    viaUnmapMMIO(pScrn);
+    VIAFreeRec(pScrn);
+    return FALSE;
 }
 
 static void
