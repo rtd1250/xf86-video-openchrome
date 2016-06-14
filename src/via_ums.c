@@ -108,8 +108,9 @@ viaMapMMIO(ScrnInfoPtr pScrn)
 #endif
 
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                "Mapping MMIO at address 0x%lx with size 0x%x.\n",
-                pVia->MmioBase, VIA_MMIO_REGSIZE);
+                "Mapping MMIO at address 0x%lX with "
+                "size %u KB.\n",
+                pVia->MmioBase, VIA_MMIO_REGSIZE / 1024);
 
 #ifdef HAVE_PCIACCESS
     err = pci_device_map_range(pVia->PciInfo,
@@ -120,7 +121,7 @@ viaMapMMIO(ScrnInfoPtr pScrn)
     if (err) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                     "Unable to map MMIO.\n"
-                    "Error: %s (%d)\n",
+                    "Error: %s (%u)\n",
                     strerror(err), err);
         goto fail;
     }
@@ -136,9 +137,9 @@ viaMapMMIO(ScrnInfoPtr pScrn)
 #endif
 
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-               "Mapping 2D Host BitBLT space at address 0x%lx with "
-               "size 0x%x.\n",
-               pVia->MmioBase + VIA_MMIO_BLTBASE, VIA_MMIO_BLTSIZE);
+               "Mapping 2D Host BitBLT space at address 0x%lX with "
+               "size %u KB.\n",
+               pVia->MmioBase + VIA_MMIO_BLTBASE, VIA_MMIO_BLTSIZE / 1024);
 
 #ifdef HAVE_PCIACCESS
     err = pci_device_map_range(pVia->PciInfo,
@@ -149,7 +150,7 @@ viaMapMMIO(ScrnInfoPtr pScrn)
     if (err) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                     "Unable to map 2D Host BitBLT space.\n"
-                    "Error: %s (%d)\n",
+                    "Error: %s (%u)\n",
                     strerror(err), err);
         goto fail;
     }
@@ -184,8 +185,9 @@ viaMapMMIO(ScrnInfoPtr pScrn)
 #endif
 
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-               "Mapping the frame buffer at address 0x%lX with size 0x%lX.\n",
-               pVia->FrameBufferBase, pVia->videoRambytes);
+               "Mapping the frame buffer at address 0x%lX with "
+               "size %u KB.\n",
+               pVia->FrameBufferBase, pVia->videoRambytes / 1024);
 
 #ifdef HAVE_PCIACCESS
     err = pci_device_map_range(pVia->PciInfo, pVia->FrameBufferBase,
@@ -195,8 +197,8 @@ viaMapMMIO(ScrnInfoPtr pScrn)
                                (void **)&pVia->FBBase);
     if (err) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                    "Unable to map a frame buffer.\n"
-                    "Error: %s (%d)\n",
+                    "Unable to map the frame buffer.\n"
+                    "Error: %s (%u)\n",
                     strerror(err), err);
         goto fail;
     }
@@ -287,7 +289,6 @@ viaMapMMIO(ScrnInfoPtr pScrn)
 fail:
 
 #ifdef HAVE_PCIACCESS
-
     if (pVia->FBBase) {
         pci_device_unmap_range(pVia->PciInfo, (pointer) pVia->FBBase,
                                 pVia->videoRambytes);
@@ -322,6 +323,7 @@ fail:
     pVia->FBBase = NULL;
     pVia->BltBase = NULL;
     pVia->MapBase = NULL;
+
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaMapMMIO.\n"));
     return FALSE;
