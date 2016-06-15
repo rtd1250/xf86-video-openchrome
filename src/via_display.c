@@ -1200,12 +1200,24 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaSeqMask(hwp, 0x1D, temp >> 8, 0x03);
 
 
-    /* line compare: We are not doing splitscreen so 0x3FFF */
-    hwp->writeCrtc(hwp, 0x18, 0xFF);
-    ViaCrtcMask(hwp, 0x07, 0x10, 0x10);
-    ViaCrtcMask(hwp, 0x09, 0x40, 0x40);
+    /* We are not using the split screen feature so line compare register
+     * should be set to 0x7FF. */
+    temp = 0x7FF;
+
+    /* 3X5.18[7:0] - Line Compare Bits [7:0] */
+    hwp->writeCrtc(hwp, 0x18, temp & 0xFF);
+
+    /* 3X5.07[4] - Line Compare Bit [8] */
+    ViaCrtcMask(hwp, 0x07, temp >> 4, 0x10);
+
+    /* 3X5.09[6] - Line Compare Bit [9] */
+    ViaCrtcMask(hwp, 0x09, temp >> 3, 0x40);
+
+    /* 3X5.35[4] - Line Compare Bit [10] */
+    ViaCrtcMask(hwp, 0x35, temp >> 6, 0x10);
+
+
     ViaCrtcMask(hwp, 0x33, 0x06, 0x07);
-    ViaCrtcMask(hwp, 0x35, 0x10, 0x10);
 
     /* zero Maximum scan line */
     ViaCrtcMask(hwp, 0x09, 0x00, 0x1F);
