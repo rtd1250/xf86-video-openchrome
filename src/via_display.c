@@ -2044,6 +2044,7 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaIGA2SetDisplayRegister.\n"));
+
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "Requested Screen Mode: %s\n", mode->name);
 
@@ -2104,10 +2105,10 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
                         "IGA2 CrtcHTotal: %d\n", mode->CrtcHTotal));
     temp = mode->CrtcHTotal - 1;
 
-    /* 3X5.50[7:0]: Horizontal Total Period Bits[7:0] */
+    /* 3X5.50[7:0] - Horizontal Total Period Bits [7:0] */
     hwp->writeCrtc(hwp, 0x50, temp & 0xFF);
 
-    /* 3X5.55[3:0]: Horizontal Total Period Bits[11:8] */
+    /* 3X5.55[3:0] - Horizontal Total Period Bits [11:8] */
     ViaCrtcMask(hwp, 0x55, temp >> 8, 0x0F);
 
 
@@ -2117,10 +2118,10 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
                         "IGA2 CrtcHDisplay: %d\n", mode->CrtcHDisplay));
     temp = mode->CrtcHDisplay - 1;
 
-    /* 3X5.51[7:0]: Horizontal Active Data Period Bits[7:0] */
+    /* 3X5.51[7:0] - Horizontal Active Data Period Bits [7:0] */
     hwp->writeCrtc(hwp, 0x51, temp & 0xFF);
 
-    /* 3X5.55[6:4]: Horizontal Active Data Period Bits[10:8] */
+    /* 3X5.55[6:4] - Horizontal Active Data Period Bits [10:8] */
     ViaCrtcMask(hwp, 0x55, temp >> 4, 0x70);
 
 
@@ -2130,10 +2131,10 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
                         "IGA2 CrtcHBlankStart: %d\n", mode->CrtcHBlankStart));
     temp = mode->CrtcHBlankStart;
 
-    /* 3X5.52[7:0]: Horizontal Blanking Start Bits[7:0] */
+    /* 3X5.52[7:0] - Horizontal Blanking Start Bits [7:0] */
     hwp->writeCrtc(hwp, 0x52, temp & 0xFF);
 
-    /* 3X5.54[2:0]: Horizontal Blanking Start Bits[10:8] */
+    /* 3X5.54[2:0] - Horizontal Blanking Start Bits [10:8] */
     ViaCrtcMask(hwp, 0x54, temp >> 8, 0x07);
 
 
@@ -2143,13 +2144,13 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
                         "IGA2 CrtcHBlankEnd: %d\n", mode->CrtcHBlankEnd));
     temp = mode->CrtcHBlankEnd - 1;
 
-    /* 3X5.53[7:0]: Horizontal Blanking End Bits[7:0] */
+    /* 3X5.53[7:0] - Horizontal Blanking End Bits [7:0] */
     hwp->writeCrtc(hwp, 0x53, temp & 0xFF);
 
-    /* 3X5.54[5:3]: Horizontal Blanking End Bits[10:8] */
+    /* 3X5.54[5:3] - Horizontal Blanking End Bits [10:8] */
     ViaCrtcMask(hwp, 0x54, temp >> 5, 0x38);
 
-    /* 3X5.5D[6]: Horizontal Blanking End Bits[11] */
+    /* 3X5.5D[6] - Horizontal Blanking End Bit [11] */
     ViaCrtcMask(hwp, 0x5D, temp >> 5, 0x40);
 
 
@@ -2160,20 +2161,20 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
                         "IGA2 CrtcHSyncStart: %d\n", mode->CrtcHSyncStart));
     temp = mode->CrtcHSyncStart;
 
-    /* 3X5.56[7:0]: Horizontal Retrace Start Bits[7:0] */
+    /* 3X5.56[7:0] - Horizontal Retrace Start Bits [7:0] */
     hwp->writeCrtc(hwp, 0x56, temp & 0xFF);
 
-    /* 3X5.54[7:6]: Horizontal Retrace Start Bits[9:8] */
+    /* 3X5.54[7:6] - Horizontal Retrace Start Bits [9:8] */
     ViaCrtcMask(hwp, 0x54, temp >> 2, 0xC0);
 
-    /* 3X5.5C[7]: Horizontal Retrace Start Bits[10] */
+    /* 3X5.5C[7] - Horizontal Retrace Start Bit [10] */
     ViaCrtcMask(hwp, 0x5C, temp >> 3, 0x80);
 
     /* For UniChrome Pro and Chrome9. */
     if ((pVia->Chipset != VIA_CLE266)
         && (pVia->Chipset != VIA_KM400)) {
 
-        /* 3X5.5D[7]: Horizontal Retrace Start Bits[11] */
+        /* 3X5.5D[7] - Horizontal Retrace Start Bit [11] */
         ViaCrtcMask(hwp, 0x5D, temp >> 4, 0x80);
     }
 
@@ -2184,10 +2185,10 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
                         "IGA2 CrtcHSyncEnd: %d\n", mode->CrtcHSyncEnd));
     temp = mode->CrtcHSyncEnd - 1;
 
-    /* 3X5.57[7:0]: Horizontal Retrace End Bits[7:0] */
+    /* 3X5.57[7:0] - Horizontal Retrace End Bits [7:0] */
     hwp->writeCrtc(hwp, 0x57, temp & 0xFF);
 
-    /* 3X5.5C[6]: Horizontal Retrace End Bits[8] */
+    /* 3X5.5C[6] - Horizontal Retrace End Bit [8] */
     ViaCrtcMask(hwp, 0x5C, temp >> 2, 0x40);
 
 
@@ -2197,10 +2198,10 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
                         "IGA2 CrtcVTotal: %d\n", mode->CrtcVTotal));
     temp = mode->CrtcVTotal - 1;
 
-    /* 3X5.58[7:0]: Vertical Total Period Bits[7:0] */
+    /* 3X5.58[7:0] - Vertical Total Period Bits [7:0] */
     hwp->writeCrtc(hwp, 0x58, temp & 0xFF);
 
-    /* 3X5.5D[2:0]: Vertical Total Period Bits[10:8] */
+    /* 3X5.5D[2:0] - Vertical Total Period Bits [10:8] */
     ViaCrtcMask(hwp, 0x5D, temp >> 8, 0x07);
 
 
@@ -2210,10 +2211,10 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
                         "IGA2 CrtcVDisplay: %d\n", mode->CrtcVDisplay));
     temp = mode->CrtcVDisplay - 1;
 
-    /* 3X5.59[7:0]: Vertical Active Data Period Bits[7:0] */
+    /* 3X5.59[7:0] - Vertical Active Data Period Bits [7:0] */
     hwp->writeCrtc(hwp, 0x59, temp & 0xFF);
 
-    /* 3X5.5D[5:3]: Vertical Active Data Period Bits[10:8] */
+    /* 3X5.5D[5:3] - Vertical Active Data Period Bits [10:8] */
     ViaCrtcMask(hwp, 0x5D, temp >> 5, 0x38);
 
 
@@ -2223,10 +2224,10 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
                         "IGA2 CrtcVBlankStart: %d\n", mode->CrtcVBlankStart));
     temp = mode->CrtcVBlankStart;
 
-    /* 3X5.5A[7:0]: Vertical Blanking Start Bits[7:0] */
+    /* 3X5.5A[7:0] - Vertical Blanking Start Bits [7:0] */
     hwp->writeCrtc(hwp, 0x5A, temp & 0xFF);
 
-    /* 3X5.5C[2:0]: Vertical Blanking Start Bits[10:8] */
+    /* 3X5.5C[2:0] - Vertical Blanking Start Bits [10:8] */
     ViaCrtcMask(hwp, 0x5C, temp >> 8, 0x07);
 
 
@@ -2236,10 +2237,10 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
                         "IGA2 CrtcVBlankEnd: %d\n", mode->CrtcVBlankEnd));
     temp = mode->CrtcVBlankEnd - 1;
 
-    /* 3X5.5B[7:0]: Vertical Blanking End Bits[7:0] */
+    /* 3X5.5B[7:0] - Vertical Blanking End Bits [7:0] */
     hwp->writeCrtc(hwp, 0x5B, temp & 0xFF);
 
-    /* 3X5.5C[5:3]: Vertical Blanking End Bits[10:8] */
+    /* 3X5.5C[5:3] - Vertical Blanking End Bits [10:8] */
     ViaCrtcMask(hwp, 0x5C, temp >> 5, 0x38);
 
 
@@ -2249,10 +2250,10 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
                         "IGA2 CrtcVSyncStart: %d\n", mode->CrtcVSyncStart));
     temp = mode->CrtcVSyncStart;
 
-    /* 3X5.5E[7:0]: Vertical Retrace Start Bits[7:0] */
+    /* 3X5.5E[7:0] - Vertical Retrace Start Bits [7:0] */
     hwp->writeCrtc(hwp, 0x5E, temp & 0xFF);
 
-    /* 3X5.5F[7:5]: Vertical Retrace Start Bits[10:8] */
+    /* 3X5.5F[7:5] - Vertical Retrace Start Bits [10:8] */
     ViaCrtcMask(hwp, 0x5F, temp >> 3, 0xE0);
 
 
@@ -2262,7 +2263,7 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
                         "IGA2 CrtcVSyncEnd: %d\n", mode->CrtcVSyncEnd));
     temp = mode->CrtcVSyncEnd - 1;
 
-    /*3X5.5F[4:0]: Vertical Retrace End[4:0] */
+    /*3X5.5F[4:0] - Vertical Retrace End Bits [4:0] */
     ViaCrtcMask(hwp, 0x5F, temp & 0x1F, 0x1F);
 
 
@@ -2275,10 +2276,10 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
         temp &= ~0x03;
     }
 
-    /* 3X5.66[7:0]: Second Display Horizontal Offset Bits[7:0] */
+    /* 3X5.66[7:0] - Second Display Horizontal Offset Bits [7:0] */
     hwp->writeCrtc(hwp, 0x66, temp & 0xFF);
 
-    /* 3X5.67[1:0]: Second Display Horizontal Offset Bits[9:8] */
+    /* 3X5.67[1:0] - Second Display Horizontal Offset Bits [9:8] */
     ViaCrtcMask(hwp, 0x67, temp >> 8, 0x03);
 
 
@@ -2291,14 +2292,13 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
         temp &= ~0x03;
     }
 
-    /* 3X5.65[7:0]: Second Display Horizontal
-     * 2-Quadword Count Data Bits[7:0] */
+    /* 3X5.65[7:0] - Second Display Horizontal
+     * 2-Quadword Count Data Bits [7:0] */
     hwp->writeCrtc(hwp, 0x65, (temp >> 1) & 0xFF);
 
-    /* 3X5.67[3:2]: Second Display Horizontal
-     * 2-Quadword Count Data Bits[9:8] */
+    /* 3X5.67[3:2] - Second Display Horizontal
+     * 2-Quadword Count Data Bits [9:8] */
     ViaCrtcMask(hwp, 0x67, temp >> 7, 0x0C);
-
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaIGA2SetDisplayRegister.\n"));
