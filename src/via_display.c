@@ -856,12 +856,54 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     hwp->writeSeq(hwp, 0x03, 0x00);
     hwp->writeSeq(hwp, 0x04, 0x0E);
 
+
+    /* Setting maximum scan line to 0. */
+    /* 3X5.09[4:0] - Maximum Scan Line */
+    ViaCrtcMask(hwp, 0x09, 0x00, 0x1F);
+
+
+    /* 3X5.14[6]   - Double Word Mode
+     *               Allows normal addressing or double-word addressing.
+     *               0: Normal word addressing
+     *               1: Double word addressing
+     * 3X5.14[4:0] - Underline Location */
+    ViaCrtcMask(hwp, 0x14, 0x00, 0x5F);
+
+
+    /* We are not using the split screen feature so line compare register
+     * should be set to 0x7FF. */
+    temp = 0x7FF;
+
+    /* 3X5.18[7:0] - Line Compare Bits [7:0] */
+    hwp->writeCrtc(hwp, 0x18, temp & 0xFF);
+
+    /* 3X5.07[4] - Line Compare Bit [8] */
+    ViaCrtcMask(hwp, 0x07, temp >> 4, 0x10);
+
+    /* 3X5.09[6] - Line Compare Bit [9] */
+    ViaCrtcMask(hwp, 0x09, temp >> 3, 0x40);
+
+    /* 3X5.35[4] - Line Compare Bit [10] */
+    ViaCrtcMask(hwp, 0x35, temp >> 6, 0x10);
+
+
     /* Set the color depth for IGA1. */
     switch (pScrn->bitsPerPixel) {
     case 8:
         /* Only CLE266.AX uses 6-bit LUT. */
         if (pVia->Chipset == VIA_CLE266 && pVia->ChipRev < 15) {
             /* 6-bit LUT */
+            /* 3C5.15[7]   - 8/6 Bits LUT
+             *               0: 6-bit
+             *               1: 8-bit
+             * 3C5.15[4]   - Hi Color Mode Select
+             *               0: 555
+             *               1: 565
+             * 3C5.15[3:2] - Display Color Depth Select
+             *               00: 8bpp
+             *               01: 16bpp
+             *               10: 30bpp
+             *               11: 32bpp */
             ViaSeqMask(hwp, 0x15, 0x00, 0x9C);
         } else {
             /* 8-bit LUT */
@@ -870,17 +912,6 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
         break;
     case 16:
-        /* 3C5.15[7]   - 8/6 Bits LUT
-         *               0: 6-bit
-         *               1: 8-bit
-         * 3C5.15[4]   - Hi Color Mode Select
-         *               0: 555
-         *               1: 565
-         * 3C5.15[3:2] - Display Color Depth Select
-         *               00: 8bpp
-         *               01: 16bpp
-         *               10: 30bpp
-         *               11: 32bpp */
         ViaSeqMask(hwp, 0x15, 0x94, 0x9C);
         break;
     case 24:
@@ -1198,36 +1229,6 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     /* 3C5.1D[1:0] - Primary Display Horizontal Display
      *               Fetch Count Data Bits [9:8] */
     ViaSeqMask(hwp, 0x1D, temp >> 8, 0x03);
-
-
-    /* We are not using the split screen feature so line compare register
-     * should be set to 0x7FF. */
-    temp = 0x7FF;
-
-    /* 3X5.18[7:0] - Line Compare Bits [7:0] */
-    hwp->writeCrtc(hwp, 0x18, temp & 0xFF);
-
-    /* 3X5.07[4] - Line Compare Bit [8] */
-    ViaCrtcMask(hwp, 0x07, temp >> 4, 0x10);
-
-    /* 3X5.09[6] - Line Compare Bit [9] */
-    ViaCrtcMask(hwp, 0x09, temp >> 3, 0x40);
-
-    /* 3X5.35[4] - Line Compare Bit [10] */
-    ViaCrtcMask(hwp, 0x35, temp >> 6, 0x10);
-
-
-    /* Setting maximum scan line to 0. */
-    /* 3X5.09[4:0] - Maximum Scan Line */
-    ViaCrtcMask(hwp, 0x09, 0x00, 0x1F);
-
-
-    /* 3X5.14[6]   - Double Word Mode
-     *               Allows normal addressing or double-word addressing.
-     *               0: Normal word addressing
-     *               1: Double word addressing
-     * 3X5.14[4:0] - Underline Location */
-    ViaCrtcMask(hwp, 0x14, 0x00, 0x5F);
 
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
