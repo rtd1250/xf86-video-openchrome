@@ -1217,9 +1217,18 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x35, temp >> 6, 0x10);
 
 
-    /* zero Maximum scan line */
+    /* Setting maximum scan line to 0. */
+    /* 3X5.09[4:0] - Maximum Scan Line */
     ViaCrtcMask(hwp, 0x09, 0x00, 0x1F);
-    hwp->writeCrtc(hwp, 0x14, 0x00);
+
+
+    /* 3X5.14[6]   - Double Word Mode
+     *               Allows normal addressing or double-word addressing.
+     *               0: Normal word addressing
+     *               1: Double word addressing
+     * 3X5.14[4:0] - Underline Location */
+    ViaCrtcMask(hwp, 0x14, 0x00, 0x5F);
+
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaIGA1SetDisplayRegister.\n"));
