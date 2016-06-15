@@ -1217,8 +1217,6 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x35, temp >> 6, 0x10);
 
 
-    ViaCrtcMask(hwp, 0x33, 0x06, 0x07);
-
     /* zero Maximum scan line */
     ViaCrtcMask(hwp, 0x09, 0x00, 0x1F);
     hwp->writeCrtc(hwp, 0x14, 0x00);
