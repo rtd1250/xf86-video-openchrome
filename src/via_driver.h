@@ -52,6 +52,7 @@
 #include "fb.h"
 
 #include "xf86Crtc.h"
+#include "xf86fbman.h"
 #include "xf86RandR12.h"
 #include "xf86cmap.h"
 
