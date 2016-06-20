@@ -363,7 +363,7 @@ viaUnmapMMIO(ScrnInfoPtr pScrn)
     if (pVia->BltBase) {
         xf86UnMapVidMem(pScrn->scrnIndex, (pointer) pVia->BltBase,
                         VIA_MMIO_BLTSIZE);
-    {
+    }
 
     if (pVia->MapBase) {
         xf86UnMapVidMem(pScrn->scrnIndex, (pointer) pVia->MapBase,
