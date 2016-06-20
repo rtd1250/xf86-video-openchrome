@@ -391,7 +391,7 @@ viaInitPCIe(VIAPtr pVia)
 }
 
 static void
-viaInitAgp(VIAPtr pVia)
+viaInitAGP(VIAPtr pVia)
 {
     VIASETREG(VIA_REG_TRANSET, 0x00100000);
     VIASETREG(VIA_REG_TRANSPACE, 0x00000000);
@@ -542,7 +542,7 @@ viaInitialize2DEngine(ScrnInfoPtr pScrn)
             viaInitPCIe(pVia);
             break;
         default:
-            viaInitAgp(pVia);
+            viaInitAGP(pVia);
             break;
     }
 
