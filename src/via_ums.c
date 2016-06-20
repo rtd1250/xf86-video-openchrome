@@ -414,7 +414,7 @@ viaInitAGP(VIAPtr pVia)
  * issuing a Header-1 command.
  */
 static void
-viaEnableAgpVQ(VIAPtr pVia)
+viaEnableAGPVQ(VIAPtr pVia)
 {
    CARD32
        vqStartAddr = pVia->VQStart,
@@ -556,7 +556,7 @@ viaInitialize2DEngine(ScrnInfoPtr pScrn)
                 viaEnablePCIeVQ(pVia);
                 break;
             default:
-                viaEnableAgpVQ(pVia);
+                viaEnableAGPVQ(pVia);
                 break;
         }
     } else {
