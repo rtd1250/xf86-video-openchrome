@@ -438,6 +438,8 @@ VIAFreeScreen(FREE_SCREEN_ARGS_DECL)
     if (xf86LoaderCheckSymbol("vgaHWFreeHWRec")) {
         vgaHWFreeHWRec(pScrn);
     }
+
+    VIAFreeRec(pScrn);
 }
 
 static void
