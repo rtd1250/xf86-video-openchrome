@@ -725,7 +725,7 @@ viaIGA1Init(ScrnInfoPtr pScrn)
          *             Clock Select and CRTC Register Protect
          *
          */
-        ViaCrtcMask(hwp, 0x47, 0x02, 0xEF);
+        ViaCrtcMask(hwp, 0x47, 0x00, 0xEF);
 
     }
 
