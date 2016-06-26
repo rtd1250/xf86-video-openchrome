@@ -403,7 +403,7 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
      *                Primary Display’s LUT
      *             1: 3C6/3C7/3C8/3C9 addresses map to
      *                Secondary Display’s LUT */
-    ViaSeqMask(hwp, 0x1A, 0x88, 0x88);
+    ViaSeqMask(hwp, 0x1A, 0x88, 0xC8);
 
     /* Set DVP0 data drive strength to 0b11 (highest). */
     /* 3C5.1B[1]   - DVP0 Data Drive Strength Bit [0]
@@ -923,22 +923,6 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
                     "Unsupported color depth: %d\n",
                     pScrn->bitsPerPixel);
         break;
-    }
-
-    switch (pVia->Chipset) {
-        case VIA_CX700:
-        case VIA_K8M890:
-        case VIA_P4M900:
-        case VIA_VX800:
-        case VIA_VX855:
-        case VIA_VX900:
-            break;
-        default:
-            ViaSeqMask(hwp, 0x16, 0x08, 0xBF);
-            ViaSeqMask(hwp, 0x17, 0x1F, 0xFF);
-            ViaSeqMask(hwp, 0x18, 0x4E, 0xFF);
-            ViaSeqMask(hwp, 0x1A, 0x08, 0xF9);
-            break;
     }
 
 
