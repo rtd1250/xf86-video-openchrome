@@ -1045,7 +1045,7 @@ viaProbePinStrapping(ScrnInfoPtr pScrn)
         /* 3C5.12[4] - FPD17 pin strapping
          *             0: TMDS transmitter (DVI) / capture device
          *             1: Flat panel */
-        if (sr12 && 0x10) {
+        if (sr12 & 0x10) {
             xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "A flat panel is connected to "
                         "flat panel interface.\n");
@@ -1065,7 +1065,7 @@ viaProbePinStrapping(ScrnInfoPtr pScrn)
         /* 3C5.12[5] - FPD18 pin strapping
          *             0: TMDS transmitter (DVI)
          *             1: TV encoder */
-        if (sr12 && 0x20) {
+        if (sr12 & 0x20) {
             xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "A TMDS transmitter (DVI) is connected to "
                         "DVI port.\n");
@@ -1079,17 +1079,17 @@ viaProbePinStrapping(ScrnInfoPtr pScrn)
              *               01: NTSC
              *               10: PAL-N
              *               11: PAL-NC */
-            if (sr13 && 0x04) {
+            if (sr13 & 0x04) {
                 xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                             "NTSC for the TV encoder.\n");
             } else {
-                if (!(sr13 && 0x08)) {
+                if (!(sr13 & 0x08)) {
                     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                                 "PAL for the TV encoder.\n");
                 } else {
                     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                                 "PAL%s for the TV encoder.\n",
-                                sr13 && 0x04 ? "-NC" : "-N");
+                                sr13 & 0x04 ? "-NC" : "-N");
                 }
             }
 
@@ -1098,7 +1098,7 @@ viaProbePinStrapping(ScrnInfoPtr pScrn)
              *             1: 625 lines (PAL) */
             xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "%s lines for the TV encoder.\n",
-                        sr12 && 0x40 ? "625" : "525");
+                        sr12 & 0x40 ? "625" : "525");
         }
 
         break;
@@ -1112,12 +1112,12 @@ viaProbePinStrapping(ScrnInfoPtr pScrn)
          *                DVI or TV out use
          *             1: Enable DVP0 (Digital Video Port 0) for
          *                DVI or TV out use */
-        if (sr12 && 0x40) {
+        if (sr12 & 0x40) {
 
             /* 3C5.12[5] - DVP0D5 pin strapping
              *             0: TMDS transmitter (DVI)
              *             1: TV encoder */
-            if (sr12 && 0x20) {
+            if (sr12 & 0x20) {
                 xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                             "A TV encoder is detected on "
                             "DVP0 (Digital Video Port 0).\n");
@@ -1133,12 +1133,12 @@ viaProbePinStrapping(ScrnInfoPtr pScrn)
          *             0: AGP pins are used for AGP
          *             1: AGP pins are used by FPDP
          *             (Flat Panel Display Port) */
-        if (sr13 && 0x08) {
+        if (sr13 & 0x08) {
 
             /* 3C5.12[4] - DVP0D4 pin strapping
              *             0: Dual 12-bit FPDP (Flat Panel Display Port)
              *             1: 24-bit FPDP  (Flat Panel Display Port) */
-            if (sr12 && 0x10) {
+            if (sr12 & 0x10) {
                 xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                             "24-bit FPDP (Flat Panel Display Port) "
                             "detected.\n");
@@ -1159,7 +1159,7 @@ viaProbePinStrapping(ScrnInfoPtr pScrn)
                  * 3C5.12[5] - DVP0D5 pin strapping
                  *             0: TMDS transmitter (DVI)
                  *             1: TV encoder */
-                if ((!(sr12 && 0x40)) && (!(sr12 && 0x20))) {
+                if ((!(sr12 & 0x40)) && (!(sr12 & 0x20))) {
                     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                                 "A TV encoder is connected to "
                                 "FPDP (Flat Panel Display Port).\n");
