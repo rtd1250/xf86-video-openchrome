@@ -1404,10 +1404,12 @@ viaIGA1Save(ScrnInfoPtr pScrn)
         Regs->SR4C = hwp->readSeq(hwp, 0x4C);
 
     /* Save register 3C5.4D.
-     * According to CX700 (UniChrome Pro II) documentation, this register
-     * is called Dual Channel Memory Control.
-     * According to VX800 / VX855 / VX900 (Chrome 9 HC3 / HCM / HD)
-     * documentations, this register is called Preemptive Arbiter Control.
+     * According to CX700 / VX700 (UniChrome Pro II) Open Graphics
+     * Programming Manual Part I: Graphics Core / 2D,
+     * this register is called Dual Channel Memory Control.
+     * According to VX800 / VX855 / VX900 (Chrome9 HC3 / HCM / HD)
+     * Open Graphics Programming Manual Part I: Graphics Core / 2D,
+     * this register is called Preemptive Arbiter Control.
      * It is likely that this register is also supported in UniChrome Pro. */
         Regs->SR4D = hwp->readSeq(hwp, 0x4D);
 
@@ -1695,10 +1697,12 @@ viaIGA1Restore(ScrnInfoPtr pScrn)
     case VIA_VX900:
 
     /* Restore register 3C5.4D.
-     * According to CX700 (UniChrome Pro II) documentation, this register
-     * is called Dual Channel Memory Control.
-     * According to VX800 / VX855 / VX900 (Chrome 9 HC3 / HCM / HD)
-     * documentations, this register is called Preemptive Arbiter Control.
+     * According to CX700 / VX700 (UniChrome Pro II) Open Graphics
+     * Programming Manual Part I: Graphics Core / 2D,
+     * this register is called Dual Channel Memory Control.
+     * According to VX800 / VX855 / VX900 (Chrome9 HC3 / HCM / HD)
+     * Open Graphics Programming Manual Part I: Graphics Core / 2D,
+     * this register is called Preemptive Arbiter Control.
      * It is likely that this register is also supported in UniChrome Pro. */
         hwp->writeSeq(hwp, 0x4D, Regs->SR4D);
 
