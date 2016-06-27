@@ -509,27 +509,25 @@ via_tv_init(ScrnInfoPtr pScrn)
 }
 
 /*
- * Enables CRT using DPMS registers.
+ * Enables or disables analog VGA output by controlling DAC
+ * (Digital to Analog Converter) output state.
  */
 static void
-ViaDisplayEnableCRT(ScrnInfoPtr pScrn)
+viaAnalogOutput(ScrnInfoPtr pScrn, Bool displayState)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDisplayEnableCRT\n"));
-    ViaCrtcMask(hwp, 0x36, 0x00, 0x30);
-}
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaAnalogOutput.\n"));
 
-/*
- * Disables CRT using DPMS registers.
- */
-static void
-ViaDisplayDisableCRT(ScrnInfoPtr pScrn)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    /* This register controls analog VGA DAC output state. */
+    /* 3X5.47[2] - DACOFF Backdoor Register
+     *             0: DAC on
+     *             1: DAC off */
+    ViaCrtcMask(hwp, 0x47, displayState ? 0x00 : 0x04, 0x04);
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDisplayDisableCRT\n"));
-    ViaCrtcMask(hwp, 0x36, 0x30, 0x30);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaAnalogOutput.\n"));
 }
 
 static void
@@ -562,12 +560,12 @@ via_analog_dpms(xf86OutputPtr output, int mode)
 
     switch (mode) {
     case DPMSModeOn:
-        ViaDisplayEnableCRT(pScrn);
+        viaAnalogOutput(pScrn, TRUE);
         break;
     case DPMSModeStandby:
     case DPMSModeSuspend:
     case DPMSModeOff:
-        ViaDisplayDisableCRT(pScrn);
+        viaAnalogOutput(pScrn, FALSE);
         break;
     default:
         break;
@@ -637,7 +635,7 @@ via_analog_mode_set(xf86OutputPtr output, DisplayModePtr mode,
         ViaSeqMask(hwp, 0x16, value, 0x40);
     }
 
-    ViaDisplayEnableCRT(pScrn);
+    viaAnalogOutput(pScrn, TRUE);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_analog_mode_set.\n"));
