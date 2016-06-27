@@ -635,8 +635,6 @@ via_analog_mode_set(xf86OutputPtr output, DisplayModePtr mode,
         ViaSeqMask(hwp, 0x16, value, 0x40);
     }
 
-    viaAnalogOutput(pScrn, TRUE);
-
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_analog_mode_set.\n"));
 }
