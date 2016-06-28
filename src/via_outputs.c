@@ -525,6 +525,9 @@ viaAnalogOutput(ScrnInfoPtr pScrn, Bool displayState)
      *             0: DAC on
      *             1: DAC off */
     ViaCrtcMask(hwp, 0x47, displayState ? 0x00 : 0x04, 0x04);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "Analog VGA Output: %s\n",
+                displayState ? "On" : "Off");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaAnalogOutput.\n"));
