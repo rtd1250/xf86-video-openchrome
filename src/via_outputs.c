@@ -554,6 +554,51 @@ viaAnalogSource(ScrnInfoPtr pScrn, CARD8 displaySource)
                         "Exiting viaAnalogSource.\n"));
 }
 
+/*
+ * Intializes analog VGA related registers.
+ */
+static void
+viaAnalogInit(ScrnInfoPtr pScrn)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaAnalogInit.\n"));
+
+    /* 3X5.37[7]   - DAC Power Save Control 1
+     *               0: Depend on Rx3X5.37[5:4] setting
+     *               1: DAC always goes into power save mode
+     * 3X5.37[6]   - DAC Power Down Control
+     *               0: Depend on Rx3X5.47[2] setting
+     *               1: DAC never goes to power down mode
+     * 3X5.37[5:4] - DAC Power Save Control 2
+     *               00: DAC never goes to power save mode
+     *               01: DAC goes to power save mode by line
+     *               10: DAC goes to power save mode by frame
+     *               11: DAC goes to power save mode by line and frame
+     * 3X5.37[3]   - DAC PEDESTAL Control
+     * 3X5.37[2:0] - DAC Factor
+     *               (Default: 100) */
+    ViaCrtcMask(hwp, 0x37, 0x04, 0xFF);
+
+    switch (pVia->Chipset) {
+    case VIA_CX700:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        /* 3C5.5E[0] - CRT DACOFF Setting
+         *             1: CRT DACOFF controlled by 3C5.01[5] */
+        ViaSeqMask(hwp, 0x5E, 0x01, 0x01);
+        break;
+    default:
+        break;
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaAnalogInit.\n"));
+}
+
 static void
 via_analog_create_resources(xf86OutputPtr output)
 {
@@ -648,6 +693,8 @@ via_analog_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_analog_mode_set.\n"));
+
+    viaAnalogInit(pScrn);
 
     if (output->crtc) {
         viaAnalogSource(pScrn, iga->index ? 0x01 : 0x00);
