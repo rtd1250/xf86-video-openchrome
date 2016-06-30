@@ -485,6 +485,11 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
      *               11: PLL on/off according to the PMS */
     ViaSeqMask(hwp, 0x2D, 0x03, 0xC3);
 
+    /* In Wyse X class mobile thin client, it was observed that setting
+     * SR2E[3:2] (3C5.2E[3:2]; PCI Master / DMA) to 0b11 (clock on / off
+     * according to the engine IDLE status) causes an X.Org Server boot
+     * failure. Setting this register to 0b10 (clock always on) corrects
+     * the problem. */
     /* 3C5.2E[7:6] - Capturer (Gated Clock <ECK>)
      *               0x: Clock off
      *               10: Clock always on
@@ -501,7 +506,7 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
      *               0x: Clock off
      *               10: Clock always on
      *               11: Clock on/off according to the engine IDLE status */
-    ViaSeqMask(hwp, 0x2E, 0xFF, 0xFF);
+    ViaSeqMask(hwp, 0x2E, 0xFB, 0xFF);
 
     /* 3C5.3F[7:6] - CR Clock Control (Gated Clock <ECK>)
      *               0x: Clock off
