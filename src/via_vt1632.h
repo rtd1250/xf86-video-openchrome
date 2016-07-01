@@ -42,7 +42,7 @@ struct ViaVT1632PrivateData {
 	CARD8 Register0C;
 };
 
-void via_vt1632_power(xf86OutputPtr output, BOOL on);
+void via_vt1632_power(xf86OutputPtr output, Bool powerState);
 void via_vt1632_save(xf86OutputPtr output);
 void via_vt1632_restore(xf86OutputPtr output);
 int via_vt1632_mode_valid(xf86OutputPtr output, DisplayModePtr pMode);

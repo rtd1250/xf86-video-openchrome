@@ -65,7 +65,7 @@ via_vt1632_dump_registers(ScrnInfoPtr pScrn, I2CDevPtr pDev)
 
 
 void
-via_vt1632_power(xf86OutputPtr output, BOOL on)
+via_vt1632_power(xf86OutputPtr output, Bool powerState)
 {
     struct ViaVT1632PrivateData * Private = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
@@ -73,14 +73,11 @@ via_vt1632_power(xf86OutputPtr output, BOOL on)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_vt1632_power.\n"));
 
-    if (on == TRUE) {
-        xf86I2CMaskByte(Private->VT1632I2CDev, 0x08, 0x01, 0x01);
-    } else {
-        xf86I2CMaskByte(Private->VT1632I2CDev, 0x08, 0x00, 0x01);
-    }
+    xf86I2CMaskByte(Private->VT1632I2CDev, 0x08, powerState ? 0x01 : 0x00, 0x01);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "VT1632A Power: %s\n",
+                powerState ? "On" : "Off");
 
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1632A: Power %s.\n",
-                on ? "On" : "Off");
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_vt1632_power.\n"));
 }

@@ -869,16 +869,16 @@ via_dvi_dpms(xf86OutputPtr output, int mode)
 
     switch (mode) {
     case DPMSModeOn:
-        viaTMDSPower(pScrn, TRUE);
+        via_vt1632_power(output, TRUE);
         break;
-
     case DPMSModeStandby:
     case DPMSModeSuspend:
     case DPMSModeOff:
-        viaTMDSPower(pScrn, FALSE);
+        via_vt1632_power(output, FALSE);
+        break;
+    default:
         break;
     }
-
 }
 
 static void
