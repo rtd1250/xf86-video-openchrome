@@ -3048,6 +3048,7 @@ iga1_crtc_set_cursor_colors (xf86CrtcPtr crtc, int bg, int fg)
         return;
 
     switch(pVia->Chipset) {
+    case VIA_PM800:
     case VIA_CX700:
     case VIA_P4M890:
     case VIA_P4M900:
@@ -3090,6 +3091,7 @@ iga1_crtc_set_cursor_position (xf86CrtcPtr crtc, int x, int y)
     }
 
     switch(pVia->Chipset) {
+    case VIA_PM800:
     case VIA_CX700:
     case VIA_P4M890:
     case VIA_P4M900:
@@ -3115,6 +3117,7 @@ iga1_crtc_show_cursor (xf86CrtcPtr crtc)
     VIAPtr pVia = VIAPTR(pScrn);
 
     switch(pVia->Chipset) {
+    case VIA_PM800:
     case VIA_CX700:
     case VIA_P4M890:
     case VIA_P4M900:
@@ -3141,6 +3144,7 @@ iga1_crtc_hide_cursor (xf86CrtcPtr crtc)
     CARD32 temp;
 
     switch(pVia->Chipset) {
+    case VIA_PM800:
     case VIA_CX700:
     case VIA_P4M890:
     case VIA_P4M900:
@@ -3509,6 +3513,7 @@ iga2_crtc_set_cursor_colors(xf86CrtcPtr crtc, int bg, int fg)
         return;
 
     switch(pVia->Chipset) {
+    case VIA_PM800:
     case VIA_CX700:
     case VIA_P4M890:
     case VIA_P4M900:
@@ -3558,6 +3563,7 @@ iga2_crtc_set_cursor_position(xf86CrtcPtr crtc, int x, int y)
     }
 
     switch(pVia->Chipset) {
+    case VIA_PM800:
     case VIA_CX700:
     case VIA_P4M890:
     case VIA_P4M900:
@@ -3583,6 +3589,7 @@ iga2_crtc_show_cursor(xf86CrtcPtr crtc)
     VIAPtr pVia = VIAPTR(pScrn);
 
     switch(pVia->Chipset) {
+    case VIA_PM800:
     case VIA_CX700:
     case VIA_P4M890:
     case VIA_P4M900:
@@ -3610,6 +3617,7 @@ iga2_crtc_hide_cursor(xf86CrtcPtr crtc)
     CARD32 temp;
 
     switch(pVia->Chipset) {
+    case VIA_PM800:
     case VIA_CX700:
     case VIA_P4M890:
     case VIA_P4M900:
