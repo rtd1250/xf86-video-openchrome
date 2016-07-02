@@ -207,7 +207,7 @@ void ViaSetUseExternalClock(vgaHWPtr hwp);
 /* via_display.c */
 void viaIGA1DPMSControl(ScrnInfoPtr pScrn, CARD8 DPMS_Control);
 void viaIGA2DisplayOutput(ScrnInfoPtr pScrn, Bool OutputEnable);
-void viaIGA2DisplayChannel(ScrnInfoPtr pScrn, Bool Channel_State);
+void viaIGA2DisplayChannel(ScrnInfoPtr pScrn, Bool channelState);
 void viaDisplayInit(ScrnInfoPtr pScrn);
 void ViaGammaDisable(ScrnInfoPtr pScrn);
 void ViaCRTCInit(ScrnInfoPtr pScrn);

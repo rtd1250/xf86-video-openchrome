@@ -73,22 +73,22 @@ viaIGA2DisplayOutput(ScrnInfoPtr pScrn, Bool OutputEnable)
  * Controls IGA2 display channel state.
  */
 void
-viaIGA2DisplayChannel(ScrnInfoPtr pScrn, Bool Channel_State)
+viaIGA2DisplayChannel(ScrnInfoPtr pScrn, Bool channelState)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaIGA2DisplayChannel.\n"));
 
-    /* 3X5.6A[7]: Second Display Channel Enable
-     * 3X5.6A[6]: Second Display Channel Reset (0 for reset) */
+    /* 3X5.6A[7] - Second Display Channel Enable
+     * 3X5.6A[6] - Second Display Channel Reset (0 for reset) */
     ViaCrtcMask(hwp, 0x6A, 0x00, 0x40);
-    ViaCrtcMask(hwp, 0x6A, Channel_State ? 0x80 : 0x00, 0x80);
+    ViaCrtcMask(hwp, 0x6A, channelState ? 0x80 : 0x00, 0x80);
     ViaCrtcMask(hwp, 0x6A, 0x40, 0x40);
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "IGA2 Display Channel: %s\n",
-                Channel_State ? "On" : "Off");
+                channelState ? "On" : "Off");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaIGA2DisplayChannel.\n"));
