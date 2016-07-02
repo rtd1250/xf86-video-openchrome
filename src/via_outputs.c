@@ -929,19 +929,7 @@ via_dvi_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 static xf86OutputStatus
 via_dvi_detect(xf86OutputPtr output)
 {
-    xf86OutputStatus status = XF86OutputStatusDisconnected;
-    ScrnInfoPtr pScrn = output->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
-    xf86MonPtr mon;
-
-    mon = xf86OutputGetEDID(output, pVia->pI2CBus2);
-    if (mon && DIGITAL(mon->features.input_type)) {
-        xf86OutputSetEDID(output, mon);
-        status = XF86OutputStatusConnected;
-    } else {
-        status = via_vt1632_detect(output);
-    }
-    return status;
+    return via_vt1632_detect(output);
 }
 
 static void
