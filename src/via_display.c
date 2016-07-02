@@ -53,7 +53,7 @@ viaIGA1DPMSControl(ScrnInfoPtr pScrn, CARD8 DPMS_Control)
  * Controls IGA2 display output on or off state.
  */
 void
-viaIGA2DisplayOutput(ScrnInfoPtr pScrn, Bool OutputEnable)
+viaIGA2DisplayOutput(ScrnInfoPtr pScrn, Bool outputState)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
@@ -63,7 +63,7 @@ viaIGA2DisplayOutput(ScrnInfoPtr pScrn, Bool OutputEnable)
     /* 3X5.6B[2] - IGA2 Screen Off
      *             0: Screen on
      *             1: Screen off */
-    ViaCrtcMask(hwp, 0x6B, OutputEnable ? 0x00 : 0x04, 0x04);
+    ViaCrtcMask(hwp, 0x6B, outputState ? 0x00 : 0x04, 0x04);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaIGA2DisplayOutput.\n"));
