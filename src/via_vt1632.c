@@ -67,7 +67,7 @@ via_vt1632_dump_registers(ScrnInfoPtr pScrn, I2CDevPtr pDev)
 void
 via_vt1632_power(xf86OutputPtr output, Bool powerState)
 {
-    struct ViaVT1632PrivateData * Private = output->driver_private;
+    ViaVT1632Ptr Private = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -85,7 +85,7 @@ via_vt1632_power(xf86OutputPtr output, Bool powerState)
 void
 via_vt1632_save(xf86OutputPtr output)
 {
-    struct ViaVT1632PrivateData * Private = output->driver_private;
+    ViaVT1632Ptr Private = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -106,7 +106,7 @@ via_vt1632_save(xf86OutputPtr output)
 void
 via_vt1632_restore(xf86OutputPtr output)
 {
-    struct ViaVT1632PrivateData * Private = output->driver_private;
+    ViaVT1632Ptr Private = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -127,7 +127,7 @@ via_vt1632_restore(xf86OutputPtr output)
 int
 via_vt1632_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
 {
-    struct ViaVT1632PrivateData * Private = output->driver_private;
+    ViaVT1632Ptr Private = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
@@ -154,7 +154,7 @@ void
 via_vt1632_mode_set(xf86OutputPtr output, DisplayModePtr mode,
                     DisplayModePtr adjusted_mode)
 {
-    struct ViaVT1632PrivateData * Private = output->driver_private;
+    ViaVT1632Ptr Private = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
@@ -200,7 +200,7 @@ via_vt1632_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 xf86OutputStatus
 via_vt1632_detect(xf86OutputPtr output)
 {
-    struct ViaVT1632PrivateData * Private = output->driver_private;
+    ViaVT1632Ptr Private = output->driver_private;
     xf86OutputStatus status;
     ScrnInfoPtr pScrn = output->scrn;
     CARD8 tmp;
@@ -262,17 +262,17 @@ via_vt1632_probe(ScrnInfoPtr pScrn, I2CDevPtr pDev) {
     return TRUE;
 }
 
-struct ViaVT1632PrivateData *
+ViaVT1632Ptr
 via_vt1632_init(ScrnInfoPtr pScrn, I2CDevPtr pDev)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    struct ViaVT1632PrivateData * Private = NULL;
+    ViaVT1632Ptr Private = NULL;
     CARD8 buf = 0;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_vt1632_init.\n"));
 
-    Private = xnfcalloc(1, sizeof(struct ViaVT1632PrivateData));
+    Private = xnfcalloc(1, sizeof(ViaVT1632Rec));
     if (!Private) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                     "Failed to allocate memory for DVI initialization.\n");

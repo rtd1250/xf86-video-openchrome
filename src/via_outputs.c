@@ -929,7 +929,30 @@ via_dvi_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 static xf86OutputStatus
 via_dvi_detect(xf86OutputPtr output)
 {
-    return via_vt1632_detect(output);
+    xf86OutputStatus status = XF86OutputStatusDisconnected;
+    ScrnInfoPtr pScrn = output->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+    ViaVT1632Ptr Private = output->driver_private;
+    xf86MonPtr mon;
+
+    /* Check for the DVI presence via VT1632A first before accessing
+     * I2C bus. */
+    status = via_vt1632_detect(output);
+    if (status == XF86OutputStatusConnected) {
+
+        /* Since DVI presence was established, access the I2C bus
+         * assigned to DVI. */
+        mon = xf86OutputGetEDID(output, Private->VT1632I2CDev->pI2CBus);
+
+        /* Is the interface type digital? */
+        if (mon && DIGITAL(mon->features.input_type)) {
+            xf86OutputSetEDID(output, mon);
+        } else {
+            status = XF86OutputStatusDisconnected;
+        }
+    }
+
+    return status;
 }
 
 static void
@@ -963,7 +986,7 @@ via_dvi_init(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     xf86OutputPtr output = NULL;
-    struct ViaVT1632PrivateData *private_data = NULL;
+    ViaVT1632Ptr private_data = NULL;
     I2CBusPtr pBus = NULL;
     I2CDevPtr pDev = NULL;
     I2CSlaveAddr addr = 0x10;
