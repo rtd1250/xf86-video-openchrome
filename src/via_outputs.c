@@ -923,9 +923,7 @@ via_dvi_mode_set(xf86OutputPtr output, DisplayModePtr mode,
     ScrnInfoPtr pScrn = output->scrn;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
-    via_vt1632_power(output, FALSE);
     via_vt1632_mode_set(output, mode, adjusted_mode);
-    via_vt1632_power(output, TRUE);
 }
 
 static xf86OutputStatus
