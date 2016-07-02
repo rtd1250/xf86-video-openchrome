@@ -521,10 +521,11 @@ viaAnalogOutput(ScrnInfoPtr pScrn, Bool outputState)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaAnalogOutput.\n"));
 
-    /* 3C5.01[5] - DACOFF Register
+    /* This register controls analog VGA DAC output state. */
+    /* 3X5.47[2] - DACOFF Backdoor Register
      *             0: DAC on
      *             1: DAC off */
-    ViaSeqMask(hwp, 0x01, outputState ? 0x00 : 0x20, 0x20);
+    ViaCrtcMask(hwp, 0x47, outputState ? 0x00 : 0x04, 0x04);
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "Analog VGA Output: %s\n",
                 outputState ? "On" : "Off");
