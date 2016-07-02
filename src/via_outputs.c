@@ -1,5 +1,6 @@
 /*
- * Copyright 2005-2015 The Openchrome Project
+ * Copyright 2016 Kevin Brace
+ * Copyright 2005-2016 The OpenChrome Project
  *                     [http://www.freedesktop.org/wiki/Openchrome]
  * Copyright 2004-2005 The Unichrome Project  [unichrome.sf.net]
  * Copyright 1998-2003 VIA Technologies, Inc. All Rights Reserved.
