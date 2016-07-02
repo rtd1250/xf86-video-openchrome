@@ -35,15 +35,19 @@
  * Controls IGA1 DPMS State.
  */
 void
-viaIGA1DPMSControl(ScrnInfoPtr pScrn, CARD8 DPMS_Control)
+viaIGA1DPMSControl(ScrnInfoPtr pScrn, CARD8 dpmsControl)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaIGA1DPMSControl.\n"));
 
-    /* 3X5.36[5:4]: DPMS Control */
-    ViaCrtcMask(hwp, 0x36, (DPMS_Control << 4) & 0x30, 0x30);
+    /* 3X5.36[5:4] - DPMS Control
+     *               00: On
+     *               01: Stand-by
+     *               10: Suspend
+     *               11: Off */
+    ViaCrtcMask(hwp, 0x36, dpmsControl << 4, 0x30);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaIGA1DPMSControl.\n"));
