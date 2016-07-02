@@ -514,7 +514,7 @@ via_tv_init(ScrnInfoPtr pScrn)
  * (Digital to Analog Converter) output state.
  */
 static void
-viaAnalogOutput(ScrnInfoPtr pScrn, Bool displayState)
+viaAnalogOutput(ScrnInfoPtr pScrn, Bool outputState)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
@@ -524,10 +524,10 @@ viaAnalogOutput(ScrnInfoPtr pScrn, Bool displayState)
     /* 3C5.01[5] - DACOFF Register
      *             0: DAC on
      *             1: DAC off */
-    ViaSeqMask(hwp, 0x01, displayState ? 0x00 : 0x20, 0x20);
+    ViaSeqMask(hwp, 0x01, outputState ? 0x00 : 0x20, 0x20);
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "Analog VGA Output: %s\n",
-                displayState ? "On" : "Off");
+                outputState ? "On" : "Off");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaAnalogOutput.\n"));
