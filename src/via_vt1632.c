@@ -201,7 +201,7 @@ xf86OutputStatus
 via_vt1632_detect(xf86OutputPtr output)
 {
     struct ViaVT1632PrivateData * Private = output->driver_private;
-    xf86OutputStatus status = XF86OutputStatusDisconnected;
+    xf86OutputStatus status;
     ScrnInfoPtr pScrn = output->scrn;
     CARD8 tmp;
 
@@ -213,6 +213,10 @@ via_vt1632_detect(xf86OutputPtr output)
         xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
                     "VT1632A: DVI device is detected.\n");
         status = XF86OutputStatusConnected;
+    } else {
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "VT1632A: DVI device was not detected.\n");
+        status = XF86OutputStatusDisconnected;
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
