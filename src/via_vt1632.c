@@ -209,7 +209,7 @@ via_vt1632_detect(xf86OutputPtr output)
                         "Entered via_vt1632_detect.\n"));
 
     xf86I2CReadByte(Private->VT1632I2CDev, 0x09, &tmp);
-    if (tmp & 0x02) {
+    if (tmp & 0x04) {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
                     "VT1632A: DVI device is detected.\n");
         status = XF86OutputStatusConnected;
