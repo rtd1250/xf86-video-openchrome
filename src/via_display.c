@@ -64,6 +64,9 @@ viaIGA2DisplayOutput(ScrnInfoPtr pScrn, Bool outputState)
      *             0: Screen on
      *             1: Screen off */
     ViaCrtcMask(hwp, 0x6B, outputState ? 0x00 : 0x04, 0x04);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "IGA2 Display Output: %s\n",
+                outputState ? "On" : "Off");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaIGA2DisplayOutput.\n"));
