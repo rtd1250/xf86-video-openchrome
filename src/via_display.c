@@ -1032,12 +1032,14 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
      *               111: Shift to early time by 2 characters */
     ViaCrtcMask(hwp, 0x33, 0x05, 0x4F);
 
-    /* Set IGA1 to linear mode */
-    /* 3X5.43[2]  - IGA1 Address Mode Selection
-     *              0: Linear
-     *              1: Tile */
-    ViaCrtcMask(hwp, 0x43, 0x00, 0x04);
-
+    /* UniChrome Pro or later */
+    if ((pVia->Chipset != VIA_CLE266) && (pVia->Chipset != VIA_KM400)) {
+        /* Set IGA1 to linear mode. */
+        /* 3X5.43[2]  - IGA1 Address Mode Selection
+         *              0: Linear
+         *              1: Tile */
+        ViaCrtcMask(hwp, 0x43, 0x00, 0x04);
+    }
 
     /* Set IGA1 horizontal total.*/
     /* Due to IGA1 horizontal total being only 9 bits wide,
@@ -1761,7 +1763,7 @@ viaIGA1Restore(ScrnInfoPtr pScrn)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Restoring IGA1 registers.\n"));
 
-/* UniChrome Pro or later */
+/*  later */
     switch (pVia->Chipset) {
     case VIA_PM800:
     case VIA_K8M800:
