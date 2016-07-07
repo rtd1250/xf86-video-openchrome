@@ -885,9 +885,6 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "IGA1 Requested Screen Mode: %s\n", mode->name);
 
-    ViaCrtcMask(hwp, 0x11, 0x00, 0x80); /* modify starting address */
-    ViaCrtcMask(hwp, 0x03, 0x80, 0x80); /* enable vertical retrace access */
-
     /* Set Misc Register */
     temp = 0x23;
     if (mode->Flags & V_NHSYNC)
@@ -911,11 +908,13 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     hwp->writeSeq(hwp, 0x03, 0x00);
     hwp->writeSeq(hwp, 0x04, 0x0E);
 
+    ViaCrtcMask(hwp, 0x03, 0x80, 0x80); /* enable vertical retrace access */
 
     /* Setting maximum scan line to 0. */
     /* 3X5.09[4:0] - Maximum Scan Line */
     ViaCrtcMask(hwp, 0x09, 0x00, 0x1F);
 
+    ViaCrtcMask(hwp, 0x11, 0x00, 0x80); /* modify starting address */
 
     /* 3X5.14[6]   - Double Word Mode
      *               Allows normal addressing or double-word addressing.
