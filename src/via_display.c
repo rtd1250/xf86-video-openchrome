@@ -288,6 +288,23 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
      *             1: Enable */
     ViaSeqMask(hwp, 0x10, 0x01, 0x01);
 
+    temp = hwp->readEnable(hwp);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Enable Register: 0x%02X\n", temp));
+    hwp->writeEnable(hwp, temp | 0x01);
+
+    temp = hwp->readMiscOut(hwp);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Misc. Register: 0x%02X\n", temp));
+    hwp->writeMiscOut(hwp, temp | 0x2E);
+
+    temp = hwp->readEnable(hwp);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Enable Register: 0x%02X\n", temp));
+    temp = hwp->readMiscOut(hwp);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Misc. Register: 0x%02X\n", temp));
+
     ViaCRTCSetGraphicsRegisters(pScrn);
     ViaCRTCSetAttributeRegisters(pScrn);
 
