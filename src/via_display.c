@@ -2157,8 +2157,14 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     /* Use IGA2 for DVP1 Data Source Selection 0. */
     ViaCrtcMask(hwp, 0x9B, 0x10, 0x10);
 
-    /* Linear Mode */
-    ViaCrtcMask(hwp, 0x62, 0x00, 0x01);
+    /* UniChrome Pro or later */
+    if ((pVia->Chipset != VIA_CLE266) && (pVia->Chipset != VIA_KM400)) {
+        /* Set IGA2 to linear mode. */
+        /* 3X5.62[0] - IGA2 Address Mode Selection
+         *             0: Linear
+         *             1: Tile */
+        ViaCrtcMask(hwp, 0x62, 0x00, 0x01);
+    }
 
 
     /* Set IGA2 horizontal total pixels.*/
