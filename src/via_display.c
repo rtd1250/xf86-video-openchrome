@@ -2194,10 +2194,13 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
 
     /* Set IGA2 horizontal blank start. */
-    /* Horizontal Blanking Start: 2048 - 1 (max) */
+    /* Subtracting 1 from CrtcHBlankStart appears to suppress some
+     * monitors from reporting horizontal resolution that is 1 more
+     * than the desired horizontal
+     * resolution. (i.e., 1601 rather than 1600) */
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "IGA2 CrtcHBlankStart: %d\n", mode->CrtcHBlankStart));
-    temp = mode->CrtcHBlankStart;
+    temp = mode->CrtcHBlankStart - 1;
 
     /* 3X5.52[7:0] - Horizontal Blanking Start Bits [7:0] */
     hwp->writeCrtc(hwp, 0x52, temp & 0xFF);
