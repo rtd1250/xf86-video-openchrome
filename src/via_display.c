@@ -2811,19 +2811,11 @@ iga1_crtc_save(xf86CrtcPtr crtc)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered iga1_crtc_save.\n"));
 
-    vgaHWProtect(pScrn, TRUE);
-
-    /* Save the standard VGA registers. */
-    if (xf86IsPrimaryPci(pVia->PciInfo)) {
-        vgaHWSave(pScrn, &hwp->SavedReg, VGA_SR_ALL);
-    } else {
-        vgaHWSave(pScrn, &hwp->SavedReg, VGA_SR_MODE);
-    }
-
-    viaIGA1Save(pScrn);
-
     vgaHWProtect(pScrn, FALSE);
     vgaHWUnlock(hwp);
+
+    vgaHWSave(pScrn, &hwp->SavedReg, VGA_SR_ALL);
+    viaIGA1Save(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting iga1_crtc_save.\n"));
