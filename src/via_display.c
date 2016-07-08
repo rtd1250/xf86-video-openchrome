@@ -2832,27 +2832,23 @@ iga1_crtc_restore(xf86CrtcPtr crtc)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered iga1_crtc_restore.\n"));
 
-    vgaHWProtect(pScrn, TRUE);
-
-    /* Restore the standard VGA registers. */
-    if (xf86IsPrimaryPci(pVia->PciInfo)) {
-        vgaHWRestore(pScrn, &hwp->SavedReg, VGA_SR_ALL);
-    } else {
-        vgaHWRestore(pScrn, &hwp->SavedReg, VGA_SR_MODE);
-    }
-
     /* Gamma must be disabled before restoring palette. */
     ViaGammaDisable(pScrn);
 
+    vgaHWRestore(pScrn, &hwp->SavedReg, VGA_SR_ALL);
     viaIGA1Restore(pScrn);
 
     ViaDisablePrimaryFIFO(pScrn);
 
-    vgaHWProtect(pScrn, FALSE);
     vgaHWLock(hwp);
+    vgaHWProtect(pScrn, TRUE);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting iga1_crtc_restore.\n"));
+
+
+
+
 }
 
 static Bool
