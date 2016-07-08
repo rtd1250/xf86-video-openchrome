@@ -2290,10 +2290,13 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
 
     /* Set IGA2 vertical blank start. */
-    /* Vertical Blanking Start: 2048 - 1 (max) */
+    /* Subtracting 1 from CrtcVBlankStart appears to suppress some
+     * monitors from reporting vertical resolution that is 1 more
+     * than the desired vertical resolution. (i.e., 1201 rather
+     * than 1200) */
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "IGA2 CrtcVBlankStart: %d\n", mode->CrtcVBlankStart));
-    temp = mode->CrtcVBlankStart;
+    temp = mode->CrtcVBlankStart - 1;
 
     /* 3X5.5A[7:0] - Vertical Blanking Start Bits [7:0] */
     hwp->writeCrtc(hwp, 0x5A, temp & 0xFF);
