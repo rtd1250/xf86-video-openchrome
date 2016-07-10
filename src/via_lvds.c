@@ -771,6 +771,51 @@ ViaPanelScaleDisable(ScrnInfoPtr pScrn)
 }
 
 static void
+viaSetLVDSOutput(ScrnInfoPtr pScrn)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaSetLVDSOutput.\n"));
+
+    switch (pVia->Chipset) {
+    case VIA_CX700:
+        /* 3X5.97[3:0] appears to be a register to adjust LVDS Channel 2
+         * delay parameter. (the official name of the register is unknown) */
+        ViaCrtcMask(hwp, 0x97, 0x01, 0x0F);
+        break;
+   default:
+        break;
+    }
+
+    switch (pVia->Chipset) {
+    case VIA_CX700:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        /* IGA2 for LVDS Channel 2. */
+        ViaCrtcMask(hwp, 0x97, 0x10, 0x10);
+
+        /* Do not power down LVDS Channel 2. */
+        /* For now, use OPENLDI mode for LVDS Channel 2. */
+        ViaCrtcMask(hwp, 0xD2, 0x01, 0x41);
+
+        /* Sequential mode for LVDS Channel 2 output format. */
+        ViaCrtcMask(hwp, 0xD4, 0x80, 0x80);
+
+        /* This part will have to be programmable between 18-bit
+         * mode and 24-bit mode in the future. */
+        /* Turn on 18-bit (dither) mode for LVDS Channel 2. */
+        ViaCrtcMask(hwp, 0xD4, 0x40, 0x40);
+        break;
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaSetLVDSOutput.\n"));
+}
+
+static void
 via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 					DisplayModePtr adjusted_mode)
 {
@@ -785,6 +830,8 @@ via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
     } else {
         ViaPanelScaleDisable(pScrn);
     }
+
+    viaSetLVDSOutput(pScrn);
 }
 
 static int
