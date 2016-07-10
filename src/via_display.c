@@ -466,7 +466,7 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
      * 3C5.1E[0]   - On/Off ROC ECK
      *               0: Off
      *               1: On */
-    ViaSeqMask(hwp, 0x1E, 0xF4, 0xF4);
+    ViaSeqMask(hwp, 0x1E, 0xF5, 0xFD);
 
     /* Set DVP0 data drive strength to 0b11 (highest). */
     /* Set DVP0 clock drive strength to 0b11 (highest). */
