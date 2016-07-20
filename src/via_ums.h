@@ -192,7 +192,6 @@ Bool umsCrtcInit(ScrnInfoPtr pScrn);
 void viaOutputDetect(ScrnInfoPtr pScrn);
 CARD32 ViaGetMemoryBandwidth(ScrnInfoPtr pScrn);
 CARD32 ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode);
-void viaTMDSPower(ScrnInfoPtr pScrn, Bool On);
 void ViaTVPower(ScrnInfoPtr pScrn, Bool On);
 void ViaTVSave(ScrnInfoPtr pScrn);
 void ViaTVRestore(ScrnInfoPtr pScrn);
@@ -226,6 +225,10 @@ void ViaShadowCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
 
 /* via_lvds.c */
 void via_lvds_init(ScrnInfoPtr pScrn);
+
+/* via_tmds.c */
+void viaTMDSPower(ScrnInfoPtr pScrn, Bool On);
+void via_dvi_init(ScrnInfoPtr pScrn);
 
 /* in via_bandwidth.c */
 void ViaSetPrimaryFIFO(ScrnInfoPtr pScrn, DisplayModePtr mode);
