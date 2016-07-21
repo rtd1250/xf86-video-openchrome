@@ -223,6 +223,9 @@ void viaIGA2Save(ScrnInfoPtr pScrn);
 void viaIGA2Restore(ScrnInfoPtr pScrn);
 void ViaShadowCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
 
+/* via_analog.c */
+void via_analog_init(ScrnInfoPtr pScrn);
+
 /* via_lvds.c */
 void via_lvds_init(ScrnInfoPtr pScrn);
 
