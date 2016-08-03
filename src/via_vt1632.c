@@ -1,4 +1,7 @@
 /*
+ * Copyright 2016 Kevin Brace
+ * Copyright 2016 The OpenChrome Project
+ *                [http://www.freedesktop.org/wiki/Openchrome]
  * Copyright 2014 SHS SERVICES GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -224,78 +227,117 @@ via_vt1632_detect(xf86OutputPtr output)
     return status;
 }
 
-BOOL
-via_vt1632_probe(ScrnInfoPtr pScrn, I2CDevPtr pDev) {
-    CARD8 buf = 0;
-    CARD16 VendorID = 0;
-    CARD16 DeviceID = 0;
+Bool
+viaVT1632Init(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus)
+{
+    xf86OutputPtr output;
+    VIAPtr pVia = VIAPTR(pScrn);
+    ViaVT1632Ptr pVIAVT1632Rec = NULL;
+    I2CDevPtr pI2CDevice = NULL;
+    I2CSlaveAddr i2cAddr = 0x10;
+    CARD8 buf;
+    CARD16 vendorID, deviceID;
+    Bool status = FALSE;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
-                        "Entered via_vt1632_probe.\n"));
-
-    xf86I2CReadByte(pDev, 0, &buf);
-    VendorID = buf;
-    xf86I2CReadByte(pDev, 1, &buf);
-    VendorID |= buf << 8;
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Vendor ID: 0x%04x\n", VendorID));
+                        "Entered viaVT1632Init.\n"));
 
-    xf86I2CReadByte(pDev, 2, &buf);
-    DeviceID = buf;
-    xf86I2CReadByte(pDev, 3, &buf);
-    DeviceID |= buf << 8;
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Device ID: 0x%04x\n", DeviceID));
-
-    if ((VendorID != 0x1106) || (DeviceID != 0x3192)) {
+    if (!xf86I2CProbeAddress(pI2CBus, i2cAddr)) {
         xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                    "VT1632A DVI transmitter not detected.\n");
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "Exiting via_vt1632_probe.\n"));
-        return FALSE;
+                    "I2C device not found.\n");
+        goto exit;
+    }
+
+    pI2CDevice = xf86CreateI2CDevRec();
+    if (!pI2CDevice) {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                    "Failed to create an I2C bus device record.\n");
+        goto exit;
+    }
+
+    pI2CDevice->DevName = "VT1632";
+    pI2CDevice->SlaveAddr = i2cAddr;
+    pI2CDevice->pI2CBus = pI2CBus;
+    if (!xf86I2CDevInit(pI2CDevice)) {
+        xf86DestroyI2CDevRec(pI2CDevice, TRUE);
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                    "Failed to initialize a device on I2C bus.\n");
+        goto exit;
+    }
+
+    xf86I2CReadByte(pI2CDevice, 0, &buf);
+    vendorID = buf;
+    xf86I2CReadByte(pI2CDevice, 1, &buf);
+    vendorID |= buf << 8;
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Vendor ID: 0x%04x\n", vendorID));
+
+    xf86I2CReadByte(pI2CDevice, 2, &buf);
+    deviceID = buf;
+    xf86I2CReadByte(pI2CDevice, 3, &buf);
+    deviceID |= buf << 8;
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Device ID: 0x%04x\n", deviceID));
+
+    if ((vendorID != 0x1106) || (deviceID != 0x3192)) {
+        xf86DestroyI2CDevRec(pI2CDevice, TRUE);
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                    "VT1632 external TMDS transmitter not detected.\n");
+        goto exit;
     }
 
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                "VT1632A DVI transmitter detected.\n");
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting via_vt1632_probe.\n"));
-    return TRUE;
-}
+                "VT1632 external TMDS transmitter detected.\n");
 
-ViaVT1632Ptr
-via_vt1632_init(ScrnInfoPtr pScrn, I2CDevPtr pDev)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-    ViaVT1632Ptr Private = NULL;
-    CARD8 buf = 0;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered via_vt1632_init.\n"));
-
-    Private = xnfcalloc(1, sizeof(ViaVT1632Rec));
-    if (!Private) {
+    pVIAVT1632Rec = xnfcalloc(1, sizeof(ViaVT1632Rec));
+    if (!pVIAVT1632Rec) {
+        xf86DestroyI2CDevRec(pI2CDevice, TRUE);
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                    "Failed to allocate memory for DVI initialization.\n");
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "Exiting via_vt1632_init.\n"));
-        return NULL;
+                    "Failed to allocate working storage for VT1632.\n");
+        goto exit;
     }
-    Private->VT1632I2CDev = pDev;
 
-    xf86I2CReadByte(pDev, 0x06, &buf);
-    Private->DotclockMin = buf * 1000;
+    // Remembering which I2C bus is used for VT1632.
+    pVIAVT1632Rec->VT1632I2CDev = pI2CDevice;
 
-    xf86I2CReadByte(pDev, 0x07, &buf);
-    Private->DotclockMax = (buf + 65) * 1000;
+    xf86I2CReadByte(pI2CDevice, 0x06, &buf);
+    pVIAVT1632Rec->DotclockMin = buf * 1000;
 
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1632A Dot Clock Range: "
+    xf86I2CReadByte(pI2CDevice, 0x07, &buf);
+    pVIAVT1632Rec->DotclockMax = (buf + 65) * 1000;
+
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Supported VT1632 Dot Clock Range: "
                 "%d to %d MHz\n",
-                Private->DotclockMin / 1000,
-                Private->DotclockMax / 1000);
+                pVIAVT1632Rec->DotclockMin / 1000,
+                pVIAVT1632Rec->DotclockMax / 1000);
 
-    via_vt1632_dump_registers(pScrn, pDev);
+    output = xf86OutputCreate(pScrn, &via_dvi_funcs, "DVI-2");
+    if (!output) {
+        free(pVIAVT1632Rec);
+        xf86DestroyI2CDevRec(pI2CDevice, TRUE);
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                    "Failed to allocate X Server display output record for "
+                    "VT1632.\n");
+        goto exit;
+    }
 
+    output->driver_private = pVIAVT1632Rec;
+
+    /* Since there are two (2) display controllers registered with the
+     * X.Org Server and both IGA1 and IGA2 can handle DVI without any
+     * limitations, possible_crtcs should be set to 0x3 (0b11) so that
+     * either display controller can get assigned to handle DVI. */
+    output->possible_crtcs = (1 << 1) | (1 << 0);
+
+    output->possible_clones = 0;
+    output->interlaceAllowed = FALSE;
+    output->doubleScanAllowed = FALSE;
+
+    via_vt1632_dump_registers(pScrn, pI2CDevice);
+
+    status = TRUE;
+exit:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting via_vt1632_init.\n"));
-    return Private;
+                        "Exiting viaVT1632Init.\n"));
+    return status;
 }

@@ -116,7 +116,15 @@
 #define     VIA_DI_PORT_DVP0        0x1
 #define     VIA_DI_PORT_DVP1        0x2
 #define     VIA_DI_PORT_DFPLOW      0x4
+#define     VIA_DI_PORT_LVDS1       0x4
+#define     VIA_DI_PORT_TMDS        0x4
 #define     VIA_DI_PORT_DFPHIGH     0x8
+#define     VIA_DI_PORT_LVDS2       0x8
+
+/* External TMDS (DVI) Transmitter Type */
+#define     VIA_TMDS_NONE           0x0
+#define     VIA_TMDS_VT1632         0x1
+
 
 typedef struct ViaPanelMode {
     int Width ;
@@ -180,6 +188,14 @@ typedef struct _VIABIOSINFO {
 
 } VIABIOSInfoRec, *VIABIOSInfoPtr;
 
+
+typedef struct _VIATMDSRec {
+    I2CBusPtr pVIATMDSI2CBus;
+} VIATMDSRec, *VIATMDSRecPtr;
+
+
+
+
 /* via_ums.c */
 void viaUnmapMMIO(ScrnInfoPtr pScrn);
 void viaDisableVQ(ScrnInfoPtr pScrn);
@@ -224,6 +240,7 @@ void via_analog_init(ScrnInfoPtr pScrn);
 void via_lvds_init(ScrnInfoPtr pScrn);
 
 /* via_tmds.c */
+const xf86OutputFuncsRec via_dvi_funcs;
 void viaTMDSPower(ScrnInfoPtr pScrn, Bool On);
 void via_dvi_init(ScrnInfoPtr pScrn);
 

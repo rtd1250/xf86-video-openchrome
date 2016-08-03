@@ -329,17 +329,17 @@ viaOutputDetect(ScrnInfoPtr pScrn)
        display detection purposes. */
     viaProbePinStrapping(pScrn);
 
-    /* LVDS */
-    via_lvds_init(pScrn);
-
     /* VGA */
     via_analog_init(pScrn);
 
     /* TV */
     via_tv_init(pScrn);
 
-    /* External TMDS Transmitter (DVI) */
+    /* DVI */
     via_dvi_init(pScrn);
+
+    /* LVDS */
+    via_lvds_init(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaOutputDetect.\n"));
