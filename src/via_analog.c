@@ -400,7 +400,16 @@ via_analog_init(ScrnInfoPtr pScrn)
 
     output = xf86OutputCreate(pScrn, &via_analog_funcs, "VGA-1");
 
-    output->possible_crtcs = 0x3;
+    /* While there are two (2) display controllers registered with the
+     * X.Org Server, it is often desirable to fix the analog VGA output
+     * to IGA1 since LVDS FP (Flat Panel) typically prefers IGA2. (While
+     * it is not used at this point, only IGA2 contains panel resolution
+     * scaling functionality. IGA1 does not have this.)
+     * With this arrangement, DVI should end up getting assigned to IGA2
+     * since DVI can go to either display controller without limitations.
+     * This should be the case for TV as well. */
+    output->possible_crtcs = (1 << 0);
+
     output->possible_clones = 0;
     output->interlaceAllowed = TRUE;
     output->doubleScanAllowed = FALSE;
