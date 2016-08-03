@@ -50,5 +50,6 @@ void via_vt1632_mode_set(xf86OutputPtr output, DisplayModePtr mode, DisplayModeP
 xf86OutputStatus via_vt1632_detect(xf86OutputPtr output);
 BOOL via_vt1632_probe(ScrnInfoPtr pScrn, I2CDevPtr pDev);
 ViaVT1632Ptr via_vt1632_init(ScrnInfoPtr pScrn, I2CDevPtr pDev);
+Bool viaVT1632Init(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus);
 
 #endif /* _VIA_VT1632_H_ */
