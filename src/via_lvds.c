@@ -885,7 +885,13 @@ via_lvds_detect(xf86OutputPtr output)
         int width, height;
         Bool ret;
 
+        /* Disable reading off EDID from I2C bus 2 since it is often
+         * used by DVI as well. For now, this is how DVI and LVDS FP will
+         * coexist. */
+/*
         ret = ViaPanelGetSizeFromDDCv1(output, &width, &height);
+*/
+        ret = FALSE;
         if (ret) {
             panel->NativeModeIndex = ViaPanelLookUpModeIndex(width, height);
             DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
