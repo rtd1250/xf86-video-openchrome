@@ -848,9 +848,6 @@ viaSetLVDSOutput(ScrnInfoPtr pScrn)
     case VIA_VX800:
     case VIA_VX855:
     case VIA_VX900:
-        /* IGA2 for LVDS Channel 2. */
-        ViaCrtcMask(hwp, 0x97, 0x10, 0x10);
-
         /* Do not power down LVDS Channel 2. */
         /* For now, use OPENLDI mode for LVDS Channel 2. */
         ViaCrtcMask(hwp, 0xD2, 0x01, 0x41);
@@ -875,6 +872,7 @@ via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 {
     ViaPanelInfoPtr Panel = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
+    drmmode_crtc_private_ptr iga = output->crtc->driver_private;
     VIAPtr pVia = VIAPTR(pScrn);
 
     if (Panel->Scale) {
@@ -885,7 +883,20 @@ via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
         ViaPanelScaleDisable(pScrn);
     }
 
-    viaSetLVDSOutput(pScrn);
+    if (output->crtc) {
+        viaSetLVDSOutput(pScrn);
+
+        switch (pVia->Chipset) {
+        case VIA_CX700:
+        case VIA_VX800:
+        case VIA_VX855:
+        case VIA_VX900:
+            viaLVDS2SetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
+            break;
+        default:
+            break;
+        }
+    }
 }
 
 static int
