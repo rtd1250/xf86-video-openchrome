@@ -126,6 +126,33 @@ viaLVDS1SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
                         "Exiting viaLVDS1SetDisplaySource.\n"));
 }
 
+/*
+ * Sets IGA1 or IGA2 as the display output source for VIA Technologies
+ * Chrome IGP LVDS2 integrated LVDS transmitter.
+ */
+static void
+viaLVDS2SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    CARD8 temp = displaySource;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaLVDS2SetDisplaySource.\n"));
+
+    /* Set LVDS2 integrated LVDS transmitter display output source.
+    /* 3X5.97[4] - LVDS Channel 2 Data Source Selection
+     *             0: Primary Display
+     *             1: Secondary Display */
+    ViaCrtcMask(hwp, 0x97, temp << 4, 0x10);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "LVDS2 Integrated LVDS Transmitter Display Output "
+                "Source: IGA%d\n",
+                (temp & 0x01) + 1);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaLVDS2SetDisplaySource.\n"));
+}
+
 static void
 ViaLVDSSoftwarePowerFirstSequence(ScrnInfoPtr pScrn, Bool on)
 {
