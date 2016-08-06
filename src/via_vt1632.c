@@ -204,7 +204,6 @@ Bool
 viaVT1632Init(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus)
 {
     xf86OutputPtr output;
-    VIAPtr pVia = VIAPTR(pScrn);
     ViaVT1632Ptr pVIAVT1632Rec = NULL;
     I2CDevPtr pI2CDevice = NULL;
     I2CSlaveAddr i2cAddr = 0x10;
