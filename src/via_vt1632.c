@@ -209,8 +209,8 @@ via_vt1632_mode_set(xf86OutputPtr output, DisplayModePtr mode,
                 "Exiting via_vt1632_mode_set.\n"));
 }
 
-xf86OutputStatus
-via_vt1632_detect(xf86OutputPtr output)
+static xf86OutputStatus
+viaVT1632Sense(xf86OutputPtr output)
 {
     ViaVT1632Ptr Private = output->driver_private;
     xf86OutputStatus status;
@@ -218,7 +218,7 @@ via_vt1632_detect(xf86OutputPtr output)
     CARD8 tmp;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered via_vt1632_detect.\n"));
+                        "Entered viaVT1632Sense.\n"));
 
     xf86I2CReadByte(Private->VT1632I2CDev, 0x09, &tmp);
     if (tmp & 0x04) {
@@ -232,7 +232,7 @@ via_vt1632_detect(xf86OutputPtr output)
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting via_vt1632_detect.\n"));
+                        "Exiting viaVT1632Sense.\n"));
     return status;
 }
 
@@ -327,7 +327,7 @@ via_dvi_detect(xf86OutputPtr output)
 
     /* Check for the DVI presence via VT1632A first before accessing
      * I2C bus. */
-    status = via_vt1632_detect(output);
+    status = viaVT1632Sense(output);
     if (status == XF86OutputStatusConnected) {
 
         /* Since DVI presence was established, access the I2C bus
