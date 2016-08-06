@@ -200,6 +200,33 @@ via_vt1632_mode_set(xf86OutputPtr output, DisplayModePtr mode,
                 "Exiting via_vt1632_mode_set.\n"));
 }
 
+xf86OutputStatus
+via_vt1632_detect(xf86OutputPtr output)
+{
+    ViaVT1632Ptr Private = output->driver_private;
+    xf86OutputStatus status;
+    ScrnInfoPtr pScrn = output->scrn;
+    CARD8 tmp;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered via_vt1632_detect.\n"));
+
+    xf86I2CReadByte(Private->VT1632I2CDev, 0x09, &tmp);
+    if (tmp & 0x04) {
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "VT1632A: DVI device is detected.\n");
+        status = XF86OutputStatusConnected;
+    } else {
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "VT1632A: DVI device was not detected.\n");
+        status = XF86OutputStatusDisconnected;
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting via_vt1632_detect.\n"));
+    return status;
+}
+
 Bool
 viaVT1632Init(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus)
 {

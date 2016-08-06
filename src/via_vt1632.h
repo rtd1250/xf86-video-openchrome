@@ -47,6 +47,7 @@ void via_vt1632_save(xf86OutputPtr output);
 void via_vt1632_restore(xf86OutputPtr output);
 int via_vt1632_mode_valid(xf86OutputPtr output, DisplayModePtr pMode);
 void via_vt1632_mode_set(xf86OutputPtr output, DisplayModePtr mode, DisplayModePtr adjusted_mode);
+xf86OutputStatus via_vt1632_detect(xf86OutputPtr output);
 Bool viaVT1632Init(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus);
 
 #endif /* _VIA_VT1632_H_ */
