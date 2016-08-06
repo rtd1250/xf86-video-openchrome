@@ -85,6 +85,42 @@ via_vt1632_power(xf86OutputPtr output, Bool powerState)
                         "Exiting via_vt1632_power.\n"));
 }
 
+static void
+viaVT1632InitRegisters(ScrnInfoPtr pScrn, I2CDevPtr pDev)
+{
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaVT1632InitRegisters.\n"));
+
+    /* For Wyse C00X VX855 chipset DVP1 (Digital Video Port 1), use
+     * 12-bit mode with dual edge transfer, along with rising edge
+     * data capture first mode. This is likely true for CX700, VX700,
+     * VX800, and VX900 chipsets as well. */
+    xf86I2CWriteByte(pDev, 0x08,
+                        VIA_VT1632_VEN | VIA_VT1632_HEN |
+                        VIA_VT1632_DSEL |
+                        VIA_VT1632_EDGE | VIA_VT1632_PDB);
+
+    /* Route receiver detect bit (Offset 0x09[2]) as the output of
+     * MSEN pin. */
+    xf86I2CWriteByte(pDev, 0x09, 0x20);
+
+    /* Turning on deskew feature caused screen display issues.
+     * This was observed with Wyse C00X. */
+    xf86I2CWriteByte(pDev, 0x0A, 0x00);
+
+    /* While VIA Technologies VT1632A datasheet insists on setting this
+     * register to 0x89 as the recommended setting, in practice, this
+     * leads to a blank screen on the display with Wyse C00X. According to
+     * Silicon Image SiI 164 datasheet (VT1632A is a pin and mostly
+     * register compatible chip), offset 0x0C is for PLL filter enable,
+     * PLL filter setting, and continuous SYNC enable bits. All of these are
+     * turned off for proper operation. */
+    xf86I2CWriteByte(pDev, 0x0C, 0x00);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaVT1632InitRegisters.\n"));
+}
+
 void
 via_vt1632_save(xf86OutputPtr output)
 {
@@ -157,44 +193,17 @@ void
 via_vt1632_mode_set(xf86OutputPtr output, DisplayModePtr mode,
                     DisplayModePtr adjusted_mode)
 {
-    ViaVT1632Ptr Private = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
+    ViaVT1632Ptr pVIAVT1632Rec = output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
                         "Entered via_vt1632_mode_set.\n"));
 
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "VT1632A: Enabling DVI.\n");
+    via_vt1632_dump_registers(pScrn, pVIAVT1632Rec->VT1632I2CDev);
 
-    via_vt1632_dump_registers(pScrn, Private->VT1632I2CDev);
+    viaVT1632InitRegisters(pScrn, pVIAVT1632Rec->VT1632I2CDev);
 
-    /* For Wyse C00X VX855 chipset DVP1 (Digital Video Port 1), use
-     * 12-bit mode with dual edge transfer, along with rising edge
-     * data capture first mode. This is likely true for CX700, VX700,
-     * VX800, and VX900 chipsets as well. */
-    xf86I2CWriteByte(Private->VT1632I2CDev, 0x08,
-                        VIA_VT1632_VEN | VIA_VT1632_HEN |
-                        VIA_VT1632_DSEL |
-                        VIA_VT1632_EDGE | VIA_VT1632_PDB);
-
-    /* Route receiver detect bit (Offset 0x09[2]) as the output of
-     * MSEN pin. */
-    xf86I2CWriteByte(Private->VT1632I2CDev, 0x09, 0x20);
-
-    /* Turning on deskew feature caused screen display issues.
-     * This was observed with Wyse C00X. */
-    xf86I2CWriteByte(Private->VT1632I2CDev, 0x0A, 0x00);
-
-    /* While VIA Technologies VT1632A datasheet insists on setting this
-     * register to 0x89 as the recommended setting, in practice, this
-     * leads to a blank screen on the display with Wyse C00X. According to
-     * Silicon Image SiI 164 datasheet (VT1632A is a pin and mostly
-     * register compatible chip), offset 0x0C is for PLL filter enable,
-     * PLL filter setting, and continuous SYNC enable bits. All of these are
-     * turned off for proper operation. */
-    xf86I2CWriteByte(Private->VT1632I2CDev, 0x0C, 0x00);
-
-    via_vt1632_dump_registers(pScrn, Private->VT1632I2CDev);
+    via_vt1632_dump_registers(pScrn, pVIAVT1632Rec->VT1632I2CDev);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "Exiting via_vt1632_mode_set.\n"));
