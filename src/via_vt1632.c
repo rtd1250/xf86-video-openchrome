@@ -261,6 +261,9 @@ via_vt1632_dpms(xf86OutputPtr output, int mode)
 {
     ScrnInfoPtr pScrn = output->scrn;
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered via_vt1632_dpms.\n"));
+
     switch (mode) {
     case DPMSModeOn:
         via_vt1632_power(output, TRUE);
@@ -273,6 +276,9 @@ via_vt1632_dpms(xf86OutputPtr output, int mode)
     default:
         break;
     }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting via_vt1632_dpms.\n"));
 }
 
 static void
