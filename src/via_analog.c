@@ -255,7 +255,6 @@ via_analog_mode_set(xf86OutputPtr output, DisplayModePtr mode,
                     DisplayModePtr adjusted_mode)
 {
     ScrnInfoPtr pScrn = output->scrn;
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
     drmmode_crtc_private_ptr iga = output->crtc->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
