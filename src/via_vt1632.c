@@ -317,7 +317,7 @@ via_dvi_commit(xf86OutputPtr output)
 }
 
 static xf86OutputStatus
-via_dvi_detect(xf86OutputPtr output)
+via_vt1632_detect(xf86OutputPtr output)
 {
     xf86OutputStatus status = XF86OutputStatusDisconnected;
     ScrnInfoPtr pScrn = output->scrn;
@@ -366,7 +366,7 @@ const xf86OutputFuncsRec via_dvi_funcs = {
     .prepare            = via_dvi_prepare,
     .commit             = via_dvi_commit,
     .mode_set           = via_vt1632_mode_set,
-    .detect             = via_dvi_detect,
+    .detect             = via_vt1632_detect,
     .get_modes          = xf86OutputGetEDIDModes,
     .destroy            = via_dvi_destroy,
 };
