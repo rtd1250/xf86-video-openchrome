@@ -248,7 +248,7 @@ via_dvi_get_property(xf86OutputPtr output, Atom property)
 #endif
 
 static void
-via_dvi_dpms(xf86OutputPtr output, int mode)
+via_vt1632_dpms(xf86OutputPtr output, int mode)
 {
     ScrnInfoPtr pScrn = output->scrn;
 
@@ -353,7 +353,7 @@ const xf86OutputFuncsRec via_dvi_funcs = {
 #ifdef RANDR_13_INTERFACE
     .get_property       = via_dvi_get_property,
 #endif
-    .dpms               = via_dvi_dpms,
+    .dpms               = via_vt1632_dpms,
     .save               = via_dvi_save,
     .restore            = via_dvi_restore,
     .mode_valid         = via_dvi_mode_valid,
