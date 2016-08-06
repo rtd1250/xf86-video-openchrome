@@ -301,16 +301,6 @@ via_dvi_commit(xf86OutputPtr output)
 {
 }
 
-static void
-via_dvi_mode_set(xf86OutputPtr output, DisplayModePtr mode,
-                 DisplayModePtr adjusted_mode)
-{
-    ScrnInfoPtr pScrn = output->scrn;
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    via_vt1632_mode_set(output, mode, adjusted_mode);
-}
-
 static xf86OutputStatus
 via_dvi_detect(xf86OutputPtr output)
 {
@@ -360,7 +350,7 @@ const xf86OutputFuncsRec via_dvi_funcs = {
     .mode_fixup         = via_dvi_mode_fixup,
     .prepare            = via_dvi_prepare,
     .commit             = via_dvi_commit,
-    .mode_set           = via_dvi_mode_set,
+    .mode_set           = via_vt1632_mode_set,
     .detect             = via_dvi_detect,
     .get_modes          = xf86OutputGetEDIDModes,
     .destroy            = via_dvi_destroy,
