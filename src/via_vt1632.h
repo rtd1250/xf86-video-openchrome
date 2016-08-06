@@ -42,6 +42,9 @@ typedef struct _ViaVT1632 {
 	CARD8 Register0C;
 } ViaVT1632Rec, *ViaVT1632Ptr;
 
+
+const xf86OutputFuncsRec via_dvi_funcs;
+
 void via_vt1632_power(xf86OutputPtr output, Bool powerState);
 void via_vt1632_save(xf86OutputPtr output);
 void via_vt1632_restore(xf86OutputPtr output);
