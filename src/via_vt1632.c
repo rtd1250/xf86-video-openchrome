@@ -130,16 +130,13 @@ viaVT1632Sense(ScrnInfoPtr pScrn, I2CDevPtr pDev)
 }
 
 static void
-viaVT1632Power(xf86OutputPtr output, Bool powerState)
+viaVT1632Power(ScrnInfoPtr pScrn, I2CDevPtr pDev, Bool powerState)
 {
-    ViaVT1632Ptr Private = output->driver_private;
-    ScrnInfoPtr pScrn = output->scrn;
-
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaVT1632Power.\n"));
 
-    xf86I2CMaskByte(Private->VT1632I2CDev, 0x08, powerState ? 0x01 : 0x00, 0x01);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1632A Power: %s\n",
+    xf86I2CMaskByte(pDev, 0x08, powerState ? 0x01 : 0x00, 0x01);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1632 (DVI) Power: %s\n",
                 powerState ? "On" : "Off");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -258,18 +255,19 @@ static void
 via_vt1632_dpms(xf86OutputPtr output, int mode)
 {
     ScrnInfoPtr pScrn = output->scrn;
+    ViaVT1632Ptr pVIAVT1632Rec = output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_vt1632_dpms.\n"));
 
     switch (mode) {
     case DPMSModeOn:
-        viaVT1632Power(output, TRUE);
+        viaVT1632Power(pScrn, pVIAVT1632Rec->VT1632I2CDev, TRUE);
         break;
     case DPMSModeStandby:
     case DPMSModeSuspend:
     case DPMSModeOff:
-        viaVT1632Power(output, FALSE);
+        viaVT1632Power(pScrn, pVIAVT1632Rec->VT1632I2CDev, FALSE);
         break;
     default:
         break;
