@@ -198,26 +198,22 @@ viaTMDSSense(ScrnInfoPtr pScrn)
     return tmdsReceiverDetected;
 }
 
-void
-viaTMDSPower(ScrnInfoPtr pScrn, Bool On)
+static void
+viaTMDSPower(ScrnInfoPtr pScrn, Bool powerState)
 {
-
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaTMDSPower.\n"));
 
-    if (On) {
-        /* Power on TMDS */
-        ViaCrtcMask(hwp, 0xD2, 0x00, 0x08);
-    } else {
-        /* Power off TMDS */
-        ViaCrtcMask(hwp, 0xD2, 0x08, 0x08);
-    }
+    /* 3X5.D2[3] - Power Down (Active High) for DVI
+     *             0: TMDS power on
+     *             1: TMDS power down */
+    ViaCrtcMask(hwp, 0xD2, powerState ? 0x00 : 0x08, 0x08);
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "Integrated TMDS (DVI) Power: %s\n",
-                On ? "On" : "Off");
+                powerState ? "On" : "Off");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaTMDSPower.\n"));

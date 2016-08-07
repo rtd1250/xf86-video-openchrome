@@ -240,7 +240,6 @@ void via_analog_init(ScrnInfoPtr pScrn);
 void via_lvds_init(ScrnInfoPtr pScrn);
 
 /* via_tmds.c */
-void viaTMDSPower(ScrnInfoPtr pScrn, Bool On);
 void via_dvi_init(ScrnInfoPtr pScrn);
 
 /*via_tv.c */
