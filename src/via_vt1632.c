@@ -319,19 +319,18 @@ via_dvi_commit(xf86OutputPtr output)
 static xf86OutputStatus
 via_vt1632_detect(xf86OutputPtr output)
 {
+    xf86MonPtr mon;
     xf86OutputStatus status = XF86OutputStatusDisconnected;
     ScrnInfoPtr pScrn = output->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
-    ViaVT1632Ptr Private = output->driver_private;
-    xf86MonPtr mon;
+    ViaVT1632Ptr pVIAVT1632Rec = output->driver_private;
 
-    /* Check for the DVI presence via VT1632A first before accessing
+    /* Check for the DVI presence via VT1632 first before accessing
      * I2C bus. */
-    if (viaVT1632Sense(pScrn, Private->VT1632I2CDev)) {
+    if (viaVT1632Sense(pScrn, pVIAVT1632Rec->VT1632I2CDev)) {
 
         /* Since DVI presence was established, access the I2C bus
          * assigned to DVI. */
-        mon = xf86OutputGetEDID(output, Private->VT1632I2CDev->pI2CBus);
+        mon = xf86OutputGetEDID(output, pVIAVT1632Rec->VT1632I2CDev->pI2CBus);
 
         /* Is the interface type digital? */
         if (mon && DIGITAL(mon->features.input_type)) {
