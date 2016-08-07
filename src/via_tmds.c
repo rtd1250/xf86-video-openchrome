@@ -378,7 +378,6 @@ via_tmds_detect(xf86OutputPtr output)
     xf86OutputStatus status = XF86OutputStatusDisconnected;
     ScrnInfoPtr pScrn = output->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
-    VIATMDSRecPtr pVIATMDSRec = output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_tmds_detect.\n"));
@@ -504,7 +503,6 @@ viaTMDSInit(ScrnInfoPtr pScrn)
 {
     xf86OutputPtr output;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
     VIATMDSRecPtr pVIATMDSRec = NULL;
     CARD8 sr13, sr5a, cr3e;
     Bool status = FALSE;
@@ -589,11 +587,6 @@ void
 via_dvi_init(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    xf86OutputPtr output = NULL;
-    ViaVT1632Ptr private_data = NULL;
-    I2CBusPtr pBus = NULL;
-    I2CDevPtr pDev = NULL;
-    I2CSlaveAddr addr = 0x10;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_dvi_init.\n"));
