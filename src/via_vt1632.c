@@ -102,6 +102,33 @@ viaVT1632InitRegisters(ScrnInfoPtr pScrn, I2CDevPtr pDev)
                         "Exiting viaVT1632InitRegisters.\n"));
 }
 
+/*
+ * Returns TMDS receiver detection state for VIA Technologies VT1632
+ * external TMDS transmitter.
+ */
+static Bool
+viaVT1632Sense(ScrnInfoPtr pScrn, I2CDevPtr pDev)
+{
+    CARD8 tmp;
+    Bool receiverDetected = FALSE;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaVT1632Sense.\n"));
+
+    xf86I2CReadByte(pDev, 0x09, &tmp);
+    if (tmp & 0x04) {
+        receiverDetected = TRUE;
+    }
+
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "VT1632 %s a TMDS receiver.\n",
+                receiverDetected ? "detected" : "did not detect");
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaVT1632Sense.\n"));
+    return receiverDetected;
+}
+
 static void
 viaVT1632Power(xf86OutputPtr output, Bool powerState)
 {
@@ -205,33 +232,6 @@ via_vt1632_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "Exiting via_vt1632_mode_set.\n"));
-}
-
-/*
- * Returns TMDS receiver detection state for VIA Technologies VT1632
- * external TMDS transmitter.
- */
-static Bool
-viaVT1632Sense(ScrnInfoPtr pScrn, I2CDevPtr pDev)
-{
-    CARD8 tmp;
-    Bool receiverDetected = FALSE;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaVT1632Sense.\n"));
-
-    xf86I2CReadByte(pDev, 0x09, &tmp);
-    if (tmp & 0x04) {
-        receiverDetected = TRUE;
-    }
-
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "VT1632 %s a TMDS receiver.\n",
-                receiverDetected ? "detected" : "did not detect");
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaVT1632Sense.\n"));
-    return receiverDetected;
 }
 
 static void
