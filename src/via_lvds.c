@@ -153,6 +153,28 @@ viaLVDS2SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
                         "Exiting viaLVDS2SetDisplaySource.\n"));
 }
 
+/*
+ * Sets DFP (Digital Flat Panel) Low interface delay tap.
+ */
+static void
+viaDFPLowSetDelayTap(ScrnInfoPtr pScrn, CARD8 delayTap)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaDFPLowSetDelayTap.\n"));
+
+    /* Set DFP Low interface delay tap.
+    /* 3X5.99[3:0] - DFP Low Delay Tap */
+    ViaCrtcMask(hwp, 0x99, delayTap, 0x0F);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "DFP Low Delay Tap: %d\n",
+                (delayTap & 0x0F));
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaDFPLowSetDelayTap.\n"));
+}
+
 static void
 ViaLVDSSoftwarePowerFirstSequence(ScrnInfoPtr pScrn, Bool on)
 {
