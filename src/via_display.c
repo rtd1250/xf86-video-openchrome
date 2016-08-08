@@ -2154,12 +2154,6 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
      * (Power Management Status). */
     ViaSeqMask(hwp, 0x2A, 0x0F, 0x0F);
 
-    /* 3X5.99[3:0] appears to be a register to adjust an LCD panel
-     * (the official name of the register is unknown). */
-    if (pVia->Chipset == VIA_P4M900) {
-        ViaCrtcMask(hwp, 0x99, 0x08, 0x0F);
-    }
-
     /* IGA2 for DFP Low. */
     ViaCrtcMask(hwp, 0x99, 0x10, 0x10);
 

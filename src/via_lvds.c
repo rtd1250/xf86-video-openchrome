@@ -909,6 +909,9 @@ via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
         viaSetLVDSOutput(pScrn);
 
         switch (pVia->Chipset) {
+        case VIA_P4M900:
+            viaDFPLowSetDelayTap(pScrn, 0x08);
+            break;
         case VIA_CX700:
         case VIA_VX800:
         case VIA_VX855:
