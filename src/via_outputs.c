@@ -81,6 +81,32 @@ ViaPrintMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 }
 
 /*
+ * Sets IGA1 or IGA2 as the display output source for DVP0
+ * (Digital Video Port) interface.
+ */
+void
+viaDVP0SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    CARD8 temp = displaySource;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaDVP0SetDisplaySource.\n"));
+
+    /* Set DVP0 display output source.
+    /* 3X5.96[4] - DVP0 Data Source Selection
+     *             0: Primary Display
+     *             1: Secondary Display */
+    ViaCrtcMask(hwp, 0x96, temp << 4, 0x10);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "DVP0 Display Output Source: IGA%d\n",
+                (temp & 0x01) + 1);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaDVP0SetDisplaySource.\n"));
+}
+
+/*
  * Sets IGA1 or IGA2 as the display output source for DVP1
  * (Digital Video Port) interface.
  */

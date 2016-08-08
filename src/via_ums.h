@@ -205,6 +205,7 @@ Bool umsPreInit(ScrnInfoPtr pScrn);
 Bool umsCrtcInit(ScrnInfoPtr pScrn);
 
 /* via_output.c */
+void viaDVP0SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource);
 void viaDVP1SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource);
 void viaOutputDetect(ScrnInfoPtr pScrn);
 CARD32 ViaGetMemoryBandwidth(ScrnInfoPtr pScrn);
