@@ -750,18 +750,6 @@ static void
 via_lvds_prepare(xf86OutputPtr output)
 {
     via_lvds_dpms(output, DPMSModeOff);
-
-    if (output->crtc) {
-        drmmode_crtc_private_ptr iga = output->crtc->driver_private;
-        CARD8 value = 0x00; /* Value for IGA 1 */
-        ScrnInfoPtr pScrn = output->scrn;
-        vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-        /* IGA 2 */
-        if (iga->index)
-            value = 0x10;
-        ViaCrtcMask(hwp, 0x99, value, value);
-    }
 }
 
 static void
