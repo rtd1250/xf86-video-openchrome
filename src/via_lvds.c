@@ -952,6 +952,7 @@ via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
         case VIA_K8M890:
         case VIA_P4M900:
             viaDFPLowSetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
+            viaDVP1SetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
             break;
         case VIA_CX700:
         case VIA_VX800:

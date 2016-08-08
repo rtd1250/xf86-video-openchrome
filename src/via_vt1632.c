@@ -216,10 +216,23 @@ via_vt1632_mode_set(xf86OutputPtr output, DisplayModePtr mode,
                     DisplayModePtr adjusted_mode)
 {
     ScrnInfoPtr pScrn = output->scrn;
+    drmmode_crtc_private_ptr iga = output->crtc->driver_private;
+    VIAPtr pVia = VIAPTR(pScrn);
     ViaVT1632Ptr pVIAVT1632Rec = output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
                         "Entered via_vt1632_mode_set.\n"));
+
+    switch (pVia->Chipset) {
+    case VIA_CX700:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        viaDVP1SetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
+        break;
+    default:
+        break;
+    }
 
     via_vt1632_dump_registers(pScrn, pVIAVT1632Rec->VT1632I2CDev);
 

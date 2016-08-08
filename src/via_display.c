@@ -2154,9 +2154,6 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
      * (Power Management Status). */
     ViaSeqMask(hwp, 0x2A, 0x0F, 0x0F);
 
-    /* Use IGA2 for DVP1 Data Source Selection 0. */
-    ViaCrtcMask(hwp, 0x9B, 0x10, 0x10);
-
     /* UniChrome Pro or later */
     if ((pVia->Chipset != VIA_CLE266) && (pVia->Chipset != VIA_KM400)) {
         /* Set IGA2 to linear mode. */
