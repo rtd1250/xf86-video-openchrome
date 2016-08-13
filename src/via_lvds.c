@@ -49,28 +49,34 @@ static OptionInfoRec ViaPanelOptions[] =
     {-1,                NULL,           OPTV_NONE,      {0},    FALSE}
 };
 
+/* These table values were copied from lcd.c of VIA Frame 
+ * Buffer device driver. */
+/* {int Width, int Height, bool useDualEdge, bool useDithering}; */
 static ViaPanelModeRec ViaPanelNativeModes[] = {
-    {640, 480},
-    {800, 600},
-    {1024, 768},
-    {1280, 768},
-    {1280, 1024},
-    {1400, 1050},
-    {1600, 1200},   /* 0x6 */
-    {1280, 800},    /* 0x7 Resolution 1280x800 (Samsung NC20) */
-    {800, 480},     /* 0x8 For Quanta 800x480 */
-    {1024, 600},    /* 0x9 Resolution 1024x600 (for HP 2133) */
-    {1368, 768},    /* 0xA Resolution 1366x768 */
-    {1920, 1080},
-    {1920, 1200},
-    {1280, 1024},   /* 0xD */
-    {1440, 900},    /* 0xE */
-    {1280, 720},    /* 0xF 480x640 */
-    {1200, 900},   /* 0x10 For OLPC 1.5 */
-    {1360, 768},   /* 0x11 Resolution 1360X768 */
-    {1024, 768},   /* 0x12 Resolution 1024x768 */
-    {800, 480}     /* 0x13 General 8x4 panel use this setting */
-};
+    { 640,  480, FALSE,  TRUE},
+    { 800,  600, FALSE,  TRUE},
+    {1024,  768, FALSE,  TRUE},
+    {1280,  768, FALSE,  TRUE},
+    {1280, 1024,  TRUE,  TRUE},
+    {1400, 1050,  TRUE,  TRUE},
+    {1600, 1200,  TRUE,  TRUE},
+    {1280,  800, FALSE,  TRUE},
+    { 800,  480, FALSE,  TRUE},
+    {1024,  768,  TRUE,  TRUE},
+    {1024,  768, FALSE, FALSE},
+    {1024,  768,  TRUE, FALSE},
+    {1280,  768, FALSE, FALSE},
+    {1280, 1024,  TRUE, FALSE},
+    {1400, 1050,  TRUE, FALSE},
+    {1600, 1200,  TRUE, FALSE},
+    {1366,  768, FALSE, FALSE},
+    {1024,  600, FALSE,  TRUE},
+    {1280,  768,  TRUE,  TRUE},
+    {1280,  800, FALSE,  TRUE},
+    {1360,  768, FALSE, FALSE},
+    {1280,  768,  TRUE, FALSE},
+    { 480,  640, FALSE,  TRUE},
+    {1200,  900, FALSE, FALSE}};
 
 #define MODEPREFIX(name) NULL, NULL, name, 0, M_T_DRIVER | M_T_DEFAULT
 #define MODESUFFIX 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,FALSE,FALSE,0,NULL,0,0.0,0.0

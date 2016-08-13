@@ -127,8 +127,10 @@
 
 
 typedef struct ViaPanelMode {
-    int Width ;
-    int Height ;
+    int Width;
+    int Height;
+    Bool useDualEdge;
+    Bool useDithering;
 } ViaPanelModeRec, *ViaPanelModePtr ;
 
 typedef struct ViaPanelInfo {
