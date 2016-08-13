@@ -93,7 +93,7 @@ viaDVP0SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaDVP0SetDisplaySource.\n"));
 
-    /* Set DVP0 display output source.
+    /* Set DVP0 display output source. */
     /* 3X5.96[4] - DVP0 Data Source Selection
      *             0: Primary Display
      *             1: Secondary Display */
@@ -119,7 +119,7 @@ viaDVP1SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaDVP1SetDisplaySource.\n"));
 
-    /* Set DVP1 display output source.
+    /* Set DVP1 display output source. */
     /* 3X5.9B[4] - DVP1 Data Source Selection
      *             0: Primary Display
      *             1: Secondary Display */
@@ -590,12 +590,11 @@ ViaComputeDotClock(unsigned clock)
 static CARD32
 ViaComputeProDotClock(unsigned clock)
 {
-    double fvco, fout, fref, err, minErr;
+    double fvco, fout, err, minErr;
     CARD32 dr = 0, dn, dm, maxdm, maxdn;
     CARD32 factual;
     union pllparams bestClock;
 
-    fref = 14.318e6;
     fout = (double)clock * 1.e3;
 
     factual = ~0;
