@@ -736,7 +736,7 @@ ViaGetResolutionIndex(ScrnInfoPtr pScrn, ViaPanelInfoPtr Panel,
  * Gets the native panel resolution from scratch pad registers.
  */
 static void
-ViaPanelGetNativeModeFromScratchPad(xf86OutputPtr output)
+viaLVDSGetFPInfoFromScratchPad(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
@@ -744,7 +744,7 @@ ViaPanelGetNativeModeFromScratchPad(xf86OutputPtr output)
     CARD8 index;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                     "Entered ViaPanelGetNativeModeFromScratchPad.\n"));
+                     "Entered viaLVDSGetFPInfoFromScratchPad.\n"));
 
     index = hwp->readCrtc(hwp, 0x3F) & 0x0F;
 
@@ -769,7 +769,7 @@ ViaPanelGetNativeModeFromScratchPad(xf86OutputPtr output)
                panel->useDithering ? "On (18-bit)" : "Off (24-bit)");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                     "Exiting ViaPanelGetNativeModeFromScratchPad.\n"));
+                     "Exiting viaLVDSGetFPInfoFromScratchPad.\n"));
 }
 
 static int
@@ -1132,7 +1132,7 @@ via_lvds_detect(xf86OutputPtr output)
             cr3b = hwp->readCrtc(hwp, 0x3B) & cr3b_mask;
 
             if (cr3b) {
-                ViaPanelGetNativeModeFromScratchPad(output);
+                viaLVDSGetFPInfoFromScratchPad(output);
 
                 if (panel->NativeWidth && panel->NativeHeight) {
                     status = XF86OutputStatusConnected;
