@@ -990,16 +990,6 @@ viaSetLVDSOutput(ScrnInfoPtr pScrn)
 
     switch (pVia->Chipset) {
     case VIA_CX700:
-        /* 3X5.97[3:0] appears to be a register to adjust LVDS Channel 2
-         * delay parameter. (the official name of the register is unknown) */
-        ViaCrtcMask(hwp, 0x97, 0x01, 0x0F);
-        break;
-   default:
-        break;
-    }
-
-    switch (pVia->Chipset) {
-    case VIA_CX700:
     case VIA_VX800:
     case VIA_VX855:
     case VIA_VX900:
@@ -1039,6 +1029,9 @@ via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
         switch (pVia->Chipset) {
         case VIA_P4M900:
             viaDFPLowSetDelayTap(pScrn, 0x08);
+            break;
+        case VIA_CX700:
+            viaLVDS2SetDelayTap(pScrn, 0x01);
             break;
         default:
             break;
