@@ -1039,10 +1039,8 @@ via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
         case VIA_VX900:
             viaLVDS2SetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
 
-            /* This part will have to be programmable between 18-bit
-             * mode and 24-bit mode in the future. */
-            /* Turn on 18-bit (dithering) mode for LVDS Channel 2. */
-            viaLVDS2SetDithering(pScrn, TRUE);
+            /* Set LVDS2 output color dithering. */
+            viaLVDS2SetDithering(pScrn, Panel->useDithering ? TRUE : FALSE);
             break;
         default:
             break;
