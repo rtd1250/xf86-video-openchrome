@@ -738,13 +738,13 @@ ViaGetResolutionIndex(ScrnInfoPtr pScrn, ViaPanelInfoPtr Panel,
 static void
 ViaPanelGetNativeModeFromScratchPad(xf86OutputPtr output)
 {
-    ViaPanelInfoPtr panel = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
+    ViaPanelInfoPtr panel = output->driver_private;
     CARD8 index;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                     "ViaPanelGetNativeModeFromScratchPad\n"));
+                     "Entered ViaPanelGetNativeModeFromScratchPad.\n"));
 
     index = hwp->readCrtc(hwp, 0x3F) & 0x0F;
 
@@ -755,7 +755,11 @@ ViaPanelGetNativeModeFromScratchPad(xf86OutputPtr output)
     panel->useDithering = ViaPanelNativeModes[index].useDithering;
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-               "Native Panel Resolution is %dx%d\n",
+               "VIA Technologies VGA BIOS Scratch Pad Register "
+               "Flat Panel Index: %d\n",
+               panel->NativeModeIndex);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+               "Flat Panel Native Resolution: %dx%d\n",
                panel->NativeWidth, panel->NativeHeight);
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                "Flat Panel Dual Edge Transfer: %s\n",
@@ -764,6 +768,8 @@ ViaPanelGetNativeModeFromScratchPad(xf86OutputPtr output)
                "Flat Panel Output Color Dithering: %s\n",
                panel->useDithering ? "On (18-bit)" : "Off (24-bit)");
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                     "Exiting ViaPanelGetNativeModeFromScratchPad.\n"));
 }
 
 static int
