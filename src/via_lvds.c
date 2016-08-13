@@ -751,9 +751,19 @@ ViaPanelGetNativeModeFromScratchPad(xf86OutputPtr output)
     panel->NativeModeIndex = index;
     panel->NativeWidth = ViaPanelNativeModes[index].Width;
     panel->NativeHeight = ViaPanelNativeModes[index].Height;
+    panel->useDualEdge = ViaPanelNativeModes[index].useDualEdge;
+    panel->useDithering = ViaPanelNativeModes[index].useDithering;
+
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                "Native Panel Resolution is %dx%d\n",
                panel->NativeWidth, panel->NativeHeight);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+               "Flat Panel Dual Edge Transfer: %s\n",
+               panel->useDualEdge ? "On" : "Off");
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+               "Flat Panel Output Color Dithering: %s\n",
+               panel->useDithering ? "On (18-bit)" : "Off (24-bit)");
+
 }
 
 static int

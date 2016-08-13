@@ -138,6 +138,9 @@ typedef struct ViaPanelInfo {
     /* Native physical resolution */
     int NativeHeight;
     int NativeWidth;
+    Bool useDualEdge;
+    Bool useDithering;
+
     /* Native resolution index, see via_panel.c */
     CARD8 NativeModeIndex;
     /* Determine if we must use the hardware scaler
