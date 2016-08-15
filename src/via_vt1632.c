@@ -144,13 +144,13 @@ viaVT1632Power(ScrnInfoPtr pScrn, I2CDevPtr pDev, Bool powerState)
 }
 
 void
-via_vt1632_save(xf86OutputPtr output)
+viaVT1632SaveRegisters(xf86OutputPtr output)
 {
     ViaVT1632Ptr Private = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered via_vt1632_save.\n"));
+                        "Entered viaVT1632SaveRegisters.\n"));
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "VT1632A: Saving the content of registers "
@@ -161,7 +161,7 @@ via_vt1632_save(xf86OutputPtr output)
     xf86I2CReadByte(Private->VT1632I2CDev, 0x0C, &Private->Register0C);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting via_vt1632_save.\n"));
+                        "Exiting viaVT1632SaveRegisters.\n"));
 }
 
 void
@@ -293,7 +293,7 @@ via_vt1632_dpms(xf86OutputPtr output, int mode)
 static void
 via_dvi_save(xf86OutputPtr output)
 {
-    via_vt1632_save(output);
+    viaVT1632SaveRegisters(output);
 }
 
 static void
