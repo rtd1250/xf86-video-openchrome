@@ -293,7 +293,13 @@ via_vt1632_save(xf86OutputPtr output)
     ScrnInfoPtr pScrn = output->scrn;
     ViaVT1632Ptr pVIAVT1632Rec = output->driver_private;
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered via_vt1632_save.\n"));
+
     viaVT1632SaveRegisters(pScrn, pVIAVT1632Rec->VT1632I2CDev, pVIAVT1632Rec);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting via_vt1632_save.\n"));
 }
 
 static void
