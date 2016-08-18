@@ -303,7 +303,7 @@ via_vt1632_save(xf86OutputPtr output)
 }
 
 static void
-via_dvi_restore(xf86OutputPtr output)
+via_vt1632_restore(xf86OutputPtr output)
 {
     viaVT1632RestoreRegisters(output);
 }
@@ -378,7 +378,7 @@ const xf86OutputFuncsRec via_dvi_funcs = {
 #endif
     .dpms               = via_vt1632_dpms,
     .save               = via_vt1632_save,
-    .restore            = via_dvi_restore,
+    .restore            = via_vt1632_restore,
     .mode_valid         = via_dvi_mode_valid,
     .mode_fixup         = via_dvi_mode_fixup,
     .prepare            = via_dvi_prepare,
