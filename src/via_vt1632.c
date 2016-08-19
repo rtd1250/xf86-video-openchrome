@@ -305,8 +305,14 @@ via_vt1632_restore(xf86OutputPtr output)
     ScrnInfoPtr pScrn = output->scrn;
     ViaVT1632Ptr pVIAVT1632Rec = output->driver_private;
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered via_vt1632_restore.\n"));
+
     viaVT1632RestoreRegisters(pScrn, pVIAVT1632Rec->VT1632I2CDev,
                                 pVIAVT1632Rec);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting via_vt1632_restore.\n"));
 }
 
 static int
