@@ -180,28 +180,28 @@ viaVT1632RestoreRegisters(ScrnInfoPtr pScrn, I2CDevPtr pDev,
 }
 
 int
-via_vt1632_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
+viaVT1632CheckModeValidity(xf86OutputPtr output, DisplayModePtr pMode)
 {
     ViaVT1632Ptr Private = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
-                        "Entered via_vt1632_mode_valid.\n"));
+                        "Entered viaVT1632CheckModeValidity.\n"));
 
     if (pMode->Clock < Private->DotclockMin) {
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "Exiting via_vt1632_mode_valid.\n"));
+                            "Exiting viaVT1632CheckModeValidity.\n"));
         return MODE_CLOCK_LOW;
     }
 
     if (pMode->Clock > Private->DotclockMax) {
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "Exiting via_vt1632_mode_valid.\n"));
+                            "Exiting viaVT1632CheckModeValidity.\n"));
         return MODE_CLOCK_HIGH;
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting via_vt1632_mode_valid.\n"));
+                        "Exiting viaVT1632CheckModeValidity.\n"));
     return MODE_OK;
 }
 
@@ -318,7 +318,7 @@ via_vt1632_restore(xf86OutputPtr output)
 static int
 via_dvi_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
 {
-    return via_vt1632_mode_valid(output, pMode);
+    return viaVT1632CheckModeValidity(output, pMode);
 }
 
 static Bool
