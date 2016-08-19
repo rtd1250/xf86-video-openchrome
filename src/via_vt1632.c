@@ -239,20 +239,20 @@ via_vt1632_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 }
 
 static void
-via_dvi_create_resources(xf86OutputPtr output)
+via_vt1632_create_resources(xf86OutputPtr output)
 {
 }
 
 #ifdef RANDR_12_INTERFACE
 static Bool
-via_dvi_set_property(xf86OutputPtr output, Atom property,
+via_vt1632_set_property(xf86OutputPtr output, Atom property,
                      RRPropertyValuePtr value)
 {
     return TRUE;
 }
 
 static Bool
-via_dvi_get_property(xf86OutputPtr output, Atom property)
+via_vt1632_get_property(xf86OutputPtr output, Atom property)
 {
     return FALSE;
 }
@@ -316,25 +316,25 @@ via_vt1632_restore(xf86OutputPtr output)
 }
 
 static int
-via_dvi_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
+via_vt1632_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
 {
     return viaVT1632CheckModeValidity(output, pMode);
 }
 
 static Bool
-via_dvi_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
+via_vt1632_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
                    DisplayModePtr adjusted_mode)
 {
     return TRUE;
 }
 
 static void
-via_dvi_prepare(xf86OutputPtr output)
+via_vt1632_prepare(xf86OutputPtr output)
 {
 }
 
 static void
-via_dvi_commit(xf86OutputPtr output)
+via_vt1632_commit(xf86OutputPtr output)
 {
 }
 
@@ -371,29 +371,29 @@ via_vt1632_detect(xf86OutputPtr output)
 }
 
 static void
-via_dvi_destroy(xf86OutputPtr output)
+via_vt1632_destroy(xf86OutputPtr output)
 {
 }
 
-const xf86OutputFuncsRec via_dvi_funcs = {
-    .create_resources   = via_dvi_create_resources,
+const xf86OutputFuncsRec via_vt1632_funcs = {
+    .create_resources   = via_vt1632_create_resources,
 #ifdef RANDR_12_INTERFACE
-    .set_property       = via_dvi_set_property,
+    .set_property       = via_vt1632_set_property,
 #endif
 #ifdef RANDR_13_INTERFACE
-    .get_property       = via_dvi_get_property,
+    .get_property       = via_vt1632_get_property,
 #endif
     .dpms               = via_vt1632_dpms,
     .save               = via_vt1632_save,
     .restore            = via_vt1632_restore,
-    .mode_valid         = via_dvi_mode_valid,
-    .mode_fixup         = via_dvi_mode_fixup,
-    .prepare            = via_dvi_prepare,
-    .commit             = via_dvi_commit,
+    .mode_valid         = via_vt1632_mode_valid,
+    .mode_fixup         = via_vt1632_mode_fixup,
+    .prepare            = via_vt1632_prepare,
+    .commit             = via_vt1632_commit,
     .mode_set           = via_vt1632_mode_set,
     .detect             = via_vt1632_detect,
     .get_modes          = xf86OutputGetEDIDModes,
-    .destroy            = via_dvi_destroy,
+    .destroy            = via_vt1632_destroy,
 };
 
 Bool
@@ -479,7 +479,7 @@ viaVT1632Init(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus)
                 pVIAVT1632Rec->DotclockMin / 1000,
                 pVIAVT1632Rec->DotclockMax / 1000);
 
-    output = xf86OutputCreate(pScrn, &via_dvi_funcs, "DVI-2");
+    output = xf86OutputCreate(pScrn, &via_vt1632_funcs, "DVI-2");
     if (!output) {
         free(pVIAVT1632Rec);
         xf86DestroyI2CDevRec(pI2CDevice, TRUE);
