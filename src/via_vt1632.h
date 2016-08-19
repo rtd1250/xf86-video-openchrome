@@ -45,7 +45,6 @@ typedef struct _ViaVT1632 {
 
 const xf86OutputFuncsRec via_dvi_funcs;
 
-void viaVT1632RestoreRegisters(xf86OutputPtr output);
 int via_vt1632_mode_valid(xf86OutputPtr output, DisplayModePtr pMode);
 Bool viaVT1632Init(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus);
 

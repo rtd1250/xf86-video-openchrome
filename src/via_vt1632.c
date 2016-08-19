@@ -161,22 +161,19 @@ viaVT1632SaveRegisters(ScrnInfoPtr pScrn, I2CDevPtr pDev,
                         "Exiting viaVT1632SaveRegisters.\n"));
 }
 
-void
-viaVT1632RestoreRegisters(xf86OutputPtr output)
+static void
+viaVT1632RestoreRegisters(ScrnInfoPtr pScrn, I2CDevPtr pDev,
+                            ViaVT1632Ptr pVIAVT1632Rec)
 {
-    ViaVT1632Ptr Private = output->driver_private;
-    ScrnInfoPtr pScrn = output->scrn;
-
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaVT1632RestoreRegisters.\n"));
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "VT1632A: Restoring registers 0x08, 0x09, "
-                        "0x0A, and 0x0C.\n"));
-    xf86I2CWriteByte(Private->VT1632I2CDev, 0x08, Private->Register08);
-    xf86I2CWriteByte(Private->VT1632I2CDev, 0x09, Private->Register09);
-    xf86I2CWriteByte(Private->VT1632I2CDev, 0x0A, Private->Register0A);
-    xf86I2CWriteByte(Private->VT1632I2CDev, 0x0C, Private->Register0C);
+                        "Restoring VT1632 registers.\n"));
+    xf86I2CWriteByte(pDev, 0x08, pVIAVT1632Rec->Register08);
+    xf86I2CWriteByte(pDev, 0x09, pVIAVT1632Rec->Register09);
+    xf86I2CWriteByte(pDev, 0x0A, pVIAVT1632Rec->Register0A);
+    xf86I2CWriteByte(pDev, 0x0C, pVIAVT1632Rec->Register0C);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaVT1632RestoreRegisters.\n"));
@@ -305,7 +302,11 @@ via_vt1632_save(xf86OutputPtr output)
 static void
 via_vt1632_restore(xf86OutputPtr output)
 {
-    viaVT1632RestoreRegisters(output);
+    ScrnInfoPtr pScrn = output->scrn;
+    ViaVT1632Ptr pVIAVT1632Rec = output->driver_private;
+
+    viaVT1632RestoreRegisters(pScrn, pVIAVT1632Rec->VT1632I2CDev,
+                                pVIAVT1632Rec);
 }
 
 static int
