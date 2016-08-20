@@ -1095,9 +1095,9 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
 
     /* Set IGA1 horizontal display end. */
-    /* Due to IGA1 horizontal display end being only 8 bits wide,
-     * the adjusted horizontal display end needs to be shifted by
-     * 3 bit positions to the right.
+    /* Due to IGA1 horizontal display end being only 8 bits
+     * or 9 bits (for VX900 chipset) wide, the adjusted horizontal
+     * display end needs to be shifted by 3 bit positions to the right.
      * In addition to that, this particular register requires the
      * value to be 1 less than the actual value being written. */
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -1107,17 +1107,28 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     /* 3X5.01[7:0] - Horizontal Display End Bits [7:0] */
     hwp->writeCrtc(hwp, 0x01, temp & 0xFF);
 
+    if (pVia->Chipset == VIA_VX900) {
+        /* 3X5.45[1] - Horizontal Display End Bit [8] */
+        ViaCrtcMask(hwp, 0x45, temp >> 7, 0x02);
+    }
+
 
     /* Set IGA1 horizontal blank start. */
-    /* Due to IGA1 horizontal blank start being only 8 bits wide,
-     * the adjusted horizontal blank start needs to be shifted by
-     * 3 bit positions to the right. */
+    /* Due to IGA1 horizontal blank start being only 8 bits or
+     * 9 bits (for VX900 chipset) wide, the adjusted horizontal
+     * blank start needs to be shifted by 3 bit positions to the
+     * right. */
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "IGA1 CrtcHBlankStart: %d\n", mode->CrtcHBlankStart));
     temp = mode->CrtcHBlankStart >> 3;
 
     /* 3X5.02[7:0] - Horizontal Blanking Start Bits [7:0] */
      hwp->writeCrtc(hwp, 0x02, temp & 0xFF);
+
+     if (pVia->Chipset == VIA_VX900) {
+         /* 3X5.45[2] - Horizontal Blanking Start Bit [8] */
+         ViaCrtcMask(hwp, 0x45, temp >> 6, 0x04);
+     }
 
 
     /* Set IGA1 horizontal blank end. */
@@ -1317,6 +1328,8 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 static ModeStatus
 viaIGA1ModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
+    VIAPtr pVia = VIAPTR(pScrn);
+
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaIGA1ModeValid.\n"));
 
@@ -1333,10 +1346,16 @@ viaIGA1ModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
     if (mode->CrtcHTotal > (4096 + ((1 << 3) * (5 - 1))))
         return MODE_BAD_HVALUE;
 
-    if (mode->CrtcHDisplay > 2048)
+    if (((pVia->Chipset != VIA_VX900)
+            && (mode->CrtcHDisplay > 2048))
+        || ((pVia->Chipset == VIA_VX900)
+            && (mode->CrtcHDisplay > 4096)))
         return MODE_BAD_HVALUE;
 
-    if (mode->CrtcHBlankStart > 2048)
+    if (((pVia->Chipset != VIA_VX900)
+            && (mode->CrtcHBlankStart > 2048))
+        || ((pVia->Chipset == VIA_VX900)
+            && (mode->CrtcHBlankStart > 4096)))
         return MODE_BAD_HVALUE;
 
     if ((mode->CrtcHBlankEnd - mode->CrtcHBlankStart) > 1025)
