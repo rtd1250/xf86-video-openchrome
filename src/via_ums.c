@@ -277,9 +277,6 @@ viaMapMMIO(ScrnInfoPtr pScrn)
 
     viaMMIOEnable(pScrn);
 
-    /* Unlock CRTC. */
-    ViaCrtcMask(hwp, 0x47, 0x00, 0x01);
-
     vgaHWGetIOBase(hwp);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,

@@ -580,9 +580,19 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
      *               1: Enable */
     ViaCrtcMask(hwp, 0x36, 0x01, 0x01);
 
-    /* For UniChrome Pro and Chrome9. */
-    if ((pVia->Chipset != VIA_CLE266)
-        && (pVia->Chipset != VIA_KM400)) {
+    switch (pVia->Chipset) {
+    case VIA_CLE266:
+    case VIA_KM400:
+        ViaCrtcMask(hwp, 0x47, 0x00, 0x23);
+        break;
+    case VIA_K8M800:
+    case VIA_PM800:
+    case VIA_P4M800PRO:
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
         /* 3X5.47[7] - IGA1 Timing Plus 2 VCK
          * 3X5.47[6] - IGA1 Timing Plus 4 VCK
          * 3X5.47[5] - Peep at the PCI-bus
@@ -594,10 +604,27 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
          * 3X5.47[1] - LCD Simultaneous Mode Backdoor Register for
          *             8/9 Dot Clocks
          * 3X5.47[0] - LCD Simultaneous Mode Backdoor Register for
-         *             Clock Select and CRTC Register Protect
-         *
-         */
+         *             Clock Select and CRTC Register Protect */
         ViaCrtcMask(hwp, 0x47, 0x00, 0x23);
+        break;
+    case VIA_VX855:
+    case VIA_VX900:
+        /* 3X5.47[7] - IGA1 Timing Plus 2 VCK
+         * 3X5.47[6] - IGA1 Timing Plus 4 VCK
+         * 3X5.47[5] - Peep at the PCI-bus
+         *             0: Disable
+         *             1: Enable
+         * 3X5.47[4] - CRT Timing Register Protect
+         * 3X5.47[3] - IGA1 Timing Plus 6 VCK
+         * 3X5.47[2] - DACOFF Backdoor Register
+         * 3X5.47[1] - LCD Simultaneous Mode Backdoor Register for
+         *             8/9 Dot Clocks
+         * 3X5.47[0] - LCD Simultaneous Mode Backdoor Register for
+         *             Clock Select */
+        ViaCrtcMask(hwp, 0x47, 0x00, 0x33);
+        break;
+    default:
+        break;
     }
 
     /* 3X5.6B[3] - Simultaneous Display Enable
