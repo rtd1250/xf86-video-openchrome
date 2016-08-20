@@ -31,7 +31,7 @@
 #define VIA_VT1632_EDGE 0x02
 #define VIA_VT1632_PDB  0x01
 
-typedef struct _ViaVT1632 {
+typedef struct _viaVT1632Rec {
 	I2CDevPtr VT1632I2CDev;
 
 	int DotclockMin;
@@ -40,7 +40,7 @@ typedef struct _ViaVT1632 {
 	CARD8 Register09;
 	CARD8 Register0A;
 	CARD8 Register0C;
-} ViaVT1632Rec, *ViaVT1632Ptr;
+} viaVT1632Rec, *viaVT1632RecPtr;
 
 
 const xf86OutputFuncsRec via_vt1632_funcs;

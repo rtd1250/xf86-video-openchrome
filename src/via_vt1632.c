@@ -145,7 +145,7 @@ viaVT1632Power(ScrnInfoPtr pScrn, I2CDevPtr pDev, Bool powerState)
 
 static void
 viaVT1632SaveRegisters(ScrnInfoPtr pScrn, I2CDevPtr pDev,
-                        ViaVT1632Ptr pVIAVT1632Rec)
+                        viaVT1632RecPtr pVIAVT1632Rec)
 {
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaVT1632SaveRegisters.\n"));
@@ -163,7 +163,7 @@ viaVT1632SaveRegisters(ScrnInfoPtr pScrn, I2CDevPtr pDev,
 
 static void
 viaVT1632RestoreRegisters(ScrnInfoPtr pScrn, I2CDevPtr pDev,
-                            ViaVT1632Ptr pVIAVT1632Rec)
+                            viaVT1632RecPtr pVIAVT1632Rec)
 {
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaVT1632RestoreRegisters.\n"));
@@ -183,7 +183,7 @@ static int
 viaVT1632CheckModeValidity(xf86OutputPtr output, DisplayModePtr pMode)
 {
     ScrnInfoPtr pScrn = output->scrn;
-    ViaVT1632Ptr pVIAVT1632Rec = output->driver_private;
+    viaVT1632RecPtr pVIAVT1632Rec = output->driver_private;
     int status = MODE_OK;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
@@ -211,7 +211,7 @@ via_vt1632_mode_set(xf86OutputPtr output, DisplayModePtr mode,
     ScrnInfoPtr pScrn = output->scrn;
     drmmode_crtc_private_ptr iga = output->crtc->driver_private;
     VIAPtr pVia = VIAPTR(pScrn);
-    ViaVT1632Ptr pVIAVT1632Rec = output->driver_private;
+    viaVT1632RecPtr pVIAVT1632Rec = output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
                         "Entered via_vt1632_mode_set.\n"));
@@ -246,7 +246,7 @@ static void
 via_vt1632_dpms(xf86OutputPtr output, int mode)
 {
     ScrnInfoPtr pScrn = output->scrn;
-    ViaVT1632Ptr pVIAVT1632Rec = output->driver_private;
+    viaVT1632RecPtr pVIAVT1632Rec = output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_vt1632_dpms.\n"));
@@ -272,7 +272,7 @@ static void
 via_vt1632_save(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
-    ViaVT1632Ptr pVIAVT1632Rec = output->driver_private;
+    viaVT1632RecPtr pVIAVT1632Rec = output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_vt1632_save.\n"));
@@ -287,7 +287,7 @@ static void
 via_vt1632_restore(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
-    ViaVT1632Ptr pVIAVT1632Rec = output->driver_private;
+    viaVT1632RecPtr pVIAVT1632Rec = output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_vt1632_restore.\n"));
@@ -328,7 +328,7 @@ via_vt1632_detect(xf86OutputPtr output)
     xf86MonPtr mon;
     xf86OutputStatus status = XF86OutputStatusDisconnected;
     ScrnInfoPtr pScrn = output->scrn;
-    ViaVT1632Ptr pVIAVT1632Rec = output->driver_private;
+    viaVT1632RecPtr pVIAVT1632Rec = output->driver_private;
 
     /* Check for the DVI presence via VT1632 first before accessing
      * I2C bus. */
@@ -399,7 +399,7 @@ Bool
 viaVT1632Init(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus)
 {
     xf86OutputPtr output;
-    ViaVT1632Ptr pVIAVT1632Rec = NULL;
+    viaVT1632RecPtr pVIAVT1632Rec = NULL;
     I2CDevPtr pI2CDevice = NULL;
     I2CSlaveAddr i2cAddr = 0x10;
     CARD8 buf;
@@ -456,7 +456,7 @@ viaVT1632Init(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus)
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                 "VT1632 external TMDS transmitter detected.\n");
 
-    pVIAVT1632Rec = xnfcalloc(1, sizeof(ViaVT1632Rec));
+    pVIAVT1632Rec = xnfcalloc(1, sizeof(viaVT1632Rec));
     if (!pVIAVT1632Rec) {
         xf86DestroyI2CDevRec(pI2CDevice, TRUE);
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
