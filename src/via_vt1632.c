@@ -242,21 +242,6 @@ via_vt1632_create_resources(xf86OutputPtr output)
 {
 }
 
-#ifdef RANDR_12_INTERFACE
-static Bool
-via_vt1632_set_property(xf86OutputPtr output, Atom property,
-                     RRPropertyValuePtr value)
-{
-    return TRUE;
-}
-
-static Bool
-via_vt1632_get_property(xf86OutputPtr output, Atom property)
-{
-    return FALSE;
-}
-#endif
-
 static void
 via_vt1632_dpms(xf86OutputPtr output, int mode)
 {
@@ -369,6 +354,21 @@ via_vt1632_detect(xf86OutputPtr output)
     return status;
 }
 
+#ifdef RANDR_12_INTERFACE
+static Bool
+via_vt1632_set_property(xf86OutputPtr output, Atom property,
+                     RRPropertyValuePtr value)
+{
+    return TRUE;
+}
+
+static Bool
+via_vt1632_get_property(xf86OutputPtr output, Atom property)
+{
+    return FALSE;
+}
+#endif
+
 static void
 via_vt1632_destroy(xf86OutputPtr output)
 {
@@ -376,12 +376,6 @@ via_vt1632_destroy(xf86OutputPtr output)
 
 const xf86OutputFuncsRec via_vt1632_funcs = {
     .create_resources   = via_vt1632_create_resources,
-#ifdef RANDR_12_INTERFACE
-    .set_property       = via_vt1632_set_property,
-#endif
-#ifdef RANDR_13_INTERFACE
-    .get_property       = via_vt1632_get_property,
-#endif
     .dpms               = via_vt1632_dpms,
     .save               = via_vt1632_save,
     .restore            = via_vt1632_restore,
@@ -392,6 +386,12 @@ const xf86OutputFuncsRec via_vt1632_funcs = {
     .mode_set           = via_vt1632_mode_set,
     .detect             = via_vt1632_detect,
     .get_modes          = xf86OutputGetEDIDModes,
+#ifdef RANDR_12_INTERFACE
+    .set_property       = via_vt1632_set_property,
+#endif
+#ifdef RANDR_13_INTERFACE
+    .get_property       = via_vt1632_get_property,
+#endif
     .destroy            = via_vt1632_destroy,
 };
 
