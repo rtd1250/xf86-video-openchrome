@@ -170,7 +170,6 @@ viaProbePinStrapping(ScrnInfoPtr pScrn)
 
     switch (pVia->Chipset) {
     case VIA_CLE266:
-    case VIA_KM400:
 
         /* 3C5.12[4] - FPD17 pin strapping
          *             0: TMDS transmitter (DVI) / capture device
@@ -233,6 +232,7 @@ viaProbePinStrapping(ScrnInfoPtr pScrn)
 
         break;
 
+    case VIA_KM400:
     case VIA_K8M800:
     case VIA_PM800:
     case VIA_P4M800PRO:
