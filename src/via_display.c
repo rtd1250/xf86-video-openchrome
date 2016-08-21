@@ -2241,6 +2241,11 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     /* 3X5.55[6:4] - Horizontal Active Data Period Bits [10:8] */
     ViaCrtcMask(hwp, 0x55, temp >> 4, 0x70);
 
+    if (pVia->Chipset == VIA_VX900) {
+        /* 3X5.55[7] - Horizontal Active Data Period Bits [11] */
+        ViaCrtcMask(hwp, 0x55, temp >> 4, 0x80);
+    }
+
 
     /* Set IGA2 horizontal blank start. */
     /* Subtracting 1 from CrtcHBlankStart appears to suppress some
@@ -2256,6 +2261,11 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
     /* 3X5.54[2:0] - Horizontal Blanking Start Bits [10:8] */
     ViaCrtcMask(hwp, 0x54, temp >> 8, 0x07);
+
+    if (pVia->Chipset == VIA_VX900) {
+        /* 3X5.6B[0] - Horizontal Blanking Start Bit [11] */
+        ViaCrtcMask(hwp, 0x6B, temp >> 11, 0x01);
+    }
 
 
     /* Set IGA2 horizontal blank end. */
@@ -2438,10 +2448,16 @@ viaIGA2ModeValid(ScrnInfoPtr pScrn, DisplayModePtr mode)
     if (mode->CrtcHTotal > 4096)
         return MODE_BAD_HVALUE;
 
-    if (mode->CrtcHDisplay > 2048)
+    if (((pVia->Chipset != VIA_VX900)
+            && (mode->CrtcHDisplay > 2048))
+        || ((pVia->Chipset == VIA_VX900)
+            && (mode->CrtcHDisplay > 4096)))
         return MODE_BAD_HVALUE;
 
-    if (mode->CrtcHBlankStart > 2048)
+    if (((pVia->Chipset != VIA_VX900)
+            && (mode->CrtcHBlankStart > 2048))
+        || ((pVia->Chipset == VIA_VX900)
+            && (mode->CrtcHBlankStart > 4096)))
         return MODE_BAD_HVALUE;
 
     if (mode->CrtcHBlankEnd > 4096)
