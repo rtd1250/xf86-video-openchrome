@@ -902,9 +902,6 @@ viaSetLVDSOutput(ScrnInfoPtr pScrn)
         /* Do not power down LVDS Channel 2. */
         /* For now, use OPENLDI mode for LVDS Channel 2. */
         ViaCrtcMask(hwp, 0xD2, 0x01, 0x41);
-
-        /* Sequential mode for LVDS Channel 2 output format. */
-        ViaCrtcMask(hwp, 0xD4, 0x80, 0x80);
         break;
     }
 
@@ -1084,6 +1081,9 @@ via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 
             /* Set LVDS2 output color dithering. */
             viaLVDS2SetDithering(pScrn, Panel->useDithering ? TRUE : FALSE);
+
+            /* Set LVDS2 output format to sequential mode. */
+            viaLVDS2SetOutputFormat(pScrn, 0x01);
             break;
         default:
             break;
