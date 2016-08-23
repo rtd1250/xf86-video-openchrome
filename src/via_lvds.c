@@ -491,26 +491,6 @@ ViaLVDSPower(ScrnInfoPtr pScrn, Bool Power_On)
 }
 
 static void
-via_lvds_create_resources(xf86OutputPtr output)
-{
-}
-
-#ifdef RANDR_12_INTERFACE
-static Bool
-via_lvds_set_property(xf86OutputPtr output, Atom property,
-						RRPropertyValuePtr value)
-{
-    return FALSE;
-}
-
-static Bool
-via_lvds_get_property(xf86OutputPtr output, Atom property)
-{
-    return FALSE;
-}
-#endif
-
-static void
 ViaLCDPowerSequence(vgaHWPtr hwp, VIALCDPowerSeqRec Sequence)
 {
     int i;
@@ -572,54 +552,6 @@ ViaLCDPower(xf86OutputPtr output, Bool Power_On)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting ViaLCDPower.\n"));
-}
-
-static void
-via_lvds_dpms(xf86OutputPtr output, int mode)
-{
-    ScrnInfoPtr pScrn = output->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    switch (mode) {
-    case DPMSModeOn:
-        switch (pVia->Chipset) {
-        case VIA_P4M900:
-        case VIA_CX700:
-        case VIA_VX800:
-        case VIA_VX855:
-        case VIA_VX900:
-            ViaLVDSPower(pScrn, TRUE);
-            break;
-        }
-        ViaLCDPower(output, TRUE);
-        break;
-
-    case DPMSModeStandby:
-    case DPMSModeSuspend:
-    case DPMSModeOff:
-        switch (pVia->Chipset) {
-        case VIA_P4M900:
-        case VIA_CX700:
-        case VIA_VX800:
-        case VIA_VX855:
-        case VIA_VX900:
-            ViaLVDSPower(pScrn, FALSE);
-            break;
-        }
-        ViaLCDPower(output, FALSE);
-        break;
-    }
-}
-
-static void
-via_lvds_save(xf86OutputPtr output)
-{
-}
-
-static void
-via_lvds_restore(xf86OutputPtr output)
-{
-    ViaLCDPower(output, TRUE);
 }
 
 /*
@@ -795,28 +727,6 @@ viaLVDSGetFPInfoFromScratchPad(xf86OutputPtr output)
                      "Exiting viaLVDSGetFPInfoFromScratchPad.\n"));
 }
 
-static int
-via_lvds_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
-{
-    ScrnInfoPtr pScrn = output->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    ViaPanelInfoPtr Panel = output->driver_private;
-
-    if (Panel->NativeWidth < pMode->HDisplay ||
-        Panel->NativeHeight < pMode->VDisplay)
-        return MODE_PANEL;
-
-    if (!Panel->Scale && Panel->NativeHeight != pMode->VDisplay &&
-         Panel->NativeWidth != pMode->HDisplay)
-        return MODE_PANEL;
-
-    if (!ViaModeDotClockTranslate(pScrn, pMode))
-        return MODE_NOCLOCK;
-
-    return MODE_OK;
-}
-
 static void
 ViaPanelCenterMode(DisplayModePtr mode, DisplayModePtr adjusted_mode)
 {
@@ -846,35 +756,6 @@ ViaPanelCenterMode(DisplayModePtr mode, DisplayModePtr adjusted_mode)
     adjusted_mode->CrtcVBlankEnd = adjusted_mode->CrtcVTotal - vBorder;
     adjusted_mode->CrtcVSyncStart = adjusted_mode->VSyncStart;
     adjusted_mode->CrtcVSyncEnd = adjusted_mode->VSyncEnd;
-}
-
-static Bool
-via_lvds_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
-					DisplayModePtr adjusted_mode)
-{
-    ViaPanelInfoPtr Panel = output->driver_private;
-
-    xf86SetModeCrtc(adjusted_mode, 0);
-    if (!Panel->Center && (mode->HDisplay < Panel->NativeWidth ||
-        mode->VDisplay < Panel->NativeHeight)) {
-        Panel->Scale = TRUE;
-    } else {
-        Panel->Scale = FALSE;
-        ViaPanelCenterMode(mode, adjusted_mode);
-    }
-    return TRUE;
-}
-
-static void
-via_lvds_prepare(xf86OutputPtr output)
-{
-    via_lvds_dpms(output, DPMSModeOff);
-}
-
-static void
-via_lvds_commit(xf86OutputPtr output)
-{
-    via_lvds_dpms(output, DPMSModeOn);
 }
 
 static void
@@ -1006,9 +887,130 @@ viaSetLVDSOutput(ScrnInfoPtr pScrn)
                         "Exiting viaSetLVDSOutput.\n"));
 }
 
+static int
+ViaPanelLookUpModeIndex(int width, int height)
+{
+    int i, index = VIA_PANEL_INVALID;
+    int length = sizeof(ViaPanelNativeModes) / sizeof(ViaPanelModeRec);
+
+
+    for (i = 0; i < length; i++) {
+        if (ViaPanelNativeModes[i].Width == width
+            && ViaPanelNativeModes[i].Height == height) {
+            index = i;
+            break;
+        }
+    }
+    return index;
+}
+
+static void
+via_lvds_create_resources(xf86OutputPtr output)
+{
+}
+
+static void
+via_lvds_dpms(xf86OutputPtr output, int mode)
+{
+    ScrnInfoPtr pScrn = output->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    switch (mode) {
+    case DPMSModeOn:
+        switch (pVia->Chipset) {
+        case VIA_P4M900:
+        case VIA_CX700:
+        case VIA_VX800:
+        case VIA_VX855:
+        case VIA_VX900:
+            ViaLVDSPower(pScrn, TRUE);
+            break;
+        }
+        ViaLCDPower(output, TRUE);
+        break;
+
+    case DPMSModeStandby:
+    case DPMSModeSuspend:
+    case DPMSModeOff:
+        switch (pVia->Chipset) {
+        case VIA_P4M900:
+        case VIA_CX700:
+        case VIA_VX800:
+        case VIA_VX855:
+        case VIA_VX900:
+            ViaLVDSPower(pScrn, FALSE);
+            break;
+        }
+        ViaLCDPower(output, FALSE);
+        break;
+    }
+}
+
+static void
+via_lvds_save(xf86OutputPtr output)
+{
+}
+
+static void
+via_lvds_restore(xf86OutputPtr output)
+{
+    ViaLCDPower(output, TRUE);
+}
+
+static int
+via_lvds_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
+{
+    ScrnInfoPtr pScrn = output->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    ViaPanelInfoPtr Panel = output->driver_private;
+
+    if (Panel->NativeWidth < pMode->HDisplay ||
+        Panel->NativeHeight < pMode->VDisplay)
+        return MODE_PANEL;
+
+    if (!Panel->Scale && Panel->NativeHeight != pMode->VDisplay &&
+         Panel->NativeWidth != pMode->HDisplay)
+        return MODE_PANEL;
+
+    if (!ViaModeDotClockTranslate(pScrn, pMode))
+        return MODE_NOCLOCK;
+
+    return MODE_OK;
+}
+
+static Bool
+via_lvds_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
+                    DisplayModePtr adjusted_mode)
+{
+    ViaPanelInfoPtr Panel = output->driver_private;
+
+    xf86SetModeCrtc(adjusted_mode, 0);
+    if (!Panel->Center && (mode->HDisplay < Panel->NativeWidth ||
+        mode->VDisplay < Panel->NativeHeight)) {
+        Panel->Scale = TRUE;
+    } else {
+        Panel->Scale = FALSE;
+        ViaPanelCenterMode(mode, adjusted_mode);
+    }
+    return TRUE;
+}
+
+static void
+via_lvds_prepare(xf86OutputPtr output)
+{
+    via_lvds_dpms(output, DPMSModeOff);
+}
+
+static void
+via_lvds_commit(xf86OutputPtr output)
+{
+    via_lvds_dpms(output, DPMSModeOn);
+}
+
 static void
 via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
-					DisplayModePtr adjusted_mode)
+                    DisplayModePtr adjusted_mode)
 {
     ViaPanelInfoPtr Panel = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
@@ -1062,23 +1064,6 @@ via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
             break;
         }
     }
-}
-
-static int
-ViaPanelLookUpModeIndex(int width, int height)
-{
-    int i, index = VIA_PANEL_INVALID;
-    int length = sizeof(ViaPanelNativeModes) / sizeof(ViaPanelModeRec);
-
-
-    for (i = 0; i < length; i++) {
-        if (ViaPanelNativeModes[i].Width == width
-            && ViaPanelNativeModes[i].Height == height) {
-            index = i;
-            break;
-        }
-    }
-    return index;
 }
 
 static xf86OutputStatus
@@ -1230,6 +1215,21 @@ via_lvds_get_modes(xf86OutputPtr output)
     return pDisplay_Mode;
 }
 
+#ifdef RANDR_12_INTERFACE
+static Bool
+via_lvds_set_property(xf86OutputPtr output, Atom property,
+                        RRPropertyValuePtr value)
+{
+    return FALSE;
+}
+
+static Bool
+via_lvds_get_property(xf86OutputPtr output, Atom property)
+{
+    return FALSE;
+}
+#endif
+
 static void
 via_lvds_destroy(xf86OutputPtr output)
 {
@@ -1240,12 +1240,6 @@ via_lvds_destroy(xf86OutputPtr output)
 
 static const xf86OutputFuncsRec via_lvds_funcs = {
     .create_resources   = via_lvds_create_resources,
-#ifdef RANDR_12_INTERFACE
-    .set_property       = via_lvds_set_property,
-#endif
-#ifdef RANDR_13_INTERFACE
-    .get_property       = via_lvds_get_property,
-#endif
     .dpms               = via_lvds_dpms,
     .save               = via_lvds_save,
     .restore            = via_lvds_restore,
@@ -1256,7 +1250,13 @@ static const xf86OutputFuncsRec via_lvds_funcs = {
     .mode_set           = via_lvds_mode_set,
     .detect             = via_lvds_detect,
     .get_modes          = via_lvds_get_modes,
-    .destroy            = via_lvds_destroy,
+#ifdef RANDR_12_INTERFACE
+    .set_property       = via_lvds_set_property,
+#endif
+#ifdef RANDR_13_INTERFACE
+    .get_property       = via_lvds_get_property,
+#endif
+    .destroy            = via_lvds_destroy
 };
 
 
