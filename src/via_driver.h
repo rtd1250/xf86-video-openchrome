@@ -376,6 +376,9 @@ typedef struct _VIA {
 #endif /* HAVE_DEBUG */
 
     video_via_regs*     VideoRegs;
+
+    /* Keeping track of the number of DVI connectors. */
+    unsigned int        numberDVI;
 } VIARec, *VIAPtr;
 
 #define VIAPTR(p) ((VIAPtr)((p)->driverPrivate))

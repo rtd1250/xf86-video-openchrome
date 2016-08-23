@@ -399,12 +399,14 @@ Bool
 viaVT1632Init(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus)
 {
     xf86OutputPtr output;
+    VIAPtr pVia = VIAPTR(pScrn);
     viaVT1632RecPtr pVIAVT1632Rec = NULL;
     I2CDevPtr pI2CDevice = NULL;
     I2CSlaveAddr i2cAddr = 0x10;
     CARD8 buf;
     CARD16 vendorID, deviceID;
     Bool status = FALSE;
+    char outputNameBuffer[32];
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaVT1632Init.\n"));
@@ -478,7 +480,10 @@ viaVT1632Init(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus)
                 pVIAVT1632Rec->DotclockMin / 1000,
                 pVIAVT1632Rec->DotclockMax / 1000);
 
-    output = xf86OutputCreate(pScrn, &via_vt1632_funcs, "DVI-2");
+    /* The code to dynamically designate the particular DVI (i.e., DVI-1,
+     * DVI-2, etc.) for xrandr was borrowed from xf86-video-r128 DDX. */
+    sprintf(outputNameBuffer, "DVI-%d", (pVia->numberDVI + 1));
+    output = xf86OutputCreate(pScrn, &via_vt1632_funcs, outputNameBuffer);
     if (!output) {
         free(pVIAVT1632Rec);
         xf86DestroyI2CDevRec(pI2CDevice, TRUE);
@@ -502,6 +507,7 @@ viaVT1632Init(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus)
 
     via_vt1632_dump_registers(pScrn, pI2CDevice);
 
+    pVia->numberDVI++;
     status = TRUE;
 exit:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
