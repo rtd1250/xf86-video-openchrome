@@ -1330,10 +1330,12 @@ via_lvds_init(ScrnInfoPtr pScrn)
     if (output)  {
         output->driver_private = Panel;
 
-        if (pVia->Chipset == VIA_VX900)
-            output->possible_crtcs = 0x3;
-        else
-            output->possible_crtcs = 0x2;
+        /* While there are two (2) display controllers registered with the
+         * X.Org Server, it is often desirable to fix FP (Flat Panel) to
+         * IGA2 since only IGA2 contains panel resolution scaling
+         * functionality. IGA1 does not have this. */
+        output->possible_crtcs = 1 << 1;
+
         output->possible_clones = 0;
         output->interlaceAllowed = FALSE;
         output->doubleScanAllowed = FALSE;
