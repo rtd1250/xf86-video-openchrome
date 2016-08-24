@@ -3046,7 +3046,6 @@ iga1_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
     ScrnInfoPtr pScrn = crtc->scrn;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
-    int SR1A, SR1B, CR67, CR6A;
     LOCO colors[size];
     int i;
 
@@ -3071,12 +3070,6 @@ iga1_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
         VIALoadRgbLut(pScrn, 0, size, colors);
 
     } else {
-
-        SR1A = hwp->readSeq(hwp, 0x1A);
-        SR1B = hwp->readSeq(hwp, 0x1B);
-        CR67 = hwp->readCrtc(hwp, 0x67);
-        CR6A = hwp->readCrtc(hwp, 0x6A);
-
         for (i = 0; i < size; i++) {
             hwp->writeDacWriteAddr(hwp, i);
             hwp->writeDacData(hwp, colors[i].red);
