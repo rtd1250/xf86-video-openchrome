@@ -118,7 +118,7 @@ viaLVDS1SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaLVDS1SetDisplaySource.\n"));
 
-    /* Set LVDS1 integrated LVDS transmitter display output source.
+    /* Set LVDS1 integrated LVDS transmitter display output source. */
     /* 3X5.99[4] - LVDS Channel 1 Data Source Selection
      *             0: Primary Display
      *             1: Secondary Display */
@@ -145,7 +145,7 @@ viaLVDS2SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaLVDS2SetDisplaySource.\n"));
 
-    /* Set LVDS2 integrated LVDS transmitter display output source.
+    /* Set LVDS2 integrated LVDS transmitter display output source. */
     /* 3X5.97[4] - LVDS Channel 2 Data Source Selection
      *             0: Primary Display
      *             1: Secondary Display */
@@ -170,7 +170,7 @@ viaLVDS2SetDelayTap(ScrnInfoPtr pScrn, CARD8 delayTap)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaLVDS2SetDelayTap.\n"));
 
-    /* Set LVDS2 delay tap.
+    /* Set LVDS2 delay tap. */
     /* 3X5.97[3:0] - LVDS2 Delay Tap */
     ViaCrtcMask(hwp, 0x97, delayTap, 0x0F);
 
@@ -195,7 +195,7 @@ viaDFPLowSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaDFPLowSetDisplaySource.\n"));
 
-    /* Set DFP Low display output source.
+    /* Set DFP Low display output source. */
     /* 3X5.99[4] - DFP Low Data Source Selection
      *             0: Primary Display
      *             1: Secondary Display */
@@ -221,7 +221,7 @@ viaDFPHighSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaDFPHighSetDisplaySource.\n"));
 
-    /* Set DFP High display output source.
+    /* Set DFP High display output source. */
     /* 3X5.97[4] - DFP High Data Source Selection
      *             0: Primary Display
      *             1: Secondary Display */
@@ -245,7 +245,7 @@ viaDFPLowSetDelayTap(ScrnInfoPtr pScrn, CARD8 delayTap)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaDFPLowSetDelayTap.\n"));
 
-    /* Set DFP Low interface delay tap.
+    /* Set DFP Low interface delay tap. */
     /* 3X5.99[3:0] - DFP Low Delay Tap */
     ViaCrtcMask(hwp, 0x99, delayTap, 0x0F);
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -267,7 +267,7 @@ viaDFPHighSetDelayTap(ScrnInfoPtr pScrn, CARD8 delayTap)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaDFPHighSetDelayTap.\n"));
 
-    /* Set DFP High interface delay tap.
+    /* Set DFP High interface delay tap. */
     /* 3X5.97[3:0] - DFP High Delay Tap */
     ViaCrtcMask(hwp, 0x97, delayTap, 0x0F);
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -983,8 +983,6 @@ static int
 via_lvds_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
 {
     ScrnInfoPtr pScrn = output->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
-
     ViaPanelInfoPtr Panel = output->driver_private;
 
     if (Panel->NativeWidth < pMode->HDisplay ||
@@ -1291,7 +1289,6 @@ via_lvds_init(ScrnInfoPtr pScrn)
     ViaPanelInfoPtr Panel = (ViaPanelInfoPtr) xnfcalloc(sizeof(ViaPanelInfoRec), 1);
     OptionInfoPtr  Options = xnfalloc(sizeof(ViaPanelOptions));
     MessageType from = X_DEFAULT;
-    const char *s = NULL;
     VIAPtr pVia = VIAPTR(pScrn);
     xf86OutputPtr output = NULL;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
