@@ -1253,9 +1253,9 @@ via_lvds_init(ScrnInfoPtr pScrn)
     xf86DrvMsg(pScrn->scrnIndex, from, "LVDS-0 : DVI Center is %s.\n",
                Panel->Center ? "enabled" : "disabled");
 
-    /* The code to dynamically designate a particular LVDS (i.e., LVDS-1,
-     * LVDS-2, etc.) for xrandr was borrowed from xf86-video-r128 DDX. */
-    sprintf(outputNameBuffer, "LVDS-%d", (pVia->numberFP + 1));
+    /* The code to dynamically designate a particular FP (i.e., FP-1,
+     * FP-2, etc.) for xrandr was borrowed from xf86-video-r128 DDX. */
+    sprintf(outputNameBuffer, "FP-%d", (pVia->numberFP + 1));
     output = xf86OutputCreate(pScrn, &via_lvds_funcs, outputNameBuffer);
 
     if (output)  {
