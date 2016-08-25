@@ -1070,85 +1070,52 @@ static xf86OutputStatus
 via_lvds_detect(xf86OutputPtr output)
 {
     xf86OutputStatus status = XF86OutputStatusDisconnected;
-    ViaPanelInfoPtr panel = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
     vgaHWPtr hwp = VGAHWPTR(pScrn);
-    CARD8 cr3b = 0x00;
-    CARD8 cr3b_mask = 0x00;
+    VIAPtr pVia = VIAPTR(pScrn);
+    ViaPanelInfoPtr panel = output->driver_private;
+    CARD8 cr3b;
+    CARD8 cr3b_mask;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_lvds_detect.\n"));
 
-    /* Hardcode panel size for the XO */
+    /* Hardcode panel size for the OLPC XO-1.5. */
     if (pVia->IsOLPCXO15) {
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                    "Setting up OLPC XO-1.5 flat panel.\n");
         panel->NativeWidth = 1200;
         panel->NativeHeight = 900;
         status = XF86OutputStatusConnected;
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                            "Setting up OLPC XO-1.5 flat panel.\n"));
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                            "Detected Flat Panel Screen Resolution: "
-                            "%dx%d\n",
-                            panel->NativeWidth, panel->NativeHeight));
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "Exiting via_lvds_detect.\n"));
-        return status;
+        goto exit;
     }
 
-    if (!panel->NativeWidth || !panel->NativeHeight) {
-        int width, height;
-        Bool ret;
-
-        /* Disable reading off EDID from I2C bus 2 since it is often
-         * used by DVI as well. For now, this is how DVI and LVDS FP will
-         * coexist. */
+    /* Disable reading off EDID from I2C bus 2 since it is often
+     * used by DVI as well. For now, this is how DVI and LVDS FP will
+     * coexist. */
 /*
-        ret = ViaPanelGetSizeFromDDCv1(output, &width, &height);
+    if (ViaPanelGetSizeFromDDCv1(output, &width, &height)) {
 */
-        ret = FALSE;
-        if (ret) {
-            panel->NativeModeIndex = ViaPanelLookUpModeIndex(width, height);
-            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                                "ViaPanelLookUpModeIndex: Width %d, "
-                                "Height %d, NativeModeIndex%d\n", 
-                                width, height, panel->NativeModeIndex));
-            if (panel->NativeModeIndex != VIA_PANEL_INVALID) {
-                panel->NativeWidth = width;
-                panel->NativeHeight = height;
-                status = XF86OutputStatusConnected;
-            }
-        } else {
-            /* Apparently this is the way VIA Technologies passes */
-            /* the presence of a flat panel to the device driver */
-            /* via BIOS setup. */
-            if (pVia->Chipset == VIA_CLE266) {
-                cr3b_mask = 0x08;
-            } else {
-                cr3b_mask = 0x02;
-            }            
-
-            cr3b = hwp->readCrtc(hwp, 0x3B) & cr3b_mask;
-
-            if (cr3b) {
-                viaLVDSGetFPInfoFromScratchPad(output);
-
-                if (panel->NativeWidth && panel->NativeHeight) {
-                    status = XF86OutputStatusConnected;
-                }
-            }
-        }
-
-        if (status == XF86OutputStatusConnected) {
-            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                                "Detected Flat Panel Screen Resolution: "
-                                "%dx%d\n",
-                                panel->NativeWidth, panel->NativeHeight));
-        }
-    } else {
+    if (FALSE) {
         status = XF86OutputStatusConnected;
+    } else {
+        /* Apparently this is the way VIA Technologies passes */
+        /* the presence of a flat panel to the device driver */
+        /* via BIOS setup. */
+        if (pVia->Chipset == VIA_CLE266) {
+            cr3b_mask = 0x08;
+        } else {
+            cr3b_mask = 0x02;
+        }
+
+        cr3b = hwp->readCrtc(hwp, 0x3B) & cr3b_mask;
+        if (cr3b) {
+            viaLVDSGetFPInfoFromScratchPad(output);
+            status = XF86OutputStatusConnected;
+        }
     }
 
+exit:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_lvds_detect.\n"));
     return status;
