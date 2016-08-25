@@ -63,6 +63,8 @@ openchrome_drv_la_SOURCES = \
          via_mode.h \
          via_priv.h \
          via_regs.h \
+         via_sii164.c \
+         via_sii164.h \
          via_tmds.c \
          via_tv.c \
          via_xv_overlay.c \

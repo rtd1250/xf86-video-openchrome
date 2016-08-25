@@ -639,6 +639,28 @@ via_dvi_init(ScrnInfoPtr pScrn)
                     "successfully for DVI use.\n");
     }
 
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "Probing I2C Bus 2 for SiI 164.\n");
+    if (!viaSiI164Init(pScrn, pVia->pI2CBus2)) {
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "I2C Bus 2 was not initialized for DVI use.\n");
+    } else {
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "SiI 164 attached to I2C Bus 2 was initialized "
+                    "successfully for DVI use.\n");
+    }
+
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "Probing I2C Bus 3 for SiI 164.\n");
+    if (!viaSiI164Init(pScrn, pVia->pI2CBus3)) {
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "I2C Bus 3 was not initialized for DVI use.\n");
+    } else {
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "SiI 164 attached to I2C Bus 3 was initialized "
+                    "successfully for DVI use.\n");
+    }
+
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_dvi_init.\n"));
 }
