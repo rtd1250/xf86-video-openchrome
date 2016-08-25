@@ -689,29 +689,6 @@ ViaPanelGetSizeFromDDCv1(xf86OutputPtr output, int *width, int *height)
     return TRUE;
 }
 
-static Bool
-ViaGetResolutionIndex(ScrnInfoPtr pScrn, ViaPanelInfoPtr Panel,
-                      DisplayModePtr mode)
-{
-    int i;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                     "ViaGetResolutionIndex: Looking for %dx%d\n",
-                     mode->CrtcHDisplay, mode->CrtcVDisplay));
-    for (i = 0; ViaResolutionTable[i].Index != VIA_RES_INVALID; i++) {
-        if ((ViaResolutionTable[i].X == mode->CrtcHDisplay)
-            && (ViaResolutionTable[i].Y == mode->CrtcVDisplay)) {
-            Panel->ResolutionIndex = ViaResolutionTable[i].Index;
-            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaGetResolutionIndex:"
-                             " %d\n", Panel->ResolutionIndex));
-            return TRUE;
-        }
-    }
-
-    Panel->ResolutionIndex = VIA_RES_INVALID;
-    return FALSE;
-}
-
 /*
  * Gets the native panel resolution from scratch pad registers.
  */
