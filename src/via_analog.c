@@ -386,6 +386,9 @@ via_analog_init(ScrnInfoPtr pScrn)
     output->doubleScanAllowed = FALSE;
     pBIOSInfo->analog = output;
 
+    /* Increment the number of analog VGA connectors. */
+    pVia->numberVGA++;
+
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_analog_init.\n"));
 }
