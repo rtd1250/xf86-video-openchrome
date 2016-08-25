@@ -348,6 +348,9 @@ viaOutputDetect(ScrnInfoPtr pScrn)
     /* Initialize the number of DVI connectors. */
     pVia->numberDVI = 0;
 
+    /* Initialize the number of FP connectors. */
+    pVia->numberFP = 0;
+
     /* Read off the VIA Technologies IGP pin strapping for
        display detection purposes. */
     viaProbePinStrapping(pScrn);

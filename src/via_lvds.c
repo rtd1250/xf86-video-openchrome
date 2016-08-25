@@ -1221,6 +1221,7 @@ via_lvds_init(ScrnInfoPtr pScrn)
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     CARD8 cr3b = 0x00;
     CARD8 cr3b_mask = 0x00;
+    char outputNameBuffer[32];
 
     if (!Panel)
         return;
@@ -1252,7 +1253,10 @@ via_lvds_init(ScrnInfoPtr pScrn)
     xf86DrvMsg(pScrn->scrnIndex, from, "LVDS-0 : DVI Center is %s.\n",
                Panel->Center ? "enabled" : "disabled");
 
-    output = xf86OutputCreate(pScrn, &via_lvds_funcs, "LVDS-1");
+    /* The code to dynamically designate a particular LVDS (i.e., LVDS-1,
+     * LVDS-2, etc.) for xrandr was borrowed from xf86-video-r128 DDX. */
+    sprintf(outputNameBuffer, "LVDS-%d", (pVia->numberFP + 1));
+    output = xf86OutputCreate(pScrn, &via_lvds_funcs, outputNameBuffer);
 
     if (output)  {
         output->driver_private = Panel;
@@ -1266,6 +1270,9 @@ via_lvds_init(ScrnInfoPtr pScrn)
         output->possible_clones = 0;
         output->interlaceAllowed = FALSE;
         output->doubleScanAllowed = FALSE;
+
+        /* Increment the number of FP connectors. */
+        pVia->numberFP++;
 
         if (pVia->IsOLPCXO15) {
             output->mm_height = 152;

@@ -382,6 +382,9 @@ typedef struct _VIA {
 
     /* Keeping track of the number of DVI connectors. */
     unsigned int        numberDVI;
+
+    /* Keeping track of the number of FP (Flat Panel) connectors. */
+    unsigned int        numberFP;
 } VIARec, *VIAPtr;
 
 #define VIAPTR(p) ((VIAPtr)((p)->driverPrivate))
