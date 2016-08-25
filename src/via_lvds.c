@@ -886,23 +886,6 @@ viaSetLVDSOutput(ScrnInfoPtr pScrn)
                         "Exiting viaSetLVDSOutput.\n"));
 }
 
-static int
-ViaPanelLookUpModeIndex(int width, int height)
-{
-    int i, index = VIA_PANEL_INVALID;
-    int length = sizeof(ViaPanelNativeModes) / sizeof(ViaPanelModeRec);
-
-
-    for (i = 0; i < length; i++) {
-        if (ViaPanelNativeModes[i].Width == width
-            && ViaPanelNativeModes[i].Height == height) {
-            index = i;
-            break;
-        }
-    }
-    return index;
-}
-
 static void
 via_lvds_create_resources(xf86OutputPtr output)
 {
