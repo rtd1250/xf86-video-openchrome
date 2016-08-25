@@ -342,6 +342,9 @@ viaOutputDetect(ScrnInfoPtr pScrn)
 
     pBIOSInfo->analog = NULL;
 
+    /* Initialize the number of VGA connectors. */
+    pVia->numberVGA = 0;
+
     /* Initialize the number of DVI connectors. */
     pVia->numberDVI = 0;
 

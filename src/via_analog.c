@@ -353,6 +353,7 @@ via_analog_init(ScrnInfoPtr pScrn)
     VIAPtr pVia = VIAPTR(pScrn);
     VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
     xf86OutputPtr output = NULL;
+    char outputNameBuffer[32];
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_analog_init.\n"));
@@ -365,7 +366,10 @@ via_analog_init(ScrnInfoPtr pScrn)
         return;
     }
 
-    output = xf86OutputCreate(pScrn, &via_analog_funcs, "VGA-1");
+    /* The code to dynamically designate the output name for
+     * xrandr was borrowed from xf86-video-r128 DDX. */
+    sprintf(outputNameBuffer, "VGA-%d", (pVia->numberVGA + 1));
+    output = xf86OutputCreate(pScrn, &via_analog_funcs, outputNameBuffer);
 
     /* While there are two (2) display controllers registered with the
      * X.Org Server, it is often desirable to fix the analog VGA output
