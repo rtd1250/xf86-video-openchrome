@@ -46,40 +46,6 @@
  */
 #include "via_mode.h"
 
-static void
-ViaPrintMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
-{
-    xf86PrintModeline(pScrn->scrnIndex, mode);
-
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcHDisplay: 0x%x\n",
-               mode->CrtcHDisplay);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcHBlankStart: 0x%x\n",
-               mode->CrtcHBlankStart);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcHSyncStart: 0x%x\n",
-               mode->CrtcHSyncStart);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcHSyncEnd: 0x%x\n",
-               mode->CrtcHSyncEnd);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcHBlankEnd: 0x%x\n",
-               mode->CrtcHBlankEnd);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcHTotal: 0x%x\n",
-               mode->CrtcHTotal);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcHSkew: 0x%x\n",
-               mode->CrtcHSkew);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcVDisplay: 0x%x\n",
-               mode->CrtcVDisplay);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcVBlankStart: 0x%x\n",
-               mode->CrtcVBlankStart);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcVSyncStart: 0x%x\n",
-               mode->CrtcVSyncStart);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcVSyncEnd: 0x%x\n",
-               mode->CrtcVSyncEnd);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcVBlankEnd: 0x%x\n",
-               mode->CrtcVBlankEnd);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcVTotal: 0x%x\n",
-               mode->CrtcVTotal);
-
-}
-
 /*
  * Sets IGA1 or IGA2 as the display output source for DVP0
  * (Digital Video Port) interface.

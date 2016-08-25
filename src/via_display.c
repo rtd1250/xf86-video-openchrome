@@ -31,6 +31,41 @@
 
 #include "via_driver.h"
 
+
+static void
+ViaPrintMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
+{
+    xf86PrintModeline(pScrn->scrnIndex, mode);
+
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcHDisplay: 0x%x\n",
+               mode->CrtcHDisplay);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcHBlankStart: 0x%x\n",
+               mode->CrtcHBlankStart);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcHSyncStart: 0x%x\n",
+               mode->CrtcHSyncStart);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcHSyncEnd: 0x%x\n",
+               mode->CrtcHSyncEnd);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcHBlankEnd: 0x%x\n",
+               mode->CrtcHBlankEnd);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcHTotal: 0x%x\n",
+               mode->CrtcHTotal);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcHSkew: 0x%x\n",
+               mode->CrtcHSkew);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcVDisplay: 0x%x\n",
+               mode->CrtcVDisplay);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcVBlankStart: 0x%x\n",
+               mode->CrtcVBlankStart);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcVSyncStart: 0x%x\n",
+               mode->CrtcVSyncStart);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcVSyncEnd: 0x%x\n",
+               mode->CrtcVSyncEnd);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcVBlankEnd: 0x%x\n",
+               mode->CrtcVBlankEnd);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CrtcVTotal: 0x%x\n",
+               mode->CrtcVTotal);
+
+}
+
 /*
  * Controls IGA1 DPMS State.
  */
@@ -3012,6 +3047,7 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     /* Disable IGA1 */
     ViaSeqMask(hwp, 0x59, 0x00, 0x80);
 
+    ViaPrintMode(pScrn, adjusted_mode);
     viaIGA1SetDisplayRegister(pScrn, adjusted_mode);
     ViaSetPrimaryFIFO(pScrn, adjusted_mode);
 
@@ -3440,6 +3476,7 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     viaIGA2Init(pScrn);
     ViaCRTCInit(pScrn);
 
+    ViaPrintMode(pScrn, adjusted_mode);
     viaIGA2SetDisplayRegister(pScrn, adjusted_mode);
     ViaSetSecondaryFIFO(pScrn, adjusted_mode);
     pBIOSInfo->Clock = ViaModeDotClockTranslate(pScrn, adjusted_mode);
