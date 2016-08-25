@@ -40,6 +40,7 @@
 #include <unistd.h>
 #include "via_driver.h"
 #include "via_vt1632.h"
+#include "via_sii164.h"
 
 
 /*
