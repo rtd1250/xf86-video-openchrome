@@ -88,6 +88,141 @@ viaIGA1DPMSControl(ScrnInfoPtr pScrn, CARD8 dpmsControl)
                         "Exiting viaIGA1DPMSControl.\n"));
 }
 
+static void
+viaIGA1InitHI(ScrnInfoPtr pScrn)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA1InitHI.\n"));
+
+    switch(pVia->Chipset) {
+    case VIA_PM800:
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        VIASETREG(PRIM_HI_TRANSCOLOR, 0x00000000);
+        VIASETREG(PRIM_HI_INVTCOLOR, 0x00FFFFFF);
+
+        /* Not setting up V327_HI_INVTCOLOR register contributes to
+         * an X Server boot time crash. */
+        VIASETREG(V327_HI_INVTCOLOR, 0x00FFFFFF);
+        VIASETREG(PRIM_HI_FIFO, 0x0D000D0F);
+        VIASETREG(PRIM_HI_CTRL, 0x36000004);
+        break;
+    default:
+        VIASETREG(HI_TRANSPARENT_COLOR, 0x00000000);
+        VIASETREG(HI_INVTCOLOR, 0x00FFFFFF);
+        VIASETREG(ALPHA_V3_PREFIFO_CONTROL, 0x000E0000);
+        VIASETREG(ALPHA_V3_FIFO_CONTROL, 0xE0F0000);
+        VIASETREG(HI_CONTROL, 0x76000004);
+        break;
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA1InitHI.\n"));
+}
+
+static void
+viaIGA1SetHIStartingAddress(xf86CrtcPtr crtc)
+{
+
+    drmmode_crtc_private_ptr iga = crtc->driver_private;
+    ScrnInfoPtr pScrn = crtc->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA1SetHIStartingAddress.\n"));
+
+    switch(pVia->Chipset) {
+    case VIA_PM800:
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        VIASETREG(PRIM_HI_FBOFFSET, iga->cursor_bo->offset);
+        break;
+    default:
+        /* Mono Cursor Display Path [bit31]: Primary */
+        VIASETREG(HI_FBOFFSET, iga->cursor_bo->offset);
+        break;
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA1SetHIStartingAddress.\n"));
+}
+
+/*
+ * This function displays or hides IGA1 hardware icon (HI).
+ */
+static void
+viaIGA1DisplayHI(ScrnInfoPtr pScrn, Bool HI_Status)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+    CARD32 temp;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA1DisplayHI.\n"));
+
+    switch(pVia->Chipset) {
+    case VIA_PM800:
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        temp = VIAGETREG(PRIM_HI_CTRL);
+        temp &= 0xFFFFFFFE;
+        temp |= HI_Status ? 0x00000001 : 0x00000000;
+
+        /* PRIM_HI_CTRL[0] - Hardware Icon (HI) Enable */
+        VIASETREG(PRIM_HI_CTRL, temp);
+        break;
+    default:
+        temp = VIAGETREG(HI_CONTROL);
+        temp &= 0xFFFFFFFE;
+        temp |= HI_Status ? 0x00000001 : 0x00000000;
+
+        /* HI_CONTROL[0] - Hardware Icon (HI) Enable */
+        VIASETREG(HI_CONTROL, temp);
+        break;
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA1DisplayHI.\n"));
+}
+
+static void
+viaIGA1SetHIDisplayLocation(ScrnInfoPtr pScrn,
+                            int x, unsigned int xoff,
+                            int y, unsigned int yoff)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    switch(pVia->Chipset) {
+    case VIA_PM800:
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        VIASETREG(PRIM_HI_POSSTART,     ((x    << 16) | (y    & 0x07ff)));
+        VIASETREG(PRIM_HI_CENTEROFFSET, ((xoff << 16) | (yoff & 0x07ff)));
+        break;
+    default:
+        VIASETREG(HI_POSSTART,     ((x    << 16) | (y    & 0x07ff)));
+        VIASETREG(HI_CENTEROFFSET, ((xoff << 16) | (yoff & 0x07ff)));
+        break;
+    }
+}
+
 /*
  * Controls IGA2 display output on or off state.
  */
@@ -134,6 +269,123 @@ viaIGA2DisplayChannel(ScrnInfoPtr pScrn, Bool channelState)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaIGA2DisplayChannel.\n"));
+}
+
+static void
+viaIGA2InitHI(ScrnInfoPtr pScrn)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA2InitHI.\n"));
+
+    switch(pVia->Chipset) {
+    case VIA_PM800:
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        VIASETREG(HI_TRANSPARENT_COLOR, 0x00000000);
+        VIASETREG(HI_INVTCOLOR, 0x00FFFFFF);
+        VIASETREG(ALPHA_V3_PREFIFO_CONTROL, 0x000E0000);
+        VIASETREG(ALPHA_V3_FIFO_CONTROL, 0x0E0F0000);
+        VIASETREG(HI_CONTROL, 0xB6000004);
+        break;
+    default:
+        VIASETREG(HI_TRANSPARENT_COLOR, 0x00000000);
+        VIASETREG(HI_INVTCOLOR, 0X00FFFFFF);
+        VIASETREG(ALPHA_V3_PREFIFO_CONTROL, 0x000E0000);
+        VIASETREG(ALPHA_V3_FIFO_CONTROL, 0xE0F0000);
+        VIASETREG(HI_CONTROL, 0xF6000004);
+        break;
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA2InitHI.\n"));
+}
+
+static void
+viaIGA2SetHIStartingAddress(xf86CrtcPtr crtc)
+{
+    drmmode_crtc_private_ptr iga = crtc->driver_private;
+    ScrnInfoPtr pScrn = crtc->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA2SetHIStartingAddress.\n"));
+
+    VIASETREG(HI_FBOFFSET, iga->cursor_bo->offset);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA2SetHIStartingAddress.\n"));
+}
+
+/*
+ * This function displays or hides IGA2 hardware icon (HI).
+ */
+static void
+viaIGA2DisplayHI(ScrnInfoPtr pScrn, Bool HI_Status)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+    CARD32 temp;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA2DisplayHI.\n"));
+
+    switch(pVia->Chipset) {
+    case VIA_PM800:
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        temp = VIAGETREG(HI_CONTROL);
+        temp &= 0xFFFFFFFE;
+        temp |= HI_Status ? 0x00000001 : 0x00000000;
+
+        /* HI_CONTROL[0] - Hardware Icon (HI) Enable */
+        VIASETREG(HI_CONTROL, temp);
+        break;
+    default:
+        temp = VIAGETREG(HI_CONTROL);
+        temp &= 0xFFFFFFFE;
+        temp |= HI_Status ? 0x00000001 : 0x00000000;
+
+        /* HI_CONTROL[0] - Hardware Icon (HI) Enable */
+        VIASETREG(HI_CONTROL, temp);
+        break;
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA2DisplayHI.\n"));
+}
+
+static void
+viaIGA2SetHIDisplayLocation(ScrnInfoPtr pScrn,
+                            int x, unsigned int xoff,
+                            int y, unsigned int yoff)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    switch(pVia->Chipset) {
+    case VIA_PM800:
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        VIASETREG(HI_POSSTART,     ((x    << 16) | (y    & 0x07FF)));
+        VIASETREG(HI_CENTEROFFSET, ((xoff << 16) | (yoff & 0x07FF)));
+        break;
+    default:
+        VIASETREG(HI_POSSTART,     ((x    << 16) | (y    & 0x07FF)));
+        VIASETREG(HI_CENTEROFFSET, ((xoff << 16) | (yoff & 0x07FF)));
+        break;
+    }
 }
 
 /*
@@ -3139,12 +3391,10 @@ iga1_crtc_shadow_destroy(xf86CrtcPtr crtc, PixmapPtr rotate_pixmap, void *data)
     and in all other bpps the fg and bg are in 8-8-8 RGB format.
 */
 static void
-iga1_crtc_set_cursor_colors (xf86CrtcPtr crtc, int bg, int fg)
+iga1_crtc_set_cursor_colors(xf86CrtcPtr crtc, int bg, int fg)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-    CARD32 temp;
 
     if (xf86_config->cursor_fg)
         return;
@@ -3153,33 +3403,16 @@ iga1_crtc_set_cursor_colors (xf86CrtcPtr crtc, int bg, int fg)
     if (fg == xf86_config->cursor_fg && bg == xf86_config->cursor_bg)
         return;
 
-    switch(pVia->Chipset) {
-    case VIA_PM800:
-    case VIA_CX700:
-    case VIA_P4M890:
-    case VIA_P4M900:
-    case VIA_VX800:
-    case VIA_VX855:
-    case VIA_VX900:
-        temp = VIAGETREG(PRIM_HI_CTRL);
-        VIASETREG(PRIM_HI_CTRL, temp & 0xFFFFFFFE);
-        break;
-
-    default:
-        temp = VIAGETREG(HI_CONTROL);
-        VIASETREG(HI_CONTROL, temp & 0xFFFFFFFE);
-        break;
-    }
+    viaIGA1DisplayHI(pScrn, FALSE);
 
     xf86_config->cursor_fg = fg;
     xf86_config->cursor_bg = bg;
 }
 
 static void
-iga1_crtc_set_cursor_position (xf86CrtcPtr crtc, int x, int y)
+iga1_crtc_set_cursor_position(xf86CrtcPtr crtc, int x, int y)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
     unsigned xoff, yoff;
 
     if (x < 0) {
@@ -3196,90 +3429,57 @@ iga1_crtc_set_cursor_position (xf86CrtcPtr crtc, int x, int y)
         yoff = 0;
     }
 
-    switch(pVia->Chipset) {
-    case VIA_PM800:
-    case VIA_CX700:
-    case VIA_P4M890:
-    case VIA_P4M900:
-    case VIA_VX800:
-    case VIA_VX855:
-    case VIA_VX900:
-        VIASETREG(PRIM_HI_POSSTART,    ((x    << 16) | (y    & 0x07ff)));
-        VIASETREG(PRIM_HI_CENTEROFFSET, ((xoff << 16) | (yoff & 0x07ff)));
-        break;
-
-    default:
-        VIASETREG(HI_POSSTART,    ((x    << 16) | (y    & 0x07ff)));
-        VIASETREG(HI_CENTEROFFSET, ((xoff << 16) | (yoff & 0x07ff)));
-        break;
-    }
+    viaIGA1SetHIDisplayLocation(pScrn, x, xoff, y, yoff);
 }
 
 static void
-iga1_crtc_show_cursor (xf86CrtcPtr crtc)
-{
-    drmmode_crtc_private_ptr iga = crtc->driver_private;
-    ScrnInfoPtr pScrn = crtc->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    switch(pVia->Chipset) {
-    case VIA_PM800:
-    case VIA_CX700:
-    case VIA_P4M890:
-    case VIA_P4M900:
-    case VIA_VX800:
-    case VIA_VX855:
-    case VIA_VX900:
-        VIASETREG(PRIM_HI_FBOFFSET, iga->cursor_bo->offset);
-        VIASETREG(PRIM_HI_CTRL, 0x36000005);
-        break;
-
-    default:
-        /* Mono Cursor Display Path [bit31]: Primary */
-        VIASETREG(HI_FBOFFSET, iga->cursor_bo->offset);
-        VIASETREG(HI_CONTROL, 0x76000005);
-        break;
-    }
-}
-
-static void
-iga1_crtc_hide_cursor (xf86CrtcPtr crtc)
+iga1_crtc_show_cursor(xf86CrtcPtr crtc)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
-    CARD32 temp;
 
-    switch(pVia->Chipset) {
-    case VIA_PM800:
-    case VIA_CX700:
-    case VIA_P4M890:
-    case VIA_P4M900:
-    case VIA_VX800:
-    case VIA_VX855:
-    case VIA_VX900:
-        temp = VIAGETREG(PRIM_HI_CTRL);
-        VIASETREG(PRIM_HI_CTRL, temp & 0xFFFFFFFA);
-        break;
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered iga1_crtc_show_cursor.\n"));
 
-    default:
-        temp = VIAGETREG(HI_CONTROL);
-        /* Hardware cursor disable [bit0] */
-        VIASETREG(HI_CONTROL, temp & 0xFFFFFFFA);
-        break;
-    }
+    viaIGA1DisplayHI(pScrn, TRUE);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting iga1_crtc_show_cursor.\n"));
 }
 
 static void
-iga_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
+iga1_crtc_hide_cursor(xf86CrtcPtr crtc)
+{
+    ScrnInfoPtr pScrn = crtc->scrn;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered iga1_crtc_hide_cursor.\n"));
+
+    viaIGA1DisplayHI(pScrn, FALSE);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting iga1_crtc_hide_cursor.\n"));
+}
+
+static void
+iga1_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
 {
     drmmode_crtc_private_ptr iga = crtc->driver_private;
     ScrnInfoPtr pScrn = crtc->scrn;
     void *dst;
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered iga1_crtc_load_cursor_argb.\n"));
+
     dst = drm_bo_map(pScrn, iga->cursor_bo);
     memset(dst, 0x00, iga->cursor_bo->size);
     memcpy(dst, image, iga->cursor_bo->size);
     drm_bo_unmap(pScrn, iga->cursor_bo);
+
+    viaIGA1InitHI(pScrn);
+    viaIGA1SetHIStartingAddress(crtc);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting iga1_crtc_load_cursor_argb.\n"));
 }
 
 static void
@@ -3317,7 +3517,7 @@ const xf86CrtcFuncsRec iga1_crtc_funcs = {
     .set_cursor_position    = iga1_crtc_set_cursor_position,
     .show_cursor            = iga1_crtc_show_cursor,
     .hide_cursor            = iga1_crtc_hide_cursor,
-    .load_cursor_argb       = iga_crtc_load_cursor_argb,
+    .load_cursor_argb       = iga1_crtc_load_cursor_argb,
 #if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) > 2
     .set_origin             = iga1_crtc_set_origin,
 #endif
@@ -3598,8 +3798,7 @@ iga2_crtc_set_cursor_colors(xf86CrtcPtr crtc, int bg, int fg)
     ScrnInfoPtr pScrn = crtc->scrn;
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
     int height = 64, width = 64, i;
-    VIAPtr pVia = VIAPTR(pScrn);
-    CARD32 pixel, temp, *dst;
+    CARD32 pixel, *dst;
 
     if (xf86_config->cursor_fg)
         return;
@@ -3611,24 +3810,7 @@ iga2_crtc_set_cursor_colors(xf86CrtcPtr crtc, int bg, int fg)
     if (fg == xf86_config->cursor_fg && bg == xf86_config->cursor_bg)
         return;
 
-    switch(pVia->Chipset) {
-    case VIA_PM800:
-    case VIA_CX700:
-    case VIA_P4M890:
-    case VIA_P4M900:
-    case VIA_VX800:
-    case VIA_VX855:
-    case VIA_VX900:
-        temp = VIAGETREG(HI_CONTROL);
-        VIASETREG(HI_CONTROL, temp & 0xFFFFFFFE);
-        break;
-
-    default:
-        temp = VIAGETREG(HI_CONTROL);
-        VIASETREG(HI_CONTROL, temp & 0xFFFFFFFE);
-        height = width = 32;
-        break;
-    }
+    viaIGA2DisplayHI(pScrn, FALSE);
 
     dst = drm_bo_map(pScrn, iga->cursor_bo);
     for (i = 0; i < width * height; i++, dst++)
@@ -3644,7 +3826,6 @@ static void
 iga2_crtc_set_cursor_position(xf86CrtcPtr crtc, int x, int y)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
     unsigned xoff, yoff;
 
     if (x < 0) {
@@ -3661,78 +3842,58 @@ iga2_crtc_set_cursor_position(xf86CrtcPtr crtc, int x, int y)
         yoff = 0;
     }
 
-    switch(pVia->Chipset) {
-    case VIA_PM800:
-    case VIA_CX700:
-    case VIA_P4M890:
-    case VIA_P4M900:
-    case VIA_VX800:
-    case VIA_VX855:
-    case VIA_VX900:
-        VIASETREG(HI_POSSTART,    ((x    << 16) | (y    & 0x07ff)));
-        VIASETREG(HI_CENTEROFFSET, ((xoff << 16) | (yoff & 0x07ff)));
-        break;
-
-    default:
-        VIASETREG(HI_POSSTART,    ((x    << 16) | (y    & 0x07ff)));
-        VIASETREG(HI_CENTEROFFSET, ((xoff << 16) | (yoff & 0x07ff)));
-        break;
-    }
+    viaIGA2SetHIDisplayLocation(pScrn, x, xoff, y, yoff);
 }
 
 static void
 iga2_crtc_show_cursor(xf86CrtcPtr crtc)
 {
-    drmmode_crtc_private_ptr iga = crtc->driver_private;
     ScrnInfoPtr pScrn = crtc->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
 
-    switch(pVia->Chipset) {
-    case VIA_PM800:
-    case VIA_CX700:
-    case VIA_P4M890:
-    case VIA_P4M900:
-    case VIA_VX800:
-    case VIA_VX855:
-    case VIA_VX900:
-        VIASETREG(HI_FBOFFSET, iga->cursor_bo->offset);
-        VIASETREG(HI_CONTROL, 0xB6000005);
-        break;
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered iga2_crtc_show_cursor.\n"));
 
-    default:
-        /* Mono Cursor Display Path [bit31]: Secondary */
-        /* FIXME For CLE266 and KM400 try to enable 32x32 cursor size [bit1] */
-        VIASETREG(HI_FBOFFSET, iga->cursor_bo->offset);
-        VIASETREG(HI_CONTROL, 0xF6000005);
-        break;
-    }
+    viaIGA2DisplayHI(pScrn, TRUE);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting iga2_crtc_show_cursor.\n"));
+
 }
 
 static void
 iga2_crtc_hide_cursor(xf86CrtcPtr crtc)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
-    CARD32 temp;
 
-    switch(pVia->Chipset) {
-    case VIA_PM800:
-    case VIA_CX700:
-    case VIA_P4M890:
-    case VIA_P4M900:
-    case VIA_VX800:
-    case VIA_VX855:
-    case VIA_VX900:
-	    temp = VIAGETREG(HI_CONTROL);
-        VIASETREG(HI_CONTROL, temp & 0xFFFFFFFA);
-        break;
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered iga2_crtc_hide_cursor.\n"));
 
-    default:
-        temp = VIAGETREG(HI_CONTROL);
-        /* Hardware cursor disable [bit0] */
-        VIASETREG(HI_CONTROL, temp & 0xFFFFFFFA);
-        break;
-	}
+    viaIGA2DisplayHI(pScrn, FALSE);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting iga2_crtc_hide_cursor.\n"));
+}
+
+static void
+iga2_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
+{
+    drmmode_crtc_private_ptr iga = crtc->driver_private;
+    ScrnInfoPtr pScrn = crtc->scrn;
+    void *dst;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered iga2_crtc_load_cursor_argb.\n"));
+
+    dst = drm_bo_map(pScrn, iga->cursor_bo);
+    memset(dst, 0x00, iga->cursor_bo->size);
+    memcpy(dst, image, iga->cursor_bo->size);
+    drm_bo_unmap(pScrn, iga->cursor_bo);
+
+    viaIGA2InitHI(pScrn);
+    viaIGA2SetHIStartingAddress(crtc);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting iga2_crtc_load_cursor_argb.\n"));
 }
 
 const xf86CrtcFuncsRec iga2_crtc_funcs = {
@@ -3753,7 +3914,7 @@ const xf86CrtcFuncsRec iga2_crtc_funcs = {
     .set_cursor_position    = iga2_crtc_set_cursor_position,
     .show_cursor            = iga2_crtc_show_cursor,
     .hide_cursor            = iga2_crtc_hide_cursor,
-    .load_cursor_argb       = iga_crtc_load_cursor_argb,
+    .load_cursor_argb       = iga2_crtc_load_cursor_argb,
 #if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) > 2
     .set_origin             = iga2_crtc_set_origin,
 #endif

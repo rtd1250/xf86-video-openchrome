@@ -1015,36 +1015,6 @@ umsCrtcInit(ScrnInfoPtr pScrn)
     iga2_rec->index = 1;
     iga2->driver_private = iga2_rec;
 
-    /* Init HI_X0 for cursor */
-    switch (pVia->Chipset) {
-    case VIA_CX700:
-    /* case VIA_CN750: */
-    case VIA_P4M890:
-    case VIA_P4M900:
-    case VIA_VX800:
-    case VIA_VX855:
-    case VIA_VX900:
-        /* set 0 as transparent color key for IGA 2 */
-        VIASETREG(HI_TRANSPARENT_COLOR, 0);
-        VIASETREG(HI_INVTCOLOR, 0X00FFFFFF);
-        VIASETREG(ALPHA_V3_PREFIFO_CONTROL, 0xE0000);
-        VIASETREG(ALPHA_V3_FIFO_CONTROL, 0xE0F0000);
-
-        /* set 0 as transparent color key for IGA 1 */
-        VIASETREG(PRIM_HI_TRANSCOLOR, 0);
-        VIASETREG(PRIM_HI_FIFO, 0x0D000D0F);
-        VIASETREG(PRIM_HI_INVTCOLOR, 0x00FFFFFF);
-        VIASETREG(V327_HI_INVTCOLOR, 0x00FFFFFF);
-        break;
-
-    default:
-        VIASETREG(HI_TRANSPARENT_COLOR, 0);
-        VIASETREG(HI_INVTCOLOR, 0X00FFFFFF);
-        VIASETREG(ALPHA_V3_PREFIFO_CONTROL, 0xE0000);
-        VIASETREG(ALPHA_V3_FIFO_CONTROL, 0xE0F0000);
-        break;
-    }
-
     /*
      * CLE266A:
      *   Max Line Pitch: 4080, (FB corruption when higher, driver problem?)
