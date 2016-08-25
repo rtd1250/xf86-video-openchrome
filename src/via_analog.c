@@ -345,7 +345,9 @@ via_analog_set_property(xf86OutputPtr output, Atom property,
 {
     return TRUE;
 }
+#endif
 
+#ifdef RANDR_13_INTERFACE
 static Bool
 via_analog_get_property(xf86OutputPtr output, Atom property)
 {
