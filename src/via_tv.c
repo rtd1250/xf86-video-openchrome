@@ -221,23 +221,6 @@ ViaDisplayEnableDVO(ScrnInfoPtr pScrn, int port)
 }
 
 static void
-ViaDisplayDisableDVO(ScrnInfoPtr pScrn, int port)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDisplayDisableDVO, port: %d\n",
-                     port));
-    switch (port) {
-    case VIA_DI_PORT_DVP0:
-        ViaSeqMask(hwp, 0x1E, 0x00, 0xC0);
-        break;
-    case VIA_DI_PORT_DVP1:
-        ViaSeqMask(hwp, 0x1E, 0x00, 0x30);
-        break;
-    }
-}
-
-static void
 ViaDisplaySetStreamOnDVO(ScrnInfoPtr pScrn, int port, int iga)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
