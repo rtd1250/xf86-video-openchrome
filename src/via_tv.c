@@ -176,7 +176,6 @@ static int
 via_tv_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
 {
     ScrnInfoPtr pScrn = output->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
     int ret = MODE_OK;
 
     if (!ViaModeDotClockTranslate(pScrn, pMode))
