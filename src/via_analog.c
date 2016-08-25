@@ -171,21 +171,6 @@ via_analog_create_resources(xf86OutputPtr output)
 {
 }
 
-#ifdef RANDR_12_INTERFACE
-static Bool
-via_analog_set_property(xf86OutputPtr output, Atom property,
-                        RRPropertyValuePtr value)
-{
-    return TRUE;
-}
-
-static Bool
-via_analog_get_property(xf86OutputPtr output, Atom property)
-{
-    return FALSE;
-}
-#endif
-
 static void
 via_analog_dpms(xf86OutputPtr output, int mode)
 {
@@ -353,6 +338,21 @@ via_analog_detect(xf86OutputPtr output)
     return status;
 }
 
+#ifdef RANDR_12_INTERFACE
+static Bool
+via_analog_set_property(xf86OutputPtr output, Atom property,
+                        RRPropertyValuePtr value)
+{
+    return TRUE;
+}
+
+static Bool
+via_analog_get_property(xf86OutputPtr output, Atom property)
+{
+    return FALSE;
+}
+#endif
+
 static void
 via_analog_destroy(xf86OutputPtr output)
 {
@@ -360,12 +360,6 @@ via_analog_destroy(xf86OutputPtr output)
 
 static const xf86OutputFuncsRec via_analog_funcs = {
     .create_resources   = via_analog_create_resources,
-#ifdef RANDR_12_INTERFACE
-    .set_property       = via_analog_set_property,
-#endif
-#ifdef RANDR_13_INTERFACE
-    .get_property       = via_analog_get_property,
-#endif
     .dpms               = via_analog_dpms,
     .save               = via_analog_save,
     .restore            = via_analog_restore,
@@ -376,6 +370,12 @@ static const xf86OutputFuncsRec via_analog_funcs = {
     .mode_set           = via_analog_mode_set,
     .detect             = via_analog_detect,
     .get_modes          = xf86OutputGetEDIDModes,
+#ifdef RANDR_12_INTERFACE
+    .set_property       = via_analog_set_property,
+#endif
+#ifdef RANDR_13_INTERFACE
+    .get_property       = via_analog_get_property,
+#endif
     .destroy            = via_analog_destroy,
 };
 
