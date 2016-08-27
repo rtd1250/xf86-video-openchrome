@@ -507,6 +507,8 @@ unsigned long viaXvMCPutImageSize(ScrnInfoPtr pScrn);
 
 /* via_i2c.c */
 void ViaI2CInit(ScrnInfoPtr pScrn);
+Bool xf86I2CMaskByte(I2CDevPtr d, I2CByte subaddr,
+                        I2CByte value, I2CByte mask);
 
 #ifdef HAVE_DRI
 Bool VIADRI1ScreenInit(ScreenPtr pScreen);

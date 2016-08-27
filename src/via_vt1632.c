@@ -32,22 +32,6 @@
 #include "via_driver.h"
 #include "via_vt1632.h"
 
-static Bool
-xf86I2CMaskByte(I2CDevPtr d, I2CByte subaddr, I2CByte value, I2CByte mask)
-{
-    I2CByte tmp;
-    Bool ret;
-
-    ret = xf86I2CReadByte(d, subaddr, &tmp);
-    if (!ret)
-        return FALSE;
-
-    tmp &= ~mask;
-    tmp |= (value & mask);
-
-    return xf86I2CWriteByte(d, subaddr, tmp);
-}
-
 static void
 via_vt1632_dump_registers(ScrnInfoPtr pScrn, I2CDevPtr pDev)
 {
