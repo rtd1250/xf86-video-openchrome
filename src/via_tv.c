@@ -46,6 +46,53 @@
  *
  */
 static void
+ViaDisplayEnableDVO(ScrnInfoPtr pScrn, int port)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDisplayEnableDVO, port: %d\n",
+                     port));
+    switch (port) {
+    case VIA_DI_PORT_DVP0:
+        ViaSeqMask(hwp, 0x1E, 0xC0, 0xC0);
+        break;
+    case VIA_DI_PORT_DVP1:
+        ViaSeqMask(hwp, 0x1E, 0x30, 0x30);
+        break;
+    }
+}
+
+static void
+ViaDisplaySetStreamOnDVO(ScrnInfoPtr pScrn, int port, int iga)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    int regNum;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDisplaySetStreamOnDVO, port: %d\n",
+                     port));
+
+    switch (port) {
+        case VIA_DI_PORT_DVP0:
+            regNum = 0x96;
+            break;
+        case VIA_DI_PORT_DVP1:
+            regNum = 0x9B;
+            break;
+        case VIA_DI_PORT_DFPLOW:
+            regNum = 0x97;
+            break;
+        case VIA_DI_PORT_DFPHIGH:
+            regNum = 0x99;
+            break;
+    }
+
+    if (!iga)
+        ViaCrtcMask(hwp, regNum, 0x00, 0x10);
+    else
+        ViaCrtcMask(hwp, regNum, 0x10, 0x10);
+}
+
+static void
 ViaTVSave(ScrnInfoPtr pScrn)
 {
     VIABIOSInfoPtr pBIOSInfo = VIAPTR(pScrn)->pBIOSInfo;
@@ -201,53 +248,6 @@ static void
 via_tv_commit(xf86OutputPtr output)
 {
     via_tv_dpms(output, DPMSModeOn);
-}
-
-static void
-ViaDisplayEnableDVO(ScrnInfoPtr pScrn, int port)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDisplayEnableDVO, port: %d\n",
-                     port));
-    switch (port) {
-    case VIA_DI_PORT_DVP0:
-        ViaSeqMask(hwp, 0x1E, 0xC0, 0xC0);
-        break;
-    case VIA_DI_PORT_DVP1:
-        ViaSeqMask(hwp, 0x1E, 0x30, 0x30);
-        break;
-    }
-}
-
-static void
-ViaDisplaySetStreamOnDVO(ScrnInfoPtr pScrn, int port, int iga)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    int regNum;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDisplaySetStreamOnDVO, port: %d\n",
-                     port));
-
-    switch (port) {
-        case VIA_DI_PORT_DVP0:
-            regNum = 0x96;
-            break;
-        case VIA_DI_PORT_DVP1:
-            regNum = 0x9B;
-            break;
-        case VIA_DI_PORT_DFPLOW:
-            regNum = 0x97;
-            break;
-        case VIA_DI_PORT_DFPHIGH:
-            regNum = 0x99;
-            break;
-    }
-
-    if (!iga)
-        ViaCrtcMask(hwp, regNum, 0x00, 0x10);
-    else
-        ViaCrtcMask(hwp, regNum, 0x10, 0x10);
 }
 
 static void
