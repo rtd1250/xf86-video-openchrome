@@ -63,33 +63,138 @@ ViaDisplayEnableDVO(ScrnInfoPtr pScrn, int port)
 }
 
 static void
-ViaDisplaySetStreamOnDVO(ScrnInfoPtr pScrn, int port, int iga)
+viaTVSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
 {
+
     vgaHWPtr hwp = VGAHWPTR(pScrn);
-    int regNum;
+    VIAPtr pVia = VIAPTR(pScrn);
+    CARD8 sr12, sr13, sr5a;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDisplaySetStreamOnDVO, port: %d\n",
-                     port));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaTVSetDisplaySource.\n"));
 
-    switch (port) {
-        case VIA_DI_PORT_DVP0:
-            regNum = 0x96;
-            break;
-        case VIA_DI_PORT_DVP1:
-            regNum = 0x9B;
-            break;
-        case VIA_DI_PORT_DFPLOW:
-            regNum = 0x97;
-            break;
-        case VIA_DI_PORT_DFPHIGH:
-            regNum = 0x99;
-            break;
+    if ((pVia->Chipset == VIA_CX700)
+        || (pVia->Chipset == VIA_VX800)
+        || (pVia->Chipset == VIA_VX855)
+        || (pVia->Chipset == VIA_VX900)) {
+
+        sr5a = hwp->readSeq(hwp, 0x5A);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "SR5A: 0x%02X\n", sr5a));
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "Setting 3C5.5A[0] to 0.\n"));
+        ViaSeqMask(hwp, 0x5A, sr5a & 0xFE, 0x01);
     }
 
-    if (!iga)
-        ViaCrtcMask(hwp, regNum, 0x00, 0x10);
-    else
-        ViaCrtcMask(hwp, regNum, 0x10, 0x10);
+    sr12 = hwp->readSeq(hwp, 0x12);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR12: 0x%02X\n", sr12));
+    sr13 = hwp->readSeq(hwp, 0x13);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR13: 0x%02X\n", sr13));
+    switch (pVia->Chipset) {
+    case VIA_CLE266:
+        /* 3C5.12[5] - FPD18 pin strapping
+         *             0: DIP1 (Digital Interface Port 1) is used by
+         *                a TMDS transmitter (DVI)
+         *             1: DIP1 (Digital Interface Port 1) is used by
+         *                a TV encoder */
+        if (sr12 & 0x20) {
+            viaDIP1SetDisplaySource(pScrn, displaySource);
+        } else {
+            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                        "DIP1 was not set up for "
+                        "an external TV encoder use.\n");
+        }
+
+        break;
+    case VIA_KM400:
+    case VIA_K8M800:
+    case VIA_PM800:
+    case VIA_P4M800PRO:
+        /* 3C5.13[3] - DVP0D8 pin strapping
+         *             0: AGP pins are used for AGP
+         *             1: AGP pins are used by FPDP
+         *                (Flat Panel Display Port)
+         * 3C5.12[6] - DVP0D6 pin strapping
+         *             0: Disable DVP0 (Digital Video Port 0)
+         *             1: Enable DVP0 (Digital Video Port 0)
+         * 3C5.12[5] - DVP0D5 pin strapping
+         *             0: DVP0 is used by a TMDS transmitter (DVI)
+         *             1: DVP0 is used by a TV encoder
+         * 3C5.12[4] - DVP0D4 pin strapping
+         *             0: Dual 12-bit FPDP (Flat Panel Display Port)
+         *             1: 24-bit FPDP  (Flat Panel Display Port) */
+        if ((sr12 & 0x40) && (sr12 & 0x20)) {
+            viaDVP0SetDisplaySource(pScrn, displaySource);
+        } else if ((sr13 & 0x08) && (~(sr12 & 0x10))) {
+            viaDFPLowSetDisplaySource(pScrn, displaySource);
+        } else if (sr13 & 0x08) {
+            viaDVP1SetDisplaySource(pScrn, displaySource);
+        } else {
+            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                        "None of the external ports were set up for "
+                        "external TV encoder use.\n");
+        }
+
+        break;
+    case VIA_P4M890:
+    case VIA_K8M890:
+    case VIA_P4M900:
+        /* 3C5.12[6] - FPD6 pin strapping
+         *             0: Disable DVP0 (Digital Video Port 0)
+         *             1: Enable DVP0 (Digital Video Port 0)
+         * 3C5.12[5] - FPD5 pin strapping
+         *             0: DVP0 is used by a TMDS transmitter (DVI)
+         *             1: DVP0 is used by a TV encoder
+         * 3C5.12[4] - FPD4 pin strapping
+         *             0: Dual 12-bit FPDP (Flat Panel Display Port)
+         *             1: 24-bit FPDP  (Flat Panel Display Port) */
+        if ((sr12 & 0x40) & (sr12 & 0x20) &(~(sr12 & 0x10))) {
+            viaDVP0SetDisplaySource(pScrn, displaySource);
+        } else {
+            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                        "Unrecognized external TV encoder use.\n"
+                        "Contact the developer for assistance.\n");
+        }
+
+        break;
+    case VIA_CX700:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        /* 3C5.13[6] - DVP1 DVP / capture port selection
+         *             0: DVP1 is used as a DVP (Digital Video Port)
+         *             1: DVP1 is used as a capture port
+         */
+        if (~(sr13 & 0x40)) {
+            viaDVP1SetDisplaySource(pScrn, displaySource);
+        } else {
+            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                        "DVP1 is not set up for external TV "
+                        "encoder use.\n");
+        }
+
+        break;
+    default:
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                    "Unrecognized IGP for "
+                    "an external TV encoder use.\n");
+        break;
+    }
+
+    if ((pVia->Chipset == VIA_CX700)
+        || (pVia->Chipset == VIA_VX800)
+        || (pVia->Chipset == VIA_VX855)
+        || (pVia->Chipset == VIA_VX900)) {
+
+        hwp->writeSeq(hwp, 0x5A, sr5a);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "Restoring 3C5.5A[0].\n"));
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaTVSetDisplaySource.\n"));
 }
 
 static void
@@ -255,18 +360,16 @@ via_tv_mode_set(xf86OutputPtr output, DisplayModePtr mode,
                 DisplayModePtr adjusted_mode)
 {
     ScrnInfoPtr pScrn = output->scrn;
+    drmmode_crtc_private_ptr iga = output->crtc->driver_private;
     VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+    VIABIOSInfoPtr pBIOSInfo = VIAPTR(pScrn)->pBIOSInfo;
 
     /* TV on FirstCrtc */
     if (output->crtc) {
-        drmmode_crtc_private_ptr iga = output->crtc->driver_private;
-
-        ViaDisplaySetStreamOnDVO(pScrn, pBIOSInfo->TVDIPort, iga->index);
+        viaTVSetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
+        ViaDisplayEnableDVO(pScrn, pBIOSInfo->TVDIPort);
+        ViaTVSetMode(output->crtc, adjusted_mode);
     }
-    ViaDisplayEnableDVO(pScrn, pBIOSInfo->TVDIPort);
-
-    ViaTVSetMode(output->crtc, adjusted_mode);
 
     pVia->FirstInit = FALSE;
 }

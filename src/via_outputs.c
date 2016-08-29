@@ -47,6 +47,32 @@
 #include "via_mode.h"
 
 /*
+ * Sets IGA1 or IGA2 as the display output source for DIP1
+ * (Digital Interface Port 1) interface for CLE266 only.
+ */
+void
+viaDIP1SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    CARD8 temp = displaySource;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaDIP1SetDisplaySource.\n"));
+
+    /* Set DIP1 display output source. */
+    /* 3X5.93[7] - DIP1 (Digital Interface Port 1) Data Source Selection
+     *             0: Primary Display (IGA1)
+     *             1: Secondary Display (IGA2) */
+    ViaCrtcMask(hwp, 0x93, temp << 7, 0x80);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "DIP1 Display Output Source: IGA%d\n",
+                (temp & 0x01) + 1);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaDIP1SetDisplaySource.\n"));
+}
+
+/*
  * Sets IGA1 or IGA2 as the display output source for DVP0
  * (Digital Video Port) interface.
  */
@@ -97,6 +123,33 @@ viaDVP1SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaDVP1SetDisplaySource.\n"));
 }
+
+/*
+ * Sets IGA1 or IGA2 as the display output source for VIA Technologies
+ * Chrome IGP DFP (Digital Flat Panel) Low interface.
+ */
+void
+viaDFPLowSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    CARD8 temp = displaySource;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaDFPLowSetDisplaySource.\n"));
+
+    /* Set DFP Low display output source. */
+    /* 3X5.99[4] - DFP Low Data Source Selection
+     *             0: Primary Display
+     *             1: Secondary Display */
+    ViaCrtcMask(hwp, 0x99, temp << 4, 0x10);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "DFP Low Display Output Source: IGA%d\n",
+                (temp & 0x01) + 1);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaDFPLowSetDisplaySource.\n"));
+}
+
 /*
  * Reads off the VIA Technologies IGP pin strapping for
  * display detection purposes.

@@ -184,32 +184,6 @@ viaLVDS2SetDelayTap(ScrnInfoPtr pScrn, CARD8 delayTap)
 
 /*
  * Sets IGA1 or IGA2 as the display output source for VIA Technologies
- * Chrome IGP DFP (Digital Flat Panel) Low interface.
- */
-static void
-viaDFPLowSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    CARD8 temp = displaySource;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaDFPLowSetDisplaySource.\n"));
-
-    /* Set DFP Low display output source. */
-    /* 3X5.99[4] - DFP Low Data Source Selection
-     *             0: Primary Display
-     *             1: Secondary Display */
-    ViaCrtcMask(hwp, 0x99, temp << 4, 0x10);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "DFP Low Display Output Source: IGA%d\n",
-                (temp & 0x01) + 1);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaDFPLowSetDisplaySource.\n"));
-}
-
-/*
- * Sets IGA1 or IGA2 as the display output source for VIA Technologies
  * Chrome IGP DFP (Digital Flat Panel) High interface.
  */
 static void
