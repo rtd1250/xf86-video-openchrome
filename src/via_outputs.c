@@ -207,7 +207,7 @@ viaProbePinStrapping(ScrnInfoPtr pScrn)
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "A TMDS transmitter (DVI) / capture device is "
-                        "connected to flat panel interface.\n");
+                        "connected to DIP0.\n");
         }
 
         /* 3C5.12[5] - FPD18 pin strapping
@@ -215,29 +215,25 @@ viaProbePinStrapping(ScrnInfoPtr pScrn)
          *             1: TV encoder */
         if (sr12 & 0x20) {
             xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "A TMDS transmitter (DVI) is connected to "
-                        "DVI port.\n");
-        } else {
-            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "A TV encoder is connected to "
-                        "DVI port.\n");
+                        "DIP1.\n");
 
             /* 3C5.13[4:3] - FPD21-20 pin strapping
              *               00: PAL
              *               01: NTSC
              *               10: PAL-N
              *               11: PAL-NC */
-            if (sr13 & 0x04) {
+            if ((~(sr13 & 0x08)) & (sr13 & 0x04)) {
                 xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                             "NTSC for the TV encoder.\n");
             } else {
-                if (!(sr13 & 0x08)) {
+                if (~(sr13 & 0x08)) {
                     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                                 "PAL for the TV encoder.\n");
                 } else {
                     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                                 "PAL%s for the TV encoder.\n",
-                                sr13 & 0x04 ? "-NC" : "-N");
+                                (sr13 & 0x04) ? "-NC" : "-N");
                 }
             }
 
@@ -246,7 +242,11 @@ viaProbePinStrapping(ScrnInfoPtr pScrn)
              *             1: 625 lines (PAL) */
             xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "%s lines for the TV encoder.\n",
-                        sr12 & 0x40 ? "625" : "525");
+                        (sr12 & 0x40) ? "625" : "525");
+        } else {
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "A TMDS transmitter (DVI) is connected to "
+                        "DIP1.\n");
         }
 
         break;
