@@ -48,6 +48,7 @@ ViaSetTVClockSource(xf86CrtcPtr crtc)
                 case VIA_CX700:
                 case VIA_VX800:
                 case VIA_VX855:
+                case VIA_VX900:
                     /* IGA1 */
                     if (!iga->index) {
                         /* Fixing it to DVP1 for IGA1. */
