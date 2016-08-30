@@ -47,58 +47,58 @@
 #include "via_mode.h"
 
 /*
- * Sets IGA1 or IGA2 as the display output source for DIP1
- * (Digital Interface Port 1) interface for CLE266 only.
+ * Sets IGA1 or IGA2 as the display output source for DIP0
+ * (Digital Interface Port 0) interface for CLE266 only.
  */
 void
-viaDIP1SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
+viaDIP0SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     CARD8 temp = displaySource;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaDIP1SetDisplaySource.\n"));
+                        "Entered viaDIP0SetDisplaySource.\n"));
 
-    /* Set DIP1 display output source. */
-    /* 3X5.93[7] - DIP1 (Digital Interface Port 1) Data Source Selection
+    /* Set DIP0 display output source. */
+    /* 3X5.6C[7] - DIP0 (Digital Interface Port 0) Data Source Selection
      *             0: Primary Display (IGA1)
      *             1: Secondary Display (IGA2) */
-    ViaCrtcMask(hwp, 0x93, temp << 7, 0x80);
+    ViaCrtcMask(hwp, 0x6C, temp << 7, 0x80);
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "DIP1 Display Output Source: IGA%d\n",
+                "DIP0 Display Output Source: IGA%d\n",
                 (temp & 0x01) + 1);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaDIP1SetDisplaySource.\n"));
+                        "Exiting viaDIP0SetDisplaySource.\n"));
 }
 
 /*
- * Sets DIP1 (Digital Interface Port 1) I/O pad state.
+ * Sets DIP0 (Digital Interface Port 0) I/O pad state.
  * This function is for CLE266 chipset only.
  */
 void
-viaDIP1EnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState)
+viaDIP0EnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaDIP1EnableIOPads.\n"));
+                        "Entered viaDIP0EnableIOPads.\n"));
 
-    /* Set DIP1 I/O pad state. */
-    /* 3C5.1E[5:4] - DIP1 Power Control
+    /* Set DIP0 I/O pad state. */
+    /* 3C5.1E[7:6] - DIP0 Power Control
      *               0x: Pad always off
      *               10: Depend on the other control signal
      *               11: Pad on/off according to the
      *                   Power Management Status (PMS) */
-    ViaSeqMask(hwp, 0x1E, ioPadState << 4, 0x30);
+    ViaSeqMask(hwp, 0x1E, ioPadState << 6, 0xC0);
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "DIP1 I/O Pad State: %s\n",
+                "DIP0 I/O Pad State: %s\n",
                 (ioPadState & 0x02) ?
                     (ioPadState & 0x01) ? "Automatic On / Off" : "Conditional"
                 : "Off");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaDIP1EnableIOPads.\n"));
+                        "Exiting viaDIP0EnableIOPads.\n"));
 }
 
 /*
@@ -329,7 +329,7 @@ viaProbePinStrapping(ScrnInfoPtr pScrn)
         if (sr12 & 0x20) {
             xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "A TV encoder is connected to "
-                        "DIP1.\n");
+                        "DIP0.\n");
 
             /* 3C5.13[4:3] - FPD21-20 pin strapping
              *               00: PAL
@@ -359,7 +359,7 @@ viaProbePinStrapping(ScrnInfoPtr pScrn)
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "A TMDS transmitter (DVI) is connected to "
-                        "DIP1.\n");
+                        "DIP0.\n");
         }
 
         break;

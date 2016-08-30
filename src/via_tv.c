@@ -73,15 +73,15 @@ viaTVSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
     switch (pVia->Chipset) {
     case VIA_CLE266:
         /* 3C5.12[5] - FPD18 pin strapping
-         *             0: DIP1 (Digital Interface Port 1) is used by
+         *             0: DIP0 (Digital Interface Port 0) is used by
          *                a TMDS transmitter (DVI)
-         *             1: DIP1 (Digital Interface Port 1) is used by
+         *             1: DIP0 (Digital Interface Port 0) is used by
          *                a TV encoder */
         if (sr12 & 0x20) {
-            viaDIP1SetDisplaySource(pScrn, displaySource);
+            viaDIP0SetDisplaySource(pScrn, displaySource);
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                        "DIP1 was not set up for "
+                        "DIP0 was not set up for "
                         "an external TV encoder use.\n");
         }
 
@@ -207,15 +207,15 @@ viaTVEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState)
     switch (pVia->Chipset) {
     case VIA_CLE266:
         /* 3C5.12[5] - FPD18 pin strapping
-         *             0: DIP1 (Digital Interface Port 1) is used by
+         *             0: DIP0 (Digital Interface Port 0) is used by
          *                a TMDS transmitter (DVI)
-         *             1: DIP1 (Digital Interface Port 1) is used by
+         *             1: DIP0 (Digital Interface Port 0) is used by
          *                a TV encoder */
         if (sr12 & 0x20) {
-            viaDIP1EnableIOPads(pScrn, ioPadState);
+            viaDIP0EnableIOPads(pScrn, ioPadState);
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                        "DIP1 is not set up for "
+                        "DIP0 is not set up for "
                         "an external TV encoder use.\n");
         }
 

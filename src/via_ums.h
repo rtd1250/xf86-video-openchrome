@@ -209,8 +209,8 @@ Bool umsPreInit(ScrnInfoPtr pScrn);
 Bool umsCrtcInit(ScrnInfoPtr pScrn);
 
 /* via_output.c */
-void viaDIP1SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource);
-void viaDIP1EnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState);
+void viaDIP0SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource);
+void viaDIP0EnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState);
 void viaDVP0SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource);
 void viaDVP0EnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState);
 void viaDVP1SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource);
