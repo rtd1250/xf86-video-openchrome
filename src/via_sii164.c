@@ -194,6 +194,7 @@ via_sii164_mode_set(xf86OutputPtr output, DisplayModePtr mode,
     case VIA_VX855:
     case VIA_VX900:
         viaDVP1SetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
+        viaDVP1EnableIOPads(pScrn, 0x03);
         break;
     default:
         break;
