@@ -211,9 +211,13 @@ Bool umsCrtcInit(ScrnInfoPtr pScrn);
 
 /* via_output.c */
 void viaDIP1SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource);
+void viaDIP1EnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState);
 void viaDVP0SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource);
+void viaDVP0EnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState);
 void viaDVP1SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource);
+void viaDVP1EnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState);
 void viaDFPLowSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource);
+void viaDFPLowEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState);
 void viaOutputDetect(ScrnInfoPtr pScrn);
 CARD32 ViaGetMemoryBandwidth(ScrnInfoPtr pScrn);
 CARD32 ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode);
