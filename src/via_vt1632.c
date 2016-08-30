@@ -189,40 +189,6 @@ exit:
     return status;
 }
 
-void
-via_vt1632_mode_set(xf86OutputPtr output, DisplayModePtr mode,
-                    DisplayModePtr adjusted_mode)
-{
-    ScrnInfoPtr pScrn = output->scrn;
-    drmmode_crtc_private_ptr iga = output->crtc->driver_private;
-    VIAPtr pVia = VIAPTR(pScrn);
-    viaVT1632RecPtr pVIAVT1632Rec = output->driver_private;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
-                        "Entered via_vt1632_mode_set.\n"));
-
-    switch (pVia->Chipset) {
-    case VIA_CX700:
-    case VIA_VX800:
-    case VIA_VX855:
-    case VIA_VX900:
-        viaDVP1SetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
-        viaDVP1EnableIOPads(pScrn, 0x03);
-        break;
-    default:
-        break;
-    }
-
-    via_vt1632_dump_registers(pScrn, pVIAVT1632Rec->VT1632I2CDev);
-
-    viaVT1632InitRegisters(pScrn, pVIAVT1632Rec->VT1632I2CDev);
-
-    via_vt1632_dump_registers(pScrn, pVIAVT1632Rec->VT1632I2CDev);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "Exiting via_vt1632_mode_set.\n"));
-}
-
 static void
 via_vt1632_create_resources(xf86OutputPtr output)
 {
@@ -306,6 +272,40 @@ via_vt1632_prepare(xf86OutputPtr output)
 static void
 via_vt1632_commit(xf86OutputPtr output)
 {
+}
+
+static void
+via_vt1632_mode_set(xf86OutputPtr output, DisplayModePtr mode,
+                    DisplayModePtr adjusted_mode)
+{
+    ScrnInfoPtr pScrn = output->scrn;
+    drmmode_crtc_private_ptr iga = output->crtc->driver_private;
+    VIAPtr pVia = VIAPTR(pScrn);
+    viaVT1632RecPtr pVIAVT1632Rec = output->driver_private;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered via_vt1632_mode_set.\n"));
+
+    switch (pVia->Chipset) {
+    case VIA_CX700:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        viaDVP1SetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
+        viaDVP1EnableIOPads(pScrn, 0x03);
+        break;
+    default:
+        break;
+    }
+
+    via_vt1632_dump_registers(pScrn, pVIAVT1632Rec->VT1632I2CDev);
+
+    viaVT1632InitRegisters(pScrn, pVIAVT1632Rec->VT1632I2CDev);
+
+    via_vt1632_dump_registers(pScrn, pVIAVT1632Rec->VT1632I2CDev);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "Exiting via_vt1632_mode_set.\n"));
 }
 
 static xf86OutputStatus
