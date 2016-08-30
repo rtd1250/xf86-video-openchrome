@@ -176,40 +176,6 @@ exit:
     return status;
 }
 
-void
-via_sii164_mode_set(xf86OutputPtr output, DisplayModePtr mode,
-                    DisplayModePtr adjusted_mode)
-{
-    ScrnInfoPtr pScrn = output->scrn;
-    drmmode_crtc_private_ptr iga = output->crtc->driver_private;
-    VIAPtr pVia = VIAPTR(pScrn);
-    viaSiI164RecPtr pSiI164Rec = output->driver_private;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
-                        "Entered via_sii164_mode_set.\n"));
-
-    switch (pVia->Chipset) {
-    case VIA_CX700:
-    case VIA_VX800:
-    case VIA_VX855:
-    case VIA_VX900:
-        viaDVP1SetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
-        viaDVP1EnableIOPads(pScrn, 0x03);
-        break;
-    default:
-        break;
-    }
-
-    via_sii164_dump_registers(pScrn, pSiI164Rec->SiI164I2CDev);
-
-    viaSiI164InitRegisters(pScrn, pSiI164Rec->SiI164I2CDev);
-
-    via_sii164_dump_registers(pScrn, pSiI164Rec->SiI164I2CDev);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "Exiting via_sii164_mode_set.\n"));
-}
-
 static void
 via_sii164_create_resources(xf86OutputPtr output)
 {
@@ -293,6 +259,40 @@ via_sii164_prepare(xf86OutputPtr output)
 static void
 via_sii164_commit(xf86OutputPtr output)
 {
+}
+
+static void
+via_sii164_mode_set(xf86OutputPtr output, DisplayModePtr mode,
+                    DisplayModePtr adjusted_mode)
+{
+    ScrnInfoPtr pScrn = output->scrn;
+    drmmode_crtc_private_ptr iga = output->crtc->driver_private;
+    VIAPtr pVia = VIAPTR(pScrn);
+    viaSiI164RecPtr pSiI164Rec = output->driver_private;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered via_sii164_mode_set.\n"));
+
+    switch (pVia->Chipset) {
+    case VIA_CX700:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        viaDVP1SetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
+        viaDVP1EnableIOPads(pScrn, 0x03);
+        break;
+    default:
+        break;
+    }
+
+    via_sii164_dump_registers(pScrn, pSiI164Rec->SiI164I2CDev);
+
+    viaSiI164InitRegisters(pScrn, pSiI164Rec->SiI164I2CDev);
+
+    via_sii164_dump_registers(pScrn, pSiI164Rec->SiI164I2CDev);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "Exiting via_sii164_mode_set.\n"));
 }
 
 static xf86OutputStatus
