@@ -44,6 +44,23 @@
 
 
 /*
+	1. Formula:
+		2^13 X 0.0698uSec [1/14.318MHz] = 8192 X 0.0698uSec =572.1uSec
+		Timer = Counter x 572 uSec
+	2. Note:
+		0.0698 uSec is too small to compute for hardware. So we multiply a
+		reference value(2^13) to make it big enough to compute for hardware.
+	3. Note:
+		The meaning of the TD0~TD3 are count of the clock.
+		TD(sec) = (sec)/(per clock) x (count of clocks)
+*/
+#define TD0 200
+#define TD1 25
+#define TD2 0
+#define TD3 25
+
+
+/*
  * Initializes most registers related to VIA Technologies IGP
  * integrated TMDS transmitter. Synchronization polarity and
  * display output source need to be set separately. */
@@ -207,10 +224,44 @@ viaTMDSPower(ScrnInfoPtr pScrn, Bool powerState)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaTMDSPower.\n"));
 
-    /* 3X5.D2[3] - Power Down (Active High) for DVI
-     *             0: TMDS power on
-     *             1: TMDS power down */
-    ViaCrtcMask(hwp, 0xD2, powerState ? 0x00 : 0x08, 0x08);
+    if (powerState) {
+        /* 3X5.91[7] - Software Direct On / Off Display Period
+                       in the Panel Path
+                       0: On
+                       1: Off */
+        ViaCrtcMask(hwp, 0x91, 0x00, 0x80);
+
+        /* 3X5.91[0] - Hardware or Software Control Power Sequence
+                       1: Software Control */
+        ViaCrtcMask(hwp, 0x91, 0x01, 0x01);
+
+        usleep(TD0);
+
+        /* 3X5.91[4] - Software VDD On
+                       0: Off
+                       1: On */
+        ViaCrtcMask(hwp, 0x91, 0x10, 0x10);
+
+        usleep(TD1);
+
+        /* 3X5.91[3] - Software Data On
+                       0: Off
+                       1: On */
+        ViaCrtcMask(hwp, 0x91, 0x08, 0x08);
+
+        /* 3X5.D2[3] - Power Down (Active High) for DVI
+         *             0: TMDS power on
+         *             1: TMDS power down */
+        ViaCrtcMask(hwp, 0xD2, 0x00, 0x08);
+    } else {
+        ViaCrtcMask(hwp, 0xD2, 0x08, 0x08);
+
+        ViaCrtcMask(hwp, 0x91, 0x00, 0x08);
+
+        usleep(TD1);
+
+        ViaCrtcMask(hwp, 0x91, 0x00, 0x10);
+    }
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "Integrated TMDS (DVI) Power: %s\n",
