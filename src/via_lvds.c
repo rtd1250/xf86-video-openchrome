@@ -465,13 +465,14 @@ ViaLVDSPower(ScrnInfoPtr pScrn, Bool Power_On)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered ViaLVDSPower.\n"));
+
     /*
      * VX800, CX700 have HW issue, so we'd better use SW power sequence
      * Fix Ticket #308
      */
     switch (pVia->Chipset) {
-    case VIA_VX800:
     case VIA_CX700:
+    case VIA_VX800:
 
         /* Is the integrated TMDS transmitter (DVI) not in use? */
         crd2 = hwp->readCrtc(hwp, 0xD2);
@@ -485,7 +486,9 @@ ViaLVDSPower(ScrnInfoPtr pScrn, Bool Power_On)
 
         ViaLVDSSoftwarePowerSecondSequence(pScrn, Power_On);
         break;
-    default:
+
+    case VIA_VX855:
+    case VIA_VX900:
         /* Is the integrated TMDS transmitter (DVI) not in use? */
         crd2 = hwp->readCrtc(hwp, 0xD2);
         if (((pVia->Chipset == VIA_CX700)
@@ -496,6 +499,10 @@ ViaLVDSPower(ScrnInfoPtr pScrn, Bool Power_On)
             ViaLVDSHardwarePowerFirstSequence(pScrn, Power_On);
         }
 
+        ViaLVDSHardwarePowerSecondSequence(pScrn, Power_On);
+        break;
+    default:
+        ViaLVDSHardwarePowerFirstSequence(pScrn, Power_On);
         ViaLVDSHardwarePowerSecondSequence(pScrn, Power_On);
         break;
     }
@@ -895,6 +902,10 @@ via_lvds_dpms(xf86OutputPtr output, int mode)
     switch (mode) {
     case DPMSModeOn:
         switch (pVia->Chipset) {
+        case VIA_PM800:
+        case VIA_P4M800PRO:
+        case VIA_P4M890:
+        case VIA_K8M890:
         case VIA_P4M900:
         case VIA_CX700:
         case VIA_VX800:
@@ -902,14 +913,21 @@ via_lvds_dpms(xf86OutputPtr output, int mode)
         case VIA_VX900:
             ViaLVDSPower(pScrn, TRUE);
             break;
+        default:
+            ViaLCDPower(output, TRUE);
+            break;
         }
-        ViaLCDPower(output, TRUE);
+
         break;
 
     case DPMSModeStandby:
     case DPMSModeSuspend:
     case DPMSModeOff:
         switch (pVia->Chipset) {
+        case VIA_PM800:
+        case VIA_P4M800PRO:
+        case VIA_P4M890:
+        case VIA_K8M890:
         case VIA_P4M900:
         case VIA_CX700:
         case VIA_VX800:
@@ -917,8 +935,11 @@ via_lvds_dpms(xf86OutputPtr output, int mode)
         case VIA_VX900:
             ViaLVDSPower(pScrn, FALSE);
             break;
+        default:
+            ViaLCDPower(output, FALSE);
+            break;
         }
-        ViaLCDPower(output, FALSE);
+
         break;
     }
 }
