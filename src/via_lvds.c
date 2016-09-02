@@ -459,7 +459,9 @@ ViaLVDSPowerChannel(ScrnInfoPtr pScrn, Bool on)
 static void
 ViaLVDSPower(ScrnInfoPtr pScrn, Bool Power_On)
 {
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
+    CARD8 crd2;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered ViaLVDSPower.\n"));
@@ -470,11 +472,30 @@ ViaLVDSPower(ScrnInfoPtr pScrn, Bool Power_On)
     switch (pVia->Chipset) {
     case VIA_VX800:
     case VIA_CX700:
-        ViaLVDSSoftwarePowerFirstSequence(pScrn, Power_On);
+
+        /* Is the integrated TMDS transmitter (DVI) not in use? */
+        crd2 = hwp->readCrtc(hwp, 0xD2);
+        if (((pVia->Chipset == VIA_CX700)
+                || (pVia->Chipset == VIA_VX800)
+                || (pVia->Chipset == VIA_VX855)
+                || (pVia->Chipset == VIA_VX900))
+            && (!(crd2 & 0x10))) {
+            ViaLVDSSoftwarePowerFirstSequence(pScrn, Power_On);
+        }
+
         ViaLVDSSoftwarePowerSecondSequence(pScrn, Power_On);
         break;
     default:
-        ViaLVDSHardwarePowerFirstSequence(pScrn, Power_On);
+        /* Is the integrated TMDS transmitter (DVI) not in use? */
+        crd2 = hwp->readCrtc(hwp, 0xD2);
+        if (((pVia->Chipset == VIA_CX700)
+                || (pVia->Chipset == VIA_VX800)
+                || (pVia->Chipset == VIA_VX855)
+                || (pVia->Chipset == VIA_VX900))
+            && (!(crd2 & 0x10))) {
+            ViaLVDSHardwarePowerFirstSequence(pScrn, Power_On);
+        }
+
         ViaLVDSHardwarePowerSecondSequence(pScrn, Power_On);
         break;
     }
