@@ -3188,7 +3188,7 @@ iga1_crtc_restore(xf86CrtcPtr crtc)
     ViaDisablePrimaryFIFO(pScrn);
 
     vgaHWLock(hwp);
-    vgaHWProtect(pScrn, TRUE);
+    vgaHWProtect(pScrn, FALSE);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting iga1_crtc_restore.\n"));
