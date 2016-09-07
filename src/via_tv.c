@@ -105,7 +105,7 @@ viaTVSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
          *             1: 24-bit FPDP  (Flat Panel Display Port) */
         if ((sr12 & 0x40) && (sr12 & 0x20)) {
             viaDVP0SetDisplaySource(pScrn, displaySource);
-        } else if ((sr13 & 0x08) && (~(sr12 & 0x10))) {
+        } else if ((sr13 & 0x08) && (!(sr12 & 0x10))) {
             viaDFPLowSetDisplaySource(pScrn, displaySource);
         } else if (sr13 & 0x08) {
             viaDVP1SetDisplaySource(pScrn, displaySource);
@@ -128,7 +128,7 @@ viaTVSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
          * 3C5.12[4] - FPD4 pin strapping
          *             0: Dual 12-bit FPDP (Flat Panel Display Port)
          *             1: 24-bit FPDP  (Flat Panel Display Port) */
-        if ((sr12 & 0x40) & (sr12 & 0x20) &(~(sr12 & 0x10))) {
+        if ((sr12 & 0x40) & (sr12 & 0x20) &(!(sr12 & 0x10))) {
             viaDVP0SetDisplaySource(pScrn, displaySource);
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
@@ -145,7 +145,7 @@ viaTVSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
          *             0: DVP1 is used as a DVP (Digital Video Port)
          *             1: DVP1 is used as a capture port
          */
-        if (~(sr13 & 0x40)) {
+        if (!(sr13 & 0x40)) {
             viaDVP1SetDisplaySource(pScrn, displaySource);
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
@@ -239,7 +239,7 @@ viaTVEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState)
          *             1: 24-bit FPDP (Flat Panel Display Port) */
         if ((sr12 & 0x40) && (sr12 & 0x20)) {
             viaDVP0EnableIOPads(pScrn, ioPadState);
-        } else if ((sr13 & 0x08) && (~(sr12 & 0x10))) {
+        } else if ((sr13 & 0x08) && (!(sr12 & 0x10))) {
             viaDFPLowEnableIOPads(pScrn, ioPadState);
         } else if (sr13 & 0x08) {
             viaDVP1EnableIOPads(pScrn, ioPadState);
@@ -262,7 +262,7 @@ viaTVEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState)
          * 3C5.12[4] - FPD4 pin strapping
          *             0: Dual 12-bit FPDP (Flat Panel Display Port)
          *             1: 24-bit FPDP (Flat Panel Display Port) */
-        if ((sr12 & 0x40) & (sr12 & 0x20) &(~(sr12 & 0x10))) {
+        if ((sr12 & 0x40) & (sr12 & 0x20) &(!(sr12 & 0x10))) {
             viaDVP0EnableIOPads(pScrn, ioPadState);
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
@@ -279,7 +279,7 @@ viaTVEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState)
          *             0: DVP1 is used as a DVP (Digital Video Port)
          *             1: DVP1 is used as a capture port
          */
-        if (~(sr13 & 0x40)) {
+        if (!(sr13 & 0x40)) {
             viaDVP1EnableIOPads(pScrn, ioPadState);
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,

@@ -336,11 +336,11 @@ viaProbePinStrapping(ScrnInfoPtr pScrn)
              *               01: NTSC
              *               10: PAL-N
              *               11: PAL-NC */
-            if ((~(sr13 & 0x08)) & (sr13 & 0x04)) {
+            if ((!(sr13 & 0x08)) & (sr13 & 0x04)) {
                 xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                             "NTSC for the TV encoder.\n");
             } else {
-                if (~(sr13 & 0x08)) {
+                if (!(sr13 & 0x08)) {
                     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                                 "PAL for the TV encoder.\n");
                 } else {
