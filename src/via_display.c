@@ -2367,24 +2367,6 @@ viaIGA2Init(ScrnInfoPtr pScrn)
      *             1: Enable */
     ViaCrtcMask(hwp, 0x79, 0x00, 0x01);
 
-    /* Set DVP0 (Digital Video Port 0) source to IGA2. */
-    /* 3X5.96[7]   - DVP0 ALPHA Enable
-     *               0: Disable
-     *               1: Enable
-     * 3X5.96[6]   - DVP0 VSYNC Polarity
-     *               0: Positive
-     *               1: Negative
-     * 3X5.96[5]   - DVP0 HSYNC Polarity
-     *               0: Positive
-     *               1: Negative
-     * 3X5.96[4]   - DVP0 Data Source Selection 0
-     *               0: Primary Display
-     *               1: Secondary Display
-     * 3X5.96[3]   - DVP0 Clock Polarity
-     * 3X5.96[2:0] - DVP0 Clock Adjust
-     *               Valid Value: 0 through 7 */
-    ViaCrtcMask(hwp, 0x96, 0x10, 0x10);
-
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaIGA2Init.\n"));
 }
