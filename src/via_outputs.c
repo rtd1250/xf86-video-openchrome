@@ -490,7 +490,7 @@ viaProbePinStrapping(ScrnInfoPtr pScrn)
              *               01: NTSC
              *               10: PAL-N
              *               11: PAL-NC */
-            if ((!(sr13 & 0x08)) & (sr13 & 0x04)) {
+            if ((!(sr13 & 0x08)) && (sr13 & 0x04)) {
                 xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                             "NTSC for the TV encoder.\n");
             } else {
@@ -553,7 +553,7 @@ viaProbePinStrapping(ScrnInfoPtr pScrn)
 
             /* 3C5.12[4] - DVP0D4 pin strapping
              *             0: Dual 12-bit FPDP (Flat Panel Display Port)
-             *             1: 24-bit FPDP  (Flat Panel Display Port) */
+             *             1: 24-bit FPDP (Flat Panel Display Port) */
             if (sr12 & 0x10) {
                 xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                             "24-bit FPDP (Flat Panel Display Port) "

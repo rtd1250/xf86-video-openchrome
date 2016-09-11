@@ -102,7 +102,7 @@ viaTVSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
          *             1: DVP0 is used by a TV encoder
          * 3C5.12[4] - DVP0D4 pin strapping
          *             0: Dual 12-bit FPDP (Flat Panel Display Port)
-         *             1: 24-bit FPDP  (Flat Panel Display Port) */
+         *             1: 24-bit FPDP (Flat Panel Display Port) */
         if ((sr12 & 0x40) && (sr12 & 0x20)) {
             viaDVP0SetDisplaySource(pScrn, displaySource);
         } else if ((sr13 & 0x08) && (!(sr12 & 0x10))) {
@@ -127,8 +127,8 @@ viaTVSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
          *             1: DVP0 is used by a TV encoder
          * 3C5.12[4] - FPD4 pin strapping
          *             0: Dual 12-bit FPDP (Flat Panel Display Port)
-         *             1: 24-bit FPDP  (Flat Panel Display Port) */
-        if ((sr12 & 0x40) & (sr12 & 0x20) &(!(sr12 & 0x10))) {
+         *             1: 24-bit FPDP (Flat Panel Display Port) */
+        if ((sr12 & 0x40) && (sr12 & 0x20) && (!(sr12 & 0x10))) {
             viaDVP0SetDisplaySource(pScrn, displaySource);
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
@@ -262,7 +262,7 @@ viaTVEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState)
          * 3C5.12[4] - FPD4 pin strapping
          *             0: Dual 12-bit FPDP (Flat Panel Display Port)
          *             1: 24-bit FPDP (Flat Panel Display Port) */
-        if ((sr12 & 0x40) & (sr12 & 0x20) &(!(sr12 & 0x10))) {
+        if ((sr12 & 0x40) && (sr12 & 0x20) && (!(sr12 & 0x10))) {
             viaDVP0EnableIOPads(pScrn, ioPadState);
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
