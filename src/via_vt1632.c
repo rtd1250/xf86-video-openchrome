@@ -497,22 +497,22 @@ viaVT1632SetDataDriveStrength(ScrnInfoPtr pScrn, CARD8 dataDriveStrength)
 }
 
 static void
-via_vt1632_dump_registers(ScrnInfoPtr pScrn, I2CDevPtr pDev)
+viaVT1632DumpRegisters(ScrnInfoPtr pScrn, I2CDevPtr pDev)
 {
     int i;
     CARD8 tmp;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered via_vt1632_dump_registers.\n"));
+                        "Entered viaVT1632DumpRegisters.\n"));
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1632A: dumping registers:\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Dumping VT1632(A) registers.\n"));
     for (i = 0; i <= 0x0f; i++) {
         xf86I2CReadByte(pDev, i, &tmp);
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1632A: 0x%02x: 0x%02x\n", i, tmp));
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "0x%02x: 0x%02x\n", i, tmp));
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting via_vt1632_dump_registers.\n"));
+                        "Exiting viaVT1632DumpRegisters.\n"));
 }
 
 static void
@@ -755,11 +755,11 @@ via_vt1632_mode_set(xf86OutputPtr output, DisplayModePtr mode,
     viaVT1632SetClockDriveStrength(pScrn, 0x03);
     viaVT1632SetDataDriveStrength(pScrn, 0x03);
 
-    via_vt1632_dump_registers(pScrn, pVIAVT1632Rec->VT1632I2CDev);
+    viaVT1632DumpRegisters(pScrn, pVIAVT1632Rec->VT1632I2CDev);
 
     viaVT1632InitRegisters(pScrn, pVIAVT1632Rec->VT1632I2CDev);
 
-    via_vt1632_dump_registers(pScrn, pVIAVT1632Rec->VT1632I2CDev);
+    viaVT1632DumpRegisters(pScrn, pVIAVT1632Rec->VT1632I2CDev);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "Exiting via_vt1632_mode_set.\n"));
@@ -948,7 +948,7 @@ viaVT1632Init(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus)
     output->interlaceAllowed = FALSE;
     output->doubleScanAllowed = FALSE;
 
-    via_vt1632_dump_registers(pScrn, pI2CDevice);
+    viaVT1632DumpRegisters(pScrn, pI2CDevice);
 
     pVia->numberDVI++;
     status = TRUE;
