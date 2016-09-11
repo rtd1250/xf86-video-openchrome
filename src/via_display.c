@@ -605,9 +605,6 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
     temp = hwp->readSeq(hwp, 0x1A);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "SR1A: 0x%02X\n", temp));
-    temp = hwp->readSeq(hwp, 0x1B);
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "SR1B: 0x%02X\n", temp));
     temp = hwp->readSeq(hwp, 0x1E);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "SR1E: 0x%02X\n", temp));
@@ -623,9 +620,6 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
     temp = hwp->readSeq(hwp, 0x3F);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "SR3F: 0x%02X\n", temp));
-    temp = hwp->readSeq(hwp, 0x65);
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "SR65: 0x%02X\n", temp));
     temp = hwp->readCrtc(hwp, 0x36);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "CR36: 0x%02X\n", temp));
@@ -725,49 +719,17 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
      *                Secondary Display’s LUT */
     ViaSeqMask(hwp, 0x1A, 0x88, 0xC8);
 
-    /* Set DVP0 data drive strength to 0b11 (highest). */
-    /* 3C5.1B[1]   - DVP0 Data Drive Strength Bit [0]
-     *              (It could be for DIP0 (Digital Interface Port 0) for
-     *              CLE266. Reserved for CX700 / VX700 / VX800 / VX855 /
-     *              VX900. These newer devices do not have DVP0.) */
-    ViaSeqMask(hwp, 0x1B, 0x02, 0x02);
-
-    /* Set DVP0 clock drive strength to 0b11 (highest). */
-    /* 3C5.1E[7:6] - Video Capture Port Power Control
-     *               0x: Pad always off
-     *               10: Depend on the other control signal
-     *               11: Pad on/off according to the PMS
-     * 3C5.1E[5:4] - Digital Video Port 1 Power Control
-     *               0x: Pad always off
-     *               10: Depend on the other control signal
-     *               11: Pad on/off according to the PMS
-     * 3C5.1E[3]   - Spread Spectrum On/Off
+    /* 3C5.1E[3]   - Spread Spectrum On/Off
      *               0: Off
      *               1: On
-     * 3C5.1E[2]   - DVP0 Clock Drive Strength Bit [0]
-     *               (It could be for DIP0 (Digital Interface Port 0) for
-     *               CLE266. Reserved for CX700 / VX700 / VX800 / VX855 /
-     *               VX900. These newer devices do not have DVP0.)
      * 3C5.1E[1]   - Replace ECK by MCK
      *               For BIST purpose.
      * 3C5.1E[0]   - On/Off ROC ECK
      *               0: Off
      *               1: On */
-    ViaSeqMask(hwp, 0x1E, 0xF5, 0xFD);
+    ViaSeqMask(hwp, 0x1E, 0x01, 0x09);
 
-    /* Set DVP0 data drive strength to 0b11 (highest). */
-    /* Set DVP0 clock drive strength to 0b11 (highest). */
-    /* 3C5.2A[7]   - Reserved
-     * 3C5.2A[6]   - The Spread Spectrum Type Control
-     *               0: Original Type
-     *               1: FIFO Type
-     * 3C5.2A[5]   - DVP0 Data Drive Strength Bit [1]
-     *               (Reserved for CX700 / VX700 / VX800 / VX855 /
-     *               VX900. These devices do not have DVP0.)
-     * 3C5.2A[4]   - DVP0 Clock Drive Strength Bit [1]
-     *               (Reserved for CX700 / VX700 / VX800 / VX855 /
-     *               VX900. These devices do not have DVP0.)
-     * 3C5.2A[3:2] - LVDS Channel 2 I/O Pad Control
+    /* 3C5.2A[3:2] - LVDS Channel 2 I/O Pad Control
      *               0x: Pad always off
      *               10: Depend on the other control signal
      *               11: Pad on/off according to the PMS
@@ -775,7 +737,7 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
      *               0x: Pad always off
      *               10: Depend on the other control signal
      *               11: Pad on/off according to the PMS */
-    ViaSeqMask(hwp, 0x2A, 0x3F, 0x3F);
+    ViaSeqMask(hwp, 0x2A, 0x0F, 0x0F);
 
     /* 3C5.2D[7:6] - E3_ECK_N Selection
      *               00: E3_ECK_N
@@ -836,20 +798,6 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
      *               10: Clock always on
      *               11: Clock on/off according to each engine IDLE status */
     ViaSeqMask(hwp, 0x3F, 0xFF, 0xFF);
-
-    /* Set DVP1 data drive strength to 0b11 (highest). */
-    /* Set DVP1 clock drive strength to 0b11 (highest). */
-    /* 3C5.65[3:2] - DVP1 Clock Pads Driving Select
-     *               00: lowest
-     *               01: low
-     *               10: high
-     *               11: highest
-     * 3C5.65[1:0] - DVP1 Data Pads Driving Select
-     *               00: lowest
-     *               01: low
-     *               10: high
-     *               11: highest */
-    ViaSeqMask(hwp, 0x65, 0x0F, 0x0F);
 
     /* 3X5.36[7]   - DPMS VSYNC Output
      * 3X5.36[6]   - DPMS HSYNC Output

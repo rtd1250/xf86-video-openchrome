@@ -211,10 +211,22 @@ Bool umsCrtcInit(ScrnInfoPtr pScrn);
 /* via_output.c */
 void viaDIP0SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource);
 void viaDIP0EnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState);
+void viaDIP0SetClockDriveStrength(ScrnInfoPtr pScrn,
+                                    CARD8 clockDriveStrength);
+void viaDIP0SetDataDriveStrength(ScrnInfoPtr pScrn,
+                                    CARD8 dataDriveStrength);
 void viaDVP0SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource);
 void viaDVP0EnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState);
+void viaDVP0SetClockDriveStrength(ScrnInfoPtr pScrn,
+                                    CARD8 clockDriveStrength);
+void viaDVP0SetDataDriveStrength(ScrnInfoPtr pScrn,
+                                    CARD8 dataDriveStrength);
 void viaDVP1SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource);
 void viaDVP1EnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState);
+void viaDVP1SetClockDriveStrength(ScrnInfoPtr pScrn,
+                                    CARD8 clockDriveStrength);
+void viaDVP1SetDataDriveStrength(ScrnInfoPtr pScrn,
+                                    CARD8 dataDriveStrength);
 void viaDFPLowSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource);
 void viaDFPLowEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState);
 void viaOutputDetect(ScrnInfoPtr pScrn);
