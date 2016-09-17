@@ -429,44 +429,6 @@ ViaDisplaySetStreamOnDFP(ScrnInfoPtr pScrn, Bool primary)
         ViaCrtcMask(hwp, 0x99, 0x10, 0x10);
 }
 
-static void
-ViaCRTCSetGraphicsRegisters(ScrnInfoPtr pScrn)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    /* graphics registers */
-    hwp->writeGr(hwp, 0x00, 0x00);
-    hwp->writeGr(hwp, 0x01, 0x00);
-    hwp->writeGr(hwp, 0x02, 0x00);
-    hwp->writeGr(hwp, 0x03, 0x00);
-    hwp->writeGr(hwp, 0x04, 0x00);
-    hwp->writeGr(hwp, 0x05, 0x40);
-    hwp->writeGr(hwp, 0x06, 0x05);
-    hwp->writeGr(hwp, 0x07, 0x0F);
-    hwp->writeGr(hwp, 0x08, 0xFF);
-
-    ViaGrMask(hwp, 0x20, 0, 0xFF);
-    ViaGrMask(hwp, 0x21, 0, 0xFF);
-    ViaGrMask(hwp, 0x22, 0, 0xFF);
-}
-
-static void
-ViaCRTCSetAttributeRegisters(ScrnInfoPtr pScrn)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    CARD8 i;
-
-    /* attribute registers */
-    for (i = 0; i <= 0xF; i++) {
-        hwp->writeAttr(hwp, i, i);
-    }
-    hwp->writeAttr(hwp, 0x10, 0x41);
-    hwp->writeAttr(hwp, 0x11, 0xFF);
-    hwp->writeAttr(hwp, 0x12, 0x0F);
-    hwp->writeAttr(hwp, 0x13, 0x00);
-    hwp->writeAttr(hwp, 0x14, 0x00);
-}
-
 void
 VIALoadRgbLut(ScrnInfoPtr pScrn, int start, int numColors, LOCO *colors)
 {
@@ -543,17 +505,6 @@ ViaGammaDisable(ScrnInfoPtr pScrn)
     }
 }
 
-void
-ViaCRTCInit(ScrnInfoPtr pScrn)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    hwp->writeSeq(hwp, 0x10, 0x01); /* unlock extended registers */
-    ViaCrtcMask(hwp, 0x47, 0x00, 0x01); /* unlock CRT registers */
-    ViaCRTCSetGraphicsRegisters(pScrn);
-    ViaCRTCSetAttributeRegisters(pScrn);
-}
-
 /*
  * Initialize common IGA (Integrated Graphics Accelerator) registers.
  */
@@ -562,18 +513,13 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
+    CARD8 i;
 #ifdef HAVE_DEBUG
     CARD8 temp;
 #endif
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaIGAInitCommon.\n"));
-
-    /* Unlock VIA Technologies extended VGA registers. */
-    /* 3C5.10[0] - Unlock Accessing of I/O Space
-     *             0: Disable
-     *             1: Enable */
-    ViaSeqMask(hwp, 0x10, 0x01, 0x01);
 
     temp = hwp->readEnable(hwp);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -583,7 +529,7 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
     temp = hwp->readMiscOut(hwp);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Misc. Register: 0x%02X\n", temp));
-    hwp->writeMiscOut(hwp, temp | 0x2E);
+    hwp->writeMiscOut(hwp, temp | 0x22);
 
     temp = hwp->readEnable(hwp);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -592,8 +538,89 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Misc. Register: 0x%02X\n", temp));
 
-    ViaCRTCSetGraphicsRegisters(pScrn);
-    ViaCRTCSetAttributeRegisters(pScrn);
+
+    /* Sequencer Registers */
+    ViaSeqMask(hwp, 0x00, 0x03, 0x03);
+    ViaSeqMask(hwp, 0x01, 0x01, 0x35);
+    ViaSeqMask(hwp, 0x02, 0x0F, 0x0F);
+    ViaSeqMask(hwp, 0x03, 0x00, 0x3F);
+    ViaSeqMask(hwp, 0x04, 0x0E, 0x0E);
+
+
+    /* Graphics Registers */
+    hwp->writeGr(hwp, 0x00, 0x00);
+    hwp->writeGr(hwp, 0x01, 0x00);
+    hwp->writeGr(hwp, 0x02, 0x00);
+    hwp->writeGr(hwp, 0x03, 0x00);
+    hwp->writeGr(hwp, 0x04, 0x00);
+    hwp->writeGr(hwp, 0x05, 0x40);
+    hwp->writeGr(hwp, 0x06, 0x05);
+    hwp->writeGr(hwp, 0x07, 0x0F);
+    hwp->writeGr(hwp, 0x08, 0xFF);
+
+
+    /* Attribute Registers */
+    for (i = 0; i <= 15; i++) {
+        hwp->writeAttr(hwp, i, i);
+    }
+
+    hwp->writeAttr(hwp, 0x10, 0x41);
+    hwp->writeAttr(hwp, 0x11, 0xFF);
+    hwp->writeAttr(hwp, 0x12, 0x0F);
+    hwp->writeAttr(hwp, 0x13, 0x00);
+    hwp->writeAttr(hwp, 0x14, 0x00);
+
+
+    /* Unlock VIA Technologies extended VGA registers. */
+    /* 3C5.10[0] - Unlock Accessing of I/O Space
+     *             0: Disable
+     *             1: Enable */
+    ViaSeqMask(hwp, 0x10, 0x01, 0x01);
+
+    switch (pVia->Chipset) {
+    case VIA_CLE266:
+    case VIA_KM400:
+    case VIA_K8M800:
+    case VIA_PM800:
+    case VIA_P4M800PRO:
+    case VIA_CX700:
+    case VIA_P4M890:
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+        /* 3X5.47[7] - IGA1 Timing Plus 2 VCK
+         * 3X5.47[6] - IGA1 Timing Plus 4 VCK
+         * 3X5.47[5] - Peep at the PCI-bus
+         *             0: Disable
+         *             1: Enable
+         * 3X5.47[4] - Reserved
+         * 3X5.47[3] - IGA1 Timing Plus 6 VCK
+         * 3X5.47[2] - DACOFF Backdoor Register
+         * 3X5.47[1] - LCD Simultaneous Mode Backdoor Register for
+         *             8/9 Dot Clocks
+         * 3X5.47[0] - LCD Simultaneous Mode Backdoor Register for
+         *             Clock Select and CRTC Register Protect */
+        ViaCrtcMask(hwp, 0x47, 0x00, 0x01);
+        break;
+    case VIA_VX855:
+    case VIA_VX900:
+        /* 3X5.47[7] - IGA1 Timing Plus 2 VCK
+         * 3X5.47[6] - IGA1 Timing Plus 4 VCK
+         * 3X5.47[5] - Peep at the PCI-bus
+         *             0: Disable
+         *             1: Enable
+         * 3X5.47[4] - CRT Timing Register Protect
+         * 3X5.47[3] - IGA1 Timing Plus 6 VCK
+         * 3X5.47[2] - DACOFF Backdoor Register
+         * 3X5.47[1] - LCD Simultaneous Mode Backdoor Register for
+         *             8/9 Dot Clocks
+         * 3X5.47[0] - LCD Simultaneous Mode Backdoor Register for
+         *             Clock Select */
+        ViaCrtcMask(hwp, 0x47, 0x00, 0x10);
+        break;
+    default:
+        break;
+    }
 
 #ifdef HAVE_DEBUG
     temp = hwp->readSeq(hwp, 0x15);
@@ -623,15 +650,9 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
     temp = hwp->readCrtc(hwp, 0x36);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "CR36: 0x%02X\n", temp));
-
-    /* For UniChrome Pro and Chrome9. */
-    if ((pVia->Chipset != VIA_CLE266)
-        && (pVia->Chipset != VIA_KM400)) {
-        temp = hwp->readCrtc(hwp, 0x47);
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "CR47: 0x%02X\n", temp));
-    }
-
+    temp = hwp->readCrtc(hwp, 0x47);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "CR47: 0x%02X\n", temp));
     temp = hwp->readCrtc(hwp, 0x6B);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "CR6B: 0x%02X\n", temp));
@@ -643,6 +664,13 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
     }
 
 #endif
+
+
+    /* VIA Technologies Chrome Extended Graphics Registers */
+    ViaGrMask(hwp, 0x20, 0, 0xFF);
+    ViaGrMask(hwp, 0x21, 0, 0xFF);
+    ViaGrMask(hwp, 0x22, 0, 0xFF);
+
 
     /* Be careful with 3C5.15[5] - Wrap Around Disable.
      * It must be set to 1 for correct operation. */
@@ -815,52 +843,14 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
      *               1: Enable */
     ViaCrtcMask(hwp, 0x36, 0x01, 0x01);
 
-    switch (pVia->Chipset) {
-    case VIA_CLE266:
-    case VIA_KM400:
-        ViaCrtcMask(hwp, 0x47, 0x00, 0x23);
-        break;
-    case VIA_K8M800:
-    case VIA_PM800:
-    case VIA_P4M800PRO:
-    case VIA_CX700:
-    case VIA_P4M890:
-    case VIA_K8M890:
-    case VIA_P4M900:
-    case VIA_VX800:
-        /* 3X5.47[7] - IGA1 Timing Plus 2 VCK
-         * 3X5.47[6] - IGA1 Timing Plus 4 VCK
-         * 3X5.47[5] - Peep at the PCI-bus
-         *             0: Disable
-         *             1: Enable
-         * 3X5.47[4] - Reserved
-         * 3X5.47[3] - IGA1 Timing Plus 6 VCK
-         * 3X5.47[2] - DACOFF Backdoor Register
-         * 3X5.47[1] - LCD Simultaneous Mode Backdoor Register for
-         *             8/9 Dot Clocks
-         * 3X5.47[0] - LCD Simultaneous Mode Backdoor Register for
-         *             Clock Select and CRTC Register Protect */
-        ViaCrtcMask(hwp, 0x47, 0x00, 0x23);
-        break;
-    case VIA_VX855:
-    case VIA_VX900:
-        /* 3X5.47[7] - IGA1 Timing Plus 2 VCK
-         * 3X5.47[6] - IGA1 Timing Plus 4 VCK
-         * 3X5.47[5] - Peep at the PCI-bus
-         *             0: Disable
-         *             1: Enable
-         * 3X5.47[4] - CRT Timing Register Protect
-         * 3X5.47[3] - IGA1 Timing Plus 6 VCK
-         * 3X5.47[2] - DACOFF Backdoor Register
-         * 3X5.47[1] - LCD Simultaneous Mode Backdoor Register for
-         *             8/9 Dot Clocks
-         * 3X5.47[0] - LCD Simultaneous Mode Backdoor Register for
-         *             Clock Select */
-        ViaCrtcMask(hwp, 0x47, 0x00, 0x33);
-        break;
-    default:
-        break;
-    }
+    /* 3X5.47[5] - Peep at the PCI-bus
+     *             0: Disable
+     *             1: Enable
+     * 3X5.47[1] - LCD Simultaneous Mode Backdoor Register for
+     *             8/9 Dot Clocks
+     * 3X5.47[0] - LCD Simultaneous Mode Backdoor Register for
+     *             Clock Select and CRTC Register Protect */
+    ViaCrtcMask(hwp, 0x47, 0x00, 0x23);
 
     /* 3X5.6B[3] - Simultaneous Display Enable
      *             0: Disable
@@ -1164,20 +1154,11 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
     hwp->writeMiscOut(hwp, temp);
 
-
-    /* Sequence registers */
-    hwp->writeSeq(hwp, 0x00, 0x00);
-
-#if 0
-    if (mode->Flags & V_CLKDIV2)
-        hwp->writeSeq(hwp, 0x01, 0x09);
-    else
-#endif
-        hwp->writeSeq(hwp, 0x01, 0x01);
-
-    hwp->writeSeq(hwp, 0x02, 0x0F);
-    hwp->writeSeq(hwp, 0x03, 0x00);
-    hwp->writeSeq(hwp, 0x04, 0x0E);
+    if (mode->Flags & V_CLKDIV2) {
+        ViaSeqMask(hwp, 0x01, 0x08, 0x08);
+    } else {
+        ViaSeqMask(hwp, 0x01, 0x00, 0x08);
+    }
 
     ViaCrtcMask(hwp, 0x03, 0x80, 0x80); /* enable vertical retrace access */
 
@@ -3221,7 +3202,6 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 
     viaIGAInitCommon(pScrn);
     viaIGA1Init(pScrn);
-    ViaCRTCInit(pScrn);
 
     /* Turn off Screen */
     ViaCrtcMask(hwp, 0x17, 0x00, 0x80);
@@ -3604,7 +3584,6 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 
     viaIGAInitCommon(pScrn);
     viaIGA2Init(pScrn);
-    ViaCRTCInit(pScrn);
 
     ViaPrintMode(pScrn, adjusted_mode);
     viaIGA2SetDisplayRegister(pScrn, adjusted_mode);
