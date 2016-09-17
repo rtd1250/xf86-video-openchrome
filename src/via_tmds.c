@@ -203,7 +203,7 @@ viaTMDSSense(ScrnInfoPtr pScrn)
      *             0: No connect
      *             1: Connected */
     sr1a = hwp->readSeq(hwp, 0x1A);
-    if (sr1a & 0x20) {
+    if (sr1a & 0x10) {
         tmdsReceiverDetected = TRUE;
     }
 
