@@ -132,6 +132,41 @@ viaAnalogInit(ScrnInfoPtr pScrn)
                         "Exiting viaAnalogInit.\n"));
 }
 
+/*
+ * Sets the polarity of horizontal synchronization and vertical
+ * synchronization.
+ */
+static void
+viaAnalogSetSyncPolarity(ScrnInfoPtr pScrn, DisplayModePtr mode)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    CARD8 miscRegister;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaAnalogSetSyncPolarity.\n"));
+
+/* Set certain bits of miscellaneous output register
+ * meant for IGA1. */
+    miscRegister = hwp->readMiscOut(hwp);
+    if (mode->Flags & V_NHSYNC) {
+        miscRegister |= 0x40;
+    } else {
+        miscRegister &= (~0x40);
+    }
+
+    if (mode->Flags & V_NVSYNC) {
+        miscRegister |= 0x80;
+    } else {
+        miscRegister &= (~0x80);
+    }
+
+    hwp->writeMiscOut(hwp, miscRegister);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaAnalogSetSyncPolarity.\n"));
+}
+
+
 static void
 via_analog_create_resources(xf86OutputPtr output)
 {
@@ -211,9 +246,9 @@ via_analog_mode_set(xf86OutputPtr output, DisplayModePtr mode,
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_analog_mode_set.\n"));
 
-    viaAnalogInit(pScrn);
-
     if (output->crtc) {
+        viaAnalogInit(pScrn);
+        viaAnalogSetSyncPolarity(pScrn, adjusted_mode);
         viaAnalogSource(pScrn, iga->index ? 0x01 : 0x00);
     }
 

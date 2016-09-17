@@ -1137,23 +1137,6 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "IGA1 Requested Screen Mode: %s\n", mode->name);
 
-    /* Set certain bits of miscellaneous output register
-     * meant for IGA1. */
-    temp = hwp->readMiscOut(hwp);
-    if (mode->Flags & V_NHSYNC) {
-        temp |= 0x40;
-    } else {
-        temp &= (~0x40);
-    }
-
-    if (mode->Flags & V_NVSYNC) {
-        temp |= 0x80;
-    } else {
-        temp &= (~0x80);
-    }
-
-    hwp->writeMiscOut(hwp, temp);
-
     if (mode->Flags & V_CLKDIV2) {
         ViaSeqMask(hwp, 0x01, 0x08, 0x08);
     } else {
