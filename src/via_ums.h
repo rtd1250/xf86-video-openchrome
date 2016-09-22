@@ -263,6 +263,7 @@ void via_analog_init(ScrnInfoPtr pScrn);
 void via_lvds_init(ScrnInfoPtr pScrn);
 
 /* via_tmds.c */
+void viaExtTMDSSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource);
 void via_dvi_init(ScrnInfoPtr pScrn);
 
 /*via_tv.c */
