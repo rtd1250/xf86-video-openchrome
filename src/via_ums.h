@@ -264,6 +264,7 @@ void via_lvds_init(ScrnInfoPtr pScrn);
 
 /* via_tmds.c */
 void viaExtTMDSSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource);
+void viaExtTMDSEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState);
 void via_dvi_init(ScrnInfoPtr pScrn);
 
 /*via_tv.c */
