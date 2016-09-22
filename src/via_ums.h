@@ -267,6 +267,8 @@ void viaExtTMDSSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource);
 void viaExtTMDSEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState);
 void viaExtTMDSSetClockDriveStrength(ScrnInfoPtr pScrn,
                                         CARD8 clockDriveStrength);
+void viaExtTMDSSetDataDriveStrength(ScrnInfoPtr pScrn,
+                                        CARD8 dataDriveStrength);
 void via_dvi_init(ScrnInfoPtr pScrn);
 
 /*via_tv.c */
