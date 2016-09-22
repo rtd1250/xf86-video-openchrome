@@ -33,106 +33,6 @@
 #include "via_sii164.h"
 
 static void
-viaSiI164SetClockDriveStrength(ScrnInfoPtr pScrn, CARD8 clockDriveStrength)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-    CARD8 sr12, sr13, sr5a;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaSiI164SetClockDriveStrength.\n"));
-
-    if ((pVia->Chipset == VIA_CX700)
-        || (pVia->Chipset == VIA_VX800)
-        || (pVia->Chipset == VIA_VX855)
-        || (pVia->Chipset == VIA_VX900)) {
-
-        sr5a = hwp->readSeq(hwp, 0x5A);
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "SR5A: 0x%02X\n", sr5a));
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "Setting 3C5.5A[0] to 0.\n"));
-        ViaSeqMask(hwp, 0x5A, sr5a & 0xFE, 0x01);
-    }
-
-    sr12 = hwp->readSeq(hwp, 0x12);
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "SR12: 0x%02X\n", sr12));
-    sr13 = hwp->readSeq(hwp, 0x13);
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "SR13: 0x%02X\n", sr13));
-    switch (pVia->Chipset) {
-    case VIA_CLE266:
-        /* 3C5.12[5] - FPD18 pin strapping
-         *             0: DIP0 (Digital Interface Port 0) is used by
-         *                a TMDS transmitter (DVI)
-         *             1: DIP0 (Digital Interface Port 0) is used by
-         *                a TV encoder */
-        if (!(sr12 & 0x20)) {
-            viaDIP0SetClockDriveStrength(pScrn, clockDriveStrength);
-        }
-
-        break;
-    case VIA_KM400:
-    case VIA_K8M800:
-    case VIA_PM800:
-    case VIA_P4M800PRO:
-        /* 3C5.12[6] - DVP0D6 pin strapping
-         *             0: Disable DVP0 (Digital Video Port 0)
-         *             1: Enable DVP0 (Digital Video Port 0)
-         * 3C5.12[5] - DVP0D5 pin strapping
-         *             0: DVP0 is used by a TMDS transmitter (DVI)
-         *             1: DVP0 is used by a TV encoder */
-        if ((sr12 & 0x40) && (!(sr12 & 0x20))) {
-            viaDVP0SetClockDriveStrength(pScrn, clockDriveStrength);
-        }
-
-        break;
-    case VIA_P4M890:
-    case VIA_K8M890:
-    case VIA_P4M900:
-        /* 3C5.12[6] - FPD6 pin strapping
-         *             0: Disable DVP0 (Digital Video Port 0)
-         *             1: Enable DVP0 (Digital Video Port 0)
-         * 3C5.12[5] - FPD5 pin strapping
-         *             0: DVP0 is used by a TMDS transmitter (DVI)
-         *             1: DVP0 is used by a TV encoder */
-        if ((sr12 & 0x40) && (!(sr12 & 0x20))) {
-            viaDVP0SetClockDriveStrength(pScrn, clockDriveStrength);
-        }
-
-        break;
-    case VIA_CX700:
-    case VIA_VX800:
-    case VIA_VX855:
-    case VIA_VX900:
-        /* 3C5.13[6] - DVP1 DVP / capture port selection
-         *             0: DVP1 is used as a DVP (Digital Video Port)
-         *             1: DVP1 is used as a capture port */
-        if (!(sr13 & 0x40)) {
-            viaDVP1SetClockDriveStrength(pScrn, clockDriveStrength);
-        }
-
-        break;
-    default:
-        break;
-    }
-
-    if ((pVia->Chipset == VIA_CX700)
-        || (pVia->Chipset == VIA_VX800)
-        || (pVia->Chipset == VIA_VX855)
-        || (pVia->Chipset == VIA_VX900)) {
-
-        hwp->writeSeq(hwp, 0x5A, sr5a);
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "Restoring 3C5.5A[0].\n"));
-    }
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaSiI164SetClockDriveStrength.\n"));
-}
-
-static void
 viaSiI164SetDataDriveStrength(ScrnInfoPtr pScrn, CARD8 dataDriveStrength)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
@@ -473,7 +373,7 @@ via_sii164_mode_set(xf86OutputPtr output, DisplayModePtr mode,
                         "Entered via_sii164_mode_set.\n"));
 
     if (output->crtc) {
-        viaSiI164SetClockDriveStrength(pScrn, 0x03);
+        viaExtTMDSSetClockDriveStrength(pScrn, 0x03);
         viaSiI164SetDataDriveStrength(pScrn, 0x03);
         viaExtTMDSEnableIOPads(pScrn, 0x03);
 
