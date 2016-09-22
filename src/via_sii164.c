@@ -497,13 +497,13 @@ viaSiI164SetDataDriveStrength(ScrnInfoPtr pScrn, CARD8 dataDriveStrength)
 }
 
 static void
-via_sii164_dump_registers(ScrnInfoPtr pScrn, I2CDevPtr pDev)
+viaSiI164DumpRegisters(ScrnInfoPtr pScrn, I2CDevPtr pDev)
 {
     int i;
     CARD8 tmp;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered via_sii164_dump_registers.\n"));
+                        "Entered viaSiI164DumpRegisters.\n"));
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "SiI 164: dumping registers:\n"));
     for (i = 0; i <= 0x0f; i++) {
@@ -512,7 +512,7 @@ via_sii164_dump_registers(ScrnInfoPtr pScrn, I2CDevPtr pDev)
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting via_sii164_dump_registers.\n"));
+                        "Exiting viaSiI164DumpRegisters.\n"));
 }
 
 static void
@@ -741,9 +741,9 @@ via_sii164_mode_set(xf86OutputPtr output, DisplayModePtr mode,
         viaSiI164SetDataDriveStrength(pScrn, 0x03);
         viaSiI164EnableIOPads(pScrn, 0x03);
 
-        via_sii164_dump_registers(pScrn, pSiI164Rec->SiI164I2CDev);
+        viaSiI164DumpRegisters(pScrn, pSiI164Rec->SiI164I2CDev);
         viaSiI164InitRegisters(pScrn, pSiI164Rec->SiI164I2CDev);
-        via_sii164_dump_registers(pScrn, pSiI164Rec->SiI164I2CDev);
+        viaSiI164DumpRegisters(pScrn, pSiI164Rec->SiI164I2CDev);
 
         viaSiI164SetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
     }
@@ -937,7 +937,7 @@ viaSiI164Init(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus)
     output->interlaceAllowed = FALSE;
     output->doubleScanAllowed = FALSE;
 
-    via_sii164_dump_registers(pScrn, pI2CDevice);
+    viaSiI164DumpRegisters(pScrn, pI2CDevice);
 
     pVia->numberDVI++;
     status = TRUE;
