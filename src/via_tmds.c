@@ -192,24 +192,31 @@ static Bool
 viaTMDSSense(ScrnInfoPtr pScrn)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
-    CARD8 sr1a;
-    Bool tmdsReceiverDetected = FALSE;
+    VIAPtr pVia = VIAPTR(pScrn);
+    CARD8 tmdsReceiverDetected = 0x00;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaTMDSSense.\n"));
 
-    /* Detect the presence of DVI. */
-    /* 3C5.1A[4] - DVI Sense
-     *             0: No connect
-     *             1: Connected */
-    sr1a = hwp->readSeq(hwp, 0x1A);
-    if (sr1a & 0x10) {
-        tmdsReceiverDetected = TRUE;
+    if (pVia->Chipset == VIA_CX700) {
+        /* Detect the presence of DVI. */
+        /* 3C5.1A[4] - DVI Sense
+         *             0: No connect
+         *             1: Connected */
+        tmdsReceiverDetected = (hwp->readSeq(hwp, 0x1A) >> 4) & 0x01;
+    } else if ((pVia->Chipset == VIA_VX800)
+                || (pVia->Chipset == VIA_VX855)
+                || (pVia->Chipset == VIA_VX900)) {
+        /* Detect the presence of DVI. */
+        /* 3C5.3E[5] - Integrated DVI Sense
+         *             0: No connect
+         *             1: Connected */
+        tmdsReceiverDetected = (hwp->readSeq(hwp, 0x3E) >> 5) & 0x01;
     }
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "Integrated TMDS transmitter %s a TMDS receiver.\n",
-                tmdsReceiverDetected ? "detected" : "did not detect");
+                (tmdsReceiverDetected & 0x01) ? "detected" : "did not detect");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaTMDSSense.\n"));
