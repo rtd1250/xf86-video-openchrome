@@ -736,16 +736,17 @@ via_sii164_mode_set(xf86OutputPtr output, DisplayModePtr mode,
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_sii164_mode_set.\n"));
 
-    viaSiI164SetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
-    viaSiI164EnableIOPads(pScrn, 0x03);
-    viaSiI164SetClockDriveStrength(pScrn, 0x03);
-    viaSiI164SetDataDriveStrength(pScrn, 0x03);
+    if (output->crtc) {
+        viaSiI164SetClockDriveStrength(pScrn, 0x03);
+        viaSiI164SetDataDriveStrength(pScrn, 0x03);
+        viaSiI164EnableIOPads(pScrn, 0x03);
 
-    via_sii164_dump_registers(pScrn, pSiI164Rec->SiI164I2CDev);
+        via_sii164_dump_registers(pScrn, pSiI164Rec->SiI164I2CDev);
+        viaSiI164InitRegisters(pScrn, pSiI164Rec->SiI164I2CDev);
+        via_sii164_dump_registers(pScrn, pSiI164Rec->SiI164I2CDev);
 
-    viaSiI164InitRegisters(pScrn, pSiI164Rec->SiI164I2CDev);
-
-    via_sii164_dump_registers(pScrn, pSiI164Rec->SiI164I2CDev);
+        viaSiI164SetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
+    }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "Exiting via_sii164_mode_set.\n"));
