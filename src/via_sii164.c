@@ -731,7 +731,6 @@ via_sii164_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 {
     ScrnInfoPtr pScrn = output->scrn;
     drmmode_crtc_private_ptr iga = output->crtc->driver_private;
-    VIAPtr pVia = VIAPTR(pScrn);
     viaSiI164RecPtr pSiI164Rec = output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,

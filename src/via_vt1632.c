@@ -744,7 +744,6 @@ via_vt1632_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 {
     ScrnInfoPtr pScrn = output->scrn;
     drmmode_crtc_private_ptr iga = output->crtc->driver_private;
-    VIAPtr pVia = VIAPTR(pScrn);
     viaVT1632RecPtr pVIAVT1632Rec = output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
