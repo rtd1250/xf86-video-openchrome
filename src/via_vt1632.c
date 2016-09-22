@@ -749,16 +749,17 @@ via_vt1632_mode_set(xf86OutputPtr output, DisplayModePtr mode,
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_vt1632_mode_set.\n"));
 
-    viaVT1632SetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
-    viaVT1632EnableIOPads(pScrn, 0x03);
-    viaVT1632SetClockDriveStrength(pScrn, 0x03);
-    viaVT1632SetDataDriveStrength(pScrn, 0x03);
+    if (output->crtc) {
+        viaVT1632SetClockDriveStrength(pScrn, 0x03);
+        viaVT1632SetDataDriveStrength(pScrn, 0x03);
+        viaVT1632EnableIOPads(pScrn, 0x03);
 
-    viaVT1632DumpRegisters(pScrn, pVIAVT1632Rec->VT1632I2CDev);
+        viaVT1632DumpRegisters(pScrn, pVIAVT1632Rec->VT1632I2CDev);
+        viaVT1632InitRegisters(pScrn, pVIAVT1632Rec->VT1632I2CDev);
+        viaVT1632DumpRegisters(pScrn, pVIAVT1632Rec->VT1632I2CDev);
 
-    viaVT1632InitRegisters(pScrn, pVIAVT1632Rec->VT1632I2CDev);
-
-    viaVT1632DumpRegisters(pScrn, pVIAVT1632Rec->VT1632I2CDev);
+        viaVT1632SetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
+    }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "Exiting via_vt1632_mode_set.\n"));
