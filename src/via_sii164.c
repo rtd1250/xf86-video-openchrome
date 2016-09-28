@@ -59,16 +59,15 @@ viaSiI164InitRegisters(ScrnInfoPtr pScrn, I2CDevPtr pDev)
 
     xf86I2CWriteByte(pDev, 0x08,
                         VIA_SII164_VEN | VIA_SII164_HEN |
-                        VIA_SII164_DSEL |
-                        VIA_SII164_EDGE | VIA_SII164_PDB);
+                        VIA_SII164_DSEL | VIA_SII164_EDGE | VIA_SII164_PDB);
 
     /* Route receiver detect bit (Offset 0x09[2]) as the output of
      * MSEN pin. */
     xf86I2CWriteByte(pDev, 0x09, 0x20);
 
-    xf86I2CWriteByte(pDev, 0x0A, 0x00);
+    xf86I2CWriteByte(pDev, 0x0A, 0x90);
 
-    xf86I2CWriteByte(pDev, 0x0C, 0x00);
+    xf86I2CWriteByte(pDev, 0x0C, 0x89);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaSiI164InitRegisters.\n"));
