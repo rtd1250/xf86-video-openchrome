@@ -915,30 +915,6 @@ ViaPanelScaleDisable(ScrnInfoPtr pScrn)
 }
 
 static void
-viaSetLVDSOutput(ScrnInfoPtr pScrn)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaSetLVDSOutput.\n"));
-
-    switch (pVia->Chipset) {
-    case VIA_CX700:
-    case VIA_VX800:
-    case VIA_VX855:
-    case VIA_VX900:
-        /* Do not power down LVDS Channel 2. */
-        /* For now, use OPENLDI mode for LVDS Channel 2. */
-        ViaCrtcMask(hwp, 0xD2, 0x01, 0x41);
-        break;
-    }
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaSetLVDSOutput.\n"));
-}
-
-static void
 via_lvds_create_resources(xf86OutputPtr output)
 {
 }
@@ -1072,8 +1048,6 @@ via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
     }
 
     if (output->crtc) {
-        viaSetLVDSOutput(pScrn);
-
         switch (pVia->Chipset) {
         case VIA_P4M900:
             viaDFPLowSetDelayTap(pScrn, 0x08);
@@ -1108,6 +1082,9 @@ via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 
             /* Set LVDS2 output format to sequential mode. */
             viaLVDS2SetOutputFormat(pScrn, 0x01);
+
+            /* Set LVDS2 output to OPENLDI mode. */
+            viaLVDS2SetFormat(pScrn, 0x01);
             break;
         default:
             break;
