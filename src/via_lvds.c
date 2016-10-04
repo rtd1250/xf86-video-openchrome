@@ -1039,15 +1039,15 @@ via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
     drmmode_crtc_private_ptr iga = output->crtc->driver_private;
     VIAPtr pVia = VIAPTR(pScrn);
 
-    if (Panel->Scale) {
-        ViaPanelScale(pScrn, mode->HDisplay, mode->VDisplay,
-                        Panel->NativeWidth,
-                        Panel->NativeHeight);
-    } else {
-        ViaPanelScaleDisable(pScrn);
-    }
-
     if (output->crtc) {
+        if (Panel->Scale) {
+            ViaPanelScale(pScrn, mode->HDisplay, mode->VDisplay,
+                            Panel->NativeWidth,
+                            Panel->NativeHeight);
+        } else {
+            ViaPanelScaleDisable(pScrn);
+        }
+
         switch (pVia->Chipset) {
         case VIA_P4M900:
             viaDFPLowSetDelayTap(pScrn, 0x08);
