@@ -1100,11 +1100,8 @@ via_lvds_detect(xf86OutputPtr output)
 {
     xf86OutputStatus status = XF86OutputStatusDisconnected;
     ScrnInfoPtr pScrn = output->scrn;
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     ViaPanelInfoPtr panel = output->driver_private;
-    CARD8 cr3b;
-    CARD8 cr3b_mask;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_lvds_detect.\n"));
@@ -1119,30 +1116,13 @@ via_lvds_detect(xf86OutputPtr output)
         goto exit;
     }
 
-    /* Disable reading off EDID from I2C bus 2 since it is often
-     * used by DVI as well. For now, this is how DVI and LVDS FP will
-     * coexist. */
-/*
-    if (ViaPanelGetSizeFromDDCv1(output, &width, &height)) {
-*/
-    if (FALSE) {
-        status = XF86OutputStatusConnected;
-    } else {
-        /* Apparently this is the way VIA Technologies passes */
-        /* the presence of a flat panel to the device driver */
-        /* via BIOS setup. */
-        if (pVia->Chipset == VIA_CLE266) {
-            cr3b_mask = 0x08;
-        } else {
-            cr3b_mask = 0x02;
-        }
-
-        cr3b = hwp->readCrtc(hwp, 0x3B) & cr3b_mask;
-        if (cr3b) {
-            viaLVDSGetFPInfoFromScratchPad(output);
-            status = XF86OutputStatusConnected;
-        }
-    }
+    /* For now, FP detection code will not scan the I2C bus
+     * in order to obtain EDID since it is often used by DVI
+     * as well. Hence, reading off the CRTC scratch pad register
+     * supplied by the VGA BIOS is the only method available
+     * to figure out the FP native screen resolution. */
+    viaLVDSGetFPInfoFromScratchPad(output);
+    status = XF86OutputStatusConnected;
 
 exit:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
