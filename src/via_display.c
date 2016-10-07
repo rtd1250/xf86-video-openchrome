@@ -67,6 +67,29 @@ ViaPrintMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 }
 
 /*
+ * Resets IGA1 hardware.
+ */
+static void
+viaIGA1HWReset(ScrnInfoPtr pScrn, CARD8 resetState)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA1HWReset.\n"));
+
+    /* 3X5.17[7] - IGA1 HW Reset
+     *             0: Reset
+     *             1: Normal Operation */
+    ViaCrtcMask(hwp, 0x17, resetState << 7, 0x80);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "IGA1 HW Reset: %s\n",
+                (resetState & 0x01) ? "Off" : "On");
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA1HWReset.\n"));
+}
+
+/*
  * Controls IGA1 DPMS State.
  */
 void
@@ -3172,12 +3195,13 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered iga1_crtc_mode_set.\n"));
 
+    /* Put IGA1 into a reset state. */
+    viaIGA1HWReset(pScrn, 0x00);
+
     if (!vgaHWInit(pScrn, adjusted_mode)) {
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                             "vgaHWInit failed.\n"));
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "Exiting iga1_crtc_mode_set.\n"));
-        return;
+        goto exit;
     }
 
     /* Turn off IGA1 during mode setting. */
@@ -3185,9 +3209,6 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 
     viaIGAInitCommon(pScrn);
     viaIGA1Init(pScrn);
-
-    /* Turn off Screen */
-    ViaCrtcMask(hwp, 0x17, 0x00, 0x80);
 
     /* Disable IGA1 */
     ViaSeqMask(hwp, 0x59, 0x00, 0x80);
@@ -3207,14 +3228,15 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     /* Enable IGA1 */
     ViaSeqMask(hwp, 0x59, 0x80, 0x80);
 
-    /* Turn on Screen */
-    ViaCrtcMask(hwp, 0x17, 0x80, 0x80);
-
     viaIGA1SetFBStartingAddress(crtc, x, y);
     VIAVidAdjustFrame(pScrn, x, y);
 
     /* Turn on IGA1 now that mode setting is done. */
     viaIGA1DPMSControl(pScrn, 0x00);
+
+exit:
+    /* Put IGA1 back into a normal operating state. */
+    viaIGA1HWReset(pScrn, 0x01);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting iga1_crtc_mode_set.\n"));
