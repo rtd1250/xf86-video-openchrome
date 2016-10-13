@@ -92,7 +92,7 @@ viaIGA1HWReset(ScrnInfoPtr pScrn, CARD8 resetState)
 /*
  * Controls IGA1 DPMS State.
  */
-void
+static void
 viaIGA1DPMSControl(ScrnInfoPtr pScrn, CARD8 dpmsControl)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
@@ -249,7 +249,7 @@ viaIGA1SetHIDisplayLocation(ScrnInfoPtr pScrn,
 /*
  * Controls IGA2 display output on or off state.
  */
-void
+static void
 viaIGA2DisplayOutput(ScrnInfoPtr pScrn, Bool outputState)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
@@ -3163,8 +3163,18 @@ iga1_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
 }
 
 static void
-iga1_crtc_prepare (xf86CrtcPtr crtc)
+iga1_crtc_prepare(xf86CrtcPtr crtc)
 {
+    ScrnInfoPtr pScrn = crtc->scrn;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered iga1_crtc_prepare.\n"));
+
+    /* Turn off IGA1. */
+    viaIGA1DPMSControl(pScrn, 0x03);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting iga1_crtc_prepare.\n"));
 }
 
 static void
@@ -3204,9 +3214,6 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
         goto exit;
     }
 
-    /* Turn off IGA1 during mode setting. */
-    viaIGA1DPMSControl(pScrn, 0x03);
-
     viaIGAInitCommon(pScrn);
     viaIGA1Init(pScrn);
 
@@ -3231,15 +3238,31 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     viaIGA1SetFBStartingAddress(crtc, x, y);
     VIAVidAdjustFrame(pScrn, x, y);
 
-    /* Turn on IGA1 now that mode setting is done. */
-    viaIGA1DPMSControl(pScrn, 0x00);
-
 exit:
     /* Put IGA1 back into a normal operating state. */
     viaIGA1HWReset(pScrn, 0x01);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting iga1_crtc_mode_set.\n"));
+}
+
+static void
+iga1_crtc_commit(xf86CrtcPtr crtc)
+{
+    ScrnInfoPtr pScrn = crtc->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entering iga1_crtc_commit.\n"));
+
+    if (crtc->scrn->pScreen != NULL && pVia->drmmode.hwcursor)
+        xf86_reload_cursors(crtc->scrn->pScreen);
+
+    /* Turn on IGA1. */
+    viaIGA1DPMSControl(pScrn, 0x00);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting iga1_crtc_commit.\n"));
 }
 
 static void
@@ -3398,16 +3421,6 @@ iga1_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
 }
 
 static void
-iga_crtc_commit(xf86CrtcPtr crtc)
-{
-    ScrnInfoPtr pScrn = crtc->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    if (crtc->scrn->pScreen != NULL && pVia->drmmode.hwcursor)
-        xf86_reload_cursors(crtc->scrn->pScreen);
-}
-
-static void
 iga_crtc_destroy(xf86CrtcPtr crtc)
 {
     if (crtc->driver_private)
@@ -3423,7 +3436,7 @@ const xf86CrtcFuncsRec iga1_crtc_funcs = {
     .mode_fixup             = iga1_crtc_mode_fixup,
     .prepare                = iga1_crtc_prepare,
     .mode_set               = iga1_crtc_mode_set,
-    .commit                 = iga_crtc_commit,
+    .commit                 = iga1_crtc_commit,
     .gamma_set              = iga1_crtc_gamma_set,
     .shadow_create          = iga1_crtc_shadow_create,
     .shadow_allocate        = iga1_crtc_shadow_allocate,
@@ -3545,8 +3558,18 @@ iga2_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
 }
 
 static void
-iga2_crtc_prepare (xf86CrtcPtr crtc)
+iga2_crtc_prepare(xf86CrtcPtr crtc)
 {
+    ScrnInfoPtr pScrn = crtc->scrn;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered iga2_crtc_prepare.\n"));
+
+    /* Turn off IGA2. */
+    viaIGA2DisplayOutput(pScrn, FALSE);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting iga2_crtc_prepare.\n"));
 }
 
 static void
@@ -3584,9 +3607,6 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
         return;
     }
 
-    /* Turn off IGA2 during mode setting. */
-    viaIGA2DisplayOutput(pScrn, FALSE);
-
     viaIGAInitCommon(pScrn);
     viaIGA2Init(pScrn);
 
@@ -3605,11 +3625,27 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     viaIGA2SetFBStartingAddress(crtc, x, y);
     VIAVidAdjustFrame(pScrn, x, y);
 
-    /* Turn on IGA2 now that mode setting is done. */
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting iga2_crtc_mode_set.\n"));
+}
+
+static void
+iga2_crtc_commit(xf86CrtcPtr crtc)
+{
+    ScrnInfoPtr pScrn = crtc->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entering iga2_crtc_commit.\n"));
+
+    if (crtc->scrn->pScreen != NULL && pVia->drmmode.hwcursor)
+        xf86_reload_cursors(crtc->scrn->pScreen);
+
+    /* Turn on IGA2. */
     viaIGA2DisplayOutput(pScrn, TRUE);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting iga2_crtc_mode_set.\n"));
+                        "Exiting iga2_crtc_commit.\n"));
 }
 
 static void
@@ -3819,7 +3855,7 @@ const xf86CrtcFuncsRec iga2_crtc_funcs = {
     .mode_fixup             = iga2_crtc_mode_fixup,
     .prepare                = iga2_crtc_prepare,
     .mode_set               = iga2_crtc_mode_set,
-    .commit                 = iga_crtc_commit,
+    .commit                 = iga2_crtc_commit,
     .gamma_set              = iga2_crtc_gamma_set,
     .shadow_create          = iga2_crtc_shadow_create,
     .shadow_allocate        = iga2_crtc_shadow_allocate,
