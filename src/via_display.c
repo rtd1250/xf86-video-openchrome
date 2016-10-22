@@ -247,6 +247,29 @@ viaIGA1SetHIDisplayLocation(ScrnInfoPtr pScrn,
 }
 
 /*
+ * Resets IGA2 hardware.
+ */
+static void
+viaIGA2HWReset(ScrnInfoPtr pScrn, CARD8 resetState)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA2HWReset.\n"));
+
+    /* 3X5.6A[6] - Second Display Channel Reset
+     *             0: Reset
+     *             1: Normal Operation */
+    ViaCrtcMask(hwp, 0x6A, resetState << 6, 0x40);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "IGA2 HW Reset: %s\n",
+                (resetState & 0x01) ? "Off" : "On");
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA2HWReset.\n"));
+}
+
+/*
  * Controls IGA2 display output on or off state.
  */
 static void
@@ -280,11 +303,8 @@ viaIGA2DisplayChannel(ScrnInfoPtr pScrn, Bool channelState)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaIGA2DisplayChannel.\n"));
 
-    /* 3X5.6A[7] - Second Display Channel Enable
-     * 3X5.6A[6] - Second Display Channel Reset (0 for reset) */
-    ViaCrtcMask(hwp, 0x6A, 0x00, 0x40);
-    ViaCrtcMask(hwp, 0x6A, channelState ? 0x80 : 0x00, 0x80);
-    ViaCrtcMask(hwp, 0x6A, 0x40, 0x40);
+    /* 3X5.6A[7] - Second Display Channel Enable */
+    ViaCrtcMask(hwp, 0x6A, channelState << 7, 0x80);
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "IGA2 Display Channel: %s\n",
@@ -3599,13 +3619,17 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered iga2_crtc_mode_set.\n"));
 
-    if (!vgaHWInit(pScrn, adjusted_mode)) {
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "vgaHWInit failed.\n"));
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "Exiting iga2_crtc_mode_set.\n"));
-        return;
-    }
+    /* Put IGA2 into a reset state. */
+    viaIGA2HWReset(pScrn, 0x00);
+
+    /* Disable IGA2 display channel. */
+    viaIGA2DisplayChannel(pScrn, FALSE);
+
+//  if (!vgaHWInit(pScrn, adjusted_mode)) {
+//      DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+//                          "vgaHWInit failed.\n"));
+//      goto exit;
+//  }
 
     viaIGAInitCommon(pScrn);
     viaIGA2Init(pScrn);
@@ -3620,10 +3644,15 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 
     hwp->disablePalette(hwp);
 
-    viaIGA2DisplayChannel(pScrn, TRUE);
-
     viaIGA2SetFBStartingAddress(crtc, x, y);
     VIAVidAdjustFrame(pScrn, x, y);
+
+exit:
+    /* Enable IGA2 display channel. */
+    viaIGA2DisplayChannel(pScrn, TRUE);
+
+    /* Put IGA2 back into a normal operating state. */
+    viaIGA2HWReset(pScrn, 0x01);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting iga2_crtc_mode_set.\n"));
