@@ -111,6 +111,86 @@ viaIGA1DPMSControl(ScrnInfoPtr pScrn, CARD8 dpmsControl)
                         "Exiting viaIGA1DPMSControl.\n"));
 }
 
+/*
+ * Sets IGA1 color depth.
+ */
+static void
+viaIGA1SetColorDepth(ScrnInfoPtr pScrn, CARD8 bitsPerPixel)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA1SetColorDepth.\n"));
+
+    /* Set the color depth for IGA1. */
+    switch (bitsPerPixel) {
+    case 8:
+        /* 3C5.15[7]   - 8/6 Bits LUT
+         *               0: 6-bit
+         *               1: 8-bit
+         * 3C5.15[4]   - Hi Color Mode Select
+         *               0: 555
+         *               1: 565
+         * 3C5.15[3:2] - Display Color Depth Select
+         *               00: 8bpp
+         *               01: 16bpp
+         *               10: 30bpp
+         *               11: 32bpp */
+        ViaSeqMask(hwp, 0x15, 0x80, 0x9C);
+        break;
+    case 16:
+        ViaSeqMask(hwp, 0x15, 0x94, 0x9C);
+        break;
+    case 24:
+    case 32:
+        ViaSeqMask(hwp, 0x15, 0x9C, 0x9C);
+        break;
+    default:
+        break;
+    }
+
+    if ((bitsPerPixel == 8)
+        || (bitsPerPixel == 16)
+        || (bitsPerPixel == 24)
+        || (bitsPerPixel == 32)) {
+
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "IGA1 Color Depth: %d bit\n",
+                    bitsPerPixel);
+    } else {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                    "Unsupported IGA1 Color Depth: %d bit\n",
+                    bitsPerPixel);
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA1SetColorDepth.\n"));
+}
+
+/*
+ * Sets IGA1 output LUT. (6-bit or 8-bit)
+ */
+static void
+viaIGA1SetOutputLUT(ScrnInfoPtr pScrn, CARD8 outputLUT)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA1SetOutputLUT.\n"));
+
+    /* Set the output LUT for IGA1. */
+    /* 3C5.15[7]   - 8/6 Bits LUT
+     *               0: 6-bit
+     *               1: 8-bit */
+    ViaSeqMask(hwp, 0x15, outputLUT << 7, 0x80);
+    xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                "IGA1 Output LUT: %s bit\n",
+                (outputLUT & 0x01) ? "8" : "6");
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA1SetOutputLUT.\n"));
+}
+
 static void
 viaIGA1InitHI(ScrnInfoPtr pScrn)
 {
@@ -1217,45 +1297,6 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
     /* 3X5.35[4] - Line Compare Bit [10] */
     ViaCrtcMask(hwp, 0x35, temp >> 6, 0x10);
-
-
-    /* Set the color depth for IGA1. */
-    switch (pScrn->bitsPerPixel) {
-    case 8:
-        /* Only CLE266.AX uses 6-bit LUT. */
-        if (pVia->Chipset == VIA_CLE266 && pVia->ChipRev < 15) {
-            /* 6-bit LUT */
-            /* 3C5.15[7]   - 8/6 Bits LUT
-             *               0: 6-bit
-             *               1: 8-bit
-             * 3C5.15[4]   - Hi Color Mode Select
-             *               0: 555
-             *               1: 565
-             * 3C5.15[3:2] - Display Color Depth Select
-             *               00: 8bpp
-             *               01: 16bpp
-             *               10: 30bpp
-             *               11: 32bpp */
-            ViaSeqMask(hwp, 0x15, 0x00, 0x9C);
-        } else {
-            /* 8-bit LUT */
-            ViaSeqMask(hwp, 0x15, 0x80, 0x9C);
-        }
-
-        break;
-    case 16:
-        ViaSeqMask(hwp, 0x15, 0x94, 0x9C);
-        break;
-    case 24:
-    case 32:
-        ViaSeqMask(hwp, 0x15, 0x9C, 0x9C);
-        break;
-    default:
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                    "Unsupported color depth: %d\n",
-                    pScrn->bitsPerPixel);
-        break;
-    }
 
 
     /* 3X5.32[7:5] - HSYNC Delay Number by VCLK
@@ -3241,7 +3282,16 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     ViaSeqMask(hwp, 0x59, 0x00, 0x80);
 
     ViaPrintMode(pScrn, adjusted_mode);
+
+    /* Set color depth. */
+    viaIGA1SetColorDepth(pScrn, pScrn->bitsPerPixel);
+
+    /* Set output LUT to 8-bit mode. */
+    viaIGA1SetOutputLUT(pScrn, 0x01);
+
+    /* Set display controller screen parameters. */
     viaIGA1SetDisplayRegister(pScrn, adjusted_mode);
+
     ViaSetPrimaryFIFO(pScrn, adjusted_mode);
 
     pBIOSInfo->Clock = ViaModeDotClockTranslate(pScrn, adjusted_mode);
