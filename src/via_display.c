@@ -67,6 +67,28 @@ ViaPrintMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 }
 
 /*
+ * Sets IGA1 or IGA2 for palette LUT access.
+ * This function should be called before changing the
+ * contents of the palette.
+ */
+static void
+viaSetPaletteLUTAccess(ScrnInfoPtr pScrn, CARD8 displaySource)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaSetPaletteLUTAccess.\n"));
+
+    ViaSeqMask(hwp, 0x1A, displaySource, 0x01);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "Palette LUT Access: IGA%d\n",
+                (displaySource & 0x01) + 1);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaSetPaletteLUTAccess.\n"));
+}
+
+/*
  * Resets IGA1 hardware.
  */
 static void
@@ -168,27 +190,63 @@ viaIGA1SetColorDepth(ScrnInfoPtr pScrn, CARD8 bitsPerPixel)
 }
 
 /*
- * Sets IGA1 output LUT. (6-bit or 8-bit)
+ * Sets IGA1 palette LUT resolution. (6-bit or 8-bit)
  */
 static void
-viaIGA1SetOutputLUT(ScrnInfoPtr pScrn, CARD8 outputLUT)
+viaIGA1SetPaletteLUTResolution(ScrnInfoPtr pScrn, CARD8 paletteLUT)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaIGA1SetOutputLUT.\n"));
+                        "Entered viaIGA1SetPaletteLUTResolution.\n"));
 
-    /* Set the output LUT for IGA1. */
-    /* 3C5.15[7]   - 8/6 Bits LUT
-     *               0: 6-bit
-     *               1: 8-bit */
-    ViaSeqMask(hwp, 0x15, outputLUT << 7, 0x80);
-    xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                "IGA1 Output LUT: %s bit\n",
-                (outputLUT & 0x01) ? "8" : "6");
+    /* Set the palette LUT resolution for IGA1. */
+    /* 3C5.15[7] - IGA1 6 / 8 Bit LUT
+     *             0: 6-bit
+     *             1: 8-bit */
+    ViaSeqMask(hwp, 0x15, paletteLUT << 7, 0x80);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "IGA1 Palette LUT Resolution: %s bit\n",
+                (paletteLUT & 0x01) ? "8" : "6");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaIGA1SetOutputLUT.\n"));
+                        "Exiting viaIGA1SetPaletteLUTResolution.\n"));
+}
+
+/*
+ * Controls IGA1 gamma correction state.
+ */
+static void
+viaIGA1SetGamma(ScrnInfoPtr pScrn, CARD8 gammaCorrection)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA1SetGamma.\n"));
+
+    switch (pVia->Chipset) {
+    case VIA_CLE266:
+    case VIA_KM400:
+        /* 3C5.16[7] - IGA1 Gamma Correction
+         *             0: Disable
+         *             1: Enable */
+        ViaSeqMask(hwp, 0x16, gammaCorrection << 7, 0x80);
+        break;
+    default:
+        /* 3X5.33[7] - IGA1 Gamma Correction
+         *             0: Disable
+         *             1: Enable */
+        ViaCrtcMask(hwp, 0x33, gammaCorrection << 7, 0x80);
+        break;
+    }
+
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "IGA1 Gamma Correction: %s\n",
+                (gammaCorrection & 0x01) ? "On" : "Off");
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA1SetGamma.\n"));
 }
 
 static void
@@ -394,6 +452,53 @@ viaIGA2DisplayChannel(ScrnInfoPtr pScrn, Bool channelState)
                         "Exiting viaIGA2DisplayChannel.\n"));
 }
 
+/*
+ * Sets IGA2 palette LUT resolution. (6-bit or 8-bit)
+ */
+static void
+viaIGA2SetPaletteLUTResolution(ScrnInfoPtr pScrn, CARD8 paletteLUT)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA2SetPaletteLUTResolution.\n"));
+
+    /* Set the palette LUT resolution for IGA2. */
+    /* 3X5.6A[5] - IGA2 6 / 8 Bit LUT
+     *             0: 6-bit
+     *             1: 8-bit */
+    ViaCrtcMask(hwp, 0x6A, paletteLUT << 5, 0x20);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "IGA2 Palette LUT Resolution: %s bit\n",
+                (paletteLUT & 0x01) ? "8" : "6");
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA2SetPaletteLUTResolution.\n"));
+}
+
+/*
+ * Controls IGA2 gamma correction state.
+ */
+static void
+viaIGA2SetGamma(ScrnInfoPtr pScrn, CARD8 gammaCorrection)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA2SetGamma.\n"));
+
+    /* 3X5.6A[1] - IGA2 Gamma Correction
+     *             0: Disable
+     *             1: Enable */
+    ViaCrtcMask(hwp, 0x6A, gammaCorrection << 1, 0x02);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "IGA2 Gamma Correction: %s\n",
+                (gammaCorrection & 0x01) ? "On" : "Off");
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA2SetGamma.\n"));
+}
+
 static void
 viaIGA2InitHI(ScrnInfoPtr pScrn)
 {
@@ -568,7 +673,7 @@ VIALoadRgbLut(ScrnInfoPtr pScrn, int start, int numColors, LOCO *colors)
      * X subsystem.  So we just space out RGB values over the 256*3. */
 
     switch (pScrn->bitsPerPixel) {
-        case 16:
+        case 15:
             for (i = start; i < numColors; i++) {
                 hwp->writeDacWriteAddr(hwp, i * 4);
                 for (j = 0; j < 4; j++) {
@@ -579,6 +684,7 @@ VIALoadRgbLut(ScrnInfoPtr pScrn, int start, int numColors, LOCO *colors)
             }
             break;
         case 8:
+        case 16:
         case 24:
         case 32:
             for (i = start; i < numColors; i++) {
@@ -2323,7 +2429,7 @@ viaIGA2Init(ScrnInfoPtr pScrn)
      * 3X5.6A[0] - LCD Pre-fetch Mode Enable
      *             0: Disable
      *             1: Enable */
-    ViaCrtcMask(hwp, 0x6A, 0x80, 0xB3);
+    ViaCrtcMask(hwp, 0x6A, 0x80, 0xC1);
 
     /* TV out uses division by 2 mode.
      * Other devices like analog (VGA), DVI, flat panel, etc.,
@@ -3157,9 +3263,6 @@ iga1_crtc_restore(xf86CrtcPtr crtc)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered iga1_crtc_restore.\n"));
 
-    /* Gamma must be disabled before restoring palette. */
-    ViaGammaDisable(pScrn);
-
     vgaHWRestore(pScrn, &hwp->SavedReg, VGA_SR_ALL);
     viaIGA1Restore(pScrn);
 
@@ -3286,9 +3389,6 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     /* Set color depth. */
     viaIGA1SetColorDepth(pScrn, pScrn->bitsPerPixel);
 
-    /* Set output LUT to 8-bit mode. */
-    viaIGA1SetOutputLUT(pScrn, 0x01);
-
     /* Set display controller screen parameters. */
     viaIGA1SetDisplayRegister(pScrn, adjusted_mode);
 
@@ -3299,8 +3399,6 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     ViaSetPrimaryDotclock(pScrn, pBIOSInfo->Clock);
     ViaSetUseExternalClock(hwp);
     ViaCrtcMask(hwp, 0x6B, 0x00, 0x01);
-
-    hwp->disablePalette(hwp);
 
     /* Enable IGA1 */
     ViaSeqMask(hwp, 0x59, 0x80, 0x80);
@@ -3340,10 +3438,11 @@ iga1_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
 					int size)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
     LOCO colors[size];
     int i;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entering iga1_crtc_gamma_set.\n"));
 
     for (i = 0; i < size; i++) {
         colors[i].red = red[i] >> 8;
@@ -3351,28 +3450,47 @@ iga1_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
         colors[i].blue = blue[i] >> 8;
     }
 
-    if (pScrn->bitsPerPixel != 8) {
-        switch (pVia->Chipset) {
-        case VIA_CLE266:
-        case VIA_KM400:
-            ViaSeqMask(hwp, 0x16, 0x80, 0x80);
-            break;
-        default:
-            ViaCrtcMask(hwp, 0x33, 0x80, 0x80);
-            break;
-        }
+    /* Set palette LUT to 8-bit mode. */
+    viaIGA1SetPaletteLUTResolution(pScrn, 0x01);
 
-        ViaSeqMask(hwp, 0x1A, 0x00, 0x01);
+    switch (pScrn->bitsPerPixel) {
+    case 8:
+        /* IGA1 will access the palette LUT. */
+        viaSetPaletteLUTAccess(pScrn, 0x00);
+
         VIALoadRgbLut(pScrn, 0, size, colors);
 
-    } else {
-        for (i = 0; i < size; i++) {
-            hwp->writeDacWriteAddr(hwp, i);
-            hwp->writeDacData(hwp, colors[i].red);
-            hwp->writeDacData(hwp, colors[i].green);
-            hwp->writeDacData(hwp, colors[i].blue);
-        }
+        /* Turn gamma correction off. */
+        viaIGA1SetGamma(pScrn, 0x00);
+        break;
+    case 16:
+        /* IGA1 will access the palette LUT. */
+        viaSetPaletteLUTAccess(pScrn, 0x00);
+
+        VIALoadRgbLut(pScrn, 0, size, colors);
+
+        /* Turn gamma correction on. */
+        viaIGA1SetGamma(pScrn, 0x01);
+        break;
+    case 24:
+    case 32:
+        /* IGA1 will access the palette LUT. */
+        viaSetPaletteLUTAccess(pScrn, 0x00);
+
+        VIALoadRgbLut(pScrn, 0, size, colors);
+
+        /* Turn gamma correction on. */
+        viaIGA1SetGamma(pScrn, 0x01);
+        break;
+    default:
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                    "Unsupported color depth: %d\n",
+                    pScrn->bitsPerPixel);
+        break;
     }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting iga1_crtc_gamma_set.\n"));
 }
 
 static void *
@@ -3692,8 +3810,6 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     ViaSetSecondaryDotclock(pScrn, pBIOSInfo->Clock);
     ViaSetUseExternalClock(hwp);
 
-    hwp->disablePalette(hwp);
-
     viaIGA2SetFBStartingAddress(crtc, x, y);
     VIAVidAdjustFrame(pScrn, x, y);
 
@@ -3732,11 +3848,11 @@ iga2_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
 					int size)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-    int SR1A, SR1B, CR67, CR6A;
     LOCO colors[size];
     int i;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entering iga2_crtc_gamma_set.\n"));
 
     for (i = 0; i < size; i++) {
         colors[i].red = red[i] >> 8;
@@ -3744,57 +3860,47 @@ iga2_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
         colors[i].blue = blue[i] >> 8;
     }
 
-    if (pScrn->bitsPerPixel != 8) {
-        if (!(pVia->Chipset == VIA_CLE266 &&
-            CLE266_REV_IS_AX(pVia->ChipRev))) {
-            ViaSeqMask(hwp, 0x1A, 0x01, 0x01);
-            ViaCrtcMask(hwp, 0x6A, 0x02, 0x02);
+    /* Set palette LUT to 8-bit mode. */
+    viaIGA2SetPaletteLUTResolution(pScrn, 0x01);
 
-            switch (pVia->Chipset) {
-            case VIA_CLE266:
-            case VIA_KM400:
-            case VIA_K8M800:
-            case VIA_PM800:
-                break;
+    switch (pScrn->bitsPerPixel) {
+    case 8:
+        /* IGA2 will access the palette LUT. */
+        viaSetPaletteLUTAccess(pScrn, 0x01);
 
-            default:
-                ViaCrtcMask(hwp, 0x6A, 0x20, 0x20);
-                break;
-            }
-            VIALoadRgbLut(pScrn, 0, size, colors);
-        }
-    } else {
-        SR1A = hwp->readSeq(hwp, 0x1A);
-        SR1B = hwp->readSeq(hwp, 0x1B);
-        CR67 = hwp->readCrtc(hwp, 0x67);
-        CR6A = hwp->readCrtc(hwp, 0x6A);
+        VIALoadRgbLut(pScrn, 0, size, colors);
 
-        ViaSeqMask(hwp, 0x1A, 0x01, 0x01);
-        ViaSeqMask(hwp, 0x1B, 0x80, 0x80);
-        ViaCrtcMask(hwp, 0x67, 0x00, 0xC0);
-        ViaCrtcMask(hwp, 0x6A, 0xC0, 0xC0);
+        /* Turn gamma correction off. */
+        viaIGA2SetGamma(pScrn, 0x00);
+        break;
+    case 16:
+        /* IGA2 will access the palette LUT. */
+        viaSetPaletteLUTAccess(pScrn, 0x01);
 
-        for (i = 0; i < size; i++) {
-            hwp->writeDacWriteAddr(hwp, i);
-            hwp->writeDacData(hwp, colors[i].red);
-            hwp->writeDacData(hwp, colors[i].green);
-            hwp->writeDacData(hwp, colors[i].blue);
-        }
+        VIALoadRgbLut(pScrn, 0, size, colors);
 
-        hwp->writeSeq(hwp, 0x1A, SR1A);
-        hwp->writeSeq(hwp, 0x1B, SR1B);
-        hwp->writeCrtc(hwp, 0x67, CR67);
-        hwp->writeCrtc(hwp, 0x6A, CR6A);
+        /* Turn gamma correction on. */
+        viaIGA2SetGamma(pScrn, 0x01);
+        break;
+    case 24:
+    case 32:
+        /* IGA2 will access the palette LUT. */
+        viaSetPaletteLUTAccess(pScrn, 0x01);
 
-        /* Screen 0 palette was changed by mode setting of Screen 1,
-         * so load it again. */
-        for (i = 0; i < size; i++) {
-            hwp->writeDacWriteAddr(hwp, i);
-            hwp->writeDacData(hwp, colors[i].red);
-            hwp->writeDacData(hwp, colors[i].green);
-            hwp->writeDacData(hwp, colors[i].blue);
-        }
+        VIALoadRgbLut(pScrn, 0, size, colors);
+
+        /* Turn gamma correction on. */
+        viaIGA2SetGamma(pScrn, 0x01);
+        break;
+    default:
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                    "Unsupported color depth: %d\n",
+                    pScrn->bitsPerPixel);
+        break;
     }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting iga2_crtc_gamma_set.\n"));
 }
 
 static void *
