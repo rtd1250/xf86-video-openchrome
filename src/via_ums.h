@@ -197,7 +197,14 @@ typedef struct _VIATMDSRec {
     I2CBusPtr pVIATMDSI2CBus;
 } VIATMDSRec, *VIATMDSRecPtr;
 
-
+typedef struct
+{
+    CARD16 X;
+    CARD16 Y;
+    CARD16 Bpp;
+    CARD8 bRamClock;
+    CARD8 bTuningValue;
+} ViaExpireNumberTable;
 
 
 /* via_ums.c */
@@ -274,11 +281,6 @@ void via_dvi_init(ScrnInfoPtr pScrn);
 void ViaTVPrintRegs(ScrnInfoPtr pScrn);
 #endif
 Bool via_tv_init(ScrnInfoPtr pScrn);
-
-/* in via_bandwidth.c */
-void ViaSetPrimaryFIFO(ScrnInfoPtr pScrn, DisplayModePtr mode);
-void ViaSetSecondaryFIFO(ScrnInfoPtr pScrn, DisplayModePtr mode);
-void ViaDisablePrimaryFIFO(ScrnInfoPtr pScrn);
 
 /* via_vt162x.c */
 I2CDevPtr ViaVT162xDetect(ScrnInfoPtr pScrn, I2CBusPtr pBus, CARD8 Address);

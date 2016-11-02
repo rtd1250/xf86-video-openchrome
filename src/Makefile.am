@@ -45,7 +45,6 @@ openchrome_drv_la_SOURCES = \
          via_exa.c \
          via_exa_h2.c \
          via_exa_h6.c \
-         via_bandwidth.c \
          via_ums.h \
          via_ch7xxx.c \
          via_ch7xxx.h \
