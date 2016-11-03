@@ -4292,12 +4292,6 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     /* Disable IGA2 display channel. */
     viaIGA2DisplayChannel(pScrn, FALSE);
 
-//  if (!vgaHWInit(pScrn, adjusted_mode)) {
-//      DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-//                          "vgaHWInit failed.\n"));
-//      goto exit;
-//  }
-
     viaIGAInitCommon(pScrn);
     viaIGA2Init(pScrn);
 
@@ -4318,7 +4312,6 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     viaIGA2SetFBStartingAddress(crtc, x, y);
     VIAVidAdjustFrame(pScrn, x, y);
 
-exit:
     /* Enable IGA2 display channel. */
     viaIGA2DisplayChannel(pScrn, TRUE);
 
