@@ -473,6 +473,56 @@ viaIGA2DisplayChannel(ScrnInfoPtr pScrn, Bool channelState)
 }
 
 /*
+ * Sets IGA2 color depth.
+ */
+static void
+viaIGA2SetColorDepth(ScrnInfoPtr pScrn, CARD8 bitsPerPixel)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaIGA2SetColorDepth.\n"));
+
+    /* Set the color depth for IGA2. */
+    switch (pScrn->bitsPerPixel) {
+        case 8:
+            /* 3X5.67[7:6] - Display Color Depth Select
+             *               00: 8bpp
+             *               01: 16bpp
+             *               10: 30bpp
+             *               11: 32bpp */
+            ViaCrtcMask(hwp, 0x67, 0x00, 0xC0);
+            break;
+        case 16:
+            ViaCrtcMask(hwp, 0x67, 0x40, 0xC0);
+            break;
+        case 24:
+        case 32:
+            ViaCrtcMask(hwp, 0x67, 0xC0, 0xC0);
+            break;
+        default:
+            break;
+    }
+
+    if ((bitsPerPixel == 8)
+        || (bitsPerPixel == 16)
+        || (bitsPerPixel == 24)
+        || (bitsPerPixel == 32)) {
+
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "IGA2 Color Depth: %d bit\n",
+                    bitsPerPixel);
+    } else {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                    "Unsupported IGA2 Color Depth: %d bit\n",
+                    bitsPerPixel);
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaIGA2SetColorDepth.\n"));
+}
+
+/*
  * Sets IGA2 palette LUT resolution. (6-bit or 8-bit)
  */
 static void
@@ -2783,37 +2833,6 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "Requested Screen Mode: %s\n", mode->name);
 
-    /* Set the color depth for IGA2. */
-    switch (pScrn->bitsPerPixel) {
-        case 8:
-            /* Only CLE266.AX uses 6-bit LUT. */
-            if (pVia->Chipset == VIA_CLE266 && pVia->ChipRev < 15) {
-                /* 6-bit LUT */
-                /* 3X5.6A[5] - Second Display 8/6 Bits LUT
-                 *             0: 6-bit
-                 *             1: 8-bit */
-                ViaCrtcMask(hwp, 0x6A, 0x00, 0x20);
-            } else {
-                /* Set IGA2 display LUT to 8-bit */
-                ViaCrtcMask(hwp, 0x6A, 0x20, 0x20);
-            }
-
-            ViaCrtcMask(hwp, 0x67, 0x00, 0xC0);
-            break;
-        case 16:
-            ViaCrtcMask(hwp, 0x67, 0x40, 0xC0);
-            break;
-        case 24:
-        case 32:
-            ViaCrtcMask(hwp, 0x67, 0xC0, 0xC0);
-            break;
-        default:
-            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                        "Unsupported color depth: %d\n",
-                        pScrn->bitsPerPixel);
-            break;
-    }
-
     /* LVDS Channel 1 and 2 should be controlled by PMS
      * (Power Management Status). */
     ViaSeqMask(hwp, 0x2A, 0x0F, 0x0F);
@@ -4283,7 +4302,13 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     viaIGA2Init(pScrn);
 
     ViaPrintMode(pScrn, adjusted_mode);
+
+    /* Set color depth. */
+    viaIGA2SetColorDepth(pScrn, pScrn->bitsPerPixel);
+
+    /* Set display controller screen parameters. */
     viaIGA2SetDisplayRegister(pScrn, adjusted_mode);
+
     ViaSetSecondaryFIFO(pScrn, adjusted_mode);
     pBIOSInfo->Clock = ViaModeDotClockTranslate(pScrn, adjusted_mode);
     pBIOSInfo->ClockExternal = FALSE;
