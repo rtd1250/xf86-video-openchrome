@@ -3957,7 +3957,7 @@ iga1_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
         VIALoadRgbLut(pScrn, 0, size, colors);
 
         /* Turn gamma correction off. */
-        viaIGA1SetGamma(pScrn, 0x00);
+        viaIGA1SetGamma(pScrn, FALSE);
         break;
     case 16:
         /* IGA1 will access the palette LUT. */
@@ -3965,8 +3965,8 @@ iga1_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
 
         VIALoadRgbLut(pScrn, 0, size, colors);
 
-        /* Turn gamma correction on. */
-        viaIGA1SetGamma(pScrn, 0x01);
+        /* Turn gamma correction off. */
+        viaIGA1SetGamma(pScrn, FALSE);
         break;
     case 24:
     case 32:
@@ -3975,8 +3975,8 @@ iga1_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
 
         VIALoadRgbLut(pScrn, 0, size, colors);
 
-        /* Turn gamma correction on. */
-        viaIGA1SetGamma(pScrn, 0x01);
+        /* Turn gamma correction off. */
+        viaIGA1SetGamma(pScrn, FALSE);
         break;
     default:
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
@@ -4366,7 +4366,7 @@ iga2_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
         VIALoadRgbLut(pScrn, 0, size, colors);
 
         /* Turn gamma correction off. */
-        viaIGA2SetGamma(pScrn, 0x00);
+        viaIGA2SetGamma(pScrn, FALSE);
         break;
     case 16:
         /* IGA2 will access the palette LUT. */
@@ -4374,8 +4374,8 @@ iga2_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
 
         VIALoadRgbLut(pScrn, 0, size, colors);
 
-        /* Turn gamma correction on. */
-        viaIGA2SetGamma(pScrn, 0x01);
+        /* Turn gamma correction off. */
+        viaIGA2SetGamma(pScrn, FALSE);
         break;
     case 24:
     case 32:
@@ -4384,8 +4384,8 @@ iga2_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
 
         VIALoadRgbLut(pScrn, 0, size, colors);
 
-        /* Turn gamma correction on. */
-        viaIGA2SetGamma(pScrn, 0x01);
+        /* Turn gamma correction off. */
+        viaIGA2SetGamma(pScrn, FALSE);
         break;
     default:
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
