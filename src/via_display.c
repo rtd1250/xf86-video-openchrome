@@ -167,10 +167,7 @@ viaIGA1SetColorDepth(ScrnInfoPtr pScrn, CARD8 bitsPerPixel)
     /* Set the color depth for IGA1. */
     switch (bitsPerPixel) {
     case 8:
-        /* 3C5.15[7]   - 8/6 Bits LUT
-         *               0: 6-bit
-         *               1: 8-bit
-         * 3C5.15[4]   - Hi Color Mode Select
+        /* 3C5.15[4]   - Hi Color Mode Select
          *               0: 555
          *               1: 565
          * 3C5.15[3:2] - Display Color Depth Select
@@ -178,14 +175,14 @@ viaIGA1SetColorDepth(ScrnInfoPtr pScrn, CARD8 bitsPerPixel)
          *               01: 16bpp
          *               10: 30bpp
          *               11: 32bpp */
-        ViaSeqMask(hwp, 0x15, 0x80, 0x9C);
+        ViaSeqMask(hwp, 0x15, 0x00, 0x1C);
         break;
     case 16:
-        ViaSeqMask(hwp, 0x15, 0x94, 0x9C);
+        ViaSeqMask(hwp, 0x15, 0x14, 0x1C);
         break;
     case 24:
     case 32:
-        ViaSeqMask(hwp, 0x15, 0x9C, 0x9C);
+        ViaSeqMask(hwp, 0x15, 0x1C, 0x1C);
         break;
     default:
         break;
