@@ -322,7 +322,7 @@ viaLVDS2SetDithering(ScrnInfoPtr pScrn, CARD8 ditheringStatus)
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "LVDS2 Output Color Dithering: %s\n",
-                ditheringStatus ? "On (18-bit)" : "Off (24-bit)");
+                ditheringStatus ? "On (18 bit)" : "Off (24 bit)");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaLVDS2SetDithering.\n"));
@@ -775,7 +775,7 @@ viaLVDSGetFPInfoFromScratchPad(xf86OutputPtr output)
                panel->useDualEdge ? "On" : "Off");
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                "Flat Panel Output Color Dithering: %s\n",
-               panel->useDithering ? "On (18-bit)" : "Off (24-bit)");
+               panel->useDithering ? "On (18 bit)" : "Off (24 bit)");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                      "Exiting viaLVDSGetFPInfoFromScratchPad.\n"));
