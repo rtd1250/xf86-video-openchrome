@@ -271,9 +271,6 @@ viaIGA1InitHI(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaIGA1InitHI.\n"));
-
     switch(pVia->Chipset) {
     case VIA_PM800:
     case VIA_CX700:
@@ -299,9 +296,6 @@ viaIGA1InitHI(ScrnInfoPtr pScrn)
         VIASETREG(HI_CONTROL, 0x76000004);
         break;
     }
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaIGA1InitHI.\n"));
 }
 
 static void
@@ -311,9 +305,6 @@ viaIGA1SetHIStartingAddress(xf86CrtcPtr crtc)
     drmmode_crtc_private_ptr iga = crtc->driver_private;
     ScrnInfoPtr pScrn = crtc->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaIGA1SetHIStartingAddress.\n"));
 
     switch(pVia->Chipset) {
     case VIA_PM800:
@@ -330,9 +321,6 @@ viaIGA1SetHIStartingAddress(xf86CrtcPtr crtc)
         VIASETREG(HI_FBOFFSET, iga->cursor_bo->offset);
         break;
     }
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaIGA1SetHIStartingAddress.\n"));
 }
 
 /*
@@ -343,9 +331,6 @@ viaIGA1DisplayHI(ScrnInfoPtr pScrn, Bool HI_Status)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     CARD32 temp;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaIGA1DisplayHI.\n"));
 
     switch(pVia->Chipset) {
     case VIA_PM800:
@@ -371,9 +356,6 @@ viaIGA1DisplayHI(ScrnInfoPtr pScrn, Bool HI_Status)
         VIASETREG(HI_CONTROL, temp);
         break;
     }
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaIGA1DisplayHI.\n"));
 }
 
 static void
@@ -571,9 +553,6 @@ viaIGA2InitHI(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaIGA2InitHI.\n"));
-
     switch(pVia->Chipset) {
     case VIA_PM800:
     case VIA_CX700:
@@ -596,9 +575,6 @@ viaIGA2InitHI(ScrnInfoPtr pScrn)
         VIASETREG(HI_CONTROL, 0xF6000004);
         break;
     }
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaIGA2InitHI.\n"));
 }
 
 static void
@@ -608,13 +584,7 @@ viaIGA2SetHIStartingAddress(xf86CrtcPtr crtc)
     ScrnInfoPtr pScrn = crtc->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaIGA2SetHIStartingAddress.\n"));
-
     VIASETREG(HI_FBOFFSET, iga->cursor_bo->offset);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaIGA2SetHIStartingAddress.\n"));
 }
 
 /*
@@ -625,9 +595,6 @@ viaIGA2DisplayHI(ScrnInfoPtr pScrn, Bool HI_Status)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     CARD32 temp;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaIGA2DisplayHI.\n"));
 
     switch(pVia->Chipset) {
     case VIA_PM800:
@@ -653,9 +620,6 @@ viaIGA2DisplayHI(ScrnInfoPtr pScrn, Bool HI_Status)
         VIASETREG(HI_CONTROL, temp);
         break;
     }
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaIGA2DisplayHI.\n"));
 }
 
 static void
@@ -4059,13 +4023,7 @@ iga1_crtc_show_cursor(xf86CrtcPtr crtc)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered iga1_crtc_show_cursor.\n"));
-
     viaIGA1DisplayHI(pScrn, TRUE);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting iga1_crtc_show_cursor.\n"));
 }
 
 static void
@@ -4073,13 +4031,7 @@ iga1_crtc_hide_cursor(xf86CrtcPtr crtc)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered iga1_crtc_hide_cursor.\n"));
-
     viaIGA1DisplayHI(pScrn, FALSE);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting iga1_crtc_hide_cursor.\n"));
 }
 
 static void
@@ -4089,9 +4041,6 @@ iga1_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
     ScrnInfoPtr pScrn = crtc->scrn;
     void *dst;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered iga1_crtc_load_cursor_argb.\n"));
-
     dst = drm_bo_map(pScrn, iga->cursor_bo);
     memset(dst, 0x00, iga->cursor_bo->size);
     memcpy(dst, image, iga->cursor_bo->size);
@@ -4099,9 +4048,6 @@ iga1_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
 
     viaIGA1InitHI(pScrn);
     viaIGA1SetHIStartingAddress(crtc);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting iga1_crtc_load_cursor_argb.\n"));
 }
 
 static void
@@ -4480,14 +4426,7 @@ iga2_crtc_show_cursor(xf86CrtcPtr crtc)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered iga2_crtc_show_cursor.\n"));
-
     viaIGA2DisplayHI(pScrn, TRUE);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting iga2_crtc_show_cursor.\n"));
-
 }
 
 static void
@@ -4495,13 +4434,7 @@ iga2_crtc_hide_cursor(xf86CrtcPtr crtc)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered iga2_crtc_hide_cursor.\n"));
-
     viaIGA2DisplayHI(pScrn, FALSE);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting iga2_crtc_hide_cursor.\n"));
 }
 
 static void
@@ -4511,9 +4444,6 @@ iga2_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
     ScrnInfoPtr pScrn = crtc->scrn;
     void *dst;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered iga2_crtc_load_cursor_argb.\n"));
-
     dst = drm_bo_map(pScrn, iga->cursor_bo);
     memset(dst, 0x00, iga->cursor_bo->size);
     memcpy(dst, image, iga->cursor_bo->size);
@@ -4521,9 +4451,6 @@ iga2_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
 
     viaIGA2InitHI(pScrn);
     viaIGA2SetHIStartingAddress(crtc);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting iga2_crtc_load_cursor_argb.\n"));
 }
 
 const xf86CrtcFuncsRec iga2_crtc_funcs = {
