@@ -116,6 +116,9 @@ version.h: $(openchrome_drv_la_SOURCES)
         if [ -d .svn ]; then \
 	        echo '#define BUILDCOMMENT "(development build, at revision '\
 	                "`svnversion -nc .. | sed -e s/^[^:]*://`"')"' > $@.tmp; \
+        elif [ "$$SOURCE_DATE_EPOCH" ]; then \
+	        printf '#define BUILDCOMMENT "(compiled with SOURCE_DATE_EPOCH: %s)"' $$SOURCE_DATE_EPOCH \
+        	> $@.tmp; \
         else \
 	        date +'#define BUILDCOMMENT "(development build, compiled on %c)"' \
         	> $@.tmp; \
