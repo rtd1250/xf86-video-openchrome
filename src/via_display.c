@@ -4181,7 +4181,7 @@ iga2_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
     if (pVia->pBIOSInfo->Bandwidth < temp) {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                     "Required bandwidth is not available. (%u > %u)\n",
-			        (unsigned)temp, (unsigned)pVia->pBIOSInfo->Bandwidth);
+                    (unsigned)temp, (unsigned)pVia->pBIOSInfo->Bandwidth);
         return FALSE;
     }
     return TRUE;
@@ -4286,7 +4286,7 @@ iga2_crtc_commit(xf86CrtcPtr crtc)
 
 static void
 iga2_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
-					int size)
+                    int size)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
     LOCO colors[size];
