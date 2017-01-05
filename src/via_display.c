@@ -3691,7 +3691,7 @@ iga1_crtc_commit(xf86CrtcPtr crtc)
 
 static void
 iga1_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
-					int size)
+                    int size)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
     LOCO colors[size];
