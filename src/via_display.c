@@ -2302,10 +2302,13 @@ viaIGA1Restore(ScrnInfoPtr pScrn)
 
     vgaHWProtect(pScrn, TRUE);
 
+    vgaHWRestore(pScrn, &hwp->SavedReg, VGA_SR_ALL);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Restoring sequencer registers.\n"));
+
     /* Unlock extended registers. */
     hwp->writeSeq(hwp, 0x10, 0x01);
-
-    vgaHWRestore(pScrn, &hwp->SavedReg, VGA_SR_ALL);
 
     hwp->writeSeq(hwp, 0x15, Regs->SR[0x15]);
     ViaSeqMask(hwp, 0x16, Regs->SR[0x16], 0xBF);
