@@ -3342,39 +3342,109 @@ viaIGA2Save(ScrnInfoPtr pScrn)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Saving IGA2 registers.\n"));
 
-/* Unlock and save extended registers. */
+    /* Unlock extended registers. */
     hwp->writeSeq(hwp, 0x10, 0x01);
 
-    /* Save LCD control registers (from CR 0x50 to 0x93). */
-    for (i = 0; i < 68; i++)
-        Regs->CRTCRegs[i] = hwp->readCrtc(hwp, i + 0x50);
-
-    if (pVia->Chipset != VIA_CLE266 && pVia->Chipset != VIA_KM400) {
-        /* LVDS Channel 2 Function Select 0 / DVI Function Select */
-        Regs->CR97 = hwp->readCrtc(hwp, 0x97);
-        /* LVDS Channel 1 Function Select 0 */
-        Regs->CR99 = hwp->readCrtc(hwp, 0x99);
-        /* Digital Video Port 1 Function Select 0 */
-        Regs->CR9B = hwp->readCrtc(hwp, 0x9B);
-        /* Power Now Control 4 */
-        Regs->CR9F = hwp->readCrtc(hwp, 0x9F);
-
-        /* Horizontal Scaling Initial Value */
-        Regs->CRA0 = hwp->readCrtc(hwp, 0xA0);
-        /* Vertical Scaling Initial Value */
-        Regs->CRA1 = hwp->readCrtc(hwp, 0xA1);
-        /* Scaling Enable Bit */
-        Regs->CRA2 = hwp->readCrtc(hwp, 0xA2);
+    for (i = 0; i < (0x88 - 0x50 + 1); i++) {
+        Regs->CR[i + 0x50] = hwp->readCrtc(hwp, i + 0x50);
     }
 
-    /* Save TMDS status */
+    for (i = 0; i < (0x92 - 0x8A + 1); i++) {
+        Regs->CR[i + 0x8A] = hwp->readCrtc(hwp, i + 0x8A);
+    }
+
+    for (i = 0; i < (0xA3 - 0x94 + 1); i++) {
+        Regs->CR[i + 0x94] = hwp->readCrtc(hwp, i + 0x94);
+    }
+
+    Regs->CR[0xA4] = hwp->readCrtc(hwp, 0xA4);
+
+    for (i = 0; i < (0xAC - 0xA5 + 1); i++) {
+        Regs->CR[i + 0xA5] = hwp->readCrtc(hwp, i + 0xA5);
+    }
+
+    /* Chrome 9 */
     switch (pVia->Chipset) {
-    case VIA_CX700:
+    case VIA_K8M890:
+    case VIA_P4M900:
     case VIA_VX800:
     case VIA_VX855:
     case VIA_VX900:
-        Regs->CRD2 = hwp->readCrtc(hwp, 0xD2);
+        Regs->CR[0xAF] = hwp->readCrtc(hwp, 0xAF);
         break;
+    default:
+        break;
+    }
+
+    /* Chrome 9, Chrome 9 HC, and Chrome 9 HC3 */
+    switch (pVia->Chipset) {
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+        for (i = 0; i < (0xCD - 0xB0 + 1); i++) {
+            Regs->CR[i + 0xB0] = hwp->readCrtc(hwp, i + 0xB0);
+        }
+
+        break;
+    default:
+        break;
+    }
+
+    switch (pVia->Chipset) {
+
+    /* UniChrome Pro and UniChrome Pro II */
+    case VIA_PM800:
+    case VIA_K8M800:
+    case VIA_P4M800PRO:
+    case VIA_CX700:
+    case VIA_P4M890:
+        for (i = 0; i < (0xD7 - 0xD0 + 1); i++) {
+            Regs->CR[i + 0xD0] = hwp->readCrtc(hwp, i + 0xD0);
+        }
+
+        break;
+
+    /* Chrome 9 */
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        for (i = 0; i < (0xEC - 0xD0 + 1); i++) {
+            Regs->CR[i + 0xD0] = hwp->readCrtc(hwp, i + 0xD0);
+        }
+
+        break;
+    default:
+        break;
+    }
+
+    /* Chrome 9 */
+    switch (pVia->Chipset) {
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        for (i = 0; i < (0xF5 - 0xF0 + 1); i++) {
+            Regs->CR[i + 0xF0] = hwp->readCrtc(hwp, i + 0xF0);
+        }
+
+        break;
+    default:
+        break;
+    }
+
+    /* Chrome 9 HCM and Chrome 9 HD */
+    if ((pVia->Chipset == VIA_VX855) || (pVia->Chipset == VIA_VX900)) {
+        for (i = 0; i < (0xFC - 0xF6 + 1); i++) {
+            Regs->CR[i + 0xF6] = hwp->readCrtc(hwp, i + 0xF6);
+        }
+    }
+
+    /* Chrome 9 HD */
+    if (pVia->Chipset == VIA_VX900) {
+        Regs->CR[0xFD] = hwp->readCrtc(hwp, 0xFD);
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -3405,32 +3475,124 @@ viaIGA2Restore(ScrnInfoPtr pScrn)
     /* Unlock extended registers. */
     hwp->writeSeq(hwp, 0x10, 0x01);
 
-    /* Restore LCD control registers. */
-    for (i = 0; i < 68; i++)
-        hwp->writeCrtc(hwp, i + 0x50, Regs->CRTCRegs[i]);
-
-    if (pVia->Chipset != VIA_CLE266 && pVia->Chipset != VIA_KM400) {
-        /* Scaling Initial values */
-        hwp->writeCrtc(hwp, 0xA0, Regs->CRA0);
-        hwp->writeCrtc(hwp, 0xA1, Regs->CRA1);
-        hwp->writeCrtc(hwp, 0xA2, Regs->CRA2);
-
-        /* LVDS Channels Functions Selection */
-        hwp->writeCrtc(hwp, 0x97, Regs->CR97);
-        hwp->writeCrtc(hwp, 0x99, Regs->CR99);
-        hwp->writeCrtc(hwp, 0x9B, Regs->CR9B);
-        hwp->writeCrtc(hwp, 0x9F, Regs->CR9F);
+    for (i = 0; i < (0x5F - 0x50 + 1); i++) {
+        hwp->writeCrtc(hwp, i + 0x50, Regs->CR[i + 0x50]);
     }
 
-    /* Restore TMDS status */
+    for (i = 0; i < (0x69 - 0x62 + 1); i++) {
+        hwp->writeCrtc(hwp, i + 0x62, Regs->CR[i + 0x62]);
+    }
+
+    for (i = 0; i < (0x88 - 0x6D + 1); i++) {
+        hwp->writeCrtc(hwp, i + 0x6D, Regs->CR[i + 0x6D]);
+    }
+
+    for (i = 0; i < (0x92 - 0x8A + 1); i++) {
+        hwp->writeCrtc(hwp, i + 0x8A, Regs->CR[i + 0x8A]);
+    }
+
+    for (i = 0; i < (0xA3 - 0x94 + 1); i++) {
+        hwp->writeCrtc(hwp, i + 0x94, Regs->CR[i + 0x94]);
+    }
+
+    /* UniChrome Pro and UniChrome Pro II */
     switch (pVia->Chipset) {
+    case VIA_PM800:
+    case VIA_K8M800:
+    case VIA_P4M800PRO:
     case VIA_CX700:
+    case VIA_P4M890:
+        hwp->writeCrtc(hwp, 0xA4, Regs->CR[0xA4]);
+        break;
+    default:
+        break;
+    }
+
+    for (i = 0; i < (0xAC - 0xA5 + 1); i++) {
+        hwp->writeCrtc(hwp, i + 0xA5, Regs->CR[i + 0xA5]);
+    }
+
+    /* Chrome 9 */
+    switch (pVia->Chipset) {
+    case VIA_K8M890:
+    case VIA_P4M900:
     case VIA_VX800:
     case VIA_VX855:
     case VIA_VX900:
-        /* LVDS Control Register */
-        hwp->writeCrtc(hwp, 0xD2, Regs->CRD2);
+        hwp->writeCrtc(hwp, 0xAF, Regs->CR[0xAF]);
         break;
+    default:
+        break;
+    }
+
+    /* Chrome 9, Chrome 9 HC, and Chrome 9 HC3 */
+    switch (pVia->Chipset) {
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+        for (i = 0; i < (0xCD - 0xB0 + 1); i++) {
+            hwp->writeCrtc(hwp, i + 0xB0, Regs->CR[i + 0xB0]);
+        }
+
+        break;
+    default:
+        break;
+    }
+
+    switch (pVia->Chipset) {
+    /* UniChrome Pro and UniChrome Pro II */
+    case VIA_PM800:
+    case VIA_K8M800:
+    case VIA_P4M800PRO:
+    case VIA_CX700:
+    case VIA_P4M890:
+        for (i = 0; i < (0xD7 - 0xD0 + 1); i++) {
+            hwp->writeCrtc(hwp, i + 0xD0, Regs->CR[i + 0xD0]);
+        }
+
+        break;
+
+    /* Chrome 9 */
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        for (i = 0; i < (0xEC - 0xD0 + 1); i++) {
+            hwp->writeCrtc(hwp, i + 0xD0, Regs->CR[i + 0xD0]);
+        }
+
+        break;
+    default:
+        break;
+    }
+
+    /* Chrome 9 */
+    switch (pVia->Chipset) {
+    case VIA_K8M890:
+    case VIA_P4M900:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        for (i = 0; i < (0xF5 - 0xF0 + 1); i++) {
+            hwp->writeCrtc(hwp, i + 0xF0, Regs->CR[i + 0xF0]);
+        }
+
+        break;
+    default:
+        break;
+    }
+
+    /* Chrome 9 HCM and Chrome 9 HD */
+    if ((pVia->Chipset == VIA_VX855) || (pVia->Chipset == VIA_VX900)) {
+        for (i = 0; i < (0xFC - 0xF6 + 1); i++) {
+            hwp->writeCrtc(hwp, i + 0xF6, Regs->CR[i + 0xF6]);
+        }
+    }
+
+    /* Chrome 9 HD */
+    if (pVia->Chipset == VIA_VX900) {
+        hwp->writeCrtc(hwp, 0xFD, Regs->CR[0xFD]);
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,

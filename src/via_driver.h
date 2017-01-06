@@ -127,9 +127,6 @@
 static int gVIAEntityIndex = -1;
 
 typedef struct {
-    CARD8   CRTCRegs[68];
-    CARD8   CR97, CR99, CR9B, CR9F, CRA0, CRA1, CRA2, CRD2;
-
     CARD8   SR[256];
     CARD8   CR[256];
 } VIARegRec, *VIARegPtr;
