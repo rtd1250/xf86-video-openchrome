@@ -3483,6 +3483,10 @@ viaIGA2Restore(ScrnInfoPtr pScrn)
         hwp->writeCrtc(hwp, i + 0x62, Regs->CR[i + 0x62]);
     }
 
+    hwp->writeCrtc(hwp, 0x6A, Regs->CR[0x6A]);
+    hwp->writeCrtc(hwp, 0x6B, Regs->CR[0x6B]);
+    hwp->writeCrtc(hwp, 0x6C, Regs->CR[0x6C]);
+
     for (i = 0; i < (0x88 - 0x6D + 1); i++) {
         hwp->writeCrtc(hwp, i + 0x6D, Regs->CR[i + 0x6D]);
     }
