@@ -2311,7 +2311,7 @@ viaIGA1Restore(ScrnInfoPtr pScrn)
     hwp->writeSeq(hwp, 0x10, 0x01);
 
     hwp->writeSeq(hwp, 0x15, Regs->SR[0x15]);
-    ViaSeqMask(hwp, 0x16, Regs->SR[0x16], 0xBF);
+    hwp->writeSeq(hwp, 0x16, Regs->SR[0x16]);
     hwp->writeSeq(hwp, 0x17, Regs->SR[0x17]);
     hwp->writeSeq(hwp, 0x18, Regs->SR[0x18]);
     hwp->writeSeq(hwp, 0x19, Regs->SR[0x19]);
