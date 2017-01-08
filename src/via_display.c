@@ -3342,6 +3342,8 @@ viaIGA2Save(ScrnInfoPtr pScrn)
 
     vgaHWProtect(pScrn, TRUE);
 
+    vgaHWSave(pScrn, &hwp->SavedReg, VGA_SR_ALL);
+
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Saving IGA2 registers.\n"));
 
@@ -3471,6 +3473,8 @@ viaIGA2Restore(ScrnInfoPtr pScrn)
                         "Entered viaIGA2Restore.\n"));
 
     vgaHWProtect(pScrn, TRUE);
+
+    vgaHWRestore(pScrn, &hwp->SavedReg, VGA_SR_ALL);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Restoring IGA2 registers.\n"));
