@@ -895,9 +895,6 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
     temp = hwp->readSeq(hwp, 0x1E);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "SR1E: 0x%02X\n", temp));
-    temp = hwp->readSeq(hwp, 0x2A);
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "SR2A: 0x%02X\n", temp));
     temp = hwp->readSeq(hwp, 0x2D);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "SR2D: 0x%02X\n", temp));
@@ -1016,16 +1013,6 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
      *               0: Off
      *               1: On */
     ViaSeqMask(hwp, 0x1E, 0x01, 0x09);
-
-    /* 3C5.2A[3:2] - LVDS Channel 2 I/O Pad Control
-     *               0x: Pad always off
-     *               10: Depend on the other control signal
-     *               11: Pad on/off according to the PMS
-     * 3C5.2A[1:0] - LVDS Channel 1 and DVI I/O Pad Control
-     *               0x: Pad always off
-     *               10: Depend on the other control signal
-     *               11: Pad on/off according to the PMS */
-    ViaSeqMask(hwp, 0x2A, 0x0F, 0x0F);
 
     /* 3C5.2D[7:6] - E3_ECK_N Selection
      *               00: E3_ECK_N
