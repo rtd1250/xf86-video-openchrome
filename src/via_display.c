@@ -2797,10 +2797,6 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "Requested Screen Mode: %s\n", mode->name);
 
-    /* LVDS Channel 1 and 2 should be controlled by PMS
-     * (Power Management Status). */
-    ViaSeqMask(hwp, 0x2A, 0x0F, 0x0F);
-
     /* UniChrome Pro or later */
     if ((pVia->Chipset != VIA_CLE266) && (pVia->Chipset != VIA_KM400)) {
         /* Set IGA2 to linear mode. */
