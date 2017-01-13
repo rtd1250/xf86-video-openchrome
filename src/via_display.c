@@ -1690,12 +1690,6 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     /* Set IGA1 horizontal offset adjustment. */
     temp = (pScrn->displayWidth * (pScrn->bitsPerPixel >> 3)) >> 3;
 
-    /* Make sure that this is 32-byte aligned. */
-    if (temp & 0x03) {
-        temp += 0x03;
-        temp &= ~0x03;
-    }
-
     /* 3X5.13[7:0] - Primary Display Horizontal Offset Bits [7:0] */
     hwp->writeCrtc(hwp, 0x13, temp & 0xFF);
 
@@ -1704,17 +1698,7 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
 
     /* Set IGA1 horizontal display fetch (read) count. */
-    temp = (mode->CrtcHDisplay * (pScrn->bitsPerPixel >> 3)) >> 3;
-
-    /* Make sure that this is 32-byte aligned. */
-    if (temp & 0x03) {
-        temp += 0x03;
-        temp &= ~0x03;
-    }
-
-    /* Primary Display Horizontal Display Fetch Count Data needs to be
-     * 16-byte aligned. */
-    temp = temp >> 1;
+    temp = (mode->CrtcHDisplay * (pScrn->bitsPerPixel >> 3)) >> 4;
 
     /* 3C5.1C[7:0] - Primary Display Horizontal Display
      *               Fetch Count Data Bits [7:0] */
