@@ -1015,6 +1015,14 @@ umsCrtcInit(ScrnInfoPtr pScrn)
     iga2_rec->index = 1;
     iga2->driver_private = iga2_rec;
 
+    if (!pScrn->bitsPerPixel) {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                    "Detected bitsPerPixel to be 0 bit.\n");
+        xf86CrtcDestroy(iga2);
+        xf86CrtcDestroy(iga1);
+        return FALSE;
+    }
+
     /*
      * CLE266A:
      *   Max Line Pitch: 4080, (FB corruption when higher, driver problem?)
@@ -1027,8 +1035,8 @@ umsCrtcInit(ScrnInfoPtr pScrn)
      * We should be able to limit the memory available for a mode to 32 MB,
      * but miScanLineWidth fails to catch this properly (apertureSize).
      */
-    max_pitch = 8192 / ((pScrn->bitsPerPixel + 7) >> 3);
-    max_height = max_pitch;
+    max_pitch = (8192 / ((pScrn->bitsPerPixel + 7) >> 3)) - (16 / ((pScrn->bitsPerPixel + 7) >> 3));
+    max_height = 8192 / ((pScrn->bitsPerPixel + 7) >> 3);
 
     xf86CrtcSetSizeRange(pScrn, 320, 200, max_pitch, max_height);
 
