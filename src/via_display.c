@@ -2971,12 +2971,6 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     /* Set IGA2 horizontal offset adjustment. */
     temp = (pScrn->displayWidth * (pScrn->bitsPerPixel >> 3)) >> 3;
 
-    /* Make sure that this is 32-byte aligned. */
-    if (temp & 0x03) {
-        temp += 0x03;
-        temp &= ~0x03;
-    }
-
     /* 3X5.66[7:0] - Second Display Horizontal Offset Bits [7:0] */
     hwp->writeCrtc(hwp, 0x66, temp & 0xFF);
 
@@ -2984,22 +2978,16 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x67, temp >> 8, 0x03);
 
 
-    /* Set IGA2 alignment. */
-    temp = (mode->CrtcHDisplay * (pScrn->bitsPerPixel >> 3)) >> 3;
-
-    /* Make sure that this is 32-byte aligned. */
-    if (temp & 0x03) {
-        temp += 0x03;
-        temp &= ~0x03;
-    }
+    /* Set IGA2 fetch count. */
+    temp = (mode->CrtcHDisplay * (pScrn->bitsPerPixel >> 3)) >> 4;
 
     /* 3X5.65[7:0] - Second Display Horizontal
-     * 2-Quadword Count Data Bits [7:0] */
-    hwp->writeCrtc(hwp, 0x65, (temp >> 1) & 0xFF);
+     *               2-Quadword Count Data Bits [7:0] */
+    hwp->writeCrtc(hwp, 0x65, temp & 0xFF);
 
     /* 3X5.67[3:2] - Second Display Horizontal
-     * 2-Quadword Count Data Bits [9:8] */
-    ViaCrtcMask(hwp, 0x67, temp >> 7, 0x0C);
+     *               2-Quadword Count Data Bits [9:8] */
+    ViaCrtcMask(hwp, 0x67, temp >> 6, 0x0C);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaIGA2SetDisplayRegister.\n"));
