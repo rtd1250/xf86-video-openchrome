@@ -353,6 +353,143 @@ viaLVDS2SetOutputFormat(ScrnInfoPtr pScrn, CARD8 outputFormat)
                         "Exiting viaLVDS2SetOutputFormat.\n"));
 }
 
+/*
+ * Sets PCIe based 2 chip chipset's pin multiplexed DVP0 I/O pad state.
+ */
+static void
+viaDVP0PCIeSetIOPadSetting(ScrnInfoPtr pScrn, CARD8 ioPadState)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaDVP0PCIeSetIOPadSetting.\n"));
+
+    /* Set pin multiplexed DVP1 I/O pad state. */
+    /* 3C5.2A[3:2] - DVP0 I/O Pad Control */
+    ViaSeqMask(hwp, 0x2A, ioPadState << 2, 0x0C);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "DVP0 I/O Pad State: %d\n",
+                (ioPadState & 0x03));
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaDVP0PCIeSetIOPadSetting.\n"));
+}
+
+/*
+ * Sets PCIe based 2 chip chipset's pin multiplexed DVP1 I/O pad state.
+ */
+static void
+viaDVP1PCIeSetIOPadSetting(ScrnInfoPtr pScrn, CARD8 ioPadState)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaDVP1PCIeSetIOPadSetting.\n"));
+
+    /* Set pin multiplexed DVP0 I/O pad state. */
+    /* 3C5.2A[1:0] - DVP1 I/O Pad Control */
+    ViaSeqMask(hwp, 0x2A, ioPadState, 0x03);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "DVP1 I/O Pad State: %d\n",
+                (ioPadState & 0x03));
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaDVP1PCIeSetIOPadSetting.\n"));
+}
+
+static void
+viaFPIOPadSetting(ScrnInfoPtr pScrn, Bool ioPadOn)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
+    CARD8 sr12, sr13, sr5a;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaFPIOPadSetting.\n"));
+
+    if ((pVia->Chipset == VIA_CX700)
+        || (pVia->Chipset == VIA_VX800)
+        || (pVia->Chipset == VIA_VX855)
+        || (pVia->Chipset == VIA_VX900)) {
+
+        sr5a = hwp->readSeq(hwp, 0x5A);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "SR5A: 0x%02X\n", sr5a));
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "Setting 3C5.5A[0] to 0.\n"));
+        ViaSeqMask(hwp, 0x5A, sr5a & 0xFE, 0x01);
+    }
+
+    sr12 = hwp->readSeq(hwp, 0x12);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR12: 0x%02X\n", sr12));
+    sr13 = hwp->readSeq(hwp, 0x13);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR13: 0x%02X\n", sr13));
+
+    switch (pVia->Chipset) {
+    case VIA_CLE266:
+        break;
+    case VIA_KM400:
+    case VIA_K8M800:
+    case VIA_PM800:
+    case VIA_P4M800PRO:
+        break;
+    case VIA_P4M890:
+    case VIA_K8M890:
+    case VIA_P4M900:
+        /* The tricky thing about VIA Technologies PCI Express based
+         * north bridge / south bridge 2 chip chipset is that
+         * it pin multiplexes DVP0 / DVP1 with north bridge's PCI
+         * Express x16 link. In particular, HP 2133 Mini-Note's WLAN
+         * is connected to north bridge's PCI Express Lane 0, but the
+         * Lane 0 is also pin multiplexed with DVP0. What this means is
+         * turning on DVP0 without probing the relevant strapping pin
+         * to determine the connected panel interface type will lead to
+         * the PCIe based WLAN to getting disabled by OpenChrome DDX
+         * when X.Org Server starts.
+         *     The current remedy for this will be to turn on DVP0
+         * only when an 18-bit / 24-bit interface flat panel is 
+         * connected. */
+        /* 3C5.12[4] - DVP0D4 pin strapping
+         *             0: Use DVP1 only for a flat panel.
+         *             1: Use DVP0 and DVP1 for a flat panel */
+        if (sr12 & 0x10) {
+            /* Since an 18-bit / 24-bit flat panel is being used, actively
+             * control DVP0. */
+            viaDVP0PCIeSetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
+        } else {
+            /* Keep DVP0 powered down. Otherwise, it will interfere with
+             * PCIe Lane 0 through 7. */
+            viaDVP0PCIeSetIOPadSetting(pScrn, 0x00);
+        }
+
+        /* Control DVP1 for a flat panel. */
+        viaDVP1PCIeSetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
+        break;
+    case VIA_CX700:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        break;
+    default:
+        break;
+    }
+
+    if ((pVia->Chipset == VIA_CX700)
+        || (pVia->Chipset == VIA_VX800)
+        || (pVia->Chipset == VIA_VX855)
+        || (pVia->Chipset == VIA_VX900)) {
+
+        hwp->writeSeq(hwp, 0x5A, sr5a);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "Restoring 3C5.5A[0].\n"));
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaFPIOPadSetting.\n"));
+}
+
 static void
 ViaLVDSSoftwarePowerFirstSequence(ScrnInfoPtr pScrn, Bool on)
 {
@@ -944,6 +1081,7 @@ via_lvds_dpms(xf86OutputPtr output, int mode)
             break;
         }
 
+        viaFPIOPadSetting(pScrn, TRUE);
         break;
 
     case DPMSModeStandby:
@@ -966,6 +1104,7 @@ via_lvds_dpms(xf86OutputPtr output, int mode)
             break;
         }
 
+        viaFPIOPadSetting(pScrn, FALSE);
         break;
     }
 }
@@ -1021,13 +1160,19 @@ via_lvds_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
 static void
 via_lvds_prepare(xf86OutputPtr output)
 {
+    ScrnInfoPtr pScrn = output->scrn;
+
     via_lvds_dpms(output, DPMSModeOff);
+    viaFPIOPadSetting(pScrn, FALSE);
 }
 
 static void
 via_lvds_commit(xf86OutputPtr output)
 {
+    ScrnInfoPtr pScrn = output->scrn;
+
     via_lvds_dpms(output, DPMSModeOn);
+    viaFPIOPadSetting(pScrn, TRUE);
 }
 
 static void
