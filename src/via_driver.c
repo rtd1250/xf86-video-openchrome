@@ -1462,6 +1462,23 @@ viaPreInit(ScrnInfoPtr pScrn, int flags)
                pVia->I2CScan ? "" : "not ");
 #endif /* HAVE_DEBUG */
 
+    /* Checking for VIA Technologies NanoBook reference design.
+       Examples include Everex CloudBook and Sylvania g netbook.
+       It is also called FIC CE260 and CE261 by its ODM (Original 
+       Design Manufacturer) name.
+       This device has its strapping resistors set to a wrong 
+       setting to handle DVI. As a result, we need to make special 
+       accommodations to handle DVI properly. */
+    if ((pVia->Chipset == VIA_CX700) &&
+        (SUBVENDOR_ID(pVia->PciInfo) == 0x1509) &&
+        (SUBSYS_ID(pVia->PciInfo) == 0x2D30)) {
+
+        pVia->isVIANanoBook      = TRUE;
+    } else {
+        pVia->isVIANanoBook      = FALSE;
+    }
+
+
     /* Checking for OLPC XO-1.5. */
     if ((pVia->Chipset == VIA_VX855) &&
         (SUBVENDOR_ID(pVia->PciInfo) == 0x152D) &&

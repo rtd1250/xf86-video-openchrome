@@ -284,6 +284,12 @@ typedef struct _VIA {
     /* BIOS Info Ptr */
     VIABIOSInfoPtr      pBIOSInfo;
 
+    /* VIA Technologies NanoBook reference design.
+       Examples include Everex CloudBook and Sylvania g netbook.
+       It is also called FIC CE260 and CE261 by its ODM (Original 
+       Design Manufacturer) name. */
+    Bool                isVIANanoBook;
+
     /* OLPC XO-1.5 */
     Bool                IsOLPCXO15;
 

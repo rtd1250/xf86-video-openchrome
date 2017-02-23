@@ -106,6 +106,28 @@ static DisplayModeRec OLPCMode = {
 #define TD3 25
 
 /*
+ * Sets CX700 or later single chipset's LVDS1 I/O pad state.
+ */
+void
+viaLVDS1SetIOPadSetting(ScrnInfoPtr pScrn, CARD8 ioPadState)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaLVDS1SetIOPadSetting.\n"));
+
+    /* Set LVDS1 I/O pad state. */
+    /* 3C5.2A[1:0] - LVDS1 I/O Pad Control */
+    ViaSeqMask(hwp, 0x2A, ioPadState, 0x03);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "LVDS1 I/O Pad State: %d\n",
+                (ioPadState & 0x03));
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaLVDS1SetIOPadSetting.\n"));
+}
+
+/*
  * Sets IGA1 or IGA2 as the display output source for VIA Technologies
  * Chrome IGP LVDS1 integrated LVDS transmitter.
  */
@@ -155,6 +177,28 @@ viaLVDS1SetFormat(ScrnInfoPtr pScrn, CARD8 format)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaLVDS1SetFormat.\n"));
+}
+
+/*
+ * Sets CX700 or later single chipset's LVDS2 I/O pad state.
+ */
+static void
+viaLVDS2SetIOPadSetting(ScrnInfoPtr pScrn, CARD8 ioPadState)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaLVDS2SetIOPadSetting.\n"));
+
+    /* Set LVDS2 I/O pad state. */
+    /* 3C5.2A[3:2] - LVDS2 I/O Pad Control */
+    ViaSeqMask(hwp, 0x2A, ioPadState << 2, 0x0C);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "LVDS2 I/O Pad State: %d\n",
+                (ioPadState & 0x03));
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaLVDS2SetIOPadSetting.\n"));
 }
 
 /*
@@ -471,6 +515,24 @@ viaFPIOPadSetting(ScrnInfoPtr pScrn, Bool ioPadOn)
     case VIA_VX800:
     case VIA_VX855:
     case VIA_VX900:
+        /* 3C5.13[7:6] - DVP1D15 and DVP1D14 pin strappings
+         *               00: LVDS1 + LVDS2
+         *               01: DVI + LVDS2
+         *               10: Dual LVDS (LVDS1 + LVDS2 used 
+         *                   simultaneously)
+         *               11: DVI only */
+        if ((((~(sr13 & 0x80)) && (~(sr13 & 0x40)))
+             || ((sr13 & 0x80) && (~(sr13 & 0x40))))
+           && (!pVia->isVIANanoBook)) {
+
+            viaLVDS1SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
+        }
+
+        if (((~(sr13 & 0x80)) || (~(sr13 & 0x40))) 
+           || (pVia->isVIANanoBook)) {
+
+            viaLVDS2SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
+        }
         break;
     default:
         break;
