@@ -278,6 +278,73 @@ viaTMDSPower(ScrnInfoPtr pScrn, Bool powerState)
                         "Exiting viaTMDSPower.\n"));
 }
 
+static void
+viaTMDSIOPadSetting(ScrnInfoPtr pScrn, Bool ioPadOn)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
+    CARD8 sr12, sr13, sr5a;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaTMDSIOPadSetting.\n"));
+
+    if ((pVia->Chipset == VIA_CX700)
+        || (pVia->Chipset == VIA_VX800)
+        || (pVia->Chipset == VIA_VX855)
+        || (pVia->Chipset == VIA_VX900)) {
+
+        sr5a = hwp->readSeq(hwp, 0x5A);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "SR5A: 0x%02X\n", sr5a));
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "Setting 3C5.5A[0] to 0.\n"));
+        ViaSeqMask(hwp, 0x5A, sr5a & 0xFE, 0x01);
+    }
+
+    sr12 = hwp->readSeq(hwp, 0x12);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR12: 0x%02X\n", sr12));
+    sr13 = hwp->readSeq(hwp, 0x13);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR13: 0x%02X\n", sr13));
+
+    switch (pVia->Chipset) {
+    case VIA_CX700:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        /* 3C5.13[7:6] - DVP1D15 and DVP1D14 pin strappings
+         *               00: LVDS1 + LVDS2
+         *               01: DVI + LVDS2
+         *               10: Dual LVDS (LVDS1 + LVDS2 used 
+         *                   simultaneously)
+         *               11: DVI only */
+        if ((((~(sr13 & 0x80)) && (sr13 & 0x40))
+             || ((sr13 & 0x80) && (sr13 & 0x40)))
+           || (pVia->isVIANanoBook)) {
+
+            viaLVDS1SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
+        }
+
+        break;
+    default:
+        break;
+    }
+
+    if ((pVia->Chipset == VIA_CX700)
+        || (pVia->Chipset == VIA_VX800)
+        || (pVia->Chipset == VIA_VX855)
+        || (pVia->Chipset == VIA_VX900)) {
+
+        hwp->writeSeq(hwp, 0x5A, sr5a);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "Restoring 3C5.5A[0].\n"));
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaTMDSIOPadSetting.\n"));
+}
+
 void
 viaExtTMDSSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
 {
@@ -764,11 +831,13 @@ via_tmds_dpms(xf86OutputPtr output, int mode)
     switch (mode) {
     case DPMSModeOn:
         viaTMDSPower(pScrn, TRUE);
+        viaTMDSIOPadSetting(pScrn, TRUE);
         break;
     case DPMSModeStandby:
     case DPMSModeSuspend:
     case DPMSModeOff:
         viaTMDSPower(pScrn, FALSE);
+        viaTMDSIOPadSetting(pScrn, FALSE);
         break;
     default:
         break;
