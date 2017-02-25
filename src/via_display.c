@@ -3707,6 +3707,21 @@ iga1_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
                     (unsigned)temp, (unsigned)pVia->pBIOSInfo->Bandwidth);
         return FALSE;
     }
+
+    if (!pScrn->bitsPerPixel) {
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "Invalid bpp information.\n");
+        return FALSE;
+    }
+
+    /* 16 is the Chrome IGP display controller memory alignment. */
+    if (crtc->x % (16 / ((pScrn->bitsPerPixel + 7) >> 3))) {
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "The X location specified is not properly aligned "
+                    "to Chrome IGP's memory alignment.\n");
+        return FALSE;
+    }
+
     return TRUE;
 }
 
@@ -4108,6 +4123,21 @@ iga2_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
                     (unsigned)temp, (unsigned)pVia->pBIOSInfo->Bandwidth);
         return FALSE;
     }
+
+    if (!pScrn->bitsPerPixel) {
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "Invalid bpp information.\n");
+        return FALSE;
+    }
+
+    /* 16 is the Chrome IGP display controller memory alignment. */
+    if (crtc->x % (16 / ((pScrn->bitsPerPixel + 7) >> 3))) {
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "The X location specified is not properly aligned "
+                    "to Chrome IGP's memory alignment.\n");
+        return FALSE;
+    }
+
     return TRUE;
 }
 
