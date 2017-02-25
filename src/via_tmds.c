@@ -914,6 +914,7 @@ via_tmds_prepare(xf86OutputPtr output)
                         "Entered via_tmds_prepare.\n"));
 
     viaTMDSPower(pScrn, FALSE);
+    viaTMDSIOPadSetting(pScrn, FALSE);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_tmds_prepare.\n"));
@@ -928,6 +929,7 @@ via_tmds_commit(xf86OutputPtr output)
                         "Entered via_tmds_commit.\n"));
 
     viaTMDSPower(pScrn, TRUE);
+    viaTMDSIOPadSetting(pScrn, TRUE);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_tmds_commit.\n"));
