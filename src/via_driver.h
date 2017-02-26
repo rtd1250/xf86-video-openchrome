@@ -369,6 +369,10 @@ typedef struct _VIA {
 
     /* Keeping track of the number of FP (Flat Panel) connectors. */
     unsigned int        numberFP;
+
+    /* Shadow copy of CR3B through CR3F. */
+    CARD8       originalCR3B, originalCR3C, originalCR3D,
+                originalCR3E, originalCR3F;
 } VIARec, *VIAPtr;
 
 #define VIAPTR(p) ((VIAPtr)((p)->driverPrivate))

@@ -907,6 +907,21 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
     temp = hwp->readCrtc(hwp, 0x36);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "CR36: 0x%02X\n", temp));
+    temp = hwp->readCrtc(hwp, 0x3B);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "CR3B: 0x%02X\n", temp));
+    temp = hwp->readCrtc(hwp, 0x3C);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "CR3C: 0x%02X\n", temp));
+    temp = hwp->readCrtc(hwp, 0x3D);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "CR3D: 0x%02X\n", temp));
+    temp = hwp->readCrtc(hwp, 0x3E);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "CR3E: 0x%02X\n", temp));
+    temp = hwp->readCrtc(hwp, 0x3F);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "CR3F: 0x%02X\n", temp));
     temp = hwp->readCrtc(hwp, 0x47);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "CR47: 0x%02X\n", temp));
@@ -1089,6 +1104,13 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
      *               0: Disable
      *               1: Enable */
     ViaCrtcMask(hwp, 0x36, 0x01, 0x01);
+
+    /* 3X5.3B through 3X5.3F are scratch pad registers. */
+    ViaCrtcMask(hwp, 0x3B, pVia->originalCR3B, 0xFF);
+    ViaCrtcMask(hwp, 0x3C, pVia->originalCR3C, 0xFF);
+    ViaCrtcMask(hwp, 0x3D, pVia->originalCR3D, 0xFF);
+    ViaCrtcMask(hwp, 0x3E, pVia->originalCR3E, 0xFF);
+    ViaCrtcMask(hwp, 0x3F, pVia->originalCR3F, 0xFF);
 
     /* 3X5.47[5] - Peep at the PCI-bus
      *             0: Disable

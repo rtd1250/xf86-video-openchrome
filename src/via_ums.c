@@ -921,6 +921,13 @@ umsCrtcInit(ScrnInfoPtr pScrn)
     VIABIOSInfoPtr pBIOSInfo;
     xf86CrtcPtr iga1, iga2;
 
+    /* 3X5.3B through 3X5.3F are scratch pad registers. */
+    pVia->originalCR3B = hwp->readCrtc(hwp, 0x3B);
+    pVia->originalCR3C = hwp->readCrtc(hwp, 0x3C);
+    pVia->originalCR3D = hwp->readCrtc(hwp, 0x3D);
+    pVia->originalCR3E = hwp->readCrtc(hwp, 0x3E);
+    pVia->originalCR3F = hwp->readCrtc(hwp, 0x3F);
+
     /* Read memory bandwidth from registers. */
     pVia->MemClk = hwp->readCrtc(hwp, 0x3D) >> 4;
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
