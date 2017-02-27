@@ -1,7 +1,7 @@
 /*
  * Copyright 2016 Kevin Brace
  * Copyright 2015-2016 The OpenChrome Project
- *                     [http://www.freedesktop.org/wiki/Openchrome]
+ *                     [https://www.freedesktop.org/wiki/Openchrome]
  * Copyright 2014 SHS SERVICES GmbH
  *
  * Permission is hereby granted, free of charge, to any person obtaining a

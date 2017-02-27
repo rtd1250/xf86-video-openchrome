@@ -1,6 +1,6 @@
 /*
  * Copyright 2005-2015 The Openchrome Project
- *                     [http://www.freedesktop.org/wiki/Openchrome]
+ *                     [https://www.freedesktop.org/wiki/Openchrome]
  * Copyright 2004-2006 Luc Verhaegen.
  * Copyright 2004-2005 The Unichrome Project  [unichrome.sf.net]
  * Copyright 1998-2003 VIA Technologies, Inc. All Rights Reserved.
@@ -225,7 +225,7 @@ static MODULESETUPPROTO(VIASetup);
 
 static XF86ModuleVersionInfo VIAVersRec = {
     "openchrome",
-    "http://www.freedesktop.org/wiki/Openchrome/",
+    "https://www.freedesktop.org/wiki/Openchrome/",
     MODINFOSTRING1,
     MODINFOSTRING2,
 #ifdef XORG_VERSION_CURRENT
@@ -478,7 +478,7 @@ via_pci_probe(DriverPtr driver, int entity_num,
                 "VIA Technologies does not support this driver in any way.\n");
         xf86Msg(X_NOTICE,
                 "For support, please refer to"
-                " http://www.freedesktop.org/wiki/Openchrome/.\n");
+                " https://www.freedesktop.org/wiki/Openchrome/.\n");
 #ifdef BUILDCOMMENT
         xf86Msg(X_NOTICE, BUILDCOMMENT"\n");
 #endif
@@ -519,7 +519,7 @@ VIAProbe(DriverPtr drv, int flags)
     xf86Msg(X_NOTICE,
             "VIA Technologies does not support this driver in any way.\n");
     xf86Msg(X_NOTICE, "For support, please refer to"
-                      " http://www.freedesktop.org/wiki/Openchrome/.\n");
+                      " https://www.freedesktop.org/wiki/Openchrome/.\n");
 
 #ifdef BUILDCOMMENT
     xf86Msg(X_NOTICE, BUILDCOMMENT"\n");
