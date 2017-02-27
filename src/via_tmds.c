@@ -1094,7 +1094,7 @@ viaTMDSInit(ScrnInfoPtr pScrn)
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     VIATMDSRecPtr pVIATMDSRec = NULL;
-    CARD8 sr13, sr5a, cr3e;
+    CARD8 sr13, sr5a;
     Bool status = FALSE;
     char outputNameBuffer[32];
 

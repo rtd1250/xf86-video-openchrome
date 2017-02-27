@@ -161,7 +161,6 @@ static void
 viaLVDS1SetFormat(ScrnInfoPtr pScrn, CARD8 format)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaLVDS1SetFormat.\n"));
@@ -258,7 +257,6 @@ static void
 viaLVDS2SetFormat(ScrnInfoPtr pScrn, CARD8 format)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaLVDS2SetFormat.\n"));
