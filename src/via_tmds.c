@@ -1103,6 +1103,10 @@ viaTMDSInit(ScrnInfoPtr pScrn)
 
     sr5a = hwp->readSeq(hwp, 0x5A);
     ViaSeqMask(hwp, 0x5A, sr5a | 0x01, 0x01);
+    sr13 = hwp->readSeq(hwp, 0x13);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR13: 0x%02X\n", sr13));
+    hwp->writeSeq(hwp, 0x5A, sr5a);
 
     /* 3C5.13[7:6] - Integrated LVDS / DVI Mode Select
      *               (DVP1D15-14 pin strapping)
@@ -1110,32 +1114,20 @@ viaTMDSInit(ScrnInfoPtr pScrn)
      *               01: DVI + LVDS2
      *               10: Dual LVDS Channel (High Resolution Panel)
      *               11: One DVI only (decrease the clock jitter) */
-    sr13 = hwp->readSeq(hwp, 0x13);
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "SR13: 0x%02X\n", sr13));
-    hwp->writeSeq(hwp, 0x5A, sr5a);
-    sr13 &= 0xC0;
-    if ((sr13 == 0x40) || (sr13 == 0xC0)) {
+    /* Check for DVI presence using pin strappings.
+     * VIA Technologies NanoBook reference design based products
+     * have their pin strappings set to a wrong setting to communicate
+     * the presence of DVI, so it requires special handling here. */
+    if ((((~(sr13 & 0x80)) && (sr13 & 0x40))
+         || ((sr13 & 0x80) && (sr13 & 0x40)))
+       || (pVia->isVIANanoBook)) {
+
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                     "Integrated TMDS transmitter found via pin strapping.\n");
     } else {
-        /* 3X5.3E[5] supposedly signals the presence of
-         * a DVI connector coming from an integrated TMDS transmitter.
-         * This check is done if the pin strapping does not indicate
-         * the presence of a DVI connector. Note that 3X5.3E is set by
-         * VIA Technologies VGA BIOS. */
-        cr3e = hwp->readCrtc(hwp, 0x3E);
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "CR3E: 0x%02X\n", cr3e));
-        if (cr3e & 0x20) {
-            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Integrated TMDS transmitter found via "
-                        "VIA Technologies VGA BIOS scratch pad register.\n");
-        } else {
-            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Integrated TMDS transmitter not found.\n");
-            goto exit;
-        }
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "Integrated TMDS transmitter not found.\n");
+        goto exit;
     }
 
     pVIATMDSRec = xnfcalloc(1, sizeof(VIATMDSRec));
