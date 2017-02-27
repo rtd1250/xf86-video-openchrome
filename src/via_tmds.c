@@ -198,21 +198,8 @@ viaTMDSSense(ScrnInfoPtr pScrn)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaTMDSSense.\n"));
 
-    if (pVia->Chipset == VIA_CX700) {
-        /* Detect the presence of DVI. */
-        /* 3C5.1A[4] - DVI Sense
-         *             0: No connect
-         *             1: Connected */
-        tmdsReceiverDetected = (hwp->readSeq(hwp, 0x1A) >> 4) & 0x01;
-    } else if ((pVia->Chipset == VIA_VX800)
-                || (pVia->Chipset == VIA_VX855)
-                || (pVia->Chipset == VIA_VX900)) {
-        /* Detect the presence of DVI. */
-        /* 3C5.3E[5] - Integrated DVI Sense
-         *             0: No connect
-         *             1: Connected */
-        tmdsReceiverDetected = (hwp->readSeq(hwp, 0x3E) >> 5) & 0x01;
-    }
+    /* For now, faking DVI detection.*/
+    tmdsReceiverDetected = 0x01;
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "Integrated TMDS transmitter %s a TMDS receiver.\n",
