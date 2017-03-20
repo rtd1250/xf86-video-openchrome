@@ -1332,8 +1332,6 @@ via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
             break;
         case VIA_CX700:
         case VIA_VX800:
-        case VIA_VX855:
-        case VIA_VX900:
             viaLVDS2SetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
 
             /* Set LVDS2 output color dithering. */
@@ -1344,6 +1342,19 @@ via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 
             /* Set LVDS2 output to OPENLDI mode. */
             viaLVDS2SetFormat(pScrn, 0x01);
+            break;
+        case VIA_VX855:
+        case VIA_VX900:
+            viaLVDS1SetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
+
+            /* Set LVDS1 output color dithering. */
+            viaLVDS1SetDithering(pScrn, Panel->useDithering ? TRUE : FALSE);
+
+            /* Set LVDS1 output format to sequential mode. */
+            viaLVDS1SetOutputFormat(pScrn, 0x01);
+
+            /* Set LVDS1 output to OPENLDI mode. */
+            viaLVDS1SetFormat(pScrn, 0x01);
             break;
         default:
             break;
