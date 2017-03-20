@@ -205,6 +205,31 @@ viaLVDS1SetDithering(ScrnInfoPtr pScrn, CARD8 ditheringStatus)
 }
 
 /*
+ * Sets output format of LVDS1 to rotation or sequential mode.
+ */
+static void
+viaLVDS1SetOutputFormat(ScrnInfoPtr pScrn, CARD8 outputFormat)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaLVDS1SetOutputFormat.\n"));
+
+    /* Set LVDS1 output format. */
+    /* 3X5.88[6] - LVDS Channel 1 Output Format
+     *             0: Rotation
+     *             1: Sequential */
+    ViaCrtcMask(hwp, 0x88, outputFormat ? 0x40 : 0x00, 0x40);
+
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "LVDS1 Output Format: %s\n",
+                outputFormat ? "Sequential" : "Rotation");
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaLVDS1SetOutputFormat.\n"));
+}
+
+/*
  * Sets CX700 or later single chipset's LVDS2 I/O pad state.
  */
 static void
