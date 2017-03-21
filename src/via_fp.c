@@ -63,7 +63,7 @@ static ViaPanelModeRec ViaPanelNativeModes[] = {
     {1280,  800, FALSE,  TRUE},
     { 800,  480, FALSE,  TRUE},
     {1024,  768,  TRUE,  TRUE},
-    {1024,  768, FALSE, FALSE},
+    {1366,  768, FALSE, FALSE},
     {1024,  768,  TRUE, FALSE},
     {1280,  768, FALSE, FALSE},
     {1280, 1024,  TRUE, FALSE},
