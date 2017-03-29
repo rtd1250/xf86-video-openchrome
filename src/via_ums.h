@@ -125,6 +125,8 @@
 #define     VIA_TMDS_NONE           0x0
 #define     VIA_TMDS_VT1632         0x1
 
+#define BIT(x) (1 << x)
+
 
 typedef struct ViaPanelMode {
     int Width;
