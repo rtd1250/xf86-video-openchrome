@@ -210,55 +210,35 @@ viaTMDSSense(ScrnInfoPtr pScrn)
     return tmdsReceiverDetected;
 }
 
+/*
+ * Sets integrated TMDS (DVI) monitor power state.
+ */
 static void
 viaTMDSPower(ScrnInfoPtr pScrn, Bool powerState)
 {
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaTMDSPower.\n"));
 
     if (powerState) {
-        /* 3X5.91[7] - Software Direct On / Off Display Period
-                       in the Panel Path
-                       0: On
-                       1: Off */
-        ViaCrtcMask(hwp, 0x91, 0x00, 0x80);
-
-        /* 3X5.91[0] - Hardware or Software Control Power Sequence
-                       1: Software Control */
-        ViaCrtcMask(hwp, 0x91, 0x01, 0x01);
-
+        viaLVDS1SetSoftDisplayPeriod(pScrn, TRUE);
+        viaLVDS1SetPowerSeq(pScrn, TRUE);
         usleep(TD0);
-
-        /* 3X5.91[4] - Software VDD On
-                       0: Off
-                       1: On */
-        ViaCrtcMask(hwp, 0x91, 0x10, 0x10);
-
+        viaLVDS1SetSoftVdd(pScrn, TRUE);
         usleep(TD1);
-
-        /* 3X5.91[3] - Software Data On
-                       0: Off
-                       1: On */
-        ViaCrtcMask(hwp, 0x91, 0x08, 0x08);
-
-        /* 3X5.D2[3] - Power Down (Active High) for DVI
-         *             0: TMDS power on
-         *             1: TMDS power down */
-        ViaCrtcMask(hwp, 0xD2, 0x00, 0x08);
+        viaLVDS1SetSoftData(pScrn, TRUE);
+        viaTMDSSetPower(pScrn, TRUE);
     } else {
-        ViaCrtcMask(hwp, 0xD2, 0x08, 0x08);
-
-        ViaCrtcMask(hwp, 0x91, 0x00, 0x08);
-
+        viaLVDS1SetPowerSeq(pScrn, TRUE);
+        viaTMDSSetPower(pScrn, FALSE);
+        viaLVDS1SetSoftData(pScrn, FALSE);
         usleep(TD1);
-
-        ViaCrtcMask(hwp, 0x91, 0x00, 0x10);
+        viaLVDS1SetSoftVdd(pScrn, FALSE);
+        usleep(TD0);
+        viaLVDS1SetSoftDisplayPeriod(pScrn, FALSE);
     }
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "Integrated TMDS (DVI) Power: %s\n",
+                "DVI Monitor Power: %s\n",
                 powerState ? "On" : "Off");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
