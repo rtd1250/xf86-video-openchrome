@@ -280,6 +280,23 @@ viaLVDS1SetSoftDisplayPeriod(ScrnInfoPtr pScrn, Bool softOn)
                 softOn ? "On" : "Off");
 }
 
+/*
+ * Sets CX700 / VX700 and VX800 chipsets' TMDS (DVI) power state.
+ */
+static inline void
+viaTMDSSetPower(ScrnInfoPtr pScrn, Bool powerState)
+{
+    /* Set TMDS (DVI) power state. */
+    /* 3X5.D2[3] - Power Down (Active High) for DVI
+     *             0: TMDS power on
+     *             1: TMDS power down */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0xD2, powerState ? 0 : BIT(3),
+                BIT(3));
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "TMDS (DVI) Power State: %s\n",
+                powerState ? "On" : "Off");
+}
+
 
 /* via_ums.c */
 void viaUnmapMMIO(ScrnInfoPtr pScrn);
