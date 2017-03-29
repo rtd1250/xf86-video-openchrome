@@ -209,6 +209,24 @@ typedef struct
 } ViaExpireNumberTable;
 
 
+/*
+ * Sets CX700 or later single chipset's LVDS1 power sequence type.
+ */
+static inline void
+viaLVDS1SetPowerSeq(ScrnInfoPtr pScrn, Bool ctrlType)
+{
+    /* Set LVDS1 power sequence type. */
+    /* 3X5.91[0] - LVDS1 Hardware or Software Control Power Sequence
+     *             0: Hardware Control
+     *             1: Software Control */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x91, ctrlType ? BIT(0) : 0x00,
+                BIT(0));
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "LVDS1 Power Sequence: %s Control\n",
+                ctrlType ? "Software" : "Hardware");
+}
+
+
 /* via_ums.c */
 void viaUnmapMMIO(ScrnInfoPtr pScrn);
 void viaDisableVQ(ScrnInfoPtr pScrn);
