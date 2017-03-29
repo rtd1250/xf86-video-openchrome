@@ -244,6 +244,23 @@ viaLVDS1SetSoftData(ScrnInfoPtr pScrn, Bool softOn)
                 softOn ? "On" : "Off");
 }
 
+/*
+ * Sets CX700 or later single chipset's LVDS1 software controlled Vdd.
+ */
+static inline void
+viaLVDS1SetSoftVdd(ScrnInfoPtr pScrn, Bool softOn)
+{
+    /* Set LVDS1 software controlled Vdd. */
+    /* 3X5.91[4] - Software VDD On
+     *             0: Off
+     *             1: On */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x91, softOn ? BIT(4) : 0,
+                BIT(4));
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "LVDS1 Software Controlled Vdd: %s\n",
+                softOn ? "On" : "Off");
+}
+
 
 /* via_ums.c */
 void viaUnmapMMIO(ScrnInfoPtr pScrn);
