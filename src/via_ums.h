@@ -210,6 +210,23 @@ typedef struct
 
 
 /*
+ * Sets analog (VGA) DAC output state.
+ */
+static inline void
+viaAnalogSetDACOutput(ScrnInfoPtr pScrn, Bool outputState)
+{
+    /* Set analog (VGA) DAC output state. */
+    /* 3X5.47[2] - DACOFF Backdoor Register
+     *             0: DAC on
+     *             1: DAC off */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x47, outputState ? 0x00 : BIT(2),
+                BIT(2));
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "Analog (VGA) DAC Output: %s\n",
+                outputState ? "On" : "Off");
+}
+
+/*
  * Sets CX700 or later single chipset's LVDS1 power sequence type.
  */
 static inline void
