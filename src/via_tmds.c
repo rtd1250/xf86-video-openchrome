@@ -44,23 +44,6 @@
 
 
 /*
-	1. Formula:
-		2^13 X 0.0698uSec [1/14.318MHz] = 8192 X 0.0698uSec =572.1uSec
-		Timer = Counter x 572 uSec
-	2. Note:
-		0.0698 uSec is too small to compute for hardware. So we multiply a
-		reference value(2^13) to make it big enough to compute for hardware.
-	3. Note:
-		The meaning of the TD0~TD3 are count of the clock.
-		TD(sec) = (sec)/(per clock) x (count of clocks)
-*/
-#define TD0 200
-#define TD1 25
-#define TD2 0
-#define TD3 25
-
-
-/*
  * Initializes most registers related to VIA Technologies IGP
  * integrated TMDS transmitter. Synchronization polarity and
  * display output source need to be set separately. */
