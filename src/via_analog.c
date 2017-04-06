@@ -130,13 +130,13 @@ viaAnalogInit(ScrnInfoPtr pScrn)
  * synchronization.
  */
 static void
-viaAnalogSetSyncPolarity(ScrnInfoPtr pScrn, DisplayModePtr mode)
+viaAnalogSyncPolarity(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     CARD8 miscRegister;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaAnalogSetSyncPolarity.\n"));
+                        "Entered viaAnalogSyncPolarity.\n"));
 
 /* Set certain bits of miscellaneous output register
  * meant for IGA1. */
@@ -156,7 +156,7 @@ viaAnalogSetSyncPolarity(ScrnInfoPtr pScrn, DisplayModePtr mode)
     hwp->writeMiscOut(hwp, miscRegister);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaAnalogSetSyncPolarity.\n"));
+                        "Exiting viaAnalogSyncPolarity.\n"));
 }
 
 
@@ -241,7 +241,7 @@ via_analog_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 
     if (output->crtc) {
         viaAnalogInit(pScrn);
-        viaAnalogSetSyncPolarity(pScrn, adjusted_mode);
+        viaAnalogSyncPolarity(pScrn, adjusted_mode);
         viaAnalogSetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
     }
 
