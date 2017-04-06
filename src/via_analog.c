@@ -81,6 +81,37 @@ viaAnalogSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
 }
 
 /*
+ * Set analog (VGA) sync polarity.
+ */
+static void
+viaAnalogSyncPolarity(ScrnInfoPtr pScrn, unsigned int flags)
+{
+    CARD8 syncPolarity = 0x00;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaAnalogSyncPolarity.\n"));
+
+    if (flags & V_NHSYNC) {
+        syncPolarity |= BIT(0);
+    }
+
+    if (flags & V_NHSYNC) {
+        syncPolarity |= BIT(1);
+    }
+
+    viaAnalogSetSyncPolarity(pScrn, syncPolarity);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "Analog (VGA) Horizontal Sync Polarity: %s\n",
+                (syncPolarity & BIT(0)) ? "-" : "+");
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "Analog (VGA) Vertical Sync Polarity: %s\n",
+                (syncPolarity & BIT(1)) ? "-" : "+");
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaAnalogSyncPolarity.\n"));
+}
+
+/*
  * Intializes analog VGA related registers.
  */
 static void
@@ -123,40 +154,6 @@ viaAnalogInit(ScrnInfoPtr pScrn)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaAnalogInit.\n"));
-}
-
-/*
- * Sets the polarity of horizontal synchronization and vertical
- * synchronization.
- */
-static void
-viaAnalogSyncPolarity(ScrnInfoPtr pScrn, DisplayModePtr mode)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    CARD8 miscRegister;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaAnalogSyncPolarity.\n"));
-
-/* Set certain bits of miscellaneous output register
- * meant for IGA1. */
-    miscRegister = hwp->readMiscOut(hwp);
-    if (mode->Flags & V_NHSYNC) {
-        miscRegister |= 0x40;
-    } else {
-        miscRegister &= (~0x40);
-    }
-
-    if (mode->Flags & V_NVSYNC) {
-        miscRegister |= 0x80;
-    } else {
-        miscRegister &= (~0x80);
-    }
-
-    hwp->writeMiscOut(hwp, miscRegister);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaAnalogSyncPolarity.\n"));
 }
 
 
@@ -241,7 +238,7 @@ via_analog_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 
     if (output->crtc) {
         viaAnalogInit(pScrn);
-        viaAnalogSyncPolarity(pScrn, adjusted_mode);
+        viaAnalogSyncPolarity(pScrn, mode->Flags);
         viaAnalogSetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
     }
 
