@@ -258,7 +258,7 @@ viaAnalogSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
     /* 3C5.16[6] - CRT Display Source
      *             0: Primary Display Stream (IGA1)
      *             1: Secondary Display Stream (IGA2) */
-    ViaSeqMask(VGAHWPTR(pScrn), displaySource << 6, BIT(6));
+    ViaSeqMask(VGAHWPTR(pScrn), 0x16, displaySource << 6, BIT(6));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Analog (VGA) Display Source: IGA%d\n",
                         (displaySource & 0x01) + 1));

@@ -63,18 +63,18 @@ viaAnalogOutput(ScrnInfoPtr pScrn, Bool outputState)
  * Specifies IGA1 or IGA2 for analog VGA DAC source.
  */
 static void
-viaAnalogDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
+viaAnalogDisplaySource(ScrnInfoPtr pScrn, int index)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
-    CARD8 value = displaySource;
+    CARD8 displaySource = index;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaAnalogDisplaySource.\n"));
 
-    ViaSeqMask(hwp, 0x16, value << 6, 0x40);
+    viaAnalogSetDisplaySource(pScrn, displaySource & 0x01);
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "Analog VGA Display Output Source: IGA%d\n",
-                (value & 0x01) + 1);
+                "Analog (VGA) Display Source: IGA%d\n",
+                (displaySource & 0x01) + 1);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaAnalogDisplaySource.\n"));
@@ -239,7 +239,7 @@ via_analog_mode_set(xf86OutputPtr output, DisplayModePtr mode,
     if (output->crtc) {
         viaAnalogInit(pScrn);
         viaAnalogSyncPolarity(pScrn, mode->Flags);
-        viaAnalogDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
+        viaAnalogDisplaySource(pScrn, iga->index);
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
