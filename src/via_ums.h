@@ -249,6 +249,22 @@ viaAnalogSetSyncPolarity(ScrnInfoPtr pScrn, CARD8 syncPolarity)
 }
 
 /*
+ * Sets analog (VGA) display source.
+ */
+static inline void
+viaAnalogSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
+{
+    /* Set analog (VGA) display source. */
+    /* 3C5.16[6] - CRT Display Source
+     *             0: Primary Display Stream (IGA1)
+     *             1: Secondary Display Stream (IGA2) */
+    ViaSeqMask(VGAHWPTR(pScrn), displaySource << 6, BIT(6));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Analog (VGA) Display Source: IGA%d\n",
+                        (displaySource & 0x01) + 1));
+}
+
+/*
  * Sets CX700 or later single chipset's LVDS1 power sequence type.
  */
 static inline void
