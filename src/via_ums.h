@@ -195,6 +195,13 @@ typedef struct _VIABIOSINFO {
 } VIABIOSInfoRec, *VIABIOSInfoPtr;
 
 
+/*
+ * Record for storing FP (Flat Panel) specific information.
+ */
+typedef struct _viaFPRec {
+    I2CBusPtr pVIAFPI2CBus;
+} viaFPRec, *viaFPRecPtr;
+
 typedef struct _VIATMDSRec {
     I2CBusPtr pVIATMDSI2CBus;
 } VIATMDSRec, *VIATMDSRecPtr;
