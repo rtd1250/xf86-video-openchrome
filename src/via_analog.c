@@ -65,7 +65,6 @@ viaAnalogOutput(ScrnInfoPtr pScrn, Bool outputState)
 static void
 viaAnalogDisplaySource(ScrnInfoPtr pScrn, int index)
 {
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
     CARD8 displaySource = index;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
