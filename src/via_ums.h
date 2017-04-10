@@ -26,8 +26,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _VIA_BIOS_H_
-#define _VIA_BIOS_H_ 1
+#ifndef _VIA_UMS_H_
+#define _VIA_UMS_H_ 1
 
 #include "via_vgahw.h"
 
@@ -447,4 +447,4 @@ void ViaVT162xInit(ScrnInfoPtr pScrn);
 I2CDevPtr ViaCH7xxxDetect(ScrnInfoPtr pScrn, I2CBusPtr pBus, CARD8 Address);
 void ViaCH7xxxInit(ScrnInfoPtr pScrn);
 
-#endif /* _VIA_BIOS_H_ */
+#endif /* _VIA_UMS_H_ */
