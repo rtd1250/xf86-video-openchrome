@@ -205,6 +205,7 @@ typedef struct _viaFPRec {
 
 typedef struct _VIATMDSRec {
     I2CBusPtr pVIATMDSI2CBus;
+    CARD8       diPortType;
 } VIATMDSRec, *VIATMDSRecPtr;
 
 typedef struct

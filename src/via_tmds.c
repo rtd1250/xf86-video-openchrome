@@ -1086,6 +1086,11 @@ viaTMDSInit(ScrnInfoPtr pScrn)
         goto exit;
     }
 
+    /* Leaving a hint for mode setting and DPMS to know which port
+     * to access. For CX700 / VX700 and VX800 integrated TMDS
+     * transmitter, it is fixed to LVDS1 (TMDS uses LVDS1 wires). */
+    pVIATMDSRec->diPortType = VIA_DI_PORT_TMDS;
+
     /* The code to dynamically designate the particular DVI (i.e., DVI-1,
      * DVI-2, etc.) for xrandr was borrowed from xf86-video-r128 DDX. */
     sprintf(outputNameBuffer, "DVI-%d", (pVia->numberDVI + 1));
