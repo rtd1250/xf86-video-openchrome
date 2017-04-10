@@ -106,13 +106,13 @@ viaTMDSInitRegisters(ScrnInfoPtr pScrn)
  * synchronization.
  */
 static void
-viaTMDSSetSyncPolarity(ScrnInfoPtr pScrn, DisplayModePtr mode)
+viaTMDSSyncPolarity(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     CARD8 cr97;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaTMDSSetSyncPolarity.\n"));
+                        "Entered viaTMDSSyncPolarity.\n"));
 
     /* 3X5.97[6] - DVI (TMDS) VSYNC Polarity
      *             0: Positive
@@ -136,7 +136,7 @@ viaTMDSSetSyncPolarity(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ViaCrtcMask(hwp, 0x97, cr97, 0x60);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaTMDSSetSyncPolarity.\n"));
+                        "Exiting viaTMDSSyncPolarity.\n"));
 }
 
 /*
@@ -898,7 +898,7 @@ via_tmds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 
     /* Set integrated TMDS transmitter synchronization polarity for
      * both horizontal synchronization and vertical synchronization. */
-    viaTMDSSetSyncPolarity(pScrn, adjusted_mode);
+    viaTMDSSyncPolarity(pScrn, adjusted_mode);
 
     if (output->crtc) {
         viaTMDSSetSource(pScrn, iga->index ? 0x01 : 0x00);
