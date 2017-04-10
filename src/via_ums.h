@@ -273,6 +273,25 @@ viaAnalogSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
                         (displaySource & 0x01) + 1));
 }
 
+static inline void
+viaTMDSSetSyncPolarity(ScrnInfoPtr pScrn, CARD8 syncPolarity)
+{
+    /* Set TMDS (DVI) sync polarity. */
+    /* 3X5.97[6] - DVI (TMDS) VSYNC Polarity
+     *             0: Positive
+     *             1: Negative
+     * 3X5.97[5] - DVI (TMDS) HSYNC Polarity
+     *             0: Positive
+     *             1: Negative */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x97, syncPolarity << 5, BIT(6) | BIT(5));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "TMDS (DVI) Horizontal Sync Polarity: %s\n",
+                (syncPolarity & BIT(0)) ? "-" : "+"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "TMDS (DVI) Vertical Sync Polarity: %s\n",
+                (syncPolarity & BIT(1)) ? "-" : "+"));
+}
+
 /*
  * Sets CX700 or later single chipset's LVDS1 power sequence type.
  */
