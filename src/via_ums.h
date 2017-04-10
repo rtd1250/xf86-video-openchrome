@@ -113,12 +113,15 @@
 
 /* Digital Port */
 #define     VIA_DI_PORT_NONE        0x0
+#define     VIA_DI_PORT_DIP0        0x1
 #define     VIA_DI_PORT_DVP0        0x1
+#define     VIA_DI_PORT_DIP1        0x2
 #define     VIA_DI_PORT_DVP1        0x2
-#define     VIA_DI_PORT_DFPLOW      0x4
+#define     VIA_DI_PORT_FPDPLOW     0x4
+#define     VIA_DI_PORT_DVP2        0x4
 #define     VIA_DI_PORT_LVDS1       0x4
 #define     VIA_DI_PORT_TMDS        0x4
-#define     VIA_DI_PORT_DFPHIGH     0x8
+#define     VIA_DI_PORT_FPDPHIGH    0x8
 #define     VIA_DI_PORT_LVDS2       0x8
 
 /* External TMDS (DVI) Transmitter Type */
