@@ -831,7 +831,7 @@ ViaLCDPowerSequence(vgaHWPtr hwp, VIALCDPowerSeqRec Sequence)
 static void
 ViaLCDPower(xf86OutputPtr output, Bool Power_On)
 {
-    ViaPanelInfoPtr Panel = output->driver_private;
+    viaFPRecPtr Panel = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
@@ -997,7 +997,7 @@ viaLVDSGetFPInfoFromScratchPad(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
-    ViaPanelInfoPtr panel = output->driver_private;
+    viaFPRecPtr panel = output->driver_private;
     CARD8 index;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -1235,7 +1235,7 @@ static int
 via_lvds_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
 {
     ScrnInfoPtr pScrn = output->scrn;
-    ViaPanelInfoPtr Panel = output->driver_private;
+    viaFPRecPtr Panel = output->driver_private;
 
     if (Panel->NativeWidth < pMode->HDisplay ||
         Panel->NativeHeight < pMode->VDisplay)
@@ -1255,7 +1255,7 @@ static Bool
 via_lvds_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
                     DisplayModePtr adjusted_mode)
 {
-    ViaPanelInfoPtr Panel = output->driver_private;
+    viaFPRecPtr Panel = output->driver_private;
 
     xf86SetModeCrtc(adjusted_mode, 0);
     if (!Panel->Center && (mode->HDisplay < Panel->NativeWidth ||
@@ -1290,7 +1290,7 @@ static void
 via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
                     DisplayModePtr adjusted_mode)
 {
-    ViaPanelInfoPtr Panel = output->driver_private;
+    viaFPRecPtr Panel = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
     drmmode_crtc_private_ptr iga = output->crtc->driver_private;
     VIAPtr pVia = VIAPTR(pScrn);
@@ -1368,7 +1368,7 @@ via_lvds_detect(xf86OutputPtr output)
     xf86OutputStatus status = XF86OutputStatusDisconnected;
     ScrnInfoPtr pScrn = output->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
-    ViaPanelInfoPtr panel = output->driver_private;
+    viaFPRecPtr panel = output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_lvds_detect.\n"));
@@ -1400,7 +1400,7 @@ exit:
 static DisplayModePtr
 via_lvds_get_modes(xf86OutputPtr output)
 {
-    ViaPanelInfoPtr pPanel = output->driver_private;
+    viaFPRecPtr pPanel = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
     DisplayModePtr pDisplay_Mode = NULL;
 
@@ -1506,7 +1506,7 @@ static const xf86OutputFuncsRec via_lvds_funcs = {
 void
 via_lvds_init(ScrnInfoPtr pScrn)
 {
-    ViaPanelInfoPtr Panel = (ViaPanelInfoPtr) xnfcalloc(sizeof(ViaPanelInfoRec), 1);
+    viaFPRecPtr Panel = (viaFPRecPtr) xnfcalloc(sizeof(viaFPRec), 1);
     OptionInfoPtr  Options = xnfalloc(sizeof(ViaPanelOptions));
     MessageType from = X_DEFAULT;
     VIAPtr pVia = VIAPTR(pScrn);

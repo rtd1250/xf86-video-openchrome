@@ -138,32 +138,6 @@ typedef struct ViaPanelMode {
     Bool useDithering;
 } ViaPanelModeRec, *ViaPanelModePtr ;
 
-typedef struct ViaPanelInfo {
-    Bool IsActive ;
-    /* Native physical resolution */
-    int NativeHeight;
-    int NativeWidth;
-    Bool useDualEdge;
-    Bool useDithering;
-
-    /* Native resolution index, see via_panel.c */
-    CARD8 NativeModeIndex;
-    /* Determine if we must use the hardware scaler
-     * It might be false even if the "Center" option
-     * was specified
-     */
-    Bool            Scale;
-
-    /* Panel/LCD entries */
-    CARD16      ResolutionIndex;
-    int         PanelIndex;
-    Bool        Center;
-    Bool        SetDVI;
-    /* LCD Simultaneous Expand Mode HWCursor Y Scale */
-    Bool        scaleY;
-    int         resY;
-} ViaPanelInfoRec, *ViaPanelInfoPtr ;
-
 typedef struct _VIABIOSINFO {
 	xf86OutputPtr analog;
 	xf86OutputPtr tv;
@@ -202,6 +176,30 @@ typedef struct _VIABIOSINFO {
  * Record for storing FP (Flat Panel) specific information.
  */
 typedef struct _viaFPRec {
+    Bool IsActive ;
+    /* Native physical resolution */
+    int NativeHeight;
+    int NativeWidth;
+    Bool useDualEdge;
+    Bool useDithering;
+
+    /* Native resolution index, see via_panel.c */
+    CARD8 NativeModeIndex;
+    /* Determine if we must use the hardware scaler
+     * It might be false even if the "Center" option
+     * was specified
+     */
+    Bool            Scale;
+
+    /* Panel/LCD entries */
+    CARD16      ResolutionIndex;
+    int         PanelIndex;
+    Bool        Center;
+    Bool        SetDVI;
+    /* LCD Simultaneous Expand Mode HWCursor Y Scale */
+    Bool        scaleY;
+    int         resY;
+
     I2CBusPtr pVIAFPI2CBus;
 } viaFPRec, *viaFPRecPtr;
 
