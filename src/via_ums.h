@@ -230,9 +230,9 @@ viaAnalogSetDACOutput(ScrnInfoPtr pScrn, Bool outputState)
      *             1: DAC off */
     ViaCrtcMask(VGAHWPTR(pScrn), 0x47, outputState ? 0x00 : BIT(2),
                 BIT(2));
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "Analog (VGA) DAC Output: %s\n",
-                outputState ? "On" : "Off");
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Analog (VGA) DAC Output: %s\n",
+                        outputState ? "On" : "Off"));
 }
 
 static inline void
@@ -250,11 +250,11 @@ viaAnalogSetSyncPolarity(ScrnInfoPtr pScrn, CARD8 syncPolarity)
                 & ~((BIT(1) | BIT(0)) << 6))
             | ((syncPolarity & (BIT(1) | BIT(0))) << 6));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "Analog (VGA) Horizontal Sync Polarity: %s\n",
-                (syncPolarity & BIT(0)) ? "-" : "+"));
+                        "Analog (VGA) Horizontal Sync Polarity: %s\n",
+                        (syncPolarity & BIT(0)) ? "-" : "+"));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "Analog (VGA) Vertical Sync Polarity: %s\n",
-                (syncPolarity & BIT(1)) ? "-" : "+"));
+                        "Analog (VGA) Vertical Sync Polarity: %s\n",
+                        (syncPolarity & BIT(1)) ? "-" : "+"));
 }
 
 /*
@@ -285,9 +285,9 @@ viaLVDS1SetPowerSeq(ScrnInfoPtr pScrn, Bool ctrlType)
      *             1: Software Control */
     ViaCrtcMask(VGAHWPTR(pScrn), 0x91, ctrlType ? BIT(0) : 0x00,
                 BIT(0));
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "LVDS1 Power Sequence: %s Control\n",
-                ctrlType ? "Software" : "Hardware");
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "LVDS1 Power Sequence: %s Control\n",
+                        ctrlType ? "Software" : "Hardware"));
 }
 
 /*
@@ -303,9 +303,9 @@ viaLVDS1SetSoftData(ScrnInfoPtr pScrn, Bool softOn)
      *             1: On */
     ViaCrtcMask(VGAHWPTR(pScrn), 0x91, softOn ? BIT(3) : 0,
                 BIT(3));
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "LVDS1 Software Controlled Data Path: %s\n",
-                softOn ? "On" : "Off");
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "LVDS1 Software Controlled Data Path: %s\n",
+                        softOn ? "On" : "Off"));
 }
 
 /*
@@ -320,9 +320,9 @@ viaLVDS1SetSoftVdd(ScrnInfoPtr pScrn, Bool softOn)
      *             1: On */
     ViaCrtcMask(VGAHWPTR(pScrn), 0x91, softOn ? BIT(4) : 0,
                 BIT(4));
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "LVDS1 Software Controlled Vdd: %s\n",
-                softOn ? "On" : "Off");
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "LVDS1 Software Controlled Vdd: %s\n",
+                        softOn ? "On" : "Off"));
 }
 
 /*
@@ -339,9 +339,9 @@ viaLVDS1SetSoftDisplayPeriod(ScrnInfoPtr pScrn, Bool softOn)
      *             1: Off */
     ViaCrtcMask(VGAHWPTR(pScrn), 0x91, softOn ? 0 : BIT(7),
                 BIT(7));
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "LVDS1 Software Controlled Display Period: %s\n",
-                softOn ? "On" : "Off");
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "LVDS1 Software Controlled Display Period: %s\n",
+                        softOn ? "On" : "Off"));
 }
 
 /*
@@ -356,9 +356,9 @@ viaTMDSSetPower(ScrnInfoPtr pScrn, Bool powerState)
      *             1: TMDS power down */
     ViaCrtcMask(VGAHWPTR(pScrn), 0xD2, powerState ? 0 : BIT(3),
                 BIT(3));
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "TMDS (DVI) Power State: %s\n",
-                powerState ? "On" : "Off");
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "TMDS (DVI) Power State: %s\n",
+                        powerState ? "On" : "Off"));
 }
 
 /*
@@ -376,11 +376,11 @@ viaTMDSSetSyncPolarity(ScrnInfoPtr pScrn, CARD8 syncPolarity)
      *             1: Negative */
     ViaCrtcMask(VGAHWPTR(pScrn), 0x97, syncPolarity << 5, BIT(6) | BIT(5));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "TMDS (DVI) Horizontal Sync Polarity: %s\n",
-                (syncPolarity & BIT(0)) ? "-" : "+"));
+                        "TMDS (DVI) Horizontal Sync Polarity: %s\n",
+                        (syncPolarity & BIT(0)) ? "-" : "+"));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "TMDS (DVI) Vertical Sync Polarity: %s\n",
-                (syncPolarity & BIT(1)) ? "-" : "+"));
+                        "TMDS (DVI) Vertical Sync Polarity: %s\n",
+                        (syncPolarity & BIT(1)) ? "-" : "+"));
 }
 
 /*
