@@ -237,7 +237,7 @@ via_analog_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 
     if (output->crtc) {
         viaAnalogInit(pScrn);
-        viaAnalogSyncPolarity(pScrn, mode->Flags);
+        viaAnalogSyncPolarity(pScrn, adjusted_mode->Flags);
         viaAnalogDisplaySource(pScrn, iga->index);
     }
 
