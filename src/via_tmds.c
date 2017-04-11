@@ -106,34 +106,28 @@ viaTMDSInitRegisters(ScrnInfoPtr pScrn)
  * synchronization.
  */
 static void
-viaTMDSSyncPolarity(ScrnInfoPtr pScrn, DisplayModePtr mode)
+viaTMDSSyncPolarity(ScrnInfoPtr pScrn, unsigned int flags)
 {
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    CARD8 cr97;
+    CARD8 syncPolarity = 0x00;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaTMDSSyncPolarity.\n"));
 
-    /* 3X5.97[6] - DVI (TMDS) VSYNC Polarity
-     *             0: Positive
-     *             1: Negative
-     * 3X5.97[5] - DVI (TMDS) HSYNC Polarity
-     *             0: Positive
-     *             1: Negative */
-    cr97 = hwp->readCrtc(hwp, 0x97);
-    if (mode->Flags & V_NHSYNC) {
-        cr97 |= 0x20;
-    } else {
-        cr97 &= (~0x20);
+    if (flags & V_NHSYNC) {
+        syncPolarity |= BIT(0);
     }
 
-    if (mode->Flags & V_NVSYNC) {
-        cr97 |= 0x40;
-    } else {
-        cr97 &= (~0x40);
+    if (flags & V_NHSYNC) {
+        syncPolarity |= BIT(1);
     }
 
-    ViaCrtcMask(hwp, 0x97, cr97, 0x60);
+    viaTMDSSetSyncPolarity(pScrn, syncPolarity);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "TMDS (DVI) Horizontal Sync Polarity: %s\n",
+                (syncPolarity & BIT(0)) ? "-" : "+");
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "TMDS (DVI) Vertical Sync Polarity: %s\n",
+                (syncPolarity & BIT(1)) ? "-" : "+");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaTMDSSyncPolarity.\n"));
@@ -896,9 +890,7 @@ via_tmds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
     /* Initialize VIA IGP integrated TMDS transmitter registers. */
     viaTMDSInitRegisters(pScrn);
 
-    /* Set integrated TMDS transmitter synchronization polarity for
-     * both horizontal synchronization and vertical synchronization. */
-    viaTMDSSyncPolarity(pScrn, adjusted_mode);
+    viaTMDSSyncPolarity(pScrn, adjusted_mode->Flags);
 
     if (output->crtc) {
         viaTMDSSetSource(pScrn, iga->index ? 0x01 : 0x00);
