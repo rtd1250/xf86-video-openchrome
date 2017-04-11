@@ -138,13 +138,13 @@ viaTMDSSyncPolarity(ScrnInfoPtr pScrn, unsigned int flags)
  * integrated TMDS transmitter.
  */
 static void
-viaTMDSSetSource(ScrnInfoPtr pScrn, CARD8 displaySource)
+viaTMDSDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     CARD8 temp = displaySource;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaTMDSSetSource.\n"));
+                        "Entered viaTMDSDisplaySource.\n"));
 
     /* Set integrated TMDS transmitter display output source.
      * The integrated TMDS transmitter appears to utilize LVDS1's data
@@ -158,7 +158,7 @@ viaTMDSSetSource(ScrnInfoPtr pScrn, CARD8 displaySource)
                 (temp & 0x01) + 1);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaTMDSSetSource.\n"));
+                        "Exiting viaTMDSDisplaySource.\n"));
 }
 
 /*
@@ -894,7 +894,7 @@ via_tmds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
         /* Set integrated TMDS transmitter sync polarity. */
         viaTMDSSyncPolarity(pScrn, adjusted_mode->Flags);
 
-        viaTMDSSetSource(pScrn, iga->index ? 0x01 : 0x00);
+        viaTMDSDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
