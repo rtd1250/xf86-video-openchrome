@@ -380,6 +380,24 @@ viaTMDSSetPower(ScrnInfoPtr pScrn, Bool powerState)
                 powerState ? "On" : "Off");
 }
 
+/*
+ * Sets TMDS (DVI) display source.
+ */
+static inline void
+viaTMDSSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
+{
+    /* Set integrated TMDS transmitter display output source.
+     * The integrated TMDS transmitter appears to utilize LVDS1's data
+     * source selection bit (3X5.99[4]). */
+    /* 3X5.99[4] - LVDS Channel1 Data Source Selection
+     *             0: Primary Display
+     *             1: Secondary Display */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x99, displaySource << 4, BIT(4));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "TMDS (DVI) Display Source: IGA%d\n",
+                        (displaySource & 0x01) + 1));
+}
+
 
 /* via_ums.c */
 void viaUnmapMMIO(ScrnInfoPtr pScrn);
