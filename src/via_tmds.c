@@ -887,12 +887,13 @@ via_tmds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_tmds_mode_set.\n"));
 
-    /* Initialize VIA IGP integrated TMDS transmitter registers. */
-    viaTMDSInitRegisters(pScrn);
-
-    viaTMDSSyncPolarity(pScrn, adjusted_mode->Flags);
-
     if (output->crtc) {
+        /* Initialize VIA IGP integrated TMDS transmitter registers. */
+        viaTMDSInitRegisters(pScrn);
+
+        /* Set integrated TMDS transmitter sync polarity. */
+        viaTMDSSyncPolarity(pScrn, adjusted_mode->Flags);
+
         viaTMDSSetSource(pScrn, iga->index ? 0x01 : 0x00);
     }
 
