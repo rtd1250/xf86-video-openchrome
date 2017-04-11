@@ -134,28 +134,20 @@ viaTMDSSyncPolarity(ScrnInfoPtr pScrn, unsigned int flags)
 }
 
 /*
- * Sets IGA1 or IGA2 as the display output source for VIA Technologies IGP
- * integrated TMDS transmitter.
+ * Sets TMDS (DVI) display source.
  */
 static void
-viaTMDSDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
+viaTMDSDisplaySource(ScrnInfoPtr pScrn, int index)
 {
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    CARD8 temp = displaySource;
+    CARD8 displaySource = index;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaTMDSDisplaySource.\n"));
 
-    /* Set integrated TMDS transmitter display output source.
-     * The integrated TMDS transmitter appears to utilize LVDS1's data
-     * source selection bit (3X5.99[4]). */
-    /* 3X5.99[4] - LVDS Channel1 Data Source Selection
-     *             0: Primary Display
-     *             1: Secondary Display */
-    ViaCrtcMask(hwp, 0x99, temp << 4, 0x10);
+    viaTMDSSetDisplaySource(pScrn, displaySource & 0x01);
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "Integrated TMDS Transmitter Display Output Source: IGA%d\n",
-                (temp & 0x01) + 1);
+                "TMDS (DVI) Display Source: IGA%d\n",
+                (displaySource & 0x01) + 1);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaTMDSDisplaySource.\n"));
@@ -894,7 +886,7 @@ via_tmds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
         /* Set integrated TMDS transmitter sync polarity. */
         viaTMDSSyncPolarity(pScrn, adjusted_mode->Flags);
 
-        viaTMDSDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
+        viaTMDSDisplaySource(pScrn, iga->index);
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
