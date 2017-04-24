@@ -602,6 +602,73 @@ viaFPIOPadSetting(ScrnInfoPtr pScrn, Bool ioPadOn)
 }
 
 static void
+viaFPDisplaySource(ScrnInfoPtr pScrn, int index)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
+    CARD8 sr12, sr13;
+    CARD8 displaySource = index & 0x01;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaFPDisplaySource.\n"));
+
+    sr12 = hwp->readSeq(hwp, 0x12);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR12: 0x%02X\n", sr12));
+    sr13 = hwp->readSeq(hwp, 0x13);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR13: 0x%02X\n", sr13));
+
+    switch (pVia->Chipset) {
+    case VIA_KM400:
+    case VIA_K8M800:
+    case VIA_PM800:
+    case VIA_P4M800PRO:
+        /* 3C5.12[4] - DVP0D4 pin strapping
+         *             0: 12-bit flat panel interface
+         *             1: 24-bit flat panel interface */
+        if (sr12 & 0x10) {
+            viaDFPHighSetDisplaySource(pScrn, displaySource);
+            viaDFPLowSetDisplaySource(pScrn, displaySource);
+        }
+
+        break;
+    case VIA_P4M890:
+    case VIA_K8M890:
+    case VIA_P4M900:
+        /* 3C5.12[4] - DVP0D4 pin strapping
+         *             0: 12-bit flat panel interface
+         *             1: 24-bit flat panel interface */
+        if (sr12 & 0x10) {
+            viaDFPHighSetDisplaySource(pScrn, displaySource);
+        }
+
+        viaDFPLowSetDisplaySource(pScrn, displaySource);
+        viaDVP1SetDisplaySource(pScrn, displaySource);
+        break;
+    case VIA_CX700:
+    case VIA_VX800:
+        /* The code will be reworked later. */
+        viaLVDS2SetDisplaySource(pScrn, displaySource);
+        break;
+    case VIA_VX855:
+    case VIA_VX900:
+        viaLVDS1SetDisplaySource(pScrn, displaySource);
+        break;
+    default:
+        break;
+
+    }
+
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "FP Display Source: IGA%d\n",
+                displaySource + 1);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaFPDisplaySource.\n"));
+}
+
+static void
 ViaLVDSSoftwarePowerFirstSequence(ScrnInfoPtr pScrn, Bool on)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
@@ -1315,25 +1382,11 @@ via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
             break;
         }
 
+        viaFPDisplaySource(pScrn, iga->index);
 
         switch (pVia->Chipset) {
-        case VIA_KM400:
-        case VIA_K8M800:
-        case VIA_PM800:
-        case VIA_P4M800PRO:
-            viaDFPLowSetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
-            viaDFPHighSetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
-            break;
-        case VIA_P4M890:
-        case VIA_K8M890:
-        case VIA_P4M900:
-            viaDFPLowSetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
-            viaDVP1SetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
-            break;
         case VIA_CX700:
         case VIA_VX800:
-            viaLVDS2SetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
-
             /* Set LVDS2 output color dithering. */
             viaLVDS2SetDithering(pScrn, Panel->useDithering ? TRUE : FALSE);
 
@@ -1345,8 +1398,6 @@ via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
             break;
         case VIA_VX855:
         case VIA_VX900:
-            viaLVDS1SetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
-
             /* Set LVDS1 output color dithering. */
             viaLVDS1SetDithering(pScrn, Panel->useDithering ? TRUE : FALSE);
 
