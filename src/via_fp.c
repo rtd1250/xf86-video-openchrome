@@ -761,6 +761,38 @@ ViaLVDSSoftwarePowerSecondSequence(ScrnInfoPtr pScrn, Bool on)
     }
 }
 
+static void
+viaFPPrimaryHardPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
+{
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaFPPrimaryHardPowerSeq.\n"));
+
+    /* Use hardware FP power sequence control. */
+    viaFPSetPrimaryPowerSeqType(pScrn, TRUE);
+
+    if (powerState) {
+        /* Power on FP. */
+        viaFPSetPrimaryHardPower(pScrn, TRUE);
+
+        /* Make sure back light is turned on. */
+        viaFPSetPrimaryDirectBackLightCtrl(pScrn, TRUE);
+
+        /* Make sure display period is turned on. */
+        viaFPSetPrimaryDirectDisplayPeriodCtrl(pScrn, TRUE);
+    } else {
+        /* Make sure display period is turned off. */
+        viaFPSetPrimaryDirectDisplayPeriodCtrl(pScrn, FALSE);
+
+        /* Make sure back light is turned off. */
+        viaFPSetPrimaryDirectBackLightCtrl(pScrn, FALSE);
+
+        /* Power off FP. */
+        viaFPSetPrimaryHardPower(pScrn, FALSE);
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaFPPrimaryHardPowerSeq.\n"));
+}
 
 static void
 ViaLVDSHardwarePowerFirstSequence(ScrnInfoPtr pScrn, Bool on)
