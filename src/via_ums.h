@@ -274,6 +274,25 @@ viaAnalogSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
 }
 
 /*
+ * Sets KM400 or later chipset's FP primary power sequence control
+ * type.
+ */
+static inline void
+viaFPSetPrimaryPowerSeqType(ScrnInfoPtr pScrn, Bool ctrlType)
+{
+    /* Set FP primary power sequence control type. */
+    /* 3X5.91[0] - FP Primary Power Sequence Control Type
+     *             0: Hardware Control
+     *             1: Software Control */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x91, ctrlType ? 0x00 : BIT(0),
+                BIT(0));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "FP Primary Power Sequence Control Type: "
+                        "%s Control\n",
+                        ctrlType ? "Hardware" : "Software"));
+}
+
+/*
  * Sets CX700 or later single chipset's LVDS1 power sequence type.
  */
 static inline void
