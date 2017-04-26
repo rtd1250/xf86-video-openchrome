@@ -293,6 +293,24 @@ viaFPSetPrimaryPowerSeqType(ScrnInfoPtr pScrn, Bool ctrlType)
 }
 
 /*
+ * Sets KM400 or later chipset's FP primary direct back light control
+ * bit.
+ */
+static inline void
+viaFPSetPrimaryDirectBackLightCtrl(ScrnInfoPtr pScrn, Bool directOn)
+{
+    /* Set FP primary direct back light control bit. */
+    /* 3X5.91[6] - FP Primary Direct Back Light Control
+     *             0: On
+     *             1: Off */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x91, directOn ? 0x00 : BIT(6),
+                BIT(6));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "FP Primary Direct Back Light Control: %s\n",
+                        directOn ? "On" : "Off"));
+}
+
+/*
  * Sets CX700 or later single chipset's LVDS1 power sequence type.
  */
 static inline void
