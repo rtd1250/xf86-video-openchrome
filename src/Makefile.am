@@ -59,7 +59,6 @@ openchrome_drv_la_SOURCES = \
          via_memmgr.h \
          via_memmgr.c \
          via_outputs.c \
-         via_mode.h \
          via_priv.h \
          via_regs.h \
          via_sii164.c \

@@ -41,12 +41,6 @@
 #include <unistd.h>
 
 /*
- * Modetable nonsense.
- *
- */
-#include "via_mode.h"
-
-/*
  * Sets IGA1 or IGA2 as the display output source for DIP0
  * (Digital Interface Port 0) interface for CLE266 only.
  */
