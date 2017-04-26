@@ -329,6 +329,25 @@ viaFPSetPrimaryDirectDisplayPeriodCtrl(ScrnInfoPtr pScrn, Bool directOn)
 }
 
 /*
+ * Sets KM400 or later chipset's FP primary hardware controlled
+ * power sequence bit.
+ */
+static inline void
+viaFPSetPrimaryHardPower(ScrnInfoPtr pScrn, Bool powerState)
+{
+    /* Set FP primary hardware controlled power sequence bit. */
+    /* 3X5.6A[3] - FP Primary Hardware Controlled Power Sequence
+     *             0: Hardware Controlled Power Off
+     *             1: Hardware Controlled Power On */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x6A, powerState ? BIT(3) : 0x00,
+                BIT(3));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "FP Primary Hardware Controlled Power "
+                        "Sequence: %s\n",
+                        powerState ? "On" : "Off"));
+}
+
+/*
  * Sets CX700 or later single chipset's LVDS1 power sequence type.
  */
 static inline void
