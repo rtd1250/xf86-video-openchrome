@@ -931,19 +931,6 @@ viaFPPower(ScrnInfoPtr pScrn, Bool powerState, CARD8 diPortType)
                         "Exiting viaFPPower.\n"));
 }
 
-static void
-ViaLCDPowerSequence(vgaHWPtr hwp, VIALCDPowerSeqRec Sequence)
-{
-    int i;
-
-    for (i = 0; i < Sequence.numEntry; i++) {
-        ViaVgahwMask(hwp, 0x300 + Sequence.port[i], Sequence.offset[i],
-                     0x301 + Sequence.port[i], Sequence.data[i],
-                     Sequence.mask[i]);
-        usleep(Sequence.delay[i]);
-    }
-}
-
 /*
  * Try to interpret EDID ourselves.
  */
