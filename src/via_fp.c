@@ -1362,47 +1362,62 @@ via_lvds_create_resources(xf86OutputPtr output)
 }
 
 static void
-via_lvds_dpms(xf86OutputPtr output, int mode)
+via_fp_dpms(xf86OutputPtr output, int mode)
 {
     ScrnInfoPtr pScrn = output->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered via_fp_dpms.\n"));
+
     switch (mode) {
     case DPMSModeOn:
         switch (pVia->Chipset) {
-        case VIA_PM800:
+        case VIA_CLE266:
+        case VIA_KM400:
         case VIA_P4M800PRO:
+        case VIA_PM800:
+        case VIA_K8M800:
         case VIA_P4M890:
         case VIA_K8M890:
         case VIA_P4M900:
+            viaFPPower(pScrn, TRUE, VIA_DI_PORT_NONE);
+            break;
         case VIA_CX700:
         case VIA_VX800:
+            viaFPPower(pScrn, TRUE, VIA_DI_PORT_LVDS2);
+            break;
         case VIA_VX855:
         case VIA_VX900:
-            ViaLVDSPower(pScrn, TRUE);
+            viaFPPower(pScrn, TRUE, VIA_DI_PORT_LVDS1);
             break;
         default:
-            ViaLCDPower(output, TRUE);
             break;
         }
 
         viaFPIOPadSetting(pScrn, TRUE);
         break;
-
     case DPMSModeStandby:
     case DPMSModeSuspend:
     case DPMSModeOff:
         switch (pVia->Chipset) {
-        case VIA_PM800:
+        case VIA_CLE266:
+        case VIA_KM400:
         case VIA_P4M800PRO:
+        case VIA_PM800:
+        case VIA_K8M800:
         case VIA_P4M890:
         case VIA_K8M890:
         case VIA_P4M900:
+            viaFPPower(pScrn, FALSE, VIA_DI_PORT_NONE);
+            break;
         case VIA_CX700:
         case VIA_VX800:
+            viaFPPower(pScrn, FALSE, VIA_DI_PORT_LVDS2);
+            break;
         case VIA_VX855:
         case VIA_VX900:
-            ViaLVDSPower(pScrn, FALSE);
+            viaFPPower(pScrn, FALSE, VIA_DI_PORT_LVDS1);
             break;
         default:
             ViaLCDPower(output, FALSE);
@@ -1411,7 +1426,12 @@ via_lvds_dpms(xf86OutputPtr output, int mode)
 
         viaFPIOPadSetting(pScrn, FALSE);
         break;
+    default:
+        break;
     }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting via_fp_dpms.\n"));
 }
 
 static void
@@ -1467,7 +1487,7 @@ via_lvds_prepare(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
 
-    via_lvds_dpms(output, DPMSModeOff);
+    via_fp_dpms(output, DPMSModeOff);
     viaFPIOPadSetting(pScrn, FALSE);
 }
 
@@ -1476,7 +1496,7 @@ via_lvds_commit(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
 
-    via_lvds_dpms(output, DPMSModeOn);
+    via_fp_dpms(output, DPMSModeOn);
     viaFPIOPadSetting(pScrn, TRUE);
 }
 
@@ -1661,7 +1681,7 @@ via_lvds_destroy(xf86OutputPtr output)
 
 static const xf86OutputFuncsRec via_lvds_funcs = {
     .create_resources   = via_lvds_create_resources,
-    .dpms               = via_lvds_dpms,
+    .dpms               = via_fp_dpms,
     .save               = via_lvds_save,
     .restore            = via_lvds_restore,
     .mode_valid         = via_lvds_mode_valid,
