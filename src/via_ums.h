@@ -107,6 +107,12 @@
 #define VIA_MEM_END     0x0B
 #define VIA_MEM_NONE    0xFF
 
+#define VIA_BW_MIN       74000000 /* > 640x480@60Hz@32bpp */
+#define VIA_BW_DDR200   394000000
+#define VIA_BW_DDR400   553000000 /* > 1920x1200@60Hz@32bpp */
+#define VIA_BW_DDR667   922000000
+#define VIA_BW_DDR1066  922000000
+
 /* Digital Output Bus Width */
 #define	    VIA_DI_12BIT		    0x00
 #define	    VIA_DI_24BIT		    0x01
@@ -216,6 +222,16 @@ typedef struct
     CARD8 bRamClock;
     CARD8 bTuningValue;
 } ViaExpireNumberTable;
+
+union pllparams {
+    struct {
+        CARD32 dtz : 2;
+        CARD32 dr  : 3;
+        CARD32 dn  : 7;
+        CARD32 dm  :10;
+    } params;
+    CARD32 packed;
+};
 
 
 /*

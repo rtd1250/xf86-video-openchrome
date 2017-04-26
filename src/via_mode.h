@@ -30,20 +30,5 @@
  * Bandwidth
  *
  */
-#define VIA_BW_MIN       74000000 /* > 640x480@60Hz@32bpp */
-#define VIA_BW_DDR200   394000000
-#define VIA_BW_DDR400   553000000 /* > 1920x1200@60Hz@32bpp */
-#define VIA_BW_DDR667   922000000
-#define VIA_BW_DDR1066  922000000
-
-union pllparams {
-    struct {
-        CARD32 dtz : 2;
-        CARD32 dr  : 3;
-        CARD32 dn  : 7;
-        CARD32 dm  :10;
-    } params;
-    CARD32 packed;
-};
 
 #endif /* _VIA_MODE_H_ */
