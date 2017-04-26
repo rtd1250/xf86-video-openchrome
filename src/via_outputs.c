@@ -933,38 +933,14 @@ ViaComputeProDotClock(unsigned clock)
     return bestClock.packed;
 }
 
-/*
- *
- */
 CARD32
 ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    int i;
 
     if ((pVia->Chipset == VIA_CLE266) || (pVia->Chipset == VIA_KM400)) {
-        CARD32 best1 = 0, best2;
-
-        for (i = 0; ViaDotClocks[i].DotClock; i++)
-            if (ViaDotClocks[i].DotClock == mode->Clock) {
-                best1 = ViaDotClocks[i].UniChrome;
-                break;
-            }
-
-        best2 = ViaComputeDotClock(mode->Clock);
-
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                         "ViaComputeDotClock %d : %04x : %04x\n",
-                         mode->Clock, (unsigned int)best1,
-                         (unsigned int)best2));
-
-        return best2;
+        return ViaComputeDotClock(mode->Clock);
     } else {
-        for (i = 0; ViaDotClocks[i].DotClock; i++)
-            if (ViaDotClocks[i].DotClock == mode->Clock)
-                return ViaDotClocks[i].UniChromePro.packed;
         return ViaComputeProDotClock(mode->Clock);
     }
-
-    return 0;
 }
