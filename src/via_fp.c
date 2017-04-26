@@ -944,57 +944,6 @@ ViaLCDPowerSequence(vgaHWPtr hwp, VIALCDPowerSeqRec Sequence)
     }
 }
 
-static void
-ViaLCDPower(xf86OutputPtr output, Bool Power_On)
-{
-    viaFPRecPtr Panel = output->driver_private;
-    ScrnInfoPtr pScrn = output->scrn;
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
-    int i;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered ViaLCDPower.\n"));
-
-    /* Enable LCD */
-    if (Power_On)
-        ViaCrtcMask(hwp, 0x6A, 0x08, 0x08);
-    else
-        ViaCrtcMask(hwp, 0x6A, 0x00, 0x08);
-
-    if (pBIOSInfo->LCDPower)
-        pBIOSInfo->LCDPower(pScrn, Power_On);
-
-    /* Find Panel Size Index for PowerSeq Table */
-    if (pVia->Chipset == VIA_CLE266) {
-        if (Panel->NativeModeIndex != VIA_PANEL_INVALID) {
-            for (i = 0; i < NumPowerOn; i++) {
-                if (lcdTable[Panel->PanelIndex].powerSeq
-                    == powerOn[i].powerSeq)
-                    break;
-            }
-        } else
-            i = 0;
-    } else
-        /* KM and K8M use PowerSeq Table index 2. */
-        i = 2;
-
-    usleep(1);
-    if (Power_On)
-        ViaLCDPowerSequence(hwp, powerOn[i]);
-    else
-        ViaLCDPowerSequence(hwp, powerOff[i]);
-    usleep(1);
-
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "Integrated LVDS Flat Panel Power: %s\n",
-                Power_On ? "On" : "Off");
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting ViaLCDPower.\n"));
-}
-
 /*
  * Try to interpret EDID ourselves.
  */
@@ -1342,7 +1291,6 @@ via_fp_dpms(xf86OutputPtr output, int mode)
             viaFPPower(pScrn, FALSE, VIA_DI_PORT_LVDS1);
             break;
         default:
-            ViaLCDPower(output, FALSE);
             break;
         }
 
@@ -1364,7 +1312,6 @@ via_lvds_save(xf86OutputPtr output)
 static void
 via_lvds_restore(xf86OutputPtr output)
 {
-    ViaLCDPower(output, TRUE);
 }
 
 static int
