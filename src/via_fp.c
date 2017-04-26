@@ -949,67 +949,6 @@ viaFPPower(ScrnInfoPtr pScrn, Bool powerState, CARD8 diPortType)
 }
 
 static void
-ViaLVDSPower(ScrnInfoPtr pScrn, Bool Power_On)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-    CARD8 crd2;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered ViaLVDSPower.\n"));
-
-    /*
-     * VX800, CX700 have HW issue, so we'd better use SW power sequence
-     * Fix Ticket #308
-     */
-    switch (pVia->Chipset) {
-    case VIA_CX700:
-    case VIA_VX800:
-
-        /* Is the integrated TMDS transmitter (DVI) not in use? */
-        crd2 = hwp->readCrtc(hwp, 0xD2);
-        if (((pVia->Chipset == VIA_CX700)
-                || (pVia->Chipset == VIA_VX800)
-                || (pVia->Chipset == VIA_VX855)
-                || (pVia->Chipset == VIA_VX900))
-            && (!(crd2 & 0x10))) {
-            ViaLVDSSoftwarePowerFirstSequence(pScrn, Power_On);
-        }
-
-        ViaLVDSSoftwarePowerSecondSequence(pScrn, Power_On);
-        break;
-
-    case VIA_VX855:
-    case VIA_VX900:
-        /* Is the integrated TMDS transmitter (DVI) not in use? */
-        crd2 = hwp->readCrtc(hwp, 0xD2);
-        if (((pVia->Chipset == VIA_CX700)
-                || (pVia->Chipset == VIA_VX800)
-                || (pVia->Chipset == VIA_VX855)
-                || (pVia->Chipset == VIA_VX900))
-            && (!(crd2 & 0x10))) {
-            ViaLVDSHardwarePowerFirstSequence(pScrn, Power_On);
-        }
-
-        ViaLVDSHardwarePowerSecondSequence(pScrn, Power_On);
-        break;
-    default:
-        ViaLVDSHardwarePowerFirstSequence(pScrn, Power_On);
-        ViaLVDSHardwarePowerSecondSequence(pScrn, Power_On);
-        break;
-    }
-
-    ViaLVDSPowerChannel(pScrn, Power_On);
-
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "Integrated LVDS Flat Panel Power: %s\n",
-                Power_On ? "On" : "Off");
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting ViaLVDSPower.\n"));
-}
-
-static void
 ViaLCDPowerSequence(vgaHWPtr hwp, VIALCDPowerSeqRec Sequence)
 {
     int i;
