@@ -668,6 +668,49 @@ viaFPDisplaySource(ScrnInfoPtr pScrn, int index)
                         "Exiting viaFPDisplaySource.\n"));
 }
 
+/*
+ * This software controlled FP power on / off sequence code is
+ * for CLE266's IGP which was codenamed Castle Rock. The code is
+ * untested. The turn on sequence and register access likely
+ * originated from the code VIA Technologies made open source around
+ * Year 2004.
+ */
+static void
+viaFPCastleRockSoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaFPCastleRockSoftPowerSeq.\n"));
+
+    if (powerState) {
+        ViaCrtcMask(hwp, 0x6A, BIT(3), BIT(3));
+
+        ViaCrtcMask(hwp, 0x91, BIT(4), BIT(4));
+        usleep(25);
+
+        ViaCrtcMask(hwp, 0x91, BIT(3), BIT(3));
+        usleep(510);
+
+        ViaCrtcMask(hwp, 0x91, BIT(2) | BIT(1), BIT(2) | BIT(1));
+        usleep(1);
+    } else {
+        ViaCrtcMask(hwp, 0x6A, 0x00, BIT(3));
+
+        ViaCrtcMask(hwp, 0x91, 0x00, BIT(2) | BIT(1));
+        usleep(210);
+
+        ViaCrtcMask(hwp, 0x91, 0x00, BIT(3));
+        usleep(25);
+
+        ViaCrtcMask(hwp, 0x91, 0x00, BIT(4));
+        usleep(1);
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaFPCastleRockSoftPowerSeq.\n"));
+}
+
 static void
 ViaLVDSSoftwarePowerFirstSequence(ScrnInfoPtr pScrn, Bool on)
 {
