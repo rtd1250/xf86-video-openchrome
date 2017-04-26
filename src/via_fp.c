@@ -880,23 +880,6 @@ ViaLVDSHardwarePowerSecondSequence(ScrnInfoPtr pScrn, Bool on)
 }
 
 static void
-ViaLVDSPowerChannel(ScrnInfoPtr pScrn, Bool on)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    CARD8 lvdsMask;
-
-    if (on) {
-        /* LVDS0: 0x7F, LVDS1: 0xBF */
-        lvdsMask = 0x7F & 0xBF;
-        hwp->writeCrtc(hwp, 0xD2, hwp->readCrtc(hwp, 0xD2) & lvdsMask);
-    } else {
-        /* LVDS0: 0x80, LVDS1: 0x40 */
-        lvdsMask = 0x80 | 0x40;
-        hwp->writeCrtc(hwp, 0xD2, hwp->readCrtc(hwp, 0xD2) | lvdsMask);
-    }
-}
-
-static void
 viaFPPower(ScrnInfoPtr pScrn, Bool powerState, CARD8 diPortType)
 {
     VIAPtr pVia = VIAPTR(pScrn);
