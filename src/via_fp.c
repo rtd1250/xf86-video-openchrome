@@ -897,6 +897,58 @@ ViaLVDSPowerChannel(ScrnInfoPtr pScrn, Bool on)
 }
 
 static void
+viaFPPower(ScrnInfoPtr pScrn, Bool powerState, CARD8 diPortType)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaFPPower.\n"));
+
+    switch (pVia->Chipset) {
+    case VIA_CLE266:
+        viaFPCastleRockSoftPowerSeq(pScrn, powerState);
+        break;
+    case VIA_KM400:
+    case VIA_P4M800PRO:
+    case VIA_PM800:
+    case VIA_K8M800:
+    case VIA_P4M890:
+    case VIA_K8M890:
+    case VIA_P4M900:
+        viaFPPrimaryHardPowerSeq(pScrn, powerState);
+        break;
+    /*
+     * VX800, CX700 have HW issue, so we'd better use SW power sequence.
+     * Fix Ticket #308.
+     */
+    case VIA_CX700:
+    case VIA_VX800:
+        if ((diPortType & VIA_DI_PORT_LVDS1)
+            && (diPortType & VIA_DI_PORT_LVDS2)) {
+            ViaLVDSSoftwarePowerFirstSequence(pScrn, powerState);
+            ViaLVDSSoftwarePowerSecondSequence(pScrn, powerState);
+        } else if ((diPortType & VIA_DI_PORT_LVDS1)
+                    && (~(diPortType & VIA_DI_PORT_LVDS2))) {
+            ViaLVDSSoftwarePowerFirstSequence(pScrn, powerState);
+        } else if ((~(diPortType & VIA_DI_PORT_LVDS1))
+                        && (diPortType & VIA_DI_PORT_LVDS2)) {
+            ViaLVDSSoftwarePowerSecondSequence(pScrn, powerState);
+        }
+
+         break;
+    case VIA_VX855:
+    case VIA_VX900:
+        ViaLVDSHardwarePowerFirstSequence(pScrn, powerState);
+        break;
+    default:
+        break;
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaFPPower.\n"));
+}
+
+static void
 ViaLVDSPower(ScrnInfoPtr pScrn, Bool Power_On)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
