@@ -311,6 +311,24 @@ viaFPSetPrimaryDirectBackLightCtrl(ScrnInfoPtr pScrn, Bool directOn)
 }
 
 /*
+ * Sets KM400 or later chipset's FP primary direct display period
+ * control bit.
+ */
+static inline void
+viaFPSetPrimaryDirectDisplayPeriodCtrl(ScrnInfoPtr pScrn, Bool directOn)
+{
+    /* Set FP primary direct display period bit. */
+    /* 3X5.91[7] - FP Primary Direct Display Period Control
+     *             0: On
+     *             1: Off */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x91, directOn ? 0x00 : BIT(7),
+                BIT(7));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "FP Primary Direct Display Period Control: %s\n",
+                        directOn ? "On" : "Off"));
+}
+
+/*
  * Sets CX700 or later single chipset's LVDS1 power sequence type.
  */
 static inline void
