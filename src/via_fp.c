@@ -908,19 +908,24 @@ viaFPPower(ScrnInfoPtr pScrn, Bool powerState, CARD8 diPortType)
         if ((diPortType & VIA_DI_PORT_LVDS1)
             && (diPortType & VIA_DI_PORT_LVDS2)) {
             ViaLVDSSoftwarePowerFirstSequence(pScrn, powerState);
+            viaLVDS1SetPower(pScrn, powerState);
             ViaLVDSSoftwarePowerSecondSequence(pScrn, powerState);
+            viaLVDS2SetPower(pScrn, powerState);
         } else if ((diPortType & VIA_DI_PORT_LVDS1)
                     && (~(diPortType & VIA_DI_PORT_LVDS2))) {
             ViaLVDSSoftwarePowerFirstSequence(pScrn, powerState);
+            viaLVDS1SetPower(pScrn, powerState);
         } else if ((~(diPortType & VIA_DI_PORT_LVDS1))
                         && (diPortType & VIA_DI_PORT_LVDS2)) {
             ViaLVDSSoftwarePowerSecondSequence(pScrn, powerState);
+            viaLVDS2SetPower(pScrn, powerState);
         }
 
          break;
     case VIA_VX855:
     case VIA_VX900:
         ViaLVDSHardwarePowerFirstSequence(pScrn, powerState);
+        viaLVDS1SetPower(pScrn, powerState);
         break;
     default:
         break;
