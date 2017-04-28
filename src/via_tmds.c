@@ -189,16 +189,10 @@ viaTMDSPower(ScrnInfoPtr pScrn, Bool powerState)
                         "Entered viaTMDSPower.\n"));
 
     if (powerState) {
-        /* Software control for LVDS1 power sequence. */
-        viaLVDS1SetPowerSeq(pScrn, TRUE);
-
         viaLVDS1SetSoftDisplayPeriod(pScrn, TRUE);
         viaLVDS1SetSoftData(pScrn, TRUE);
         viaTMDSSetPower(pScrn, TRUE);
     } else {
-        /* Software control for LVDS1 power sequence. */
-        viaLVDS1SetPowerSeq(pScrn, TRUE);
-
         viaTMDSSetPower(pScrn, FALSE);
         viaLVDS1SetSoftData(pScrn, FALSE);
         viaLVDS1SetSoftDisplayPeriod(pScrn, FALSE);
