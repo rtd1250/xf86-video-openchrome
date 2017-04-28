@@ -364,6 +364,23 @@ viaFPSetPrimaryHardPower(ScrnInfoPtr pScrn, Bool powerState)
 }
 
 /*
+ * Sets CX700 or later chipset's LVDS1 power state.
+ */
+static inline void
+viaLVDS1SetPower(ScrnInfoPtr pScrn, Bool powerState)
+{
+    /* Set LVDS1 power state. */
+    /* 3X5.D2[7] - Power Down (Active High) for Channel 1 LVDS
+     *             0: LVDS1 power on
+     *             1: LVDS1 power down */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0xD2, powerState ? 0x00 : BIT(7),
+                BIT(7));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "LVDS1 Power State: %s\n",
+                        powerState ? "On" : "Off"));
+}
+
+/*
  * Sets CX700 or later single chipset's LVDS1 power sequence type.
  */
 static inline void
