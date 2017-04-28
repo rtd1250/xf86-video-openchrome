@@ -452,6 +452,23 @@ viaLVDS1SetSoftDisplayPeriod(ScrnInfoPtr pScrn, Bool softOn)
 }
 
 /*
+ * Sets CX700 / VX700 and VX800 chipsets' LVDS2 power state.
+ */
+static inline void
+viaLVDS2SetPower(ScrnInfoPtr pScrn, Bool powerState)
+{
+    /* Set LVDS2 power state. */
+    /* 3X5.D2[6] - Power Down (Active High) for Channel 2 LVDS
+     *             0: LVDS2 power on
+     *             1: LVDS2 power down */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0xD2, powerState ? 0x00 : BIT(6),
+                BIT(6));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "LVDS2 Power State: %s\n",
+                        powerState ? "On" : "Off"));
+}
+
+/*
  * Sets CX700 / VX700 and VX800 chipsets' TMDS (DVI) power state.
  */
 static inline void
