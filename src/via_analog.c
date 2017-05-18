@@ -114,13 +114,13 @@ viaAnalogDisplaySource(ScrnInfoPtr pScrn, int index)
  * Intializes analog VGA related registers.
  */
 static void
-viaAnalogInit(ScrnInfoPtr pScrn)
+viaAnalogInitReg(ScrnInfoPtr pScrn)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaAnalogInit.\n"));
+                        "Entered viaAnalogInitReg.\n"));
 
     /* 3X5.37[7]   - DAC Power Save Control 1
      *               0: Depend on Rx3X5.37[5:4] setting
@@ -152,7 +152,7 @@ viaAnalogInit(ScrnInfoPtr pScrn)
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaAnalogInit.\n"));
+                        "Exiting viaAnalogInitReg.\n"));
 }
 
 
@@ -236,7 +236,7 @@ via_analog_mode_set(xf86OutputPtr output, DisplayModePtr mode,
                         "Entered via_analog_mode_set.\n"));
 
     if (output->crtc) {
-        viaAnalogInit(pScrn);
+        viaAnalogInitReg(pScrn);
         viaAnalogSyncPolarity(pScrn, adjusted_mode->Flags);
         viaAnalogDisplaySource(pScrn, iga->index);
     }
