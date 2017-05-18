@@ -60,26 +60,6 @@ viaAnalogOutput(ScrnInfoPtr pScrn, Bool outputState)
 }
 
 /*
- * Specifies IGA1 or IGA2 for analog VGA DAC source.
- */
-static void
-viaAnalogDisplaySource(ScrnInfoPtr pScrn, int index)
-{
-    CARD8 displaySource = index;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaAnalogDisplaySource.\n"));
-
-    viaAnalogSetDisplaySource(pScrn, displaySource & 0x01);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "Analog (VGA) Display Source: IGA%d\n",
-                (displaySource & 0x01) + 1);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaAnalogDisplaySource.\n"));
-}
-
-/*
  * Set analog (VGA) sync polarity.
  */
 static void
@@ -108,6 +88,26 @@ viaAnalogSyncPolarity(ScrnInfoPtr pScrn, unsigned int flags)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaAnalogSyncPolarity.\n"));
+}
+
+/*
+ * Specifies IGA1 or IGA2 for analog VGA DAC source.
+ */
+static void
+viaAnalogDisplaySource(ScrnInfoPtr pScrn, int index)
+{
+    CARD8 displaySource = index;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaAnalogDisplaySource.\n"));
+
+    viaAnalogSetDisplaySource(pScrn, displaySource & 0x01);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "Analog (VGA) Display Source: IGA%d\n",
+                (displaySource & 0x01) + 1);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaAnalogDisplaySource.\n"));
 }
 
 /*
