@@ -281,8 +281,8 @@ typedef struct _VIA {
     /* Rotation */
     Bool    RandRRotation;
 
-    /* BIOS Info Ptr */
-    VIABIOSInfoPtr      pBIOSInfo;
+    /* Display Record Pointer */
+    VIADisplayPtr      pVIADisplay;
 
     /* VIA Technologies NanoBook reference design.
        Examples include Everex CloudBook and Sylvania g netbook.

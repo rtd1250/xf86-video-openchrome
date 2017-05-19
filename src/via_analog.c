@@ -375,7 +375,7 @@ void
 via_analog_init(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
     xf86OutputPtr output = NULL;
     char outputNameBuffer[32];
 
@@ -408,7 +408,7 @@ via_analog_init(ScrnInfoPtr pScrn)
     output->possible_clones = 0;
     output->interlaceAllowed = TRUE;
     output->doubleScanAllowed = FALSE;
-    pBIOSInfo->analog = output;
+    pVIADisplay->analog = output;
 
     /* Increment the number of analog VGA connectors. */
     pVia->numberVGA++;

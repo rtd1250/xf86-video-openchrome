@@ -649,12 +649,12 @@ void
 viaOutputDetect(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaOutputDetect.\n"));
 
-    pBIOSInfo->analog = NULL;
+    pVIADisplay->analog = NULL;
 
     /* Initialize the number of VGA connectors. */
     pVia->numberVGA = 0;

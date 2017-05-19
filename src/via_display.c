@@ -3723,10 +3723,10 @@ iga1_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
 
     temp = mode->CrtcHDisplay * mode->CrtcVDisplay * mode->VRefresh *
             (pScrn->bitsPerPixel >> 3);
-    if (pVia->pBIOSInfo->Bandwidth < temp) {
+    if (pVia->pVIADisplay->Bandwidth < temp) {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                     "Required bandwidth is not available. (%u > %u)\n",
-                    (unsigned)temp, (unsigned)pVia->pBIOSInfo->Bandwidth);
+                    (unsigned)temp, (unsigned)pVia->pVIADisplay->Bandwidth);
         return FALSE;
     }
 
@@ -3785,7 +3785,7 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     ScrnInfoPtr pScrn = crtc->scrn;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered iga1_crtc_mode_set.\n"));
@@ -3815,9 +3815,9 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 
     ViaSetPrimaryFIFO(pScrn, adjusted_mode);
 
-    pBIOSInfo->Clock = ViaModeDotClockTranslate(pScrn, adjusted_mode);
-    pBIOSInfo->ClockExternal = FALSE;
-    ViaSetPrimaryDotclock(pScrn, pBIOSInfo->Clock);
+    pVIADisplay->Clock = ViaModeDotClockTranslate(pScrn, adjusted_mode);
+    pVIADisplay->ClockExternal = FALSE;
+    ViaSetPrimaryDotclock(pScrn, pVIADisplay->Clock);
     ViaSetUseExternalClock(hwp);
     ViaCrtcMask(hwp, 0x6B, 0x00, 0x01);
 
@@ -4139,10 +4139,10 @@ iga2_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
 
     temp = mode->CrtcHDisplay * mode->CrtcVDisplay * mode->VRefresh *
             (pScrn->bitsPerPixel >> 3);
-    if (pVia->pBIOSInfo->Bandwidth < temp) {
+    if (pVia->pVIADisplay->Bandwidth < temp) {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                     "Required bandwidth is not available. (%u > %u)\n",
-                    (unsigned)temp, (unsigned)pVia->pBIOSInfo->Bandwidth);
+                    (unsigned)temp, (unsigned)pVia->pVIADisplay->Bandwidth);
         return FALSE;
     }
 
@@ -4200,7 +4200,7 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     ScrnInfoPtr pScrn = crtc->scrn;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered iga2_crtc_mode_set.\n"));
@@ -4223,9 +4223,9 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     viaIGA2SetDisplayRegister(pScrn, adjusted_mode);
 
     ViaSetSecondaryFIFO(pScrn, adjusted_mode);
-    pBIOSInfo->Clock = ViaModeDotClockTranslate(pScrn, adjusted_mode);
-    pBIOSInfo->ClockExternal = FALSE;
-    ViaSetSecondaryDotclock(pScrn, pBIOSInfo->Clock);
+    pVIADisplay->Clock = ViaModeDotClockTranslate(pScrn, adjusted_mode);
+    pVIADisplay->ClockExternal = FALSE;
+    ViaSetSecondaryDotclock(pScrn, pVIADisplay->Clock);
     ViaSetUseExternalClock(hwp);
 
     viaIGA2SetFBStartingAddress(crtc, x, y);

@@ -144,7 +144,7 @@ typedef struct ViaPanelMode {
     Bool useDithering;
 } ViaPanelModeRec, *ViaPanelModePtr ;
 
-typedef struct _VIABIOSINFO {
+typedef struct _VIADISPLAY {
 	xf86OutputPtr analog;
 	xf86OutputPtr tv;
 
@@ -175,7 +175,7 @@ typedef struct _VIABIOSINFO {
     int            TVNumModes;
     void (*TVPrintRegs) (ScrnInfoPtr pScrn);
 
-} VIABIOSInfoRec, *VIABIOSInfoPtr;
+} VIADisplayRec, *VIADisplayPtr;
 
 
 /*

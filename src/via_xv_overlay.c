@@ -683,7 +683,7 @@ viaOverlayHQVCalcZoomHeight(VIAPtr pVia,
                             HQV_V_TAP8_12221, HQV_V_TAP8_12221 };
     /* CARD32 HQVmini[5] = { 0, 0x0c000000, 0x0a000000, 0x09000000, 0x08800000 }; */
 
-    /*if (pVia->pBIOSInfo->scaleY)
+    /*if (pVia->pVIADisplay->scaleY)
      * {
      * dstHeight = dstHeight + 1;
      * } */
@@ -1751,10 +1751,10 @@ SetVideoWindow(ScrnInfoPtr pScrn, unsigned long videoFlag,
      * So, we need to adjust the Y top and bottom position.
      *
     if (videoFlag & VIDEO_1_INUSE) {
-        if (pBIOSInfo->SetDVI && pBIOSInfo->scaleY) {
-            top = (pUpdate->DstTop * pBIOSInfo->Panel->NativeMode->Height
+        if (pVIADisplay->SetDVI && pVIADisplay->scaleY) {
+            top = (pUpdate->DstTop * pVIADisplay->Panel->NativeMode->Height
                    / pScrn->currentMode->VDisplay);
-            bottom = (pUpdate->DstBottom * pBIOSInfo->Panel->NativeMode->Height
+            bottom = (pUpdate->DstBottom * pVIADisplay->Panel->NativeMode->Height
                       / pScrn->currentMode->VDisplay);
         }
     }*/
@@ -1830,10 +1830,10 @@ Upd_Video(xf86CrtcPtr crtc, unsigned long videoFlag,
                   pUpdate->DstTop, pUpdate->DstBottom));
 
     dstWidth = pUpdate->DstRight - pUpdate->DstLeft;
-	/*if (pBIOSInfo->lvds && pBIOSInfo->lvds->status == XF86OutputStatusConnected &&
-		pBIOSInfo->Panel->Scale) {
+	/*if (pVIADisplay->lvds && pVIADisplay->lvds->status == XF86OutputStatusConnected &&
+		pVIADisplay->Panel->Scale) {
         * FIXME: We need to determine if the panel is using V1 or V3 *
-        float hfactor = (float)pBIOSInfo->Panel->NativeMode->Width
+        float hfactor = (float)pVIADisplay->Panel->NativeMode->Width
                         / pScrn->currentMode->HDisplay;
         dstWidth *= hfactor;
     }*/

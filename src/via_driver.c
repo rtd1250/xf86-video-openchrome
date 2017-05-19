@@ -405,14 +405,14 @@ VIAFreeRec(ScrnInfoPtr pScrn)
     if (!pScrn->driverPrivate)
         return;
 
-    VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
 
-    if (pBIOSInfo) {
-        if (pBIOSInfo->TVI2CDev)
-            xf86DestroyI2CDevRec(pBIOSInfo->TVI2CDev, TRUE);
+    if (pVIADisplay) {
+        if (pVIADisplay->TVI2CDev)
+            xf86DestroyI2CDevRec(pVIADisplay->TVI2CDev, TRUE);
 
-        pVia->pBIOSInfo = NULL;
-        free(pBIOSInfo);
+        pVia->pVIADisplay = NULL;
+        free(pVIADisplay);
     }
 
     if (pVia->VideoRegs)
@@ -719,15 +719,15 @@ VIAGetRec(ScrnInfoPtr pScrn)
     /* allocate VIARec */
     pVia = (VIARec *) xnfcalloc(sizeof(VIARec), 1);
     if (pVia) {
-        pVia->pBIOSInfo = xnfcalloc(sizeof(VIABIOSInfoRec), 1);
-        VIABIOSInfoPtr pBIOSInfo = pVia->pBIOSInfo;
+        pVia->pVIADisplay = xnfcalloc(sizeof(VIADisplayRec), 1);
+        VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
 
-        if (pBIOSInfo) {
-            pBIOSInfo->TVI2CDev = NULL;
+        if (pVIADisplay) {
+            pVIADisplay->TVI2CDev = NULL;
 
             pVia->VideoRegs = (video_via_regs *) xnfcalloc(sizeof(video_via_regs), 1);
             if (!pVia->VideoRegs) {
-                free(pBIOSInfo);
+                free(pVIADisplay);
                 free(pVia);
             } else {
                 pScrn->driverPrivate = pVia;
@@ -924,7 +924,7 @@ viaPreInit(ScrnInfoPtr pScrn, int flags)
     XF86OptionPtr option = xf86NewOption("MigrationHeuristic", "greedy");
     EntityInfoPtr pEnt;
     VIAPtr pVia;
-    VIABIOSInfoPtr pBIOSInfo;
+    VIADisplayPtr pVIADisplay;
     MessageType from = X_DEFAULT;
     const char *s = NULL;
 #ifdef HAVE_DRI
@@ -1373,41 +1373,41 @@ viaPreInit(ScrnInfoPtr pScrn, int flags)
     xf86DrvMsg(pScrn->scrnIndex, from,
                "Will try to allocate %d kB of AGP memory.\n", pVia->agpMem);
 
-    pBIOSInfo = pVia->pBIOSInfo;
-    pBIOSInfo->TVDotCrawl = FALSE;
+    pVIADisplay = pVia->pVIADisplay;
+    pVIADisplay->TVDotCrawl = FALSE;
     from = xf86GetOptValBool(VIAOptions, OPTION_TVDOTCRAWL,
-                             &pBIOSInfo->TVDotCrawl)
+                             &pVIADisplay->TVDotCrawl)
             ? X_CONFIG : X_DEFAULT;
     xf86DrvMsg(pScrn->scrnIndex, from, "TV dotCrawl is %s.\n",
-               pBIOSInfo->TVDotCrawl ? "enabled" : "disabled");
+               pVIADisplay->TVDotCrawl ? "enabled" : "disabled");
 
     /* TV Deflicker */
-    pBIOSInfo->TVDeflicker = 0;
+    pVIADisplay->TVDeflicker = 0;
     from = xf86GetOptValInteger(VIAOptions, OPTION_TVDEFLICKER,
-                                &pBIOSInfo->TVDeflicker)
+                                &pVIADisplay->TVDeflicker)
             ? X_CONFIG : X_DEFAULT;
     xf86DrvMsg(pScrn->scrnIndex, from, "TV deflicker is set to %d.\n",
-               pBIOSInfo->TVDeflicker);
+               pVIADisplay->TVDeflicker);
 
-    pBIOSInfo->TVType = TVTYPE_NONE;
+    pVIADisplay->TVType = TVTYPE_NONE;
     if ((s = xf86GetOptValString(VIAOptions, OPTION_TVTYPE))) {
         if (!xf86NameCmp(s, "NTSC")) {
-            pBIOSInfo->TVType = TVTYPE_NTSC;
+            pVIADisplay->TVType = TVTYPE_NTSC;
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Type is NTSC.\n");
         } else if (!xf86NameCmp(s, "PAL")) {
-            pBIOSInfo->TVType = TVTYPE_PAL;
+            pVIADisplay->TVType = TVTYPE_PAL;
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Type is PAL.\n");
         } else if (!xf86NameCmp(s, "480P")) {
-            pBIOSInfo->TVType = TVTYPE_480P;
+            pVIADisplay->TVType = TVTYPE_480P;
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Type is SDTV 480P.\n");
         } else if (!xf86NameCmp(s, "576P")) {
-            pBIOSInfo->TVType = TVTYPE_576P;
+            pVIADisplay->TVType = TVTYPE_576P;
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Type is SDTV 576P.\n");
         } else if (!xf86NameCmp(s, "720P")) {
-            pBIOSInfo->TVType = TVTYPE_720P;
+            pVIADisplay->TVType = TVTYPE_720P;
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Type is HDTV 720P.\n");
         } else if (!xf86NameCmp(s, "1080I")) {
-            pBIOSInfo->TVType = TVTYPE_1080I;
+            pVIADisplay->TVType = TVTYPE_1080I;
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Type is HDTV 1080i.\n");
         }
     } else {
@@ -1415,25 +1415,25 @@ viaPreInit(ScrnInfoPtr pScrn, int flags)
     }
 
     /* TV output signal Option */
-    pBIOSInfo->TVOutput = TVOUTPUT_NONE;
+    pVIADisplay->TVOutput = TVOUTPUT_NONE;
     if ((s = xf86GetOptValString(VIAOptions, OPTION_TVOUTPUT))) {
         if (!xf86NameCmp(s, "S-Video")) {
-            pBIOSInfo->TVOutput = TVOUTPUT_SVIDEO;
+            pVIADisplay->TVOutput = TVOUTPUT_SVIDEO;
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
                        "TV Output Signal is S-Video.\n");
         } else if (!xf86NameCmp(s, "Composite")) {
-            pBIOSInfo->TVOutput = TVOUTPUT_COMPOSITE;
+            pVIADisplay->TVOutput = TVOUTPUT_COMPOSITE;
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
                        "TV Output Signal is Composite.\n");
         } else if (!xf86NameCmp(s, "SC")) {
-            pBIOSInfo->TVOutput = TVOUTPUT_SC;
+            pVIADisplay->TVOutput = TVOUTPUT_SC;
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "TV Output Signal is SC.\n");
         } else if (!xf86NameCmp(s, "RGB")) {
-            pBIOSInfo->TVOutput = TVOUTPUT_RGB;
+            pVIADisplay->TVOutput = TVOUTPUT_RGB;
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
                        "TV Output Signal is RGB.\n");
         } else if (!xf86NameCmp(s, "YCbCr")) {
-            pBIOSInfo->TVOutput = TVOUTPUT_YCBCR;
+            pVIADisplay->TVOutput = TVOUTPUT_YCBCR;
             xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
                        "TV Output Signal is YCbCr.\n");
         }

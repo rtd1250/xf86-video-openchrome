@@ -918,7 +918,7 @@ umsCrtcInit(ScrnInfoPtr pScrn)
     ClockRangesPtr clockRanges;
 #endif
     int max_pitch, max_height;
-    VIABIOSInfoPtr pBIOSInfo;
+    VIADisplayPtr pVIADisplay;
     xf86CrtcPtr iga1, iga2;
 
     /* 3X5.3B through 3X5.3F are scratch pad registers. */
@@ -937,17 +937,17 @@ umsCrtcInit(ScrnInfoPtr pScrn)
                    "Unknown Memory clock: %d\n", pVia->MemClk);
         pVia->MemClk = VIA_MEM_END - 1;
     }
-    pBIOSInfo = pVia->pBIOSInfo;
-    pBIOSInfo->Bandwidth = ViaGetMemoryBandwidth(pScrn);
+    pVIADisplay = pVia->pVIADisplay;
+    pVIADisplay->Bandwidth = ViaGetMemoryBandwidth(pScrn);
 
-    if (pBIOSInfo->TVType == TVTYPE_NONE) {
+    if (pVIADisplay->TVType == TVTYPE_NONE) {
         /* Use jumper to determine TV type. */
         if (hwp->readCrtc(hwp, 0x3B) & 0x02) {
-            pBIOSInfo->TVType = TVTYPE_PAL;
+            pVIADisplay->TVType = TVTYPE_PAL;
             DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                              "Detected TV standard: PAL.\n"));
         } else {
-            pBIOSInfo->TVType = TVTYPE_NTSC;
+            pVIADisplay->TVType = TVTYPE_NTSC;
             DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                              "Detected TV standard: NTSC.\n"));
         }
