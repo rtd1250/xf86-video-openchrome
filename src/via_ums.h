@@ -209,10 +209,10 @@ typedef struct _VIAFP {
     I2CBusPtr pVIAFPI2CBus;
 } VIAFPRec, *VIAFPPtr;
 
-typedef struct _VIATMDSRec {
+typedef struct _VIATMDS {
     I2CBusPtr pVIATMDSI2CBus;
     CARD8       diPortType;
-} VIATMDSRec, *VIATMDSRecPtr;
+} VIATMDSRec, *VIATMDSPtr;
 
 typedef struct
 {

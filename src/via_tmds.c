@@ -1020,7 +1020,7 @@ viaTMDSInit(ScrnInfoPtr pScrn)
     xf86OutputPtr output;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
-    VIATMDSRecPtr pVIATMDSRec = NULL;
+    VIATMDSPtr pVIATMDS = NULL;
     CARD8 sr13, sr5a;
     Bool status = FALSE;
     char outputNameBuffer[32];
@@ -1057,8 +1057,8 @@ viaTMDSInit(ScrnInfoPtr pScrn)
         goto exit;
     }
 
-    pVIATMDSRec = xnfcalloc(1, sizeof(VIATMDSRec));
-    if (!pVIATMDSRec) {
+    pVIATMDS = xnfcalloc(1, sizeof(VIATMDSRec));
+    if (!pVIATMDS) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                     "Failed to allocate working storage for integrated "
                     "TMDS transmitter.\n");
@@ -1068,21 +1068,21 @@ viaTMDSInit(ScrnInfoPtr pScrn)
     /* Leaving a hint for mode setting and DPMS to know which port
      * to access. For CX700 / VX700 and VX800 integrated TMDS
      * transmitter, it is fixed to LVDS1 (TMDS uses LVDS1 wires). */
-    pVIATMDSRec->diPortType = VIA_DI_PORT_TMDS;
+    pVIATMDS->diPortType = VIA_DI_PORT_TMDS;
 
     /* The code to dynamically designate the particular DVI (i.e., DVI-1,
      * DVI-2, etc.) for xrandr was borrowed from xf86-video-r128 DDX. */
     sprintf(outputNameBuffer, "DVI-%d", (pVia->numberDVI + 1));
     output = xf86OutputCreate(pScrn, &via_tmds_funcs, outputNameBuffer);
     if (!output) {
-        free(pVIATMDSRec);
+        free(pVIATMDS);
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                     "Failed to allocate X Server display output record for "
                     "integrated TMDS transmitter.\n");
         goto exit;
     }
 
-    output->driver_private = pVIATMDSRec;
+    output->driver_private = pVIATMDS;
 
     /* Since there are two (2) display controllers registered with the
      * X.Org Server and both IGA1 and IGA2 can handle DVI without any
