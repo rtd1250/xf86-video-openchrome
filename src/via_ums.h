@@ -181,7 +181,7 @@ typedef struct _VIADISPLAY {
 /*
  * Record for storing FP (Flat Panel) specific information.
  */
-typedef struct _viaFPRec {
+typedef struct _VIAFP {
     Bool IsActive ;
     /* Native physical resolution */
     int NativeHeight;
@@ -207,7 +207,7 @@ typedef struct _viaFPRec {
     int         resY;
 
     I2CBusPtr pVIAFPI2CBus;
-} viaFPRec, *viaFPRecPtr;
+} VIAFPRec, *VIAFPPtr;
 
 typedef struct _VIATMDSRec {
     I2CBusPtr pVIATMDSI2CBus;

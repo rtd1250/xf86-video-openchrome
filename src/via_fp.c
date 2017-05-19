@@ -1053,7 +1053,7 @@ viaLVDSGetFPInfoFromScratchPad(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
-    viaFPRecPtr panel = output->driver_private;
+    VIAFPPtr pVIAFP = output->driver_private;
     CARD8 index;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -1061,25 +1061,25 @@ viaLVDSGetFPInfoFromScratchPad(xf86OutputPtr output)
 
     index = hwp->readCrtc(hwp, 0x3F) & 0x0F;
 
-    panel->NativeModeIndex = index;
-    panel->NativeWidth = ViaPanelNativeModes[index].Width;
-    panel->NativeHeight = ViaPanelNativeModes[index].Height;
-    panel->useDualEdge = ViaPanelNativeModes[index].useDualEdge;
-    panel->useDithering = ViaPanelNativeModes[index].useDithering;
+    pVIAFP->NativeModeIndex = index;
+    pVIAFP->NativeWidth = ViaPanelNativeModes[index].Width;
+    pVIAFP->NativeHeight = ViaPanelNativeModes[index].Height;
+    pVIAFP->useDualEdge = ViaPanelNativeModes[index].useDualEdge;
+    pVIAFP->useDithering = ViaPanelNativeModes[index].useDithering;
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                "VIA Technologies VGA BIOS Scratch Pad Register "
                "Flat Panel Index: %d\n",
-               panel->NativeModeIndex);
+               pVIAFP->NativeModeIndex);
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                "Flat Panel Native Resolution: %dx%d\n",
-               panel->NativeWidth, panel->NativeHeight);
+               pVIAFP->NativeWidth, pVIAFP->NativeHeight);
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                "Flat Panel Dual Edge Transfer: %s\n",
-               panel->useDualEdge ? "On" : "Off");
+               pVIAFP->useDualEdge ? "On" : "Off");
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                "Flat Panel Output Color Dithering: %s\n",
-               panel->useDithering ? "On (18 bit)" : "Off (24 bit)");
+               pVIAFP->useDithering ? "On (18 bit)" : "Off (24 bit)");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                      "Exiting viaLVDSGetFPInfoFromScratchPad.\n"));
@@ -1309,7 +1309,7 @@ static int
 via_lvds_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
 {
     ScrnInfoPtr pScrn = output->scrn;
-    viaFPRecPtr Panel = output->driver_private;
+    VIAFPPtr Panel = output->driver_private;
 
     if (Panel->NativeWidth < pMode->HDisplay ||
         Panel->NativeHeight < pMode->VDisplay)
@@ -1329,7 +1329,7 @@ static Bool
 via_lvds_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
                     DisplayModePtr adjusted_mode)
 {
-    viaFPRecPtr Panel = output->driver_private;
+    VIAFPPtr Panel = output->driver_private;
 
     xf86SetModeCrtc(adjusted_mode, 0);
     if (!Panel->Center && (mode->HDisplay < Panel->NativeWidth ||
@@ -1364,7 +1364,7 @@ static void
 via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
                     DisplayModePtr adjusted_mode)
 {
-    viaFPRecPtr Panel = output->driver_private;
+    VIAFPPtr Panel = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
     drmmode_crtc_private_ptr iga = output->crtc->driver_private;
     VIAPtr pVia = VIAPTR(pScrn);
@@ -1426,7 +1426,7 @@ via_lvds_detect(xf86OutputPtr output)
     xf86OutputStatus status = XF86OutputStatusDisconnected;
     ScrnInfoPtr pScrn = output->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
-    viaFPRecPtr panel = output->driver_private;
+    VIAFPPtr pVIAFP = output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_lvds_detect.\n"));
@@ -1435,8 +1435,8 @@ via_lvds_detect(xf86OutputPtr output)
     if (pVia->IsOLPCXO15) {
         xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                     "Setting up OLPC XO-1.5 flat panel.\n");
-        panel->NativeWidth = 1200;
-        panel->NativeHeight = 900;
+        pVIAFP->NativeWidth = 1200;
+        pVIAFP->NativeHeight = 900;
         status = XF86OutputStatusConnected;
         goto exit;
     }
@@ -1458,7 +1458,7 @@ exit:
 static DisplayModePtr
 via_lvds_get_modes(xf86OutputPtr output)
 {
-    viaFPRecPtr pPanel = output->driver_private;
+    VIAFPPtr pPanel = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
     DisplayModePtr pDisplay_Mode = NULL;
 
@@ -1564,7 +1564,7 @@ static const xf86OutputFuncsRec via_lvds_funcs = {
 void
 via_lvds_init(ScrnInfoPtr pScrn)
 {
-    viaFPRecPtr Panel = (viaFPRecPtr) xnfcalloc(sizeof(viaFPRec), 1);
+    VIAFPPtr pVIAFP = (VIAFPPtr) xnfcalloc(sizeof(VIAFPRec), 1);
     OptionInfoPtr  Options = xnfalloc(sizeof(ViaPanelOptions));
     MessageType from = X_DEFAULT;
     VIAPtr pVia = VIAPTR(pScrn);
@@ -1574,7 +1574,7 @@ via_lvds_init(ScrnInfoPtr pScrn)
     CARD8 cr3b_mask = 0x00;
     char outputNameBuffer[32];
 
-    if (!Panel)
+    if (!pVIAFP)
         return;
 
     /* Apparently this is the way VIA Technologies passes */
@@ -1595,14 +1595,14 @@ via_lvds_init(ScrnInfoPtr pScrn)
     memcpy(Options, ViaPanelOptions, sizeof(ViaPanelOptions));
     xf86ProcessOptions(pScrn->scrnIndex, pScrn->options, Options);
 
-    Panel->NativeModeIndex = VIA_PANEL_INVALID;
+    pVIAFP->NativeModeIndex = VIA_PANEL_INVALID;
 
     /* LCD Center/Expend Option */
-    Panel->Center = FALSE;
-    from = xf86GetOptValBool(Options, OPTION_CENTER, &Panel->Center)
+    pVIAFP->Center = FALSE;
+    from = xf86GetOptValBool(Options, OPTION_CENTER, &pVIAFP->Center)
             ? X_CONFIG : X_DEFAULT;
     xf86DrvMsg(pScrn->scrnIndex, from, "LVDS-0 : DVI Center is %s.\n",
-               Panel->Center ? "enabled" : "disabled");
+               pVIAFP->Center ? "enabled" : "disabled");
 
     /* The code to dynamically designate a particular FP (i.e., FP-1,
      * FP-2, etc.) for xrandr was borrowed from xf86-video-r128 DDX. */
@@ -1610,7 +1610,7 @@ via_lvds_init(ScrnInfoPtr pScrn)
     output = xf86OutputCreate(pScrn, &via_lvds_funcs, outputNameBuffer);
 
     if (output)  {
-        output->driver_private = Panel;
+        output->driver_private = pVIAFP;
 
         /* While there are two (2) display controllers registered with the
          * X.Org Server, it is often desirable to fix FP (Flat Panel) to
@@ -1630,6 +1630,6 @@ via_lvds_init(ScrnInfoPtr pScrn)
             output->mm_width = 114;
         }
     } else {
-        free(Panel);
+        free(pVIAFP);
     }
 }
