@@ -44,64 +44,6 @@
 
 
 /*
- * Initializes most registers related to VIA Technologies IGP
- * integrated TMDS transmitter. Synchronization polarity and
- * display output source need to be set separately. */
-static void
-viaTMDSInitRegisters(ScrnInfoPtr pScrn)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaTMDSInitRegisters.\n"));
-
-    /* Activate DVI + LVDS2 mode. */
-    /* 3X5.D2[5:4] - Display Channel Select
-     *               00: LVDS1 + LVDS2
-     *               01: DVI + LVDS2
-     *               10: One Dual LVDS Channel (High Resolution Pannel)
-     *               11: Single Channel DVI */
-    ViaCrtcMask(hwp, 0xD2, 0x10, 0x30);
-
-    /* Various DVI PLL settings should be set to default settings. */
-    /* 3X5.D1[7]   - PLL2 Reference Clock Edge Select Bit
-     *               0: PLLCK lock to rising edge of reference clock
-     *               1: PLLCK lock to falling edge of reference clock
-     * 3X5.D1[6:5] - PLL2 Charge Pump Current Set Bits
-     *               00: ICH = 12.5 uA
-     *               01: ICH = 25.0 uA
-     *               10: ICH = 37.5 uA
-     *               11: ICH = 50.0 uA
-     * 3X5.D1[4:1] - Reserved
-     * 3X5.D1[0]   - PLL2 Control Voltage Measurement Enable Bit */
-    ViaCrtcMask(hwp, 0xD1, 0x00, 0xE1);
-
-    /* Disable DVI test mode. */
-    /* 3X5.D5[7] - PD1 Enable Selection
-     *             1: Select by power flag
-     *             0: By register
-     * 3X5.D5[5] - DVI Testing Mode Enable
-     * 3X5.D5[4] - DVI Testing Format Selection
-     *             0: Half cycle
-     *             1: LFSR mode */
-    ViaCrtcMask(hwp, 0xD5, 0x00, 0xB0);
-
-    /* Disable DVI sense interrupt. */
-    /* 3C5.2B[7] - DVI Sense Interrupt Enable
-     *             0: Disable
-     *             1: Enable */
-    ViaSeqMask(hwp, 0x2B, 0x00, 0x80);
-
-    /* Clear DVI sense interrupt status. */
-    /* 3C5.2B[6] - DVI Sense Interrupt Status
-     *             (This bit has a RW1C attribute.) */
-    ViaSeqMask(hwp, 0x2B, 0x40, 0x40);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaTMDSInitRegisters.\n"));
-}
-
-/*
  * Sets the polarity of horizontal synchronization and vertical
  * synchronization.
  */
@@ -151,6 +93,64 @@ viaTMDSDisplaySource(ScrnInfoPtr pScrn, int index)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaTMDSDisplaySource.\n"));
+}
+
+/*
+ * Initializes most registers related to VIA Technologies IGP
+ * integrated TMDS transmitter. Synchronization polarity and
+ * display output source need to be set separately. */
+static void
+viaTMDSInitReg(ScrnInfoPtr pScrn)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaTMDSInitReg.\n"));
+
+    /* Activate DVI + LVDS2 mode. */
+    /* 3X5.D2[5:4] - Display Channel Select
+     *               00: LVDS1 + LVDS2
+     *               01: DVI + LVDS2
+     *               10: One Dual LVDS Channel (High Resolution Pannel)
+     *               11: Single Channel DVI */
+    ViaCrtcMask(hwp, 0xD2, 0x10, 0x30);
+
+    /* Various DVI PLL settings should be set to default settings. */
+    /* 3X5.D1[7]   - PLL2 Reference Clock Edge Select Bit
+     *               0: PLLCK lock to rising edge of reference clock
+     *               1: PLLCK lock to falling edge of reference clock
+     * 3X5.D1[6:5] - PLL2 Charge Pump Current Set Bits
+     *               00: ICH = 12.5 uA
+     *               01: ICH = 25.0 uA
+     *               10: ICH = 37.5 uA
+     *               11: ICH = 50.0 uA
+     * 3X5.D1[4:1] - Reserved
+     * 3X5.D1[0]   - PLL2 Control Voltage Measurement Enable Bit */
+    ViaCrtcMask(hwp, 0xD1, 0x00, 0xE1);
+
+    /* Disable DVI test mode. */
+    /* 3X5.D5[7] - PD1 Enable Selection
+     *             1: Select by power flag
+     *             0: By register
+     * 3X5.D5[5] - DVI Testing Mode Enable
+     * 3X5.D5[4] - DVI Testing Format Selection
+     *             0: Half cycle
+     *             1: LFSR mode */
+    ViaCrtcMask(hwp, 0xD5, 0x00, 0xB0);
+
+    /* Disable DVI sense interrupt. */
+    /* 3C5.2B[7] - DVI Sense Interrupt Enable
+     *             0: Disable
+     *             1: Enable */
+    ViaSeqMask(hwp, 0x2B, 0x00, 0x80);
+
+    /* Clear DVI sense interrupt status. */
+    /* 3C5.2B[6] - DVI Sense Interrupt Status
+     *             (This bit has a RW1C attribute.) */
+    ViaSeqMask(hwp, 0x2B, 0x40, 0x40);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaTMDSInitReg.\n"));
 }
 
 /*
@@ -875,7 +875,7 @@ via_tmds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 
     if (output->crtc) {
         /* Initialize VIA IGP integrated TMDS transmitter registers. */
-        viaTMDSInitRegisters(pScrn);
+        viaTMDSInitReg(pScrn);
 
         /* Set integrated TMDS transmitter sync polarity. */
         viaTMDSSyncPolarity(pScrn, adjusted_mode->Flags);
