@@ -646,13 +646,13 @@ viaProbePinStrapping(ScrnInfoPtr pScrn)
 }
 
 void
-viaOutputDetect(ScrnInfoPtr pScrn)
+viaInitDisplay(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaOutputDetect.\n"));
+                        "Entered viaInitDisplay.\n"));
 
     /* Initialize the number of VGA connectors. */
     pVIADisplay->numberVGA = 0;
@@ -683,7 +683,7 @@ viaOutputDetect(ScrnInfoPtr pScrn)
     viaAnalogInit(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaOutputDetect.\n"));
+                        "Exiting viaInitDisplay.\n"));
 }
 
 #ifdef HAVE_DEBUG

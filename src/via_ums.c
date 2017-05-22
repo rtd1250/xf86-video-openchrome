@@ -1047,7 +1047,7 @@ umsCrtcInit(ScrnInfoPtr pScrn)
 
     xf86CrtcSetSizeRange(pScrn, 320, 200, max_pitch, max_height);
 
-    viaOutputDetect(pScrn);
+    viaInitDisplay(pScrn);
 
     return TRUE;
 }

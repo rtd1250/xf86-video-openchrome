@@ -565,7 +565,7 @@ void viaDVP1SetDataDriveStrength(ScrnInfoPtr pScrn,
                                     CARD8 dataDriveStrength);
 void viaDFPLowSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource);
 void viaDFPLowEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState);
-void viaOutputDetect(ScrnInfoPtr pScrn);
+void viaInitDisplay(ScrnInfoPtr pScrn);
 CARD32 ViaGetMemoryBandwidth(ScrnInfoPtr pScrn);
 CARD32 ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void viaProbePinStrapping(ScrnInfoPtr pScrn);
