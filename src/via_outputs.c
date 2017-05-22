@@ -654,10 +654,8 @@ viaOutputDetect(ScrnInfoPtr pScrn)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaOutputDetect.\n"));
 
-    pVIADisplay->analog = NULL;
-
     /* Initialize the number of VGA connectors. */
-    pVia->numberVGA = 0;
+    pVIADisplay->numberVGA = 0;
 
     /* Initialize the number of DVI connectors. */
     pVia->numberDVI = 0;

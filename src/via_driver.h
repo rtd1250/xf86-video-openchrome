@@ -361,9 +361,6 @@ typedef struct _VIA {
 
     video_via_regs*     VideoRegs;
 
-    /* Keeping track of the number of analog VGA connectors. */
-    unsigned int        numberVGA;
-
     /* Keeping track of the number of DVI connectors. */
     unsigned int        numberDVI;
 

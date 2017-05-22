@@ -392,7 +392,7 @@ via_analog_init(ScrnInfoPtr pScrn)
 
     /* The code to dynamically designate the output name for
      * xrandr was borrowed from xf86-video-r128 DDX. */
-    sprintf(outputNameBuffer, "VGA-%d", (pVia->numberVGA + 1));
+    sprintf(outputNameBuffer, "VGA-%d", (pVIADisplay->numberVGA + 1));
     output = xf86OutputCreate(pScrn, &via_analog_funcs, outputNameBuffer);
 
     /* While there are two (2) display controllers registered with the
@@ -408,11 +408,73 @@ via_analog_init(ScrnInfoPtr pScrn)
     output->possible_clones = 0;
     output->interlaceAllowed = TRUE;
     output->doubleScanAllowed = FALSE;
-    pVIADisplay->analog = output;
 
     /* Increment the number of analog VGA connectors. */
-    pVia->numberVGA++;
+    pVIADisplay->numberVGA++;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_analog_init.\n"));
+}
+
+void
+viaAnalogInit(ScrnInfoPtr pScrn)
+{
+    xf86OutputPtr output;
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
+    VIAAnalogPtr pVIAAnalog;
+    char outputNameBuffer[32];
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaAnalogInit.\n"));
+
+    if (!pVIADisplay->analogPresence) {
+        goto exit;
+    }
+
+    pVIAAnalog = (VIAAnalogPtr) xnfcalloc(1, sizeof(VIAAnalogRec));
+    if (!pVIAAnalog) {
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                            "Failed to allocate storage for "
+                            "analog (VGA).\n"));
+        goto exit;
+     }
+
+    /* The code to dynamically designate the output name for
+     * xrandr was borrowed from xf86-video-r128 DDX. */
+    sprintf(outputNameBuffer, "VGA-%d", (pVIADisplay->numberVGA + 1));
+    output = xf86OutputCreate(pScrn, &via_analog_funcs, outputNameBuffer);
+    if (!output) {
+        free(pVIAAnalog);
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                    "Failed to allocate X Server display output "
+                    "record for analog (VGA).\n");
+        goto exit;
+    }
+
+    /* Increment the number of analog VGA connectors. */
+    pVIADisplay->numberVGA++;
+
+    /* Hint about which I2C bus to access for obtaining EDID. */
+    pVIAAnalog->analogI2CBus = pVIADisplay->analogI2CBus;
+
+    output->driver_private = pVIAAnalog;
+
+    /* While there are two (2) display controllers registered with the
+     * X.Org Server, it is often desirable to fix the analog VGA output
+     * to IGA1 since LVDS FP (Flat Panel) typically prefers IGA2. (While
+     * it is not used at this point, only IGA2 contains panel resolution
+     * scaling functionality. IGA1 does not have this.)
+     * With this arrangement, DVI should end up getting assigned to IGA2
+     * since DVI can go to either display controller without limitations.
+     * This should be the case for TV as well. */
+    output->possible_crtcs = BIT(1) | BIT(0);
+
+    output->possible_clones = 0;
+    output->interlaceAllowed = FALSE;
+    output->doubleScanAllowed = FALSE;
+
+exit:
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaAnalogInit.\n"));
 }

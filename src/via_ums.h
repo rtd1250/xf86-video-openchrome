@@ -145,8 +145,13 @@ typedef struct ViaPanelMode {
 } ViaPanelModeRec, *ViaPanelModePtr ;
 
 typedef struct _VIADISPLAY {
-	xf86OutputPtr analog;
-	xf86OutputPtr tv;
+    Bool        analogPresence;
+    CARD8       analogI2CBus;
+
+    /* Keeping track of the number of analog VGA connectors. */
+    unsigned int        numberVGA;
+
+    xf86OutputPtr tv;
 
     CARD32      Clock; /* register value for the dotclock */
     Bool        ClockExternal;
@@ -177,6 +182,9 @@ typedef struct _VIADISPLAY {
 
 } VIADisplayRec, *VIADisplayPtr;
 
+typedef struct _VIAANALOG {
+    CARD8       analogI2CBus;
+} VIAAnalogRec, *VIAAnalogPtr;
 
 /*
  * Record for storing FP (Flat Panel) specific information.
