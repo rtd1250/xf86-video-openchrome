@@ -151,6 +151,8 @@ typedef struct _VIADISPLAY {
     /* Keeping track of the number of analog VGA connectors. */
     unsigned int        numberVGA;
 
+   CARD8       mappedI2CBus;
+
     xf86OutputPtr tv;
 
     CARD32      Clock; /* register value for the dotclock */
@@ -589,7 +591,8 @@ void viaIGA2Restore(ScrnInfoPtr pScrn);
 void ViaShadowCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
 
 /* via_analog.c */
-void via_analog_init(ScrnInfoPtr pScrn);
+void viaAnalogProbe(ScrnInfoPtr pScrn);
+void viaAnalogInit(ScrnInfoPtr pScrn);
 
 /* via_lvds.c */
 void viaLVDS1SetIOPadSetting(ScrnInfoPtr pScrn, CARD8 ioPadState);

@@ -372,48 +372,57 @@ static const xf86OutputFuncsRec via_analog_funcs = {
 };
 
 void
-via_analog_init(ScrnInfoPtr pScrn)
+viaAnalogProbe(ScrnInfoPtr pScrn)
 {
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
-    xf86OutputPtr output = NULL;
-    char outputNameBuffer[32];
+    CARD8 sr13, sr5a;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered via_analog_init.\n"));
+                        "Entered viaAnalogProbe.\n"));
 
-    if (!pVia->pI2CBus1 || !pVia->pI2CBus2) {
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                    "I2C Bus 1 or I2C Bus 2 does not exist.\n");
+    /* Detect the presence of VGA. */
+    switch (pVia->Chipset) {
+    case VIA_CX700:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        sr5a = hwp->readSeq(hwp, 0x5A);
+
+        /* Setting SR5A[0] to 1.
+         * This allows the reading out the alternative
+         * pin strapping information from SR12 and SR13. */
+        ViaSeqMask(hwp, 0x5A, BIT(0), BIT(0));
+
+        sr13 = hwp->readSeq(hwp, 0x13);
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "Exiting via_analog_init.\n"));
-        return;
+                            "SR13: 0x%02X\n", sr13));
+        if (!(sr13 & BIT(2))) {
+            pVIADisplay->analogPresence = TRUE;
+            pVIADisplay->analogI2CBus = VIA_I2C_BUS2 | VIA_I2C_BUS1;
+            pVIADisplay->mappedI2CBus |= VIA_I2C_BUS2 | VIA_I2C_BUS1;
+            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                                "Detected the presence of VGA.\n"));
+        } else {
+            pVIADisplay->analogPresence = FALSE;
+            pVIADisplay->analogI2CBus = VIA_I2C_NONE;
+        }
+
+        hwp->writeSeq(hwp, 0x5A, sr5a);
+        break;
+    default:
+        /* For all other devices, assume VGA presence. */
+        pVIADisplay->analogPresence = TRUE;
+        pVIADisplay->analogI2CBus = VIA_I2C_BUS2 | VIA_I2C_BUS1;
+        pVIADisplay->mappedI2CBus |= VIA_I2C_BUS2 | VIA_I2C_BUS1;
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "Detected the presence of VGA.\n"));
+        break;
     }
 
-    /* The code to dynamically designate the output name for
-     * xrandr was borrowed from xf86-video-r128 DDX. */
-    sprintf(outputNameBuffer, "VGA-%d", (pVIADisplay->numberVGA + 1));
-    output = xf86OutputCreate(pScrn, &via_analog_funcs, outputNameBuffer);
-
-    /* While there are two (2) display controllers registered with the
-     * X.Org Server, it is often desirable to fix the analog VGA output
-     * to IGA1 since LVDS FP (Flat Panel) typically prefers IGA2. (While
-     * it is not used at this point, only IGA2 contains panel resolution
-     * scaling functionality. IGA1 does not have this.)
-     * With this arrangement, DVI should end up getting assigned to IGA2
-     * since DVI can go to either display controller without limitations.
-     * This should be the case for TV as well. */
-    output->possible_crtcs = (1 << 0);
-
-    output->possible_clones = 0;
-    output->interlaceAllowed = TRUE;
-    output->doubleScanAllowed = FALSE;
-
-    /* Increment the number of analog VGA connectors. */
-    pVIADisplay->numberVGA++;
-
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting via_analog_init.\n"));
+                        "Exiting viaAnalogProbe.\n"));
 }
 
 void
