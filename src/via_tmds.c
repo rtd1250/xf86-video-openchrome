@@ -154,32 +154,6 @@ viaTMDSInitReg(ScrnInfoPtr pScrn)
 }
 
 /*
- * Returns TMDS receiver detection state for VIA Technologies IGP
- * integrated TMDS transmitter.
- */
-static Bool
-viaTMDSSense(ScrnInfoPtr pScrn)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-    CARD8 tmdsReceiverDetected = 0x00;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaTMDSSense.\n"));
-
-    /* For now, faking DVI detection.*/
-    tmdsReceiverDetected = 0x01;
-
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "Integrated TMDS transmitter %s a TMDS receiver.\n",
-                (tmdsReceiverDetected & 0x01) ? "detected" : "did not detect");
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaTMDSSense.\n"));
-    return tmdsReceiverDetected;
-}
-
-/*
  * Sets integrated TMDS (DVI) monitor power state.
  */
 static void
@@ -898,40 +872,35 @@ via_tmds_detect(xf86OutputPtr output)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_tmds_detect.\n"));
 
-    /* Check for DVI presence by sensing the TMDS receiver connected
-     * to the integrated TMDS transmitter. */
-    if (viaTMDSSense(pScrn)) {
+    if (!pVia->pI2CBus2) {
+        goto exit;
+    }
 
-        if (!pVia->pI2CBus2) {
-            goto exit;
-        }
-
-        /* Assume that only I2C bus 2 is used for the DVI connected to the
-         * integrated TMDS transmitter. */
-        if (!xf86I2CProbeAddress(pVia->pI2CBus2, 0xA0)) {
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                        "I2C device on I2C Bus 2 does not support EDID.\n");
-            goto exit;
-        }
-
+    /* Assume that only I2C bus 2 is used for the DVI connected to the
+     * integrated TMDS transmitter. */
+    if (!xf86I2CProbeAddress(pVia->pI2CBus2, 0xA0)) {
         xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                    "Obtaining EDID for DVI.\n");
+                    "I2C device on I2C Bus 2 does not support EDID.\n");
+        goto exit;
+    }
 
-        /* Since DVI presence was established, access the I2C bus,
-         * in order to obtain EDID from the monitor. */
-        mon = xf86OutputGetEDID(output, pVia->pI2CBus2);
+    xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                "Obtaining EDID for DVI.\n");
 
-        /* Is the interface type digital? */
-        if (mon && DIGITAL(mon->features.input_type)) {
-            status = XF86OutputStatusConnected;
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                        "Detected a monitor connected to DVI.\n");
-            xf86OutputSetEDID(output, mon);
-        } else {
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                        "Could not obtain EDID from a monitor "
-                        "connected to DVI.\n");
-        }
+    /* Since DVI presence was established, access the I2C bus,
+     * in order to obtain EDID from the monitor. */
+    mon = xf86OutputGetEDID(output, pVia->pI2CBus2);
+
+    /* Is the interface type digital? */
+    if (mon && DIGITAL(mon->features.input_type)) {
+        status = XF86OutputStatusConnected;
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                    "Detected a monitor connected to DVI.\n");
+        xf86OutputSetEDID(output, mon);
+    } else {
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                    "Could not obtain EDID from a monitor "
+                    "connected to DVI.\n");
     }
 
 exit:
