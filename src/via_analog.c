@@ -248,83 +248,53 @@ via_analog_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 static xf86OutputStatus
 via_analog_detect(xf86OutputPtr output)
 {
-    xf86OutputStatus status = XF86OutputStatusDisconnected;
     ScrnInfoPtr pScrn = output->scrn;
+    xf86MonPtr pMon;
+    xf86OutputStatus status = XF86OutputStatusDisconnected;
+    I2CBusPtr pI2CBus;
     VIAPtr pVia = VIAPTR(pScrn);
-    xf86MonPtr mon;
+    VIAAnalogPtr pVIAAnalog = (VIAAnalogPtr) output->driver_private;
 
-    /* Probe I2C Bus 1 to see if a VGA monitor is connected. */
-    xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                "Probing for a VGA monitor on I2C Bus 1.\n");
-    mon = xf86OutputGetEDID(output, pVia->pI2CBus1);
-    if (mon && (!mon->features.input_type)) {
-        xf86OutputSetEDID(output, mon);
-        status = XF86OutputStatusConnected;
-        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                    "Detected a VGA monitor on I2C Bus 1.\n");
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered via_analog_detect.\n"));
+
+    if (pVIAAnalog->analogI2CBus & VIA_I2C_BUS1) {
+        pI2CBus = pVia->pI2CBus1;
     } else {
-        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                    "Did not detect a VGA monitor on I2C Bus 1.\n");
+        pI2CBus = NULL;
+    }
 
-        /* Probe I2C Bus 2 to see if a VGA monitor is connected. */
-        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                    "Probing for a VGA monitor on I2C Bus 2.\n");
-        mon = xf86OutputGetEDID(output, pVia->pI2CBus2);
-        if (mon && (!mon->features.input_type)) {
-            xf86OutputSetEDID(output, mon);
+    if (pI2CBus) {
+        pMon = xf86OutputGetEDID(output, pI2CBus);
+        if (pMon && (!pMon->features.input_type)) {
             status = XF86OutputStatusConnected;
+            xf86OutputSetEDID(output, pMon);
             xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                        "Detected a VGA monitor on I2C Bus 2.\n");
-        } else {
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                        "Did not detect a VGA monitor on I2C Bus 2.\n");
-
-            /* Perform manual detection of a VGA monitor since */
-            /* it was not detected via I2C buses. */
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                        "Now perform manual detection of a VGA "
-                        "monitor.\n");
-            vgaHWPtr hwp = VGAHWPTR(pScrn);
-            CARD8 SR01 = hwp->readSeq(hwp, 0x01);
-            CARD8 SR40 = hwp->readSeq(hwp, 0x40);
-            CARD8 CR36 = hwp->readCrtc(hwp, 0x36);
-
-            /* We have to power on the display to detect it */
-            ViaSeqMask(hwp, 0x01, 0x00, 0x20);
-            ViaCrtcMask(hwp, 0x36, 0x00, 0xF0);
-
-            /* Wait for vblank */
-            usleep(16);
-
-            /* Detect the load on pins */
-            ViaSeqMask(hwp, 0x40, 0x80, 0x80);
-
-            if ((VIA_CX700 == pVia->Chipset) ||
-                (VIA_VX800 == pVia->Chipset) ||
-                (VIA_VX855 == pVia->Chipset) ||
-                (VIA_VX900 == pVia->Chipset))
-                ViaSeqMask(hwp, 0x40, 0x00, 0x80);
-
-            if (ViaVgahwIn(hwp, 0x3C2) & 0x20) {
-                status = XF86OutputStatusConnected;
-                xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                            "Detected a VGA monitor using manual "
-                            "detection method.\n");
-            }
-
-            if ((VIA_CX700 == pVia->Chipset) ||
-                (VIA_VX800 == pVia->Chipset) ||
-                (VIA_VX855 == pVia->Chipset) ||
-                (VIA_VX900 == pVia->Chipset))
-                ViaSeqMask(hwp, 0x40, 0x00, 0x80);
-
-            /* Restore previous state */
-            hwp->writeSeq(hwp, 0x40, SR40);
-            hwp->writeSeq(hwp, 0x01, SR01);
-            hwp->writeCrtc(hwp, 0x36, CR36);
+                        "Detected a monitor connected to VGA.\n");
+            goto exit;
         }
     }
 
+    if (pVIAAnalog->analogI2CBus & VIA_I2C_BUS2) {
+        pI2CBus = pVia->pI2CBus2;
+    } else {
+        pI2CBus = NULL;
+    }
+
+    if (pI2CBus) {
+        pMon = xf86OutputGetEDID(output, pI2CBus);
+        if (pMon && (!pMon->features.input_type)) {
+            status = XF86OutputStatusConnected;
+            xf86OutputSetEDID(output, pMon);
+            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                        "Detected a monitor connected to VGA.\n");
+            goto exit;
+        }
+    }
+
+exit:
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting via_analog_detect.\n"));
     return status;
 }
 
