@@ -155,6 +155,83 @@ viaAnalogInitReg(ScrnInfoPtr pScrn)
                         "Exiting viaAnalogInitReg.\n"));
 }
 
+/*
+ * Detect a VGA connector.
+ *
+ * The code here was borrowed from VIA Technologies X.Org X Server
+ * DDX code. (In particular, from viaDetectCRTVsync function
+ * inside via_output.c.)
+ */
+static Bool
+viaAnalogDetectConnector(ScrnInfoPtr pScrn)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
+    Bool connectorDetected = FALSE;
+    CARD8 sr01, sr40;
+    CARD8 cr36, cr47;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaAnalogDetectConnector.\n"));
+
+    sr01 = hwp->readSeq(hwp, 0x01);
+    sr40 = hwp->readSeq(hwp, 0x40);
+    cr36 = hwp->readCrtc(hwp, 0x36);
+    cr47 = hwp->readCrtc(hwp, 0x47);
+
+    /* Screen On. */
+    ViaSeqMask(hwp, 0x01, 0x00, BIT(5));
+
+    /* Turn on DAC. */
+    ViaCrtcMask(hwp, 0x47, 0x00, BIT(2));
+
+    /* Power On DPMS. */
+    ViaCrtcMask(hwp, 0x36, 0x00, BIT(7) | BIT(6) | BIT(5) | BIT(4));
+
+    /* Wait for vblank. */
+    usleep(16);
+
+    /* Enable CRT Sense. */
+    ViaSeqMask(hwp, 0x40, BIT(7), BIT(7));
+
+    if ((pVia->Chipset == VIA_CX700)
+        || (pVia->Chipset == VIA_VX800)
+        || (pVia->Chipset == VIA_VX855)
+        || (pVia->Chipset == VIA_VX900)) {
+        ViaSeqMask(hwp, 0x40, 0x00, BIT(7));
+    }
+
+    /*
+    VT3324, VT3353: SR40[7]=1 --> SR40[7] = 0 --> check 3C2[4]
+    other: SR40[7]=1 --> check 3C2[4] --> SR40[7]=0
+    */
+    if (ViaVgahwIn(hwp, 0x3C2) & BIT(4)) {
+        connectorDetected = TRUE;
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "VGA connector detected.\n"));
+    } else {
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "VGA connector not detected.\n"));
+    }
+
+    if ((pVia->Chipset != VIA_CX700)
+        && (pVia->Chipset != VIA_VX800)
+        && (pVia->Chipset != VIA_VX855)
+        && (pVia->Chipset != VIA_VX900)) {
+        ViaSeqMask(hwp, 0x40, 0x00, BIT(7));
+    }
+
+    /* Restore */
+    hwp->writeCrtc(hwp, 0x47, cr47);
+    hwp->writeCrtc(hwp, 0x36, cr36);
+    hwp->writeSeq(hwp, 0x40, sr40);
+    hwp->writeSeq(hwp, 0x01, sr01);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaAnalogDetectConnector.\n"));
+    return connectorDetected;
+}
+
 
 static void
 via_analog_create_resources(xf86OutputPtr output)
@@ -254,9 +331,24 @@ via_analog_detect(xf86OutputPtr output)
     I2CBusPtr pI2CBus;
     VIAPtr pVia = VIAPTR(pScrn);
     VIAAnalogPtr pVIAAnalog = (VIAAnalogPtr) output->driver_private;
+    Bool connectorDetected;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_analog_detect.\n"));
+
+    xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                "Probing for a VGA connector . . .\n");
+
+    connectorDetected = viaAnalogDetectConnector(pScrn);
+    if (!connectorDetected) {
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                    "VGA connector not detected.\n");
+        goto exit;
+    }
+
+    status = XF86OutputStatusConnected;
+    xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                "VGA connector detected.\n");
 
     if (pVIAAnalog->analogI2CBus & VIA_I2C_BUS1) {
         pI2CBus = pVia->pI2CBus1;
@@ -267,7 +359,6 @@ via_analog_detect(xf86OutputPtr output)
     if (pI2CBus) {
         pMon = xf86OutputGetEDID(output, pI2CBus);
         if (pMon && (!pMon->features.input_type)) {
-            status = XF86OutputStatusConnected;
             xf86OutputSetEDID(output, pMon);
             xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                         "Detected a monitor connected to VGA.\n");
