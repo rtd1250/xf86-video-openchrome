@@ -864,43 +864,36 @@ via_tmds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 static xf86OutputStatus
 via_tmds_detect(xf86OutputPtr output)
 {
-    xf86MonPtr mon;
-    xf86OutputStatus status = XF86OutputStatusDisconnected;
     ScrnInfoPtr pScrn = output->scrn;
+    xf86MonPtr pMon;
+    xf86OutputStatus status = XF86OutputStatusDisconnected;
+    I2CBusPtr pI2CBus;
     VIAPtr pVia = VIAPTR(pScrn);
+    VIATMDSPtr pVIATMDS = (VIATMDSPtr) output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_tmds_detect.\n"));
 
-    if (!pVia->pI2CBus2) {
-        goto exit;
-    }
-
-    /* Assume that only I2C bus 2 is used for the DVI connected to the
-     * integrated TMDS transmitter. */
-    if (!xf86I2CProbeAddress(pVia->pI2CBus2, 0xA0)) {
-        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                    "I2C device on I2C Bus 2 does not support EDID.\n");
-        goto exit;
-    }
-
-    xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                "Obtaining EDID for DVI.\n");
-
-    /* Since DVI presence was established, access the I2C bus,
-     * in order to obtain EDID from the monitor. */
-    mon = xf86OutputGetEDID(output, pVia->pI2CBus2);
-
-    /* Is the interface type digital? */
-    if (mon && DIGITAL(mon->features.input_type)) {
-        status = XF86OutputStatusConnected;
-        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                    "Detected a monitor connected to DVI.\n");
-        xf86OutputSetEDID(output, mon);
+    if (pVIATMDS->i2cBus & VIA_I2C_BUS2) {
+        pI2CBus = pVia->pI2CBus2;
+    } else if (pVIATMDS->i2cBus & VIA_I2C_BUS3) {
+        pI2CBus = pVia->pI2CBus3;
     } else {
-        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                    "Could not obtain EDID from a monitor "
-                    "connected to DVI.\n");
+        pI2CBus = NULL;
+    }
+
+    if (pI2CBus) {
+        pMon = xf86OutputGetEDID(output, pI2CBus);
+        if (pMon && DIGITAL(pMon->features.input_type)) {
+            status = XF86OutputStatusConnected;
+            xf86OutputSetEDID(output, pMon);
+            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                        "Detected a monitor connected to DVI.\n");
+        } else {
+            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                        "Could not obtain EDID from a monitor "
+                        "connected to DVI.\n");
+        }
     }
 
 exit:
