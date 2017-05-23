@@ -1539,7 +1539,7 @@ via_lvds_destroy(xf86OutputPtr output)
     output->driver_private = NULL;
 }
 
-static const xf86OutputFuncsRec via_lvds_funcs = {
+static const xf86OutputFuncsRec via_fp_funcs = {
     .create_resources   = via_lvds_create_resources,
     .dpms               = via_fp_dpms,
     .save               = via_lvds_save,
@@ -1608,7 +1608,7 @@ via_lvds_init(ScrnInfoPtr pScrn)
     /* The code to dynamically designate a particular FP (i.e., FP-1,
      * FP-2, etc.) for xrandr was borrowed from xf86-video-r128 DDX. */
     sprintf(outputNameBuffer, "FP-%d", (pVIADisplay->numberFP + 1));
-    output = xf86OutputCreate(pScrn, &via_lvds_funcs, outputNameBuffer);
+    output = xf86OutputCreate(pScrn, &via_fp_funcs, outputNameBuffer);
 
     if (output)  {
         output->driver_private = pVIAFP;
