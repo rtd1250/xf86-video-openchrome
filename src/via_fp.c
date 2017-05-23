@@ -1634,3 +1634,101 @@ via_lvds_init(ScrnInfoPtr pScrn)
         free(pVIAFP);
     }
 }
+
+void
+viaFPInit(ScrnInfoPtr pScrn)
+{
+    xf86OutputPtr output;
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
+    VIAFPPtr pVIAFP;
+    char outputNameBuffer[32];
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entering viaFPInit.\n"));
+
+    if (pVIADisplay->intFP1Presence) {
+        pVIAFP = (VIAFPPtr) xnfcalloc(1, sizeof(VIAFPRec));
+        if (!pVIAFP) {
+            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                                "Failed to allocate private storage for "
+                                "FP.\n"));
+            goto exit;
+        }
+
+        /* The code to dynamically designate a particular FP (i.e., FP-1,
+         * FP-2, etc.) for xrandr was borrowed from xf86-video-r128 DDX. */
+        sprintf(outputNameBuffer, "FP-%d", (pVIADisplay->numberFP + 1));
+        output = xf86OutputCreate(pScrn, &via_fp_funcs, outputNameBuffer);
+        if (!output) {
+            free(pVIAFP);
+            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                        "Failed to allocate X Server display output record for "
+                        "FP.\n");
+            goto exit;
+        }
+
+        /* Increment the number of FP connectors. */
+        pVIADisplay->numberFP++;
+
+        pVIAFP->diPort = pVIADisplay->intFP1DIPort;
+
+        /* Hint about which I2C bus to access for obtaining EDID. */
+        pVIAFP->i2cBus = pVIADisplay->intFP1I2CBus;
+
+        output->driver_private = pVIAFP;
+
+        output->possible_crtcs = BIT(1) | BIT(0);
+
+        output->possible_clones = 0;
+        output->interlaceAllowed = FALSE;
+        output->doubleScanAllowed = FALSE;
+
+        if (pVia->IsOLPCXO15) {
+            output->mm_height = 152;
+            output->mm_width = 114;
+        }
+    }
+
+    if (pVIADisplay->intFP2Presence) {
+        pVIAFP = (VIAFPPtr) xnfcalloc(1, sizeof(VIAFPRec));
+        if (!pVIAFP) {
+            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                                "Failed to allocate private storage for "
+                                "FP.\n"));
+            goto exit;
+        }
+
+        /* The code to dynamically designate a particular FP (i.e., FP-1,
+         * FP-2, etc.) for xrandr was borrowed from xf86-video-r128 DDX. */
+        sprintf(outputNameBuffer, "FP-%d", (pVIADisplay->numberFP + 1));
+        output = xf86OutputCreate(pScrn, &via_fp_funcs, outputNameBuffer);
+        if (!output) {
+            free(pVIAFP);
+            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                        "Failed to allocate X Server display output record for "
+                        "FP.\n");
+            goto exit;
+        }
+
+        /* Increment the number of FP connectors. */
+        pVIADisplay->numberFP++;
+
+        pVIAFP->diPort = pVIADisplay->intFP2DIPort;
+
+        /* Hint about which I2C bus to access for obtaining EDID. */
+        pVIAFP->i2cBus = pVIADisplay->intFP2I2CBus;
+
+        output->driver_private = pVIAFP;
+
+        output->possible_crtcs = BIT(1) | BIT(0);
+
+        output->possible_clones = 0;
+        output->interlaceAllowed = FALSE;
+        output->doubleScanAllowed = FALSE;
+    }
+
+exit:
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaFPInit.\n"));
+}

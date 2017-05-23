@@ -152,6 +152,14 @@ typedef struct _VIADISPLAY {
     CARD8       intTMDSDIPort;
     CARD8       intTMDSI2CBus;
 
+    Bool        intFP1Presence;
+    CARD8       intFP1DIPort;
+    CARD8       intFP1I2CBus;
+
+    Bool        intFP2Presence;
+    CARD8       intFP2DIPort;
+    CARD8       intFP2I2CBus;
+
     /* Keeping track of the number of analog VGA connectors. */
     unsigned int        numberVGA;
 
@@ -226,7 +234,8 @@ typedef struct _VIAFP {
     Bool        scaleY;
     int         resY;
 
-    I2CBusPtr pVIAFPI2CBus;
+    CARD8       diPort;
+    CARD8       i2cBus;
 } VIAFPRec, *VIAFPPtr;
 
 typedef struct _VIATMDS {
