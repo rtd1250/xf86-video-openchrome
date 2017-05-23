@@ -661,7 +661,7 @@ viaInitDisplay(ScrnInfoPtr pScrn)
     pVIADisplay->numberDVI = 0;
 
     /* Initialize the number of FP connectors. */
-    pVia->numberFP = 0;
+    pVIADisplay->numberFP = 0;
 
     /* Read off the VIA Technologies IGP pin strapping for
        display detection purposes. */

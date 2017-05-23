@@ -1568,6 +1568,7 @@ via_lvds_init(ScrnInfoPtr pScrn)
     OptionInfoPtr  Options = xnfalloc(sizeof(ViaPanelOptions));
     MessageType from = X_DEFAULT;
     VIAPtr pVia = VIAPTR(pScrn);
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
     xf86OutputPtr output = NULL;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     CARD8 cr3b = 0x00;
@@ -1606,7 +1607,7 @@ via_lvds_init(ScrnInfoPtr pScrn)
 
     /* The code to dynamically designate a particular FP (i.e., FP-1,
      * FP-2, etc.) for xrandr was borrowed from xf86-video-r128 DDX. */
-    sprintf(outputNameBuffer, "FP-%d", (pVia->numberFP + 1));
+    sprintf(outputNameBuffer, "FP-%d", (pVIADisplay->numberFP + 1));
     output = xf86OutputCreate(pScrn, &via_lvds_funcs, outputNameBuffer);
 
     if (output)  {
@@ -1623,7 +1624,7 @@ via_lvds_init(ScrnInfoPtr pScrn)
         output->doubleScanAllowed = FALSE;
 
         /* Increment the number of FP connectors. */
-        pVia->numberFP++;
+        pVIADisplay->numberFP++;
 
         if (pVia->IsOLPCXO15) {
             output->mm_height = 152;

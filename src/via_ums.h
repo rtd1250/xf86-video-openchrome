@@ -158,6 +158,9 @@ typedef struct _VIADISPLAY {
     /* Keeping track of the number of DVI connectors. */
     unsigned int        numberDVI;
 
+    /* Keeping track of the number of FP (Flat Panel) connectors. */
+    unsigned int        numberFP;
+
    CARD8       mappedI2CBus;
 
     xf86OutputPtr tv;
