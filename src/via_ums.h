@@ -613,9 +613,10 @@ void ViaShadowCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void viaAnalogProbe(ScrnInfoPtr pScrn);
 void viaAnalogInit(ScrnInfoPtr pScrn);
 
-/* via_lvds.c */
+/* via_fp.c */
 void viaLVDS1SetIOPadSetting(ScrnInfoPtr pScrn, CARD8 ioPadState);
-void via_lvds_init(ScrnInfoPtr pScrn);
+void viaFPProbe(ScrnInfoPtr pScrn);
+void viaFPInit(ScrnInfoPtr pScrn);
 
 /* via_tmds.c */
 void viaExtTMDSSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource);

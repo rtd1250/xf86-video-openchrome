@@ -669,6 +669,8 @@ viaInitDisplay(ScrnInfoPtr pScrn)
 
     viaTMDSProbe(pScrn);
 
+    viaFPProbe(pScrn);
+
     viaAnalogProbe(pScrn);
 
 
@@ -678,14 +680,14 @@ viaInitDisplay(ScrnInfoPtr pScrn)
     /* DVI */
     via_dvi_init(pScrn);
 
-    /* LVDS */
-    via_lvds_init(pScrn);
-
     /* DVI */
     viaTMDSInit(pScrn);
 
     /* VGA */
     viaAnalogInit(pScrn);
+
+    /* FP (Flat Panel) */
+    viaFPInit(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaInitDisplay.\n"));

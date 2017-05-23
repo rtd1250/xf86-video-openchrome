@@ -1560,79 +1560,174 @@ static const xf86OutputFuncsRec via_fp_funcs = {
     .destroy            = via_lvds_destroy
 };
 
-
 void
-via_lvds_init(ScrnInfoPtr pScrn)
+viaFPProbe(ScrnInfoPtr pScrn)
 {
-    VIAFPPtr pVIAFP = (VIAFPPtr) xnfcalloc(sizeof(VIAFPRec), 1);
-    OptionInfoPtr  Options = xnfalloc(sizeof(ViaPanelOptions));
-    MessageType from = X_DEFAULT;
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
-    xf86OutputPtr output = NULL;
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    CARD8 cr3b = 0x00;
-    CARD8 cr3b_mask = 0x00;
-    char outputNameBuffer[32];
+    CARD8 sr12, sr13, sr5a;
+    CARD8 cr3b;
 
-    if (!pVIAFP)
-        return;
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaFPProbe.\n"));
 
-    /* Apparently this is the way VIA Technologies passes */
-    /* the presence of a flat panel to the device driver */
-    /* via BIOS setup. */
-    if (pVia->Chipset == VIA_CLE266) {
-        cr3b_mask = 0x08;
-    } else {
-        cr3b_mask = 0x02;
-    }            
+    sr12 = hwp->readSeq(hwp, 0x12);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR12: 0x%02X\n", sr12));
+    sr13 = hwp->readSeq(hwp, 0x13);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR13: 0x%02X\n", sr13));
+    cr3b = hwp->readCrtc(hwp, 0x3B);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "CR3B: 0x%02X\n", sr13));
 
-    cr3b = hwp->readCrtc(hwp, 0x3B) & cr3b_mask;
-
-    if (!cr3b) {
-        return;
-    }
-
-    memcpy(Options, ViaPanelOptions, sizeof(ViaPanelOptions));
-    xf86ProcessOptions(pScrn->scrnIndex, pScrn->options, Options);
-
-    pVIAFP->NativeModeIndex = VIA_PANEL_INVALID;
-
-    /* LCD Center/Expend Option */
-    pVIAFP->Center = FALSE;
-    from = xf86GetOptValBool(Options, OPTION_CENTER, &pVIAFP->Center)
-            ? X_CONFIG : X_DEFAULT;
-    xf86DrvMsg(pScrn->scrnIndex, from, "LVDS-0 : DVI Center is %s.\n",
-               pVIAFP->Center ? "enabled" : "disabled");
-
-    /* The code to dynamically designate a particular FP (i.e., FP-1,
-     * FP-2, etc.) for xrandr was borrowed from xf86-video-r128 DDX. */
-    sprintf(outputNameBuffer, "FP-%d", (pVIADisplay->numberFP + 1));
-    output = xf86OutputCreate(pScrn, &via_fp_funcs, outputNameBuffer);
-
-    if (output)  {
-        output->driver_private = pVIAFP;
-
-        /* While there are two (2) display controllers registered with the
-         * X.Org Server, it is often desirable to fix FP (Flat Panel) to
-         * IGA2 since only IGA2 contains panel resolution scaling
-         * functionality. IGA1 does not have this. */
-        output->possible_crtcs = 1 << 1;
-
-        output->possible_clones = 0;
-        output->interlaceAllowed = FALSE;
-        output->doubleScanAllowed = FALSE;
-
-        /* Increment the number of FP connectors. */
-        pVIADisplay->numberFP++;
-
-        if (pVia->IsOLPCXO15) {
-            output->mm_height = 152;
-            output->mm_width = 114;
+    /* Detect the presence of FPs. */
+    switch (pVia->Chipset) {
+    case VIA_CLE266:
+        if ((sr12 & BIT(4)) || (cr3b & BIT(3))) {
+            pVIADisplay->intFP1Presence = TRUE;
+            pVIADisplay->intFP1DIPort = VIA_DI_PORT_DIP0;
+            pVIADisplay->intFP2Presence = FALSE;
+            pVIADisplay->intFP2DIPort = VIA_DI_PORT_NONE;
+        } else {
+            pVIADisplay->intFP1Presence = FALSE;
+            pVIADisplay->intFP1DIPort = VIA_DI_PORT_NONE;
+            pVIADisplay->intFP2Presence = FALSE;
+            pVIADisplay->intFP2DIPort = VIA_DI_PORT_NONE;
         }
-    } else {
-        free(pVIAFP);
+
+        break;
+    case VIA_KM400:
+    case VIA_P4M800PRO:
+    case VIA_PM800:
+    case VIA_K8M800:
+        /* 3C5.13[3] - DVP0D8 pin strapping
+         *             0: AGP pins are used for AGP
+         *             1: AGP pins are used by FPDP
+         *             (Flat Panel Display Port) */
+        if ((sr13 & BIT(3)) && (cr3b & BIT(1))) {
+            pVIADisplay->intFP1Presence = TRUE;
+            pVIADisplay->intFP1DIPort = VIA_DI_PORT_FPDPHIGH
+                                            | VIA_DI_PORT_FPDPLOW;
+            pVIADisplay->intFP2Presence = FALSE;
+            pVIADisplay->intFP2DIPort = VIA_DI_PORT_NONE;
+
+        } else {
+            pVIADisplay->intFP1Presence = FALSE;
+            pVIADisplay->intFP1DIPort = VIA_DI_PORT_NONE;
+            pVIADisplay->intFP2Presence = FALSE;
+            pVIADisplay->intFP2DIPort = VIA_DI_PORT_NONE;
+        }
+
+        break;
+    case VIA_P4M890:
+    case VIA_K8M890:
+    case VIA_P4M900:
+        if (cr3b & BIT(1)) {
+
+            /* 3C5.12[4] - DVP0D4 pin strapping
+             *             0: 12-bit FPDP (Flat Panel Display Port)
+             *             1: 24-bit FPDP (Flat Panel Display Port) */
+            if (sr12 & BIT(4)) {
+                pVIADisplay->intFP1Presence = TRUE;
+                pVIADisplay->intFP1DIPort = VIA_DI_PORT_FPDPLOW
+                                            | VIA_DI_PORT_FPDPHIGH;
+                pVIADisplay->intFP2Presence = FALSE;
+                pVIADisplay->intFP2DIPort = VIA_DI_PORT_NONE;
+            } else {
+                pVIADisplay->intFP1Presence = TRUE;
+                pVIADisplay->intFP1DIPort = VIA_DI_PORT_FPDPLOW;
+                pVIADisplay->intFP2Presence = FALSE;
+                pVIADisplay->intFP2DIPort = VIA_DI_PORT_NONE;
+            }
+        }
+
+        break;
+    case VIA_CX700:
+    case VIA_VX800:
+    case VIA_VX855:
+    case VIA_VX900:
+        sr5a = hwp->readSeq(hwp, 0x5A);
+
+        /* Setting SR5A[0] to 1.
+         * This allows the reading out the alternative
+         * pin strapping information from SR12 and SR13. */
+        ViaSeqMask(hwp, 0x5A, BIT(0), BIT(0));
+
+        sr13 = hwp->readSeq(hwp, 0x13);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "SR13: 0x%02X\n", sr13));
+
+        if (cr3b & BIT(1)) {
+            if (pVia->isVIANanoBook) {
+                pVIADisplay->intFP1Presence = FALSE;
+                pVIADisplay->intFP1DIPort = VIA_DI_PORT_NONE;
+                pVIADisplay->intFP2Presence = TRUE;
+                pVIADisplay->intFP2DIPort = VIA_DI_PORT_LVDS2;
+
+            /* 3C5.13[7:6] - Integrated LVDS / DVI Mode Select
+             *               (DVP1D15-14 pin strapping)
+             *               00: LVDS1 + LVDS2
+             *               01: DVI + LVDS2
+             *               10: Dual LVDS Channel (High Resolution Panel)
+             *               11: One DVI only (decrease the clock jitter) */
+            } else if ((!(sr13 & BIT(7))) && (!(sr13 & BIT(6)))) {
+                pVIADisplay->intFP1Presence = TRUE;
+                pVIADisplay->intFP1DIPort = VIA_DI_PORT_LVDS1;
+                pVIADisplay->intFP2Presence = TRUE;
+                pVIADisplay->intFP2DIPort = VIA_DI_PORT_LVDS2;
+            } else if ((!(sr13 & BIT(7))) && (sr13 & BIT(6))) {
+                pVIADisplay->intFP1Presence = FALSE;
+                pVIADisplay->intFP1DIPort = VIA_DI_PORT_NONE;
+                pVIADisplay->intFP2Presence = TRUE;
+                pVIADisplay->intFP2DIPort = VIA_DI_PORT_LVDS2;
+            } else if ((sr13 & BIT(7)) && (!(sr13 & BIT(6)))) {
+                pVIADisplay->intFP1Presence = TRUE;
+                pVIADisplay->intFP1DIPort = VIA_DI_PORT_LVDS1
+                                                | VIA_DI_PORT_LVDS2;
+                pVIADisplay->intFP2Presence = FALSE;
+                pVIADisplay->intFP2DIPort = VIA_DI_PORT_NONE;
+            } else {
+                pVIADisplay->intFP1Presence = FALSE;
+                pVIADisplay->intFP1DIPort = VIA_DI_PORT_NONE;
+                pVIADisplay->intFP2Presence = FALSE;
+                pVIADisplay->intFP2DIPort = VIA_DI_PORT_NONE;
+            }
+        } else {
+            pVIADisplay->intFP1Presence = FALSE;
+            pVIADisplay->intFP1DIPort = VIA_DI_PORT_NONE;
+            pVIADisplay->intFP2Presence = FALSE;
+            pVIADisplay->intFP2DIPort = VIA_DI_PORT_NONE;
+        }
+
+        hwp->writeSeq(hwp, 0x5A, sr5a);
+        break;
+    default:
+        pVIADisplay->intFP1Presence = FALSE;
+        pVIADisplay->intFP1DIPort = VIA_DI_PORT_NONE;
+        pVIADisplay->intFP2Presence = FALSE;
+        pVIADisplay->intFP2DIPort = VIA_DI_PORT_NONE;
+        break;
     }
+
+    pVIADisplay->intFP1I2CBus = VIA_I2C_NONE;
+    pVIADisplay->intFP2I2CBus = VIA_I2C_NONE;
+
+    if ((pVIADisplay->intFP1Presence)
+        && (!(pVIADisplay->mappedI2CBus & VIA_I2C_BUS2))) {
+        pVIADisplay->intFP1I2CBus = VIA_I2C_BUS2;
+        pVIADisplay->mappedI2CBus |= VIA_I2C_BUS2;
+    }
+
+    if ((pVIADisplay->intFP2Presence)
+        && (!(pVIADisplay->mappedI2CBus & VIA_I2C_BUS2))) {
+        pVIADisplay->intFP2I2CBus = VIA_I2C_BUS2;
+        pVIADisplay->mappedI2CBus |= VIA_I2C_BUS2;
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaFPProbe.\n"));
 }
 
 void
