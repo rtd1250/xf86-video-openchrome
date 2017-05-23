@@ -1421,15 +1421,17 @@ via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 }
 
 static xf86OutputStatus
-via_lvds_detect(xf86OutputPtr output)
+via_fp_detect(xf86OutputPtr output)
 {
-    xf86OutputStatus status = XF86OutputStatusDisconnected;
     ScrnInfoPtr pScrn = output->scrn;
+    xf86MonPtr pMon;
+    xf86OutputStatus status = XF86OutputStatusDisconnected;
+    I2CBusPtr pI2CBus;
     VIAPtr pVia = VIAPTR(pScrn);
-    VIAFPPtr pVIAFP = output->driver_private;
+    VIAFPPtr pVIAFP = (VIAFPPtr) output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered via_lvds_detect.\n"));
+                        "Entered via_fp_detect.\n"));
 
     /* Hardcode panel size for the OLPC XO-1.5. */
     if (pVia->IsOLPCXO15) {
@@ -1441,17 +1443,50 @@ via_lvds_detect(xf86OutputPtr output)
         goto exit;
     }
 
-    /* For now, FP detection code will not scan the I2C bus
-     * in order to obtain EDID since it is often used by DVI
-     * as well. Hence, reading off the CRTC scratch pad register
-     * supplied by the VGA BIOS is the only method available
-     * to figure out the FP native screen resolution. */
-    viaLVDSGetFPInfoFromScratchPad(output);
-    status = XF86OutputStatusConnected;
+    if (pVIAFP->i2cBus & VIA_I2C_BUS2) {
+        pI2CBus = pVia->pI2CBus2;
+    } else if (pVIAFP->i2cBus & VIA_I2C_BUS3) {
+        pI2CBus = pVia->pI2CBus3;
+    } else {
+        pI2CBus = NULL;
+    }
+
+    if (pI2CBus) {
+        pMon = xf86OutputGetEDID(output, pI2CBus);
+        if (pMon && DIGITAL(pMon->features.input_type)) {
+            xf86OutputSetEDID(output, pMon);
+            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                        "Detected a flat panel.\n");
+            if (!ViaPanelGetSizeFromEDID(pScrn, pMon, &pVIAFP->NativeWidth, &pVIAFP->NativeHeight)) {
+                xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                            "Unable to obtain panel size from EDID.\n");
+                goto exit;
+            }
+
+            status = XF86OutputStatusConnected;
+        } else {
+            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                        "Could not obtain EDID from a flat "
+                        "panel, but will obtain flat panel "
+                        "information from scratch pad register.\n");
+
+            /* For FP without I2C bus connection, CRTC scratch pad
+             * register supplied by the VGA BIOS is the only method
+             * available to figure out the FP native screen resolution. */
+            viaLVDSGetFPInfoFromScratchPad(output);
+            status = XF86OutputStatusConnected;
+        }
+    } else {
+        /* For FP without I2C bus connection, CRTC scratch pad
+         * register supplied by the VGA BIOS is the only method
+         * available to figure out the FP native screen resolution. */
+        viaLVDSGetFPInfoFromScratchPad(output);
+        status = XF86OutputStatusConnected;
+    }
 
 exit:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting via_lvds_detect.\n"));
+                        "Exiting via_fp_detect.\n"));
     return status;
 }
 
@@ -1549,7 +1584,7 @@ static const xf86OutputFuncsRec via_fp_funcs = {
     .prepare            = via_lvds_prepare,
     .commit             = via_lvds_commit,
     .mode_set           = via_lvds_mode_set,
-    .detect             = via_lvds_detect,
+    .detect             = via_fp_detect,
     .get_modes          = via_lvds_get_modes,
 #ifdef RANDR_12_INTERFACE
     .set_property       = via_lvds_set_property,
