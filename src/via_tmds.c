@@ -982,75 +982,123 @@ static const xf86OutputFuncsRec via_tmds_funcs = {
     .destroy            = via_tmds_destroy,
 };
 
-
-Bool
-viaTMDSInit(ScrnInfoPtr pScrn)
+void
+viaTMDSProbe(ScrnInfoPtr pScrn)
 {
-    xf86OutputPtr output;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
-    VIATMDSPtr pVIATMDS = NULL;
     CARD8 sr13, sr5a;
-    Bool status = FALSE;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaTMDSProbe.\n"));
+
+    /* Detect the presence of integrated TMDS transmitter. */
+    switch (pVia->Chipset) {
+    case VIA_CX700:
+    case VIA_VX800:
+        sr5a = hwp->readSeq(hwp, 0x5A);
+
+        /* Setting SR5A[0] to 1.
+         * This allows the reading out the alternative
+         * pin strapping information from SR12 and SR13. */
+        ViaSeqMask(hwp, 0x5A, BIT(0), BIT(0));
+
+        sr13 = hwp->readSeq(hwp, 0x13);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "SR13: 0x%02X\n", sr13));
+
+        /* 3C5.13[7:6] - Integrated LVDS / DVI Mode Select
+         *               (DVP1D15-14 pin strapping)
+         *               00: LVDS1 + LVDS2
+         *               01: DVI + LVDS2
+         *               10: Dual LVDS Channel (High Resolution Panel)
+         *               11: One DVI only (decrease the clock jitter) */
+        /* Check for DVI presence using pin strappings.
+         * VIA Technologies NanoBook reference design based products
+         * have their pin strappings set to a wrong setting to communicate
+         * the presence of DVI, so it requires special handling here. */
+        if (pVia->isVIANanoBook) {
+                    pVIADisplay->intTMDSPresence = TRUE;
+                    pVIADisplay->intTMDSDIPort = VIA_DI_PORT_TMDS;
+                    pVIADisplay->intTMDSI2CBus = VIA_I2C_BUS2;
+                    pVIADisplay->mappedI2CBus |= VIA_I2C_BUS2;
+                    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                                "Integrated TMDS (DVI) transmitter detected.\n");
+        } else if (((!(sr13 & BIT(7))) && (sr13 & BIT(6)))
+                    || ((sr13 & BIT(7)) && (sr13 & BIT(6)))) {
+            pVIADisplay->intTMDSPresence = TRUE;
+            pVIADisplay->intTMDSDIPort = VIA_DI_PORT_TMDS;
+            pVIADisplay->intTMDSI2CBus = VIA_I2C_BUS2;
+            pVIADisplay->mappedI2CBus |= VIA_I2C_BUS2;
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Integrated TMDS (DVI) transmitter detected via pin strapping.\n");
+        } else {
+            pVIADisplay->intTMDSPresence = FALSE;
+            pVIADisplay->intTMDSDIPort = VIA_DI_PORT_NONE;
+            pVIADisplay->intTMDSI2CBus = VIA_I2C_NONE;
+        }
+
+        hwp->writeSeq(hwp, 0x5A, sr5a);
+        break;
+    default:
+        pVIADisplay->intTMDSPresence = FALSE;
+        pVIADisplay->intTMDSDIPort = VIA_DI_PORT_NONE;
+        pVIADisplay->intTMDSI2CBus = VIA_I2C_NONE;
+        break;
+    }
+
+     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaTMDSProbe.\n"));
+}
+
+void
+viaTMDSInit(ScrnInfoPtr pScrn)
+{
+    xf86OutputPtr output;
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
+    VIATMDSPtr pVIATMDS;
     char outputNameBuffer[32];
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaTMDSInit.\n"));
 
-    sr5a = hwp->readSeq(hwp, 0x5A);
-    ViaSeqMask(hwp, 0x5A, sr5a | 0x01, 0x01);
-    sr13 = hwp->readSeq(hwp, 0x13);
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "SR13: 0x%02X\n", sr13));
-    hwp->writeSeq(hwp, 0x5A, sr5a);
-
-    /* 3C5.13[7:6] - Integrated LVDS / DVI Mode Select
-     *               (DVP1D15-14 pin strapping)
-     *               00: LVDS1 + LVDS2
-     *               01: DVI + LVDS2
-     *               10: Dual LVDS Channel (High Resolution Panel)
-     *               11: One DVI only (decrease the clock jitter) */
-    /* Check for DVI presence using pin strappings.
-     * VIA Technologies NanoBook reference design based products
-     * have their pin strappings set to a wrong setting to communicate
-     * the presence of DVI, so it requires special handling here. */
-    if ((((~(sr13 & 0x80)) && (sr13 & 0x40))
-         || ((sr13 & 0x80) && (sr13 & 0x40)))
-       || (pVia->isVIANanoBook)) {
-
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                    "Integrated TMDS transmitter found via pin strapping.\n");
-    } else {
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                    "Integrated TMDS transmitter not found.\n");
+    if (!pVIADisplay->intTMDSPresence) {
         goto exit;
     }
 
-    pVIATMDS = xnfcalloc(1, sizeof(VIATMDSRec));
+    pVIATMDS = (VIATMDSPtr) xnfcalloc(1, sizeof(VIATMDSRec));
     if (!pVIATMDS) {
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                    "Failed to allocate working storage for integrated "
-                    "TMDS transmitter.\n");
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                            "Failed to allocate storage for "
+                            "integrated TMDS (DVI) transmitter.\n"));
         goto exit;
     }
 
-    /* Leaving a hint for mode setting and DPMS to know which port
-     * to access. For CX700 / VX700 and VX800 integrated TMDS
-     * transmitter, it is fixed to LVDS1 (TMDS uses LVDS1 wires). */
-    pVIATMDS->diPortType = VIA_DI_PORT_TMDS;
-
-    /* The code to dynamically designate the particular DVI (i.e., DVI-1,
+    /* The code to dynamically designate a particular DVI (i.e., DVI-1,
      * DVI-2, etc.) for xrandr was borrowed from xf86-video-r128 DDX. */
     sprintf(outputNameBuffer, "DVI-%d", (pVIADisplay->numberDVI + 1));
     output = xf86OutputCreate(pScrn, &via_tmds_funcs, outputNameBuffer);
     if (!output) {
         free(pVIATMDS);
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                    "Failed to allocate X Server display output record for "
-                    "integrated TMDS transmitter.\n");
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                            "Failed to create X Server display output "
+                            "for integrated TMDS (DVI) "
+                            "transmitter.\n"));
         goto exit;
     }
+
+    /* Increment the number of DVI connectors. */
+    pVIADisplay->numberDVI++;
+
+    /* Leaving a hint for mode setting and DPMS to know which port
+     * to access. For CX700 / VX700 and VX800 chipsets' integrated TMDS
+     * transmitter, it is fixed to LVDS1 (TMDS uses LVDS1 pins). */
+    pVIATMDS->diPort = pVIADisplay->intTMDSDIPort;
+
+    /* Hint about which I2C bus to access for obtaining EDID. */
+    pVIATMDS->i2cBus = pVIADisplay->intTMDSI2CBus;
 
     output->driver_private = pVIATMDS;
 
@@ -1058,18 +1106,15 @@ viaTMDSInit(ScrnInfoPtr pScrn)
      * X.Org Server and both IGA1 and IGA2 can handle DVI without any
      * limitations, possible_crtcs should be set to 0x3 (0b11) so that
      * either display controller can get assigned to handle DVI. */
-    output->possible_crtcs = (1 << 1) | (1 << 0);
+    output->possible_crtcs = BIT(1) | BIT(0);
 
     output->possible_clones = 0;
     output->interlaceAllowed = FALSE;
     output->doubleScanAllowed = FALSE;
 
-    pVIADisplay->numberDVI++;
-    status = TRUE;
 exit:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaTMDSInit.\n"));
-    return status;
 }
 
 void
@@ -1086,22 +1131,6 @@ via_dvi_init(ScrnInfoPtr pScrn)
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                     "Exiting via_dvi_init.\n"));
         return;
-    }
-
-    /* Check to see if we are dealing with the latest VIA chipsets. */
-    if ((pVia->Chipset == VIA_CX700)
-        || (pVia->Chipset == VIA_VX800)
-        || (pVia->Chipset == VIA_VX855)
-        || (pVia->Chipset == VIA_VX900)) {
-
-        if (!viaTMDSInit(pScrn)) {
-            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Integrated TMDS transmitter for DVI not found.\n");
-        } else {
-            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Integrated TMDS transmitter for DVI was "
-                        "initialized successfully.\n");
-        }
     }
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,

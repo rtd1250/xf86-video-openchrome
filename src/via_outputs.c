@@ -667,6 +667,8 @@ viaInitDisplay(ScrnInfoPtr pScrn)
        display detection purposes. */
     viaProbePinStrapping(pScrn);
 
+    viaTMDSProbe(pScrn);
+
     viaAnalogProbe(pScrn);
 
 
@@ -678,6 +680,9 @@ viaInitDisplay(ScrnInfoPtr pScrn)
 
     /* LVDS */
     via_lvds_init(pScrn);
+
+    /* DVI */
+    viaTMDSInit(pScrn);
 
     /* VGA */
     viaAnalogInit(pScrn);

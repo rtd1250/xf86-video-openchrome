@@ -148,6 +148,10 @@ typedef struct _VIADISPLAY {
     Bool        analogPresence;
     CARD8       analogI2CBus;
 
+    Bool        intTMDSPresence;
+    CARD8       intTMDSDIPort;
+    CARD8       intTMDSI2CBus;
+
     /* Keeping track of the number of analog VGA connectors. */
     unsigned int        numberVGA;
 
@@ -223,8 +227,8 @@ typedef struct _VIAFP {
 } VIAFPRec, *VIAFPPtr;
 
 typedef struct _VIATMDS {
-    I2CBusPtr pVIATMDSI2CBus;
-    CARD8       diPortType;
+    CARD8       diPort;
+    CARD8       i2cBus;
 } VIATMDSRec, *VIATMDSPtr;
 
 typedef struct
@@ -608,6 +612,8 @@ void viaExtTMDSSetClockDriveStrength(ScrnInfoPtr pScrn,
                                         CARD8 clockDriveStrength);
 void viaExtTMDSSetDataDriveStrength(ScrnInfoPtr pScrn,
                                         CARD8 dataDriveStrength);
+void viaTMDSProbe(ScrnInfoPtr pScrn);
+void viaTMDSInit(ScrnInfoPtr pScrn);
 void via_dvi_init(ScrnInfoPtr pScrn);
 
 /*via_tv.c */
