@@ -658,7 +658,7 @@ viaInitDisplay(ScrnInfoPtr pScrn)
     pVIADisplay->numberVGA = 0;
 
     /* Initialize the number of DVI connectors. */
-    pVia->numberDVI = 0;
+    pVIADisplay->numberDVI = 0;
 
     /* Initialize the number of FP connectors. */
     pVia->numberFP = 0;

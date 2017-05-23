@@ -989,6 +989,7 @@ viaTMDSInit(ScrnInfoPtr pScrn)
     xf86OutputPtr output;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
     VIATMDSPtr pVIATMDS = NULL;
     CARD8 sr13, sr5a;
     Bool status = FALSE;
@@ -1041,7 +1042,7 @@ viaTMDSInit(ScrnInfoPtr pScrn)
 
     /* The code to dynamically designate the particular DVI (i.e., DVI-1,
      * DVI-2, etc.) for xrandr was borrowed from xf86-video-r128 DDX. */
-    sprintf(outputNameBuffer, "DVI-%d", (pVia->numberDVI + 1));
+    sprintf(outputNameBuffer, "DVI-%d", (pVIADisplay->numberDVI + 1));
     output = xf86OutputCreate(pScrn, &via_tmds_funcs, outputNameBuffer);
     if (!output) {
         free(pVIATMDS);
@@ -1063,7 +1064,7 @@ viaTMDSInit(ScrnInfoPtr pScrn)
     output->interlaceAllowed = FALSE;
     output->doubleScanAllowed = FALSE;
 
-    pVia->numberDVI++;
+    pVIADisplay->numberDVI++;
     status = TRUE;
 exit:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,

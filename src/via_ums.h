@@ -151,6 +151,9 @@ typedef struct _VIADISPLAY {
     /* Keeping track of the number of analog VGA connectors. */
     unsigned int        numberVGA;
 
+    /* Keeping track of the number of DVI connectors. */
+    unsigned int        numberDVI;
+
    CARD8       mappedI2CBus;
 
     xf86OutputPtr tv;
