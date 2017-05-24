@@ -264,6 +264,21 @@ union pllparams {
 
 
 /*
+ * Controls IGA1 display output state.
+ */
+static inline void
+viaIGA1DisplayOutput(ScrnInfoPtr pScrn, Bool outputState)
+{
+    /* 3C5.01[5] - IGA1 Screen Off
+     *             0: Screen on
+     *             1: Screen off */
+    ViaSeqMask(VGAHWPTR(pScrn), 0x01, outputState ? 0x00 : BIT(5), BIT(5));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "IGA1 Display Output: %s\n",
+                        outputState ? "On" : "Off"));
+}
+
+/*
  * Sets analog (VGA) DAC output state.
  */
 static inline void
