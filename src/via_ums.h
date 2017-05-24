@@ -264,10 +264,10 @@ union pllparams {
 
 
 /*
- * Controls IGA1 display output state.
+ * Sets IGA1 display output state.
  */
 static inline void
-viaIGA1DisplayOutput(ScrnInfoPtr pScrn, Bool outputState)
+viaIGA1SetDisplayOutput(ScrnInfoPtr pScrn, Bool outputState)
 {
     /* 3C5.01[5] - IGA1 Screen Off
      *             0: Screen on
