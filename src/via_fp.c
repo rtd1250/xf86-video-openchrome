@@ -986,65 +986,6 @@ ViaPanelGetSizeFromEDID(ScrnInfoPtr pScrn, xf86MonPtr pMon,
     return FALSE;
 }
 
-static Bool
-ViaPanelGetSizeFromDDCv1(xf86OutputPtr output, int *width, int *height)
-{
-    ScrnInfoPtr pScrn = output->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
-    xf86MonPtr pMon;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered VIAGetPanelSizeFromDDCv1.\n"));
-
-    if (!pVia->pI2CBus2) {
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                    "I2C Bus 2 does not exist.\n");
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "Exiting VIAGetPanelSizeFromDDCv1.\n"));
-        return FALSE;
-    }
-
-    if (!xf86I2CProbeAddress(pVia->pI2CBus2, 0xA0)) {
-        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                    "I2C device on I2C Bus 2 does not support EDID.\n");
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "Exiting VIAGetPanelSizeFromDDCv1.\n"));
-        return FALSE;
-    }
-
-    /* Probe I2C Bus 2 to see if a flat panel is connected. */
-    xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                "Probing for a flat panel on I2C Bus 2.\n");
-    pMon = xf86OutputGetEDID(output, pVia->pI2CBus2);
-    if (pMon && DIGITAL(pMon->features.input_type)) {
-        xf86OutputSetEDID(output, pMon);
-        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                    "Detected a flat panel on I2C Bus 2.\n");
-    } else {
-        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                    "Did not detect a flat panel on I2C Bus 2.\n");
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "Exiting VIAGetPanelSizeFromDDCv1.\n"));
-        return FALSE;
-
-    }
-
-    if (!ViaPanelGetSizeFromEDID(pScrn, pMon, width, height)) {
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                    "Unable to obtain panel size from EDID information.\n");
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "Exiting VIAGetPanelSizeFromDDCv1.\n"));
-        return FALSE;
-    }
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "VIAGetPanelSizeFromDDCv1: (%d X %d)\n",
-                        *width, *height));
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting VIAGetPanelSizeFromDDCv1.\n"));
-    return TRUE;
-}
-
 /*
  * Gets the native panel resolution from scratch pad registers.
  */
