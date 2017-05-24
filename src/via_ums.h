@@ -279,6 +279,24 @@ viaIGA1DisplayOutput(ScrnInfoPtr pScrn, Bool outputState)
 }
 
 /*
+ * Sets analog (VGA) DPMS State.
+ */
+static inline void
+viaAnalogSetDPMSControl(ScrnInfoPtr pScrn, CARD8 dpmsControl)
+{
+    /* 3X5.36[5:4] - DPMS Control
+     *               00: On
+     *               01: Stand-by
+     *               10: Suspend
+     *               11: Off */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x36, dpmsControl << 4,
+                BIT(5) | BIT(4));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Analog (VGA) DPMS: %u\n",
+                        dpmsControl & (BIT(1) | BIT(0))));
+}
+
+/*
  * Sets analog (VGA) DAC output state.
  */
 static inline void
