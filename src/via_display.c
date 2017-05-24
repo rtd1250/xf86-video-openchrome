@@ -3645,10 +3645,10 @@ iga1_crtc_dpms(xf86CrtcPtr crtc, int mode)
     case DPMSModeOn:
     case DPMSModeStandby:
     case DPMSModeSuspend:
-        viaIGA1DisplayOutput(pScrn, TRUE);
+        viaIGA1SetDisplayOutput(pScrn, TRUE);
         break;
     case DPMSModeOff:
-        viaIGA1DisplayOutput(pScrn, FALSE);
+        viaIGA1SetDisplayOutput(pScrn, FALSE);
         break;
     default:
         break;
