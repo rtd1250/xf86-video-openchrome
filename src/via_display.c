@@ -3643,27 +3643,16 @@ iga1_crtc_dpms(xf86CrtcPtr crtc, int mode)
 
     switch (mode) {
     case DPMSModeOn:
-        viaIGA1DPMSControl(pScrn, 0x00);
-        break;
-
     case DPMSModeStandby:
-        viaIGA1DPMSControl(pScrn, 0x01);
-        break;
-
     case DPMSModeSuspend:
-        viaIGA1DPMSControl(pScrn, 0x02);
+        viaIGA1DisplayOutput(pScrn, TRUE);
         break;
-
     case DPMSModeOff:
-        viaIGA1DPMSControl(pScrn, 0x03);
+        viaIGA1DisplayOutput(pScrn, FALSE);
         break;
-
     default:
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Invalid DPMS Mode: %d\n",
-                    mode);
         break;
     }
-    //vgaHWSaveScreen(pScrn->pScreen, mode);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting iga1_crtc_dpms.\n"));

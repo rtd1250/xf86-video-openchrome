@@ -248,14 +248,21 @@ via_analog_dpms(xf86OutputPtr output, int mode)
 
     switch (mode) {
     case DPMSModeOn:
-        viaAnalogOutput(pScrn, TRUE);
+        viaAnalogSetDPMSControl(pScrn, 0x00);
         break;
     case DPMSModeStandby:
+        viaAnalogSetDPMSControl(pScrn, 0x01);
+        break;
     case DPMSModeSuspend:
+        viaAnalogSetDPMSControl(pScrn, 0x02);
+        break;
     case DPMSModeOff:
-        viaAnalogOutput(pScrn, FALSE);
+        viaAnalogSetDPMSControl(pScrn, 0x03);
         break;
     default:
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                    "Invalid DPMS Mode: %d\n",
+                    mode);
         break;
     }
 
@@ -293,13 +300,31 @@ via_analog_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
 static void
 via_analog_prepare(xf86OutputPtr output)
 {
-    via_analog_dpms(output, DPMSModeOff);
+    ScrnInfoPtr pScrn = output->scrn;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered via_analog_prepare.\n"));
+
+    /* DPMS On */
+    viaAnalogSetDPMSControl(pScrn, 0x03);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting via_analog_prepare.\n"));
 }
 
 static void
 via_analog_commit(xf86OutputPtr output)
 {
-    via_analog_dpms(output, DPMSModeOn);
+    ScrnInfoPtr pScrn = output->scrn;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered via_analog_commit.\n"));
+
+    /* DPMS off */
+    viaAnalogSetDPMSControl(pScrn, 0x00);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting via_analog_commit.\n"));
 }
 
 static void
