@@ -264,6 +264,22 @@ union pllparams {
 
 
 /*
+ * Resets IGA1 hardware.
+ */
+static inline void
+viaIGA1HWReset(ScrnInfoPtr pScrn, Bool resetState)
+{
+    /* 3X5.17[7] - IGA1 HW Reset
+     *             0: Reset
+     *             1: Normal Operation */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x17, resetState ? 0x00 : BIT(7),
+                BIT(7));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "IGA1 HW Reset: %s\n",
+                        resetState ? "On" : "Off"));
+}
+
+/*
  * Sets IGA1 display output state.
  */
 static inline void

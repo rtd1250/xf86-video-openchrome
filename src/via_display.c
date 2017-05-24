@@ -109,29 +109,6 @@ viaSetPaletteLUTAccess(ScrnInfoPtr pScrn, CARD8 displaySource)
 }
 
 /*
- * Resets IGA1 hardware.
- */
-static void
-viaIGA1HWReset(ScrnInfoPtr pScrn, CARD8 resetState)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaIGA1HWReset.\n"));
-
-    /* 3X5.17[7] - IGA1 HW Reset
-     *             0: Reset
-     *             1: Normal Operation */
-    ViaCrtcMask(hwp, 0x17, resetState << 7, 0x80);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "IGA1 HW Reset: %s\n",
-                (resetState & 0x01) ? "Off" : "On");
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaIGA1HWReset.\n"));
-}
-
-/*
  * Sets IGA1 color depth.
  */
 static void
@@ -3758,7 +3735,7 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
                         "Entered iga1_crtc_mode_set.\n"));
 
     /* Put IGA1 into a reset state. */
-    viaIGA1HWReset(pScrn, 0x00);
+    viaIGA1HWReset(pScrn, TRUE);
 
     if (!vgaHWInit(pScrn, adjusted_mode)) {
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -3796,7 +3773,7 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
 
 exit:
     /* Put IGA1 back into a normal operating state. */
-    viaIGA1HWReset(pScrn, 0x01);
+    viaIGA1HWReset(pScrn, FALSE);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting iga1_crtc_mode_set.\n"));
