@@ -3745,7 +3745,7 @@ iga1_crtc_prepare(xf86CrtcPtr crtc)
                         "Entered iga1_crtc_prepare.\n"));
 
     /* Turn off IGA1. */
-    viaIGA1DPMSControl(pScrn, 0x03);
+    viaIGA1SetDisplayOutput(pScrn, FALSE);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting iga1_crtc_prepare.\n"));
@@ -3837,7 +3837,7 @@ iga1_crtc_commit(xf86CrtcPtr crtc)
         xf86_reload_cursors(crtc->scrn->pScreen);
 
     /* Turn on IGA1. */
-    viaIGA1DPMSControl(pScrn, 0x00);
+    viaIGA1SetDisplayOutput(pScrn, TRUE);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting iga1_crtc_commit.\n"));
