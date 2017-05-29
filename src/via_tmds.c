@@ -1238,35 +1238,7 @@ via_dvi_init(ScrnInfoPtr pScrn)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_dvi_init.\n"));
 
-    if (!pVia->pI2CBus2 || !pVia->pI2CBus3) {
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                    "I2C Bus 2 or I2C Bus 3 does not exist.\n");
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                    "Exiting via_dvi_init.\n"));
-        return;
-    }
-
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "Probing I2C Bus 2 for VT1632.\n");
-    if (!viaVT1632Init(pScrn, pVia->pI2CBus2)) {
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                    "I2C Bus 2 was not initialized for DVI use.\n");
-    } else {
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                    "VT1632 attached to I2C Bus 2 was initialized "
-                    "successfully for DVI use.\n");
-    }
-
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "Probing I2C Bus 3 for VT1632.\n");
-    if (!viaVT1632Init(pScrn, pVia->pI2CBus3)) {
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                    "I2C Bus 3 was not initialized for DVI use.\n");
-    } else {
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                    "VT1632 attached to I2C Bus 3 was initialized "
-                    "successfully for DVI use.\n");
-    }
+    viaVT1632Init(pScrn);
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "Probing I2C Bus 2 for SiI 164.\n");

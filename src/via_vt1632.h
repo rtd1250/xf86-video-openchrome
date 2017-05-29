@@ -33,20 +33,25 @@
 #define VIA_VT1632_PDB  0x01
 
 typedef struct _VIAVT1632 {
-	I2CDevPtr VT1632I2CDev;
+    I2CDevPtr   VT1632I2CDev;
 
-	int DotclockMin;
-	int DotclockMax;
-	CARD8 Register08;
-	CARD8 Register09;
-	CARD8 Register0A;
-	CARD8 Register0C;
+    CARD8       diPort;
+    CARD8       i2cBus;
+    CARD8       transmitter;
+
+    int DotclockMin;
+    int DotclockMax;
+
+    CARD8   Register08;
+    CARD8   Register09;
+    CARD8   Register0A;
+    CARD8   Register0C;
 } VIAVT1632Rec, *VIAVT1632Ptr;
 
 
 const xf86OutputFuncsRec via_vt1632_funcs;
 
 Bool viaVT1632Probe(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus);
-Bool viaVT1632Init(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus);
+void viaVT1632Init(ScrnInfoPtr pScrn);
 
 #endif /* _VIA_VT1632_H_ */

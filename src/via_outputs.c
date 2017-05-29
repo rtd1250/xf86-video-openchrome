@@ -667,6 +667,7 @@ viaInitDisplay(ScrnInfoPtr pScrn)
        display detection purposes. */
     viaProbePinStrapping(pScrn);
 
+    viaExtTMDSProbe(pScrn);
     viaTMDSProbe(pScrn);
 
     viaFPProbe(pScrn);

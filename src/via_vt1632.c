@@ -450,22 +450,33 @@ exit:
     return status;
 }
 
-Bool
-viaVT1632Init(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus)
+void
+viaVT1632Init(ScrnInfoPtr pScrn)
 {
     xf86OutputPtr output;
     VIAPtr pVia = VIAPTR(pScrn);
     VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
-    VIAVT1632Ptr pVIAVT1632 = NULL;
-    I2CDevPtr pI2CDevice = NULL;
+    VIAVT1632Ptr pVIAVT1632;
+    I2CBusPtr pI2CBus;
+    I2CDevPtr pI2CDevice;
     I2CSlaveAddr i2cAddr = 0x10;
-    CARD8 buf;
-    CARD16 vendorID, deviceID;
-    Bool status = FALSE;
+    CARD8 i2cData;
     char outputNameBuffer[32];
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaVT1632Init.\n"));
+
+    if ((!(pVIADisplay->extTMDSPresence)) || (pVIADisplay->extTMDSTransmitter != VIA_TMDS_VT1632)) {
+        goto exit;
+    }
+
+    if (pVIADisplay->extTMDSI2CBus & VIA_I2C_BUS2) {
+        pI2CBus = pVia->pI2CBus2;
+    } else if (pVIADisplay->extTMDSI2CBus & VIA_I2C_BUS3) {
+        pI2CBus = pVia->pI2CBus3;
+    } else {
+        goto exit;
+    }
 
     if (!xf86I2CProbeAddress(pI2CBus, i2cAddr)) {
         xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
@@ -490,53 +501,16 @@ viaVT1632Init(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus)
         goto exit;
     }
 
-    xf86I2CReadByte(pI2CDevice, 0, &buf);
-    vendorID = buf;
-    xf86I2CReadByte(pI2CDevice, 1, &buf);
-    vendorID |= buf << 8;
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Vendor ID: 0x%04x\n", vendorID));
-
-    xf86I2CReadByte(pI2CDevice, 2, &buf);
-    deviceID = buf;
-    xf86I2CReadByte(pI2CDevice, 3, &buf);
-    deviceID |= buf << 8;
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Device ID: 0x%04x\n", deviceID));
-
-    if ((vendorID != 0x1106) || (deviceID != 0x3192)) {
-        xf86DestroyI2CDevRec(pI2CDevice, TRUE);
-        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                    "VT1632 external TMDS transmitter not detected.\n");
-        goto exit;
-    }
-
-    xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                "VT1632 external TMDS transmitter detected.\n");
-
-    pVIAVT1632 = xnfcalloc(1, sizeof(VIAVT1632Rec));
+    pVIAVT1632 = (VIAVT1632Ptr) xnfcalloc(1, sizeof(VIAVT1632Rec));
     if (!pVIAVT1632) {
         xf86DestroyI2CDevRec(pI2CDevice, TRUE);
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                    "Failed to allocate working storage for VT1632.\n");
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                            "Failed to allocate storage for "
+                            "VT1632.\n"));
         goto exit;
     }
 
-    // Remembering which I2C bus is used for VT1632.
-    pVIAVT1632->VT1632I2CDev = pI2CDevice;
-
-    xf86I2CReadByte(pI2CDevice, 0x06, &buf);
-    pVIAVT1632->DotclockMin = buf * 1000;
-
-    xf86I2CReadByte(pI2CDevice, 0x07, &buf);
-    pVIAVT1632->DotclockMax = (buf + 65) * 1000;
-
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Supported VT1632 Dot Clock Range: "
-                "%d to %d MHz\n",
-                pVIAVT1632->DotclockMin / 1000,
-                pVIAVT1632->DotclockMax / 1000);
-
-    /* The code to dynamically designate the particular DVI (i.e., DVI-1,
+    /* The code to dynamically designate a particular DVI (i.e., DVI-1,
      * DVI-2, etc.) for xrandr was borrowed from xf86-video-r128 DDX. */
     sprintf(outputNameBuffer, "DVI-%d", (pVIADisplay->numberDVI + 1));
     output = xf86OutputCreate(pScrn, &via_vt1632_funcs, outputNameBuffer);
@@ -544,10 +518,34 @@ viaVT1632Init(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus)
         free(pVIAVT1632);
         xf86DestroyI2CDevRec(pI2CDevice, TRUE);
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                    "Failed to allocate X Server display output record for "
-                    "VT1632.\n");
+                    "Failed to create X Server display output "
+                    "for VT1632.\n");
         goto exit;
     }
+
+    /* Increment the number of DVI connectors. */
+    pVIADisplay->numberDVI++;
+
+    // Remembering which I2C bus is used for VT1632.
+    pVIAVT1632->VT1632I2CDev = pI2CDevice;
+
+    pVIAVT1632->diPort = pVIADisplay->extTMDSDIPort;
+
+    /* Hint about which I2C bus to access for obtaining EDID. */
+    pVIAVT1632->i2cBus = pVIADisplay->extTMDSI2CBus;
+
+    pVIAVT1632->transmitter = pVIADisplay->extTMDSTransmitter;
+
+    xf86I2CReadByte(pI2CDevice, 0x06, &i2cData);
+    pVIAVT1632->DotclockMin = i2cData * 1000;
+
+    xf86I2CReadByte(pI2CDevice, 0x07, &i2cData);
+    pVIAVT1632->DotclockMax = (i2cData + 65) * 1000;
+
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Supported VT1632 Dot Clock Range: "
+                "%d to %d MHz\n",
+                pVIAVT1632->DotclockMin / 1000,
+                pVIAVT1632->DotclockMax / 1000);
 
     output->driver_private = pVIAVT1632;
 
@@ -555,18 +553,13 @@ viaVT1632Init(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus)
      * X.Org Server and both IGA1 and IGA2 can handle DVI without any
      * limitations, possible_crtcs should be set to 0x3 (0b11) so that
      * either display controller can get assigned to handle DVI. */
-    output->possible_crtcs = (1 << 1) | (1 << 0);
+    output->possible_crtcs = BIT(1) | BIT(0);
 
     output->possible_clones = 0;
     output->interlaceAllowed = FALSE;
     output->doubleScanAllowed = FALSE;
 
-    viaVT1632DumpRegisters(pScrn, pI2CDevice);
-
-    pVIADisplay->numberDVI++;
-    status = TRUE;
 exit:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaVT1632Init.\n"));
-    return status;
 }
