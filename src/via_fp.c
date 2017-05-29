@@ -994,7 +994,7 @@ viaLVDSGetFPInfoFromScratchPad(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAFPPtr pVIAFP = output->driver_private;
+    VIAFPPtr pVIAFP = (VIAFPPtr) output->driver_private;
     CARD8 index;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -1250,14 +1250,14 @@ static int
 via_lvds_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
 {
     ScrnInfoPtr pScrn = output->scrn;
-    VIAFPPtr Panel = output->driver_private;
+    VIAFPPtr pVIAFP = (VIAFPPtr) output->driver_private;
 
-    if (Panel->NativeWidth < pMode->HDisplay ||
-        Panel->NativeHeight < pMode->VDisplay)
+    if (pVIAFP->NativeWidth < pMode->HDisplay ||
+        pVIAFP->NativeHeight < pMode->VDisplay)
         return MODE_PANEL;
 
-    if (!Panel->Scale && Panel->NativeHeight != pMode->VDisplay &&
-         Panel->NativeWidth != pMode->HDisplay)
+    if (!pVIAFP->Scale && pVIAFP->NativeHeight != pMode->VDisplay &&
+         pVIAFP->NativeWidth != pMode->HDisplay)
         return MODE_PANEL;
 
     if (!ViaModeDotClockTranslate(pScrn, pMode))
@@ -1270,14 +1270,14 @@ static Bool
 via_lvds_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
                     DisplayModePtr adjusted_mode)
 {
-    VIAFPPtr Panel = output->driver_private;
+    VIAFPPtr pVIAFP = (VIAFPPtr) output->driver_private;
 
     xf86SetModeCrtc(adjusted_mode, 0);
-    if (!Panel->Center && (mode->HDisplay < Panel->NativeWidth ||
-        mode->VDisplay < Panel->NativeHeight)) {
-        Panel->Scale = TRUE;
+    if (!pVIAFP->Center && (mode->HDisplay < pVIAFP->NativeWidth ||
+        mode->VDisplay < pVIAFP->NativeHeight)) {
+        pVIAFP->Scale = TRUE;
     } else {
-        Panel->Scale = FALSE;
+        pVIAFP->Scale = FALSE;
         ViaPanelCenterMode(mode, adjusted_mode);
     }
     return TRUE;
@@ -1305,16 +1305,16 @@ static void
 via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
                     DisplayModePtr adjusted_mode)
 {
-    VIAFPPtr Panel = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
     drmmode_crtc_private_ptr iga = output->crtc->driver_private;
     VIAPtr pVia = VIAPTR(pScrn);
+    VIAFPPtr pVIAFP = (VIAFPPtr) output->driver_private;
 
     if (output->crtc) {
-        if (Panel->Scale) {
+        if (pVIAFP->Scale) {
             ViaPanelScale(pScrn, mode->HDisplay, mode->VDisplay,
-                            Panel->NativeWidth,
-                            Panel->NativeHeight);
+                            pVIAFP->NativeWidth,
+                            pVIAFP->NativeHeight);
         } else {
             ViaPanelScaleDisable(pScrn);
         }
@@ -1336,7 +1336,7 @@ via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
         case VIA_CX700:
         case VIA_VX800:
             /* Set LVDS2 output color dithering. */
-            viaLVDS2SetDithering(pScrn, Panel->useDithering ? TRUE : FALSE);
+            viaLVDS2SetDithering(pScrn, pVIAFP->useDithering ? TRUE : FALSE);
 
             /* Set LVDS2 output format to sequential mode. */
             viaLVDS2SetOutputFormat(pScrn, 0x01);
@@ -1347,7 +1347,7 @@ via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
         case VIA_VX855:
         case VIA_VX900:
             /* Set LVDS1 output color dithering. */
-            viaLVDS1SetDithering(pScrn, Panel->useDithering ? TRUE : FALSE);
+            viaLVDS1SetDithering(pScrn, pVIAFP->useDithering ? TRUE : FALSE);
 
             /* Set LVDS1 output format to sequential mode. */
             viaLVDS1SetOutputFormat(pScrn, 0x01);
@@ -1434,9 +1434,9 @@ exit:
 static DisplayModePtr
 via_lvds_get_modes(xf86OutputPtr output)
 {
-    VIAFPPtr pPanel = output->driver_private;
     ScrnInfoPtr pScrn = output->scrn;
     DisplayModePtr pDisplay_Mode = NULL;
+    VIAFPPtr pVIAFP = (VIAFPPtr) output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_lvds_get_modes.\n"));
@@ -1447,13 +1447,13 @@ via_lvds_get_modes(xf86OutputPtr output)
              * Generates a display mode for the native panel resolution,
              * using CVT.
              */
-            if (pPanel->NativeWidth && pPanel->NativeHeight) {
+            if (pVIAFP->NativeWidth && pVIAFP->NativeHeight) {
                 VIAPtr pVia = VIAPTR(pScrn);
 
                 if (pVia->IsOLPCXO15) {
                     pDisplay_Mode = xf86DuplicateMode(&OLPCMode);
                 } else {
-                    pDisplay_Mode = xf86CVTMode(pPanel->NativeWidth, pPanel->NativeHeight,
+                    pDisplay_Mode = xf86CVTMode(pVIAFP->NativeWidth, pVIAFP->NativeHeight,
                                     60.0f, FALSE, FALSE);
                 }
 
@@ -1481,7 +1481,7 @@ via_lvds_get_modes(xf86OutputPtr output)
                 xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
                             "Invalid Flat Panel Screen Resolution: "
                             "%dx%d\n",
-                            pPanel->NativeWidth, pPanel->NativeHeight);
+                            pVIAFP->NativeWidth, pVIAFP->NativeHeight);
             }
         } else {
             pDisplay_Mode = xf86OutputGetEDIDModes(output);
