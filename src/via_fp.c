@@ -1160,7 +1160,7 @@ ViaPanelScaleDisable(ScrnInfoPtr pScrn)
 }
 
 static void
-via_lvds_create_resources(xf86OutputPtr output)
+via_fp_create_resources(xf86OutputPtr output)
 {
 }
 
@@ -1237,17 +1237,17 @@ via_fp_dpms(xf86OutputPtr output, int mode)
 }
 
 static void
-via_lvds_save(xf86OutputPtr output)
+via_fp_save(xf86OutputPtr output)
 {
 }
 
 static void
-via_lvds_restore(xf86OutputPtr output)
+via_fp_restore(xf86OutputPtr output)
 {
 }
 
 static int
-via_lvds_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
+via_fp_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
 {
     ScrnInfoPtr pScrn = output->scrn;
     VIAFPPtr pVIAFP = (VIAFPPtr) output->driver_private;
@@ -1267,7 +1267,7 @@ via_lvds_mode_valid(xf86OutputPtr output, DisplayModePtr pMode)
 }
 
 static Bool
-via_lvds_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
+via_fp_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
                     DisplayModePtr adjusted_mode)
 {
     VIAFPPtr pVIAFP = (VIAFPPtr) output->driver_private;
@@ -1284,7 +1284,7 @@ via_lvds_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
 }
 
 static void
-via_lvds_prepare(xf86OutputPtr output)
+via_fp_prepare(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
 
@@ -1293,7 +1293,7 @@ via_lvds_prepare(xf86OutputPtr output)
 }
 
 static void
-via_lvds_commit(xf86OutputPtr output)
+via_fp_commit(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
 
@@ -1302,7 +1302,7 @@ via_lvds_commit(xf86OutputPtr output)
 }
 
 static void
-via_lvds_mode_set(xf86OutputPtr output, DisplayModePtr mode,
+via_fp_mode_set(xf86OutputPtr output, DisplayModePtr mode,
                     DisplayModePtr adjusted_mode)
 {
     ScrnInfoPtr pScrn = output->scrn;
@@ -1432,14 +1432,14 @@ exit:
 }
 
 static DisplayModePtr
-via_lvds_get_modes(xf86OutputPtr output)
+via_fp_get_modes(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
     DisplayModePtr pDisplay_Mode = NULL;
     VIAFPPtr pVIAFP = (VIAFPPtr) output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered via_lvds_get_modes.\n"));
+                        "Entered via_fp_get_modes.\n"));
 
     if (output->status == XF86OutputStatusConnected) {
         if (!output->MonInfo) {
@@ -1488,27 +1488,27 @@ via_lvds_get_modes(xf86OutputPtr output)
         }
     }
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting via_lvds_get_modes.\n"));
+                        "Exiting via_fp_get_modes.\n"));
     return pDisplay_Mode;
 }
 
 #ifdef RANDR_12_INTERFACE
 static Bool
-via_lvds_set_property(xf86OutputPtr output, Atom property,
+via_fp_set_property(xf86OutputPtr output, Atom property,
                         RRPropertyValuePtr value)
 {
     return FALSE;
 }
 
 static Bool
-via_lvds_get_property(xf86OutputPtr output, Atom property)
+via_fp_get_property(xf86OutputPtr output, Atom property)
 {
     return FALSE;
 }
 #endif
 
 static void
-via_lvds_destroy(xf86OutputPtr output)
+via_fp_destroy(xf86OutputPtr output)
 {
     if (output->driver_private)
         free(output->driver_private);
@@ -1516,24 +1516,24 @@ via_lvds_destroy(xf86OutputPtr output)
 }
 
 static const xf86OutputFuncsRec via_fp_funcs = {
-    .create_resources   = via_lvds_create_resources,
+    .create_resources   = via_fp_create_resources,
     .dpms               = via_fp_dpms,
-    .save               = via_lvds_save,
-    .restore            = via_lvds_restore,
-    .mode_valid         = via_lvds_mode_valid,
-    .mode_fixup         = via_lvds_mode_fixup,
-    .prepare            = via_lvds_prepare,
-    .commit             = via_lvds_commit,
-    .mode_set           = via_lvds_mode_set,
+    .save               = via_fp_save,
+    .restore            = via_fp_restore,
+    .mode_valid         = via_fp_mode_valid,
+    .mode_fixup         = via_fp_mode_fixup,
+    .prepare            = via_fp_prepare,
+    .commit             = via_fp_commit,
+    .mode_set           = via_fp_mode_set,
     .detect             = via_fp_detect,
-    .get_modes          = via_lvds_get_modes,
+    .get_modes          = via_fp_get_modes,
 #ifdef RANDR_12_INTERFACE
-    .set_property       = via_lvds_set_property,
+    .set_property       = via_fp_set_property,
 #endif
 #ifdef RANDR_13_INTERFACE
-    .get_property       = via_lvds_get_property,
+    .get_property       = via_fp_get_property,
 #endif
-    .destroy            = via_lvds_destroy
+    .destroy            = via_fp_destroy
 };
 
 void
