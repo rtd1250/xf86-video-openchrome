@@ -83,6 +83,9 @@ static Bool viaPreInit(ScrnInfoPtr pScrn, int flags);
 static Bool VIAScreenInit(SCREEN_INIT_ARGS_DECL);
 static const OptionInfoRec *VIAAvailableOptions(int chipid, int busid);
 
+
+int gVIAEntityIndex = -1;
+
 #ifdef HAVE_PCIACCESS
 
 #define VIA_DEVICE_MATCH(d,i) \

@@ -124,7 +124,7 @@
 #define VIDEO_ENGINE_CLE    1   /* CLE First generation video engine */
 #define VIDEO_ENGINE_CME    2   /* CME Second generation video engine */
 
-static int gVIAEntityIndex = -1;
+extern int gVIAEntityIndex;
 
 typedef struct {
     CARD8   SR[256];
