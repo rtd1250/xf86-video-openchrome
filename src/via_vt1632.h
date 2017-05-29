@@ -46,6 +46,7 @@ typedef struct _viaVT1632Rec {
 
 const xf86OutputFuncsRec via_vt1632_funcs;
 
+Bool viaVT1632Probe(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus);
 Bool viaVT1632Init(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus);
 
 #endif /* _VIA_VT1632_H_ */

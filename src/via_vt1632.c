@@ -375,6 +375,82 @@ const xf86OutputFuncsRec via_vt1632_funcs = {
 };
 
 Bool
+viaVT1632Probe(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus)
+{
+    I2CDevPtr pI2CDevice = NULL;
+    I2CSlaveAddr i2cAddr = 0x10;
+    VIAPtr pVia = VIAPTR(pScrn);
+    CARD8 i2cData;
+    CARD16 vendorID, deviceID;
+    Bool status = FALSE;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaVT1632Probe.\n"));
+
+    if (!pI2CBus) {
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                            "Invalid I2C bus.\n"));
+        goto exit;
+    }
+
+    if (!xf86I2CProbeAddress(pI2CBus, i2cAddr)) {
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                            "I2C bus device not found.\n"));
+        goto exit;
+    }
+
+    pI2CDevice = xf86CreateI2CDevRec();
+    if (!pI2CDevice) {
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                            "Failed to create an I2C bus device "
+                            "record.\n"));
+        goto exit;
+    }
+
+    pI2CDevice->DevName = "VT1632";
+    pI2CDevice->SlaveAddr = i2cAddr;
+    pI2CDevice->pI2CBus = pI2CBus;
+    if (!xf86I2CDevInit(pI2CDevice)) {
+        xf86DestroyI2CDevRec(pI2CDevice, TRUE);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                            "Failed to initialize a device on "
+                            "I2C bus.\n"));
+        goto exit;
+    }
+
+    xf86I2CReadByte(pI2CDevice, 0, &i2cData);
+    vendorID = i2cData;
+    xf86I2CReadByte(pI2CDevice, 1, &i2cData);
+    vendorID |= i2cData << 8;
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Vendor ID: 0x%04x\n", vendorID));
+
+    xf86I2CReadByte(pI2CDevice, 2, &i2cData);
+    deviceID = i2cData;
+    xf86I2CReadByte(pI2CDevice, 3, &i2cData);
+    deviceID |= i2cData << 8;
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Device ID: 0x%04x\n", deviceID));
+
+    if ((vendorID != 0x1106) || (deviceID != 0x3192)) {
+        xf86DestroyI2CDevRec(pI2CDevice, TRUE);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                            "VT1632 external TMDS transmitter not "
+                            "detected.\n"));
+        goto exit;
+    }
+
+    status = TRUE;
+    xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                "VT1632 external TMDS transmitter detected.\n");
+    xf86DestroyI2CDevRec(pI2CDevice, TRUE);
+exit:
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaVT1632Probe.\n"));
+    return status;
+}
+
+Bool
 viaVT1632Init(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus)
 {
     xf86OutputPtr output;
