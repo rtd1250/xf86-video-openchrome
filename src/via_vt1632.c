@@ -304,25 +304,47 @@ via_vt1632_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 static xf86OutputStatus
 via_vt1632_detect(xf86OutputPtr output)
 {
-    xf86MonPtr mon;
-    xf86OutputStatus status = XF86OutputStatusDisconnected;
     ScrnInfoPtr pScrn = output->scrn;
-    VIAVT1632Ptr pVIAVT1632 = output->driver_private;
+    xf86MonPtr pMon;
+    xf86OutputStatus status = XF86OutputStatusDisconnected;
+    I2CBusPtr pI2CBus;
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIAVT1632Ptr pVIAVT1632 = (VIAVT1632Ptr) output->driver_private;
+    Bool connectorDetected;
 
-    /* Check for the DVI presence via VT1632 first before accessing
-     * I2C bus. */
-    if (viaVT1632Sense(pScrn, pVIAVT1632->VT1632I2CDev)) {
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered via_vt1632_detect.\n"));
 
-        /* Since DVI presence was established, access the I2C bus
-         * assigned to DVI. */
-        mon = xf86OutputGetEDID(output, pVIAVT1632->VT1632I2CDev->pI2CBus);
+    xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                "Probing for a DVI connector . . .\n");
+
+    connectorDetected = viaVT1632Sense(pScrn, pVIAVT1632->VT1632I2CDev);
+    if (!connectorDetected) {
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                    "DVI connector not detected.\n");
+        goto exit;
+    }
+
+    status = XF86OutputStatusConnected;
+    xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                "DVI connector detected.\n");
+
+    if (pVIAVT1632->i2cBus & VIA_I2C_BUS2) {
+        pI2CBus = pVia->pI2CBus2;
+    } else if (pVIAVT1632->i2cBus & VIA_I2C_BUS3) {
+        pI2CBus = pVia->pI2CBus3;
+    } else {
+        pI2CBus = NULL;
+    }
+
+    if (pI2CBus) {
+        pMon = xf86OutputGetEDID(output, pI2CBus);
 
         /* Is the interface type digital? */
-        if (mon && DIGITAL(mon->features.input_type)) {
-            status = XF86OutputStatusConnected;
+        if (pMon && DIGITAL(pMon->features.input_type)) {
+            xf86OutputSetEDID(output, pMon);
             xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                         "Detected a monitor connected to DVI.\n");
-            xf86OutputSetEDID(output, mon);
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                         "Could not obtain EDID from a monitor "
@@ -330,6 +352,9 @@ via_vt1632_detect(xf86OutputPtr output)
         }
     }
 
+exit:
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting via_vt1632_detect.\n"));
     return status;
 }
 
