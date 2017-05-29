@@ -1045,6 +1045,126 @@ viaTMDSProbe(ScrnInfoPtr pScrn)
                         "Exiting viaTMDSProbe.\n"));
 }
 
+/*
+ * Probe (pre-initialization detection) of external TMDS transmitters.
+ */
+void
+viaExtTMDSProbe(ScrnInfoPtr pScrn)
+{
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
+    CARD8 sr12, sr13;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaExtTMDSProbe.\n"));
+
+    if (pVia->pI2CBus2) {
+        if (viaVT1632Probe(pScrn, pVia->pI2CBus2)) {
+            pVIADisplay->extTMDSPresence = TRUE;
+            pVIADisplay->extTMDSI2CBus = VIA_I2C_BUS2;
+            pVIADisplay->extTMDSTransmitter = VIA_TMDS_VT1632;
+            pVIADisplay->mappedI2CBus |= VIA_I2C_BUS2;
+        } else {
+            pVIADisplay->extTMDSPresence = FALSE;
+            pVIADisplay->extTMDSI2CBus = VIA_I2C_NONE;
+            pVIADisplay->extTMDSTransmitter = VIA_TMDS_NONE;
+        }
+    } else if (pVia->pI2CBus3) {
+        if (viaVT1632Probe(pScrn, pVia->pI2CBus3)) {
+            pVIADisplay->extTMDSPresence = TRUE;
+            pVIADisplay->extTMDSI2CBus = VIA_I2C_BUS3;
+            pVIADisplay->extTMDSTransmitter = VIA_TMDS_VT1632;
+            pVIADisplay->mappedI2CBus |= VIA_I2C_BUS3;
+        } else {
+            pVIADisplay->extTMDSPresence = FALSE;
+            pVIADisplay->extTMDSI2CBus = VIA_I2C_NONE;
+            pVIADisplay->extTMDSTransmitter = VIA_TMDS_NONE;
+        }
+    } else {
+        pVIADisplay->extTMDSPresence = FALSE;
+        pVIADisplay->extTMDSI2CBus = VIA_I2C_NONE;
+        pVIADisplay->extTMDSTransmitter = VIA_TMDS_NONE;
+    }
+
+    sr12 = hwp->readSeq(hwp, 0x12);
+    sr13 = hwp->readSeq(hwp, 0x13);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR12: 0x%02X\n", sr12));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "SR13: 0x%02X\n", sr13));
+    if (pVIADisplay->extTMDSPresence) {
+        switch (pVia->Chipset) {
+        case VIA_CLE266:
+
+            /* 3C5.12[4] - FPD17 pin strapping
+             *             0: TMDS transmitter (DVI) / capture device
+             *             1: Flat panel */
+            if (!(sr12 & BIT(4))) {
+                pVIADisplay->extTMDSDIPort = VIA_DI_PORT_DIP0;
+
+            /* 3C5.12[5] - FPD18 pin strapping
+             *             0: TMDS transmitter (DVI)
+             *             1: TV encoder */
+            } else if (!(sr12 & BIT(5))) {
+                pVIADisplay->extTMDSDIPort = VIA_DI_PORT_DIP1;
+            } else {
+                pVIADisplay->extTMDSDIPort = VIA_DI_PORT_NONE;
+            }
+
+            break;
+        case VIA_KM400:
+        case VIA_P4M800PRO:
+        case VIA_PM800:
+        case VIA_K8M800:
+            /* 3C5.12[6] - DVP0D6 pin strapping
+             *             0: Disable DVP0 (Digital Video Port 0) for
+             *                DVI or TV out use
+             *             1: Enable DVP0 (Digital Video Port 0) for
+             *                DVI or TV out use
+             * 3C5.12[5] - DVP0D5 pin strapping
+             *             0: TMDS transmitter (DVI)
+             *             1: TV encoder */
+            if ((sr12 & BIT(6)) && (!(sr12 & BIT(5)))) {
+                pVIADisplay->extTMDSDIPort = VIA_DI_PORT_DVP0;
+            } else {
+                pVIADisplay->extTMDSDIPort = VIA_DI_PORT_DVP1;
+            }
+
+            break;
+        case VIA_P4M890:
+        case VIA_K8M890:
+        case VIA_P4M900:
+            /* Assume DVP2 as DVP0. Hence, VIA_DI_PORT_DVP0
+             * is used. */
+            /* 3C5.12[6] - DVP2D6 pin strapping
+             *             0: Disable DVP2 (Digital Video Port 2)
+             *             1: Enable DVP2 (Digital Video Port 2)
+             * 3C5.12[5] - DVP2D5 pin strapping
+             *             0: TMDS transmitter (DVI)
+             *             1: TV encoder */
+            if ((sr12 & BIT(6)) && (!(sr12 & BIT(5)))) {
+                pVIADisplay->extTMDSDIPort = VIA_DI_PORT_DVP0;
+            } else {
+                pVIADisplay->extTMDSDIPort = VIA_DI_PORT_NONE;
+            }
+
+            break;
+        case VIA_CX700:
+        case VIA_VX800:
+        case VIA_VX855:
+        case VIA_VX900:
+            pVIADisplay->extTMDSDIPort = VIA_DI_PORT_DVP1;
+        default:
+            pVIADisplay->extTMDSDIPort = VIA_DI_PORT_NONE;
+            break;
+        }
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaExtTMDSProbe.\n"));
+}
+
 void
 viaTMDSInit(ScrnInfoPtr pScrn)
 {

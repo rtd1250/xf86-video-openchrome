@@ -152,6 +152,11 @@ typedef struct _VIADISPLAY {
     CARD8       intTMDSDIPort;
     CARD8       intTMDSI2CBus;
 
+    Bool        extTMDSPresence;
+    CARD8       extTMDSDIPort;
+    CARD8       extTMDSI2CBus;
+    CARD8       extTMDSTransmitter;
+
     Bool        intFP1Presence;
     CARD8       intFP1DIPort;
     CARD8       intFP1I2CBus;
@@ -675,6 +680,7 @@ void viaExtTMDSSetClockDriveStrength(ScrnInfoPtr pScrn,
 void viaExtTMDSSetDataDriveStrength(ScrnInfoPtr pScrn,
                                         CARD8 dataDriveStrength);
 void viaTMDSProbe(ScrnInfoPtr pScrn);
+void viaExtTMDSProbe(ScrnInfoPtr pScrn);
 void viaTMDSInit(ScrnInfoPtr pScrn);
 void via_dvi_init(ScrnInfoPtr pScrn);
 
