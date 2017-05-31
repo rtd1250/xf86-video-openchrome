@@ -168,19 +168,14 @@ viaAnalogDetectConnector(ScrnInfoPtr pScrn)
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     Bool connectorDetected = FALSE;
-    CARD8 sr01, sr40;
-    CARD8 cr36, cr47;
+    CARD8 sr40, cr36, cr47;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaAnalogDetectConnector.\n"));
 
-    sr01 = hwp->readSeq(hwp, 0x01);
     sr40 = hwp->readSeq(hwp, 0x40);
     cr36 = hwp->readCrtc(hwp, 0x36);
     cr47 = hwp->readCrtc(hwp, 0x47);
-
-    /* Screen On. */
-    ViaSeqMask(hwp, 0x01, 0x00, BIT(5));
 
     /* Turn on DAC. */
     ViaCrtcMask(hwp, 0x47, 0x00, BIT(2));
@@ -225,7 +220,6 @@ viaAnalogDetectConnector(ScrnInfoPtr pScrn)
     hwp->writeCrtc(hwp, 0x47, cr47);
     hwp->writeCrtc(hwp, 0x36, cr36);
     hwp->writeSeq(hwp, 0x40, sr40);
-    hwp->writeSeq(hwp, 0x01, sr01);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaAnalogDetectConnector.\n"));
