@@ -609,6 +609,12 @@ viaFPDisplaySource(ScrnInfoPtr pScrn, int index, CARD8 diPort)
                         "Entered viaFPDisplaySource.\n"));
 
     switch(diPort) {
+    case VIA_DI_PORT_DVP0:
+        viaDVP0SetDisplaySource(pScrn, displaySource);
+        break;
+    case VIA_DI_PORT_DVP1:
+        viaDVP1SetDisplaySource(pScrn, displaySource);
+        break;
     case VIA_DI_PORT_FPDPLOW:
         viaDFPLowSetDisplaySource(pScrn, displaySource);
         viaDVP1SetDisplaySource(pScrn, displaySource);
