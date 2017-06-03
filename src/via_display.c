@@ -3600,10 +3600,8 @@ iga1_crtc_dpms(xf86CrtcPtr crtc, int mode)
     case DPMSModeOn:
     case DPMSModeStandby:
     case DPMSModeSuspend:
-        viaIGA1SetDisplayOutput(pScrn, TRUE);
         break;
     case DPMSModeOff:
-        viaIGA1SetDisplayOutput(pScrn, FALSE);
         break;
     default:
         break;
@@ -3699,9 +3697,6 @@ iga1_crtc_prepare(xf86CrtcPtr crtc)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered iga1_crtc_prepare.\n"));
 
-    /* Turn off IGA1. */
-    viaIGA1SetDisplayOutput(pScrn, FALSE);
-
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting iga1_crtc_prepare.\n"));
 }
@@ -3790,9 +3785,6 @@ iga1_crtc_commit(xf86CrtcPtr crtc)
 
     if (crtc->scrn->pScreen != NULL && pVia->drmmode.hwcursor)
         xf86_reload_cursors(crtc->scrn->pScreen);
-
-    /* Turn on IGA1. */
-    viaIGA1SetDisplayOutput(pScrn, TRUE);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting iga1_crtc_commit.\n"));
@@ -3997,15 +3989,11 @@ iga2_crtc_dpms(xf86CrtcPtr crtc, int mode)
 
     switch (mode) {
     case DPMSModeOn:
-        viaIGA2DisplayOutput(pScrn, TRUE);
         break;
-
     case DPMSModeStandby:
     case DPMSModeSuspend:
     case DPMSModeOff:
-        viaIGA2DisplayOutput(pScrn, FALSE);
         break;
-
     default:
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Invalid DPMS mode: %d\n",
                     mode);
@@ -4115,9 +4103,6 @@ iga2_crtc_prepare(xf86CrtcPtr crtc)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered iga2_crtc_prepare.\n"));
 
-    /* Turn off IGA2. */
-    viaIGA2DisplayOutput(pScrn, FALSE);
-
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting iga2_crtc_prepare.\n"));
 }
@@ -4196,9 +4181,6 @@ iga2_crtc_commit(xf86CrtcPtr crtc)
 
     if (crtc->scrn->pScreen != NULL && pVia->drmmode.hwcursor)
         xf86_reload_cursors(crtc->scrn->pScreen);
-
-    /* Turn on IGA2. */
-    viaIGA2DisplayOutput(pScrn, TRUE);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting iga2_crtc_commit.\n"));
