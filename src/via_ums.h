@@ -314,6 +314,21 @@ viaDVP0SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
 }
 
 /*
+ * Sets the display source of DVP1 (Digital Video Port 1) interface.
+ */
+static inline void
+viaDVP1SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
+{
+    /* 3X5.9B[4] - DVP1 Data Source Selection
+     *             0: Primary Display
+     *             1: Secondary Display */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x9B, displaySource << 4, BIT(4));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "DVP1 Display Source: IGA%d\n",
+                        (displaySource & 0x01) + 1));
+}
+
+/*
  * Sets analog (VGA) DPMS State.
  */
 static inline void
@@ -643,7 +658,6 @@ void viaDVP0SetClockDriveStrength(ScrnInfoPtr pScrn,
                                     CARD8 clockDriveStrength);
 void viaDVP0SetDataDriveStrength(ScrnInfoPtr pScrn,
                                     CARD8 dataDriveStrength);
-void viaDVP1SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource);
 void viaDVP1EnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState);
 void viaDVP1SetClockDriveStrength(ScrnInfoPtr pScrn,
                                     CARD8 clockDriveStrength);
