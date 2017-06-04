@@ -944,11 +944,17 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
         break;
     }
 
+    if (status) {
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                   "Detected Video RAM Size: %d KB\n", pScrn->videoRam);
+    }
+
 exit:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaProbeVRAM.\n"));
     return status;
 }
+
 Bool
 umsPreInit(ScrnInfoPtr pScrn)
 {
@@ -1061,11 +1067,6 @@ umsPreInit(ScrnInfoPtr pScrn)
         xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
                     "Cannot use more than 256 MB of VRAM.\n");
                     pScrn->videoRam = (256 << 10);
-    }
-
-    if (from == X_PROBED) {
-        xf86DrvMsg(pScrn->scrnIndex, from,
-                   "Probed amount of VideoRAM = %d kB\n", pScrn->videoRam);
     }
 
     /* Split the FB for SAMM. */
