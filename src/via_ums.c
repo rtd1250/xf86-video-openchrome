@@ -759,6 +759,197 @@ umsCreate(ScrnInfoPtr pScrn)
 }
 
 Bool
+viaProbeVRAM(ScrnInfoPtr pScrn)
+{
+#ifdef HAVE_PCIACCESS
+    struct pci_device *hostBridge;
+    struct pci_device *dramController;
+#endif
+    CARD8 videoRAM;
+    CARD16 hostBridgeVendorID, hostBridgeDeviceID;
+    CARD16 dramControllerVendorID;
+    Bool status = TRUE;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaProbeVRAM.\n"));
+
+#ifdef HAVE_PCIACCESS
+    hostBridge = pci_device_find_by_slot(0, 0, 0, 0);
+    hostBridgeVendorID = VENDOR_ID(hostBridge);
+#else
+    hostBridgeVendorID = pciReadWord(pciTag(0, 0, 0), 0x00);
+#endif
+
+    if (hostBridgeVendorID != PCI_VIA_VENDOR_ID) {
+        status = FALSE;
+        goto exit;
+    }
+
+#ifdef HAVE_PCIACCESS
+    hostBridgeDeviceID = DEVICE_ID(hostBridge);
+#else
+    hostBridgeDeviceID = pciReadWord(pciTag(0, 0, 0), 0x02);
+#endif
+
+    if ((hostBridgeDeviceID != PCI_DEVICE_ID_VIA_CLE266_HB) &&
+        (hostBridgeDeviceID != PCI_DEVICE_ID_VIA_KM400_HB)) {
+#ifdef HAVE_PCIACCESS
+        dramController = pci_device_find_by_slot(0, 0, 0, 3);
+        dramControllerVendorID = VENDOR_ID(dramController);
+#else
+        dramControllerVendorID = pciReadWord(pciTag(0, 0, 3), 0x00);
+
+#endif
+        if (dramControllerVendorID != PCI_VIA_VENDOR_ID) {
+            status = FALSE;
+            goto exit;
+        }
+    }
+    switch (hostBridgeDeviceID) {
+    case PCI_DEVICE_ID_VIA_CLE266_HB:
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "CLE266 chipset host bridge detected.\n");
+#ifdef HAVE_PCIACCESS
+        pci_device_cfg_read_u8(hostBridge, &videoRAM, 0xE1);
+#else
+        videoRAM = pciReadByte(pciTag(0, 0, 0), 0xE1);
+#endif
+        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 10;
+        break;
+    case PCI_DEVICE_ID_VIA_KM400_HB:
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "KM400 chipset host bridge detected.\n");
+#ifdef HAVE_PCIACCESS
+        pci_device_cfg_read_u8(hostBridge, &videoRAM, 0xE1);
+#else
+        videoRAM = pciReadByte(pciTag(0, 0, 0), 0xE1);
+#endif
+        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 10;
+        break;
+    case PCI_DEVICE_ID_VIA_P4M800_AGP:
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "P4M800 chipset AGP bridge detected.\n");
+#ifdef HAVE_PCIACCESS
+        pci_device_cfg_read_u8(dramController, &videoRAM, 0xA1);
+#else
+        videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
+#endif
+        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 10;
+        break;
+    case PCI_DEVICE_ID_VIA_P4M800_PRO_AGP:
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "P4M800 Pro chipset AGP bridge detected.\n");
+#ifdef HAVE_PCIACCESS
+        pci_device_cfg_read_u8(dramController, &videoRAM, 0xA1);
+#else
+        videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
+#endif
+        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 10;
+        break;
+    case PCI_DEVICE_ID_VIA_PM800_AGP:
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "PM800 chipset AGP bridge detected.\n");
+#ifdef HAVE_PCIACCESS
+        pci_device_cfg_read_u8(dramController, &videoRAM, 0xA1);
+#else
+        videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
+#endif
+        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 10;
+        break;
+    case PCI_DEVICE_ID_VIA_K8M800_AGP:
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "K8M800 chipset AGP bridge detected.\n");
+#ifdef HAVE_PCIACCESS
+        pci_device_cfg_read_u8(dramController, &videoRAM, 0xA1);
+#else
+        videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
+#endif
+        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 10;
+        break;
+    case PCI_DEVICE_ID_VIA_CX700_AGP:
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "CX700 chipset AGP bridge detected.\n");
+#ifdef HAVE_PCIACCESS
+        pci_device_cfg_read_u8(dramController, &videoRAM, 0xA1);
+#else
+        videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
+#endif
+        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 12;
+        break;
+    case PCI_DEVICE_ID_VIA_P4M890_AGP:
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "P4M890 chipset AGP bridge detected.\n");
+#ifdef HAVE_PCIACCESS
+        pci_device_cfg_read_u8(dramController, &videoRAM, 0xA1);
+#else
+        videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
+#endif
+        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 12;
+        break;
+    case PCI_DEVICE_ID_VIA_K8M890_AGP:
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "K8M890 chipset AGP bridge detected.\n");
+#ifdef HAVE_PCIACCESS
+        pci_device_cfg_read_u8(dramController, &videoRAM, 0xA1);
+#else
+        videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
+#endif
+        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 12;
+        break;
+    case PCI_DEVICE_ID_VIA_P4M900_AGP:
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "P4M900 chipset AGP bridge detected.\n");
+#ifdef HAVE_PCIACCESS
+        pci_device_cfg_read_u8(dramController, &videoRAM, 0xA1);
+#else
+        videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
+#endif
+        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 12;
+        break;
+    case PCI_DEVICE_ID_VIA_VX800_HC:
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "VX800 chipset host controller detected.\n");
+#ifdef HAVE_PCIACCESS
+        pci_device_cfg_read_u8(dramController, &videoRAM, 0xA1);
+#else
+        videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
+#endif
+        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 12;
+        break;
+    case PCI_DEVICE_ID_VIA_VX855_HC:
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "VX855 chipset host controller detected.\n");
+#ifdef HAVE_PCIACCESS
+        pci_device_cfg_read_u8(dramController, &videoRAM, 0xA1);
+#else
+        videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
+#endif
+        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 12;
+        break;
+    case PCI_DEVICE_ID_VIA_VX900_HC:
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "VX900 chipset host controller detected.\n");
+#ifdef HAVE_PCIACCESS
+        pci_device_cfg_read_u8(dramController, &videoRAM, 0xA1);
+#else
+        videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
+#endif
+        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 12;
+        break;
+    default:
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "Could not detect available video RAM.\n");
+        pScrn->videoRam = 0;
+        status = FALSE;
+        break;
+    }
+
+exit:
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaProbeVRAM.\n"));
+    return status;
+}
+Bool
 umsPreInit(ScrnInfoPtr pScrn)
 {
     MessageType from = X_PROBED;
@@ -785,6 +976,10 @@ umsPreInit(ScrnInfoPtr pScrn)
                       VGA_NUM_ATTR);
 #endif
     hwp = VGAHWPTR(pScrn);
+
+    if (!viaProbeVRAM(pScrn)) {
+        return FALSE;
+    }
 
     switch (pVia->Chipset) {
         case VIA_CLE266:

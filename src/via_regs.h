@@ -80,6 +80,20 @@ enum VIACHIPTAGS {
 #define PCI_CHIP_VT3409         0x5122	/* VX855/VX875 */
 #define PCI_CHIP_VT3410         0x7122	/* VX900 */
 
+#define PCI_DEVICE_ID_VIA_CLE266_HB         0x3123
+#define PCI_DEVICE_ID_VIA_KM400_HB          0x3205
+#define PCI_DEVICE_ID_VIA_P4M800_AGP        0x0296
+#define PCI_DEVICE_ID_VIA_P4M800_PRO_AGP    0x0314
+#define PCI_DEVICE_ID_VIA_PM800_AGP         0x0259
+#define PCI_DEVICE_ID_VIA_K8M800_AGP        0x0204
+#define PCI_DEVICE_ID_VIA_CX700_AGP         0x0324
+#define PCI_DEVICE_ID_VIA_P4M890_AGP        0x0327
+#define PCI_DEVICE_ID_VIA_K8M890_AGP        0x0336
+#define PCI_DEVICE_ID_VIA_P4M900_AGP        0x0364
+#define PCI_DEVICE_ID_VIA_VX800_HC          0x0353
+#define PCI_DEVICE_ID_VIA_VX855_HC          0x0409
+#define PCI_DEVICE_ID_VIA_VX900_HC          0x0410
+
 /* There is some conflicting information about the two major revisions of
  * the CLE266, often labelled Ax and Cx.  The dividing line seems to be
  * either 0x0f or 0x10. */
