@@ -958,14 +958,8 @@ exit:
 Bool
 umsPreInit(ScrnInfoPtr pScrn)
 {
-    MessageType from = X_PROBED;
-    VIAPtr pVia = VIAPTR(pScrn);
-    CARD8 videoRam;
     vgaHWPtr hwp;
-#ifdef HAVE_PCIACCESS
-    struct pci_device *vgaDevice = pci_device_find_by_slot(0, 0, 0, 3);
-    struct pci_device *bridge = pci_device_find_by_slot(0, 0, 0, 0);
-#endif
+    VIAPtr pVia = VIAPTR(pScrn);
     int bMemSize = 0;
 
     if (!xf86LoadSubModule(pScrn, "vgahw"))
@@ -985,79 +979,6 @@ umsPreInit(ScrnInfoPtr pScrn)
 
     if (!viaProbeVRAM(pScrn)) {
         return FALSE;
-    }
-
-    switch (pVia->Chipset) {
-        case VIA_CLE266:
-#ifdef HAVE_PCIACCESS
-            pci_device_cfg_read_u8(bridge, &videoRam, 0xE1);
-#else
-            videoRam = pciReadByte(pciTag(0, 0, 0), 0xE1) & 0x70;
-#endif
-            pScrn->videoRam = (1 << ((videoRam & 0x70) >> 4)) << 10;
-            break;
-        case VIA_KM400:
-#ifdef HAVE_PCIACCESS
-            /* P4M800 Host Bridge PCI Device ID */
-            if (DEVICE_ID(bridge) == 0x0296) {
-                pci_device_cfg_read_u8(vgaDevice, &videoRam, 0xA1);
-            } else {
-                pci_device_cfg_read_u8(bridge, &videoRam, 0xE1);
-            }
-#else
-            /* P4M800 Host Bridge PCI Device ID */
-            if (pciReadWord(pciTag(0, 0, 0), 0x02) == 0x0296) {
-                videoRam = pciReadByte(pciTag(0, 0, 3), 0xA1) & 0x70;
-            } else {
-                videoRam = pciReadByte(pciTag(0, 0, 0), 0xE1) & 0x70;
-            }
-#endif
-            pScrn->videoRam = (1 << ((videoRam & 0x70) >> 4)) << 10;
-            break;
-        case VIA_PM800:
-        case VIA_P4M800PRO:
-        case VIA_K8M800:
-#ifdef HAVE_PCIACCESS
-            pci_device_cfg_read_u8(vgaDevice, &videoRam, 0xA1);
-#else
-            videoRam = pciReadByte(pciTag(0, 0, 3), 0xA1) & 0x70;
-#endif
-            pScrn->videoRam = (1 << ((videoRam & 0x70) >> 4)) << 10;
-            break;
-        case VIA_P4M890:
-        case VIA_K8M890:
-        case VIA_P4M900:
-        case VIA_CX700:
-        case VIA_VX800:
-        case VIA_VX855:
-        case VIA_VX900:
-#ifdef HAVE_PCIACCESS
-            pci_device_cfg_read_u8(vgaDevice, &videoRam, 0xA1);
-#else
-            videoRam = pciReadByte(pciTag(0, 0, 3), 0xA1) & 0x70;
-#endif
-            pScrn->videoRam = (1 << ((videoRam & 0x70) >> 4)) << 12;
-            break;
-        default:
-            if (pScrn->videoRam < 16384 || pScrn->videoRam > 65536) {
-                xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                           "Using old memory-detection method.\n");
-                bMemSize = hwp->readSeq(hwp, 0x39);
-                if (bMemSize > 16 && bMemSize <= 128)
-                    pScrn->videoRam = (bMemSize + 1) << 9;
-                else if (bMemSize > 0 && bMemSize < 31)
-                    pScrn->videoRam = bMemSize << 12;
-                else {
-                    from = X_DEFAULT;
-                    xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                               "Memory size detection failed: using 16 MB.\n");
-                    pScrn->videoRam = 16 << 10;
-                }
-            } else {
-                from = X_DEFAULT;
-                xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                           "No memory-detection done. Use VideoRAM option.\n");
-            }
     }
 
     /*
