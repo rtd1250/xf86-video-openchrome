@@ -105,28 +105,6 @@ static DisplayModeRec OLPCMode = {
 #define TD3 25
 
 /*
- * Sets CX700 or later single chipset's LVDS1 I/O pad state.
- */
-void
-viaLVDS1SetIOPadSetting(ScrnInfoPtr pScrn, CARD8 ioPadState)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaLVDS1SetIOPadSetting.\n"));
-
-    /* Set LVDS1 I/O pad state. */
-    /* 3C5.2A[1:0] - LVDS1 I/O Pad Control */
-    ViaSeqMask(hwp, 0x2A, ioPadState, 0x03);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "LVDS1 I/O Pad State: %d\n",
-                (ioPadState & 0x03));
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaLVDS1SetIOPadSetting.\n"));
-}
-
-/*
  * Sets IGA1 or IGA2 as the display output source for VIA Technologies
  * Chrome IGP LVDS1 integrated LVDS transmitter.
  */

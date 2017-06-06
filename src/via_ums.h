@@ -564,6 +564,19 @@ viaLVDS1SetSoftDisplayPeriod(ScrnInfoPtr pScrn, Bool softOn)
 }
 
 /*
+ * Sets CX700 or later single chipset's LVDS1 I/O pad state.
+ */
+static inline void
+viaLVDS1SetIOPadSetting(ScrnInfoPtr pScrn, CARD8 ioPadState)
+{
+    /* 3C5.2A[1:0] - LVDS1 I/O Pad Control */
+    ViaSeqMask(VGAHWPTR(pScrn), 0x2A, ioPadState, BIT(1) | BIT(0));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "LVDS1 I/O Pad State: %d\n",
+                        (ioPadState & (BIT(1) | BIT(0)))));
+}
+
+/*
  * Sets CX700 / VX700 and VX800 chipsets' LVDS2 power state.
  */
 static inline void
@@ -694,7 +707,6 @@ void viaAnalogProbe(ScrnInfoPtr pScrn);
 void viaAnalogInit(ScrnInfoPtr pScrn);
 
 /* via_fp.c */
-void viaLVDS1SetIOPadSetting(ScrnInfoPtr pScrn, CARD8 ioPadState);
 void viaFPProbe(ScrnInfoPtr pScrn);
 void viaFPInit(ScrnInfoPtr pScrn);
 
