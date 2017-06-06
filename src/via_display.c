@@ -3741,9 +3741,6 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     viaIGAInitCommon(pScrn);
     viaIGA1Init(pScrn);
 
-    /* Disable IGA1 */
-    ViaSeqMask(hwp, 0x59, 0x00, 0x80);
-
     ViaPrintMode(pScrn, adjusted_mode);
 
     /* Set color depth. */
@@ -3759,9 +3756,6 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     ViaSetPrimaryDotclock(pScrn, pVIADisplay->Clock);
     ViaSetUseExternalClock(hwp);
     ViaCrtcMask(hwp, 0x6B, 0x00, 0x01);
-
-    /* Enable IGA1 */
-    ViaSeqMask(hwp, 0x59, 0x80, 0x80);
 
     viaIGA1SetFBStartingAddress(crtc, x, y);
     VIAVidAdjustFrame(pScrn, x, y);
