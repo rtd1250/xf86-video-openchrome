@@ -594,6 +594,20 @@ viaLVDS2SetPower(ScrnInfoPtr pScrn, Bool powerState)
 }
 
 /*
+ * Sets CX700 or later single chipset's LVDS2 I/O pad state.
+ */
+static inline void
+viaLVDS2SetIOPadSetting(ScrnInfoPtr pScrn, CARD8 ioPadState)
+{
+    /* Set LVDS2 I/O pad state. */
+    /* 3C5.2A[3:2] - LVDS2 I/O Pad Control */
+    ViaSeqMask(VGAHWPTR(pScrn), 0x2A, ioPadState << 2, 0x0C);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "LVDS2 I/O Pad State: %d\n",
+                        (ioPadState & 0x03)));
+}
+
+/*
  * Sets CX700 / VX700 and VX800 chipsets' TMDS (DVI) power state.
  */
 static inline void

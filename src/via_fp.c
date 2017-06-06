@@ -207,28 +207,6 @@ viaLVDS1SetOutputFormat(ScrnInfoPtr pScrn, CARD8 outputFormat)
 }
 
 /*
- * Sets CX700 or later single chipset's LVDS2 I/O pad state.
- */
-static void
-viaLVDS2SetIOPadSetting(ScrnInfoPtr pScrn, CARD8 ioPadState)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaLVDS2SetIOPadSetting.\n"));
-
-    /* Set LVDS2 I/O pad state. */
-    /* 3C5.2A[3:2] - LVDS2 I/O Pad Control */
-    ViaSeqMask(hwp, 0x2A, ioPadState << 2, 0x0C);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "LVDS2 I/O Pad State: %d\n",
-                (ioPadState & 0x03));
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaLVDS2SetIOPadSetting.\n"));
-}
-
-/*
  * Sets IGA1 or IGA2 as the display output source for VIA Technologies
  * Chrome IGP LVDS2 integrated LVDS transmitter.
  */
