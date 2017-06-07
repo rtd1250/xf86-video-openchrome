@@ -1228,7 +1228,6 @@ via_fp_prepare(xf86OutputPtr output)
     ScrnInfoPtr pScrn = output->scrn;
 
     via_fp_dpms(output, DPMSModeOff);
-    viaFPIOPadSetting(pScrn, FALSE);
 }
 
 static void
@@ -1237,7 +1236,6 @@ via_fp_commit(xf86OutputPtr output)
     ScrnInfoPtr pScrn = output->scrn;
 
     via_fp_dpms(output, DPMSModeOn);
-    viaFPIOPadSetting(pScrn, TRUE);
 }
 
 static void
