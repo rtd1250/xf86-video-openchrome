@@ -402,25 +402,31 @@ viaLVDS2SetOutputFormat(ScrnInfoPtr pScrn, CARD8 outputFormat)
 }
 
 /*
- * Sets PCIe based 2 chip chipset's pin multiplexed DVP0 I/O pad state.
+ * Sets FPDP (Flat Panel Display Port) High I/O pad state
  */
 static void
-viaDVP0PCIeSetIOPadSetting(ScrnInfoPtr pScrn, CARD8 ioPadState)
+viaFPDPHighSetIOPadState(ScrnInfoPtr pScrn, CARD8 ioPadState)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaDVP0PCIeSetIOPadSetting.\n"));
+                        "Entered viaFPDPHighSetIOPadState.\n"));
 
-    /* Set pin multiplexed DVP1 I/O pad state. */
-    /* 3C5.2A[3:2] - DVP0 I/O Pad Control */
-    ViaSeqMask(hwp, 0x2A, ioPadState << 2, 0x0C);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "DVP0 I/O Pad State: %d\n",
-                (ioPadState & 0x03));
+    /* 3C5.2A[3:2] - FPDP High Power Control
+     *               0x: Pad always off
+     *               10: Depend on the other control signal
+     *               11: Pad on/off according to the
+     *                   Power Management Status (PMS) */
+    ViaSeqMask(hwp, 0x2A, ioPadState << 2, BIT(3) | BIT(2));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "FPDP High I/O Pad State: %s\n",
+                        ((ioPadState & (BIT(1) | BIT(0))) == 0x03) ? "On" :
+                        ((ioPadState & (BIT(1) | BIT(0))) == 0x02) ? "Conditional" :
+                        ((ioPadState & (BIT(1) | BIT(0))) == 0x01) ? "Off" :
+                                                                     "Off"));
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaDVP0PCIeSetIOPadSetting.\n"));
+                        "Exiting viaFPDPHighSetIOPadState.\n"));
 }
 
 static void
@@ -483,11 +489,11 @@ viaFPIOPadSetting(ScrnInfoPtr pScrn, Bool ioPadOn)
         if (sr12 & 0x10) {
             /* Since an 18-bit / 24-bit flat panel is being used, actively
              * control DVP0. */
-            viaDVP0PCIeSetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
+            viaFPDPHighSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
         } else {
             /* Keep DVP0 powered down. Otherwise, it will interfere with
              * PCIe Lane 0 through 7. */
-            viaDVP0PCIeSetIOPadSetting(pScrn, 0x00);
+            viaFPDPHighSetIOPadState(pScrn, 0x00);
         }
 
         /* Control DVP1 for a flat panel. */
