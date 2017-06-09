@@ -710,14 +710,12 @@ ViaLVDSHardwarePowerSecondSequence(ScrnInfoPtr pScrn, Bool on)
 }
 
 static void
-viaFPPower(ScrnInfoPtr pScrn, Bool powerState, CARD8 diPortType)
+viaFPPower(ScrnInfoPtr pScrn, int Chipset, CARD8 diPortType, Bool powerState)
 {
-    VIAPtr pVia = VIAPTR(pScrn);
-
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaFPPower.\n"));
 
-    switch (pVia->Chipset) {
+    switch (Chipset) {
     case VIA_CLE266:
         viaFPCastleRockSoftPowerSeq(pScrn, powerState);
         break;
@@ -730,29 +728,23 @@ viaFPPower(ScrnInfoPtr pScrn, Bool powerState, CARD8 diPortType)
     case VIA_P4M900:
         viaFPPrimaryHardPowerSeq(pScrn, powerState);
         break;
-    /*
-     * VX800, CX700 have HW issue, so we'd better use SW power sequence.
-     * Fix Ticket #308.
-     */
     case VIA_CX700:
     case VIA_VX800:
-        if ((diPortType & VIA_DI_PORT_LVDS1)
-            && (diPortType & VIA_DI_PORT_LVDS2)) {
+        /*
+         * VX800, CX700 have HW issue, so we'd better use SW power sequence.
+         * Fix Ticket #308.
+         */
+        if (diPortType & VIA_DI_PORT_LVDS1) {
             ViaLVDSSoftwarePowerFirstSequence(pScrn, powerState);
             viaLVDS1SetPower(pScrn, powerState);
-            ViaLVDSSoftwarePowerSecondSequence(pScrn, powerState);
-            viaLVDS2SetPower(pScrn, powerState);
-        } else if ((diPortType & VIA_DI_PORT_LVDS1)
-                    && (~(diPortType & VIA_DI_PORT_LVDS2))) {
-            ViaLVDSSoftwarePowerFirstSequence(pScrn, powerState);
-            viaLVDS1SetPower(pScrn, powerState);
-        } else if ((~(diPortType & VIA_DI_PORT_LVDS1))
-                        && (diPortType & VIA_DI_PORT_LVDS2)) {
+        }
+
+        if (diPortType & VIA_DI_PORT_LVDS2) {
             ViaLVDSSoftwarePowerSecondSequence(pScrn, powerState);
             viaLVDS2SetPower(pScrn, powerState);
         }
 
-         break;
+        break;
     case VIA_VX855:
     case VIA_VX900:
         ViaLVDSHardwarePowerFirstSequence(pScrn, powerState);
@@ -1007,57 +999,13 @@ via_fp_dpms(xf86OutputPtr output, int mode)
 
     switch (mode) {
     case DPMSModeOn:
-        switch (pVia->Chipset) {
-        case VIA_CLE266:
-        case VIA_KM400:
-        case VIA_P4M800PRO:
-        case VIA_PM800:
-        case VIA_K8M800:
-        case VIA_P4M890:
-        case VIA_K8M890:
-        case VIA_P4M900:
-            viaFPPower(pScrn, TRUE, VIA_DI_PORT_NONE);
-            break;
-        case VIA_CX700:
-        case VIA_VX800:
-            viaFPPower(pScrn, TRUE, VIA_DI_PORT_LVDS2);
-            break;
-        case VIA_VX855:
-        case VIA_VX900:
-            viaFPPower(pScrn, TRUE, VIA_DI_PORT_LVDS1);
-            break;
-        default:
-            break;
-        }
-
+        viaFPPower(pScrn, pVia->Chipset, pVIAFP->diPort, TRUE);
         viaFPIOPadState(pScrn, pVIAFP->diPort, TRUE);
         break;
     case DPMSModeStandby:
     case DPMSModeSuspend:
     case DPMSModeOff:
-        switch (pVia->Chipset) {
-        case VIA_CLE266:
-        case VIA_KM400:
-        case VIA_P4M800PRO:
-        case VIA_PM800:
-        case VIA_K8M800:
-        case VIA_P4M890:
-        case VIA_K8M890:
-        case VIA_P4M900:
-            viaFPPower(pScrn, FALSE, VIA_DI_PORT_NONE);
-            break;
-        case VIA_CX700:
-        case VIA_VX800:
-            viaFPPower(pScrn, FALSE, VIA_DI_PORT_LVDS2);
-            break;
-        case VIA_VX855:
-        case VIA_VX900:
-            viaFPPower(pScrn, FALSE, VIA_DI_PORT_LVDS1);
-            break;
-        default:
-            break;
-        }
-
+        viaFPPower(pScrn, pVia->Chipset, pVIAFP->diPort, FALSE);
         viaFPIOPadState(pScrn, pVIAFP->diPort, FALSE);
         break;
     default:
