@@ -1067,16 +1067,34 @@ static void
 via_fp_prepare(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIAFPPtr pVIAFP = (VIAFPPtr) output->driver_private;
 
-    via_fp_dpms(output, DPMSModeOff);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered via_fp_prepare.\n"));
+
+    viaFPPower(pScrn, pVia->Chipset, pVIAFP->diPort, FALSE);
+    viaFPIOPadState(pScrn, pVIAFP->diPort, FALSE);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting via_fp_prepare.\n"));
 }
 
 static void
 via_fp_commit(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIAFPPtr pVIAFP = (VIAFPPtr) output->driver_private;
 
-    via_fp_dpms(output, DPMSModeOn);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered via_fp_commit.\n"));
+
+    viaFPPower(pScrn, pVia->Chipset, pVIAFP->diPort, TRUE);
+    viaFPIOPadState(pScrn, pVIAFP->diPort, TRUE);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting via_fp_commit.\n"));
 }
 
 static void
