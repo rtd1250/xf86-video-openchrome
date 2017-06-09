@@ -423,27 +423,6 @@ viaDVP0PCIeSetIOPadSetting(ScrnInfoPtr pScrn, CARD8 ioPadState)
                         "Exiting viaDVP0PCIeSetIOPadSetting.\n"));
 }
 
-/*
- * Sets FPDP (Flat Panel Display Port) Low I/O pad state.
- */
-static void
-viaFPDPLowSetIOPadState(ScrnInfoPtr pScrn, CARD8 ioPadState)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaFPDPLowSetIOPadState.\n"));
-
-    /* 3C5.2A[1:0] - DVP1 I/O Pad Control */
-    ViaSeqMask(hwp, 0x2A, ioPadState, 0x03);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "DVP1 I/O Pad State: %d\n",
-                (ioPadState & 0x03));
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaFPDPLowSetIOPadState.\n"));
-}
-
 static void
 viaFPIOPadSetting(ScrnInfoPtr pScrn, Bool ioPadOn)
 {

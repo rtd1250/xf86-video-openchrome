@@ -516,6 +516,26 @@ viaFPSetPrimaryHardPower(ScrnInfoPtr pScrn, Bool powerState)
 }
 
 /*
+ * Sets FPDP (Flat Panel Display Port) Low I/O pad state.
+ */
+static inline void
+viaFPDPLowSetIOPadState(ScrnInfoPtr pScrn, CARD8 ioPadState)
+{
+    /* 3C5.2A[1:0] - FPDP Low Power Control
+     *               0x: Pad always off
+     *               10: Depend on the other control signal
+     *               11: Pad on/off according to the
+     *                   Power Management Status (PMS) */
+    ViaSeqMask(VGAHWPTR(pScrn), 0x2A, ioPadState, BIT(1) | BIT(0));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "FPDP Low I/O Pad State: %s\n",
+                        ((ioPadState & (BIT(1) | BIT(0))) == 0x03) ? "On" :
+                        ((ioPadState & (BIT(1) | BIT(0))) == 0x02) ? "Conditional" :
+                        ((ioPadState & (BIT(1) | BIT(0))) == 0x01) ? "Off" :
+                                                                     "Off"));
+}
+
+/*
  * Sets CX700 or later chipset's LVDS1 power state.
  */
 static inline void
