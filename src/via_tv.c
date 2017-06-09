@@ -238,7 +238,7 @@ viaTVEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState)
          *             0: Dual 12-bit FPDP (Flat Panel Display Port)
          *             1: 24-bit FPDP (Flat Panel Display Port) */
         if ((sr12 & 0x40) && (sr12 & 0x20)) {
-            viaDVP0EnableIOPads(pScrn, ioPadState);
+            viaDVP0SetIOPadState(pScrn, ioPadState);
         } else if ((sr13 & 0x08) && (!(sr12 & 0x10))) {
             viaDFPLowEnableIOPads(pScrn, ioPadState);
         } else if (sr13 & 0x08) {
@@ -263,7 +263,7 @@ viaTVEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState)
          *             0: Dual 12-bit FPDP (Flat Panel Display Port)
          *             1: 24-bit FPDP (Flat Panel Display Port) */
         if ((sr12 & 0x40) && (sr12 & 0x20) && (!(sr12 & 0x10))) {
-            viaDVP0EnableIOPads(pScrn, ioPadState);
+            viaDVP0SetIOPadState(pScrn, ioPadState);
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                         "Unrecognized external TV encoder use.\n"
