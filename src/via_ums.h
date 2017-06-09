@@ -352,7 +352,7 @@ viaDVP1SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
  * Sets DVP1 (Digital Video Port 1) I/O pad state.
  */
 static inline void
-viaDVP1EnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState)
+viaDVP1SetIOPadState(ScrnInfoPtr pScrn, CARD8 ioPadState)
 {
     /* 3C5.1E[5:4] - DVP1 Power Control
      *               0x: Pad always off

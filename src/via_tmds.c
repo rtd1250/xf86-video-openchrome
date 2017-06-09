@@ -481,7 +481,7 @@ viaExtTMDSEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState)
          *             1: DVP1 is used as a capture port
          */
         if (!(sr13 & 0x40)) {
-            viaDVP1EnableIOPads(pScrn, ioPadState);
+            viaDVP1SetIOPadState(pScrn, ioPadState);
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                         "DVP1 is not set up for TMDS "

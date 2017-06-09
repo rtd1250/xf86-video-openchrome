@@ -242,7 +242,7 @@ viaTVEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState)
         } else if ((sr13 & 0x08) && (!(sr12 & 0x10))) {
             viaDFPLowEnableIOPads(pScrn, ioPadState);
         } else if (sr13 & 0x08) {
-            viaDVP1EnableIOPads(pScrn, ioPadState);
+            viaDVP1SetIOPadState(pScrn, ioPadState);
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                         "None of the external ports were set up for "
@@ -280,7 +280,7 @@ viaTVEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState)
          *             1: DVP1 is used as a capture port
          */
         if (!(sr13 & 0x40)) {
-            viaDVP1EnableIOPads(pScrn, ioPadState);
+            viaDVP1SetIOPadState(pScrn, ioPadState);
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                         "DVP1 is not set up for external TV "
