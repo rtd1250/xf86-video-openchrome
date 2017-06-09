@@ -402,10 +402,10 @@ viaLVDS2SetOutputFormat(ScrnInfoPtr pScrn, CARD8 outputFormat)
 }
 
 static void
-viaFPIOPadSetting(ScrnInfoPtr pScrn, CARD8 diPort, Bool ioPadOn)
+viaFPIOPadState(ScrnInfoPtr pScrn, CARD8 diPort, Bool ioPadOn)
 {
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaFPIOPadSetting.\n"));
+                        "Entered viaFPIOPadState.\n"));
 
     switch(diPort) {
     case VIA_DI_PORT_DVP0:
@@ -445,7 +445,7 @@ viaFPIOPadSetting(ScrnInfoPtr pScrn, CARD8 diPort, Bool ioPadOn)
                 ioPadOn ? "On": "Off");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaFPIOPadSetting.\n"));
+                        "Exiting viaFPIOPadState.\n"));
 }
 
 static void
@@ -1030,7 +1030,7 @@ via_fp_dpms(xf86OutputPtr output, int mode)
             break;
         }
 
-        viaFPIOPadSetting(pScrn, pVIAFP->diPort, TRUE);
+        viaFPIOPadState(pScrn, pVIAFP->diPort, TRUE);
         break;
     case DPMSModeStandby:
     case DPMSModeSuspend:
@@ -1058,7 +1058,7 @@ via_fp_dpms(xf86OutputPtr output, int mode)
             break;
         }
 
-        viaFPIOPadSetting(pScrn, pVIAFP->diPort, FALSE);
+        viaFPIOPadState(pScrn, pVIAFP->diPort, FALSE);
         break;
     default:
         break;
