@@ -402,111 +402,47 @@ viaLVDS2SetOutputFormat(ScrnInfoPtr pScrn, CARD8 outputFormat)
 }
 
 static void
-viaFPIOPadSetting(ScrnInfoPtr pScrn, Bool ioPadOn)
+viaFPIOPadSetting(ScrnInfoPtr pScrn, CARD8 diPort, Bool ioPadOn)
 {
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-    CARD8 sr12, sr13, sr5a;
-
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaFPIOPadSetting.\n"));
 
-    if ((pVia->Chipset == VIA_CX700)
-        || (pVia->Chipset == VIA_VX800)
-        || (pVia->Chipset == VIA_VX855)
-        || (pVia->Chipset == VIA_VX900)) {
-
-        sr5a = hwp->readSeq(hwp, 0x5A);
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "SR5A: 0x%02X\n", sr5a));
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "Setting 3C5.5A[0] to 0.\n"));
-        ViaSeqMask(hwp, 0x5A, sr5a & 0xFE, 0x01);
-    }
-
-    sr12 = hwp->readSeq(hwp, 0x12);
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "SR12: 0x%02X\n", sr12));
-    sr13 = hwp->readSeq(hwp, 0x13);
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "SR13: 0x%02X\n", sr13));
-
-    switch (pVia->Chipset) {
-    case VIA_CLE266:
+    switch(diPort) {
+    case VIA_DI_PORT_DVP0:
+        viaDVP0SetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
         break;
-    case VIA_KM400:
-    case VIA_K8M800:
-    case VIA_PM800:
-    case VIA_P4M800PRO:
+    case VIA_DI_PORT_DVP1:
+        viaDVP1SetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
         break;
-    case VIA_P4M890:
-    case VIA_K8M890:
-    case VIA_P4M900:
-        /* The tricky thing about VIA Technologies PCI Express based
-         * north bridge / south bridge 2 chip chipset is that
-         * it pin multiplexes DVP0 / DVP1 with north bridge's PCI
-         * Express x16 link. In particular, HP 2133 Mini-Note's WLAN
-         * is connected to north bridge's PCI Express Lane 0, but the
-         * Lane 0 is also pin multiplexed with DVP0. What this means is
-         * turning on DVP0 without probing the relevant strapping pin
-         * to determine the connected panel interface type will lead to
-         * the PCIe based WLAN to getting disabled by OpenChrome DDX
-         * when X.Org Server starts.
-         *     The current remedy for this will be to turn on DVP0
-         * only when an 18-bit / 24-bit interface flat panel is 
-         * connected. */
-        /* 3C5.12[4] - DVP0D4 pin strapping
-         *             0: Use DVP1 only for a flat panel.
-         *             1: Use DVP0 and DVP1 for a flat panel */
-        if (sr12 & 0x10) {
-            /* Since an 18-bit / 24-bit flat panel is being used, actively
-             * control DVP0. */
-            viaFPDPHighSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
-        } else {
-            /* Keep DVP0 powered down. Otherwise, it will interfere with
-             * PCIe Lane 0 through 7. */
-            viaFPDPHighSetIOPadState(pScrn, 0x00);
-        }
-
-        /* Control DVP1 for a flat panel. */
+    case VIA_DI_PORT_FPDPLOW:
         viaFPDPLowSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
         break;
-    case VIA_CX700:
-    case VIA_VX800:
-    case VIA_VX855:
-    case VIA_VX900:
-        /* 3C5.13[7:6] - DVP1D15 and DVP1D14 pin strappings
-         *               00: LVDS1 + LVDS2
-         *               01: DVI + LVDS2
-         *               10: Dual LVDS (LVDS1 + LVDS2 used 
-         *                   simultaneously)
-         *               11: DVI only */
-        if ((((~(sr13 & 0x80)) && (~(sr13 & 0x40)))
-             || ((sr13 & 0x80) && (~(sr13 & 0x40))))
-           && (!pVia->isVIANanoBook)) {
-
-            viaLVDS1SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
-        }
-
-        if (((~(sr13 & 0x80)) || (~(sr13 & 0x40))) 
-           || (pVia->isVIANanoBook)) {
-
-            viaLVDS2SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
-        }
+    case VIA_DI_PORT_FPDPHIGH:
+        viaFPDPHighSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
+        break;
+    case (VIA_DI_PORT_FPDPLOW |
+          VIA_DI_PORT_FPDPHIGH):
+        viaFPDPLowSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
+        viaFPDPHighSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
+        break;
+    case VIA_DI_PORT_LVDS1:
+        viaLVDS1SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
+        break;
+    case VIA_DI_PORT_LVDS2:
+        viaLVDS2SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
+        break;
+    case (VIA_DI_PORT_LVDS1 |
+          VIA_DI_PORT_LVDS2):
+        viaLVDS1SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
+        viaLVDS2SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
         break;
     default:
         break;
     }
 
-    if ((pVia->Chipset == VIA_CX700)
-        || (pVia->Chipset == VIA_VX800)
-        || (pVia->Chipset == VIA_VX855)
-        || (pVia->Chipset == VIA_VX900)) {
-
-        hwp->writeSeq(hwp, 0x5A, sr5a);
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "Restoring 3C5.5A[0].\n"));
-    }
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "FP I/O Pad: %s\n",
+                ioPadOn ? "On": "Off");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaFPIOPadSetting.\n"));
@@ -1064,6 +1000,7 @@ via_fp_dpms(xf86OutputPtr output, int mode)
 {
     ScrnInfoPtr pScrn = output->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
+    VIAFPPtr pVIAFP = (VIAFPPtr) output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_fp_dpms.\n"));
@@ -1093,7 +1030,7 @@ via_fp_dpms(xf86OutputPtr output, int mode)
             break;
         }
 
-        viaFPIOPadSetting(pScrn, TRUE);
+        viaFPIOPadSetting(pScrn, pVIAFP->diPort, TRUE);
         break;
     case DPMSModeStandby:
     case DPMSModeSuspend:
@@ -1121,7 +1058,7 @@ via_fp_dpms(xf86OutputPtr output, int mode)
             break;
         }
 
-        viaFPIOPadSetting(pScrn, FALSE);
+        viaFPIOPadSetting(pScrn, pVIAFP->diPort, FALSE);
         break;
     default:
         break;
