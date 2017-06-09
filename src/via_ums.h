@@ -701,6 +701,21 @@ viaLVDS2SetIOPadSetting(ScrnInfoPtr pScrn, CARD8 ioPadState)
 }
 
 /*
+ * Sets CX700 or later single chipset's LVDS2 display source.
+ */
+static inline void
+viaLVDS2SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
+{
+    /* 3X5.97[4] - LVDS Channel 2 Data Source Selection
+     *             0: Primary Display
+     *             1: Secondary Display */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x97, displaySource << 4, BIT(4));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "LVDS2 Display Source: IGA%d\n",
+                        (displaySource & 0x01) + 1));
+}
+
+/*
  * Sets CX700 / VX700 and VX800 chipsets' TMDS (DVI) power state.
  */
 static inline void
