@@ -148,34 +148,6 @@ viaDIP0SetDataDriveStrength(ScrnInfoPtr pScrn, CARD8 dataDriveStrength)
 }
 
 /*
- * Sets DVP0 (Digital Video Port 0) I/O pad state.
- */
-void
-viaDVP0EnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaDVP0EnableIOPads.\n"));
-
-    /* Set DVP0 I/O pad state. */
-    /* 3C5.1E[7:6] - DVP0 Power Control
-     *               0x: Pad always off
-     *               10: Depend on the other control signal
-     *               11: Pad on/off according to the
-     *                   Power Management Status (PMS) */
-    ViaSeqMask(hwp, 0x1E, ioPadState << 6, 0xC0);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "DVP0 I/O Pad State: %s\n",
-                (ioPadState & 0x02) ?
-                    (ioPadState & 0x01) ? "Automatic On / Off" : "Conditional"
-                : "Off");
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaDVP0EnableIOPads.\n"));
-}
-
-/*
  * Sets DVP0 (Digital Video Port 0) clock I/O pad drive strength.
  */
 void
