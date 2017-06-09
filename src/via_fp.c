@@ -130,32 +130,6 @@ viaLVDS1SetFormat(ScrnInfoPtr pScrn, CARD8 format)
 }
 
 /*
- * Turns LVDS1 output color dithering on or off. (18-bit color display vs.
- * 24-bit color display)
- */
-static void
-viaLVDS1SetDithering(ScrnInfoPtr pScrn, CARD8 ditheringStatus)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaLVDS1SetDithering.\n"));
-
-    /* Set LVDS1 output color dithering bit. */
-    /* 3X5.88[0] - LVDS Channel 1 Output Bits
-     *             0: 24 bits (dithering off)
-     *             1: 18 bits (dithering on) */
-    ViaCrtcMask(hwp, 0x88, ditheringStatus ? 0x01 : 0x00, 0x01);
-
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "LVDS1 Output Color Dithering: %s\n",
-                ditheringStatus ? "On (18 bit)" : "Off (24 bit)");
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaLVDS1SetDithering.\n"));
-}
-
-/*
  * Sets output format of LVDS1 to rotation or sequential mode.
  */
 static void

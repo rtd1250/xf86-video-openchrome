@@ -644,6 +644,22 @@ viaLVDS1SetSoftDisplayPeriod(ScrnInfoPtr pScrn, Bool softOn)
 }
 
 /*
+ * Sets LVDS1 output color dithering (18-bit color display vs.
+ * 24-bit color display).
+ */
+static inline void
+viaLVDS1SetDithering(ScrnInfoPtr pScrn, Bool dithering)
+{
+    /* 3X5.88[0] - LVDS Channel 1 Output Bits
+     *             0: 24 bits (dithering off)
+     *             1: 18 bits (dithering on) */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x88, dithering ? BIT(0) : 0x00, BIT(0));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "LVDS1 Color Dithering: %s\n",
+                        dithering ? "On (18 bit color)" : "Off (24 bit color)"));
+}
+
+/*
  * Sets CX700 or later single chipset's LVDS1 I/O pad state.
  */
 static inline void
