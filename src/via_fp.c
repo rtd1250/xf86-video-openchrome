@@ -424,17 +424,16 @@ viaDVP0PCIeSetIOPadSetting(ScrnInfoPtr pScrn, CARD8 ioPadState)
 }
 
 /*
- * Sets PCIe based 2 chip chipset's pin multiplexed DVP1 I/O pad state.
+ * Sets FPDP (Flat Panel Display Port) Low I/O pad state.
  */
 static void
-viaDVP1PCIeSetIOPadSetting(ScrnInfoPtr pScrn, CARD8 ioPadState)
+viaFPDPLowSetIOPadState(ScrnInfoPtr pScrn, CARD8 ioPadState)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaDVP1PCIeSetIOPadSetting.\n"));
+                        "Entered viaFPDPLowSetIOPadState.\n"));
 
-    /* Set pin multiplexed DVP0 I/O pad state. */
     /* 3C5.2A[1:0] - DVP1 I/O Pad Control */
     ViaSeqMask(hwp, 0x2A, ioPadState, 0x03);
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -442,7 +441,7 @@ viaDVP1PCIeSetIOPadSetting(ScrnInfoPtr pScrn, CARD8 ioPadState)
                 (ioPadState & 0x03));
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaDVP1PCIeSetIOPadSetting.\n"));
+                        "Exiting viaFPDPLowSetIOPadState.\n"));
 }
 
 static void
@@ -513,7 +512,7 @@ viaFPIOPadSetting(ScrnInfoPtr pScrn, Bool ioPadOn)
         }
 
         /* Control DVP1 for a flat panel. */
-        viaDVP1PCIeSetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
+        viaFPDPLowSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
         break;
     case VIA_CX700:
     case VIA_VX800:
