@@ -396,6 +396,32 @@ viaFPIOPadState(ScrnInfoPtr pScrn, CARD8 diPort, Bool ioPadOn)
 }
 
 static void
+viaFPDithering(ScrnInfoPtr pScrn, CARD8 diPort, Bool dithering)
+{
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaFPDithering.\n"));
+
+    switch(diPort) {
+    case VIA_DI_PORT_LVDS1:
+        viaLVDS1SetDithering(pScrn, dithering);
+        break;
+    case VIA_DI_PORT_LVDS2:
+        viaLVDS2SetDithering(pScrn, dithering);
+        break;
+    case (VIA_DI_PORT_LVDS1 |
+          VIA_DI_PORT_LVDS2):
+        viaLVDS1SetDithering(pScrn, dithering);
+        viaLVDS2SetDithering(pScrn, dithering);
+        break;
+    default:
+        break;
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaFPDithering.\n"));
+}
+
+static void
 viaFPDisplaySource(ScrnInfoPtr pScrn, int index, CARD8 diPort)
 {
     CARD8 displaySource = index & 0x01;
@@ -1078,9 +1104,6 @@ via_fp_mode_set(xf86OutputPtr output, DisplayModePtr mode,
         switch (pVia->Chipset) {
         case VIA_CX700:
         case VIA_VX800:
-            /* Set LVDS2 output color dithering. */
-            viaLVDS2SetDithering(pScrn, pVIAFP->useDithering ? TRUE : FALSE);
-
             /* Set LVDS2 output format to sequential mode. */
             viaLVDS2SetOutputFormat(pScrn, 0x01);
 
@@ -1089,14 +1112,22 @@ via_fp_mode_set(xf86OutputPtr output, DisplayModePtr mode,
             break;
         case VIA_VX855:
         case VIA_VX900:
-            /* Set LVDS1 output color dithering. */
-            viaLVDS1SetDithering(pScrn, pVIAFP->useDithering ? TRUE : FALSE);
-
             /* Set LVDS1 output format to sequential mode. */
             viaLVDS1SetOutputFormat(pScrn, 0x01);
 
             /* Set LVDS1 output to OPENLDI mode. */
             viaLVDS1SetFormat(pScrn, 0x01);
+            break;
+        default:
+            break;
+        }
+
+        switch (pVia->Chipset) {
+        case VIA_CX700:
+        case VIA_VX800:
+        case VIA_VX855:
+        case VIA_VX900:
+            viaFPDithering(pScrn, pVIAFP->diPort, pVIAFP->useDithering);
             break;
         default:
             break;
