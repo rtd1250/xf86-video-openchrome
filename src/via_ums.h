@@ -703,6 +703,22 @@ viaLVDS2SetPower(ScrnInfoPtr pScrn, Bool powerState)
 }
 
 /*
+ * Sets LVDS2 output color dithering (18-bit color display vs.
+ * 24-bit color display).
+ */
+static inline void
+viaLVDS2SetDithering(ScrnInfoPtr pScrn, Bool dithering)
+{
+    /* 3X5.D4[6] - LVDS Channel 2 Output Bits
+     *             0: 24 bits (dithering off)
+     *             1: 18 bits (dithering on) */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0xD4, dithering ? BIT(6) : 0x00, BIT(6));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "LVDS2 Color Dithering: %s\n",
+                        dithering ? "On (18 bit color)" : "Off (24 bit color)"));
+}
+
+/*
  * Sets CX700 or later single chipset's LVDS2 I/O pad state.
  */
 static inline void

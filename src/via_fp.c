@@ -272,32 +272,6 @@ viaDFPHighSetDelayTap(ScrnInfoPtr pScrn, CARD8 delayTap)
 }
 
 /*
- * Turns LVDS2 output color dithering on or off. (18-bit color display vs.
- * 24-bit color display)
- */
-static void
-viaLVDS2SetDithering(ScrnInfoPtr pScrn, CARD8 ditheringStatus)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaLVDS2SetDithering.\n"));
-
-    /* Set LVDS2 output color dithering bit. */
-    /* 3X5.D4[6] - LVDS Channel 2 Output Bits
-     *             0: 24 bits (dithering off)
-     *             1: 18 bits (dithering on) */
-    ViaCrtcMask(hwp, 0xD4, ditheringStatus ? 0x40 : 0x00, 0x40);
-
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "LVDS2 Output Color Dithering: %s\n",
-                ditheringStatus ? "On (18 bit)" : "Off (24 bit)");
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaLVDS2SetDithering.\n"));
-}
-
-/*
  * Sets output format of LVDS2 to rotation or sequential mode.
  */
 static void
