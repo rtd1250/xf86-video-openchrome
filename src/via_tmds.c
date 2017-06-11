@@ -312,7 +312,7 @@ viaExtTMDSSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
         if ((sr12 & 0x40) && (!(sr12 & 0x20))) {
             viaDVP0SetDisplaySource(pScrn, displaySource);
         } else if ((sr13 & 0x08) && (!(sr12 & 0x10))) {
-            viaDFPLowSetDisplaySource(pScrn, displaySource);
+            viaFPDPLowSetDisplaySource(pScrn, displaySource);
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                         "None of the external ports were set up for "
@@ -332,7 +332,7 @@ viaExtTMDSSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
         if ((sr12 & 0x40) && (!(sr12 & 0x20))) {
             viaDVP0SetDisplaySource(pScrn, displaySource);
         } else if (!(sr12 & 0x10)) {
-            viaDFPLowSetDisplaySource(pScrn, displaySource);
+            viaFPDPLowSetDisplaySource(pScrn, displaySource);
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                         "None of the external ports were set up for "

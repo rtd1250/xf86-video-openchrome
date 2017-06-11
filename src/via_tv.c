@@ -106,7 +106,7 @@ viaTVSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
         if ((sr12 & 0x40) && (sr12 & 0x20)) {
             viaDVP0SetDisplaySource(pScrn, displaySource);
         } else if ((sr13 & 0x08) && (!(sr12 & 0x10))) {
-            viaDFPLowSetDisplaySource(pScrn, displaySource);
+            viaFPDPLowSetDisplaySource(pScrn, displaySource);
         } else if (sr13 & 0x08) {
             viaDVP1SetDisplaySource(pScrn, displaySource);
         } else {
