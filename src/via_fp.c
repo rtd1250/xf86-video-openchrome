@@ -198,31 +198,6 @@ viaDFPHighSetDelayTap(ScrnInfoPtr pScrn, CARD8 delayTap)
                         "Exiting viaDFPHighSetDelayTap.\n"));
 }
 
-/*
- * Sets output format of LVDS2 to rotation or sequential mode.
- */
-static void
-viaLVDS2SetOutputFormat(ScrnInfoPtr pScrn, CARD8 outputFormat)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaLVDS2SetOutputFormat.\n"));
-
-    /* Set LVDS2 output format. */
-    /* 3X5.D4[7] - LVDS Channel 2 Output Format
-     *             0: Rotation
-     *             1: Sequential */
-    ViaCrtcMask(hwp, 0xD4, outputFormat ? 0x80 : 0x00, 0x80);
-
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "LVDS2 Output Format: %s\n",
-                outputFormat ? "Sequential" : "Rotation");
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaLVDS2SetOutputFormat.\n"));
-}
-
 static void
 viaFPIOPadState(ScrnInfoPtr pScrn, CARD8 diPort, Bool ioPadOn)
 {

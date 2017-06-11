@@ -778,6 +778,21 @@ viaLVDS2SetFormat(ScrnInfoPtr pScrn, CARD8 format)
 }
 
 /*
+ * Sets LVDS2 output format (rotation or sequential mode).
+ */
+static inline void
+viaLVDS2SetOutputFormat(ScrnInfoPtr pScrn, CARD8 outputFormat)
+{
+    /* 3X5.D4[7] - LVDS Channel 2 Output Format
+     *             0: Rotation
+     *             1: Sequential */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0xD4, outputFormat << 7, BIT(7));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "LVDS2 Output Format: %s\n",
+                        (outputFormat & BIT(0)) ? "Sequential" : "Rotation"));
+}
+
+/*
  * Sets CX700 or later single chipset's LVDS2 display source.
  */
 static inline void
