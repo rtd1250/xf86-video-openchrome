@@ -106,28 +106,6 @@ static DisplayModeRec OLPCMode = {
 #define TD3 25
 
 /*
- * Sets FPDP (Flat Panel Display Port) Low interface delay tap.
- */
-static void
-viaFPDPLowSetDelayTap(ScrnInfoPtr pScrn, CARD8 delayTap)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaFPDPLowSetDelayTap.\n"));
-
-    /* Set FPDP Low interface delay tap. */
-    /* 3X5.99[3:0] - FPDP Low Delay Tap */
-    ViaCrtcMask(hwp, 0x99, delayTap, 0x0F);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "FPDP Low Delay Tap: %d\n",
-                (delayTap & 0x0F));
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaFPDPLowSetDelayTap.\n"));
-}
-
-/*
  * Sets DFP (Digital Flat Panel) High interface delay tap.
  */
 static void

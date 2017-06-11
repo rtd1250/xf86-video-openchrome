@@ -536,6 +536,21 @@ viaFPDPLowSetIOPadState(ScrnInfoPtr pScrn, CARD8 ioPadState)
 }
 
 /*
+ * Sets FPDP (Flat Panel Display Port) Low interface delay tap.
+ */
+static inline void
+viaFPDPLowSetDelayTap(ScrnInfoPtr pScrn, CARD8 delayTap)
+{
+    /* 3X5.99[3:0] - FPDP Low Delay Tap */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x99, delayTap,
+                BIT(3) | BIT(2) | BIT(1) | BIT(0));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "FPDP Low Delay Tap: %d\n",
+                        (delayTap & (BIT(3) | BIT(2) |
+                                     BIT(1) | BIT(0)))));
+}
+
+/*
  * Sets FPDP (Flat Panel Display Port) Low interface display source.
  */
 static inline void
