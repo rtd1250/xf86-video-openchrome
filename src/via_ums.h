@@ -536,6 +536,21 @@ viaFPDPLowSetIOPadState(ScrnInfoPtr pScrn, CARD8 ioPadState)
 }
 
 /*
+ * Sets DFP (Digital Flat Panel) Low interface display source.
+ */
+static inline void
+viaDFPLowSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
+{
+    /* 3X5.99[4] - DFP Low Data Source Selection
+     *             0: Primary Display
+     *             1: Secondary Display */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x99, displaySource << 4, BIT(4));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "DFP Low Display Source: IGA%d\n",
+                        (displaySource & 0x01) + 1));
+}
+
+/*
  * Sets FPDP (Flat Panel Display Port) High I/O pad state
  */
 static inline void
@@ -888,7 +903,6 @@ void viaDVP1SetClockDriveStrength(ScrnInfoPtr pScrn,
                                     CARD8 clockDriveStrength);
 void viaDVP1SetDataDriveStrength(ScrnInfoPtr pScrn,
                                     CARD8 dataDriveStrength);
-void viaDFPLowSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource);
 void viaDFPLowEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState);
 void viaInitDisplay(ScrnInfoPtr pScrn);
 CARD32 ViaGetMemoryBandwidth(ScrnInfoPtr pScrn);
