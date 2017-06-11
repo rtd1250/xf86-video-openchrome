@@ -687,6 +687,21 @@ viaLVDS1SetFormat(ScrnInfoPtr pScrn, CARD8 format)
                         (format & BIT(0)) ? "OPENLDI" : "SPWG"));
 }
 
+/*
+ * Sets LVDS1 output format (rotation or sequential mode).
+ */
+static inline void
+viaLVDS1SetOutputFormat(ScrnInfoPtr pScrn, CARD8 outputFormat)
+{
+    /* 3X5.88[6] - LVDS Channel 1 Output Format
+     *             0: Rotation
+     *             1: Sequential */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x88, outputFormat << 6, BIT(6));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "LVDS1 Output Format: %s\n",
+                        (outputFormat & BIT(0)) ? "Sequential" : "Rotation"));
+}
+
 /* Sets CX700 or later single chipset's LVDS1 display source. */
 static inline void
 viaLVDS1SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
