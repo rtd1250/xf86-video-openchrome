@@ -571,6 +571,21 @@ viaFPDPHighSetIOPadState(ScrnInfoPtr pScrn, CARD8 ioPadState)
 }
 
 /*
+ * Sets DFP (Digital Flat Panel) High interface display source.
+ */
+static inline void
+viaDFPHighSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
+{
+    /* 3X5.97[4] - DFP High Data Source Selection
+     *             0: Primary Display
+     *             1: Secondary Display */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x97, displaySource << 4, BIT(4));
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "DFP High Display Source: IGA%d\n",
+                (displaySource & 0x01) + 1);
+}
+
+/*
  * Sets CX700 or later chipset's LVDS1 power state.
  */
 static inline void
