@@ -324,6 +324,34 @@ viaFPFormat(ScrnInfoPtr pScrn, CARD8 diPort, CARD8 format)
 }
 
 static void
+viaFPOutputFormat(ScrnInfoPtr pScrn, CARD8 diPort, CARD8 outputFormat)
+{
+    CARD8 temp = outputFormat & 0x01;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaFPOutputFormat.\n"));
+
+    switch(diPort) {
+    case VIA_DI_PORT_LVDS1:
+        viaLVDS1SetOutputFormat(pScrn, temp);
+        break;
+    case VIA_DI_PORT_LVDS2:
+        viaLVDS2SetOutputFormat(pScrn, temp);
+        break;
+    case (VIA_DI_PORT_LVDS1 |
+          VIA_DI_PORT_LVDS2):
+        viaLVDS1SetOutputFormat(pScrn, temp);
+        viaLVDS2SetOutputFormat(pScrn, temp);
+        break;
+    default:
+        break;
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaFPOutputFormat.\n"));
+}
+
+static void
 viaFPDithering(ScrnInfoPtr pScrn, CARD8 diPort, Bool dithering)
 {
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -1029,25 +1057,13 @@ via_fp_mode_set(xf86OutputPtr output, DisplayModePtr mode,
         switch (pVia->Chipset) {
         case VIA_CX700:
         case VIA_VX800:
-            /* Set LVDS2 output format to sequential mode. */
-            viaLVDS2SetOutputFormat(pScrn, 0x01);
-            break;
-        case VIA_VX855:
-        case VIA_VX900:
-            /* Set LVDS1 output format to sequential mode. */
-            viaLVDS1SetOutputFormat(pScrn, 0x01);
-            break;
-        default:
-            break;
-        }
-
-        switch (pVia->Chipset) {
-        case VIA_CX700:
-        case VIA_VX800:
         case VIA_VX855:
         case VIA_VX900:
             /* OPENLDI Mode */
             viaFPFormat(pScrn, pVIAFP->diPort, 0x01);
+
+            /* Sequential Mode */
+            viaFPOutputFormat(pScrn, pVIAFP->diPort, 0x01);
 
             viaFPDithering(pScrn, pVIAFP->diPort, pVIAFP->useDithering);
             break;
