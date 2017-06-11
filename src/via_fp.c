@@ -106,29 +106,6 @@ static DisplayModeRec OLPCMode = {
 #define TD3 25
 
 /*
- * Sets LVDS2 (LVDS Channel 2) integrated LVDS transmitter delay tap.
- */
-static void
-viaLVDS2SetDelayTap(ScrnInfoPtr pScrn, CARD8 delayTap)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaLVDS2SetDelayTap.\n"));
-
-    /* Set LVDS2 delay tap. */
-    /* 3X5.97[3:0] - LVDS2 Delay Tap */
-    ViaCrtcMask(hwp, 0x97, delayTap, 0x0F);
-
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "LVDS2 Delay Tap: %d\n",
-                (delayTap & 0x0F));
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaLVDS2SetDelayTap.\n"));
-}
-
-/*
  * Sets DFP (Digital Flat Panel) Low interface delay tap.
  */
 static void
