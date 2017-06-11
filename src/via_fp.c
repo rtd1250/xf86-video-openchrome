@@ -106,25 +106,25 @@ static DisplayModeRec OLPCMode = {
 #define TD3 25
 
 /*
- * Sets DFP (Digital Flat Panel) Low interface delay tap.
+ * Sets FPDP (Flat Panel Display Port) Low interface delay tap.
  */
 static void
-viaDFPLowSetDelayTap(ScrnInfoPtr pScrn, CARD8 delayTap)
+viaFPDPLowSetDelayTap(ScrnInfoPtr pScrn, CARD8 delayTap)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaDFPLowSetDelayTap.\n"));
+                        "Entered viaFPDPLowSetDelayTap.\n"));
 
-    /* Set DFP Low interface delay tap. */
-    /* 3X5.99[3:0] - DFP Low Delay Tap */
+    /* Set FPDP Low interface delay tap. */
+    /* 3X5.99[3:0] - FPDP Low Delay Tap */
     ViaCrtcMask(hwp, 0x99, delayTap, 0x0F);
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "DFP Low Delay Tap: %d\n",
+                "FPDP Low Delay Tap: %d\n",
                 (delayTap & 0x0F));
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaDFPLowSetDelayTap.\n"));
+                        "Exiting viaFPDPLowSetDelayTap.\n"));
 }
 
 /*
@@ -947,7 +947,7 @@ via_fp_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 
         switch (pVia->Chipset) {
         case VIA_P4M900:
-            viaDFPLowSetDelayTap(pScrn, 0x08);
+            viaFPDPLowSetDelayTap(pScrn, 0x08);
             break;
         default:
             break;
