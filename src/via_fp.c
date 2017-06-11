@@ -106,30 +106,6 @@ static DisplayModeRec OLPCMode = {
 #define TD3 25
 
 /*
- * Sets LVDS1 (LVDS Channel 1) integrated LVDS transmitter format.
- */
-static void
-viaLVDS1SetFormat(ScrnInfoPtr pScrn, CARD8 format)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaLVDS1SetFormat.\n"));
-
-    /* Set LVDS1 format. */
-    /* 3X5.D2[1] - LVDS Channel 1 Format Selection
-     *             0: SPWG Mode
-     *             1: OPENLDI Mode */
-    ViaCrtcMask(hwp, 0xD2, format << 1, 0x02);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "LVDS1 Format: %s\n",
-                (format & 0x01) ? "OPENLDI" : "SPWG");
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaLVDS1SetFormat.\n"));
-}
-
-/*
  * Sets output format of LVDS1 to rotation or sequential mode.
  */
 static void
