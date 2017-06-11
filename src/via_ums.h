@@ -748,6 +748,21 @@ viaLVDS2SetIOPadSetting(ScrnInfoPtr pScrn, CARD8 ioPadState)
 }
 
 /*
+ * Sets LVDS2 format.
+ */
+static inline void
+viaLVDS2SetFormat(ScrnInfoPtr pScrn, CARD8 format)
+{
+    /* 3X5.D2[0] - LVDS Channel 2 Format Selection
+     *             0: SPWG Mode
+     *             1: OPENLDI Mode */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0xD2, format, BIT(0));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "LVDS2 Format: %s\n",
+                        (format & BIT(0)) ? "OPENLDI" : "SPWG"));
+}
+
+/*
  * Sets CX700 or later single chipset's LVDS2 display source.
  */
 static inline void
