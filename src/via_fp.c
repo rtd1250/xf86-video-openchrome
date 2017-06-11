@@ -1040,9 +1040,6 @@ via_fp_mode_set(xf86OutputPtr output, DisplayModePtr mode,
         case VIA_P4M900:
             viaDFPLowSetDelayTap(pScrn, 0x08);
             break;
-        case VIA_CX700:
-            viaLVDS2SetDelayTap(pScrn, 0x01);
-            break;
         default:
             break;
         }
