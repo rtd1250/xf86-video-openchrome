@@ -328,7 +328,7 @@ viaFPDithering(ScrnInfoPtr pScrn, CARD8 diPort, Bool dithering)
 }
 
 static void
-viaFPDisplaySource(ScrnInfoPtr pScrn, int index, CARD8 diPort)
+viaFPDisplaySource(ScrnInfoPtr pScrn, CARD8 diPort, int index)
 {
     CARD8 displaySource = index & 0x01;
 
@@ -1002,8 +1002,6 @@ via_fp_mode_set(xf86OutputPtr output, DisplayModePtr mode,
             break;
         }
 
-        viaFPDisplaySource(pScrn, iga->index, pVIAFP->diPort);
-
         switch (pVia->Chipset) {
         case VIA_CX700:
         case VIA_VX800:
@@ -1020,6 +1018,8 @@ via_fp_mode_set(xf86OutputPtr output, DisplayModePtr mode,
         default:
             break;
         }
+
+        viaFPDisplaySource(pScrn, pVIAFP->diPort, iga->index);
     }
 }
 
