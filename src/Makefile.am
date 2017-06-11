@@ -53,7 +53,6 @@ openchrome_drv_la_SOURCES = \
          via_driver.c \
          via_driver.h \
          via_i2c.c \
-         via_id.c \
          via_fp.c \
          via_memcpy.c \
          via_memmgr.h \
