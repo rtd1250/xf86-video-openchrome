@@ -317,7 +317,7 @@ viaFPDisplaySource(ScrnInfoPtr pScrn, CARD8 diPort, int index)
         viaDVP1SetDisplaySource(pScrn, displaySource);
         break;
     case VIA_DI_PORT_FPDPLOW:
-        viaDFPLowSetDisplaySource(pScrn, displaySource);
+        viaFPDPLowSetDisplaySource(pScrn, displaySource);
         viaDVP1SetDisplaySource(pScrn, displaySource);
         break;
     case VIA_DI_PORT_FPDPHIGH:
@@ -326,7 +326,7 @@ viaFPDisplaySource(ScrnInfoPtr pScrn, CARD8 diPort, int index)
         break;
     case (VIA_DI_PORT_FPDPLOW |
           VIA_DI_PORT_FPDPHIGH):
-        viaDFPLowSetDisplaySource(pScrn, displaySource);
+        viaFPDPLowSetDisplaySource(pScrn, displaySource);
         viaDFPHighSetDisplaySource(pScrn, displaySource);
         break;
     case VIA_DI_PORT_LVDS1:

@@ -536,17 +536,17 @@ viaFPDPLowSetIOPadState(ScrnInfoPtr pScrn, CARD8 ioPadState)
 }
 
 /*
- * Sets DFP (Digital Flat Panel) Low interface display source.
+ * Sets FPDP (Flat Panel Display Port) Low interface display source.
  */
 static inline void
-viaDFPLowSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
+viaFPDPLowSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
 {
-    /* 3X5.99[4] - DFP Low Data Source Selection
+    /* 3X5.99[4] - FPDP Low Data Source Selection
      *             0: Primary Display
      *             1: Secondary Display */
     ViaCrtcMask(VGAHWPTR(pScrn), 0x99, displaySource << 4, BIT(4));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "DFP Low Display Source: IGA%d\n",
+                        "FPDP Low Display Source: IGA%d\n",
                         (displaySource & 0x01) + 1));
 }
 
