@@ -299,21 +299,6 @@ viaIGA1SetDisplayOutput(ScrnInfoPtr pScrn, Bool outputState)
 }
 
 /*
- * Sets the display source of DVP0 (Digital Video Port 0) interface.
- */
-static inline void
-viaDVP0SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
-{
-    /* 3X5.96[4] - DVP0 Data Source Selection
-     *             0: Primary Display
-     *             1: Secondary Display */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0x96, displaySource << 4, BIT(4));
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "DVP0 Display Source: IGA%d\n",
-                        (displaySource & 0x01) + 1));
-}
-
-/*
  * Sets DVP0 (Digital Video Port 0) I/O pad state.
  */
 static inline void
@@ -334,17 +319,17 @@ viaDVP0SetIOPadState(ScrnInfoPtr pScrn, CARD8 ioPadState)
 }
 
 /*
- * Sets the display source of DVP1 (Digital Video Port 1) interface.
+ * Sets the display source of DVP0 (Digital Video Port 0) interface.
  */
 static inline void
-viaDVP1SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
+viaDVP0SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
 {
-    /* 3X5.9B[4] - DVP1 Data Source Selection
+    /* 3X5.96[4] - DVP0 Data Source Selection
      *             0: Primary Display
      *             1: Secondary Display */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0x9B, displaySource << 4, BIT(4));
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x96, displaySource << 4, BIT(4));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "DVP1 Display Source: IGA%d\n",
+                        "DVP0 Display Source: IGA%d\n",
                         (displaySource & 0x01) + 1));
 }
 
@@ -366,6 +351,21 @@ viaDVP1SetIOPadState(ScrnInfoPtr pScrn, CARD8 ioPadState)
                         ((ioPadState & (BIT(1) | BIT(0))) == 0x02) ? "Conditional" :
                         ((ioPadState & (BIT(1) | BIT(0))) == 0x01) ? "Off" :
                                                                      "Off"));
+}
+
+/*
+ * Sets the display source of DVP1 (Digital Video Port 1) interface.
+ */
+static inline void
+viaDVP1SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
+{
+    /* 3X5.9B[4] - DVP1 Data Source Selection
+     *             0: Primary Display
+     *             1: Secondary Display */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x9B, displaySource << 4, BIT(4));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "DVP1 Display Source: IGA%d\n",
+                        (displaySource & 0x01) + 1));
 }
 
 /*
@@ -704,22 +704,6 @@ viaLVDS1SetSoftDisplayPeriod(ScrnInfoPtr pScrn, Bool softOn)
 }
 
 /*
- * Sets LVDS1 output color dithering (18-bit color display vs.
- * 24-bit color display).
- */
-static inline void
-viaLVDS1SetDithering(ScrnInfoPtr pScrn, Bool dithering)
-{
-    /* 3X5.88[0] - LVDS Channel 1 Output Bits
-     *             0: 24 bits (dithering off)
-     *             1: 18 bits (dithering on) */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0x88, dithering ? BIT(0) : 0x00, BIT(0));
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "LVDS1 Color Dithering: %s\n",
-                        dithering ? "On (18 bit color)" : "Off (24 bit color)"));
-}
-
-/*
  * Sets CX700 or later single chipset's LVDS1 I/O pad state.
  */
 static inline void
@@ -762,6 +746,22 @@ viaLVDS1SetOutputFormat(ScrnInfoPtr pScrn, CARD8 outputFormat)
                         (outputFormat & BIT(0)) ? "Sequential" : "Rotation"));
 }
 
+/*
+ * Sets LVDS1 output color dithering (18-bit color display vs.
+ * 24-bit color display).
+ */
+static inline void
+viaLVDS1SetDithering(ScrnInfoPtr pScrn, Bool dithering)
+{
+    /* 3X5.88[0] - LVDS Channel 1 Output Bits
+     *             0: 24 bits (dithering off)
+     *             1: 18 bits (dithering on) */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x88, dithering ? BIT(0) : 0x00, BIT(0));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "LVDS1 Color Dithering: %s\n",
+                        dithering ? "On (18 bit color)" : "Off (24 bit color)"));
+}
+
 /* Sets CX700 or later single chipset's LVDS1 display source. */
 static inline void
 viaLVDS1SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
@@ -790,22 +790,6 @@ viaLVDS2SetPower(ScrnInfoPtr pScrn, Bool powerState)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "LVDS2 Power State: %s\n",
                         powerState ? "On" : "Off"));
-}
-
-/*
- * Sets LVDS2 output color dithering (18-bit color display vs.
- * 24-bit color display).
- */
-static inline void
-viaLVDS2SetDithering(ScrnInfoPtr pScrn, Bool dithering)
-{
-    /* 3X5.D4[6] - LVDS Channel 2 Output Bits
-     *             0: 24 bits (dithering off)
-     *             1: 18 bits (dithering on) */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0xD4, dithering ? BIT(6) : 0x00, BIT(6));
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "LVDS2 Color Dithering: %s\n",
-                        dithering ? "On (18 bit color)" : "Off (24 bit color)"));
 }
 
 /*
@@ -850,6 +834,22 @@ viaLVDS2SetOutputFormat(ScrnInfoPtr pScrn, CARD8 outputFormat)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "LVDS2 Output Format: %s\n",
                         (outputFormat & BIT(0)) ? "Sequential" : "Rotation"));
+}
+
+/*
+ * Sets LVDS2 output color dithering (18-bit color display vs.
+ * 24-bit color display).
+ */
+static inline void
+viaLVDS2SetDithering(ScrnInfoPtr pScrn, Bool dithering)
+{
+    /* 3X5.D4[6] - LVDS Channel 2 Output Bits
+     *             0: 24 bits (dithering off)
+     *             1: 18 bits (dithering on) */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0xD4, dithering ? BIT(6) : 0x00, BIT(6));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "LVDS2 Color Dithering: %s\n",
+                        dithering ? "On (18 bit color)" : "Off (24 bit color)"));
 }
 
 /*
