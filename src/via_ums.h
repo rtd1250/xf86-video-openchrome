@@ -133,6 +133,13 @@
 #define     VIA_TMDS_NONE           0x0
 #define     VIA_TMDS_VT1632         0x1
 
+/* To be used with via_analog_set_dpms_control inline function. */
+#define VIA_ANALOG_DPMS_ON          0x00
+#define VIA_ANALOG_DPMS_STANDBY     0x01
+#define VIA_ANALOG_DPMS_SUSPEND     0x02
+#define VIA_ANALOG_DPMS_OFF         0x03
+
+
 #define BIT(x) (1 << x)
 
 

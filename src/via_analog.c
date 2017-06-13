@@ -242,16 +242,16 @@ via_analog_dpms(xf86OutputPtr output, int mode)
 
     switch (mode) {
     case DPMSModeOn:
-        viaAnalogSetDPMSControl(pScrn, 0x00);
+        viaAnalogSetDPMSControl(pScrn, VIA_ANALOG_DPMS_ON);
         break;
     case DPMSModeStandby:
-        viaAnalogSetDPMSControl(pScrn, 0x01);
+        viaAnalogSetDPMSControl(pScrn, VIA_ANALOG_DPMS_STANDBY);
         break;
     case DPMSModeSuspend:
-        viaAnalogSetDPMSControl(pScrn, 0x02);
+        viaAnalogSetDPMSControl(pScrn, VIA_ANALOG_DPMS_SUSPEND);
         break;
     case DPMSModeOff:
-        viaAnalogSetDPMSControl(pScrn, 0x03);
+        viaAnalogSetDPMSControl(pScrn, VIA_ANALOG_DPMS_OFF);
         break;
     default:
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
