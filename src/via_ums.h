@@ -389,8 +389,11 @@ viaAnalogSetDPMSControl(ScrnInfoPtr pScrn, CARD8 dpmsControl)
     ViaCrtcMask(VGAHWPTR(pScrn), 0x36, dpmsControl << 4,
                 BIT(5) | BIT(4));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Analog (VGA) DPMS: %u\n",
-                        dpmsControl & (BIT(1) | BIT(0))));
+                        "Analog (VGA) DPMS: %s\n",
+                        ((dpmsControl & (BIT(1) | BIT(0))) == 0x03) ? "Off" :
+                        ((dpmsControl & (BIT(1) | BIT(0))) == 0x02) ? "Suspend" :
+                        ((dpmsControl & (BIT(1) | BIT(0))) == 0x01) ? "Standby" :
+                                                                      "On"));
 }
 
 /*
