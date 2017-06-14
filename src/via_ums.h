@@ -958,7 +958,6 @@ void viaDVP1SetClockDriveStrength(ScrnInfoPtr pScrn,
                                     CARD8 clockDriveStrength);
 void viaDVP1SetDataDriveStrength(ScrnInfoPtr pScrn,
                                     CARD8 dataDriveStrength);
-void viaDFPLowEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState);
 void viaInitDisplay(ScrnInfoPtr pScrn);
 CARD32 ViaGetMemoryBandwidth(ScrnInfoPtr pScrn);
 CARD32 ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode);

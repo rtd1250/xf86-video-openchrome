@@ -240,7 +240,7 @@ viaTVEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState)
         if ((sr12 & 0x40) && (sr12 & 0x20)) {
             viaDVP0SetIOPadState(pScrn, ioPadState);
         } else if ((sr13 & 0x08) && (!(sr12 & 0x10))) {
-            viaDFPLowEnableIOPads(pScrn, ioPadState);
+            viaFPDPLowSetIOPadState(pScrn, ioPadState);
         } else if (sr13 & 0x08) {
             viaDVP1SetIOPadState(pScrn, ioPadState);
         } else {

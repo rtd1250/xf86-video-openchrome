@@ -249,34 +249,6 @@ viaDVP1SetDataDriveStrength(ScrnInfoPtr pScrn, CARD8 dataDriveStrength)
                         "Exiting viaDVP1SetDataDriveStrength.\n"));
 }
 
-/*
- * Sets DFP (Digital Flat Panel) Low I/O pad state.
- */
-void
-viaDFPLowEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaDFPLowEnableIOPads.\n"));
-
-    /* Set DFP Low I/O pad state. */
-    /* 3C5.2A[1:0] - DFP Low Power Control
-     *               0x: Pad always off
-     *               10: Depend on the other control signal
-     *               11: Pad on/off according to the
-     *                   Power Management Status (PMS) */
-    ViaSeqMask(hwp, 0x2A, ioPadState, 0x03);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "DFP Low I/O Pad State: %s\n",
-                (ioPadState & 0x02) ?
-                    (ioPadState & 0x01) ? "Automatic On / Off": "Conditional"
-                : "Off");
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaDFPLowEnableIOPads.\n"));
-}
-
 void
 viaInitDisplay(ScrnInfoPtr pScrn)
 {
