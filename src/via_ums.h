@@ -326,6 +326,25 @@ viaDVP0SetIOPadState(ScrnInfoPtr pScrn, CARD8 ioPadState)
 }
 
 /*
+ * Sets DVP0 (Digital Video Port 0) clock I/O pad drive strength.
+ */
+static inline void
+viaDVP0SetClockDriveStrength(ScrnInfoPtr pScrn, CARD8 clockDriveStrength)
+{
+    /* 3C5.1E[2] - DVP0 Clock Drive Strength Bit [0] */
+    ViaSeqMask(VGAHWPTR(pScrn), 0x1E, clockDriveStrength << 2,
+                BIT(2));
+
+    /* 3C5.2A[4] - DVP0 Clock Drive Strength Bit [1] */
+    ViaSeqMask(VGAHWPTR(pScrn), 0x2A, clockDriveStrength << 3,
+                BIT(4));
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "DVP0 Clock I/O Pad Drive Strength: %u\n",
+                        clockDriveStrength & (BIT(1) | BIT(0))));
+}
+
+/*
  * Sets the display source of DVP0 (Digital Video Port 0) interface.
  */
 static inline void
@@ -950,8 +969,6 @@ void viaDIP0SetClockDriveStrength(ScrnInfoPtr pScrn,
                                     CARD8 clockDriveStrength);
 void viaDIP0SetDataDriveStrength(ScrnInfoPtr pScrn,
                                     CARD8 dataDriveStrength);
-void viaDVP0SetClockDriveStrength(ScrnInfoPtr pScrn,
-                                    CARD8 clockDriveStrength);
 void viaDVP0SetDataDriveStrength(ScrnInfoPtr pScrn,
                                     CARD8 dataDriveStrength);
 void viaDVP1SetClockDriveStrength(ScrnInfoPtr pScrn,
