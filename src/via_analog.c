@@ -50,7 +50,7 @@ viaAnalogOutput(ScrnInfoPtr pScrn, Bool outputState)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaAnalogOutput.\n"));
 
-    viaAnalogSetDACOutput(pScrn, outputState);
+    viaAnalogSetPower(pScrn, outputState);
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "Analog (VGA) Output: %s\n",
                 outputState ? "On" : "Off");

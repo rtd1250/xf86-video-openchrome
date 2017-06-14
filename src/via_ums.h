@@ -467,19 +467,18 @@ viaAnalogSetDPMSControl(ScrnInfoPtr pScrn, CARD8 dpmsControl)
 }
 
 /*
- * Sets analog (VGA) DAC output state.
+ * Sets analog (VGA) power.
  */
 static inline void
-viaAnalogSetDACOutput(ScrnInfoPtr pScrn, Bool outputState)
+viaAnalogSetPower(ScrnInfoPtr pScrn, Bool outputState)
 {
-    /* Set analog (VGA) DAC output state. */
     /* 3X5.47[2] - DACOFF Backdoor Register
      *             0: DAC on
      *             1: DAC off */
     ViaCrtcMask(VGAHWPTR(pScrn), 0x47, outputState ? 0x00 : BIT(2),
                 BIT(2));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Analog (VGA) DAC Output: %s\n",
+                        "Analog (VGA) Power: %s\n",
                         outputState ? "On" : "Off"));
 }
 
