@@ -318,8 +318,8 @@ via_analog_commit(xf86OutputPtr output)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_analog_commit.\n"));
 
-    /* DPMS off */
-    viaAnalogSetDPMSControl(pScrn, 0x00);
+    viaAnalogSetDPMSControl(pScrn, VIA_ANALOG_DPMS_OFF);
+    viaAnalogPower(pScrn, FALSE);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_analog_commit.\n"));
