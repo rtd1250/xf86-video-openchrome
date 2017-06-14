@@ -148,32 +148,6 @@ viaDIP0SetDataDriveStrength(ScrnInfoPtr pScrn, CARD8 dataDriveStrength)
 }
 
 /*
- * Sets DVP1 (Digital Video Port 1) clock I/O pad drive strength.
- */
-void
-viaDVP1SetClockDriveStrength(ScrnInfoPtr pScrn, CARD8 clockDriveStrength)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaDVP1SetClockDriveStrength.\n"));
-
-    /* 3C5.65[3:2] - DVP1 Clock Pads Driving Select
-     *               00: lowest
-     *               01: low
-     *               10: high
-     *               11: highest */
-    ViaSeqMask(hwp, 0x65, clockDriveStrength << 2, 0x0C);
-
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "DVP1 Clock I/O Pad Drive Strength: %u\n",
-                clockDriveStrength & 0x03);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaDVP1SetClockDriveStrength.\n"));
-}
-
-/*
  * Sets DVP1 (Digital Video Port 1) data I/O pads drive strength.
  */
 void
