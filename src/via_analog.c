@@ -45,18 +45,18 @@
  * Enables or disables analog (VGA) output.
  */
 static void
-viaAnalogOutput(ScrnInfoPtr pScrn, Bool outputState)
+viaAnalogPower(ScrnInfoPtr pScrn, Bool outputState)
 {
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaAnalogOutput.\n"));
+                        "Entered viaAnalogPower.\n"));
 
     viaAnalogSetPower(pScrn, outputState);
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "Analog (VGA) Output: %s\n",
+                "Analog (VGA) Power: %s\n",
                 outputState ? "On" : "Off");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaAnalogOutput.\n"));
+                        "Exiting viaAnalogPower.\n"));
 }
 
 /*
