@@ -414,6 +414,23 @@ viaDVP1SetClockDriveStrength(ScrnInfoPtr pScrn, CARD8 clockDriveStrength)
 }
 
 /*
+ * Sets DVP1 (Digital Video Port 1) data I/O pads drive strength.
+ */
+static inline void
+viaDVP1SetDataDriveStrength(ScrnInfoPtr pScrn, CARD8 dataDriveStrength)
+{
+    /* 3C5.65[1:0] - DVP1 Data Pads Driving Select [1:0}
+     *               00: lowest
+     *               01: low
+     *               10: high
+     *               11: highest */
+    ViaSeqMask(VGAHWPTR(pScrn), 0x65, dataDriveStrength, BIT(1) | BIT(0));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "DVP1 Data I/O Pads Drive Strength: %u\n",
+                        dataDriveStrength & (BIT(1) | BIT(0))));
+}
+
+/*
  * Sets the display source of DVP1 (Digital Video Port 1) interface.
  */
 static inline void
@@ -1002,8 +1019,6 @@ void viaDIP0EnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState);
 void viaDIP0SetClockDriveStrength(ScrnInfoPtr pScrn,
                                     CARD8 clockDriveStrength);
 void viaDIP0SetDataDriveStrength(ScrnInfoPtr pScrn,
-                                    CARD8 dataDriveStrength);
-void viaDVP1SetDataDriveStrength(ScrnInfoPtr pScrn,
                                     CARD8 dataDriveStrength);
 void viaInitDisplay(ScrnInfoPtr pScrn);
 CARD32 ViaGetMemoryBandwidth(ScrnInfoPtr pScrn);

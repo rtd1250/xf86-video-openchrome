@@ -147,32 +147,6 @@ viaDIP0SetDataDriveStrength(ScrnInfoPtr pScrn, CARD8 dataDriveStrength)
                         "Exiting viaDIP0SetDataDriveStrength.\n"));
 }
 
-/*
- * Sets DVP1 (Digital Video Port 1) data I/O pads drive strength.
- */
-void
-viaDVP1SetDataDriveStrength(ScrnInfoPtr pScrn, CARD8 dataDriveStrength)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaDVP1SetDataDriveStrength.\n"));
-
-    /* 3C5.65[1:0] - DVP1 Data Pads Driving Select
-     *               00: lowest
-     *               01: low
-     *               10: high
-     *               11: highest */
-    ViaSeqMask(hwp, 0x65, dataDriveStrength, 0x03);
-
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "DVP1 Data I/O Pads Drive Strength: %u\n",
-                dataDriveStrength & 0x03);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaDVP1SetDataDriveStrength.\n"));
-}
-
 void
 viaInitDisplay(ScrnInfoPtr pScrn)
 {
