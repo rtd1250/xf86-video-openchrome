@@ -303,8 +303,8 @@ via_analog_prepare(xf86OutputPtr output)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_analog_prepare.\n"));
 
-    /* DPMS On */
-    viaAnalogSetDPMSControl(pScrn, 0x03);
+    viaAnalogSetDPMSControl(pScrn, VIA_ANALOG_DPMS_ON);
+    viaAnalogPower(pScrn, TRUE);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_analog_prepare.\n"));
