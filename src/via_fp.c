@@ -454,27 +454,6 @@ viaFPPrimaryHardPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
 }
 
 static void
-ViaLVDSHardwarePowerFirstSequence(ScrnInfoPtr pScrn, Bool on)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    if (on) {
-        /* Use hardware control power sequence. */
-        hwp->writeCrtc(hwp, 0x91, hwp->readCrtc(hwp, 0x91) & 0xFE);
-        /* Turn on back light. */
-        hwp->writeCrtc(hwp, 0x91, hwp->readCrtc(hwp, 0x91) & 0x3F);
-        /* Turn on hardware power sequence. */
-        hwp->writeCrtc(hwp, 0x6A, hwp->readCrtc(hwp, 0x6A) | 0x08);
-    } else {
-        /* Turn off power sequence. */
-        hwp->writeCrtc(hwp, 0x6A, hwp->readCrtc(hwp, 0x6A) & 0xF7);
-        usleep(1);
-        /* Turn off back light. */
-        hwp->writeCrtc(hwp, 0x91, 0xC0);
-    }
-}
-
-static void
 ViaLVDSHardwarePowerSecondSequence(ScrnInfoPtr pScrn, Bool on)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
@@ -533,7 +512,7 @@ viaFPPower(ScrnInfoPtr pScrn, int Chipset, CARD8 diPortType, Bool powerState)
         break;
     case VIA_VX855:
     case VIA_VX900:
-        ViaLVDSHardwarePowerFirstSequence(pScrn, powerState);
+        viaFPPrimaryHardPowerSeq(pScrn, powerState);
         viaLVDS1SetPower(pScrn, powerState);
         break;
     default:
