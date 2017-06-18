@@ -958,9 +958,7 @@ exit:
 Bool
 umsPreInit(ScrnInfoPtr pScrn)
 {
-    vgaHWPtr hwp;
     VIAPtr pVia = VIAPTR(pScrn);
-    int bMemSize = 0;
 
     if (!xf86LoadSubModule(pScrn, "vgahw"))
         return FALSE;
@@ -975,7 +973,6 @@ umsPreInit(ScrnInfoPtr pScrn)
     vgaHWSetRegCounts(pScrn, VGA_NUM_CRTC, VGA_NUM_SEQ, VGA_NUM_GFX,
                       VGA_NUM_ATTR);
 #endif
-    hwp = VGAHWPTR(pScrn);
 
     if (!viaProbeVRAM(pScrn)) {
         return FALSE;
