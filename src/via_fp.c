@@ -454,13 +454,17 @@ viaFPPrimaryHardPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
 }
 
 static void
-ViaLVDSHardwarePowerSecondSequence(ScrnInfoPtr pScrn, Bool on)
+viaFPSecondaryHardPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
-    if (on) {
-        /* Use hardware control power sequence. */
-        hwp->writeCrtc(hwp, 0xD3, hwp->readCrtc(hwp, 0xD3) & 0xFE);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaFPSecondaryHardPowerSeq.\n"));
+
+    /* Use hardware control power sequence. */
+    hwp->writeCrtc(hwp, 0xD3, hwp->readCrtc(hwp, 0xD3) & 0xFE);
+
+    if (powerState) {
         /* Turn on back light. */
         hwp->writeCrtc(hwp, 0xD3, hwp->readCrtc(hwp, 0xD3) & 0x3F);
         /* Turn on hardware power sequence. */
@@ -472,6 +476,9 @@ ViaLVDSHardwarePowerSecondSequence(ScrnInfoPtr pScrn, Bool on)
         /* Turn off back light. */
         hwp->writeCrtc(hwp, 0xD3, 0xC0);
     }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaFPSecondaryHardPowerSeq.\n"));
 }
 
 static void
