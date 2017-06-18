@@ -404,7 +404,6 @@ viaVT1632Probe(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus)
 {
     I2CDevPtr pI2CDevice = NULL;
     I2CSlaveAddr i2cAddr = 0x10;
-    VIAPtr pVia = VIAPTR(pScrn);
     CARD8 i2cData;
     CARD16 vendorID, deviceID;
     Bool status = FALSE;
