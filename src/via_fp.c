@@ -461,8 +461,8 @@ viaFPSecondaryHardPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaFPSecondaryHardPowerSeq.\n"));
 
-    /* Use hardware control power sequence. */
-    hwp->writeCrtc(hwp, 0xD3, hwp->readCrtc(hwp, 0xD3) & 0xFE);
+    /* Use hardware FP power sequence control. */
+    viaFPSetSecondaryPowerSeqType(pScrn, TRUE);
 
     if (powerState) {
         /* Turn on back light. */
