@@ -362,29 +362,6 @@ viaIGA2HWReset(ScrnInfoPtr pScrn, CARD8 resetState)
 }
 
 /*
- * Controls IGA2 display output on or off state.
- */
-static void
-viaIGA2DisplayOutput(ScrnInfoPtr pScrn, Bool outputState)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaIGA2DisplayOutput.\n"));
-
-    /* 3X5.6B[2] - IGA2 Screen Off
-     *             0: Screen on
-     *             1: Screen off */
-    ViaCrtcMask(hwp, 0x6B, outputState ? 0x00 : 0x04, 0x04);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "IGA2 Display Output: %s\n",
-                outputState ? "On" : "Off");
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaIGA2DisplayOutput.\n"));
-}
-
-/*
  * Controls IGA2 display channel state.
  */
 void
