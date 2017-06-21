@@ -339,6 +339,7 @@ enum VIACHIPTAGS {
 
 #define VIASETREG(addr, data)   *(volatile unsigned int *)(pVia->MapBase + (addr)) = (data)
 #define VIAGETREG(addr)         *(volatile unsigned int *)(pVia->MapBase + (addr))
-
+#define VIASETREGMASK(addr, data, mask) \
+        VIASETREG(addr, (data & mask) | (VIAGETREG(addr) & ~mask))
 
 #endif  /* _VIA_REGS_H_ */
