@@ -303,8 +303,8 @@ via_analog_prepare(xf86OutputPtr output)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_analog_prepare.\n"));
 
-    viaAnalogSetDPMSControl(pScrn, VIA_ANALOG_DPMS_ON);
-    viaAnalogPower(pScrn, TRUE);
+    viaAnalogSetDPMSControl(pScrn, VIA_ANALOG_DPMS_OFF);
+    viaAnalogPower(pScrn, FALSE);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_analog_prepare.\n"));
@@ -318,8 +318,8 @@ via_analog_commit(xf86OutputPtr output)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_analog_commit.\n"));
 
-    viaAnalogSetDPMSControl(pScrn, VIA_ANALOG_DPMS_OFF);
-    viaAnalogPower(pScrn, FALSE);
+    viaAnalogSetDPMSControl(pScrn, VIA_ANALOG_DPMS_ON);
+    viaAnalogPower(pScrn, TRUE);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_analog_commit.\n"));
