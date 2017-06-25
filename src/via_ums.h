@@ -306,6 +306,22 @@ viaIGA1SetDisplayOutput(ScrnInfoPtr pScrn, Bool outputState)
 }
 
 /*
+ * Sets IGA2 display output state.
+ */
+static inline void
+viaIGA2SetDisplayOutput(ScrnInfoPtr pScrn, Bool outputState)
+{
+    /* 3X5.6B[2] - IGA2 Screen Off
+     *             0: Screen on
+     *             1: Screen off */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x6B,
+                outputState ? 0x00 : BIT(2), BIT(2));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "IGA2 Display Output: %s\n",
+                        outputState ? "On" : "Off"));
+}
+
+/*
  * Sets DVP0 (Digital Video Port 0) I/O pad state.
  */
 static inline void
