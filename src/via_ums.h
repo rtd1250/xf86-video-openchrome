@@ -521,6 +521,22 @@ viaAnalogSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
 }
 
 /*
+ * Sets analog (VGA) DAC off setting.
+ * Only available in CX700 / VX700, VX800, VX855, and VX900 chipsets.
+ */
+static inline void
+viaAnalogSetDACOff(ScrnInfoPtr pScrn, Bool dacOff)
+{
+    /* 3C5.5E[0] - CRT DACOFF Setting
+     *             0: Disabled
+     *             1: DAC is controlled by 3C5.01[5] */
+    ViaSeqMask(VGAHWPTR(pScrn), 0x5E, dacOff ? BIT(0) : 0x00, BIT(0));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Analog (VGA) DAC Off Setting: %s\n",
+                        dacOff ? "On" : "Off"));
+}
+
+/*
  * Sets KM400 or later chipset's FP primary power sequence control
  * type.
  */

@@ -143,9 +143,7 @@ viaAnalogInitReg(ScrnInfoPtr pScrn)
     case VIA_VX800:
     case VIA_VX855:
     case VIA_VX900:
-        /* 3C5.5E[0] - CRT DACOFF Setting
-         *             1: CRT DACOFF controlled by 3C5.01[5] */
-        ViaSeqMask(hwp, 0x5E, 0x01, 0x01);
+        viaAnalogSetDACOff(pScrn, TRUE);
         break;
     default:
         break;
