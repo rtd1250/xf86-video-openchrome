@@ -143,7 +143,8 @@ viaAnalogInitReg(ScrnInfoPtr pScrn)
     case VIA_VX800:
     case VIA_VX855:
     case VIA_VX900:
-        viaAnalogSetDACOff(pScrn, TRUE);
+        /* Make sure 3C5.01[5] does not turn off analog (VGA) DAC. */
+        viaAnalogSetDACOff(pScrn, FALSE);
         break;
     default:
         break;
