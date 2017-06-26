@@ -643,7 +643,6 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
 #endif
     pVia->maxDriSize = 0;
     pVia->agpMem = AGP_SIZE / 1024;
-    pVia->I2CDevices = VIA_I2C_BUS1 | VIA_I2C_BUS2 | VIA_I2C_BUS3;
     pVia->VideoEngine = VIDEO_ENGINE_CLE;
 #ifdef HAVE_DEBUG
     pVia->PrintVGARegs = FALSE;

@@ -180,7 +180,8 @@ typedef struct _VIADISPLAY {
     /* Keeping track of the number of FP (Flat Panel) connectors. */
     unsigned int        numberFP;
 
-   CARD8       mappedI2CBus;
+    CARD8       I2CDevices;
+    CARD8       mappedI2CBus;
 
     /* VIA Technologies NanoBook reference design.
      * Examples include Everex CloudBook and Sylvania g netbook.

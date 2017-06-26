@@ -340,8 +340,6 @@ typedef struct _VIA {
     void                *displayMap;
     CARD32              displayOffset;
 
-    CARD8               I2CDevices;	/* Option */
-
 #ifdef HAVE_DEBUG
     Bool                disableXvBWCheck;
     Bool                DumpVGAROM;

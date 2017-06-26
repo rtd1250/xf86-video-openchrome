@@ -1053,13 +1053,13 @@ umsCrtcInit(ScrnInfoPtr pScrn)
     drmmode_crtc_private_ptr iga1_rec = NULL, iga2_rec = NULL;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
 #if XORG_VERSION_CURRENT >= XORG_VERSION_NUMERIC(1,8,0,0,0)
     ClockRangePtr clockRanges;
 #else
     ClockRangesPtr clockRanges;
 #endif
     int max_pitch, max_height;
-    VIADisplayPtr pVIADisplay;
     xf86CrtcPtr iga1, iga2;
 
     /* 3X5.3B through 3X5.3F are scratch pad registers. */
@@ -1078,7 +1078,7 @@ umsCrtcInit(ScrnInfoPtr pScrn)
                    "Unknown Memory clock: %d\n", pVia->MemClk);
         pVia->MemClk = VIA_MEM_END - 1;
     }
-    pVIADisplay = pVia->pVIADisplay;
+
     pVIADisplay->Bandwidth = ViaGetMemoryBandwidth(pScrn);
 
     if (pVIADisplay->TVType == TVTYPE_NONE) {
@@ -1094,8 +1094,10 @@ umsCrtcInit(ScrnInfoPtr pScrn)
         }
     }
 
+    pVIADisplay->I2CDevices = VIA_I2C_BUS1 | VIA_I2C_BUS2 | VIA_I2C_BUS3;
+
     if (pVIADisplay->isOLPCXO15) {
-        pVia->I2CDevices &= ~VIA_I2C_BUS2;
+        pVIADisplay->I2CDevices &= ~VIA_I2C_BUS2;
     }
 
     if (pVia->drmmode.hwcursor) {

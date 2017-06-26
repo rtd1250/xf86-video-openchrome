@@ -474,15 +474,16 @@ void
 ViaI2CInit(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
                         "Entered ViaI2CInit.\n"));
 
-    if (pVia->I2CDevices & VIA_I2C_BUS1)
+    if (pVIADisplay->I2CDevices & VIA_I2C_BUS1)
         pVia->pI2CBus1 = ViaI2CBus1Init(pScrn);
-    if (pVia->I2CDevices & VIA_I2C_BUS2)
+    if (pVIADisplay->I2CDevices & VIA_I2C_BUS2)
         pVia->pI2CBus2 = ViaI2CBus2Init(pScrn);
-    if (pVia->I2CDevices & VIA_I2C_BUS3)
+    if (pVIADisplay->I2CDevices & VIA_I2C_BUS3)
         pVia->pI2CBus3 = ViaI2CBus3Init(pScrn);
 
 #ifdef HAVE_DEBUG
