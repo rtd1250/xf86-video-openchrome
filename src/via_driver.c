@@ -1466,20 +1466,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         pVia->isVIANanoBook      = FALSE;
     }
 
-    /* Checking for OLPC XO-1.5. */
-    if ((pVia->Chipset == VIA_VX855) &&
-        (SUBVENDOR_ID(pVia->PciInfo) == 0x152D) &&
-        (SUBSYS_ID(pVia->PciInfo) == 0x0833)) {
-
-        pVia->IsOLPCXO15      = TRUE;
-    } else {
-        pVia->IsOLPCXO15      = FALSE;
-    }
-
-    if (pVia->IsOLPCXO15) {
-        pVia->I2CDevices &= ~VIA_I2C_BUS2;
-    }
-
     /* CRTC handling */
     xf86CrtcConfigInit(pScrn, &via_xf86crtc_config_funcs);
 
