@@ -959,6 +959,17 @@ Bool
 umsPreInit(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
+
+    /* Checking for OLPC XO-1.5. */
+    if ((pVia->Chipset == VIA_VX855) &&
+        (SUBVENDOR_ID(pVia->PciInfo) == 0x152D) &&
+        (SUBSYS_ID(pVia->PciInfo) == 0x0833)) {
+
+        pVIADisplay->isOLPCXO15      = TRUE;
+    } else {
+        pVIADisplay->isOLPCXO15      = FALSE;
+    }
 
     if (!xf86LoadSubModule(pScrn, "vgahw"))
         return FALSE;
@@ -1065,16 +1076,6 @@ umsCrtcInit(ScrnInfoPtr pScrn)
             DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                              "Detected TV standard: NTSC.\n"));
         }
-    }
-
-    /* Checking for OLPC XO-1.5. */
-    if ((pVia->Chipset == VIA_VX855) &&
-        (SUBVENDOR_ID(pVia->PciInfo) == 0x152D) &&
-        (SUBSYS_ID(pVia->PciInfo) == 0x0833)) {
-
-        pVIADisplay->isOLPCXO15      = TRUE;
-    } else {
-        pVIADisplay->isOLPCXO15      = FALSE;
     }
 
     if (pVIADisplay->isOLPCXO15) {
