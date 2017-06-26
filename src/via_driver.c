@@ -176,7 +176,6 @@ typedef enum
     OPTION_SHADOW_FB,
     OPTION_ROTATION_TYPE,
     OPTION_ROTATE,
-    OPTION_I2CDEVICES,
     OPTION_CENTER,
     OPTION_TVDOTCRAWL,
     OPTION_TVTYPE,
@@ -217,7 +216,6 @@ static OptionInfoRec VIAOptions[] = {
     {OPTION_DISABLE_XV_BW_CHECK, "DisableXvBWCheck", OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_MAX_DRIMEM,          "MaxDRIMem",        OPTV_INTEGER, {0}, FALSE},
     {OPTION_AGPMEM,              "AGPMem",           OPTV_INTEGER, {0}, FALSE},
-    {OPTION_I2CDEVICES,          "I2CDevices",       OPTV_ANYSTR,  {0}, FALSE},
     {-1,                         NULL,               OPTV_NONE,    {0}, FALSE}
 };
 
@@ -1476,7 +1474,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         pVia->isVIANanoBook      = FALSE;
     }
 
-
     /* Checking for OLPC XO-1.5. */
     if ((pVia->Chipset == VIA_VX855) &&
         (SUBVENDOR_ID(pVia->PciInfo) == 0x152D) &&
@@ -1485,17 +1482,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         pVia->IsOLPCXO15      = TRUE;
     } else {
         pVia->IsOLPCXO15      = FALSE;
-    }
-
-    /* I2CDevices Option for I2C Initialization */
-    if ((s = xf86GetOptValString(VIAOptions, OPTION_I2CDEVICES))) {
-        pVia->I2CDevices = 0;
-        if (strstr(s, "Bus1"))
-            pVia->I2CDevices |= VIA_I2C_BUS1;
-        if (strstr(s, "Bus2"))
-            pVia->I2CDevices |= VIA_I2C_BUS2;
-        if (strstr(s, "Bus3"))
-            pVia->I2CDevices |= VIA_I2C_BUS3;
     }
 
     if (pVia->IsOLPCXO15) {
