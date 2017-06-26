@@ -356,7 +356,6 @@ typedef struct _VIA {
     Bool                DumpVGAROM;
     Bool                PrintVGARegs;
     Bool                PrintTVRegs;
-    Bool                I2CScan;
 #endif /* HAVE_DEBUG */
 
     video_via_regs*     VideoRegs;

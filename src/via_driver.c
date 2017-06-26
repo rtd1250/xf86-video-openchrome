@@ -167,7 +167,6 @@ typedef enum
 #ifdef HAVE_DEBUG
     OPTION_PRINTVGAREGS,
     OPTION_PRINTTVREGS,
-    OPTION_I2CSCAN,
 #endif
     OPTION_NOACCEL,
     OPTION_EXA_NOCOMPOSITE,
@@ -195,7 +194,6 @@ static OptionInfoRec VIAOptions[] = {
 #ifdef HAVE_DEBUG /* Don't document these three. */
     {OPTION_PRINTVGAREGS,        "PrintVGARegs",     OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_PRINTTVREGS,         "PrintTVRegs",      OPTV_BOOLEAN, {0}, FALSE},
-    {OPTION_I2CSCAN,             "I2CScan",          OPTV_BOOLEAN, {0}, FALSE},
 #endif
     {OPTION_NOACCEL,             "NoAccel",          OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_EXA_NOCOMPOSITE,     "ExaNoComposite",   OPTV_BOOLEAN, {0}, FALSE},
@@ -1450,12 +1448,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
                pVia->PrintVGARegs ? "" : "not ");
     if (pVia->PrintVGARegs)
         ViaVgahwPrint(VGAHWPTR(pScrn)); /* Do this as early as possible */
-
-    pVia->I2CScan = FALSE;
-    from = xf86GetOptValBool(VIAOptions, OPTION_I2CSCAN, &pVia->I2CScan)
-            ? X_CONFIG : X_DEFAULT;
-    xf86DrvMsg(pScrn->scrnIndex, from, "Will %sscan I2C buses.\n",
-               pVia->I2CScan ? "" : "not ");
 #endif /* HAVE_DEBUG */
 
     /* Checking for VIA Technologies NanoBook reference design.
