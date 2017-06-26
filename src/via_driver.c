@@ -941,9 +941,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     if (pScrn->numEntities > 1)
         return FALSE;
 
-    if (flags & PROBE_DETECT)
-        return FALSE;
-
     if (!VIAGetRec(pScrn)) {
         return FALSE;
     }
@@ -1110,10 +1107,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         VIAFreeRec(pScrn);
         return FALSE;
     }
-
-	/* Now handle the Display */
-    if (flags & PROBE_DETECT)
-        return TRUE;
 
     pScrn->monitor = pScrn->confScreen->monitor;
 
