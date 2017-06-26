@@ -934,15 +934,83 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     char *busId = NULL;
     drmVersionPtr drmVer;
 #endif
+    rgb defaultWeight = {0, 0, 0};
+    rgb defaultMask = {0, 0, 0};
+    Gamma defaultGamma = {0.0, 0.0, 0.0};
+    Bool status = FALSE;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered VIAPreInit.\n"));
 
-    if (pScrn->numEntities > 1)
-        return FALSE;
+    pScrn->monitor = pScrn->confScreen->monitor;
+
+    /*
+     * We support depths of 8, 16 and 24.
+     * We support bpp of 8, 16, and 32.
+     */
+    if (!xf86SetDepthBpp(pScrn, 0, 0, 0, Support32bppFb)) {
+        goto exit;
+    } else {
+        switch (pScrn->depth) {
+        case 8:
+        case 16:
+        case 24:
+            /* OK */
+            break;
+        case 32:
+            /* OK */
+            pScrn->depth = 24;
+            break;
+        default:
+            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                        "Given depth (%d) is not supported by this driver!\n",
+                        pScrn->depth);
+            goto exit;
+            break;
+        }
+    }
+
+    pScrn->rgbBits = 8;
+
+    /* Print out the depth / bpp that was set. */
+    xf86PrintDepthBpp(pScrn);
+
+    if (pScrn->depth > 8) {
+        if (!xf86SetWeight(pScrn, defaultWeight, defaultMask)) {
+            goto exit;
+        } else {
+            /* TODO check weight returned is supported. */
+        }
+    }
+
+    if (!xf86SetDefaultVisual(pScrn, -1)) {
+        goto exit;
+    } else {
+        /* We don't currently support DirectColor at > 8bpp. */
+        if (pScrn->depth > 8 && pScrn->defaultVisual != TrueColor) {
+            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                        "Given default visual (%s) is not supported "
+                        "at depth %d.\n",
+                        xf86GetVisualName(pScrn->defaultVisual),
+                                            pScrn->depth);
+            goto exit;
+        }
+    }
+
+    /* If the driver supports gamma correction, set the gamma. */
+    if (!xf86SetGamma(pScrn, defaultGamma)) {
+        goto exit;
+    }
+
+    /* This driver uses a programmable clock. */
+    pScrn->progClock = TRUE;
+
+    if (pScrn->numEntities > 1) {
+        goto exit;
+    }
 
     if (!VIAGetRec(pScrn)) {
-        return FALSE;
+        goto exit;
     }
 
     pVia = VIAPTR(pScrn);
@@ -1108,67 +1176,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         return FALSE;
     }
 
-    pScrn->monitor = pScrn->confScreen->monitor;
-
-    /*
-     * We support depths of 8, 16 and 24.
-     * We support bpp of 8, 16, and 32.
-     */
-
-    if (!xf86SetDepthBpp(pScrn, 0, 0, 0, Support32bppFb)) {
-        goto fail;
-    } else {
-        switch (pScrn->depth) {
-            case 8:
-            case 16:
-            case 24:
-            case 32:
-                /* OK */
-                break;
-            default:
-                xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                           "Given depth (%d) is not supported by this driver\n",
-                           pScrn->depth);
-                goto fail;
-        }
-    }
-
-    xf86PrintDepthBpp(pScrn);
-
-    if (pScrn->depth == 32) {
-        pScrn->depth = 24;
-    }
-
-    if (pScrn->depth > 8) {
-        rgb zeros = { 0, 0, 0 };
-
-        if (!xf86SetWeight(pScrn, zeros, zeros)) {
-            goto fail;
-        } else {
-            /* TODO check weight returned is supported */
-        }
-    }
-
-    if (!xf86SetDefaultVisual(pScrn, -1)) {
-        goto fail;
-    } else {
-        /* We don't currently support DirectColor at > 8bpp */
-        if (pScrn->depth > 8 && pScrn->defaultVisual != TrueColor) {
-            xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Given default visual"
-                       " (%s) is not supported at depth %d.\n",
-                       xf86GetVisualName(pScrn->defaultVisual), pScrn->depth);
-            goto fail;
-        }
-    }
-
-    /* We use a programmable clock */
-    pScrn->progClock = TRUE;
-
     xf86CollectOptions(pScrn, option);
-
-    /* Set the bits per RGB for 8bpp mode */
-    if (pScrn->depth == 8)
-        pScrn->rgbBits = 6;
 
     if (!VIASetupDefaultOptions(pScrn)) {
         goto fail;
@@ -1523,12 +1531,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         goto fail;
     }
 
-    /* Initialize the colormap */
-    Gamma zeros = { 0.0, 0.0, 0.0 };
-    if (!xf86SetGamma(pScrn, zeros)) {
-        goto fail;
-    }
-
     /* Set up screen parameters. */
     pVia->Bpp = pScrn->bitsPerPixel >> 3;
     pVia->Bpl = pScrn->virtualX * pVia->Bpp;
@@ -1563,17 +1565,15 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         }
     }
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered VIAPreInit.\n"));
-    return TRUE;
-
+    status = TRUE;
+    goto exit;
 fail:
     viaUnmapMMIO(pScrn);
     VIAFreeRec(pScrn);
-
+exit:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered VIAPreInit.\n"));
-    return FALSE;
+                        "Exiting VIAPreInit.\n"));
+    return status;
 }
 
 static void
