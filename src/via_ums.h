@@ -182,6 +182,9 @@ typedef struct _VIADISPLAY {
 
    CARD8       mappedI2CBus;
 
+    /* OLPC XO-1.5 */
+    Bool                isOLPCXO15;
+
     xf86OutputPtr tv;
 
     CARD32      Clock; /* register value for the dotclock */

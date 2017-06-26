@@ -924,13 +924,14 @@ via_fp_detect(xf86OutputPtr output)
     xf86OutputStatus status = XF86OutputStatusDisconnected;
     I2CBusPtr pI2CBus;
     VIAPtr pVia = VIAPTR(pScrn);
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
     VIAFPPtr pVIAFP = (VIAFPPtr) output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_fp_detect.\n"));
 
     /* Hardcode panel size for the OLPC XO-1.5. */
-    if (pVia->IsOLPCXO15) {
+    if (pVIADisplay->isOLPCXO15) {
         xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                     "Setting up OLPC XO-1.5 flat panel.\n");
         pVIAFP->NativeWidth = 1200;
@@ -991,6 +992,8 @@ via_fp_get_modes(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
     DisplayModePtr pDisplay_Mode = NULL;
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
     VIAFPPtr pVIAFP = (VIAFPPtr) output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -1005,7 +1008,7 @@ via_fp_get_modes(xf86OutputPtr output)
             if (pVIAFP->NativeWidth && pVIAFP->NativeHeight) {
                 VIAPtr pVia = VIAPTR(pScrn);
 
-                if (pVia->IsOLPCXO15) {
+                if (pVIADisplay->isOLPCXO15) {
                     pDisplay_Mode = xf86DuplicateMode(&OLPCMode);
                 } else {
                     pDisplay_Mode = xf86CVTMode(pVIAFP->NativeWidth, pVIAFP->NativeHeight,
@@ -1310,7 +1313,7 @@ viaFPInit(ScrnInfoPtr pScrn)
         output->interlaceAllowed = FALSE;
         output->doubleScanAllowed = FALSE;
 
-        if (pVia->IsOLPCXO15) {
+        if (pVIADisplay->isOLPCXO15) {
             output->mm_height = 152;
             output->mm_width = 114;
         }

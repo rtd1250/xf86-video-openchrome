@@ -1072,12 +1072,12 @@ umsCrtcInit(ScrnInfoPtr pScrn)
         (SUBVENDOR_ID(pVia->PciInfo) == 0x152D) &&
         (SUBSYS_ID(pVia->PciInfo) == 0x0833)) {
 
-        pVia->IsOLPCXO15      = TRUE;
+        pVIADisplay->isOLPCXO15      = TRUE;
     } else {
-        pVia->IsOLPCXO15      = FALSE;
+        pVIADisplay->isOLPCXO15      = FALSE;
     }
 
-    if (pVia->IsOLPCXO15) {
+    if (pVIADisplay->isOLPCXO15) {
         pVia->I2CDevices &= ~VIA_I2C_BUS2;
     }
 

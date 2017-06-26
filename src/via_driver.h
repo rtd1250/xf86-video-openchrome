@@ -290,9 +290,6 @@ typedef struct _VIA {
        Design Manufacturer) name. */
     Bool                isVIANanoBook;
 
-    /* OLPC XO-1.5 */
-    Bool                IsOLPCXO15;
-
     /* I2C & DDC */
     I2CBusPtr           pI2CBus1;
     I2CBusPtr           pI2CBus2;
