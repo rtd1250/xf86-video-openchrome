@@ -176,7 +176,6 @@ typedef enum
     OPTION_SHADOW_FB,
     OPTION_ROTATION_TYPE,
     OPTION_ROTATE,
-    OPTION_VIDEORAM,
     OPTION_I2CDEVICES,
     OPTION_CENTER,
     OPTION_TVDOTCRAWL,
@@ -206,7 +205,6 @@ static OptionInfoRec VIAOptions[] = {
     {OPTION_SHADOW_FB,           "ShadowFB",         OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_ROTATION_TYPE,       "RotationType",     OPTV_ANYSTR,  {0}, FALSE},
     {OPTION_ROTATE,              "Rotate",           OPTV_ANYSTR,  {0}, FALSE},
-    {OPTION_VIDEORAM,            "VideoRAM",         OPTV_INTEGER, {0}, FALSE},
     {OPTION_TVDOTCRAWL,          "TVDotCrawl",       OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_TVDEFLICKER,         "TVDeflicker",      OPTV_INTEGER, {0}, FALSE},
     {OPTION_TVTYPE,              "TVType",           OPTV_ANYSTR,  {0}, FALSE},
@@ -1183,10 +1181,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     }
 
     xf86ProcessOptions(pScrn->scrnIndex, pScrn->options, VIAOptions);
-
-    if (xf86GetOptValInteger(VIAOptions, OPTION_VIDEORAM, &pScrn->videoRam))
-        xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                   "Setting amount of VideoRAM to %d kB\n", pScrn->videoRam);
 
     /* When rotating, switch shadow framebuffer on and acceleration off. */
     if ((s = xf86GetOptValString(VIAOptions, OPTION_ROTATION_TYPE))) {
