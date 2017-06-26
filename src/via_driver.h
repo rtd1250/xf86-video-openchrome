@@ -284,12 +284,6 @@ typedef struct _VIA {
     /* Display Record Pointer */
     VIADisplayPtr      pVIADisplay;
 
-    /* VIA Technologies NanoBook reference design.
-       Examples include Everex CloudBook and Sylvania g netbook.
-       It is also called FIC CE260 and CE261 by its ODM (Original 
-       Design Manufacturer) name. */
-    Bool                isVIANanoBook;
-
     /* I2C & DDC */
     I2CBusPtr           pI2CBus1;
     I2CBusPtr           pI2CBus2;

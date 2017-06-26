@@ -972,9 +972,9 @@ umsPreInit(ScrnInfoPtr pScrn)
         (SUBVENDOR_ID(pVia->PciInfo) == 0x1509) &&
         (SUBSYS_ID(pVia->PciInfo) == 0x2D30)) {
 
-        pVia->isVIANanoBook      = TRUE;
+        pVIADisplay->isVIANanoBook      = TRUE;
     } else {
-        pVia->isVIANanoBook      = FALSE;
+        pVIADisplay->isVIANanoBook      = FALSE;
     }
 
     /* Checking for OLPC XO-1.5. */

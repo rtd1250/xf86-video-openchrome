@@ -185,6 +185,7 @@ viaTMDSIOPadSetting(ScrnInfoPtr pScrn, Bool ioPadOn)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
     CARD8 sr12, sr13, sr5a;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -223,7 +224,7 @@ viaTMDSIOPadSetting(ScrnInfoPtr pScrn, Bool ioPadOn)
          *               11: DVI only */
         if ((((~(sr13 & 0x80)) && (sr13 & 0x40))
              || ((sr13 & 0x80) && (sr13 & 0x40)))
-           || (pVia->isVIANanoBook)) {
+           || (pVIADisplay->isVIANanoBook)) {
 
             viaLVDS1SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
         }
@@ -1011,7 +1012,7 @@ viaTMDSProbe(ScrnInfoPtr pScrn)
          * VIA Technologies NanoBook reference design based products
          * have their pin strappings set to a wrong setting to communicate
          * the presence of DVI, so it requires special handling here. */
-        if (pVia->isVIANanoBook) {
+        if (pVIADisplay->isVIANanoBook) {
                     pVIADisplay->intTMDSPresence = TRUE;
                     pVIADisplay->intTMDSDIPort = VIA_DI_PORT_TMDS;
                     pVIADisplay->intTMDSI2CBus = VIA_I2C_BUS2;

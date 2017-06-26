@@ -1194,7 +1194,7 @@ viaFPProbe(ScrnInfoPtr pScrn)
                             "SR13: 0x%02X\n", sr13));
 
         if (cr3b & BIT(1)) {
-            if (pVia->isVIANanoBook) {
+            if (pVIADisplay->isVIANanoBook) {
                 pVIADisplay->intFP1Presence = FALSE;
                 pVIADisplay->intFP1DIPort = VIA_DI_PORT_NONE;
                 pVIADisplay->intFP2Presence = TRUE;
