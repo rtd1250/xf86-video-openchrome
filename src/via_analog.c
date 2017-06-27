@@ -352,6 +352,7 @@ via_analog_detect(xf86OutputPtr output)
     xf86OutputStatus status = XF86OutputStatusDisconnected;
     I2CBusPtr pI2CBus;
     VIAPtr pVia = VIAPTR(pScrn);
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
     VIAAnalogPtr pVIAAnalog = (VIAAnalogPtr) output->driver_private;
     Bool connectorDetected;
 
@@ -373,7 +374,7 @@ via_analog_detect(xf86OutputPtr output)
                 "VGA connector detected.\n");
 
     if (pVIAAnalog->analogI2CBus & VIA_I2C_BUS1) {
-        pI2CBus = pVia->pI2CBus1;
+        pI2CBus = pVIADisplay->pI2CBus1;
     } else {
         pI2CBus = NULL;
     }
@@ -389,7 +390,7 @@ via_analog_detect(xf86OutputPtr output)
     }
 
     if (pVIAAnalog->analogI2CBus & VIA_I2C_BUS2) {
-        pI2CBus = pVia->pI2CBus2;
+        pI2CBus = pVIADisplay->pI2CBus2;
     } else {
         pI2CBus = NULL;
     }

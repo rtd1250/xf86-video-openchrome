@@ -941,9 +941,9 @@ via_fp_detect(xf86OutputPtr output)
     }
 
     if (pVIAFP->i2cBus & VIA_I2C_BUS2) {
-        pI2CBus = pVia->pI2CBus2;
+        pI2CBus = pVIADisplay->pI2CBus2;
     } else if (pVIAFP->i2cBus & VIA_I2C_BUS3) {
-        pI2CBus = pVia->pI2CBus3;
+        pI2CBus = pVIADisplay->pI2CBus3;
     } else {
         pI2CBus = NULL;
     }

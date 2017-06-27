@@ -801,16 +801,16 @@ via_tv_init(ScrnInfoPtr pScrn)
      * On an SK43G (KM400/Ch7011), false positive detections at a VT162x
      * chip were observed, so try to detect the Ch7011 first.
      */
-    if (pVia->pI2CBus2 && xf86I2CProbeAddress(pVia->pI2CBus2, 0xEC))
-        pVIADisplay->TVI2CDev = ViaCH7xxxDetect(pScrn, pVia->pI2CBus2, 0xEC);
-    else if (pVia->pI2CBus2 && xf86I2CProbeAddress(pVia->pI2CBus2, 0x40))
-        pVIADisplay->TVI2CDev = ViaVT162xDetect(pScrn, pVia->pI2CBus2, 0x40);
-    else if (pVia->pI2CBus3 && xf86I2CProbeAddress(pVia->pI2CBus3, 0x40))
-        pVIADisplay->TVI2CDev = ViaVT162xDetect(pScrn, pVia->pI2CBus3, 0x40);
-    else if (pVia->pI2CBus2 && xf86I2CProbeAddress(pVia->pI2CBus2, 0xEA))
-        pVIADisplay->TVI2CDev = ViaCH7xxxDetect(pScrn, pVia->pI2CBus2, 0xEA);
-    else if (pVia->pI2CBus3 && xf86I2CProbeAddress(pVia->pI2CBus3, 0xEA))
-        pVIADisplay->TVI2CDev = ViaCH7xxxDetect(pScrn, pVia->pI2CBus3, 0xEA);
+    if (pVIADisplay->pI2CBus2 && xf86I2CProbeAddress(pVIADisplay->pI2CBus2, 0xEC))
+        pVIADisplay->TVI2CDev = ViaCH7xxxDetect(pScrn, pVIADisplay->pI2CBus2, 0xEC);
+    else if (pVIADisplay->pI2CBus2 && xf86I2CProbeAddress(pVIADisplay->pI2CBus2, 0x40))
+        pVIADisplay->TVI2CDev = ViaVT162xDetect(pScrn, pVIADisplay->pI2CBus2, 0x40);
+    else if (pVIADisplay->pI2CBus3 && xf86I2CProbeAddress(pVIADisplay->pI2CBus3, 0x40))
+        pVIADisplay->TVI2CDev = ViaVT162xDetect(pScrn, pVIADisplay->pI2CBus3, 0x40);
+    else if (pVIADisplay->pI2CBus2 && xf86I2CProbeAddress(pVIADisplay->pI2CBus2, 0xEA))
+        pVIADisplay->TVI2CDev = ViaCH7xxxDetect(pScrn, pVIADisplay->pI2CBus2, 0xEA);
+    else if (pVIADisplay->pI2CBus3 && xf86I2CProbeAddress(pVIADisplay->pI2CBus3, 0xEA))
+        pVIADisplay->TVI2CDev = ViaCH7xxxDetect(pScrn, pVIADisplay->pI2CBus3, 0xEA);
 
     if (!pVIADisplay->TVI2CDev) {
         xf86DrvMsg(pScrn->scrnIndex, X_PROBED,

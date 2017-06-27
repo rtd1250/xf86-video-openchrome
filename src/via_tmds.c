@@ -870,15 +870,16 @@ via_tmds_detect(xf86OutputPtr output)
     xf86OutputStatus status = XF86OutputStatusDisconnected;
     I2CBusPtr pI2CBus;
     VIAPtr pVia = VIAPTR(pScrn);
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
     VIATMDSPtr pVIATMDS = (VIATMDSPtr) output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_tmds_detect.\n"));
 
     if (pVIATMDS->i2cBus & VIA_I2C_BUS2) {
-        pI2CBus = pVia->pI2CBus2;
+        pI2CBus = pVIADisplay->pI2CBus2;
     } else if (pVIATMDS->i2cBus & VIA_I2C_BUS3) {
-        pI2CBus = pVia->pI2CBus3;
+        pI2CBus = pVIADisplay->pI2CBus3;
     } else {
         pI2CBus = NULL;
     }
@@ -1060,8 +1061,8 @@ viaExtTMDSProbe(ScrnInfoPtr pScrn)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaExtTMDSProbe.\n"));
 
-    if (pVia->pI2CBus2) {
-        if (viaVT1632Probe(pScrn, pVia->pI2CBus2)) {
+    if (pVIADisplay->pI2CBus2) {
+        if (viaVT1632Probe(pScrn, pVIADisplay->pI2CBus2)) {
             pVIADisplay->extTMDSPresence = TRUE;
             pVIADisplay->extTMDSI2CBus = VIA_I2C_BUS2;
             pVIADisplay->extTMDSTransmitter = VIA_TMDS_VT1632;
@@ -1071,8 +1072,8 @@ viaExtTMDSProbe(ScrnInfoPtr pScrn)
             pVIADisplay->extTMDSI2CBus = VIA_I2C_NONE;
             pVIADisplay->extTMDSTransmitter = VIA_TMDS_NONE;
         }
-    } else if (pVia->pI2CBus3) {
-        if (viaVT1632Probe(pScrn, pVia->pI2CBus3)) {
+    } else if (pVIADisplay->pI2CBus3) {
+        if (viaVT1632Probe(pScrn, pVIADisplay->pI2CBus3)) {
             pVIADisplay->extTMDSPresence = TRUE;
             pVIADisplay->extTMDSI2CBus = VIA_I2C_BUS3;
             pVIADisplay->extTMDSTransmitter = VIA_TMDS_VT1632;
@@ -1235,6 +1236,7 @@ void
 via_dvi_init(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_dvi_init.\n"));
@@ -1243,7 +1245,7 @@ via_dvi_init(ScrnInfoPtr pScrn)
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "Probing I2C Bus 2 for SiI 164.\n");
-    if (!viaSiI164Init(pScrn, pVia->pI2CBus2)) {
+    if (!viaSiI164Init(pScrn, pVIADisplay->pI2CBus2)) {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                     "I2C Bus 2 was not initialized for DVI use.\n");
     } else {
@@ -1254,7 +1256,7 @@ via_dvi_init(ScrnInfoPtr pScrn)
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "Probing I2C Bus 3 for SiI 164.\n");
-    if (!viaSiI164Init(pScrn, pVia->pI2CBus3)) {
+    if (!viaSiI164Init(pScrn, pVIADisplay->pI2CBus3)) {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                     "I2C Bus 3 was not initialized for DVI use.\n");
     } else {

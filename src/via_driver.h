@@ -284,11 +284,6 @@ typedef struct _VIA {
     /* Display Record Pointer */
     VIADisplayPtr      pVIADisplay;
 
-    /* I2C & DDC */
-    I2CBusPtr           pI2CBus1;
-    I2CBusPtr           pI2CBus2;
-    I2CBusPtr           pI2CBus3;
-
     /* MHS */
     Bool                IsSecondary;
     Bool                HasSecondary;

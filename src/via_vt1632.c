@@ -309,6 +309,7 @@ via_vt1632_detect(xf86OutputPtr output)
     xf86OutputStatus status = XF86OutputStatusDisconnected;
     I2CBusPtr pI2CBus;
     VIAPtr pVia = VIAPTR(pScrn);
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
     VIAVT1632Ptr pVIAVT1632 = (VIAVT1632Ptr) output->driver_private;
     Bool connectorDetected;
 
@@ -330,9 +331,9 @@ via_vt1632_detect(xf86OutputPtr output)
                 "DVI connector detected.\n");
 
     if (pVIAVT1632->i2cBus & VIA_I2C_BUS2) {
-        pI2CBus = pVia->pI2CBus2;
+        pI2CBus = pVIADisplay->pI2CBus2;
     } else if (pVIAVT1632->i2cBus & VIA_I2C_BUS3) {
-        pI2CBus = pVia->pI2CBus3;
+        pI2CBus = pVIADisplay->pI2CBus3;
     } else {
         pI2CBus = NULL;
     }
@@ -495,9 +496,9 @@ viaVT1632Init(ScrnInfoPtr pScrn)
     }
 
     if (pVIADisplay->extTMDSI2CBus & VIA_I2C_BUS2) {
-        pI2CBus = pVia->pI2CBus2;
+        pI2CBus = pVIADisplay->pI2CBus2;
     } else if (pVIADisplay->extTMDSI2CBus & VIA_I2C_BUS3) {
-        pI2CBus = pVia->pI2CBus3;
+        pI2CBus = pVIADisplay->pI2CBus3;
     } else {
         goto exit;
     }

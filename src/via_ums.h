@@ -183,6 +183,10 @@ typedef struct _VIADISPLAY {
     CARD8       I2CDevices;
     CARD8       mappedI2CBus;
 
+    I2CBusPtr       pI2CBus1;
+    I2CBusPtr       pI2CBus2;
+    I2CBusPtr       pI2CBus3;
+
     /* VIA Technologies NanoBook reference design.
      * Examples include Everex CloudBook and Sylvania g netbook.
      * It is also called FIC CE260 and CE261 by its ODM (Original
