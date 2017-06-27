@@ -898,7 +898,6 @@ via_tmds_detect(xf86OutputPtr output)
         }
     }
 
-exit:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_tmds_detect.\n"));
     return status;
