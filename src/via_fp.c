@@ -1006,8 +1006,6 @@ via_fp_get_modes(xf86OutputPtr output)
              * using CVT.
              */
             if (pVIAFP->NativeWidth && pVIAFP->NativeHeight) {
-                VIAPtr pVia = VIAPTR(pScrn);
-
                 if (pVIADisplay->isOLPCXO15) {
                     pDisplay_Mode = xf86DuplicateMode(&OLPCMode);
                 } else {
