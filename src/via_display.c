@@ -705,6 +705,7 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
     CARD8 i;
 #ifdef HAVE_DEBUG
     CARD8 temp;
@@ -1038,11 +1039,11 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
     ViaCrtcMask(hwp, 0x36, 0x01, 0x01);
 
     /* 3X5.3B through 3X5.3F are scratch pad registers. */
-    ViaCrtcMask(hwp, 0x3B, pVia->originalCR3B, 0xFF);
-    ViaCrtcMask(hwp, 0x3C, pVia->originalCR3C, 0xFF);
-    ViaCrtcMask(hwp, 0x3D, pVia->originalCR3D, 0xFF);
-    ViaCrtcMask(hwp, 0x3E, pVia->originalCR3E, 0xFF);
-    ViaCrtcMask(hwp, 0x3F, pVia->originalCR3F, 0xFF);
+    ViaCrtcMask(hwp, 0x3B, pVIADisplay->originalCR3B, 0xFF);
+    ViaCrtcMask(hwp, 0x3C, pVIADisplay->originalCR3C, 0xFF);
+    ViaCrtcMask(hwp, 0x3D, pVIADisplay->originalCR3D, 0xFF);
+    ViaCrtcMask(hwp, 0x3E, pVIADisplay->originalCR3E, 0xFF);
+    ViaCrtcMask(hwp, 0x3F, pVIADisplay->originalCR3F, 0xFF);
 
     /* 3X5.47[5] - Peep at the PCI-bus
      *             0: Disable

@@ -343,10 +343,6 @@ typedef struct _VIA {
 #endif /* HAVE_DEBUG */
 
     video_via_regs*     VideoRegs;
-
-    /* Shadow copy of CR3B through CR3F. */
-    CARD8       originalCR3B, originalCR3C, originalCR3D,
-                originalCR3E, originalCR3F;
 } VIARec, *VIAPtr;
 
 #define VIAPTR(p) ((VIAPtr)((p)->driverPrivate))
