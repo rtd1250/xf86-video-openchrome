@@ -328,12 +328,12 @@ viaFPCastleRockSoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
 }
 
 static void
-ViaLVDSSoftwarePowerFirstSequence(ScrnInfoPtr pScrn, Bool on)
+viaFPPrimarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaLVDSSoftwarePowerFirstSequence: %d\n", on));
-    if (on) {
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "viaFPPrimarySoftPowerSeq: %d\n", powerState));
+    if (powerState) {
 
         /* Software control power sequence ON*/
         hwp->writeCrtc(hwp, 0x91, hwp->readCrtc(hwp, 0x91) & 0x7F);
@@ -507,7 +507,7 @@ viaFPPower(ScrnInfoPtr pScrn, int Chipset, CARD8 diPortType, Bool powerState)
          * Fix Ticket #308.
          */
         if (diPortType & VIA_DI_PORT_LVDS1) {
-            ViaLVDSSoftwarePowerFirstSequence(pScrn, powerState);
+            viaFPPrimarySoftPowerSeq(pScrn, powerState);
             viaLVDS1SetPower(pScrn, powerState);
         }
 
