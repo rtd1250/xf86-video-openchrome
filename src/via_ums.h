@@ -756,9 +756,9 @@ viaFPDPHighSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
      *             0: Primary Display
      *             1: Secondary Display */
     ViaCrtcMask(VGAHWPTR(pScrn), 0x97, displaySource << 4, BIT(4));
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "FPDP High Display Source: IGA%d\n",
-                (displaySource & 0x01) + 1);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "FPDP High Display Source: IGA%d\n",
+                        (displaySource & 0x01) + 1));
 }
 
 /*
