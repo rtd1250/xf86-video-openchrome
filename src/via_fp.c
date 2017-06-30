@@ -340,8 +340,7 @@ viaFPPrimarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
         hwp->writeCrtc(hwp, 0x91, hwp->readCrtc(hwp, 0x91) | 0x01);
         usleep(TD0);
 
-        /* VDD ON*/
-        hwp->writeCrtc(hwp, 0x91, hwp->readCrtc(hwp, 0x91) | 0x10);
+        viaFPSetPrimarySoftVDD(pScrn, TRUE);
         usleep(TD1);
 
         viaFPSetPrimarySoftData(pScrn, TRUE);
@@ -363,8 +362,7 @@ viaFPPrimarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
         viaFPSetPrimarySoftData(pScrn, FALSE);
         usleep(TD1);
 
-        /* VDD OFF */
-        hwp->writeCrtc(hwp, 0x91, hwp->readCrtc(hwp, 0x91) & 0xEF);
+        viaFPSetPrimarySoftVDD(pScrn, FALSE);
     }
 }
 
