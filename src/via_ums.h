@@ -626,6 +626,24 @@ viaFPSetPrimarySoftVEE(ScrnInfoPtr pScrn, Bool softOn)
 }
 
 /*
+ * Sets KM400 or later chipset's FP primary software controlled
+ * data.
+ */
+static inline void
+viaFPSetPrimarySoftData(ScrnInfoPtr pScrn, Bool softOn)
+{
+    /* 3X5.91[3] - FP Primary Software Data On
+     *             0: On
+     *             1: Off */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x91, softOn ? 0x00 : BIT(3),
+                BIT(3));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "FP Primary Software Controlled Data: "
+                        "%s\n",
+                        softOn ? "On" : "Off"));
+}
+
+/*
  * Sets KM400 or later chipset's FP primary direct back light control
  * bit.
  */

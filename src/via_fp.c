@@ -344,8 +344,7 @@ viaFPPrimarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
         hwp->writeCrtc(hwp, 0x91, hwp->readCrtc(hwp, 0x91) | 0x10);
         usleep(TD1);
 
-        /* DATA ON */
-        hwp->writeCrtc(hwp, 0x91, hwp->readCrtc(hwp, 0x91) | 0x08);
+        viaFPSetPrimarySoftData(pScrn, TRUE);
         usleep(TD2);
 
         /* VEE On (unused on vt3353) */
@@ -361,8 +360,7 @@ viaFPPrimarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
         viaFPSetPrimarySoftVEE(pScrn, FALSE);
         usleep(TD2);
 
-        /* DATA OFF */
-        hwp->writeCrtc(hwp, 0x91, hwp->readCrtc(hwp, 0x91) & 0xF7);
+        viaFPSetPrimarySoftData(pScrn, FALSE);
         usleep(TD1);
 
         /* VDD OFF */
