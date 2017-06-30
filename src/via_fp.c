@@ -330,14 +330,14 @@ viaFPCastleRockSoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
 static void
 viaFPPrimarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
 {
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaFPPrimarySoftPowerSeq.\n"));
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "viaFPPrimarySoftPowerSeq: %d\n", powerState));
+    /* Use software FP power sequence control. */
+    viaFPSetPrimaryPowerSeqType(pScrn, FALSE);
+
     if (powerState) {
-
-        /* Software control power sequence ON*/
-        hwp->writeCrtc(hwp, 0x91, hwp->readCrtc(hwp, 0x91) & 0x7F);
-        hwp->writeCrtc(hwp, 0x91, hwp->readCrtc(hwp, 0x91) | 0x01);
+        viaFPSetPrimaryDirectDisplayPeriodCtrl(pScrn, TRUE);
         usleep(TD0);
 
         viaFPSetPrimarySoftVDD(pScrn, TRUE);
@@ -363,7 +363,11 @@ viaFPPrimarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
         usleep(TD1);
 
         viaFPSetPrimarySoftVDD(pScrn, FALSE);
+        viaFPSetPrimaryDirectDisplayPeriodCtrl(pScrn, FALSE);
     }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaFPPrimarySoftPowerSeq.\n"));
 }
 
 static void
