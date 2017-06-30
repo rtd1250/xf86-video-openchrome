@@ -352,11 +352,9 @@ viaFPPrimarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
         hwp->writeCrtc(hwp, 0x91, hwp->readCrtc(hwp, 0x91) | 0x04);
         usleep(TD3);
 
-        /* Back-Light ON */
-        hwp->writeCrtc(hwp, 0x91, hwp->readCrtc(hwp, 0x91) | 0x02);
+        viaFPSetPrimarySoftBackLight(pScrn, TRUE);
     } else {
-        /* Back-Light OFF */
-        hwp->writeCrtc(hwp, 0x91, hwp->readCrtc(hwp, 0x91) & 0xFD);
+        viaFPSetPrimarySoftBackLight(pScrn, FALSE);
         usleep(TD3);
 
         /* VEE OFF (unused on vt3353)*/

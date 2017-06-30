@@ -590,6 +590,24 @@ viaFPSetPrimaryPowerSeqType(ScrnInfoPtr pScrn, Bool ctrlType)
 }
 
 /*
+ * Sets KM400 or later chipset's FP primary software controlled
+ * back light.
+ */
+static inline void
+viaFPSetPrimarySoftBackLight(ScrnInfoPtr pScrn, Bool softOn)
+{
+    /* 3X5.91[1] - FP Primary Software Back Light On
+     *             0: On
+     *             1: Off */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x91, softOn ? 0x00 : BIT(1),
+                BIT(1));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "FP Primary Software Controlled Back Light: "
+                        "%s\n",
+                        softOn ? "On" : "Off"));
+}
+
+/*
  * Sets KM400 or later chipset's FP primary direct back light control
  * bit.
  */
