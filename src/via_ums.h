@@ -868,24 +868,6 @@ viaLVDS1SetPowerSeq(ScrnInfoPtr pScrn, Bool ctrlType)
 }
 
 /*
- * Sets CX700 or later single chipset's LVDS1 software controlled
- * data path state.
- */
-static inline void
-viaLVDS1SetSoftData(ScrnInfoPtr pScrn, Bool softOn)
-{
-    /* Set LVDS1 software controlled data path state. */
-    /* 3X5.91[3] - Software Data On
-     *             0: Off
-     *             1: On */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0x91, softOn ? BIT(3) : 0,
-                BIT(3));
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "LVDS1 Software Controlled Data Path: %s\n",
-                        softOn ? "On" : "Off"));
-}
-
-/*
  * Sets CX700 or later single chipset's LVDS1 software controlled Vdd.
  */
 static inline void
