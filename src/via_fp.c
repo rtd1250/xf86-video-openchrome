@@ -106,7 +106,7 @@ static DisplayModeRec OLPCMode = {
 #define TD3 25
 
 static void
-viaFPIOPadState(ScrnInfoPtr pScrn, CARD8 diPort, Bool ioPadOn)
+viaFPIOPadState(ScrnInfoPtr pScrn, CARD16 diPort, Bool ioPadOn)
 {
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaFPIOPadState.\n"));
@@ -153,7 +153,7 @@ viaFPIOPadState(ScrnInfoPtr pScrn, CARD8 diPort, Bool ioPadOn)
 }
 
 static void
-viaFPFormat(ScrnInfoPtr pScrn, CARD8 diPort, CARD8 format)
+viaFPFormat(ScrnInfoPtr pScrn, CARD16 diPort, CARD8 format)
 {
     CARD8 temp = format & 0x01;
 
@@ -181,7 +181,7 @@ viaFPFormat(ScrnInfoPtr pScrn, CARD8 diPort, CARD8 format)
 }
 
 static void
-viaFPOutputFormat(ScrnInfoPtr pScrn, CARD8 diPort, CARD8 outputFormat)
+viaFPOutputFormat(ScrnInfoPtr pScrn, CARD16 diPort, CARD8 outputFormat)
 {
     CARD8 temp = outputFormat & 0x01;
 
@@ -209,7 +209,7 @@ viaFPOutputFormat(ScrnInfoPtr pScrn, CARD8 diPort, CARD8 outputFormat)
 }
 
 static void
-viaFPDithering(ScrnInfoPtr pScrn, CARD8 diPort, Bool dithering)
+viaFPDithering(ScrnInfoPtr pScrn, CARD16 diPort, Bool dithering)
 {
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaFPDithering.\n"));
@@ -235,7 +235,7 @@ viaFPDithering(ScrnInfoPtr pScrn, CARD8 diPort, Bool dithering)
 }
 
 static void
-viaFPDisplaySource(ScrnInfoPtr pScrn, CARD8 diPort, int index)
+viaFPDisplaySource(ScrnInfoPtr pScrn, CARD16 diPort, int index)
 {
     CARD8 displaySource = index & 0x01;
 
@@ -480,7 +480,7 @@ viaFPSecondaryHardPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
 }
 
 static void
-viaFPPower(ScrnInfoPtr pScrn, int Chipset, CARD8 diPortType, Bool powerState)
+viaFPPower(ScrnInfoPtr pScrn, int Chipset, CARD16 diPort, Bool powerState)
 {
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaFPPower.\n"));
@@ -504,12 +504,12 @@ viaFPPower(ScrnInfoPtr pScrn, int Chipset, CARD8 diPortType, Bool powerState)
          * VX800, CX700 have HW issue, so we'd better use SW power sequence.
          * Fix Ticket #308.
          */
-        if (diPortType & VIA_DI_PORT_LVDS1) {
+        if (diPort & VIA_DI_PORT_LVDS1) {
             viaFPPrimarySoftPowerSeq(pScrn, powerState);
             viaLVDS1SetPower(pScrn, powerState);
         }
 
-        if (diPortType & VIA_DI_PORT_LVDS2) {
+        if (diPort & VIA_DI_PORT_LVDS2) {
             ViaLVDSSoftwarePowerSecondSequence(pScrn, powerState);
             viaLVDS2SetPower(pScrn, powerState);
         }

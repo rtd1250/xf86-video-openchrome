@@ -263,12 +263,12 @@ typedef struct _VIAFP {
     Bool        scaleY;
     int         resY;
 
-    CARD8       diPort;
+    CARD16      diPort;
     CARD8       i2cBus;
 } VIAFPRec, *VIAFPPtr;
 
 typedef struct _VIATMDS {
-    CARD8       diPort;
+    CARD16      diPort;
     CARD8       i2cBus;
 } VIATMDSRec, *VIATMDSPtr;
 
