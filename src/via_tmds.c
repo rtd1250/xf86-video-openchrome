@@ -163,17 +163,17 @@ viaTMDSPower(ScrnInfoPtr pScrn, Bool powerState)
                         "Entered viaTMDSPower.\n"));
 
     if (powerState) {
-        viaLVDS1SetSoftDisplayPeriod(pScrn, TRUE);
-        viaLVDS1SetSoftData(pScrn, TRUE);
+        viaFPSetPrimaryDirectDisplayPeriod(pScrn, TRUE);
+        viaFPSetPrimarySoftData(pScrn, TRUE);
         viaTMDSSetPower(pScrn, TRUE);
     } else {
         viaTMDSSetPower(pScrn, FALSE);
-        viaLVDS1SetSoftData(pScrn, FALSE);
-        viaLVDS1SetSoftDisplayPeriod(pScrn, FALSE);
+        viaFPSetPrimarySoftData(pScrn, FALSE);
+        viaFPSetPrimaryDirectDisplayPeriod(pScrn, FALSE);
     }
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "DVI Monitor Power: %s\n",
+                "DVI Power: %s\n",
                 powerState ? "On" : "Off");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
