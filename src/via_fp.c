@@ -337,7 +337,7 @@ viaFPPrimarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
     viaFPSetPrimaryPowerSeqType(pScrn, FALSE);
 
     if (powerState) {
-        viaFPSetPrimaryDirectDisplayPeriodCtrl(pScrn, TRUE);
+        viaFPSetPrimaryDirectDisplayPeriod(pScrn, TRUE);
         usleep(TD0);
 
         viaFPSetPrimarySoftVDD(pScrn, TRUE);
@@ -363,7 +363,7 @@ viaFPPrimarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
         usleep(TD1);
 
         viaFPSetPrimarySoftVDD(pScrn, FALSE);
-        viaFPSetPrimaryDirectDisplayPeriodCtrl(pScrn, FALSE);
+        viaFPSetPrimaryDirectDisplayPeriod(pScrn, FALSE);
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -435,10 +435,10 @@ viaFPPrimaryHardPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
         viaFPSetPrimaryDirectBackLightCtrl(pScrn, TRUE);
 
         /* Make sure display period is turned on. */
-        viaFPSetPrimaryDirectDisplayPeriodCtrl(pScrn, TRUE);
+        viaFPSetPrimaryDirectDisplayPeriod(pScrn, TRUE);
     } else {
         /* Make sure display period is turned off. */
-        viaFPSetPrimaryDirectDisplayPeriodCtrl(pScrn, FALSE);
+        viaFPSetPrimaryDirectDisplayPeriod(pScrn, FALSE);
 
         /* Make sure back light is turned off. */
         viaFPSetPrimaryDirectBackLightCtrl(pScrn, FALSE);

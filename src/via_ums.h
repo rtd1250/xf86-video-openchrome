@@ -684,7 +684,7 @@ viaFPSetPrimaryDirectBackLightCtrl(ScrnInfoPtr pScrn, Bool directOn)
  * control bit.
  */
 static inline void
-viaFPSetPrimaryDirectDisplayPeriodCtrl(ScrnInfoPtr pScrn, Bool directOn)
+viaFPSetPrimaryDirectDisplayPeriod(ScrnInfoPtr pScrn, Bool directOn)
 {
     /* Set FP primary direct display period bit. */
     /* 3X5.91[7] - FP Primary Direct Display Period Control
