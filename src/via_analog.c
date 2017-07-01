@@ -373,7 +373,7 @@ via_analog_detect(xf86OutputPtr output)
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                 "VGA connector detected.\n");
 
-    if (pVIAAnalog->analogI2CBus & VIA_I2C_BUS1) {
+    if (pVIAAnalog->i2cBus & VIA_I2C_BUS1) {
         pI2CBus = pVIADisplay->pI2CBus1;
     } else {
         pI2CBus = NULL;
@@ -389,7 +389,7 @@ via_analog_detect(xf86OutputPtr output)
         }
     }
 
-    if (pVIAAnalog->analogI2CBus & VIA_I2C_BUS2) {
+    if (pVIAAnalog->i2cBus & VIA_I2C_BUS2) {
         pI2CBus = pVIADisplay->pI2CBus2;
     } else {
         pI2CBus = NULL;
@@ -549,7 +549,7 @@ viaAnalogInit(ScrnInfoPtr pScrn)
     pVIADisplay->numberVGA++;
 
     /* Hint about which I2C bus to access for obtaining EDID. */
-    pVIAAnalog->analogI2CBus = pVIADisplay->analogI2CBus;
+    pVIAAnalog->i2cBus = pVIADisplay->analogI2CBus;
 
     output->driver_private = pVIAAnalog;
 

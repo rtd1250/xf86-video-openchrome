@@ -232,7 +232,7 @@ typedef struct _VIADISPLAY {
 } VIADisplayRec, *VIADisplayPtr;
 
 typedef struct _VIAANALOG {
-    CARD8       analogI2CBus;
+    CARD8       i2cBus;
 } VIAAnalogRec, *VIAAnalogPtr;
 
 /*
