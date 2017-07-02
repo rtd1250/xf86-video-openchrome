@@ -348,12 +348,7 @@ static xf86OutputStatus
 via_analog_detect(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
-    xf86MonPtr pMon;
     xf86OutputStatus status = XF86OutputStatusDisconnected;
-    I2CBusPtr pI2CBus;
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
-    VIAAnalogPtr pVIAAnalog = (VIAAnalogPtr) output->driver_private;
     Bool connectorDetected;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -372,6 +367,25 @@ via_analog_detect(xf86OutputPtr output)
     status = XF86OutputStatusConnected;
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                 "VGA connector detected.\n");
+exit:
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting via_analog_detect.\n"));
+    return status;
+}
+
+static DisplayModePtr
+via_analog_get_modes(xf86OutputPtr output)
+{
+    ScrnInfoPtr pScrn = output->scrn;
+    xf86MonPtr pMon;
+    DisplayModePtr pDisplay_Mode = NULL;
+    I2CBusPtr pI2CBus;
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
+    VIAAnalogPtr pVIAAnalog = (VIAAnalogPtr) output->driver_private;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered via_analog_get_modes.\n"));
 
     if (pVIAAnalog->i2cBus & VIA_I2C_BUS1) {
         pI2CBus = pVIADisplay->pI2CBus1;
@@ -383,6 +397,7 @@ via_analog_detect(xf86OutputPtr output)
         pMon = xf86OutputGetEDID(output, pI2CBus);
         if (pMon && (!pMon->features.input_type)) {
             xf86OutputSetEDID(output, pMon);
+            pDisplay_Mode = xf86OutputGetEDIDModes(output);
             xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                         "Detected a monitor connected to VGA.\n");
             goto exit;
@@ -398,8 +413,8 @@ via_analog_detect(xf86OutputPtr output)
     if (pI2CBus) {
         pMon = xf86OutputGetEDID(output, pI2CBus);
         if (pMon && (!pMon->features.input_type)) {
-            status = XF86OutputStatusConnected;
             xf86OutputSetEDID(output, pMon);
+            pDisplay_Mode = xf86OutputGetEDIDModes(output);
             xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                         "Detected a monitor connected to VGA.\n");
             goto exit;
@@ -408,8 +423,8 @@ via_analog_detect(xf86OutputPtr output)
 
 exit:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting via_analog_detect.\n"));
-    return status;
+                        "Exiting via_analog_get_modes.\n"));
+    return pDisplay_Mode;
 }
 
 #ifdef RANDR_12_INTERFACE
@@ -445,7 +460,7 @@ static const xf86OutputFuncsRec via_analog_funcs = {
     .commit             = via_analog_commit,
     .mode_set           = via_analog_mode_set,
     .detect             = via_analog_detect,
-    .get_modes          = xf86OutputGetEDIDModes,
+    .get_modes          = via_analog_get_modes,
 #ifdef RANDR_12_INTERFACE
     .set_property       = via_analog_set_property,
 #endif
