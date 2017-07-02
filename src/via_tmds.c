@@ -107,6 +107,8 @@ viaTMDSInitReg(ScrnInfoPtr pScrn)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaTMDSInitReg.\n"));
 
+    viaFPSetPrimarySoftData(pScrn, FALSE);
+
     /* Activate DVI + LVDS2 mode. */
     /* 3X5.D2[5:4] - Display Channel Select
      *               00: LVDS1 + LVDS2
@@ -164,11 +166,9 @@ viaTMDSPower(ScrnInfoPtr pScrn, Bool powerState)
 
     if (powerState) {
         viaFPSetPrimaryDirectDisplayPeriod(pScrn, TRUE);
-        viaFPSetPrimarySoftData(pScrn, TRUE);
         viaTMDSSetPower(pScrn, TRUE);
     } else {
         viaTMDSSetPower(pScrn, FALSE);
-        viaFPSetPrimarySoftData(pScrn, FALSE);
         viaFPSetPrimaryDirectDisplayPeriod(pScrn, FALSE);
     }
 
