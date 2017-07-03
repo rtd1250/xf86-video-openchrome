@@ -164,12 +164,17 @@ viaTMDSPower(ScrnInfoPtr pScrn, Bool powerState)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaTMDSPower.\n"));
 
+    /* Use hardware FP power sequence control. */
+    viaFPSetPrimaryPowerSeqType(pScrn, TRUE);
+
     if (powerState) {
-        viaFPSetPrimaryDirectDisplayPeriod(pScrn, TRUE);
+        viaFPSetPrimaryHardPower(pScrn, TRUE);
         viaTMDSSetPower(pScrn, TRUE);
+        viaFPSetPrimaryDirectDisplayPeriod(pScrn, TRUE);
     } else {
-        viaTMDSSetPower(pScrn, FALSE);
         viaFPSetPrimaryDirectDisplayPeriod(pScrn, FALSE);
+        viaTMDSSetPower(pScrn, FALSE);
+        viaFPSetPrimaryHardPower(pScrn, FALSE);
     }
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
