@@ -107,7 +107,18 @@ viaTMDSInitReg(ScrnInfoPtr pScrn)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaTMDSInitReg.\n"));
 
+    /* Turn off hardware controlled FP power on / off circuit. */
+    viaFPSetPrimaryHardPower(pScrn, FALSE);
+
+    /* Use software FP power sequence control. */
+    viaFPSetPrimaryPowerSeqType(pScrn, FALSE);
+
+    /* Turn off software controlled primary FP (LVDS1) power rails. */
+    viaFPSetPrimarySoftVDD(pScrn, FALSE);
     viaFPSetPrimarySoftData(pScrn, FALSE);
+    viaFPSetPrimarySoftVEE(pScrn, FALSE);
+    viaFPSetPrimarySoftBackLight(pScrn, FALSE);
+    viaFPSetPrimaryDirectBackLightCtrl(pScrn, FALSE);
 
     /* Activate DVI + LVDS2 mode. */
     /* 3X5.D2[5:4] - Display Channel Select
@@ -164,17 +175,12 @@ viaTMDSPower(ScrnInfoPtr pScrn, Bool powerState)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaTMDSPower.\n"));
 
-    /* Use hardware FP power sequence control. */
-    viaFPSetPrimaryPowerSeqType(pScrn, TRUE);
-
     if (powerState) {
-        viaFPSetPrimaryHardPower(pScrn, TRUE);
-        viaTMDSSetPower(pScrn, TRUE);
         viaFPSetPrimaryDirectDisplayPeriod(pScrn, TRUE);
+        viaTMDSSetPower(pScrn, TRUE);
     } else {
-        viaFPSetPrimaryDirectDisplayPeriod(pScrn, FALSE);
         viaTMDSSetPower(pScrn, FALSE);
-        viaFPSetPrimaryHardPower(pScrn, FALSE);
+        viaFPSetPrimaryDirectDisplayPeriod(pScrn, FALSE);
     }
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
