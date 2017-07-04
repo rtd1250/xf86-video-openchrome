@@ -386,9 +386,8 @@ viaFPSecondarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
         viaFPSetSecondaryHardPower(pScrn, FALSE);
 
         usleep(TD0);
+        viaFPSetSecondarySoftVDD(pScrn, TRUE);
 
-        /* VDD ON*/
-        hwp->writeCrtc(hwp, 0xD3, hwp->readCrtc(hwp, 0xD3) | 0x10);
         usleep(TD1);
 
         /* DATA ON */
@@ -413,11 +412,10 @@ viaFPSecondarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
 
         /* DATA OFF */
         hwp->writeCrtc(hwp, 0xD3, hwp->readCrtc(hwp, 0xD3) & 0xF7);
+
         /* Delay TD1 msec. */
         usleep(TD1);
-
-        /* VDD OFF */
-        hwp->writeCrtc(hwp, 0xD3, hwp->readCrtc(hwp, 0xD3) & 0xEF);
+        viaFPSetSecondarySoftVDD(pScrn, FALSE);
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,

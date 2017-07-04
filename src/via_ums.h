@@ -740,6 +740,23 @@ viaFPSetSecondaryPowerSeqType(ScrnInfoPtr pScrn, Bool ctrlType)
 }
 
 /*
+ * Sets CX700 / VX700 or later chipset's FP secondary software
+ * controlled VDD.
+ */
+static inline void
+viaFPSetSecondarySoftVDD(ScrnInfoPtr pScrn, Bool softOn)
+{
+    /* 3X5.D3[4] - FP Secondary Software VDD On
+     *             0: On
+     *             1: Off */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0xD3,
+                softOn ? 0x00 : BIT(4), BIT(4));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "FP Secondary Software Controlled VDD: %s\n",
+                        softOn ? "On" : "Off"));
+}
+
+/*
  * Sets FP secondary hardware controlled power sequence enable bit.
  */
 static inline void
