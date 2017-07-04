@@ -371,12 +371,14 @@ viaFPPrimarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
 }
 
 static void
-ViaLVDSSoftwarePowerSecondSequence(ScrnInfoPtr pScrn, Bool on)
+viaFPSecondarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaLVDSSoftwarePowerSecondSequence: %d\n", on));
-    if (on) {
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaFPSecondarySoftPowerSeq.\n"));
+
+    if (powerState) {
         /* Secondary power hardware power sequence enable 0:off 1: on */
         hwp->writeCrtc(hwp, 0xD4, hwp->readCrtc(hwp, 0xD4) & 0xFD);
 
@@ -416,6 +418,9 @@ ViaLVDSSoftwarePowerSecondSequence(ScrnInfoPtr pScrn, Bool on)
         /* VDD OFF */
         hwp->writeCrtc(hwp, 0xD3, hwp->readCrtc(hwp, 0xD3) & 0xEF);
     }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaFPSecondarySoftPowerSeq.\n"));
 }
 
 static void
@@ -510,7 +515,7 @@ viaFPPower(ScrnInfoPtr pScrn, int Chipset, CARD16 diPort, Bool powerState)
         }
 
         if (diPort & VIA_DI_PORT_LVDS2) {
-            ViaLVDSSoftwarePowerSecondSequence(pScrn, powerState);
+            viaFPSecondarySoftPowerSeq(pScrn, powerState);
             viaLVDS2SetPower(pScrn, powerState);
         }
 
