@@ -379,8 +379,8 @@ viaFPSecondarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
                         "Entered viaFPSecondarySoftPowerSeq.\n"));
 
     if (powerState) {
-        /* Secondary power hardware power sequence enable 0:off 1: on */
-        hwp->writeCrtc(hwp, 0xD4, hwp->readCrtc(hwp, 0xD4) & 0xFD);
+        /* Turn off hardware power sequence. */
+        viaFPSetSecondaryHardPower(pScrn, FALSE);
 
         /* Software control power sequence ON */
         hwp->writeCrtc(hwp, 0xD3, hwp->readCrtc(hwp, 0xD3) | 0x01);
@@ -470,11 +470,13 @@ viaFPSecondaryHardPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
     if (powerState) {
         /* Turn on back light. */
         hwp->writeCrtc(hwp, 0xD3, hwp->readCrtc(hwp, 0xD3) & 0x3F);
+
         /* Turn on hardware power sequence. */
-        hwp->writeCrtc(hwp, 0xD4, hwp->readCrtc(hwp, 0xD4) | 0x02);
+        viaFPSetSecondaryHardPower(pScrn, TRUE);
     } else {
-        /* Turn off power sequence. */
-        hwp->writeCrtc(hwp, 0xD4, hwp->readCrtc(hwp, 0xD4) & 0xFD);
+        /* Turn off hardware power sequence. */
+        viaFPSetSecondaryHardPower(pScrn, FALSE);
+
         usleep(1);
         /* Turn off back light. */
         hwp->writeCrtc(hwp, 0xD3, 0xC0);

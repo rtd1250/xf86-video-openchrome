@@ -734,6 +734,23 @@ viaFPSetSecondaryPowerSeqType(ScrnInfoPtr pScrn, Bool ctrlType)
 }
 
 /*
+ * Sets FP secondary hardware controlled power sequence enable bit.
+ */
+static inline void
+viaFPSetSecondaryHardPower(ScrnInfoPtr pScrn, Bool powerState)
+{
+    /* 3X5.D4[1] - Secondary Power Hardware Power Sequence Enable
+     *             0: Off
+     *             1: On */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0xD4,
+                powerState ? BIT(1) : 0x00, BIT(1));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "FP Secondary Hardware Controlled Power "
+                        "Sequence: %s\n",
+                        powerState ? "On" : "Off"));
+}
+
+/*
  * Sets FPDP (Flat Panel Display Port) Low I/O pad state.
  */
 static inline void
