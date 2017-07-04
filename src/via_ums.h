@@ -480,6 +480,39 @@ viaDVP1SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
 }
 
 /*
+ * Sets analog (VGA) DAC power.
+ */
+static inline void
+viaAnalogSetPower(ScrnInfoPtr pScrn, Bool outputState)
+{
+    /* 3X5.47[2] - DACOFF Backdoor Register
+     *             0: DAC on
+     *             1: DAC off */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x47,
+                outputState ? 0x00 : BIT(2), BIT(2));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Analog (VGA) Power: %s\n",
+                        outputState ? "On" : "Off"));
+}
+
+/*
+ * Sets analog (VGA) DAC off setting.
+ * Only available in CX700 / VX700, VX800, VX855, and VX900 chipsets.
+ */
+static inline void
+viaAnalogSetDACOff(ScrnInfoPtr pScrn, Bool dacOff)
+{
+    /* 3C5.5E[0] - CRT DACOFF Setting
+     *             0: Disabled
+     *             1: DAC is controlled by 3C5.01[5] */
+    ViaSeqMask(VGAHWPTR(pScrn), 0x5E,
+                dacOff ? BIT(0) : 0x00, BIT(0));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Analog (VGA) DAC Off Setting: %s\n",
+                        dacOff ? "On" : "Off"));
+}
+
+/*
  * Sets analog (VGA) DPMS State.
  */
 static inline void
@@ -490,36 +523,25 @@ viaAnalogSetDPMSControl(ScrnInfoPtr pScrn, CARD8 dpmsControl)
      *               01: Stand-by
      *               10: Suspend
      *               11: Off */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0x36, dpmsControl << 4,
-                BIT(5) | BIT(4));
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x36,
+                    dpmsControl << 4, BIT(5) | BIT(4));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Analog (VGA) DPMS: %s\n",
-                        ((dpmsControl & (BIT(1) | BIT(0))) == 0x03) ? "Off" :
-                        ((dpmsControl & (BIT(1) | BIT(0))) == 0x02) ? "Suspend" :
-                        ((dpmsControl & (BIT(1) | BIT(0))) == 0x01) ? "Standby" :
-                                                                      "On"));
+                        ((dpmsControl & (BIT(1) | BIT(0))) == 0x03) ?
+                            "Off" :
+                        ((dpmsControl & (BIT(1) | BIT(0))) == 0x02) ?
+                            "Suspend" :
+                        ((dpmsControl & (BIT(1) | BIT(0))) == 0x01) ?
+                            "Standby" :
+                            "On"));
 }
 
 /*
- * Sets analog (VGA) power.
+ * Sets analog (VGA) sync polarity.
  */
-static inline void
-viaAnalogSetPower(ScrnInfoPtr pScrn, Bool outputState)
-{
-    /* 3X5.47[2] - DACOFF Backdoor Register
-     *             0: DAC on
-     *             1: DAC off */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0x47, outputState ? 0x00 : BIT(2),
-                BIT(2));
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Analog (VGA) Power: %s\n",
-                        outputState ? "On" : "Off"));
-}
-
 static inline void
 viaAnalogSetSyncPolarity(ScrnInfoPtr pScrn, CARD8 syncPolarity)
 {
-    /* Set analog (VGA) sync polarity. */
     /* 3C2[7] - Analog Vertical Sync Polarity
      *          0: Positive
      *          1: Negative
@@ -544,30 +566,14 @@ viaAnalogSetSyncPolarity(ScrnInfoPtr pScrn, CARD8 syncPolarity)
 static inline void
 viaAnalogSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
 {
-    /* Set analog (VGA) display source. */
     /* 3C5.16[6] - CRT Display Source
      *             0: Primary Display Stream (IGA1)
      *             1: Secondary Display Stream (IGA2) */
-    ViaSeqMask(VGAHWPTR(pScrn), 0x16, displaySource << 6, BIT(6));
+    ViaSeqMask(VGAHWPTR(pScrn), 0x16,
+                displaySource << 6, BIT(6));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Analog (VGA) Display Source: IGA%d\n",
                         (displaySource & 0x01) + 1));
-}
-
-/*
- * Sets analog (VGA) DAC off setting.
- * Only available in CX700 / VX700, VX800, VX855, and VX900 chipsets.
- */
-static inline void
-viaAnalogSetDACOff(ScrnInfoPtr pScrn, Bool dacOff)
-{
-    /* 3C5.5E[0] - CRT DACOFF Setting
-     *             0: Disabled
-     *             1: DAC is controlled by 3C5.01[5] */
-    ViaSeqMask(VGAHWPTR(pScrn), 0x5E, dacOff ? BIT(0) : 0x00, BIT(0));
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Analog (VGA) DAC Off Setting: %s\n",
-                        dacOff ? "On" : "Off"));
 }
 
 /*
@@ -761,13 +767,17 @@ viaFPDPLowSetIOPadState(ScrnInfoPtr pScrn, CARD8 ioPadState)
      *               10: Depend on the other control signal
      *               11: Pad on/off according to the
      *                   Power Management Status (PMS) */
-    ViaSeqMask(VGAHWPTR(pScrn), 0x2A, ioPadState, BIT(1) | BIT(0));
+    ViaSeqMask(VGAHWPTR(pScrn), 0x2A,
+                ioPadState, BIT(1) | BIT(0));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "FPDP Low I/O Pad State: %s\n",
-                        ((ioPadState & (BIT(1) | BIT(0))) == 0x03) ? "On" :
-                        ((ioPadState & (BIT(1) | BIT(0))) == 0x02) ? "Conditional" :
-                        ((ioPadState & (BIT(1) | BIT(0))) == 0x01) ? "Off" :
-                                                                     "Off"));
+                        ((ioPadState & (BIT(1) | BIT(0))) == 0x03) ?
+                            "On" :
+                        ((ioPadState & (BIT(1) | BIT(0))) == 0x02) ?
+                            "Conditional" :
+                        ((ioPadState & (BIT(1) | BIT(0))) == 0x01) ?
+                            "Off" :
+                            "Off"));
 }
 
 /*
@@ -777,8 +787,8 @@ static inline void
 viaFPDPLowSetDelayTap(ScrnInfoPtr pScrn, CARD8 delayTap)
 {
     /* 3X5.99[3:0] - FPDP Low Delay Tap */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0x99, delayTap,
-                BIT(3) | BIT(2) | BIT(1) | BIT(0));
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x99,
+                delayTap, BIT(3) | BIT(2) | BIT(1) | BIT(0));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "FPDP Low Delay Tap: %d\n",
                         (delayTap & (BIT(3) | BIT(2) |
@@ -794,14 +804,15 @@ viaFPDPLowSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
     /* 3X5.99[4] - FPDP Low Data Source Selection
      *             0: Primary Display
      *             1: Secondary Display */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0x99, displaySource << 4, BIT(4));
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x99,
+                displaySource << 4, BIT(4));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "FPDP Low Display Source: IGA%d\n",
                         (displaySource & 0x01) + 1));
 }
 
 /*
- * Sets FPDP (Flat Panel Display Port) High I/O pad state
+ * Sets FPDP (Flat Panel Display Port) High I/O pad state.
  */
 static inline void
 viaFPDPHighSetIOPadState(ScrnInfoPtr pScrn, CARD8 ioPadState)
@@ -811,13 +822,17 @@ viaFPDPHighSetIOPadState(ScrnInfoPtr pScrn, CARD8 ioPadState)
      *               10: Depend on the other control signal
      *               11: Pad on/off according to the
      *                   Power Management Status (PMS) */
-    ViaSeqMask(VGAHWPTR(pScrn), 0x2A, ioPadState << 2, BIT(3) | BIT(2));
+    ViaSeqMask(VGAHWPTR(pScrn), 0x2A,
+                ioPadState << 2, BIT(3) | BIT(2));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "FPDP High I/O Pad State: %s\n",
-                        ((ioPadState & (BIT(1) | BIT(0))) == 0x03) ? "On" :
-                        ((ioPadState & (BIT(1) | BIT(0))) == 0x02) ? "Conditional" :
-                        ((ioPadState & (BIT(1) | BIT(0))) == 0x01) ? "Off" :
-                                                                     "Off"));
+                        ((ioPadState & (BIT(1) | BIT(0))) == 0x03) ?
+                            "On" :
+                        ((ioPadState & (BIT(1) | BIT(0))) == 0x02) ?
+                            "Conditional" :
+                        ((ioPadState & (BIT(1) | BIT(0))) == 0x01) ?
+                            "Off" :
+                            "Off"));
 }
 
 /*
@@ -844,24 +859,24 @@ viaFPDPHighSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
     /* 3X5.97[4] - FPDP High Data Source Selection
      *             0: Primary Display
      *             1: Secondary Display */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0x97, displaySource << 4, BIT(4));
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x97,
+                displaySource << 4, BIT(4));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "FPDP High Display Source: IGA%d\n",
                         (displaySource & 0x01) + 1));
 }
 
 /*
- * Sets CX700 or later chipset's LVDS1 power state.
+ * Sets LVDS1 power state.
  */
 static inline void
 viaLVDS1SetPower(ScrnInfoPtr pScrn, Bool powerState)
 {
-    /* Set LVDS1 power state. */
     /* 3X5.D2[7] - Power Down (Active High) for Channel 1 LVDS
      *             0: LVDS1 power on
      *             1: LVDS1 power down */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0xD2, powerState ? 0x00 : BIT(7),
-                BIT(7));
+    ViaCrtcMask(VGAHWPTR(pScrn), 0xD2,
+                powerState ? 0x00 : BIT(7), BIT(7));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "LVDS1 Power State: %s\n",
                         powerState ? "On" : "Off"));
@@ -902,16 +917,27 @@ viaLVDS1SetSoftVdd(ScrnInfoPtr pScrn, Bool softOn)
 }
 
 /*
- * Sets CX700 or later single chipset's LVDS1 I/O pad state.
+ * Sets LVDS1 I/O pad state.
  */
 static inline void
 viaLVDS1SetIOPadSetting(ScrnInfoPtr pScrn, CARD8 ioPadState)
 {
-    /* 3C5.2A[1:0] - LVDS1 I/O Pad Control */
-    ViaSeqMask(VGAHWPTR(pScrn), 0x2A, ioPadState, BIT(1) | BIT(0));
+    /* 3C5.2A[1:0] - LVDS1 I/O Pad Control
+     *               0x: Pad always off
+     *               10: Depend on the other control signal
+     *               11: Pad on/off according to the
+     *                   Power Management Status (PMS) */
+    ViaSeqMask(VGAHWPTR(pScrn), 0x2A,
+                ioPadState, BIT(1) | BIT(0));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "LVDS1 I/O Pad State: %d\n",
-                        (ioPadState & (BIT(1) | BIT(0)))));
+                        "LVDS1 I/O Pad State: %s\n",
+            ((ioPadState & (BIT(1) | BIT(0))) == 0x03) ?
+                "On" :
+            ((ioPadState & (BIT(1) | BIT(0))) == 0x02) ?
+                "Conditional" :
+            ((ioPadState & (BIT(1) | BIT(0))) == 0x01) ?
+                "Off" :
+                "Off"));
 }
 
 /*
@@ -923,7 +949,8 @@ viaLVDS1SetFormat(ScrnInfoPtr pScrn, CARD8 format)
     /* 3X5.D2[1] - LVDS Channel 1 Format Selection
      *             0: SPWG Mode
      *             1: OPENLDI Mode */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0xD2, format << 1, BIT(1));
+    ViaCrtcMask(VGAHWPTR(pScrn), 0xD2,
+                format << 1, BIT(1));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "LVDS1 Format: %s\n",
                         (format & BIT(0)) ? "OPENLDI" : "SPWG"));
@@ -938,10 +965,12 @@ viaLVDS1SetOutputFormat(ScrnInfoPtr pScrn, CARD8 outputFormat)
     /* 3X5.88[6] - LVDS Channel 1 Output Format
      *             0: Rotation
      *             1: Sequential */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0x88, outputFormat << 6, BIT(6));
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x88,
+                outputFormat << 6, BIT(6));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "LVDS1 Output Format: %s\n",
-                        (outputFormat & BIT(0)) ? "Sequential" : "Rotation"));
+                        (outputFormat & BIT(0)) ?
+                        "Sequential" : "Rotation"));
 }
 
 /*
@@ -954,54 +983,68 @@ viaLVDS1SetDithering(ScrnInfoPtr pScrn, Bool dithering)
     /* 3X5.88[0] - LVDS Channel 1 Output Bits
      *             0: 24 bits (dithering off)
      *             1: 18 bits (dithering on) */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0x88, dithering ? BIT(0) : 0x00, BIT(0));
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x88,
+                dithering ? BIT(0) : 0x00, BIT(0));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "LVDS1 Color Dithering: %s\n",
-                        dithering ? "On (18 bit color)" : "Off (24 bit color)"));
+                        dithering ?
+                        "On (18 bit color)" : "Off (24 bit color)"));
 }
 
-/* Sets CX700 or later single chipset's LVDS1 display source. */
+/*
+ * Sets LVDS1 display source.
+ */
 static inline void
 viaLVDS1SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
 {
     /* 3X5.99[4] - LVDS Channel 1 Data Source Selection
      *             0: Primary Display
      *             1: Secondary Display */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0x99, displaySource << 4, BIT(4));
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x99,
+                displaySource << 4, BIT(4));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "LVDS1 Display Source: IGA%d\n",
                         (displaySource & 0x01) + 1));
 }
 
 /*
- * Sets CX700 / VX700 and VX800 chipsets' LVDS2 power state.
+ * Sets LVDS2 power state.
  */
 static inline void
 viaLVDS2SetPower(ScrnInfoPtr pScrn, Bool powerState)
 {
-    /* Set LVDS2 power state. */
     /* 3X5.D2[6] - Power Down (Active High) for Channel 2 LVDS
      *             0: LVDS2 power on
      *             1: LVDS2 power down */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0xD2, powerState ? 0x00 : BIT(6),
-                BIT(6));
+    ViaCrtcMask(VGAHWPTR(pScrn), 0xD2,
+                powerState ? 0x00 : BIT(6), BIT(6));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "LVDS2 Power State: %s\n",
                         powerState ? "On" : "Off"));
 }
 
 /*
- * Sets CX700 or later single chipset's LVDS2 I/O pad state.
+ * Sets LVDS2 I/O pad state.
  */
 static inline void
 viaLVDS2SetIOPadSetting(ScrnInfoPtr pScrn, CARD8 ioPadState)
 {
-    /* Set LVDS2 I/O pad state. */
-    /* 3C5.2A[3:2] - LVDS2 I/O Pad Control */
-    ViaSeqMask(VGAHWPTR(pScrn), 0x2A, ioPadState << 2, 0x0C);
+    /* 3C5.2A[3:2] - LVDS2 I/O Pad Control
+     *               0x: Pad always off
+     *               10: Depend on the other control signal
+     *               11: Pad on/off according to the
+     *                   Power Management Status (PMS) */
+    ViaSeqMask(VGAHWPTR(pScrn), 0x2A,
+                ioPadState << 2, BIT(3) | BIT(2));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "LVDS2 I/O Pad State: %d\n",
-                        (ioPadState & 0x03)));
+                        "LVDS2 I/O Pad State: %s\n",
+                        ((ioPadState & (BIT(1) | BIT(0))) == 0x03) ?
+                            "On" :
+                        ((ioPadState & (BIT(1) | BIT(0))) == 0x02) ?
+                            "Conditional" :
+                        ((ioPadState & (BIT(1) | BIT(0))) == 0x01) ?
+                            "Off" :
+                            "Off"));
 }
 
 /*
@@ -1051,7 +1094,7 @@ viaLVDS2SetDithering(ScrnInfoPtr pScrn, Bool dithering)
 }
 
 /*
- * Sets CX700 or later single chipset's LVDS2 display source.
+ * Sets LVDS2 display source.
  */
 static inline void
 viaLVDS2SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
@@ -1059,7 +1102,8 @@ viaLVDS2SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
     /* 3X5.97[4] - LVDS Channel 2 Data Source Selection
      *             0: Primary Display
      *             1: Secondary Display */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0x97, displaySource << 4, BIT(4));
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x97,
+                displaySource << 4, BIT(4));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "LVDS2 Display Source: IGA%d\n",
                         (displaySource & 0x01) + 1));
@@ -1071,12 +1115,11 @@ viaLVDS2SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
 static inline void
 viaTMDSSetPower(ScrnInfoPtr pScrn, Bool powerState)
 {
-    /* Set TMDS (DVI) power state. */
     /* 3X5.D2[3] - Power Down (Active High) for DVI
      *             0: TMDS power on
      *             1: TMDS power down */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0xD2, powerState ? 0 : BIT(3),
-                BIT(3));
+    ViaCrtcMask(VGAHWPTR(pScrn), 0xD2,
+                powerState ? 0x00 : BIT(3), BIT(3));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "TMDS (DVI) Power State: %s\n",
                         powerState ? "On" : "Off"));
@@ -1095,7 +1138,8 @@ viaTMDSSetSyncPolarity(ScrnInfoPtr pScrn, CARD8 syncPolarity)
      * 3X5.97[5] - DVI (TMDS) HSYNC Polarity
      *             0: Positive
      *             1: Negative */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0x97, syncPolarity << 5, BIT(6) | BIT(5));
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x97,
+                syncPolarity << 5, BIT(6) | BIT(5));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "TMDS (DVI) Horizontal Sync Polarity: %s\n",
                         (syncPolarity & BIT(0)) ? "-" : "+"));
@@ -1116,7 +1160,8 @@ viaTMDSSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
     /* 3X5.99[4] - LVDS Channel1 Data Source Selection
      *             0: Primary Display
      *             1: Secondary Display */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0x99, displaySource << 4, BIT(4));
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x99,
+                displaySource << 4, BIT(4));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "TMDS (DVI) Display Source: IGA%d\n",
                         (displaySource & 0x01) + 1));
