@@ -378,12 +378,13 @@ viaFPSecondarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaFPSecondarySoftPowerSeq.\n"));
 
+    /* Use software FP power sequence control. */
+    viaFPSetSecondaryPowerSeqType(pScrn, FALSE);
+
     if (powerState) {
         /* Turn off hardware power sequence. */
         viaFPSetSecondaryHardPower(pScrn, FALSE);
 
-        /* Software control power sequence ON */
-        hwp->writeCrtc(hwp, 0xD3, hwp->readCrtc(hwp, 0xD3) | 0x01);
         usleep(TD0);
 
         /* VDD ON*/
