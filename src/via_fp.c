@@ -382,32 +382,52 @@ viaFPSecondarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
     viaFPSetSecondaryPowerSeqType(pScrn, FALSE);
 
     if (powerState) {
-        /* Turn off hardware power sequence. */
+        /* Turn off FP hardware power sequence. */
         viaFPSetSecondaryHardPower(pScrn, FALSE);
 
+        /* Wait for TD0 ms. */
         usleep(TD0);
+
+        /* Turn on FP VDD rail. */
         viaFPSetSecondarySoftVDD(pScrn, TRUE);
 
+        /* Wait for TD1 ms. */
         usleep(TD1);
+
+        /* Turn on FP data transmission. */
         viaFPSetSecondarySoftData(pScrn, TRUE);
 
+        /* Wait for TD2 ms. */
         usleep(TD2);
+
+        /* Turn on FP VEE rail. */
         viaFPSetSecondarySoftVEE(pScrn, TRUE);
 
+        /* Wait for TD3 ms. */
         usleep(TD3);
+
+        /* Turn on FP back light. */
         viaFPSetSecondarySoftBackLight(pScrn, TRUE);
     } else {
+        /* Turn off FP back light. */
         viaFPSetSecondarySoftBackLight(pScrn, FALSE);
 
+        /* Wait for TD3 ms. */
         usleep(TD3);
+
+        /* Turn off FP VEE rail. */
         viaFPSetSecondarySoftVEE(pScrn, FALSE);
 
-        /* Delay TD2 msec. */
+        /* Wait for TD2 ms. */
         usleep(TD2);
+
+        /* Turn off FP data transmission. */
         viaFPSetSecondarySoftData(pScrn, FALSE);
 
-        /* Delay TD1 msec. */
+        /* Wait for TD1 ms. */
         usleep(TD1);
+
+        /* Turn off FP VDD rail. */
         viaFPSetSecondarySoftVDD(pScrn, FALSE);
     }
 
