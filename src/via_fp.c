@@ -395,12 +395,9 @@ viaFPSecondarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
         viaFPSetSecondarySoftVEE(pScrn, TRUE);
 
         usleep(TD3);
-
-        /* Back-Light ON */
-        hwp->writeCrtc(hwp, 0xD3, hwp->readCrtc(hwp, 0xD3) | 0x02);
+        viaFPSetSecondarySoftBackLight(pScrn, TRUE);
     } else {
-        /* Back-Light OFF */
-        hwp->writeCrtc(hwp, 0xD3, hwp->readCrtc(hwp, 0xD3) & 0xFD);
+        viaFPSetSecondarySoftBackLight(pScrn, FALSE);
 
         usleep(TD3);
         viaFPSetSecondarySoftVEE(pScrn, FALSE);

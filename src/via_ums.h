@@ -740,6 +740,23 @@ viaFPSetSecondaryPowerSeqType(ScrnInfoPtr pScrn, Bool ctrlType)
 }
 
 /*
+ * Sets CX700 / VX700 or later chipset's FP secondary
+ * software controlled back light.
+ */
+static inline void
+viaFPSetSecondarySoftBackLight(ScrnInfoPtr pScrn, Bool softOn)
+{
+    /* 3X5.D3[1] - FP Secondary Software Back Light On
+     *             0: On
+     *             1: Off */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0xD3,
+                softOn ? 0x00 : BIT(1), BIT(1));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "FP Secondary Software Controlled "
+                        "Back Light: %s\n", softOn ? "On" : "Off"));
+}
+
+/*
  * Sets CX700 / VX700 or later chipset's FP secondary software
  * controlled VEE.
  */
