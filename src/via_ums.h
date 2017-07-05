@@ -741,6 +741,23 @@ viaFPSetSecondaryPowerSeqType(ScrnInfoPtr pScrn, Bool ctrlType)
 
 /*
  * Sets CX700 / VX700 or later chipset's FP secondary software
+ * controlled VEE.
+ */
+static inline void
+viaFPSetSecondarySoftVEE(ScrnInfoPtr pScrn, Bool softOn)
+{
+    /* 3X5.D3[2] - FP Secondary Software VEE On
+     *             0: On
+     *             1: Off */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0xD3,
+                softOn ? 0x00 : BIT(2), BIT(2));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "FP Secondary Software Controlled VEE: %s\n",
+                        softOn ? "On" : "Off"));
+}
+
+/*
+ * Sets CX700 / VX700 or later chipset's FP secondary software
  * controlled data.
  */
 static inline void

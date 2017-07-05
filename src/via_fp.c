@@ -392,9 +392,8 @@ viaFPSecondarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
         viaFPSetSecondarySoftData(pScrn, TRUE);
 
         usleep(TD2);
+        viaFPSetSecondarySoftVEE(pScrn, TRUE);
 
-        /* VEE ON (unused on vt3353)*/
-        hwp->writeCrtc(hwp, 0xD3, hwp->readCrtc(hwp, 0xD3) | 0x04);
         usleep(TD3);
 
         /* Back-Light ON */
@@ -402,10 +401,9 @@ viaFPSecondarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
     } else {
         /* Back-Light OFF */
         hwp->writeCrtc(hwp, 0xD3, hwp->readCrtc(hwp, 0xD3) & 0xFD);
-        usleep(TD3);
 
-        /* VEE OFF */
-        hwp->writeCrtc(hwp, 0xD3, hwp->readCrtc(hwp, 0xD3) & 0xFB);
+        usleep(TD3);
+        viaFPSetSecondarySoftVEE(pScrn, FALSE);
 
         /* Delay TD2 msec. */
         usleep(TD2);
