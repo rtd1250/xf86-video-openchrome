@@ -808,6 +808,23 @@ viaFPSetSecondarySoftVDD(ScrnInfoPtr pScrn, Bool softOn)
 }
 
 /*
+ * Sets CX700 / VX700 or later chipset's FP secondary direct back
+ * light control.
+ */
+static inline void
+viaFPSetSecondaryDirectBackLightCtrl(ScrnInfoPtr pScrn, Bool directOn)
+{
+    /* 3X5.D3[6] - FP Secondary Direct Back Light Control
+     *             0: On
+     *             1: Off */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0xD3,
+                directOn ? 0x00 : BIT(6), BIT(6));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "FP Secondary Direct Back Light "
+                        "Control: %s\n", directOn ? "On" : "Off"));
+}
+
+/*
  * Sets FP secondary hardware controlled power sequence enable bit.
  */
 static inline void
