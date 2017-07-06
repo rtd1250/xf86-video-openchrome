@@ -117,9 +117,6 @@ viaTMDSInitReg(ScrnInfoPtr pScrn)
     viaFPSetPrimarySoftVDD(pScrn, FALSE);
     viaFPSetPrimarySoftVEE(pScrn, FALSE);
 
-    /* Turn on software controlled primary FP data transmission.*/
-    viaFPSetPrimarySoftData(pScrn, TRUE);
-
     /* Turn off software controlled primary FP back light
      * control. */
     viaFPSetPrimarySoftBackLight(pScrn, FALSE);
@@ -184,9 +181,17 @@ viaTMDSPower(ScrnInfoPtr pScrn, Bool powerState)
 
     if (powerState) {
         viaFPSetPrimaryDirectDisplayPeriod(pScrn, TRUE);
+
+        /* Turn on software controlled primary FP data transmission. */
+        viaFPSetPrimarySoftData(pScrn, TRUE);
+
         viaTMDSSetPower(pScrn, TRUE);
     } else {
         viaTMDSSetPower(pScrn, FALSE);
+
+        /* Turn off software controlled primary FP data transmission. */
+        viaFPSetPrimarySoftData(pScrn, TRUE);
+
         viaFPSetPrimaryDirectDisplayPeriod(pScrn, FALSE);
     }
 
