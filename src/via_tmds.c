@@ -113,11 +113,18 @@ viaTMDSInitReg(ScrnInfoPtr pScrn)
     /* Use software FP power sequence control. */
     viaFPSetPrimaryPowerSeqType(pScrn, FALSE);
 
-    /* Turn off software controlled primary FP (LVDS1) power rails. */
+    /* Turn off software controlled primary FP power rails. */
     viaFPSetPrimarySoftVDD(pScrn, FALSE);
-    viaFPSetPrimarySoftData(pScrn, FALSE);
     viaFPSetPrimarySoftVEE(pScrn, FALSE);
+
+    /* Turn on software controlled primary FP data transmission.*/
+    viaFPSetPrimarySoftData(pScrn, TRUE);
+
+    /* Turn off software controlled primary FP back light
+     * control. */
     viaFPSetPrimarySoftBackLight(pScrn, FALSE);
+
+    /* Turn off direct control of FP back light. */
     viaFPSetPrimaryDirectBackLightCtrl(pScrn, FALSE);
 
     /* Activate DVI + LVDS2 mode. */

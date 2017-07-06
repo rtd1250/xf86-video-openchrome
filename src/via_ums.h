@@ -603,10 +603,10 @@ static inline void
 viaFPSetPrimarySoftBackLight(ScrnInfoPtr pScrn, Bool softOn)
 {
     /* 3X5.91[1] - FP Primary Software Back Light On
-     *             0: On
-     *             1: Off */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0x91, softOn ? 0x00 : BIT(1),
-                BIT(1));
+     *             0: Off
+     *             1: On */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x91,
+                softOn ? BIT(1) : 0x00, BIT(1));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "FP Primary Software Controlled Back Light: "
                         "%s\n",
@@ -621,10 +621,10 @@ static inline void
 viaFPSetPrimarySoftVEE(ScrnInfoPtr pScrn, Bool softOn)
 {
     /* 3X5.91[2] - FP Primary Software VEE On
-     *             0: On
-     *             1: Off */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0x91, softOn ? 0x00 : BIT(2),
-                BIT(2));
+     *             0: Off
+     *             1: On */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x91,
+                softOn ? BIT(2) : 0x00, BIT(2));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "FP Primary Software Controlled VEE: "
                         "%s\n",
@@ -639,10 +639,10 @@ static inline void
 viaFPSetPrimarySoftData(ScrnInfoPtr pScrn, Bool softOn)
 {
     /* 3X5.91[3] - FP Primary Software Data On
-     *             0: On
-     *             1: Off */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0x91, softOn ? 0x00 : BIT(3),
-                BIT(3));
+     *             0: Off
+     *             1: On */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x91,
+                softOn ? BIT(3) : 0x00, BIT(3));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "FP Primary Software Controlled Data: "
                         "%s\n",
@@ -657,10 +657,10 @@ static inline void
 viaFPSetPrimarySoftVDD(ScrnInfoPtr pScrn, Bool softOn)
 {
     /* 3X5.91[4] - FP Primary Software VDD On
-     *             0: On
-     *             1: Off */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0x91, softOn ? 0x00 : BIT(4),
-                BIT(4));
+     *             0: Off
+     *             1: On */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x91,
+                softOn ? BIT(4) : 0x00, BIT(4));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "FP Primary Software Controlled VDD: "
                         "%s\n",
@@ -747,10 +747,10 @@ static inline void
 viaFPSetSecondarySoftBackLight(ScrnInfoPtr pScrn, Bool softOn)
 {
     /* 3X5.D3[1] - FP Secondary Software Back Light On
-     *             0: On
-     *             1: Off */
+     *             0: Off
+     *             1: On */
     ViaCrtcMask(VGAHWPTR(pScrn), 0xD3,
-                softOn ? 0x00 : BIT(1), BIT(1));
+                softOn ? BIT(1) : 0x00, BIT(1));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "FP Secondary Software Controlled "
                         "Back Light: %s\n", softOn ? "On" : "Off"));
@@ -764,10 +764,10 @@ static inline void
 viaFPSetSecondarySoftVEE(ScrnInfoPtr pScrn, Bool softOn)
 {
     /* 3X5.D3[2] - FP Secondary Software VEE On
-     *             0: On
-     *             1: Off */
+     *             0: Off
+     *             1: On */
     ViaCrtcMask(VGAHWPTR(pScrn), 0xD3,
-                softOn ? 0x00 : BIT(2), BIT(2));
+                softOn ? BIT(2) : 0x00, BIT(2));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "FP Secondary Software Controlled VEE: %s\n",
                         softOn ? "On" : "Off"));
@@ -781,10 +781,10 @@ static inline void
 viaFPSetSecondarySoftData(ScrnInfoPtr pScrn, Bool softOn)
 {
     /* 3X5.D3[3] - FP Secondary Software Data On
-     *             0: On
-     *             1: Off */
+     *             0: Off
+     *             1: On */
     ViaCrtcMask(VGAHWPTR(pScrn), 0xD3,
-                softOn ? 0x00 : BIT(3), BIT(3));
+                softOn ? BIT(3) : 0x00, BIT(3));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "FP Secondary Software Controlled Data: %s\n",
                         softOn ? "On" : "Off"));
@@ -798,10 +798,10 @@ static inline void
 viaFPSetSecondarySoftVDD(ScrnInfoPtr pScrn, Bool softOn)
 {
     /* 3X5.D3[4] - FP Secondary Software VDD On
-     *             0: On
-     *             1: Off */
+     *             0: Off
+     *             1: On */
     ViaCrtcMask(VGAHWPTR(pScrn), 0xD3,
-                softOn ? 0x00 : BIT(4), BIT(4));
+                softOn ? BIT(4) : 0x00, BIT(4));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "FP Secondary Software Controlled VDD: %s\n",
                         softOn ? "On" : "Off"));
