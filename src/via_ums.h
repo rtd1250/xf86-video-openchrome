@@ -825,6 +825,23 @@ viaFPSetSecondaryDirectBackLightCtrl(ScrnInfoPtr pScrn, Bool directOn)
 }
 
 /*
+ * Sets CX700 / VX700 or later chipset's FP secondary direct
+ * display period control.
+ */
+static inline void
+viaFPSetSecondaryDirectDisplayPeriod(ScrnInfoPtr pScrn, Bool directOn)
+{
+    /* 3X5.D3[7] - FP Secondary Direct Display Period Control
+     *             0: On
+     *             1: Off */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0xD3,
+                directOn ? 0x00 : BIT(7), BIT(7));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "FP Secondary Direct Display Period "
+                        "Control: %s\n", directOn ? "On" : "Off"));
+}
+
+/*
  * Sets FP secondary hardware controlled power sequence enable bit.
  */
 static inline void
