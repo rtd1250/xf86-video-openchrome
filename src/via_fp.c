@@ -105,185 +105,6 @@ static DisplayModeRec OLPCMode = {
 #define TD2 0
 #define TD3 25
 
-static void
-viaFPIOPadState(ScrnInfoPtr pScrn, CARD16 diPort, Bool ioPadOn)
-{
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaFPIOPadState.\n"));
-
-    switch(diPort) {
-    case VIA_DI_PORT_DVP0:
-        viaDVP0SetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
-        break;
-    case VIA_DI_PORT_DVP1:
-        viaDVP1SetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
-        break;
-    case VIA_DI_PORT_FPDPLOW:
-        viaFPDPLowSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
-        break;
-    case VIA_DI_PORT_FPDPHIGH:
-        viaFPDPHighSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
-        break;
-    case (VIA_DI_PORT_FPDPLOW |
-          VIA_DI_PORT_FPDPHIGH):
-        viaFPDPLowSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
-        viaFPDPHighSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
-        break;
-    case VIA_DI_PORT_LVDS1:
-        viaLVDS1SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
-        break;
-    case VIA_DI_PORT_LVDS2:
-        viaLVDS2SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
-        break;
-    case (VIA_DI_PORT_LVDS1 |
-          VIA_DI_PORT_LVDS2):
-        viaLVDS1SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
-        viaLVDS2SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
-        break;
-    default:
-        break;
-    }
-
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "FP I/O Pad: %s\n",
-                ioPadOn ? "On": "Off");
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaFPIOPadState.\n"));
-}
-
-static void
-viaFPFormat(ScrnInfoPtr pScrn, CARD16 diPort, CARD8 format)
-{
-    CARD8 temp = format & 0x01;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaFPFormat.\n"));
-
-    switch(diPort) {
-    case VIA_DI_PORT_LVDS1:
-        viaLVDS1SetFormat(pScrn, temp);
-        break;
-    case VIA_DI_PORT_LVDS2:
-        viaLVDS2SetFormat(pScrn, temp);
-        break;
-    case (VIA_DI_PORT_LVDS1 |
-          VIA_DI_PORT_LVDS2):
-        viaLVDS1SetFormat(pScrn, temp);
-        viaLVDS2SetFormat(pScrn, temp);
-        break;
-    default:
-        break;
-    }
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaFPFormat.\n"));
-}
-
-static void
-viaFPOutputFormat(ScrnInfoPtr pScrn, CARD16 diPort, CARD8 outputFormat)
-{
-    CARD8 temp = outputFormat & 0x01;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaFPOutputFormat.\n"));
-
-    switch(diPort) {
-    case VIA_DI_PORT_LVDS1:
-        viaLVDS1SetOutputFormat(pScrn, temp);
-        break;
-    case VIA_DI_PORT_LVDS2:
-        viaLVDS2SetOutputFormat(pScrn, temp);
-        break;
-    case (VIA_DI_PORT_LVDS1 |
-          VIA_DI_PORT_LVDS2):
-        viaLVDS1SetOutputFormat(pScrn, temp);
-        viaLVDS2SetOutputFormat(pScrn, temp);
-        break;
-    default:
-        break;
-    }
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaFPOutputFormat.\n"));
-}
-
-static void
-viaFPDithering(ScrnInfoPtr pScrn, CARD16 diPort, Bool dithering)
-{
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaFPDithering.\n"));
-
-    switch(diPort) {
-    case VIA_DI_PORT_LVDS1:
-        viaLVDS1SetDithering(pScrn, dithering);
-        break;
-    case VIA_DI_PORT_LVDS2:
-        viaLVDS2SetDithering(pScrn, dithering);
-        break;
-    case (VIA_DI_PORT_LVDS1 |
-          VIA_DI_PORT_LVDS2):
-        viaLVDS1SetDithering(pScrn, dithering);
-        viaLVDS2SetDithering(pScrn, dithering);
-        break;
-    default:
-        break;
-    }
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaFPDithering.\n"));
-}
-
-static void
-viaFPDisplaySource(ScrnInfoPtr pScrn, CARD16 diPort, int index)
-{
-    CARD8 displaySource = index & 0x01;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaFPDisplaySource.\n"));
-
-    switch(diPort) {
-    case VIA_DI_PORT_DVP0:
-        viaDVP0SetDisplaySource(pScrn, displaySource);
-        break;
-    case VIA_DI_PORT_DVP1:
-        viaDVP1SetDisplaySource(pScrn, displaySource);
-        break;
-    case VIA_DI_PORT_FPDPLOW:
-        viaFPDPLowSetDisplaySource(pScrn, displaySource);
-        viaDVP1SetDisplaySource(pScrn, displaySource);
-        break;
-    case VIA_DI_PORT_FPDPHIGH:
-        viaFPDPHighSetDisplaySource(pScrn, displaySource);
-        viaDVP0SetDisplaySource(pScrn, displaySource);
-        break;
-    case (VIA_DI_PORT_FPDPLOW |
-          VIA_DI_PORT_FPDPHIGH):
-        viaFPDPLowSetDisplaySource(pScrn, displaySource);
-        viaFPDPHighSetDisplaySource(pScrn, displaySource);
-        break;
-    case VIA_DI_PORT_LVDS1:
-        viaLVDS1SetDisplaySource(pScrn, displaySource);
-        break;
-    case VIA_DI_PORT_LVDS2:
-        viaLVDS2SetDisplaySource(pScrn, displaySource);
-        break;
-    case (VIA_DI_PORT_LVDS1 |
-          VIA_DI_PORT_LVDS2):
-        viaLVDS1SetDisplaySource(pScrn, displaySource);
-        viaLVDS2SetDisplaySource(pScrn, displaySource);
-        break;
-    default:
-        break;
-    }
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "FP Display Source: IGA%d\n",
-                displaySource + 1);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaFPDisplaySource.\n"));
-}
-
 /*
  * This software controlled FP power on / off sequence code is
  * for CLE266's IGP which was codenamed Castle Rock. The code is
@@ -556,6 +377,185 @@ viaFPPower(ScrnInfoPtr pScrn, int Chipset, CARD16 diPort, Bool powerState)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaFPPower.\n"));
+}
+
+static void
+viaFPIOPadState(ScrnInfoPtr pScrn, CARD16 diPort, Bool ioPadOn)
+{
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaFPIOPadState.\n"));
+
+    switch(diPort) {
+    case VIA_DI_PORT_DVP0:
+        viaDVP0SetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
+        break;
+    case VIA_DI_PORT_DVP1:
+        viaDVP1SetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
+        break;
+    case VIA_DI_PORT_FPDPLOW:
+        viaFPDPLowSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
+        break;
+    case VIA_DI_PORT_FPDPHIGH:
+        viaFPDPHighSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
+        break;
+    case (VIA_DI_PORT_FPDPLOW |
+          VIA_DI_PORT_FPDPHIGH):
+        viaFPDPLowSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
+        viaFPDPHighSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
+        break;
+    case VIA_DI_PORT_LVDS1:
+        viaLVDS1SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
+        break;
+    case VIA_DI_PORT_LVDS2:
+        viaLVDS2SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
+        break;
+    case (VIA_DI_PORT_LVDS1 |
+          VIA_DI_PORT_LVDS2):
+        viaLVDS1SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
+        viaLVDS2SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
+        break;
+    default:
+        break;
+    }
+
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "FP I/O Pad: %s\n",
+                ioPadOn ? "On": "Off");
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaFPIOPadState.\n"));
+}
+
+static void
+viaFPFormat(ScrnInfoPtr pScrn, CARD16 diPort, CARD8 format)
+{
+    CARD8 temp = format & 0x01;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaFPFormat.\n"));
+
+    switch(diPort) {
+    case VIA_DI_PORT_LVDS1:
+        viaLVDS1SetFormat(pScrn, temp);
+        break;
+    case VIA_DI_PORT_LVDS2:
+        viaLVDS2SetFormat(pScrn, temp);
+        break;
+    case (VIA_DI_PORT_LVDS1 |
+          VIA_DI_PORT_LVDS2):
+        viaLVDS1SetFormat(pScrn, temp);
+        viaLVDS2SetFormat(pScrn, temp);
+        break;
+    default:
+        break;
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaFPFormat.\n"));
+}
+
+static void
+viaFPOutputFormat(ScrnInfoPtr pScrn, CARD16 diPort, CARD8 outputFormat)
+{
+    CARD8 temp = outputFormat & 0x01;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaFPOutputFormat.\n"));
+
+    switch(diPort) {
+    case VIA_DI_PORT_LVDS1:
+        viaLVDS1SetOutputFormat(pScrn, temp);
+        break;
+    case VIA_DI_PORT_LVDS2:
+        viaLVDS2SetOutputFormat(pScrn, temp);
+        break;
+    case (VIA_DI_PORT_LVDS1 |
+          VIA_DI_PORT_LVDS2):
+        viaLVDS1SetOutputFormat(pScrn, temp);
+        viaLVDS2SetOutputFormat(pScrn, temp);
+        break;
+    default:
+        break;
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaFPOutputFormat.\n"));
+}
+
+static void
+viaFPDithering(ScrnInfoPtr pScrn, CARD16 diPort, Bool dithering)
+{
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaFPDithering.\n"));
+
+    switch(diPort) {
+    case VIA_DI_PORT_LVDS1:
+        viaLVDS1SetDithering(pScrn, dithering);
+        break;
+    case VIA_DI_PORT_LVDS2:
+        viaLVDS2SetDithering(pScrn, dithering);
+        break;
+    case (VIA_DI_PORT_LVDS1 |
+          VIA_DI_PORT_LVDS2):
+        viaLVDS1SetDithering(pScrn, dithering);
+        viaLVDS2SetDithering(pScrn, dithering);
+        break;
+    default:
+        break;
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaFPDithering.\n"));
+}
+
+static void
+viaFPDisplaySource(ScrnInfoPtr pScrn, CARD16 diPort, int index)
+{
+    CARD8 displaySource = index & 0x01;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaFPDisplaySource.\n"));
+
+    switch(diPort) {
+    case VIA_DI_PORT_DVP0:
+        viaDVP0SetDisplaySource(pScrn, displaySource);
+        break;
+    case VIA_DI_PORT_DVP1:
+        viaDVP1SetDisplaySource(pScrn, displaySource);
+        break;
+    case VIA_DI_PORT_FPDPLOW:
+        viaFPDPLowSetDisplaySource(pScrn, displaySource);
+        viaDVP1SetDisplaySource(pScrn, displaySource);
+        break;
+    case VIA_DI_PORT_FPDPHIGH:
+        viaFPDPHighSetDisplaySource(pScrn, displaySource);
+        viaDVP0SetDisplaySource(pScrn, displaySource);
+        break;
+    case (VIA_DI_PORT_FPDPLOW |
+          VIA_DI_PORT_FPDPHIGH):
+        viaFPDPLowSetDisplaySource(pScrn, displaySource);
+        viaFPDPHighSetDisplaySource(pScrn, displaySource);
+        break;
+    case VIA_DI_PORT_LVDS1:
+        viaLVDS1SetDisplaySource(pScrn, displaySource);
+        break;
+    case VIA_DI_PORT_LVDS2:
+        viaLVDS2SetDisplaySource(pScrn, displaySource);
+        break;
+    case (VIA_DI_PORT_LVDS1 |
+          VIA_DI_PORT_LVDS2):
+        viaLVDS1SetDisplaySource(pScrn, displaySource);
+        viaLVDS2SetDisplaySource(pScrn, displaySource);
+        break;
+    default:
+        break;
+    }
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "FP Display Source: IGA%d\n",
+                displaySource + 1);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaFPDisplaySource.\n"));
 }
 
 /*
