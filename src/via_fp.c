@@ -486,6 +486,9 @@ viaFPSecondaryHardPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
     viaFPSetSecondaryPowerSeqType(pScrn, TRUE);
 
     if (powerState) {
+        /* Turn on display period. */
+        viaFPSetSecondaryDirectDisplayPeriod(pScrn, TRUE);
+
         /* Turn on back light. */
         viaFPSetSecondaryDirectBackLightCtrl(pScrn, TRUE);
 
