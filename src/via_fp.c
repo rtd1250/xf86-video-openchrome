@@ -272,23 +272,24 @@ viaFPPrimaryHardPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
     viaFPSetPrimaryPowerSeqType(pScrn, TRUE);
 
     if (powerState) {
-        /* Power on FP. */
+        /* Turn on FP Display Period. */
+        viaFPSetPrimaryDirectDisplayPeriod(pScrn, TRUE);
+
+        /* Turn on FP hardware power sequence. */
         viaFPSetPrimaryHardPower(pScrn, TRUE);
 
-        /* Make sure back light is turned on. */
+        /* Turn on FP back light. */
         viaFPSetPrimaryDirectBackLightCtrl(pScrn, TRUE);
 
-        /* Make sure display period is turned on. */
-        viaFPSetPrimaryDirectDisplayPeriod(pScrn, TRUE);
     } else {
-        /* Make sure display period is turned off. */
-        viaFPSetPrimaryDirectDisplayPeriod(pScrn, FALSE);
-
-        /* Make sure back light is turned off. */
+        /* Turn off FP back light. */
         viaFPSetPrimaryDirectBackLightCtrl(pScrn, FALSE);
 
-        /* Power off FP. */
+        /* Turn off FP hardware power sequence. */
         viaFPSetPrimaryHardPower(pScrn, FALSE);
+
+        /* Turn on FP Display Period. */
+        viaFPSetPrimaryDirectDisplayPeriod(pScrn, FALSE);
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
