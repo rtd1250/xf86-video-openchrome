@@ -230,7 +230,7 @@ viaFPSecondarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
     viaFPSetSecondaryPowerSeqType(pScrn, FALSE);
 
     if (powerState) {
-        /* Turn on FP Display Period. */
+        /* Turn on FP display period. */
         viaFPSetSecondaryDirectDisplayPeriod(pScrn, TRUE);
 
         /* Wait for TD0 ms. */
@@ -278,7 +278,7 @@ viaFPSecondarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
         /* Turn off FP VDD rail. */
         viaFPSetSecondarySoftVDD(pScrn, FALSE);
 
-        /* Turn off FP Display Period. */
+        /* Turn off FP display period. */
         viaFPSetSecondaryDirectDisplayPeriod(pScrn, FALSE);
     }
 
@@ -296,7 +296,7 @@ viaFPPrimaryHardPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
     viaFPSetPrimaryPowerSeqType(pScrn, TRUE);
 
     if (powerState) {
-        /* Turn on FP Display Period. */
+        /* Turn on FP display period. */
         viaFPSetPrimaryDirectDisplayPeriod(pScrn, TRUE);
 
         /* Turn on FP hardware power sequence. */
@@ -312,7 +312,7 @@ viaFPPrimaryHardPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
         /* Turn off FP hardware power sequence. */
         viaFPSetPrimaryHardPower(pScrn, FALSE);
 
-        /* Turn on FP Display Period. */
+        /* Turn on FP display period. */
         viaFPSetPrimaryDirectDisplayPeriod(pScrn, FALSE);
     }
 
