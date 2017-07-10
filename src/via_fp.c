@@ -158,32 +158,55 @@ viaFPPrimarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
     viaFPSetPrimaryPowerSeqType(pScrn, FALSE);
 
     if (powerState) {
+        /* Turn on FP Display Period. */
         viaFPSetPrimaryDirectDisplayPeriod(pScrn, TRUE);
+
+        /* Wait for TD0 ms. */
         usleep(TD0);
 
+        /* Turn on FP VDD rail. */
         viaFPSetPrimarySoftVDD(pScrn, TRUE);
+
+        /* Wait for TD1 ms. */
         usleep(TD1);
 
+        /* Turn on FP data transmission. */
         viaFPSetPrimarySoftData(pScrn, TRUE);
+
+        /* Wait for TD2 ms. */
         usleep(TD2);
 
-        /* VEE On (unused on vt3353) */
+        /* Turn on FP VEE rail. */
         viaFPSetPrimarySoftVEE(pScrn, TRUE);
+
+        /* Wait for TD3 ms. */
         usleep(TD3);
 
+        /* Turn on FP back light. */
         viaFPSetPrimarySoftBackLight(pScrn, TRUE);
     } else {
+        /* Turn off FP back light. */
         viaFPSetPrimarySoftBackLight(pScrn, FALSE);
+
+        /* Wait for TD3 ms. */
         usleep(TD3);
 
-        /* VEE Off (unused on vt3353) */
+        /* Turn off FP VEE rail. */
         viaFPSetPrimarySoftVEE(pScrn, FALSE);
+
+        /* Wait for TD2 ms. */
         usleep(TD2);
 
+        /* Turn off FP data transmission. */
         viaFPSetPrimarySoftData(pScrn, FALSE);
+
+        /* Wait for TD1 ms. */
         usleep(TD1);
 
+        /* Turn off FP VDD rail. */
         viaFPSetPrimarySoftVDD(pScrn, FALSE);
+
+        /* Turn off FP Display Period. */
         viaFPSetPrimaryDirectDisplayPeriod(pScrn, FALSE);
     }
 
