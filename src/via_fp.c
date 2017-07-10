@@ -225,13 +225,13 @@ viaFPSecondarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaFPSecondarySoftPowerSeq.\n"));
 
+    /* Turn off hardware power sequence. */
+    viaFPSetSecondaryHardPower(pScrn, FALSE);
+
     /* Use software FP power sequence control. */
     viaFPSetSecondaryPowerSeqType(pScrn, FALSE);
 
     if (powerState) {
-        /* Turn off FP hardware power sequence. */
-        viaFPSetSecondaryHardPower(pScrn, FALSE);
-
         /* Turn on FP Display Period. */
         viaFPSetSecondaryDirectDisplayPeriod(pScrn, TRUE);
 
