@@ -154,6 +154,9 @@ viaFPPrimarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaFPPrimarySoftPowerSeq.\n"));
 
+    /* Turn off FP hardware power sequence. */
+    viaFPSetPrimaryHardPower(pScrn, FALSE);
+
     /* Use software FP power sequence control. */
     viaFPSetPrimaryPowerSeqType(pScrn, FALSE);
 
