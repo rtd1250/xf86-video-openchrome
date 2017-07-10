@@ -220,8 +220,6 @@ viaFPPrimarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
 static void
 viaFPSecondarySoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
 {
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaFPSecondarySoftPowerSeq.\n"));
 
@@ -325,8 +323,6 @@ viaFPPrimaryHardPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
 static void
 viaFPSecondaryHardPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
 {
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaFPSecondaryHardPowerSeq.\n"));
 
