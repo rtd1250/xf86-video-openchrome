@@ -115,33 +115,51 @@ static DisplayModeRec OLPCMode = {
 static void
 viaFPCastleRockSoftPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
 {
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaFPCastleRockSoftPowerSeq.\n"));
 
     if (powerState) {
-        ViaCrtcMask(hwp, 0x6A, BIT(3), BIT(3));
-
-        ViaCrtcMask(hwp, 0x91, BIT(4), BIT(4));
+        /* Wait for 25 ms. */
         usleep(25);
 
-        ViaCrtcMask(hwp, 0x91, BIT(3), BIT(3));
+        /* Turn on FP VDD rail. */
+        viaFPSetPrimarySoftVDD(pScrn, TRUE);
+
+        /* Wait for 510 ms. */
         usleep(510);
 
-        ViaCrtcMask(hwp, 0x91, BIT(2) | BIT(1), BIT(2) | BIT(1));
+        /* Turn on FP data transmission. */
+        viaFPSetPrimarySoftData(pScrn, TRUE);
+
+        /* Wait for 1 ms. */
         usleep(1);
+
+        /* Turn on FP VEE rail. */
+        viaFPSetPrimarySoftVEE(pScrn, TRUE);
+
+        /* Turn on FP back light. */
+        viaFPSetPrimarySoftBackLight(pScrn, TRUE);
     } else {
-        ViaCrtcMask(hwp, 0x6A, 0x00, BIT(3));
+        /* Wait for 1 ms. */
+        usleep(1);
 
-        ViaCrtcMask(hwp, 0x91, 0x00, BIT(2) | BIT(1));
-        usleep(210);
+        /* Turn off FP back light. */
+        viaFPSetPrimarySoftBackLight(pScrn, FALSE);
 
-        ViaCrtcMask(hwp, 0x91, 0x00, BIT(3));
+        /* Turn off FP VEE rail. */
+        viaFPSetPrimarySoftVEE(pScrn, FALSE);
+
+        /* Wait for 510 ms. */
+        usleep(510);
+
+        /* Turn off FP data transmission. */
+        viaFPSetPrimarySoftData(pScrn, FALSE);
+
+        /* Wait for 25 ms. */
         usleep(25);
 
-        ViaCrtcMask(hwp, 0x91, 0x00, BIT(4));
-        usleep(1);
+        /* Turn off FP VDD rail. */
+        viaFPSetPrimarySoftVDD(pScrn, FALSE);
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
