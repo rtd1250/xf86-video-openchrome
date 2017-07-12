@@ -340,6 +340,24 @@ viaIGA2SetDisplayOutput(ScrnInfoPtr pScrn, Bool outputState)
 }
 
 /*
+ * Sets the display source of DIP0 (Digital Interface Port 0)
+ * interface. CLE266 chipset only.
+ */
+static inline void
+viaDIP0SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
+{
+    /* 3X5.6C[7] - DIP0 Data Source Selection
+     *             0: Primary Display
+     *             1: Secondary Display */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x6C,
+                displaySource << 7, BIT(7));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "DIP0 Display Source: IGA%d\n",
+                        (displaySource & 0x01) + 1));
+}
+
+
+/*
  * Sets DVP0 (Digital Video Port 0) I/O pad state.
  */
 static inline void
@@ -1279,7 +1297,6 @@ Bool umsPreInit(ScrnInfoPtr pScrn);
 Bool umsCrtcInit(ScrnInfoPtr pScrn);
 
 /* via_output.c */
-void viaDIP0SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource);
 void viaDIP0EnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState);
 void viaDIP0SetClockDriveStrength(ScrnInfoPtr pScrn,
                                     CARD8 clockDriveStrength);

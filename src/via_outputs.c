@@ -41,32 +41,6 @@
 #include <unistd.h>
 
 /*
- * Sets IGA1 or IGA2 as the display output source for DIP0
- * (Digital Interface Port 0) interface for CLE266 only.
- */
-void
-viaDIP0SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    CARD8 temp = displaySource;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaDIP0SetDisplaySource.\n"));
-
-    /* Set DIP0 display output source. */
-    /* 3X5.6C[7] - DIP0 (Digital Interface Port 0) Data Source Selection
-     *             0: Primary Display (IGA1)
-     *             1: Secondary Display (IGA2) */
-    ViaCrtcMask(hwp, 0x6C, temp << 7, 0x80);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "DIP0 Display Output Source: IGA%d\n",
-                (temp & 0x01) + 1);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaDIP0SetDisplaySource.\n"));
-}
-
-/*
  * Sets DIP0 (Digital Interface Port 0) I/O pad state.
  * This function is for CLE266 chipset only.
  */
