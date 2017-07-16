@@ -546,6 +546,28 @@ viaDVP1SetDataDriveStrength(ScrnInfoPtr pScrn, CARD8 dataDriveStrength)
 }
 
 /*
+ * Sets DVP1 (Digital Video Port 1) sync polarity.
+ */
+static inline void
+viaDVP1SetSyncPolarity(ScrnInfoPtr pScrn, CARD8 syncPolarity)
+{
+    /* 3X5.9B[6] - DVP1 VSYNC Polarity
+     *             0: Positive
+     *             1: Negative
+     * 3X5.9B[5] - DVP1 HSYNC Polarity
+     *             0: Positive
+     *             1: Negative */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x9B,
+                syncPolarity << 5, BIT(6) | BIT(5));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "DVP1 Horizontal Sync Polarity: %s\n",
+                        (syncPolarity & BIT(0)) ? "-" : "+"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "DVP1 Vertical Sync Polarity: %s\n",
+                        (syncPolarity & BIT(1)) ? "-" : "+"));
+}
+
+/*
  * Sets the display source of DVP1 (Digital Video Port 1) interface.
  */
 static inline void
