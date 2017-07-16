@@ -309,6 +309,22 @@ viaIGA1HWReset(ScrnInfoPtr pScrn, Bool resetState)
 }
 
 /*
+ * Sets IGA1 palette LUT resolution. (6-bit or 8-bit)
+ */
+static inline void
+viaIGA1SetPaletteLUTResolution(ScrnInfoPtr pScrn, Bool paletteLUT)
+{
+    /* 3C5.15[7] - IGA1 6 / 8 Bit LUT
+     *             0: 6-bit
+     *             1: 8-bit */
+    ViaSeqMask(VGAHWPTR(pScrn), 0x15,
+                paletteLUT ? BIT(7) : 0x00, BIT(7));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "IGA1 Palette LUT Resolution: %s bit\n",
+                        paletteLUT ? "8" : "6"));
+}
+
+/*
  * Sets IGA1 display output state.
  */
 static inline void
