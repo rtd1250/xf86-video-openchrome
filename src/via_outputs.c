@@ -40,32 +40,6 @@
 #include "via_driver.h"
 #include <unistd.h>
 
-/*
- * Sets DIP0 (Digital Interface Port 0) data I/O pads drive strength
- * for CLE266 chipset only.
- */
-void
-viaDIP0SetDataDriveStrength(ScrnInfoPtr pScrn, CARD8 dataDriveStrength)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaDIP0SetDataDriveStrength.\n"));
-
-    /* 3C5.1B[1] - DIP0 Data Drive Strength Bit [0] */
-    ViaSeqMask(hwp, 0x1B, dataDriveStrength << 1, 0x02);
-
-    /* 3C5.2A[5] - DIP0 Data Drive Strength Bit [1] */
-    ViaSeqMask(hwp, 0x2A, dataDriveStrength << 4, 0x20);
-
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "DIP0 Data I/O Pads Drive Strength: %u\n",
-                dataDriveStrength);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaDIP0SetDataDriveStrength.\n"));
-}
-
 void
 viaInitDisplay(ScrnInfoPtr pScrn)
 {

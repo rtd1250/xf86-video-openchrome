@@ -1322,8 +1322,6 @@ Bool umsPreInit(ScrnInfoPtr pScrn);
 Bool umsCrtcInit(ScrnInfoPtr pScrn);
 
 /* via_output.c */
-void viaDIP0SetDataDriveStrength(ScrnInfoPtr pScrn,
-                                    CARD8 dataDriveStrength);
 void viaInitDisplay(ScrnInfoPtr pScrn);
 CARD32 ViaGetMemoryBandwidth(ScrnInfoPtr pScrn);
 CARD32 ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode);
