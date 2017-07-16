@@ -549,6 +549,59 @@ viaFPDithering(ScrnInfoPtr pScrn, CARD16 diPort, Bool dithering)
                         "Exiting viaFPDithering.\n"));
 }
 
+/*
+ * Set FP sync polarity.
+ */
+static void
+viaFPSyncPolarity(ScrnInfoPtr pScrn, CARD16 diPort, unsigned int flags)
+{
+    CARD8 syncPolarity = 0x00;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaFPSyncPolarity.\n"));
+
+    if (flags & V_NHSYNC) {
+        syncPolarity |= BIT(0);
+    }
+
+    if (flags & V_NVSYNC) {
+        syncPolarity |= BIT(1);
+    }
+
+    switch(diPort) {
+    case VIA_DI_PORT_DVP0:
+        break;
+    case VIA_DI_PORT_DVP1:
+        break;
+    case VIA_DI_PORT_FPDPLOW:
+        break;
+    case VIA_DI_PORT_FPDPHIGH:
+        break;
+    case (VIA_DI_PORT_FPDPLOW |
+          VIA_DI_PORT_FPDPHIGH):
+        break;
+    case VIA_DI_PORT_LVDS1:
+        break;
+    case VIA_DI_PORT_LVDS2:
+        break;
+    case (VIA_DI_PORT_LVDS1 |
+          VIA_DI_PORT_LVDS2):
+        break;
+    default:
+        break;
+    }
+
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "FP Horizontal Sync Polarity: %s\n",
+                (syncPolarity & BIT(0)) ? "-" : "+");
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "FP Vertical Sync Polarity: %s\n",
+                (syncPolarity & BIT(1)) ? "-" : "+");
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaFPSyncPolarity.\n"));
+}
+
 static void
 viaFPDisplaySource(ScrnInfoPtr pScrn, CARD16 diPort, int index)
 {
@@ -981,6 +1034,7 @@ via_fp_mode_set(xf86OutputPtr output, DisplayModePtr mode,
             break;
         }
 
+        viaFPSyncPolarity(pScrn, pVIAFP->diPort, adjusted_mode->Flags);
         viaFPDisplaySource(pScrn, pVIAFP->diPort, iga->index);
     }
 }
