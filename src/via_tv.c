@@ -212,7 +212,7 @@ viaTVEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState)
          *             1: DIP0 (Digital Interface Port 0) is used by
          *                a TV encoder */
         if (sr12 & 0x20) {
-            viaDIP0EnableIOPads(pScrn, ioPadState);
+            viaDIP0SetIOPadState(pScrn, ioPadState);
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                         "DIP0 is not set up for "

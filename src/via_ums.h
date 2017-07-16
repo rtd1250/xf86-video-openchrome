@@ -340,6 +340,31 @@ viaIGA2SetDisplayOutput(ScrnInfoPtr pScrn, Bool outputState)
 }
 
 /*
+ * Sets DIP0 (Digital Interface Port 0) I/O pad state.
+ * CLE266 chipset only.
+ */
+static inline void
+viaDIP0SetIOPadState(ScrnInfoPtr pScrn, CARD8 ioPadState)
+{
+    /* 3C5.1E[7:6] - DIP0 Power Control
+     *               0x: Pad always off
+     *               10: Depend on the other control signal
+     *               11: Pad on/off according to the
+     *                   Power Management Status (PMS) */
+    ViaSeqMask(VGAHWPTR(pScrn), 0x1E,
+                ioPadState << 6, BIT(7) | BIT(6));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "DIP0 I/O Pad State: %s\n",
+                        ((ioPadState & (BIT(1) | BIT(0))) == 0x03) ?
+                            "On" :
+                        ((ioPadState & (BIT(1) | BIT(0))) == 0x02) ?
+                            "Conditional" :
+                        ((ioPadState & (BIT(1) | BIT(0))) == 0x01) ?
+                            "Off" :
+                            "Off"));
+}
+
+/*
  * Sets the display source of DIP0 (Digital Interface Port 0)
  * interface. CLE266 chipset only.
  */
@@ -1297,7 +1322,6 @@ Bool umsPreInit(ScrnInfoPtr pScrn);
 Bool umsCrtcInit(ScrnInfoPtr pScrn);
 
 /* via_output.c */
-void viaDIP0EnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState);
 void viaDIP0SetClockDriveStrength(ScrnInfoPtr pScrn,
                                     CARD8 clockDriveStrength);
 void viaDIP0SetDataDriveStrength(ScrnInfoPtr pScrn,

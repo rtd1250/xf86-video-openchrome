@@ -41,35 +41,6 @@
 #include <unistd.h>
 
 /*
- * Sets DIP0 (Digital Interface Port 0) I/O pad state.
- * This function is for CLE266 chipset only.
- */
-void
-viaDIP0EnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaDIP0EnableIOPads.\n"));
-
-    /* Set DIP0 I/O pad state. */
-    /* 3C5.1E[7:6] - DIP0 Power Control
-     *               0x: Pad always off
-     *               10: Depend on the other control signal
-     *               11: Pad on/off according to the
-     *                   Power Management Status (PMS) */
-    ViaSeqMask(hwp, 0x1E, ioPadState << 6, 0xC0);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "DIP0 I/O Pad State: %s\n",
-                (ioPadState & 0x02) ?
-                    (ioPadState & 0x01) ? "Automatic On / Off" : "Conditional"
-                : "Off");
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaDIP0EnableIOPads.\n"));
-}
-
-/*
  * Sets DIP0 (Digital Interface Port 0) clock I/O pad drive strength
  * for CLE266 chipset only.
  */
