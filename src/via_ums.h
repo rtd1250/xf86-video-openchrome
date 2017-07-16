@@ -1277,6 +1277,28 @@ viaLVDS2SetDithering(ScrnInfoPtr pScrn, Bool dithering)
 }
 
 /*
+ * Sets LVDS2 sync polarity.
+ */
+static inline void
+viaLVDS2SetSyncPolarity(ScrnInfoPtr pScrn, CARD8 syncPolarity)
+{
+    /* 3X5.97[6] - LVDS2 VSYNC Polarity
+     *             0: Positive
+     *             1: Negative
+     * 3X5.97[5] - LVDS2 HSYNC Polarity
+     *             0: Positive
+     *             1: Negative */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x97,
+                syncPolarity << 5, BIT(6) | BIT(5));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "LVDS2 Horizontal Sync Polarity: %s\n",
+                        (syncPolarity & BIT(0)) ? "-" : "+"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "LVDS2 Vertical Sync Polarity: %s\n",
+                        (syncPolarity & BIT(1)) ? "-" : "+"));
+}
+
+/*
  * Sets LVDS2 display source.
  */
 static inline void

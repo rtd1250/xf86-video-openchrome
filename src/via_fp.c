@@ -584,10 +584,12 @@ viaFPSyncPolarity(ScrnInfoPtr pScrn, CARD16 diPort, unsigned int flags)
         viaLVDS1SetSyncPolarity(pScrn, syncPolarity);
         break;
     case VIA_DI_PORT_LVDS2:
+        viaLVDS2SetSyncPolarity(pScrn, syncPolarity);
         break;
     case (VIA_DI_PORT_LVDS1 |
           VIA_DI_PORT_LVDS2):
         viaLVDS1SetSyncPolarity(pScrn, syncPolarity);
+        viaLVDS2SetSyncPolarity(pScrn, syncPolarity);
         break;
     default:
         break;
