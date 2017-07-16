@@ -570,6 +570,7 @@ viaFPSyncPolarity(ScrnInfoPtr pScrn, CARD16 diPort, unsigned int flags)
 
     switch(diPort) {
     case VIA_DI_PORT_DVP0:
+        viaDVP0SetSyncPolarity(pScrn, syncPolarity);
         break;
     case VIA_DI_PORT_DVP1:
         break;

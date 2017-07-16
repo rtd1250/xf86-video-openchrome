@@ -455,6 +455,28 @@ viaDVP0SetDataDriveStrength(ScrnInfoPtr pScrn, CARD8 dataDriveStrength)
 }
 
 /*
+ * Sets DVP0 (Digital Video Port 0) sync polarity.
+ */
+static inline void
+viaDVP0SetSyncPolarity(ScrnInfoPtr pScrn, CARD8 syncPolarity)
+{
+    /* 3X5.96[6] - DVP0 VSYNC Polarity
+     *             0: Positive
+     *             1: Negative
+     * 3X5.96[5] - DVP0 HSYNC Polarity
+     *             0: Positive
+     *             1: Negative */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x96,
+                syncPolarity << 5, BIT(6) | BIT(5));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "DVP0 Horizontal Sync Polarity: %s\n",
+                        (syncPolarity & BIT(0)) ? "-" : "+"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "DVP0 Vertical Sync Polarity: %s\n",
+                        (syncPolarity & BIT(1)) ? "-" : "+"));
+}
+
+/*
  * Sets the display source of DVP0 (Digital Video Port 0) interface.
  */
 static inline void
