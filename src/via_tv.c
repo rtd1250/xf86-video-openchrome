@@ -340,15 +340,6 @@ viaTVSetClockDriveStrength(ScrnInfoPtr pScrn, CARD8 clockDriveStrength)
                         "SR13: 0x%02X\n", sr13));
     switch (pVia->Chipset) {
     case VIA_CLE266:
-        /* 3C5.12[5] - FPD18 pin strapping
-         *             0: DIP0 (Digital Interface Port 0) is used by
-         *                a TMDS transmitter (DVI)
-         *             1: DIP0 (Digital Interface Port 0) is used by
-         *                a TV encoder */
-        if (sr12 & 0x20) {
-            viaDIP0SetClockDriveStrength(pScrn, clockDriveStrength);
-        }
-
         break;
     case VIA_KM400:
     case VIA_K8M800:
