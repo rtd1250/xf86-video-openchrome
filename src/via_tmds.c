@@ -59,7 +59,7 @@ viaTMDSSyncPolarity(ScrnInfoPtr pScrn, unsigned int flags)
         syncPolarity |= BIT(0);
     }
 
-    if (flags & V_NHSYNC) {
+    if (flags & V_NVSYNC) {
         syncPolarity |= BIT(1);
     }
 
