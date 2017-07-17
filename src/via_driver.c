@@ -1272,7 +1272,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
                                         &pVia->exaScratchSize)
                     ? X_CONFIG : X_DEFAULT;
             xf86DrvMsg(pScrn->scrnIndex, from,
-                       "EXA scratch area size is %d kB.\n",
+                       "EXA scratch area size is %d KB.\n",
                        pVia->exaScratchSize);
         }
     }
@@ -1365,7 +1365,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     from = xf86GetOptValInteger(VIAOptions, OPTION_AGPMEM, &pVia->agpMem)
             ? X_CONFIG : X_DEFAULT;
     xf86DrvMsg(pScrn->scrnIndex, from,
-               "Will try to allocate %d kB of AGP memory.\n", pVia->agpMem);
+               "Will try to allocate %d KB of AGP memory.\n", pVia->agpMem);
 
     pVIADisplay = pVia->pVIADisplay;
     pVIADisplay->TVDotCrawl = FALSE;
