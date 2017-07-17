@@ -108,7 +108,7 @@ viaMapMMIO(ScrnInfoPtr pScrn)
 #endif
 
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                "Mapping MMIO at address 0x%lX with "
+                "Mapping MMIO at address 0x%lx with "
                 "size %u KB.\n",
                 pVia->MmioBase, VIA_MMIO_REGSIZE / 1024);
 
@@ -137,7 +137,7 @@ viaMapMMIO(ScrnInfoPtr pScrn)
 #endif
 
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-               "Mapping 2D Host BitBLT space at address 0x%lX with "
+               "Mapping 2D Host BitBLT space at address 0x%lx with "
                "size %u KB.\n",
                pVia->MmioBase + VIA_MMIO_BLTBASE, VIA_MMIO_BLTSIZE / 1024);
 
@@ -185,7 +185,7 @@ viaMapMMIO(ScrnInfoPtr pScrn)
 #endif
 
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-               "Mapping the frame buffer at address 0x%lX with "
+               "Mapping the frame buffer at address 0x%lx with "
                "size %lu KB.\n",
                pVia->FrameBufferBase, pVia->videoRambytes / 1024);
 
@@ -236,10 +236,6 @@ viaMapMMIO(ScrnInfoPtr pScrn)
 
     pVia->FBFreeStart = 0;
     pVia->FBFreeEnd = pVia->videoRambytes;
-
-    xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-               "Frame buffer start address: %p, free start: 0x%X end: 0x%X\n",
-               pVia->FBBase, pVia->FBFreeStart, pVia->FBFreeEnd);
 
 #ifdef HAVE_PCIACCESS
     if (pVia->Chipset == VIA_VX900) {
