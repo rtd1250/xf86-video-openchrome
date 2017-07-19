@@ -1017,7 +1017,7 @@ via_fp_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 
         switch (pVia->Chipset) {
         case VIA_P4M900:
-            viaFPDPLowSetDelayTap(pScrn, 0x08);
+            viaFPDPLowSetAdjustment(pScrn, 0x08);
             break;
         default:
             break;
