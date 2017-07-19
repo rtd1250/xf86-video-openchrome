@@ -455,6 +455,21 @@ viaDVP0SetDataDriveStrength(ScrnInfoPtr pScrn, CARD8 dataDriveStrength)
 }
 
 /*
+ * Sets DVP0 (Digital Video Port 0) adjustment register.
+ */
+static inline void
+viaDVP0SetAdjustment(ScrnInfoPtr pScrn, CARD8 adjustment)
+{
+    /* 3X5.96[3:0] - DVP0 Adjustment */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x96,
+                adjustment, BIT(3) | BIT(2) | BIT(1) | BIT(0));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "DVP0 Adjustment: %d\n",
+                        (adjustment & (BIT(3) | BIT(2) |
+                                     BIT(1) | BIT(0)))));
+}
+
+/*
  * Sets DVP0 (Digital Video Port 0) sync polarity.
  */
 static inline void
