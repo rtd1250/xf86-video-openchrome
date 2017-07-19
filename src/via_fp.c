@@ -882,6 +882,102 @@ ViaPanelScaleDisable(ScrnInfoPtr pScrn)
         ViaCrtcMask(hwp, 0xA2, 0x00, 0xC8);
 }
 
+static int
+viaGetClockRangeIndex(int Clock)
+{
+    if (Clock < VIA_DPA_CLK_30M) {
+        return VIA_DPA_CLK_RANGE_30M;
+    } else if ((Clock >= VIA_DPA_CLK_30M) && (Clock < VIA_DPA_CLK_50M)) {
+        return VIA_DPA_CLK_RANGE_30M_50M;
+    } else if ((Clock >= VIA_DPA_CLK_50M) && (Clock < VIA_DPA_CLK_70M)) {
+        return VIA_DPA_CLK_RANGE_50M_70M;
+    } else if ((Clock >= VIA_DPA_CLK_70M) && (Clock < VIA_DPA_CLK_100M)) {
+        return VIA_DPA_CLK_RANGE_70M_100M;
+    } else if ((Clock >= VIA_DPA_CLK_100M) && (Clock < VIA_DPA_CLK_150M)) {
+        return VIA_DPA_CLK_RANGE_100M_150M;
+    } else {
+        return VIA_DPA_CLK_RANGE_150M;
+    }
+}
+
+static void
+viaLoadDPA(ScrnInfoPtr pScrn, CARD16 diPort, VIADPAPtr pVIADPA)
+{
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaLoadDPA.\n"));
+
+    if (!pVIADPA) {
+        goto exit;
+    }
+
+    switch (diPort) {
+    case VIA_DI_PORT_DVP0:
+        viaDVP0SetAdjustment(pScrn, pVIADPA->dvp0Adjustment);
+        viaDVP0SetClockDriveStrength(pScrn, pVIADPA->dvp0ClockDriveStrength);
+        viaDVP0SetDataDriveStrength(pScrn, pVIADPA->dvp0DataDriveStrength);
+        break;
+    case VIA_DI_PORT_DVP1:
+        viaDVP1SetAdjustment(pScrn, pVIADPA->dvp1Adjustment);
+        viaDVP1SetClockDriveStrength(pScrn, pVIADPA->dvp1ClockDriveStrength);
+        viaDVP1SetDataDriveStrength(pScrn, pVIADPA->dvp1DataDriveStrength);
+        break;
+    case VIA_DI_PORT_FPDPLOW:
+        viaFPDPLowSetAdjustment(pScrn, pVIADPA->fpdpLowAdjustment);
+        break;
+    case VIA_DI_PORT_FPDPHIGH:
+        viaFPDPHighSetAdjustment(pScrn, pVIADPA->fpdpHighAdjustment);
+        break;
+    case (VIA_DI_PORT_FPDPHIGH |
+            VIA_DI_PORT_FPDPLOW):
+        viaFPDPLowSetAdjustment(pScrn, pVIADPA->fpdpLowAdjustment);
+        viaFPDPHighSetAdjustment(pScrn, pVIADPA->fpdpHighAdjustment);
+        break;
+    default:
+        break;
+    }
+
+exit:
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaLoadDPA.\n"));
+}
+
+static void
+viaFPIOAdjustment(ScrnInfoPtr pScrn,
+                int Chipset, CARD16 diPort, int Clock)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIADPAInfoTablePtr pVIADPAInfoTable;
+    VIADPAPtr pVIADPA;
+    Bool isDPATableExist = FALSE;
+    int clockRangeIndex = 0;
+    int i = 0;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaFPIOAdjustment.\n"));
+
+    for (i = 0; i < NUMBER_VIA_DPA_TABLE; i++) {
+        if (pVia->Chipset == viaDPAIndexTable[i].Chipset) {
+            isDPATableExist = TRUE;
+            break;
+        }
+    }
+
+    if (isDPATableExist) {
+        if (viaDPAIndexTable[i].pFPDPATable) {
+            pVIADPAInfoTable = viaDPAIndexTable[i].pFPDPATable;
+        }
+
+        clockRangeIndex = viaGetClockRangeIndex(Clock);
+
+        /* Write the value to the register. */
+        pVIADPA = pVIADPAInfoTable[clockRangeIndex].pDPASetting;
+        viaLoadDPA(pScrn, diPort, pVIADPA);
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaFPIOAdjustment.\n"));
+}
+
 static void
 via_fp_create_resources(xf86OutputPtr output)
 {
@@ -1015,13 +1111,9 @@ via_fp_mode_set(xf86OutputPtr output, DisplayModePtr mode,
             ViaPanelScaleDisable(pScrn);
         }
 
-        switch (pVia->Chipset) {
-        case VIA_P4M900:
-            viaFPDPLowSetAdjustment(pScrn, 0x08);
-            break;
-        default:
-            break;
-        }
+        viaFPIOAdjustment(pScrn,
+                        pVia->Chipset, pVIAFP->diPort,
+                        adjusted_mode->Clock);
 
         switch (pVia->Chipset) {
         case VIA_CX700:

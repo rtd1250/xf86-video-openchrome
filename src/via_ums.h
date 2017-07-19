@@ -139,9 +139,24 @@
 #define VIA_ANALOG_DPMS_SUSPEND     0x02
 #define VIA_ANALOG_DPMS_OFF         0x03
 
+#define VIA_DPA_CLK_30M       30000000
+#define VIA_DPA_CLK_50M       50000000
+#define VIA_DPA_CLK_70M       70000000
+#define VIA_DPA_CLK_100M      100000000
+#define VIA_DPA_CLK_150M      150000000
+
 
 #define BIT(x) (1 << x)
 
+
+enum {
+    VIA_DPA_CLK_RANGE_30M,
+    VIA_DPA_CLK_RANGE_30M_50M,
+    VIA_DPA_CLK_RANGE_50M_70M,
+    VIA_DPA_CLK_RANGE_70M_100M,
+    VIA_DPA_CLK_RANGE_100M_150M,
+    VIA_DPA_CLK_RANGE_150M,
+};
 
 typedef struct ViaPanelMode {
     int Width;
@@ -290,6 +305,82 @@ union pllparams {
     } params;
     CARD32 packed;
 };
+
+/*
+ * DPA Setting Structure.
+ */
+typedef struct _VIADPA {
+    CARD8   dvp0Adjustment;
+    CARD8   dvp0ClockDriveStrength;
+    CARD8   dvp0DataDriveStrength;
+    CARD8   dvp1Adjustment;
+    CARD8   dvp1ClockDriveStrength;
+    CARD8   dvp1DataDriveStrength;
+    CARD8   fpdpLowAdjustment;
+    CARD8   fpdpHighAdjustment;
+} VIADPARec, *VIADPAPtr;
+
+typedef struct _VIADPAINFOTABLE {
+    CARD32          ClockRangeIndex;
+    VIADPAPtr       pDPASetting;
+} VIADPAInfoTableRec, *VIADPAInfoTablePtr;
+
+typedef struct _VIADPAINDEXTABLE {
+    int      Chipset;
+
+    VIADPAInfoTablePtr      pExtTMDSDPATable;
+    VIADPAInfoTablePtr      pFPDPATable;
+} VIA_DPA_INDEX_TABLE;
+
+
+static VIADPARec viaDPAP4M900ClockDefault[] = {
+    /*      DVP0 Adjustment, DVP0 Clock Drive, DVP0 Data Drive,
+     *      DVP1 Adjustment, DVP1 Clock Drive, DVP1 Data Drive,
+     *  FPDP Low Adjustment,              FPDP High Adjustment */
+    {                  0x07,             0x00,            0x00,
+                       0x03,             0x00,            0x00,
+                       0x08,                              0x00}
+};
+
+static VIADPARec viaDPAP4M900Clock100M150M[] = {
+    /*      DVP0 Adjustment, DVP0 Clock Drive, DVP0 Data Drive,
+     *      DVP1 Adjustment, DVP1 Clock Drive, DVP1 Data Drive,
+     *  FPDP Low Adjustment,              FPDP High Adjustment */
+    {                  0x03,             0x00,            0x01,
+                       0x03,             0x00,            0x00,
+                       0x08,                              0x00}
+};
+
+static VIADPARec viaDPAP4M900Clock150M[] = {
+    /*      DVP0 Adjustment, DVP0 Clock Drive, DVP0 Data Drive,
+     *      DVP1 Adjustment, DVP1 Clock Drive, DVP1 Data Drive,
+     *  FPDP Low Adjustment,              FPDP High Adjustment */
+    {                  0x01,             0x02,            0x01,
+                       0x03,             0x00,            0x00,
+                       0x08,                              0x00}
+};
+
+
+static VIADPAInfoTableRec viaDPAFPP4M900[] = {
+    {      VIA_DPA_CLK_RANGE_30M,   viaDPAP4M900ClockDefault},
+    {  VIA_DPA_CLK_RANGE_30M_50M,   viaDPAP4M900ClockDefault},
+    {  VIA_DPA_CLK_RANGE_50M_70M,   viaDPAP4M900ClockDefault},
+    { VIA_DPA_CLK_RANGE_70M_100M,   viaDPAP4M900ClockDefault},
+    {VIA_DPA_CLK_RANGE_100M_150M,  viaDPAP4M900Clock100M150M},
+    {     VIA_DPA_CLK_RANGE_150M,      viaDPAP4M900Clock150M}
+};
+
+
+static VIA_DPA_INDEX_TABLE viaDPAIndexTable[] = {
+//  {VIA_CX700,     NULL, NULL},
+//  {VIA_P4M890,    NULL, viaDPAFPP4M890},
+//  {VIA_K8M890,    NULL, viaDPAFPK8M890},
+    {VIA_P4M900,    NULL, viaDPAFPP4M900},
+//  {VIA_VX800,     NULL, NULL}
+};
+
+
+#define NUMBER_VIA_DPA_TABLE    (sizeof(viaDPAIndexTable) / sizeof(*(viaDPAIndexTable)))
 
 
 /*
