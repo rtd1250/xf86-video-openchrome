@@ -1041,17 +1041,17 @@ viaFPDPHighSetIOPadState(ScrnInfoPtr pScrn, CARD8 ioPadState)
 }
 
 /*
- * Sets FPDP (Flat Panel Display Port) High interface delay tap.
+ * Sets FPDP (Flat Panel Display Port) High adjustment register.
  */
 static inline void
-viaFPDPHighSetDelayTap(ScrnInfoPtr pScrn, CARD8 delayTap)
+viaFPDPHighSetAdjustment(ScrnInfoPtr pScrn, CARD8 adjustment)
 {
-    /* 3X5.97[3:0] - FPDP High Delay Tap */
-    ViaCrtcMask(VGAHWPTR(pScrn), 0x97, delayTap,
+    /* 3X5.97[3:0] - FPDP High Adjustment */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x97, adjustment,
                 BIT(3) | BIT(2) | BIT(1) | BIT(0));
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "FPDP High Delay Tap: %d\n",
-                        (delayTap & (BIT(3) | BIT(2) |
+                        "FPDP High Adjustment: %d\n",
+                        (adjustment & (BIT(3) | BIT(2) |
                                      BIT(1) | BIT(0)))));
 }
 
