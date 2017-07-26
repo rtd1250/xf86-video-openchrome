@@ -1107,7 +1107,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     pVia->KMS = FALSE;
 #ifdef HAVE_DRI
     busId = DRICreatePCIBusID(pVia->PciInfo);
-    pVia->drmmode.fd = drmOpen("via", busId);
+    pVia->drmmode.fd = drmOpen("openchrome", busId);
     if (pVia->drmmode.fd != -1) {
         if (!drmCheckModesettingSupported(busId)) {
             xf86DrvMsg(-1, X_INFO, "[drm] KMS supported\n");
@@ -1123,7 +1123,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             drmFreeVersion(drmVer);
 
             xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "[drm] via interface version: %d.%d.%d\n",
+                        "[drm] OpenChrome DRM Interface Version: %d.%d.%d\n",
                         pVia->drmVerMajor, pVia->drmVerMinor, pVia->drmVerPL);
 
             /* DRI2 or DRI1 support */
