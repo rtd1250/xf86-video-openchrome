@@ -1164,9 +1164,11 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     /* After umsPreInit function succeeds, PCI hardware resources are
      * memory mapped. If there is an error from this point on, they will
      * need to be explicitly relinquished. */
-    if (!umsPreInit(pScrn)) {
-        VIAFreeRec(pScrn);
-        return FALSE;
+    if (!pVia->KMS) {
+        if (!umsPreInit(pScrn)) {
+            VIAFreeRec(pScrn);
+            return FALSE;
+        }
     }
 
     xf86CollectOptions(pScrn, option);
@@ -1509,8 +1511,11 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     status = TRUE;
     goto exit;
 fail:
-    viaUnmapMMIO(pScrn);
-    VIAFreeRec(pScrn);
+    if (!pVia->KMS) {
+        viaUnmapMMIO(pScrn);
+    }
+
+	VIAFreeRec(pScrn);
 exit:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting VIAPreInit.\n"));
@@ -1709,6 +1714,7 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
             xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
                         "drmSetMaster failed: %s\n",
                         strerror(errno));
+            return FALSE;
         }
     }
 
