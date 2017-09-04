@@ -303,29 +303,36 @@ VIAEnterVT_internal(ScrnInfoPtr pScrn, int flags)
     VIAPtr pVia = VIAPTR(pScrn);
     int i;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAEnterVT\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
 
     for (i = 0; i < xf86_config->num_crtc; i++) {
         xf86CrtcPtr crtc = xf86_config->crtc[i];
 
-        if (crtc->funcs->save)
+        if (crtc->funcs->save) {
             crtc->funcs->save(crtc);
+        }
     }
 
     for (i = 0; i < xf86_config->num_output; i++) {
         xf86OutputPtr output = xf86_config->output[i];
 
-        if (output->funcs->save)
+        if (output->funcs->save) {
             output->funcs->save(output);
+        }
     }
 
-    if (!xf86SetDesiredModes(pScrn))
+    if (!xf86SetDesiredModes(pScrn)) {
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "Exiting %s.\n", __func__));
         return FALSE;
+    }
 
     if (!flags) {
         /* Restore video status. */
-        if (!pVia->IsSecondary)
+        if ((!pVia->IsSecondary) && (!pVia->KMS)) {
             viaRestoreVideo(pScrn);
+        }
 
 #ifdef HAVE_DRI
         if (pVia->directRenderingType == DRI_1) {
@@ -336,6 +343,9 @@ VIAEnterVT_internal(ScrnInfoPtr pScrn, int flags)
         }
 #endif
     }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
     return TRUE;
 }
 
@@ -347,50 +357,67 @@ VIAEnterVT(VT_FUNC_ARGS_DECL)
 }
 
 static void
-VIALeaveVT(VT_FUNC_ARGS_DECL)
+VIALeaveVT_internal(ScrnInfoPtr pScrn, int flags)
 {
-    SCRN_INFO_PTR(arg);
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     int i;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIALeaveVT\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
 
+    if (!flags) {
 #ifdef HAVE_DRI
-    if (pVia->directRenderingType == DRI_1) {
-        volatile drm_via_sarea_t *saPriv = (drm_via_sarea_t *) DRIGetSAREAPrivate(pScrn->pScreen);
+        if (pVia->directRenderingType == DRI_1) {
+            volatile drm_via_sarea_t *saPriv = (drm_via_sarea_t *) DRIGetSAREAPrivate(pScrn->pScreen);
 
-        DRILock(xf86ScrnToScreen(pScrn), 0);
-        saPriv->ctxOwner = ~0;
+            DRILock(xf86ScrnToScreen(pScrn), 0);
+            saPriv->ctxOwner = ~0;
 
-        viaAccelSync(pScrn);
+            viaAccelSync(pScrn);
 
-        VIADRIRingBufferCleanup(pScrn);
-        viaDRIOffscreenSave(pScrn);
+            VIADRIRingBufferCleanup(pScrn);
+            viaDRIOffscreenSave(pScrn);
 
-        if (pVia->VQEnable)
-            viaDisableVQ(pScrn);
-    }
+            if ((pVia->VQEnable) && (!pVia->KMS)) {
+                viaDisableVQ(pScrn);
+            }
+        }
 #endif
 
-    /* Save video status and turn off all video activities. */
-    if (!pVia->IsSecondary)
-        viaSaveVideo(pScrn);
+        /* Save video status and turn off all video activities. */
+        if ((!pVia->IsSecondary) && (!pVia->KMS)){
+            viaSaveVideo(pScrn);
+        }
+    }
 
     for (i = 0; i < xf86_config->num_output; i++) {
         xf86OutputPtr output = xf86_config->output[i];
 
-        if (output->funcs->restore)
+        if (output->funcs->restore) {
             output->funcs->restore(output);
+        }
     }
 
     for (i = 0; i < xf86_config->num_crtc; i++) {
         xf86CrtcPtr crtc = xf86_config->crtc[i];
 
-        if (crtc->funcs->restore)
+        if (crtc->funcs->restore) {
             crtc->funcs->restore(crtc);
+        }
     }
+
     pScrn->vtSema = FALSE;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
+}
+
+static void
+VIALeaveVT(VT_FUNC_ARGS_DECL)
+{
+    SCRN_INFO_PTR(arg);
+    VIALeaveVT_internal(pScrn, 0);
 }
 
 static void
