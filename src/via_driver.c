@@ -1670,7 +1670,9 @@ VIACloseScreen(CLOSE_SCREEN_ARGS_DECL)
     if (pVia->directRenderingType != DRI_2)
         viaExitVideo(pScrn);
 
-    viaExitAccel(pScreen);
+    if (!pVia->NoAccel) {
+        viaExitAccel(pScreen);
+    }
 
     if (pVia->ShadowPtr) {
         shadowRemove(pScreen, pScreen->GetScreenPixmap(pScreen));
