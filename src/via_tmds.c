@@ -1161,6 +1161,7 @@ viaExtTMDSProbe(ScrnInfoPtr pScrn)
         case VIA_VX855:
         case VIA_VX900:
             pVIADisplay->extTMDSDIPort = VIA_DI_PORT_DVP1;
+            break;
         default:
             pVIADisplay->extTMDSDIPort = VIA_DI_PORT_NONE;
             break;
