@@ -1580,6 +1580,8 @@ void viaFPProbe(ScrnInfoPtr pScrn);
 void viaFPInit(ScrnInfoPtr pScrn);
 
 /* via_tmds.c */
+void viaExtTMDSIOPadState(ScrnInfoPtr pScrn, uint32_t diPort,
+                            Bool ioPadOn);
 void viaExtTMDSSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource);
 void viaExtTMDSEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState);
 void viaExtTMDSSetClockDriveStrength(ScrnInfoPtr pScrn,

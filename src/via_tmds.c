@@ -272,6 +272,53 @@ viaTMDSIOPadSetting(ScrnInfoPtr pScrn, Bool ioPadOn)
 }
 
 void
+viaExtTMDSIOPadState(ScrnInfoPtr pScrn, uint32_t diPort, Bool ioPadOn)
+{
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
+    switch(diPort) {
+    case VIA_DI_PORT_DVP0:
+        viaDVP0SetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
+        break;
+    case VIA_DI_PORT_DVP1:
+        viaDVP1SetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
+        break;
+    case VIA_DI_PORT_FPDPLOW:
+        viaFPDPLowSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
+        break;
+    case VIA_DI_PORT_FPDPHIGH:
+        viaFPDPHighSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
+        break;
+    case (VIA_DI_PORT_FPDPLOW |
+          VIA_DI_PORT_FPDPHIGH):
+        viaFPDPLowSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
+        viaFPDPHighSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
+        break;
+    case VIA_DI_PORT_LVDS1:
+        viaLVDS1SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
+        break;
+    case VIA_DI_PORT_LVDS2:
+        viaLVDS2SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
+        break;
+    case (VIA_DI_PORT_LVDS1 |
+          VIA_DI_PORT_LVDS2):
+        viaLVDS1SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
+        viaLVDS2SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
+        break;
+    default:
+        break;
+    }
+
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "DVI I/O Pad: %s\n",
+                ioPadOn ? "On": "Off");
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
+}
+
+void
 viaExtTMDSSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);

@@ -30,6 +30,7 @@
 #endif
 
 #include "via_driver.h"
+#include "via_ums.h"
 #include "via_vt1632.h"
 
 static void
@@ -206,11 +207,13 @@ via_vt1632_dpms(xf86OutputPtr output, int mode)
     switch (mode) {
     case DPMSModeOn:
         viaVT1632Power(pScrn, pVIAVT1632->VT1632I2CDev, TRUE);
+        viaExtTMDSIOPadState(pScrn, pVIAVT1632->diPort, TRUE);
         break;
     case DPMSModeStandby:
     case DPMSModeSuspend:
     case DPMSModeOff:
         viaVT1632Power(pScrn, pVIAVT1632->VT1632I2CDev, FALSE);
+        viaExtTMDSIOPadState(pScrn, pVIAVT1632->diPort, FALSE);
         break;
     default:
         break;
