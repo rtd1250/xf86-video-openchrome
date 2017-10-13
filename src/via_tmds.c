@@ -1065,32 +1065,30 @@ viaExtTMDSProbe(ScrnInfoPtr pScrn)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaExtTMDSProbe.\n"));
 
-    if (pVIADisplay->pI2CBus2) {
+    pVIADisplay->extTMDSPresence = FALSE;
+    pVIADisplay->extTMDSI2CBus = VIA_I2C_NONE;
+    pVIADisplay->extTMDSTransmitter = VIA_TMDS_NONE;
+
+    if ((!(pVIADisplay->extTMDSPresence)) &&
+        ((pVIADisplay->pI2CBus2) &&
+            (~(pVIADisplay->mappedI2CBus & VIA_I2C_BUS2)))) {
         if (viaVT1632Probe(pScrn, pVIADisplay->pI2CBus2)) {
             pVIADisplay->extTMDSPresence = TRUE;
             pVIADisplay->extTMDSI2CBus = VIA_I2C_BUS2;
             pVIADisplay->extTMDSTransmitter = VIA_TMDS_VT1632;
             pVIADisplay->mappedI2CBus |= VIA_I2C_BUS2;
-        } else {
-            pVIADisplay->extTMDSPresence = FALSE;
-            pVIADisplay->extTMDSI2CBus = VIA_I2C_NONE;
-            pVIADisplay->extTMDSTransmitter = VIA_TMDS_NONE;
         }
-    } else if (pVIADisplay->pI2CBus3) {
+    }
+
+    if ((!(pVIADisplay->extTMDSPresence)) &&
+        ((pVIADisplay->pI2CBus3) &&
+            (~(pVIADisplay->mappedI2CBus & VIA_I2C_BUS3)))) {
         if (viaVT1632Probe(pScrn, pVIADisplay->pI2CBus3)) {
             pVIADisplay->extTMDSPresence = TRUE;
             pVIADisplay->extTMDSI2CBus = VIA_I2C_BUS3;
             pVIADisplay->extTMDSTransmitter = VIA_TMDS_VT1632;
             pVIADisplay->mappedI2CBus |= VIA_I2C_BUS3;
-        } else {
-            pVIADisplay->extTMDSPresence = FALSE;
-            pVIADisplay->extTMDSI2CBus = VIA_I2C_NONE;
-            pVIADisplay->extTMDSTransmitter = VIA_TMDS_NONE;
         }
-    } else {
-        pVIADisplay->extTMDSPresence = FALSE;
-        pVIADisplay->extTMDSI2CBus = VIA_I2C_NONE;
-        pVIADisplay->extTMDSTransmitter = VIA_TMDS_NONE;
     }
 
     sr12 = hwp->readSeq(hwp, 0x12);
