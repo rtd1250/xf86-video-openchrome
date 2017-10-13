@@ -270,11 +270,33 @@ via_vt1632_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
 static void
 via_vt1632_prepare(xf86OutputPtr output)
 {
+    ScrnInfoPtr pScrn = output->scrn;
+    VIAVT1632Ptr pVIAVT1632 = output->driver_private;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
+    viaVT1632Power(pScrn, pVIAVT1632->VT1632I2CDev, FALSE);
+    viaExtTMDSIOPadState(pScrn, pVIAVT1632->diPort, FALSE);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
 }
 
 static void
 via_vt1632_commit(xf86OutputPtr output)
 {
+    ScrnInfoPtr pScrn = output->scrn;
+    VIAVT1632Ptr pVIAVT1632 = output->driver_private;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
+    viaVT1632Power(pScrn, pVIAVT1632->VT1632I2CDev, TRUE);
+    viaExtTMDSIOPadState(pScrn, pVIAVT1632->diPort, TRUE);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
 }
 
 static void
