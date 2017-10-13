@@ -35,7 +35,7 @@
 typedef struct _VIAVT1632 {
     I2CDevPtr   VT1632I2CDev;
 
-    CARD16      diPort;
+    uint32_t    diPort;
     CARD8       i2cBus;
     CARD8       transmitter;
 

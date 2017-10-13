@@ -372,7 +372,8 @@ viaFPSecondaryHardPowerSeq(ScrnInfoPtr pScrn, Bool powerState)
 }
 
 static void
-viaFPPower(ScrnInfoPtr pScrn, int Chipset, CARD16 diPort, Bool powerState)
+viaFPPower(ScrnInfoPtr pScrn, int Chipset, uint32_t diPort,
+            Bool powerState)
 {
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaFPPower.\n"));
@@ -421,7 +422,7 @@ viaFPPower(ScrnInfoPtr pScrn, int Chipset, CARD16 diPort, Bool powerState)
 }
 
 static void
-viaFPIOPadState(ScrnInfoPtr pScrn, CARD16 diPort, Bool ioPadOn)
+viaFPIOPadState(ScrnInfoPtr pScrn, uint32_t diPort, Bool ioPadOn)
 {
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaFPIOPadState.\n"));
@@ -468,7 +469,7 @@ viaFPIOPadState(ScrnInfoPtr pScrn, CARD16 diPort, Bool ioPadOn)
 }
 
 static void
-viaFPFormat(ScrnInfoPtr pScrn, CARD16 diPort, CARD8 format)
+viaFPFormat(ScrnInfoPtr pScrn, uint32_t diPort, CARD8 format)
 {
     CARD8 temp = format & 0x01;
 
@@ -496,7 +497,7 @@ viaFPFormat(ScrnInfoPtr pScrn, CARD16 diPort, CARD8 format)
 }
 
 static void
-viaFPOutputFormat(ScrnInfoPtr pScrn, CARD16 diPort, CARD8 outputFormat)
+viaFPOutputFormat(ScrnInfoPtr pScrn, uint32_t diPort, CARD8 outputFormat)
 {
     CARD8 temp = outputFormat & 0x01;
 
@@ -524,7 +525,7 @@ viaFPOutputFormat(ScrnInfoPtr pScrn, CARD16 diPort, CARD8 outputFormat)
 }
 
 static void
-viaFPDithering(ScrnInfoPtr pScrn, CARD16 diPort, Bool dithering)
+viaFPDithering(ScrnInfoPtr pScrn, uint32_t diPort, Bool dithering)
 {
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaFPDithering.\n"));
@@ -553,7 +554,7 @@ viaFPDithering(ScrnInfoPtr pScrn, CARD16 diPort, Bool dithering)
  * Set FP sync polarity.
  */
 static void
-viaFPSyncPolarity(ScrnInfoPtr pScrn, CARD16 diPort, unsigned int flags)
+viaFPSyncPolarity(ScrnInfoPtr pScrn, uint32_t diPort, unsigned int flags)
 {
     CARD8 syncPolarity = 0x00;
 
@@ -609,7 +610,7 @@ viaFPSyncPolarity(ScrnInfoPtr pScrn, CARD16 diPort, unsigned int flags)
 }
 
 static void
-viaFPDisplaySource(ScrnInfoPtr pScrn, CARD16 diPort, int index)
+viaFPDisplaySource(ScrnInfoPtr pScrn, uint32_t diPort, int index)
 {
     CARD8 displaySource = index & 0x01;
 
@@ -901,7 +902,7 @@ viaGetClockRangeIndex(int Clock)
 }
 
 static void
-viaLoadDPA(ScrnInfoPtr pScrn, CARD16 diPort, VIADPAPtr pVIADPA)
+viaLoadDPA(ScrnInfoPtr pScrn, uint32_t diPort, VIADPAPtr pVIADPA)
 {
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaLoadDPA.\n"));
@@ -943,7 +944,7 @@ exit:
 
 static void
 viaFPIOAdjustment(ScrnInfoPtr pScrn,
-                int Chipset, CARD16 diPort, int Clock)
+                int Chipset, uint32_t diPort, int Clock)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     VIADPAInfoTablePtr pVIADPAInfoTable;
