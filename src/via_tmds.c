@@ -1118,11 +1118,16 @@ viaExtTMDSProbe(ScrnInfoPtr pScrn)
 
     if ((!(pVIADisplay->extTMDSPresence)) &&
         ((pVIADisplay->pI2CBus2) &&
-            (~(pVIADisplay->mappedI2CBus & VIA_I2C_BUS2)))) {
+        (~(pVIADisplay->mappedI2CBus & VIA_I2C_BUS2)))) {
         if (viaVT1632Probe(pScrn, pVIADisplay->pI2CBus2)) {
             pVIADisplay->extTMDSPresence = TRUE;
             pVIADisplay->extTMDSI2CBus = VIA_I2C_BUS2;
             pVIADisplay->extTMDSTransmitter = VIA_TMDS_VT1632;
+            pVIADisplay->mappedI2CBus |= VIA_I2C_BUS2;
+        } else if (viaSiI164Probe(pScrn, pVIADisplay->pI2CBus2)) {
+            pVIADisplay->extTMDSPresence = TRUE;
+            pVIADisplay->extTMDSI2CBus = VIA_I2C_BUS2;
+            pVIADisplay->extTMDSTransmitter = VIA_TMDS_SII164;
             pVIADisplay->mappedI2CBus |= VIA_I2C_BUS2;
         }
     }
@@ -1134,6 +1139,11 @@ viaExtTMDSProbe(ScrnInfoPtr pScrn)
             pVIADisplay->extTMDSPresence = TRUE;
             pVIADisplay->extTMDSI2CBus = VIA_I2C_BUS3;
             pVIADisplay->extTMDSTransmitter = VIA_TMDS_VT1632;
+            pVIADisplay->mappedI2CBus |= VIA_I2C_BUS3;
+        } else if (viaSiI164Probe(pScrn, pVIADisplay->pI2CBus3)) {
+            pVIADisplay->extTMDSPresence = TRUE;
+            pVIADisplay->extTMDSI2CBus = VIA_I2C_BUS3;
+            pVIADisplay->extTMDSTransmitter = VIA_TMDS_SII164;
             pVIADisplay->mappedI2CBus |= VIA_I2C_BUS3;
         }
     }

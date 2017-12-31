@@ -132,6 +132,7 @@
 /* External TMDS (DVI) Transmitter Type */
 #define     VIA_TMDS_NONE           0x0
 #define     VIA_TMDS_VT1632         0x1
+#define     VIA_TMDS_SII164         0x2
 
 /* To be used with via_analog_set_dpms_control inline function. */
 #define VIA_ANALOG_DPMS_ON          0x00
