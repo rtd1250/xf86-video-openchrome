@@ -363,6 +363,81 @@ const xf86OutputFuncsRec via_sii164_funcs = {
 };
 
 Bool
+viaSiI164Probe(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus)
+{
+    I2CDevPtr pI2CDevice = NULL;
+    I2CSlaveAddr i2cAddr = 0x70;
+    CARD8 i2cData;
+    CARD16 vendorID, deviceID;
+    Bool status = FALSE;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered viaSiI164Probe.\n"));
+
+    if (!pI2CBus) {
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                            "Invalid I2C bus.\n"));
+        goto exit;
+    }
+
+    if (!xf86I2CProbeAddress(pI2CBus, i2cAddr)) {
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                            "I2C bus device not found.\n"));
+        goto exit;
+    }
+
+    pI2CDevice = xf86CreateI2CDevRec();
+    if (!pI2CDevice) {
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                            "Failed to create an I2C bus device "
+                            "record.\n"));
+        goto exit;
+    }
+
+    pI2CDevice->DevName = "SiI 164";
+    pI2CDevice->SlaveAddr = i2cAddr;
+    pI2CDevice->pI2CBus = pI2CBus;
+    if (!xf86I2CDevInit(pI2CDevice)) {
+        xf86DestroyI2CDevRec(pI2CDevice, TRUE);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                            "Failed to initialize a device on "
+                            "I2C bus.\n"));
+        goto exit;
+    }
+
+    xf86I2CReadByte(pI2CDevice, 0, &i2cData);
+    vendorID = i2cData;
+    xf86I2CReadByte(pI2CDevice, 1, &i2cData);
+    vendorID |= i2cData << 8;
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Vendor ID: 0x%04x\n", vendorID));
+
+    xf86I2CReadByte(pI2CDevice, 2, &i2cData);
+    deviceID = i2cData;
+    xf86I2CReadByte(pI2CDevice, 3, &i2cData);
+    deviceID |= i2cData << 8;
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Device ID: 0x%04x\n", deviceID));
+
+    if ((vendorID != 0x0001) || (deviceID != 0x0006)) {
+        xf86DestroyI2CDevRec(pI2CDevice, TRUE);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                            "SiI 164 external TMDS transmitter not "
+                            "detected.\n"));
+        goto exit;
+    }
+
+    status = TRUE;
+    xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                "SiI 164 external TMDS transmitter detected.\n");
+    xf86DestroyI2CDevRec(pI2CDevice, TRUE);
+exit:
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting viaSiI164Probe.\n"));
+    return status;
+}
+
+Bool
 viaSiI164Init(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus)
 {
     xf86OutputPtr output;
