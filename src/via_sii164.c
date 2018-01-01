@@ -30,6 +30,7 @@
 #endif
 
 #include "via_driver.h"
+#include "via_ums.h"
 #include "via_sii164.h"
 
 static void
@@ -192,11 +193,13 @@ via_sii164_dpms(xf86OutputPtr output, int mode)
     switch (mode) {
     case DPMSModeOn:
         viaSiI164Power(pScrn, pSiI164Rec->pSiI164I2CDev, TRUE);
+        viaExtTMDSIOPadState(pScrn, pSiI164Rec->diPort, TRUE);
         break;
     case DPMSModeStandby:
     case DPMSModeSuspend:
     case DPMSModeOff:
         viaSiI164Power(pScrn, pSiI164Rec->pSiI164I2CDev, FALSE);
+        viaExtTMDSIOPadState(pScrn, pSiI164Rec->diPort, FALSE);
         break;
     default:
         break;
