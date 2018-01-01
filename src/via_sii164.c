@@ -191,12 +191,12 @@ via_sii164_dpms(xf86OutputPtr output, int mode)
 
     switch (mode) {
     case DPMSModeOn:
-        viaSiI164Power(pScrn, pSiI164Rec->SiI164I2CDev, TRUE);
+        viaSiI164Power(pScrn, pSiI164Rec->pSiI164I2CDev, TRUE);
         break;
     case DPMSModeStandby:
     case DPMSModeSuspend:
     case DPMSModeOff:
-        viaSiI164Power(pScrn, pSiI164Rec->SiI164I2CDev, FALSE);
+        viaSiI164Power(pScrn, pSiI164Rec->pSiI164I2CDev, FALSE);
         break;
     default:
         break;
@@ -215,7 +215,7 @@ via_sii164_save(xf86OutputPtr output)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_sii164_save.\n"));
 
-    viaSiI164SaveRegisters(pScrn, pSiI164Rec->SiI164I2CDev, pSiI164Rec);
+    viaSiI164SaveRegisters(pScrn, pSiI164Rec->pSiI164I2CDev, pSiI164Rec);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_sii164_save.\n"));
@@ -230,7 +230,7 @@ via_sii164_restore(xf86OutputPtr output)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_sii164_restore.\n"));
 
-    viaSiI164RestoreRegisters(pScrn, pSiI164Rec->SiI164I2CDev,
+    viaSiI164RestoreRegisters(pScrn, pSiI164Rec->pSiI164I2CDev,
                                 pSiI164Rec);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -276,9 +276,9 @@ via_sii164_mode_set(xf86OutputPtr output, DisplayModePtr mode,
         viaExtTMDSSetDataDriveStrength(pScrn, 0x03);
         viaExtTMDSEnableIOPads(pScrn, 0x03);
 
-        viaSiI164DumpRegisters(pScrn, pSiI164Rec->SiI164I2CDev);
-        viaSiI164InitRegisters(pScrn, pSiI164Rec->SiI164I2CDev);
-        viaSiI164DumpRegisters(pScrn, pSiI164Rec->SiI164I2CDev);
+        viaSiI164DumpRegisters(pScrn, pSiI164Rec->pSiI164I2CDev);
+        viaSiI164InitRegisters(pScrn, pSiI164Rec->pSiI164I2CDev);
+        viaSiI164DumpRegisters(pScrn, pSiI164Rec->pSiI164I2CDev);
 
         viaExtTMDSSetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
     }
@@ -297,11 +297,11 @@ via_sii164_detect(xf86OutputPtr output)
 
     /* Check for the DVI presence via SiI 164 first before accessing
      * I2C bus. */
-    if (viaSiI164Sense(pScrn, pSiI164Rec->SiI164I2CDev)) {
+    if (viaSiI164Sense(pScrn, pSiI164Rec->pSiI164I2CDev)) {
 
         /* Since DVI presence was established, access the I2C bus
          * assigned to DVI. */
-        mon = xf86OutputGetEDID(output, pSiI164Rec->SiI164I2CDev->pI2CBus);
+        mon = xf86OutputGetEDID(output, pSiI164Rec->pSiI164I2CDev->pI2CBus);
 
         /* Is the interface type digital? */
         if (mon && DIGITAL(mon->features.input_type)) {
@@ -510,7 +510,7 @@ viaSiI164Init(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus)
     }
 
     // Remembering which I2C bus is used for SiI 164.
-    pSiI164Rec->SiI164I2CDev = pI2CDevice;
+    pSiI164Rec->pSiI164I2CDev = pI2CDevice;
 
     xf86I2CReadByte(pI2CDevice, 0x06, &buf);
     pSiI164Rec->DotclockMin = buf * 1000;

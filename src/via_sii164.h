@@ -36,7 +36,11 @@
 #define VIA_SII164_PDB  0x01
 
 typedef struct _viaSiI164 {
-	I2CDevPtr SiI164I2CDev;
+    I2CDevPtr pSiI164I2CDev;
+
+    uint32_t diPort;
+    uint8_t i2cBus;
+    uint8_t transmitter;
 
 	int DotclockMin;
 	int DotclockMax;
