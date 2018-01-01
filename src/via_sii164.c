@@ -256,11 +256,33 @@ via_sii164_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
 static void
 via_sii164_prepare(xf86OutputPtr output)
 {
+    ScrnInfoPtr pScrn = output->scrn;
+    viaSiI164RecPtr pSiI164Rec = output->driver_private;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
+    viaSiI164Power(pScrn, pSiI164Rec->pSiI164I2CDev, FALSE);
+    viaExtTMDSIOPadState(pScrn, pSiI164Rec->diPort, FALSE);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
 }
 
 static void
 via_sii164_commit(xf86OutputPtr output)
 {
+    ScrnInfoPtr pScrn = output->scrn;
+    viaSiI164RecPtr pSiI164Rec = output->driver_private;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
+    viaSiI164Power(pScrn, pSiI164Rec->pSiI164I2CDev, TRUE);
+    viaExtTMDSIOPadState(pScrn, pSiI164Rec->diPort, TRUE);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
 }
 
 static void
