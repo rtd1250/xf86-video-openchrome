@@ -1592,7 +1592,7 @@ void viaExtTMDSSetDataDriveStrength(ScrnInfoPtr pScrn,
 void viaTMDSProbe(ScrnInfoPtr pScrn);
 void viaExtTMDSProbe(ScrnInfoPtr pScrn);
 void viaTMDSInit(ScrnInfoPtr pScrn);
-void via_dvi_init(ScrnInfoPtr pScrn);
+void viaExtTMDSInit(ScrnInfoPtr pScrn);
 
 /*via_tv.c */
 #ifdef HAVE_DEBUG
