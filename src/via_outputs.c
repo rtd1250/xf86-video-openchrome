@@ -70,9 +70,7 @@ viaInitDisplay(ScrnInfoPtr pScrn)
     via_tv_init(pScrn);
 
     /* DVI */
-    via_dvi_init(pScrn);
-
-    /* DVI */
+    viaExtTMDSInit(pScrn);
     viaTMDSInit(pScrn);
 
     /* VGA */
