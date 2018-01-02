@@ -307,7 +307,7 @@ typedef struct _VIA {
     ViaXvMC             xvmc;
     int                 drmVerMajor;
     int                 drmVerMinor;
-    int                 drmVerPL;
+    int                 drmVerPatchLevel;
     struct buffer_object *driOffScreenMem;
     void *              driOffScreenSave;
 #endif

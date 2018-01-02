@@ -342,7 +342,8 @@ ViaInitXVMC(ScreenPtr pScreen)
         xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
                    "[XvMC] Kernel drm version is %d.%d.%d; "
                    "at least version 2.4.0 is needed.\n",
-                   pVia->drmVerMajor, pVia->drmVerMinor, pVia->drmVerPL);
+                   pVia->drmVerMajor, pVia->drmVerMinor,
+                   pVia->drmVerPatchLevel);
         xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
                    "[XvMC] Please update. Disabling XvMC.\n");
         return;
