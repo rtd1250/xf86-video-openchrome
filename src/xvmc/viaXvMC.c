@@ -1086,7 +1086,6 @@ XvMCSyncSurface(Display * display, XvMCSurface * surface)
     ppthread_mutex_lock(&pViaXvMC->ctxMutex);
 
     if (pViaSurface->needsSync) {
-	CARD32 timeStamp = pViaSurface->timeStamp;
 	int syncMode = pViaSurface->syncMode;
 
 	if (pViaXvMC->useAGP) {
@@ -1094,9 +1093,6 @@ XvMCSyncSurface(Display * display, XvMCSurface * surface)
 	    syncMode = (pViaSurface->syncMode == LL_MODE_2D ||
 		pViaSurface->timeStamp < pViaXvMC->timeStamp) ?
 		LL_MODE_2D : LL_MODE_DECODER_IDLE;
-	    if (pViaSurface->syncMode != LL_MODE_2D)
-		timeStamp = pViaXvMC->timeStamp;
-
 	} else if (syncMode != LL_MODE_2D &&
 	    pViaXvMC->rendSurf[0] != (pViaSurface->srfNo | VIA_XVMC_VALID)) {
 
