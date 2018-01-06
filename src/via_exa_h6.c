@@ -42,31 +42,6 @@
 #include "via_rop.h"
 
 /*
- * Emit clipping borders to the command buffer and update the 2D context
- * current command with clipping info.
- */
-static int
-viaAccelClippingHelper_H6(VIAPtr pVia, int refY)
-{
-    ViaTwodContext *tdc = &pVia->td;
-
-    RING_VARS;
-
-    if (tdc->clipping) {
-        refY = (refY < tdc->clipY1) ? refY : tdc->clipY1;
-        tdc->cmd |= VIA_GEC_CLIP_ENABLE;
-        BEGIN_RING(4);
-        OUT_RING_H1(VIA_REG_CLIPTL_M1,
-                    ((tdc->clipY1 - refY) << 16) | tdc->clipX1);
-        OUT_RING_H1(VIA_REG_CLIPBR_M1,
-		    ((tdc->clipY2 - refY) << 16) | tdc->clipX2);
-    } else {
-        tdc->cmd &= ~VIA_GEC_CLIP_ENABLE;
-    }
-    return refY;
-}
-
-/*
  * Check if we can use a planeMask and update the 2D context accordingly.
  */
 static Bool
