@@ -1126,7 +1126,7 @@ ViaYUVFillBlack(VIAPtr pVia, void *buf, int num)
 static long
 AddHQVSurface(ScrnInfoPtr pScrn, unsigned int numbuf, CARD32 fourcc)
 {
-    unsigned int i, width, height, pitch, fbsize, addr;
+    unsigned int i, height, pitch, fbsize, addr;
     BOOL isplanar;
     void *buf;
 
@@ -1142,7 +1142,6 @@ AddHQVSurface(ScrnInfoPtr pScrn, unsigned int numbuf, CARD32 fourcc)
     isplanar = ((fourcc == FOURCC_YV12) || (fourcc == FOURCC_I420) ||
                 (fourcc == FOURCC_XVMC));
 
-    width = pVia->swov.SWDevice.gdwSWSrcWidth;
     height = pVia->swov.SWDevice.gdwSWSrcHeight;
     pitch = pVia->swov.SWDevice.dwPitch;
     fbsize = pitch * height * (isplanar ? 2 : 1);

@@ -684,7 +684,6 @@ ViaXvMCDestroyContext(ScrnInfoPtr pScrn, XvMCContextPtr pContext)
     VIAPtr pVia = VIAPTR(pScrn);
     ViaXvMCPtr vXvMC = &(pVia->xvmc);
     int i;
-    volatile ViaXvMCSAreaPriv *sAPriv;
     viaPortPrivPtr pPriv;
     XvPortRecPrivatePtr portPriv;
     ViaXvMCXVPriv *vx;
@@ -692,7 +691,6 @@ ViaXvMCDestroyContext(ScrnInfoPtr pScrn, XvMCContextPtr pContext)
     for (i = 0; i < VIA_XVMC_MAX_CONTEXTS; i++) {
         if (vXvMC->contexts[i] == pContext->context_id) {
 
-            sAPriv = (ViaXvMCSAreaPriv *) DRIGetSAREAPrivate(pScrn->pScreen);
             portPriv = (XvPortRecPrivatePtr) pContext->port_priv;
             pPriv = (viaPortPrivPtr) portPriv->DevPriv.ptr;
             vx = (ViaXvMCXVPriv *) pPriv->xvmc_priv;

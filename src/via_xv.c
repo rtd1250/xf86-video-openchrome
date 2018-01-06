@@ -107,10 +107,6 @@ static int viaSetPortAttribute(ScrnInfoPtr, Atom, INT32, pointer);
 static int viaPutImage(ScrnInfoPtr, short, short, short, short, short, short,
     short, short, int, unsigned char *, short, short, Bool,
     RegionPtr, pointer, DrawablePtr);
-static void UVBlit(unsigned char *dest,
-    const unsigned char *uBuffer,
-    const unsigned char *vBuffer,
-    unsigned width, unsigned srcPitch, unsigned dstPitch, unsigned lines);
 static void nv12Blit(unsigned char *nv12Chroma,
     const unsigned char *uBuffer,
     const unsigned char *vBuffer,
@@ -959,28 +955,6 @@ Flip(VIAPtr pVia, viaPortPrivPtr pPriv, int fourcc,
     }
 }
 
-static void
-planar420cp(unsigned char *dst, const unsigned char *src, int dstPitch,
-            int w, int h, int i420)
-{
-    unsigned long srcUOffset, srcVOffset;
-
-    /*
-     * Blit luma component as a fake YUY2 assembler blit.
-     */
-    if (i420) {
-        srcVOffset  = w * h + (w >> 1) * (h >> 1);
-        srcUOffset = w * h;
-    } else {
-        srcUOffset  = w * h + (w >> 1) * (h >> 1);
-        srcVOffset = w * h;
-    }
-
-    (*viaFastVidCpy) (dst, src, dstPitch, w >> 1, h, 1);
-    UVBlit(dst + dstPitch * h, src + srcUOffset,
-            src + srcVOffset, w >> 1, w >> 1, dstPitch, h >> 1);
-}
-
 /*
  * Slow and dirty. NV12 blit.
  */
@@ -1017,7 +991,6 @@ viaDmaBlitImage(VIAPtr pVia,
     Bool bounceBuffer;
     drm_via_dmablit_t blit;
     drm_via_blitsync_t *chromaSync = &blit.sync;
-    drm_via_blitsync_t lumaSync;
     unsigned char *base;
     unsigned char *bounceBase;
     unsigned bounceStride;
@@ -1096,8 +1069,6 @@ viaDmaBlitImage(VIAPtr pVia,
         sizeof(blit)))) ;
     if (err < 0)
         return -1;
-
-    lumaSync = blit.sync;
 
     if (id == FOURCC_YV12 || id == FOURCC_I420) {
         unsigned tmp = ALIGN_TO(width >> 1, 16);
@@ -1495,35 +1466,6 @@ VIAVidAdjustFrame(ScrnInfoPtr pScrn, int x, int y)
     pVia->swov.panning_x = x;
     pVia->swov.panning_y = y;
 }
-
-/*
- * Blit the U and V Fields. Used to Flip the U V for I420.
- */
-
-static void
-UVBlit(unsigned char *dst,
-        const unsigned char *uBuffer,
-        const unsigned char *vBuffer,
-        unsigned width, unsigned srcPitch, unsigned dstPitch, unsigned lines)
-{
-    int i, j;
-
-    dstPitch >>= 1;
-
-    for(j = 0; j < lines; j++)
-    {
-        for(i = 0; i < width; i++)
-        {
-            dst[i] = (uBuffer[i] << 8) | (vBuffer[i] << 16);
-        }
-
-        dst += dstPitch;
-        uBuffer += srcPitch;
-        vBuffer += srcPitch;
-    }
-
-}
-
 
 /*
  * Blit the chroma field from one buffer to another while at the same time converting from
