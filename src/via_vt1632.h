@@ -46,7 +46,7 @@ typedef struct _VIAVT1632 {
     CARD8   Register09;
     CARD8   Register0A;
     CARD8   Register0C;
-} VIAVT1632Rec, *VIAVT1632Ptr;
+} viaVT1632Rec, *viaVT1632RecPtr;
 
 
 const xf86OutputFuncsRec via_vt1632_funcs;

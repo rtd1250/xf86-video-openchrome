@@ -131,7 +131,7 @@ viaVT1632Power(ScrnInfoPtr pScrn, I2CDevPtr pDev, Bool powerState)
 
 static void
 viaVT1632SaveRegisters(ScrnInfoPtr pScrn, I2CDevPtr pDev,
-                        VIAVT1632Ptr pVIAVT1632)
+                        viaVT1632RecPtr pVIAVT1632)
 {
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaVT1632SaveRegisters.\n"));
@@ -149,7 +149,7 @@ viaVT1632SaveRegisters(ScrnInfoPtr pScrn, I2CDevPtr pDev,
 
 static void
 viaVT1632RestoreRegisters(ScrnInfoPtr pScrn, I2CDevPtr pDev,
-                            VIAVT1632Ptr pVIAVT1632)
+                            viaVT1632RecPtr pVIAVT1632)
 {
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaVT1632RestoreRegisters.\n"));
@@ -169,7 +169,7 @@ static int
 viaVT1632CheckModeValidity(xf86OutputPtr output, DisplayModePtr pMode)
 {
     ScrnInfoPtr pScrn = output->scrn;
-    VIAVT1632Ptr pVIAVT1632 = output->driver_private;
+    viaVT1632RecPtr pVIAVT1632 = output->driver_private;
     int status = MODE_OK;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
@@ -199,7 +199,7 @@ static void
 via_vt1632_dpms(xf86OutputPtr output, int mode)
 {
     ScrnInfoPtr pScrn = output->scrn;
-    VIAVT1632Ptr pVIAVT1632 = output->driver_private;
+    viaVT1632RecPtr pVIAVT1632 = output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_vt1632_dpms.\n"));
@@ -227,7 +227,7 @@ static void
 via_vt1632_save(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
-    VIAVT1632Ptr pVIAVT1632 = output->driver_private;
+    viaVT1632RecPtr pVIAVT1632 = output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_vt1632_save.\n"));
@@ -242,7 +242,7 @@ static void
 via_vt1632_restore(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
-    VIAVT1632Ptr pVIAVT1632 = output->driver_private;
+    viaVT1632RecPtr pVIAVT1632 = output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_vt1632_restore.\n"));
@@ -271,7 +271,7 @@ static void
 via_vt1632_prepare(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
-    VIAVT1632Ptr pVIAVT1632 = output->driver_private;
+    viaVT1632RecPtr pVIAVT1632 = output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered %s.\n", __func__));
@@ -287,7 +287,7 @@ static void
 via_vt1632_commit(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
-    VIAVT1632Ptr pVIAVT1632 = output->driver_private;
+    viaVT1632RecPtr pVIAVT1632 = output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered %s.\n", __func__));
@@ -305,7 +305,7 @@ via_vt1632_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 {
     ScrnInfoPtr pScrn = output->scrn;
     drmmode_crtc_private_ptr iga = output->crtc->driver_private;
-    VIAVT1632Ptr pVIAVT1632 = output->driver_private;
+    viaVT1632RecPtr pVIAVT1632 = output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_vt1632_mode_set.\n"));
@@ -335,7 +335,7 @@ via_vt1632_detect(xf86OutputPtr output)
     I2CBusPtr pI2CBus;
     VIAPtr pVia = VIAPTR(pScrn);
     VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
-    VIAVT1632Ptr pVIAVT1632 = (VIAVT1632Ptr) output->driver_private;
+    viaVT1632RecPtr pVIAVT1632 = (viaVT1632RecPtr) output->driver_private;
     Bool connectorDetected;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -370,7 +370,7 @@ via_vt1632_get_modes(xf86OutputPtr output)
     I2CBusPtr pI2CBus;
     VIAPtr pVia = VIAPTR(pScrn);
     VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
-    VIAVT1632Ptr pVIAVT1632 = (VIAVT1632Ptr) output->driver_private;
+    viaVT1632RecPtr pVIAVT1632 = (viaVT1632RecPtr) output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered %s.\n", __func__));
@@ -525,7 +525,7 @@ viaVT1632Init(ScrnInfoPtr pScrn)
     xf86OutputPtr output;
     VIAPtr pVia = VIAPTR(pScrn);
     VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
-    VIAVT1632Ptr pVIAVT1632;
+    viaVT1632RecPtr pVIAVT1632;
     I2CBusPtr pI2CBus;
     I2CDevPtr pI2CDevice;
     I2CSlaveAddr i2cAddr = 0x10;
@@ -570,7 +570,7 @@ viaVT1632Init(ScrnInfoPtr pScrn)
         goto exit;
     }
 
-    pVIAVT1632 = (VIAVT1632Ptr) xnfcalloc(1, sizeof(VIAVT1632Rec));
+    pVIAVT1632 = (viaVT1632RecPtr) xnfcalloc(1, sizeof(viaVT1632Rec));
     if (!pVIAVT1632) {
         xf86DestroyI2CDevRec(pI2CDevice, TRUE);
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
