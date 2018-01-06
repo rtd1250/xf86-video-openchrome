@@ -334,53 +334,6 @@ typedef struct _VIADPAINDEXTABLE {
 } VIA_DPA_INDEX_TABLE;
 
 
-static VIADPARec viaDPAP4M900ClockDefault[] = {
-    /*      DVP0 Adjustment, DVP0 Clock Drive, DVP0 Data Drive,
-     *      DVP1 Adjustment, DVP1 Clock Drive, DVP1 Data Drive,
-     *  FPDP Low Adjustment,              FPDP High Adjustment */
-    {                  0x07,             0x00,            0x00,
-                       0x03,             0x00,            0x00,
-                       0x08,                              0x00}
-};
-
-static VIADPARec viaDPAP4M900Clock100M150M[] = {
-    /*      DVP0 Adjustment, DVP0 Clock Drive, DVP0 Data Drive,
-     *      DVP1 Adjustment, DVP1 Clock Drive, DVP1 Data Drive,
-     *  FPDP Low Adjustment,              FPDP High Adjustment */
-    {                  0x03,             0x00,            0x01,
-                       0x03,             0x00,            0x00,
-                       0x08,                              0x00}
-};
-
-static VIADPARec viaDPAP4M900Clock150M[] = {
-    /*      DVP0 Adjustment, DVP0 Clock Drive, DVP0 Data Drive,
-     *      DVP1 Adjustment, DVP1 Clock Drive, DVP1 Data Drive,
-     *  FPDP Low Adjustment,              FPDP High Adjustment */
-    {                  0x01,             0x02,            0x01,
-                       0x03,             0x00,            0x00,
-                       0x08,                              0x00}
-};
-
-
-static VIADPAInfoTableRec viaDPAFPP4M900[] = {
-    {      VIA_DPA_CLK_RANGE_30M,   viaDPAP4M900ClockDefault},
-    {  VIA_DPA_CLK_RANGE_30M_50M,   viaDPAP4M900ClockDefault},
-    {  VIA_DPA_CLK_RANGE_50M_70M,   viaDPAP4M900ClockDefault},
-    { VIA_DPA_CLK_RANGE_70M_100M,   viaDPAP4M900ClockDefault},
-    {VIA_DPA_CLK_RANGE_100M_150M,  viaDPAP4M900Clock100M150M},
-    {     VIA_DPA_CLK_RANGE_150M,      viaDPAP4M900Clock150M}
-};
-
-
-static VIA_DPA_INDEX_TABLE viaDPAIndexTable[] = {
-//  {VIA_CX700,     NULL, NULL},
-//  {VIA_P4M890,    NULL, viaDPAFPP4M890},
-//  {VIA_K8M890,    NULL, viaDPAFPK8M890},
-    {VIA_P4M900,    NULL, viaDPAFPP4M900},
-//  {VIA_VX800,     NULL, NULL}
-};
-
-
 #define NUMBER_VIA_DPA_TABLE    (sizeof(viaDPAIndexTable) / sizeof(*(viaDPAIndexTable)))
 
 
