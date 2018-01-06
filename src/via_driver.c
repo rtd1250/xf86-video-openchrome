@@ -478,7 +478,6 @@ via_pci_probe(DriverPtr driver, int entity_num,
               struct pci_device *device, intptr_t match_data)
 {
     ScrnInfoPtr scrn = NULL;
-    EntityInfoPtr entity;
 
     scrn = xf86ConfigPciEntity(scrn, 0, entity_num, VIAPciChipsets,
                                NULL, NULL, NULL, NULL, NULL);
@@ -488,8 +487,6 @@ via_pci_probe(DriverPtr driver, int entity_num,
         scrn->driverName = DRIVER_NAME;
         scrn->name = "CHROME";
         scrn->Probe = NULL;
-
-        entity = xf86GetEntityInfo(entity_num);
 
         scrn->PreInit = VIAPreInit;
         scrn->ScreenInit = VIAScreenInit;
