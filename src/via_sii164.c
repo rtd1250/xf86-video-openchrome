@@ -42,10 +42,10 @@ viaSiI164DumpRegisters(ScrnInfoPtr pScrn, I2CDevPtr pDev)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaSiI164DumpRegisters.\n"));
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "SiI 164: dumping registers:\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Dumping SiI 164 registers.\n"));
     for (i = 0; i <= 0x0f; i++) {
         xf86I2CReadByte(pDev, i, &tmp);
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "SiI 164: 0x%02x: 0x%02x\n", i, tmp));
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "0x%02x: 0x%02x\n", i, tmp));
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
