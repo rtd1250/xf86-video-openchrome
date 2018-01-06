@@ -36,19 +36,6 @@
 #include "via_driver.h"
 #include <unistd.h>
 
-/*
- * Option handling.
- */
-enum ViaPanelOpts {
-    OPTION_CENTER
-};
-
-static OptionInfoRec ViaPanelOptions[] =
-{
-    {OPTION_CENTER,     "Center",       OPTV_BOOLEAN,   {0},    FALSE},
-    {-1,                NULL,           OPTV_NONE,      {0},    FALSE}
-};
-
 /* These table values were copied from lcd.c of VIA Frame 
  * Buffer device driver. */
 /* {int Width, int Height, bool useDualEdge, bool useDithering}; */
