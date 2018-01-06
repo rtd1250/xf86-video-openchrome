@@ -316,11 +316,7 @@ static xf86OutputStatus
 via_sii164_detect(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
-    xf86MonPtr pMon;
     xf86OutputStatus status = XF86OutputStatusDisconnected;
-    I2CBusPtr pI2CBus;
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
     viaSiI164RecPtr pSiI164Rec = (viaSiI164RecPtr) output->driver_private;
     Bool connectorDetected;
 
@@ -383,7 +379,6 @@ via_sii164_get_modes(xf86OutputPtr output)
         }
     }
 
-exit:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting %s.\n", __func__));
     return pDisplay_Mode;
