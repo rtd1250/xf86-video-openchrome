@@ -355,6 +355,26 @@ via_vt1632_detect(xf86OutputPtr output)
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                 "DVI connector detected.\n");
 
+exit:
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting via_vt1632_detect.\n"));
+    return status;
+}
+
+static DisplayModePtr
+via_vt1632_get_modes(xf86OutputPtr output)
+{
+    ScrnInfoPtr pScrn = output->scrn;
+    xf86MonPtr pMon;
+    DisplayModePtr pDisplay_Mode = NULL;
+    I2CBusPtr pI2CBus;
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
+    VIAVT1632Ptr pVIAVT1632 = (VIAVT1632Ptr) output->driver_private;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
     if (pVIAVT1632->i2cBus & VIA_I2C_BUS2) {
         pI2CBus = pVIADisplay->pI2CBus2;
     } else if (pVIAVT1632->i2cBus & VIA_I2C_BUS3) {
@@ -369,8 +389,7 @@ via_vt1632_detect(xf86OutputPtr output)
         /* Is the interface type digital? */
         if (pMon && DIGITAL(pMon->features.input_type)) {
             xf86OutputSetEDID(output, pMon);
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                        "Detected a monitor connected to DVI.\n");
+            pDisplay_Mode = xf86OutputGetEDIDModes(output);
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                         "Could not obtain EDID from a monitor "
@@ -380,8 +399,8 @@ via_vt1632_detect(xf86OutputPtr output)
 
 exit:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting via_vt1632_detect.\n"));
-    return status;
+                        "Exiting %s.\n", __func__));
+    return pDisplay_Mode;
 }
 
 #ifdef RANDR_12_INTERFACE
@@ -415,7 +434,7 @@ const xf86OutputFuncsRec via_vt1632_funcs = {
     .commit             = via_vt1632_commit,
     .mode_set           = via_vt1632_mode_set,
     .detect             = via_vt1632_detect,
-    .get_modes          = xf86OutputGetEDIDModes,
+    .get_modes          = via_vt1632_get_modes,
 #ifdef RANDR_12_INTERFACE
     .set_property       = via_vt1632_set_property,
 #endif
