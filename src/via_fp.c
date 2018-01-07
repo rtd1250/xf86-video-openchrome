@@ -1,9 +1,9 @@
 /*
- * Copyright 2017 Kevin Brace. All Rights Reserved.
+ * Copyright 2017-2018 Kevin Brace. All Rights Reserved.
  * Copyright 2007-2015 The OpenChrome Project
  *                     [https://www.freedesktop.org/wiki/Openchrome]
- * Copyright 1998-2007 VIA Technologies, Inc. All Rights Reserved.
- * Copyright 2001-2007 S3 Graphics, Inc. All Rights Reserved.
+ * Copyright 1998-2008 VIA Technologies, Inc. All Rights Reserved.
+ * Copyright 2001-2008 S3 Graphics, Inc. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
