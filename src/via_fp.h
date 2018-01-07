@@ -40,6 +40,83 @@
  * xf86-video-via v83-44398 source code.
  */
 
+
+/*
+ * P4M890 chipset FP DPA parameters default setting.
+ */
+static VIADPARec viaDPAP4M890ClockDefault[] = {
+    /*      DVP0 Adjustment, DVP0 Clock Drive, DVP0 Data Drive,
+     *      DVP1 Adjustment, DVP1 Clock Drive, DVP1 Data Drive,
+     *  FPDP Low Adjustment,              FPDP High Adjustment */
+    {                  0x07,             0x00,            0x00,
+                       0x03,             0x00,            0x00,
+                       0x04,                              0x08}
+};
+
+/*
+ * P4M890 chipset FP DPA parameters for dot clock at or above 50 MHz
+ * but below 70 MHz.
+ */
+static VIADPARec viaDPAP4M890Clock50M70M[] = {
+    /*      DVP0 Adjustment, DVP0 Clock Drive, DVP0 Data Drive,
+     *      DVP1 Adjustment, DVP1 Clock Drive, DVP1 Data Drive,
+     *  FPDP Low Adjustment,              FPDP High Adjustment */
+    {                  0x06,             0x00,            0x00,
+                       0x03,             0x00,            0x00,
+                       0x04,                              0x08}
+};
+
+/*
+ * P4M890 chipset FP DPA parameters for dot clock at or above 70 MHz
+ * but below 100 MHz.
+ */
+static VIADPARec viaDPAP4M890Clock70M100M[] = {
+    /*      DVP0 Adjustment, DVP0 Clock Drive, DVP0 Data Drive,
+     *      DVP1 Adjustment, DVP1 Clock Drive, DVP1 Data Drive,
+     *  FPDP Low Adjustment,              FPDP High Adjustment */
+    {                  0x03,             0x00,            0x00,
+                       0x03,             0x00,            0x00,
+                       0x04,                              0x08}
+};
+
+/*
+ * P4M890 chipset FP DPA parameters for dot clock at or above 100 MHz
+ * but below 150 MHz.
+ */
+static VIADPARec viaDPAP4M890Clock100M150M[] = {
+    /*      DVP0 Adjustment, DVP0 Clock Drive, DVP0 Data Drive,
+     *      DVP1 Adjustment, DVP1 Clock Drive, DVP1 Data Drive,
+     *  FPDP Low Adjustment,              FPDP High Adjustment */
+    {                  0x03,             0x00,            0x00,
+                       0x03,             0x00,            0x00,
+                       0x04,                              0x01}
+};
+
+/*
+ * P4M890 chipset FP DPA parameters for dot clock at or above 150 MHz.
+ */
+static VIADPARec viaDPAP4M890Clock150M[] = {
+    /*      DVP0 Adjustment, DVP0 Clock Drive, DVP0 Data Drive,
+     *      DVP1 Adjustment, DVP1 Clock Drive, DVP1 Data Drive,
+     *  FPDP Low Adjustment,              FPDP High Adjustment */
+    {                  0x01,             0x02,            0x02,
+                       0x03,             0x00,            0x00,
+                       0x04,                              0x0D}
+};
+
+/*
+ * P4M890 Chipset FP DPA (Digital Panel Adjustment?) Table
+ */
+static VIADPAInfoTableRec viaDPAFPP4M890[] = {
+    {         VIA_DPA_CLK_RANGE_30M,      viaDPAP4M890ClockDefault},
+    {     VIA_DPA_CLK_RANGE_30M_50M,      viaDPAP4M890ClockDefault},
+    {     VIA_DPA_CLK_RANGE_50M_70M,       viaDPAP4M890Clock50M70M},
+    {    VIA_DPA_CLK_RANGE_70M_100M,      viaDPAP4M890Clock70M100M},
+    {   VIA_DPA_CLK_RANGE_100M_150M,     viaDPAP4M890Clock100M150M},
+    {        VIA_DPA_CLK_RANGE_150M,         viaDPAP4M890Clock150M}
+};
+
+
 /*
  * K8M890 chipset FP DPA parameters default setting.
  */
@@ -168,7 +245,7 @@ static VIADPAInfoTableRec viaDPAFPP4M900[] = {
 
 static VIA_DPA_INDEX_TABLE viaDPAIndexTable[] = {
 //  {VIA_CX700,     NULL,   NULL},
-//  {VIA_P4M890,    NULL,   viaDPAFPP4M890},
+    {VIA_P4M890,    NULL,   viaDPAFPP4M890},
     {VIA_K8M890,    NULL,   viaDPAFPK8M890},
     {VIA_P4M900,    NULL,   viaDPAFPP4M900},
 //  {VIA_VX800,     NULL,   NULL}
