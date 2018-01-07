@@ -821,7 +821,7 @@ ViaPanelGetSizeFromEDID(ScrnInfoPtr pScrn, xf86MonPtr pMon,
  * Gets the native panel resolution from scratch pad registers.
  */
 static void
-viaLVDSGetFPInfoFromScratchPad(xf86OutputPtr output)
+viaFPGetFPInfoScratchPad(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
@@ -829,7 +829,7 @@ viaLVDSGetFPInfoFromScratchPad(xf86OutputPtr output)
     CARD8 index;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                     "Entered viaLVDSGetFPInfoFromScratchPad.\n"));
+                     "Entered viaFPGetFPInfoScratchPad.\n"));
 
     index = hwp->readCrtc(hwp, 0x3F) & 0x0F;
 
@@ -854,7 +854,7 @@ viaLVDSGetFPInfoFromScratchPad(xf86OutputPtr output)
                pVIAFP->useDithering ? "On (18 bit)" : "Off (24 bit)");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                     "Exiting viaLVDSGetFPInfoFromScratchPad.\n"));
+                     "Exiting viaFPGetFPInfoScratchPad.\n"));
 }
 
 static void
@@ -1299,14 +1299,14 @@ via_fp_detect(xf86OutputPtr output)
             /* For FP without I2C bus connection, CRTC scratch pad
              * register supplied by the VGA BIOS is the only method
              * available to figure out the FP native screen resolution. */
-            viaLVDSGetFPInfoFromScratchPad(output);
+            viaFPGetFPInfoScratchPad(output);
             status = XF86OutputStatusConnected;
         }
     } else {
         /* For FP without I2C bus connection, CRTC scratch pad
          * register supplied by the VGA BIOS is the only method
          * available to figure out the FP native screen resolution. */
-        viaLVDSGetFPInfoFromScratchPad(output);
+        viaFPGetFPInfoScratchPad(output);
         status = XF86OutputStatusConnected;
     }
 
