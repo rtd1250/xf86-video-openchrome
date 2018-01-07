@@ -829,7 +829,7 @@ viaFPGetFPInfoScratchPad(xf86OutputPtr output)
     CARD8 index;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                     "Entered viaFPGetFPInfoScratchPad.\n"));
+                        "Entered %s.\n", __func__));
 
     index = hwp->readCrtc(hwp, 0x3F) & 0x0F;
 
@@ -846,15 +846,9 @@ viaFPGetFPInfoScratchPad(xf86OutputPtr output)
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                "Flat Panel Native Resolution: %dx%d\n",
                pVIAFP->NativeWidth, pVIAFP->NativeHeight);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-               "Flat Panel Dual Edge Transfer: %s\n",
-               pVIAFP->useDualEdge ? "On" : "Off");
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-               "Flat Panel Output Color Dithering: %s\n",
-               pVIAFP->useDithering ? "On (18 bit)" : "Off (24 bit)");
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                     "Exiting viaFPGetFPInfoScratchPad.\n"));
+                        "Exiting %s.\n", __func__));
 }
 
 static void
