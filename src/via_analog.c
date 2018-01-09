@@ -145,6 +145,7 @@ viaAnalogInitReg(ScrnInfoPtr pScrn)
     case VIA_VX900:
         /* Make sure 3C5.01[5] does not turn off analog (VGA) DAC. */
         viaAnalogSetDACOff(pScrn, FALSE);
+
         break;
     default:
         break;
@@ -167,16 +168,28 @@ viaAnalogDetectConnector(ScrnInfoPtr pScrn)
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     Bool connectorDetected = FALSE;
-    CARD8 sr40, cr36, cr47;
+    CARD8 sr40, cr36, cr37, cr43, cr44, cr47;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaAnalogDetectConnector.\n"));
 
     sr40 = hwp->readSeq(hwp, 0x40);
     cr36 = hwp->readCrtc(hwp, 0x36);
+    cr37 = hwp->readCrtc(hwp, 0x37);
+    cr43 = hwp->readCrtc(hwp, 0x43);
+    cr44 = hwp->readCrtc(hwp, 0x44);
     cr47 = hwp->readCrtc(hwp, 0x47);
 
+    if ((pVia->Chipset == VIA_CX700)
+        || (pVia->Chipset == VIA_VX800)
+        || (pVia->Chipset == VIA_VX855)
+        || (pVia->Chipset == VIA_VX900)) {
+        ViaCrtcMask(hwp, 0x43, 0x90, BIT(7) | BIT(6) | BIT(5) | BIT(4));
+        hwp->writeCrtc(hwp, 0x44, 0x00);
+    }
+
     /* Turn on DAC. */
+    ViaCrtcMask(hwp, 0x37, 0x04, 0xff);
     ViaCrtcMask(hwp, 0x47, 0x00, BIT(2));
 
     /* Power On DPMS. */
@@ -217,6 +230,16 @@ viaAnalogDetectConnector(ScrnInfoPtr pScrn)
 
     /* Restore */
     hwp->writeCrtc(hwp, 0x47, cr47);
+
+    if ((pVia->Chipset == VIA_CX700)
+        || (pVia->Chipset == VIA_VX800)
+        || (pVia->Chipset == VIA_VX855)
+        || (pVia->Chipset == VIA_VX900)) {
+        hwp->writeCrtc(hwp, 0x44, cr44);
+        hwp->writeCrtc(hwp, 0x43, cr43);
+    }
+
+    hwp->writeCrtc(hwp, 0x37, cr37);
     hwp->writeCrtc(hwp, 0x36, cr36);
     hwp->writeSeq(hwp, 0x40, sr40);
 
