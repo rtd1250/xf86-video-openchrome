@@ -62,16 +62,6 @@ method is XAA, since EXA is still experimental.  Contrary to XAA, EXA
 implements acceleration for screen uploads and downloads (if DRI is
 enabled) and for the Render/Composite extension.
 .TP
-.BI "Option \*qActiveDevice\*q  \*q" string \*q
-Specifies the active device combination.  Any string containing "CRT",
-"LCD", "DFP", "TV" should be possible. "CRT" represents anything that
-is connected to the VGA port, "LCD" is for laptop panels (not TFT screens
-attached to the VGA port), "DFP" is for screens connected to the DVI port,
-"TV" is self-explanatory.
-The default is to use what is detected.  The driver is currently unable
-to use LCD and TV simultaneously, and will favour the LCD.  The DVI port is
-not properly probed and needs to be enabled with this option.
-.TP
 .BI "Option \*qAGPMem\*q  \*q" integer \*q
 Sets the amount of AGP memory that is allocated at X server startup.
 The allocated memory will be "integer" kB.  This AGP memory is used for
@@ -86,9 +76,6 @@ VRAM (see the option "MaxDRIMem").  The default amount of AGP is
 to accommodate the amount of AGP memory specified here.  Otherwise no
 AGP memory will be available.  It is safe to set a very large AGP
 aperture in the BIOS.
-.TP
-.BI "Option \*qCenter\*q  \*q" boolean \*q
-Enables image centering on DVI displays.  The default is disabled.
 .TP
 .BI "Option \*qDisableIRQ\*q  \*q" boolean \*q
 Disables the vertical blank IRQ.  This is a workaround for some mainboards
@@ -121,9 +108,6 @@ over 1024 pixels and use 24 bpp, set this to 8192.  Otherwise you can
 leave this at the default 4096.  The space will be allocated from AGP
 memory if available, otherwise from VRAM.
 .TP
-.BI "Option \*qLCDDualEdge\*q  \*q" boolean \*q
-Enables the use of dual-edge mode to set the LCD.  The default is disabled.
-.TP
 .BI "Option \*qMaxDRIMem\*q  \*q" integer \*q
 Sets the maximum amount of VRAM memory allocated for DRI clients to
 "integer" kB.  Normally DRI clients  get half the available VRAM size,
@@ -142,10 +126,6 @@ possibility is "smart".
 Disables the use of hardware acceleration.  Acceleration is enabled
 by default.
 .TP
-.BI "Option \*qNoAGPFor2D\*q  \*q" boolean \*q
-Disables the use of AGP DMA for 2D acceleration, even when AGP DMA is
-enabled.  The default is enabled.
-.TP
 .BI "Option \*qNoXVDMA\*q  \*q" boolean \*q
 If DRI is enabled, Xv normally uses PCI DMA to transfer video images
 from system to frame-buffer memory.  This is somewhat slower than
@@ -155,11 +135,6 @@ with fast processors.  Some video players are buggy and will display
 rendering artifacts when PCI DMA is used.  If you experience this,
 or don't want your PCI bus to be stressed with Xv images, set this
 option to "true".  This option has no effect when DRI is not enabled.
-.TP
-.BI "Option \*qPanelSize\*q  \*q" string \*q
-Specifies the size (width x height) of the LCD panel attached to the
-system.  The sizes 640x480, 800x600, 1024x768, 1280x1024, and 1400x1050
-are supported.
 .TP
 .BI "Option \*qRotationType\*q  \*q" string \*q
 Enabled rotation by using RandR. The driver only support unaccelerated
@@ -201,26 +176,6 @@ Specifies TV port.  The driver currently supports "DVP0", "DVP1",
 .BI "Option \*qTVType\*q  \*q" string \*q
 Specifies TV output format.  The driver currently supports "NTSC" and
 "PAL" timings only.
-.TP
-.BI "Option \*qVBEModes\*q  \*q" boolean \*q
-Enables the use of VBE BIOS calls for setting the display mode.  This mimics
-the behaviour of the vesa driver but still provides acceleration and
-other features.  This option may be used if your hardware works with
-the vesa driver but not with the openchrome driver.  It may not work
-on 64-bit systems.  Using "VBEModes" may speed up driver acceleration
-significantly due to a more aggressive hardware setting, particularly
-on systems with low memory bandwidth.  Your refresh rate may be limited
-to 60 Hz on some systems.
-.TP
-.BI "Option \*qVBESaveRestore\*q  \*q" boolean \*q
-Enables the use of VBE BIOS calls for saving and restoring the display state
-when the X server is launched.  This can be extremely slow on some hardware,
-and the system may appear to have locked for 10 seconds or so.  The default
-is to use the driver builtin function.  This option only works if option
-"VBEModes" is enabled.
-.TP
-.BI "Option \*qVideoRAM\*q  \*q" integer \*q
-Overrides the VideoRAM autodetection.  This should never be needed.
 .PP 
 .SH "TV ENCODERS"
 Unichromes tend to be paired with several different TV encoders.
