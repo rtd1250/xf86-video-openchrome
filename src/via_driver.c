@@ -792,40 +792,35 @@ static Bool
 via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
 {
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(scrn);
-    xf86CrtcPtr crtc = NULL;
-    ScreenPtr screen = scrn->pScreen;
-    VIAPtr pVia = VIAPTR(scrn);
     drmmode_crtc_private_ptr drmmode_crtc
                                     = xf86_config->crtc[0]->driver_private;
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
     struct buffer_object *old_front = NULL;
-    void *new_pixels = NULL;
-    PixmapPtr ppix;
-    int old_width, old_height, old_displayWidth, old_fd;
+    Bool ret;
+    ScreenPtr screen = xf86ScrnToScreen(scrn);
     uint32_t old_fb_id;
-    int format, i;
-    Bool ret = FALSE;
+    int i, pitch, old_width, old_height, old_pitch;
+    int cpp = (scrn->bitsPerPixel + 7) / 8;
+    PixmapPtr ppix = screen->GetScreenPixmap(screen);;
+    void *new_pixels;
+    VIAPtr pVia = VIAPTR(scrn);
+    xf86CrtcPtr crtc = NULL;
+    int format;
 
     DEBUG(xf86DrvMsg(scrn->scrnIndex, X_INFO,
-                        "Entered via_xf86crtc_resize.\n"));
-    xf86DrvMsg(scrn->scrnIndex, X_INFO,
-                "Now attempting to resize the screen . . .\n");
+                        "Entered %s.\n", __func__));
 
     if ((scrn->virtualX == width) && (scrn->virtualY == height)) {
-        xf86DrvMsg(scrn->scrnIndex, X_INFO,
-                    "It was determined that there is no need to resize the "
-                    "screen.\n");
         DEBUG(xf86DrvMsg(scrn->scrnIndex, X_INFO,
-                            "Exiting via_xf86crtc_resize.\n"));
+                            "Exiting %s.\n", __func__));
         return TRUE;
     }
 
-    /* Preserve the old screen information just in case they need to
+    /* Preserve the old screen information just in case it needs to
      * be restored. */
     old_width = scrn->virtualX;
     old_height = scrn->virtualY;
-    old_displayWidth = scrn->displayWidth;
-    old_fd = drmmode->fd;
+    old_pitch = drmmode->front_bo->pitch;
     old_fb_id = drmmode->fb_id;
     old_front = drmmode->front_bo;
 
@@ -836,36 +831,50 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
         goto fail;
     }
 
-    xf86DrvMsg(scrn->scrnIndex, X_INFO,
-                "Allocated a new frame buffer: %dx%d\n",
-                width, height);
+    pitch = drmmode->front_bo->pitch;
+
+    scrn->virtualX = width;
+    scrn->virtualY = height;
+    scrn->displayWidth = pitch / cpp;
+
+#ifdef HAVE_DRI
+    if (pVia->KMS) {
+        ret = drmModeAddFB(drmmode->fd, width, height, scrn->depth,
+                            scrn->bitsPerPixel, drmmode->front_bo->pitch,
+                            drmmode->front_bo->handle,
+                            &drmmode->fb_id);
+        if (ret) {
+            goto fail;
+        }
+    }
+#endif
 
     new_pixels = drm_bo_map(scrn, drmmode->front_bo);
     if (!new_pixels) {
         goto fail;
     }
 
-    if (pVia->shadowFB) {
-        new_pixels = malloc(height * drmmode->front_bo->pitch);
+    if (!pVia->shadowFB) {
+        screen->ModifyPixmapHeader(ppix, width, height, -1, -1,
+                                    pitch, new_pixels);
+    } else {
+        new_pixels = malloc(scrn->displayWidth * scrn->virtualY *
+                            ((scrn->bitsPerPixel + 7) >> 3));
         if (!new_pixels) {
             goto fail;
         }
 
         free(pVia->ShadowPtr);
         pVia->ShadowPtr = new_pixels;
+        screen->ModifyPixmapHeader(ppix, width, height, -1, -1,
+                                    pitch, pVia->ShadowPtr);
+
     }
 
-    scrn->virtualX = width;
-    scrn->virtualY = height;
-    scrn->displayWidth = (drmmode->front_bo->pitch)
-                            / ((scrn->bitsPerPixel + 7) >> 3);
+    xf86DrvMsg(scrn->scrnIndex, X_INFO,
+                "Allocated a new frame buffer: %dx%d\n",
+                width, height);
 
-    ppix = screen->GetScreenPixmap(screen);
-    if (!screen->ModifyPixmapHeader(ppix, width, height, -1, -1,
-                                    drmmode->front_bo->pitch,
-                                    new_pixels)) {
-        goto fail;
-    }
 
 #if XORG_VERSION_CURRENT < XORG_VERSION_NUMERIC(1,9,99,1,0)
     scrn->pixmapPrivate.ptr = ppix->devPrivate.ptr;
@@ -892,11 +901,11 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
 
 #ifdef HAVE_DRI
     if (pVia->KMS && old_fb_id) {
-        drmModeRmFB(old_fd, old_fb_id);
+        drmModeRmFB(drmmode->fd, old_fb_id);
     }
 #endif
 
-    if (old_front) {
+    if (old_fb_id) {
         drm_bo_unmap(scrn, old_front);
         drm_bo_free(scrn, old_front);
     }
@@ -904,7 +913,7 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
     xf86DrvMsg(scrn->scrnIndex, X_INFO,
                 "Screen resize successful.\n");
     DEBUG(xf86DrvMsg(scrn->scrnIndex, X_INFO,
-                        "Exiting via_xf86crtc_resize.\n"));
+                        "Exiting %s.\n", __func__));
     return TRUE;
 
 fail:
@@ -915,22 +924,14 @@ fail:
 
     scrn->virtualX = old_width;
     scrn->virtualY = old_height;
-    scrn->displayWidth = old_displayWidth;
-
-#ifdef HAVE_DRI
-    if (pVia->KMS && (old_fb_id != drmmode->fb_id)) {
-        drmModeRmFB(old_fd, old_fb_id);
-    }
-#endif
-
-    drmmode->fd = old_fd;
+    scrn->displayWidth = old_pitch / cpp;
     drmmode->fb_id = old_fb_id;
     drmmode->front_bo = old_front;
 
-    xf86DrvMsg(scrn->scrnIndex, X_INFO,
+    xf86DrvMsg(scrn->scrnIndex, X_ERROR,
                 "An error occurred during screen resize.\n");
     DEBUG(xf86DrvMsg(scrn->scrnIndex, X_INFO,
-                        "Exiting via_xf86crtc_resize.\n"));
+                        "Exiting %s.\n", __func__));
     return FALSE;
 }
 
