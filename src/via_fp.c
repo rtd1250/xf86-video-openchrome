@@ -1418,8 +1418,12 @@ viaFPProbe(ScrnInfoPtr pScrn)
             } else if ((!(sr13 & BIT(7))) && (!(sr13 & BIT(6)))) {
                 pVIADisplay->intFP1Presence = TRUE;
                 pVIADisplay->intFP1DIPort = VIA_DI_PORT_LVDS1;
-                pVIADisplay->intFP2Presence = TRUE;
-                pVIADisplay->intFP2DIPort = VIA_DI_PORT_LVDS2;
+
+                /*
+                 * For now, don't support the second FP.
+                 */
+                pVIADisplay->intFP2Presence = FALSE;
+                pVIADisplay->intFP2DIPort = VIA_DI_PORT_NONE;
             } else if ((!(sr13 & BIT(7))) && (sr13 & BIT(6))) {
                 pVIADisplay->intFP1Presence = FALSE;
                 pVIADisplay->intFP1DIPort = VIA_DI_PORT_NONE;
