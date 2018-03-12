@@ -1402,6 +1402,13 @@ viaFPProbe(ScrnInfoPtr pScrn)
                 pVIADisplay->intFP2Presence = TRUE;
                 pVIADisplay->intFP2DIPort = VIA_DI_PORT_LVDS2;
 
+            } else if (pVIADisplay->isQuantaIL1) {
+                /* From the Quanta IL1 schematic. */
+                pVIADisplay->intFP1Presence = TRUE;
+                pVIADisplay->intFP1DIPort = VIA_DI_PORT_DVP1;
+                pVIADisplay->intFP2Presence = FALSE;
+                pVIADisplay->intFP2DIPort = VIA_DI_PORT_NONE;
+
             /* 3C5.13[7:6] - Integrated LVDS / DVI Mode Select
              *               (DVP1D15-14 pin strapping)
              *               00: LVDS1 + LVDS2

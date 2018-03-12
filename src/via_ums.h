@@ -209,6 +209,11 @@ typedef struct _VIADISPLAY {
      * Design Manufacturer) name. */
     Bool                isVIANanoBook;
 
+    /* Quanta IL1 netbook has its FP connected to DVP1
+     * rather than LVDS, hence, a special flag register
+     * is needed for properly controlling its FP. */
+    Bool                isQuantaIL1;
+
     /* OLPC XO-1.5 */
     Bool                isOLPCXO15;
 

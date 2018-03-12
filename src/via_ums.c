@@ -973,6 +973,18 @@ umsPreInit(ScrnInfoPtr pScrn)
         pVIADisplay->isVIANanoBook      = FALSE;
     }
 
+    /* Checking for Quanta IL1 netbook. This is necessary
+     * due to its flat panel connected to DVP1 (Digital
+     * Video Port 1) rather than its LVDS channel. */
+    if ((pVia->Chipset == VIA_VX800) &&
+        (SUBVENDOR_ID(pVia->PciInfo) == 0x152D) &&
+        (SUBSYS_ID(pVia->PciInfo) == 0x0771)) {
+
+        pVIADisplay->isQuantaIL1      = TRUE;
+    } else {
+        pVIADisplay->isQuantaIL1      = FALSE;
+    }
+
     /* Checking for OLPC XO-1.5. */
     if ((pVia->Chipset == VIA_VX855) &&
         (SUBVENDOR_ID(pVia->PciInfo) == 0x152D) &&
