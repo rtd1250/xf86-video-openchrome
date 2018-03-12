@@ -1306,15 +1306,16 @@ viaFPProbe(ScrnInfoPtr pScrn)
     CARD8 cr3b;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaFPProbe.\n"));
+                        "Entered %s.\n", __func__));
 
     sr12 = hwp->readSeq(hwp, 0x12);
+    sr13 = hwp->readSeq(hwp, 0x13);
+    cr3b = hwp->readCrtc(hwp, 0x3B);
+
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "SR12: 0x%02X\n", sr12));
-    sr13 = hwp->readSeq(hwp, 0x13);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "SR13: 0x%02X\n", sr13));
-    cr3b = hwp->readCrtc(hwp, 0x3B);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "CR3B: 0x%02X\n", sr13));
 
@@ -1324,20 +1325,18 @@ viaFPProbe(ScrnInfoPtr pScrn)
         if ((sr12 & BIT(4)) || (cr3b & BIT(3))) {
             pVIADisplay->intFP1Presence = TRUE;
             pVIADisplay->intFP1DIPort = VIA_DI_PORT_DIP0;
-            pVIADisplay->intFP2Presence = FALSE;
-            pVIADisplay->intFP2DIPort = VIA_DI_PORT_NONE;
         } else {
             pVIADisplay->intFP1Presence = FALSE;
             pVIADisplay->intFP1DIPort = VIA_DI_PORT_NONE;
-            pVIADisplay->intFP2Presence = FALSE;
-            pVIADisplay->intFP2DIPort = VIA_DI_PORT_NONE;
         }
 
+        pVIADisplay->intFP2Presence = FALSE;
+        pVIADisplay->intFP2DIPort = VIA_DI_PORT_NONE;
         break;
     case VIA_KM400:
+    case VIA_K8M800:
     case VIA_P4M800PRO:
     case VIA_PM800:
-    case VIA_K8M800:
         /* 3C5.13[3] - DVP0D8 pin strapping
          *             0: AGP pins are used for AGP
          *             1: AGP pins are used by FPDP
@@ -1346,16 +1345,13 @@ viaFPProbe(ScrnInfoPtr pScrn)
             pVIADisplay->intFP1Presence = TRUE;
             pVIADisplay->intFP1DIPort = VIA_DI_PORT_FPDPHIGH
                                             | VIA_DI_PORT_FPDPLOW;
-            pVIADisplay->intFP2Presence = FALSE;
-            pVIADisplay->intFP2DIPort = VIA_DI_PORT_NONE;
-
         } else {
             pVIADisplay->intFP1Presence = FALSE;
             pVIADisplay->intFP1DIPort = VIA_DI_PORT_NONE;
-            pVIADisplay->intFP2Presence = FALSE;
-            pVIADisplay->intFP2DIPort = VIA_DI_PORT_NONE;
         }
 
+        pVIADisplay->intFP2Presence = FALSE;
+        pVIADisplay->intFP2DIPort = VIA_DI_PORT_NONE;
         break;
     case VIA_P4M890:
     case VIA_K8M890:
@@ -1367,18 +1363,20 @@ viaFPProbe(ScrnInfoPtr pScrn)
              *             1: 24-bit FPDP (Flat Panel Display Port) */
             if (sr12 & BIT(4)) {
                 pVIADisplay->intFP1Presence = TRUE;
-                pVIADisplay->intFP1DIPort = VIA_DI_PORT_FPDPLOW
-                                            | VIA_DI_PORT_FPDPHIGH;
-                pVIADisplay->intFP2Presence = FALSE;
-                pVIADisplay->intFP2DIPort = VIA_DI_PORT_NONE;
+                pVIADisplay->intFP1DIPort = VIA_DI_PORT_FPDPLOW |
+                                            VIA_DI_PORT_FPDPHIGH;
             } else {
                 pVIADisplay->intFP1Presence = TRUE;
                 pVIADisplay->intFP1DIPort = VIA_DI_PORT_FPDPLOW;
-                pVIADisplay->intFP2Presence = FALSE;
-                pVIADisplay->intFP2DIPort = VIA_DI_PORT_NONE;
             }
+        } else {
+            pVIADisplay->intFP1Presence = FALSE;
+            pVIADisplay->intFP1DIPort = VIA_DI_PORT_NONE;
+
         }
 
+        pVIADisplay->intFP2Presence = FALSE;
+        pVIADisplay->intFP2DIPort = VIA_DI_PORT_NONE;
         break;
     case VIA_CX700:
     case VIA_VX800:
@@ -1474,7 +1472,7 @@ viaFPProbe(ScrnInfoPtr pScrn)
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaFPProbe.\n"));
+                        "Exiting %s.\n", __func__));
 }
 
 void
