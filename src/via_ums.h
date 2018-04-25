@@ -341,6 +341,20 @@ typedef struct _VIADPAINDEXTABLE {
 
 #define NUMBER_VIA_DPA_TABLE    (sizeof(viaDPAIndexTable) / sizeof(*(viaDPAIndexTable)))
 
+/*
+ * Sets IGA1 or IGA2 for palette LUT access.
+ * This function should be called before changing the
+ * contents of the palette.
+ */
+static inline void
+viaSetPaletteLUTAccess(ScrnInfoPtr pScrn, CARD8 displaySource)
+{
+    ViaSeqMask(VGAHWPTR(pScrn), 0x1A,
+                displaySource, BIT(0));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Palette LUT Access: IGA%d\n",
+                        (displaySource & BIT(0)) + 1));
+}
 
 /*
  * Resets IGA1 hardware.

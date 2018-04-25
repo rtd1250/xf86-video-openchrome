@@ -87,28 +87,6 @@ ViaPrintMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 }
 
 /*
- * Sets IGA1 or IGA2 for palette LUT access.
- * This function should be called before changing the
- * contents of the palette.
- */
-static void
-viaSetPaletteLUTAccess(ScrnInfoPtr pScrn, CARD8 displaySource)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaSetPaletteLUTAccess.\n"));
-
-    ViaSeqMask(hwp, 0x1A, displaySource, 0x01);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "Palette LUT Access: IGA%d\n",
-                (displaySource & 0x01) + 1);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaSetPaletteLUTAccess.\n"));
-}
-
-/*
  * Sets IGA1 color depth.
  */
 static void
