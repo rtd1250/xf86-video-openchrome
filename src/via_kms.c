@@ -227,8 +227,6 @@ drmmode_set_mode_major(xf86CrtcPtr crtc, DisplayModePtr mode,
                            crtc->gamma_blue, crtc->gamma_size);
 #endif
 
-    if (pScrn->pScreen && drmmode->hwcursor)
-        xf86_reload_cursors(pScrn->pScreen);
 done:
     free(output_ids);
     return (ret < 0 ? FALSE : TRUE);

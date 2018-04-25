@@ -3731,13 +3731,9 @@ static void
 iga1_crtc_commit(xf86CrtcPtr crtc)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entering iga1_crtc_commit.\n"));
-
-    if (crtc->scrn->pScreen != NULL && pVia->drmmode.hwcursor)
-        xf86_reload_cursors(crtc->scrn->pScreen);
 
     /* Turn on IGA1. */
     viaIGA1SetDisplayOutput(pScrn, TRUE);
@@ -4135,13 +4131,9 @@ static void
 iga2_crtc_commit(xf86CrtcPtr crtc)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entering iga2_crtc_commit.\n"));
-
-    if (crtc->scrn->pScreen != NULL && pVia->drmmode.hwcursor)
-        xf86_reload_cursors(crtc->scrn->pScreen);
 
     /* Turn on IGA2. */
     viaIGA2SetDisplayOutput(pScrn, TRUE);
