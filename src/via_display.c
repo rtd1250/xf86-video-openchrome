@@ -410,30 +410,6 @@ viaIGA2SetColorDepth(ScrnInfoPtr pScrn, CARD8 bitsPerPixel)
 }
 
 /*
- * Sets IGA2 palette LUT resolution. (6-bit or 8-bit)
- */
-static void
-viaIGA2SetPaletteLUTResolution(ScrnInfoPtr pScrn, CARD8 paletteLUT)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaIGA2SetPaletteLUTResolution.\n"));
-
-    /* Set the palette LUT resolution for IGA2. */
-    /* 3X5.6A[5] - IGA2 6 / 8 Bit LUT
-     *             0: 6-bit
-     *             1: 8-bit */
-    ViaCrtcMask(hwp, 0x6A, paletteLUT << 5, 0x20);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "IGA2 Palette LUT Resolution: %s bit\n",
-                (paletteLUT & 0x01) ? "8" : "6");
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaIGA2SetPaletteLUTResolution.\n"));
-}
-
-/*
  * Controls IGA2 gamma correction state.
  */
 static void
