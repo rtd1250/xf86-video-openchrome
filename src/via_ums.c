@@ -985,6 +985,19 @@ umsPreInit(ScrnInfoPtr pScrn)
         pVIADisplay->isQuantaIL1      = FALSE;
     }
 
+    /* Samsung NC20 netbook has its FP connected to LVDS2
+     * rather than the more logical LVDS1, hence, a special
+     * flag register is needed for properly controlling its
+     * FP. */
+    if ((pVia->Chipset == VIA_VX800) &&
+        (SUBVENDOR_ID(pVia->PciInfo) == 0x144d) &&
+        (SUBSYS_ID(pVia->PciInfo) == 0xc04e)) {
+
+        pVIADisplay->isSamsungNC20      = TRUE;
+    } else {
+        pVIADisplay->isSamsungNC20      = FALSE;
+    }
+
     /* Checking for OLPC XO-1.5. */
     if ((pVia->Chipset == VIA_VX855) &&
         (SUBVENDOR_ID(pVia->PciInfo) == 0x152D) &&

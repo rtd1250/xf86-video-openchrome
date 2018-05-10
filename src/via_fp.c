@@ -1407,6 +1407,12 @@ viaFPProbe(ScrnInfoPtr pScrn)
                 pVIADisplay->intFP2Presence = FALSE;
                 pVIADisplay->intFP2DIPort = VIA_DI_PORT_NONE;
 
+            } else if (pVIADisplay->isSamsungNC20) {
+                pVIADisplay->intFP1Presence = FALSE;
+                pVIADisplay->intFP1DIPort = VIA_DI_PORT_NONE;
+                pVIADisplay->intFP2Presence = TRUE;
+                pVIADisplay->intFP2DIPort = VIA_DI_PORT_LVDS2;
+
             /* 3C5.13[7:6] - Integrated LVDS / DVI Mode Select
              *               (DVP1D15-14 pin strapping)
              *               00: LVDS1 + LVDS2

@@ -214,6 +214,12 @@ typedef struct _VIADISPLAY {
      * is needed for properly controlling its FP. */
     Bool                isQuantaIL1;
 
+    /* Samsung NC20 netbook has its FP connected to LVDS2
+     * rather than the more logical LVDS1, hence, a special
+     * flag register is needed for properly controlling its
+     * FP. */
+    Bool                isSamsungNC20;
+
     /* OLPC XO-1.5 */
     Bool                isOLPCXO15;
 
