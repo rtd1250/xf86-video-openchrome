@@ -509,31 +509,6 @@ viaIGA2SetHIDisplayLocation(ScrnInfoPtr pScrn,
     }
 }
 
-/*
- * Initial settings for displays.
- */
-void
-viaDisplayInit(ScrnInfoPtr pScrn)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaDisplayInit.\n"));
-
-    ViaCrtcMask(hwp, 0x6A, 0x00, 0x3D);
-    hwp->writeCrtc(hwp, 0x6B, 0x00);
-    hwp->writeCrtc(hwp, 0x6C, 0x00);
-    hwp->writeCrtc(hwp, 0x79, 0x00);
-
-    /* (IGA1 Timing Plus 2, added in VT3259 A3 or later) */
-    if (pVia->Chipset != VIA_CLE266 && pVia->Chipset != VIA_KM400)
-        ViaCrtcMask(hwp, 0x47, 0x00, 0xC8);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaDisplayInit.\n"));
-}
-
 void
 VIALoadRgbLut(ScrnInfoPtr pScrn, int start, int numColors, LOCO *colors)
 {
