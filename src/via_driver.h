@@ -484,6 +484,5 @@ int viaOffScreenLinear(struct buffer_object *obj, ScrnInfoPtr pScrn, unsigned lo
 void viaShowCursor(ScrnInfoPtr pScrn);
 void viaHideCursor(ScrnInfoPtr pScrn);
 Bool viaHWCursorInit(ScreenPtr pScreen);
-void ViaDisplaySetStreamOnCRT(ScrnInfoPtr pScrn, Bool primary);
 
 #endif /* _VIA_DRIVER_H_ */
