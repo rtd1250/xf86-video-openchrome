@@ -1542,6 +1542,11 @@ Bool umsCreate(ScrnInfoPtr pScrn);
 Bool umsPreInit(ScrnInfoPtr pScrn);
 Bool umsCrtcInit(ScrnInfoPtr pScrn);
 
+/* via_i2c.c */
+void ViaI2CInit(ScrnInfoPtr pScrn);
+Bool xf86I2CMaskByte(I2CDevPtr d, I2CByte subaddr,
+                        I2CByte value, I2CByte mask);
+
 /* via_output.c */
 void viaInitDisplay(ScrnInfoPtr pScrn);
 CARD32 ViaGetMemoryBandwidth(ScrnInfoPtr pScrn);
