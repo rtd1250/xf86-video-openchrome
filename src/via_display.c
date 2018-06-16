@@ -534,22 +534,6 @@ viaDisplayInit(ScrnInfoPtr pScrn)
                         "Exiting viaDisplayInit.\n"));
 }
 
-/*
- * Sets the primary or secondary display stream on internal TMDS.
- */
-void
-ViaDisplaySetStreamOnDFP(ScrnInfoPtr pScrn, Bool primary)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaDisplaySetStreamOnDFP\n"));
-
-    if (primary)
-        ViaCrtcMask(hwp, 0x99, 0x00, 0x10);
-    else
-        ViaCrtcMask(hwp, 0x99, 0x10, 0x10);
-}
-
 void
 VIALoadRgbLut(ScrnInfoPtr pScrn, int start, int numColors, LOCO *colors)
 {
