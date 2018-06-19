@@ -744,6 +744,13 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
     temp = hwp->readCrtc(hwp, 0x3F);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "CR3F: 0x%02X\n", temp));
+
+    if (pVia->Chipset == VIA_VX900) {
+        temp = hwp->readCrtc(hwp, 0x45);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "CR45: 0x%02X\n", temp));
+    }
+
     temp = hwp->readCrtc(hwp, 0x47);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "CR47: 0x%02X\n", temp));
@@ -926,6 +933,10 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
      *               0: Disable
      *               1: Enable */
     ViaCrtcMask(hwp, 0x36, 0x01, 0x01);
+
+    if (pVia->Chipset == VIA_VX900) {
+        ViaCrtcMask(hwp, 0x45, 0x00, 0x01);
+    }
 
     /* 3X5.3B through 3X5.3F are scratch pad registers. */
     ViaCrtcMask(hwp, 0x3B, pVIADisplay->originalCR3B, 0xFF);
