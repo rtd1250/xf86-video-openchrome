@@ -968,6 +968,9 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
         ViaCrtcMask(hwp, 0x6C, 0x00, 0x01);
     }
 
+    /* Disable display scaling. */
+    viaSetDisplayScaling(pScrn, FALSE);
+
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaIGAInitCommon.\n"));
 }
