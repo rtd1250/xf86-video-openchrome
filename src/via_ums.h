@@ -1533,6 +1533,24 @@ viaTMDSSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
                         (displaySource & 0x01) + 1));
 }
 
+/*
+ * Turn on / off display scaling engine.
+ */
+static inline void
+viaSetDisplayScaling(ScrnInfoPtr pScrn, Bool scalingState)
+{
+    /*
+     * 3X5.79[0] - LCD Scaling Enable
+     *             0: Disable
+     *             1: Enable
+     */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x79,
+                scalingState, BIT(0));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Display Scaling: %s\n",
+                        scalingState ? "On" : "Off"));
+}
+
 
 /* via_ums.c */
 void viaUnmapMMIO(ScrnInfoPtr pScrn);
