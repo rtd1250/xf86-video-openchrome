@@ -1871,7 +1871,8 @@ viaIGA1Save(ScrnInfoPtr pScrn)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
-    VIARegPtr Regs = &pVia->SavedReg;
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
+    VIARegPtr Regs = &pVIADisplay->SavedReg;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaIGA1Save.\n"));
@@ -2124,7 +2125,8 @@ viaIGA1Restore(ScrnInfoPtr pScrn)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
-    VIARegPtr Regs = &pVia->SavedReg;
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
+    VIARegPtr Regs = &pVIADisplay->SavedReg;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaIGA1Restore.\n"));
@@ -3147,7 +3149,8 @@ viaIGA2Save(ScrnInfoPtr pScrn)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
-    VIARegPtr Regs = &pVia->SavedReg;
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
+    VIARegPtr Regs = &pVIADisplay->SavedReg;
     int i;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -3279,7 +3282,8 @@ viaIGA2Restore(ScrnInfoPtr pScrn)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
-    VIARegPtr Regs = &pVia->SavedReg;
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
+    VIARegPtr Regs = &pVIADisplay->SavedReg;
     int i;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
