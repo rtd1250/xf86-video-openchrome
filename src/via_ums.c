@@ -1148,6 +1148,20 @@ umsCrtcInit(ScrnInfoPtr pScrn)
         break;
     }
 
+    if ((pVia->Chipset == VIA_VX800) ||
+        (pVia->Chipset == VIA_VX855) ||
+        (pVia->Chipset == VIA_VX900)) {
+        Regs->SR[0x14] = hwp->readSeq(hwp, 0x14);
+        Regs->SR[0x68] = hwp->readSeq(hwp, 0x68);
+        Regs->SR[0x69] = hwp->readSeq(hwp, 0x69);
+        Regs->SR[0x6A] = hwp->readSeq(hwp, 0x6A);
+        Regs->SR[0x6B] = hwp->readSeq(hwp, 0x6B);
+        Regs->SR[0x6C] = hwp->readSeq(hwp, 0x6C);
+        Regs->SR[0x6D] = hwp->readSeq(hwp, 0x6D);
+        Regs->SR[0x6E] = hwp->readSeq(hwp, 0x6E);
+        Regs->SR[0x6F] = hwp->readSeq(hwp, 0x6F);
+    }
+
     Regs->CR[0x0C] = hwp->readCrtc(hwp, 0x0C);
     Regs->CR[0x0D] = hwp->readCrtc(hwp, 0x0D);
 

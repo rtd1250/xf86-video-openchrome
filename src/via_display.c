@@ -595,6 +595,7 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
+    VIARegPtr Regs = &pVIADisplay->SavedReg;
     CARD8 i;
 #ifdef HAVE_DEBUG
     CARD8 temp;
@@ -917,6 +918,25 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
      *               10: Clock always on
      *               11: Clock on/off according to each engine IDLE status */
     ViaSeqMask(hwp, 0x3F, 0xFF, 0xFF);
+
+    /*
+     * Initialize frame buffer size and GTI for VX800, VX855, and
+     * VX900 chipsets. This code is really necessary for standby
+     * resume to work properly on VIA Embedded EPIA-M830 mainboard.
+     */
+    if ((pVia->Chipset == VIA_VX800) ||
+        (pVia->Chipset == VIA_VX855) ||
+        (pVia->Chipset == VIA_VX900)) {
+        hwp->writeSeq(hwp, 0x14, Regs->SR[0x14]);
+        hwp->writeSeq(hwp, 0x68, Regs->SR[0x68]);
+        hwp->writeSeq(hwp, 0x69, Regs->SR[0x69]);
+        hwp->writeSeq(hwp, 0x6A, Regs->SR[0x6A]);
+        hwp->writeSeq(hwp, 0x6B, Regs->SR[0x6B]);
+        hwp->writeSeq(hwp, 0x6C, Regs->SR[0x6C]);
+        hwp->writeSeq(hwp, 0x6D, Regs->SR[0x6D]);
+        hwp->writeSeq(hwp, 0x6E, Regs->SR[0x6E]);
+        hwp->writeSeq(hwp, 0x6F, Regs->SR[0x6F]);
+    }
 
     /* 3X5.36[7]   - DPMS VSYNC Output
      * 3X5.36[6]   - DPMS HSYNC Output
