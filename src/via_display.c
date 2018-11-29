@@ -959,11 +959,11 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
     }
 
     /* 3X5.3B through 3X5.3F are scratch pad registers. */
-    ViaCrtcMask(hwp, 0x3B, pVIADisplay->originalCR3B, 0xFF);
-    ViaCrtcMask(hwp, 0x3C, pVIADisplay->originalCR3C, 0xFF);
-    ViaCrtcMask(hwp, 0x3D, pVIADisplay->originalCR3D, 0xFF);
-    ViaCrtcMask(hwp, 0x3E, pVIADisplay->originalCR3E, 0xFF);
-    ViaCrtcMask(hwp, 0x3F, pVIADisplay->originalCR3F, 0xFF);
+    ViaCrtcMask(hwp, 0x3B, Regs->CR[0x3B], 0xFF);
+    ViaCrtcMask(hwp, 0x3C, Regs->CR[0x3C], 0xFF);
+    ViaCrtcMask(hwp, 0x3D, Regs->CR[0x3D], 0xFF);
+    ViaCrtcMask(hwp, 0x3E, Regs->CR[0x3E], 0xFF);
+    ViaCrtcMask(hwp, 0x3F, Regs->CR[0x3F], 0xFF);
 
     /* 3X5.47[5] - Peep at the PCI-bus
      *             0: Disable

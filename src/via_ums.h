@@ -228,10 +228,6 @@ typedef struct _VIADISPLAY {
     /* OLPC XO-1.5 */
     Bool                isOLPCXO15;
 
-    /* Shadow copy of CR3B through CR3F. */
-    CARD8       originalCR3B, originalCR3C, originalCR3D,
-                originalCR3E, originalCR3F;
-
     VIARegRec           SavedReg;
 
     xf86OutputPtr tv;
