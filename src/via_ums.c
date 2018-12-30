@@ -1188,7 +1188,7 @@ umsCrtcInit(ScrnInfoPtr pScrn)
     Regs->CR[0x47] = hwp->readCrtc(hwp, 0x47);
     Regs->CR[0x48] = hwp->readCrtc(hwp, 0x48);
 
-    for (i = 0; i < (0x9F - 0x50 + 1); i++) {
+    for (i = 0; i < (0xA8 - 0x50 + 1); i++) {
         Regs->CR[i + 0x50] = hwp->readCrtc(hwp, i + 0x50);
     }
 
@@ -1197,8 +1197,8 @@ umsCrtcInit(ScrnInfoPtr pScrn)
     case VIA_VX800:
     case VIA_VX855:
     case VIA_VX900:
-        for (i = 0; i < (0xEF - 0xA0 + 1); i++) {
-            Regs->CR[i + 0xA0] = hwp->readCrtc(hwp, i + 0xA0);
+        for (i = 0; i < (0xEF - 0xA9 + 1); i++) {
+            Regs->CR[i + 0xA9] = hwp->readCrtc(hwp, i + 0xA9);
         }
 
         break;
