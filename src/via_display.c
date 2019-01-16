@@ -612,7 +612,7 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
     temp = hwp->readMiscOut(hwp);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Misc. Register: 0x%02X\n", temp));
-    hwp->writeMiscOut(hwp, temp | 0x22);
+    hwp->writeMiscOut(hwp, temp | 0x23);
 
     temp = hwp->readEnable(hwp);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
