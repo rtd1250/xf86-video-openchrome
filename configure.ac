@@ -42,7 +42,6 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR(.)
 
 AM_INIT_AUTOMAKE([foreign dist-bzip2])
-AM_MAINTAINER_MODE
 
 # Initialize libtool
 AC_DISABLE_STATIC
