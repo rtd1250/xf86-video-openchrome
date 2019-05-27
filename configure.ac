@@ -167,7 +167,6 @@ AC_SUBST([moduledir])
 DRIVER_NAME=openchrome
 AC_SUBST([DRIVER_NAME])
 
-AC_DEFINE(X_USE_LINEARFB,1,[Compatibility define for older Xen])
 AC_DEFINE(X_USE_REGION_NULL,1,[Compatibility define for older Xen])
 AC_DEFINE(X_HAVE_XAAGETROP,1,[Compatibility define for older Xen])
 AC_DEFINE(X_NEED_I2CSTART,1,[Compatibility define for older Xen])
