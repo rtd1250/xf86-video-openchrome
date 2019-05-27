@@ -162,7 +162,6 @@ if test "$TOOLS" = yes; then
 fi
 
 AC_SUBST([DRI_CFLAGS])
-AC_SUBST([XORG_CFLAGS])
 AC_SUBST([moduledir])
 
 DRIVER_NAME=openchrome
