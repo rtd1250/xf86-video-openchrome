@@ -93,8 +93,6 @@ AM_CONDITIONAL(HAVE_XEXTPROTO_71, [ test "$HAVE_XEXTPROTO_71" = "yes" ])
 
 # Checks for libraries.
 
-# Checks for header files.
-AC_HEADER_STDC
 
 save_CPPFLAGS="$CPPFLAGS"
 CPPFLAGS="$XORG_CFLAGS $CPPFLAGS"
