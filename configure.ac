@@ -170,10 +170,11 @@ AC_SUBST([moduledir])
 DRIVER_NAME=openchrome
 AC_SUBST([DRIVER_NAME])
 
-AC_OUTPUT([
-	Makefile
-	src/xvmc/Makefile
-	src/Makefile
-	man/Makefile
-	tools/Makefile
+AC_CONFIG_FILES([
+                Makefile
+                src/xvmc/Makefile
+                src/Makefile
+                man/Makefile
+                tools/Makefile
 ])
+AC_OUTPUT
