@@ -21,9 +21,7 @@
 AUTOMAKE_OPTIONS = foreign
 SUBDIRS = src man tools
 
-EXTRA_DIST = COPYING NEWS README ChangeLog OldChangeLog
-
-MAINTAINERCLEANFILES=ChangeLog
+EXTRA_DIST = COPYING NEWS README OldChangeLog
 
 .PHONY: ChangeLog
 

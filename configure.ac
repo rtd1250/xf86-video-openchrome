@@ -43,15 +43,16 @@ AC_CONFIG_AUX_DIR(.)
 
 AM_INIT_AUTOMAKE([foreign dist-bzip2])
 
-# Require xorg-macros: XORG_CWARNFLAGS, XORG_CHANGELOG
-m4_ifndef([XORG_MACROS_VERSION], [AC_FATAL([must install xorg-macros 1.2 or later before running autoconf/autogen])])
-XORG_MACROS_VERSION(1.2)
+# Require xorg-macros: XORG_DEFAULT_OPTIONS
+m4_ifndef([XORG_MACROS_VERSION], 
+          [m4_fatal([must install xorg-macros 1.3 or later before running autoconf/autogen])])
+XORG_MACROS_VERSION(1.3)
+XORG_DEFAULT_OPTIONS
 
 # Initialize libtool
 AC_DISABLE_STATIC
 AC_PROG_LIBTOOL
 AC_SYS_LARGEFILE
-XORG_CWARNFLAGS
 
 AH_TOP([#include "xorg-server.h"])
 
@@ -176,10 +177,6 @@ AC_DEFINE(X_NEED_I2CSTART,1,[Compatibility define for older Xen])
 
 DRIVER_MAN_SUFFIX="4"
 AC_SUBST([DRIVER_MAN_SUFFIX])
-
-XORG_MANPAGE_SECTIONS
-XORG_RELEASE_VERSION
-XORG_CHANGELOG
 
 AC_OUTPUT([
 	Makefile
