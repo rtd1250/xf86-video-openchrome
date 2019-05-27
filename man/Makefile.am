@@ -23,9 +23,9 @@
 
 drivermandir = $(mandir)/man$(DRIVER_MAN_SUFFIX)
 
-driverman_MANFILES = @DRIVER_NAME@.man
+driverman_SOURCES = @DRIVER_NAME@.man
 
-driverman_DATA = $(driverman_MANFILES:man=@DRIVER_MAN_SUFFIX@)
+driverman_DATA = $(driverman_SOURCES:man=@DRIVER_MAN_SUFFIX@)
 
 EXTRA_DIST = @DRIVER_NAME@.man
 
