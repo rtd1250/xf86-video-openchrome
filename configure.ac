@@ -57,22 +57,22 @@ AC_SYS_LARGEFILE
 AH_TOP([#include "xorg-server.h"])
 
 AC_ARG_WITH(xorg-module-dir,
-            AC_HELP_STRING([--with-xorg-module-dir=DIR],
+            AS_HELP_STRING([--with-xorg-module-dir=DIR],
                            [Default xorg module directory [[default=$libdir/xorg/modules]]]),
             [moduledir="$withval"],
             [moduledir="$libdir/xorg/modules"])
 
-AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug],
+AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug],
 				    [Enable debugging support [[default=no]]]),
               [DEBUG="$enableval"],
               [DEBUG=no])
 
-AC_ARG_ENABLE(xv-debug, AC_HELP_STRING([--enable-xv-debug],
+AC_ARG_ENABLE(xv-debug, AS_HELP_STRING([--enable-xv-debug],
 				    [Enable XVideo debugging support [[default=no]]]),
               [XV_DEBUG="$enableval"],
               [XV_DEBUG=no])
 
-AC_ARG_ENABLE(viaregtool, AC_HELP_STRING([--enable-viaregtool],
+AC_ARG_ENABLE(viaregtool, AS_HELP_STRING([--enable-viaregtool],
 				    [Enable build of registers dumper tool [[default=no]]]),
               [TOOLS="$enableval"],
               [TOOLS=no])
