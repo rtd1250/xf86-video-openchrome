@@ -1707,7 +1707,7 @@ VIACreateScreenResources(ScreenPtr pScreen)
         return FALSE;
 
     if (pVia->shadowFB) {
-        if (!shadowAdd(pScreen, rootPixmap, shadowUpdatePackedWeak(),
+        if (!shadowAdd(pScreen, rootPixmap, shadowUpdatePacked,
                         viaShadowWindow, 0, NULL))
             return FALSE;
     }
