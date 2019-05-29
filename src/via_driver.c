@@ -1662,6 +1662,12 @@ LoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
     }
 }
 
+static void
+viaUpdatePacked(ScreenPtr pScreen, shadowBufPtr pBuf)
+{
+    shadowUpdatePacked(pScreen, pBuf);
+}
+
 static void *
 viaShadowWindow(ScreenPtr pScreen, CARD32 row, CARD32 offset, int mode,
 				CARD32 *size, void *closure)
@@ -1707,7 +1713,7 @@ VIACreateScreenResources(ScreenPtr pScreen)
         return FALSE;
 
     if (pVia->shadowFB) {
-        if (!shadowAdd(pScreen, rootPixmap, shadowUpdatePacked,
+        if (!shadowAdd(pScreen, rootPixmap, viaUpdatePacked,
                         viaShadowWindow, 0, NULL))
             return FALSE;
     }
