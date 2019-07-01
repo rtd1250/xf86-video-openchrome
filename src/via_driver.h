@@ -432,12 +432,6 @@ void viaSetColorSpace(VIAPtr pVia, int hue, int saturation, int brightness, int 
 
 
 /* In via_xv.c */
-void viaInitVideo(ScreenPtr pScreen);
-void viaExitVideo(ScrnInfoPtr pScrn);
-void viaSaveVideo(ScrnInfoPtr pScrn);
-void viaRestoreVideo(ScrnInfoPtr pScrn);
-void viaSetColorSpace(VIAPtr pVia, int hue, int saturation, int brightness, int contrast,
-		      Bool reset);
 void VIAVidAdjustFrame(ScrnInfoPtr pScrn, int x, int y);
 
 /* In via_memcpy.c */
