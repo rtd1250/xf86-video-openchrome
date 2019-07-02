@@ -727,7 +727,7 @@ VIASetupDefaultOptions(ScrnInfoPtr pScrn)
     return TRUE;
 }
 
-Bool
+static Bool
 VIAGetRec(ScrnInfoPtr pScrn)
 {
     Bool ret = FALSE;
