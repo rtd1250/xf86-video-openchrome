@@ -475,11 +475,10 @@ viaVT1632Probe(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus)
     pI2CDevice->SlaveAddr = i2cAddr;
     pI2CDevice->pI2CBus = pI2CBus;
     if (!xf86I2CDevInit(pI2CDevice)) {
-        xf86DestroyI2CDevRec(pI2CDevice, TRUE);
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                             "Failed to initialize a device on "
                             "I2C bus.\n"));
-        goto exit;
+        goto free_dev_rec;
     }
 
     xf86I2CReadByte(pI2CDevice, 0, &i2cData);
@@ -497,16 +496,16 @@ viaVT1632Probe(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus)
                         "Device ID: 0x%04x\n", deviceID));
 
     if ((vendorID != 0x1106) || (deviceID != 0x3192)) {
-        xf86DestroyI2CDevRec(pI2CDevice, TRUE);
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                             "VT1632 external TMDS transmitter not "
                             "detected.\n"));
-        goto exit;
+        goto free_dev_rec;
     }
 
     status = TRUE;
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                 "VT1632 external TMDS transmitter detected.\n");
+free_dev_rec:
     xf86DestroyI2CDevRec(pI2CDevice, TRUE);
 exit:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
