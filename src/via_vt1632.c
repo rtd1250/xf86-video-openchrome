@@ -443,7 +443,7 @@ Bool
 viaVT1632Probe(ScrnInfoPtr pScrn, I2CBusPtr pI2CBus)
 {
     I2CDevPtr pI2CDevice = NULL;
-    I2CSlaveAddr i2cAddr = 0x10;
+    I2CSlaveAddr i2cAddr = VIA_VT1632_I2C_ADDR;
     CARD8 i2cData;
     CARD16 vendorID, deviceID;
     Bool status = FALSE;
@@ -522,7 +522,7 @@ viaVT1632Init(ScrnInfoPtr pScrn)
     viaVT1632RecPtr pVIAVT1632;
     I2CBusPtr pI2CBus;
     I2CDevPtr pI2CDevice;
-    I2CSlaveAddr i2cAddr = 0x10;
+    I2CSlaveAddr i2cAddr = VIA_VT1632_I2C_ADDR;
     CARD8 i2cData;
     char outputNameBuffer[32];
 
