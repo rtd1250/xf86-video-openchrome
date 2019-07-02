@@ -541,12 +541,6 @@ viaVT1632Init(ScrnInfoPtr pScrn)
         goto exit;
     }
 
-    if (!xf86I2CProbeAddress(pI2CBus, i2cAddr)) {
-        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                    "I2C device not found.\n");
-        goto exit;
-    }
-
     pI2CDevice = xf86CreateI2CDevRec();
     if (!pI2CDevice) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
