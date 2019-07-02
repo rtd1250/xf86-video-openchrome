@@ -425,12 +425,13 @@ static void
 VIAFreeRec(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
+    VIADisplayPtr pVIADisplay;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAFreeRec\n"));
     if (!pScrn->driverPrivate)
         return;
 
-    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
+    pVIADisplay = pVia->pVIADisplay;
 
     if (pVIADisplay) {
         if (pVIADisplay->TVI2CDev)
@@ -731,6 +732,7 @@ VIAGetRec(ScrnInfoPtr pScrn)
 {
     Bool ret = FALSE;
     VIAPtr pVia;
+    VIADisplayPtr pVIADisplay;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAGetRec\n"));
 
@@ -741,7 +743,7 @@ VIAGetRec(ScrnInfoPtr pScrn)
     pVia = (VIARec *) xnfcalloc(sizeof(VIARec), 1);
     if (pVia) {
         pVia->pVIADisplay = xnfcalloc(sizeof(VIADisplayRec), 1);
-        VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
+        pVIADisplay = pVia->pVIADisplay;
 
         if (pVIADisplay) {
             pVIADisplay->TVI2CDev = NULL;
@@ -797,11 +799,11 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
     struct buffer_object *old_front = NULL;
     Bool ret;
-    ScreenPtr screen = xf86ScrnToScreen(scrn);
+    ScreenPtr screen;
     uint32_t old_fb_id;
     int i, pitch, old_width, old_height, old_pitch;
     int cpp = (scrn->bitsPerPixel + 7) / 8;
-    PixmapPtr ppix = screen->GetScreenPixmap(screen);;
+    PixmapPtr ppix;
     void *new_pixels;
     VIAPtr pVia = VIAPTR(scrn);
     xf86CrtcPtr crtc = NULL;
@@ -809,6 +811,9 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
 
     DEBUG(xf86DrvMsg(scrn->scrnIndex, X_INFO,
                         "Entered %s.\n", __func__));
+
+    screen = xf86ScrnToScreen(scrn);
+    ppix = screen->GetScreenPixmap(screen);
 
     if ((scrn->virtualX == width) && (scrn->virtualY == height)) {
         DEBUG(xf86DrvMsg(scrn->scrnIndex, X_INFO,
