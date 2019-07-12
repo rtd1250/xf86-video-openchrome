@@ -705,7 +705,6 @@ static void
 viaFPGetFPInfoScratchPad(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
     VIAFPPtr pVIAFP = (VIAFPPtr) output->driver_private;
