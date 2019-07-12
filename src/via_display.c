@@ -509,7 +509,7 @@ viaIGA2SetHIDisplayLocation(ScrnInfoPtr pScrn,
     }
 }
 
-void
+static void
 VIALoadRgbLut(ScrnInfoPtr pScrn, int start, int numColors, LOCO *colors)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
