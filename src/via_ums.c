@@ -754,7 +754,7 @@ umsCreate(ScrnInfoPtr pScrn)
     return TRUE;
 }
 
-Bool
+static Bool
 viaProbeVRAM(ScrnInfoPtr pScrn)
 {
 #ifdef HAVE_PCIACCESS
