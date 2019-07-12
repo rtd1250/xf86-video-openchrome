@@ -596,10 +596,7 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
     VIAPtr pVia = VIAPTR(pScrn);
     VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
     VIARegPtr Regs = &pVIADisplay->SavedReg;
-    CARD8 i;
-#ifdef HAVE_DEBUG
-    CARD8 temp;
-#endif
+    CARD8 i, temp;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaIGAInitCommon.\n"));
