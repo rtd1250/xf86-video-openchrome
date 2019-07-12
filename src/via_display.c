@@ -3091,10 +3091,10 @@ viaIGA2Restore(ScrnInfoPtr pScrn)
 void
 ViaShadowCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaShadowCRTCSetMode\n"));
-
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     CARD16 temp;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaShadowCRTCSetMode\n"));
 
     temp = (mode->CrtcHTotal >> 3) - 5;
     hwp->writeCrtc(hwp, 0x6D, temp & 0xFF);
