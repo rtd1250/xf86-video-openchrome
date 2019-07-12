@@ -758,8 +758,8 @@ static Bool
 viaProbeVRAM(ScrnInfoPtr pScrn)
 {
 #ifdef HAVE_PCIACCESS
-    struct pci_device *hostBridge;
-    struct pci_device *dramController;
+    struct pci_device *hostBridge = NULL;
+    struct pci_device *dramController = NULL;
 #endif
     CARD8 videoRAM;
     CARD16 hostBridgeVendorID, hostBridgeDeviceID;
