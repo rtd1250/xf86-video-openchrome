@@ -27,7 +27,6 @@
 #define _VIA_DRIVER_H_ 1
 
 //#define VIA_DEBUG_COMPOSITE 1
-#define HAVE_DEBUG 1
 
 #ifdef HAVE_DEBUG
 #define DEBUG(x) x
