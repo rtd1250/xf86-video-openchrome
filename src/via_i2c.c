@@ -73,12 +73,13 @@ ViaI2C1GetBits(I2CBusPtr Bus, int *clock, int *data)
 static I2CBusPtr
 ViaI2CBus1Init(ScrnInfoPtr pScrn)
 {
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    I2CBusPtr pI2CBus;
+
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered ViaI2CBus1Init.\n"));
 
-    I2CBusPtr pI2CBus = xf86CreateI2CBusRec();
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
+    pI2CBus = xf86CreateI2CBusRec();
     if (!pI2CBus) {
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                             "xf86CreateI2CBusRec failed.\n"));
@@ -156,12 +157,13 @@ ViaI2C2GetBits(I2CBusPtr Bus, int *clock, int *data)
 static I2CBusPtr
 ViaI2CBus2Init(ScrnInfoPtr pScrn)
 {
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    I2CBusPtr pI2CBus;
+
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered ViaI2CBus2Init.\n"));
 
-    I2CBusPtr pI2CBus = xf86CreateI2CBusRec();
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
+    pI2CBus = xf86CreateI2CBusRec();
     if (!pI2CBus) {
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                             "xf86CreateI2CBusRec failed.\n"));
