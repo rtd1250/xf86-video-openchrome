@@ -168,12 +168,8 @@ viaVT1632RestoreRegisters(ScrnInfoPtr pScrn, I2CDevPtr pDev,
 static int
 viaVT1632CheckModeValidity(xf86OutputPtr output, DisplayModePtr pMode)
 {
-    ScrnInfoPtr pScrn = output->scrn;
     viaVT1632RecPtr pVIAVT1632 = output->driver_private;
     int status = MODE_OK;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
-                        "Entered viaVT1632CheckModeValidity.\n"));
 
     if (pMode->Clock < pVIAVT1632->DotclockMin) {
         status = MODE_CLOCK_LOW;
@@ -185,8 +181,6 @@ viaVT1632CheckModeValidity(xf86OutputPtr output, DisplayModePtr pMode)
     }
 
 exit:
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaVT1632CheckModeValidity.\n"));
     return status;
 }
 
