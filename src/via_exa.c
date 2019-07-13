@@ -62,7 +62,7 @@ viaDumpDMA(ViaCommandBuffer *cb)
     ErrorF("\n");
 }
 
-void
+static void
 viaFlushPCI(ViaCommandBuffer *cb)
 {
     register CARD32 *bp = cb->buf;
