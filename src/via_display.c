@@ -1197,7 +1197,9 @@ viaIGA1SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y)
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
     CARD32 Base;
+#ifdef HAVE_DEBUG
     CARD8 cr0c, cr0d, cr34, cr48;
+#endif
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaIGA1SetFBStartingAddress.\n"));
@@ -2342,7 +2344,9 @@ viaIGA2SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y)
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
     CARD32 Base, tmp;
+#ifdef HAVE_DEBUG
     CARD8 cr62, cr63, cr64, cra3;
+#endif
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaIGA2SetFBStartingAddress.\n"));
