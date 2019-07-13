@@ -154,12 +154,8 @@ viaSiI164RestoreRegisters(ScrnInfoPtr pScrn, I2CDevPtr pDev,
 static int
 viaSiI164CheckModeValidity(xf86OutputPtr output, DisplayModePtr pMode)
 {
-    ScrnInfoPtr pScrn = output->scrn;
     viaSiI164RecPtr pSiI164Rec = output->driver_private;
     int status = MODE_OK;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, 
-                        "Entered viaSiI164CheckModeValidity.\n"));
 
     if (pMode->Clock < pSiI164Rec->DotclockMin) {
         status = MODE_CLOCK_LOW;
@@ -171,8 +167,6 @@ viaSiI164CheckModeValidity(xf86OutputPtr output, DisplayModePtr pMode)
     }
 
 exit:
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaSiI164CheckModeValidity.\n"));
     return status;
 }
 
