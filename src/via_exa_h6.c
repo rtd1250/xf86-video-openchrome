@@ -238,10 +238,10 @@ viaExaCopy_H6(PixmapPtr pDstPixmap, int srcX, int srcY, int dstX, int dstY,
     VIAPtr pVia = VIAPTR(pScrn);
     ViaTwodContext *tdc = &pVia->td;
 
+    RING_VARS;
+
     if (!width || !height)
         return;
-
-    RING_VARS;
 
     if (tdc->cmd & VIA_GEC_DECY) {
         srcY += height - 1;
