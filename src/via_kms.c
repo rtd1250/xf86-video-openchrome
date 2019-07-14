@@ -737,7 +737,8 @@ out_free_encoders:
     drmModeFreeConnector(koutput);
 }
 
-uint32_t find_clones(ScrnInfoPtr scrn, xf86OutputPtr output)
+static uint32_t
+find_clones(ScrnInfoPtr scrn, xf86OutputPtr output)
 {
     drmmode_output_private_ptr drmmode_output = output->driver_private, clone_drmout;
     xf86CrtcConfigPtr   xf86_config = XF86_CRTC_CONFIG_PTR(scrn);
