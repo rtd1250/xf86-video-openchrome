@@ -42,7 +42,6 @@
 #include "via_driver.h"
 #include "via_regs.h"
 #include "via_dmabuffer.h"
-#include "via_rop.h"
 
 /*
  * Use PCI MMIO to flush the command buffer when AGP DMA is not available.
