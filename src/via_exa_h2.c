@@ -237,6 +237,8 @@ viaExaCopy_H2(PixmapPtr pDstPixmap, int srcX, int srcY, int dstX, int dstY,
     VIAPtr pVia = VIAPTR(pScrn);
     ViaTwodContext *tdc = &pVia->td;
 
+    RING_VARS;
+
     if (!width || !height)
         return;
 
@@ -250,8 +252,6 @@ viaExaCopy_H2(PixmapPtr pDstPixmap, int srcX, int srcY, int dstX, int dstY,
         dstX += width - 1;
     }
     val = VIA_PITCH_ENABLE | (dstPitch >> 3) << 16 | (tdc->srcPitch >> 3);
-
-    RING_VARS;
 
     BEGIN_RING(16);
     OUT_RING_H1(VIA_REG_GEMODE, tdc->mode);
