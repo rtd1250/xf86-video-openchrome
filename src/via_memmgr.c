@@ -95,12 +95,20 @@ drm_bo_alloc_surface(ScrnInfoPtr pScrn, unsigned int width, unsigned int height,
     case DRM_FORMAT_XRGB8888:
         pitch = width * 4;
         break;
+    default:
+        pitch = 0;
+        break;
+    }
+
+    if (pitch == 0) {
+        goto exit;
     }
 
     pitch = ALIGN_TO(pitch, alignment);
     obj = drm_bo_alloc(pScrn, pitch * height, alignment, domain);
     if (!obj->pitch)
         obj->pitch = pitch;
+exit:
     return obj;
 }
 
