@@ -79,6 +79,8 @@ static char VIAClientDriverName[] = "unichrome";
 static const ViaDRMVersion drmExpected = { 1, 3, 0 };
 static const ViaDRMVersion drmCompat = { 2, 0, 0 };
 
+static char SWRastClientDriverName[] = "swrast";
+
 static Bool VIAInitVisualConfigs(ScreenPtr pScreen);
 static Bool VIADRIMapInit(ScreenPtr pScreen, VIAPtr pVia);
 
@@ -548,7 +550,7 @@ VIADRI1ScreenInit(ScreenPtr pScreen)
         case VIA_VX800:
         case VIA_VX855:
         case VIA_VX900:
-            pDRIInfo->clientDriverName = "swrast";
+            pDRIInfo->clientDriverName = SWRastClientDriverName;
             break;
         default:
             pDRIInfo->clientDriverName = VIAClientDriverName;
