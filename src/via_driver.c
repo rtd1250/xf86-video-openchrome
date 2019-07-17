@@ -948,6 +948,7 @@ xf86CrtcConfigFuncsRec via_xf86crtc_config_funcs = {
 static Bool
 VIAPreInit(ScrnInfoPtr pScrn, int flags)
 {
+    XF86OptionPtr option = xf86NewOption("MigrationHeuristic", "greedy");
     EntityInfoPtr pEnt;
     VIAPtr pVia;
     VIADisplayPtr pVIADisplay;
@@ -1259,7 +1260,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         }
     }
 
-    xf86CollectOptions(pScrn, NULL);
+    xf86CollectOptions(pScrn, option);
 
     if (!VIASetupDefaultOptions(pScrn)) {
         goto fail;
