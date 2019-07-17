@@ -163,6 +163,9 @@ static PciChipsets VIAPciChipsets[] = {
     {-1,                -1,                 VIA_RES_UNDEF}
 };
 
+static char strEXAOptionName[] = "MigrationHeuristic";
+static char strEXAValue[] = "greedy";
+
 typedef enum
 {
 #ifdef HAVE_DEBUG
@@ -948,7 +951,6 @@ xf86CrtcConfigFuncsRec via_xf86crtc_config_funcs = {
 static Bool
 VIAPreInit(ScrnInfoPtr pScrn, int flags)
 {
-    XF86OptionPtr option = xf86NewOption("MigrationHeuristic", "greedy");
     EntityInfoPtr pEnt;
     VIAPtr pVia;
     VIADisplayPtr pVIADisplay;
@@ -961,6 +963,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     rgb defaultWeight = {0, 0, 0};
     rgb defaultMask = {0, 0, 0};
     Gamma defaultGamma = {0.0, 0.0, 0.0};
+    XF86OptionPtr option;
     Bool status = FALSE;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -1260,6 +1263,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         }
     }
 
+    option = xf86NewOption(strEXAOptionName, strEXAValue);
     xf86CollectOptions(pScrn, option);
 
     if (!VIASetupDefaultOptions(pScrn)) {
