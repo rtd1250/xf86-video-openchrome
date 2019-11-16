@@ -1114,10 +1114,14 @@ umsCrtcInit(ScrnInfoPtr pScrn)
     Regs->SR[0x2A] = hwp->readSeq(hwp, 0x2A);
     Regs->SR[0x2B] = hwp->readSeq(hwp, 0x2B);
 
+    Regs->SR[0x2C] = hwp->readSeq(hwp, 0x2C);
+
     Regs->SR[0x2D] = hwp->readSeq(hwp, 0x2D);
     Regs->SR[0x2E] = hwp->readSeq(hwp, 0x2E);
     Regs->SR[0x2F] = hwp->readSeq(hwp, 0x2F);
     Regs->SR[0x30] = hwp->readSeq(hwp, 0x30);
+
+    Regs->SR[0x3D] = hwp->readSeq(hwp, 0x3D);
 
     Regs->SR[0x44] = hwp->readSeq(hwp, 0x44);
     Regs->SR[0x45] = hwp->readSeq(hwp, 0x45);

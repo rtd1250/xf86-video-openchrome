@@ -1953,6 +1953,10 @@ viaIGA1Restore(ScrnInfoPtr pScrn)
     hwp->writeSeq(hwp, 0x2A, Regs->SR[0x2A]);
     hwp->writeSeq(hwp, 0x2B, Regs->SR[0x2B]);
 
+    hwp->writeSeq(hwp, 0x2C,
+                    (hwp->readSeq(hwp, 0x2C) & (~0x01)) |
+                    (Regs->SR[0x2C] & 0x01));
+
     hwp->writeSeq(hwp, 0x2D, Regs->SR[0x2D]);
     hwp->writeSeq(hwp, 0x2E, Regs->SR[0x2E]);
 
@@ -1973,6 +1977,10 @@ viaIGA1Restore(ScrnInfoPtr pScrn)
     default:
         break;
     }
+
+    hwp->writeSeq(hwp, 0x3D,
+                    (hwp->readSeq(hwp, 0x3D) & (~0x01)) |
+                    (Regs->SR[0x3D] & 0x01));
 
     /* Restore PLL settings and several miscellaneous registers.
      * For UniChrome, register 3C5.44 through 3C5.4B are restored.
