@@ -1941,7 +1941,6 @@ viaIGA1Restore(ScrnInfoPtr pScrn)
     case VIA_P4M890:
         hwp->writeSeq(hwp, 0x23, Regs->SR[0x23]);
         hwp->writeSeq(hwp, 0x24, Regs->SR[0x24]);
-        hwp->writeSeq(hwp, 0x25, Regs->SR[0x25]);
 
         hwp->writeSeq(hwp, 0x27, Regs->SR[0x27]);
         hwp->writeSeq(hwp, 0x28, Regs->SR[0x28]);
@@ -1950,8 +1949,6 @@ viaIGA1Restore(ScrnInfoPtr pScrn)
     default:
         break;
     }
-
-    hwp->writeSeq(hwp, 0x26, Regs->SR[0x26]);
 
     hwp->writeSeq(hwp, 0x2A, Regs->SR[0x2A]);
     hwp->writeSeq(hwp, 0x2B, Regs->SR[0x2B]);
