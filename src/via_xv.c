@@ -235,7 +235,7 @@ static XF86ImageRec ImagesG[NUM_IMAGES_G] = {
 
 };
 
-static char *XvAdaptorName[XV_ADAPT_NUM] = {
+static const char *XvAdaptorName[XV_ADAPT_NUM] = {
     "XV_SWOV"
 };
 

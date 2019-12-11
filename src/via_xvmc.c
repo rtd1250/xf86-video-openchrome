@@ -69,7 +69,8 @@
  * to be added here to be supported also by XvMC.
  * Currently, only colorkey seems to be supported by Xv for Putimage.
  */
-static char *attrXvMC[VIA_NUM_XVMC_ATTRIBUTES] = { "XV_COLORKEY",
+static const char *attrXvMC[VIA_NUM_XVMC_ATTRIBUTES] = {
+    "XV_COLORKEY",
     "XV_AUTOPAINT_COLORKEY",
     "XV_BRIGHTNESS",
     "XV_CONTRAST",
