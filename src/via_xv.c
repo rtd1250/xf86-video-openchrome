@@ -682,7 +682,7 @@ viaSetupAdaptors(ScreenPtr pScreen, XF86VideoAdaptorPtr ** adaptors)
 {
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     int i, j, usedPorts, numPorts;
-    viaPortPrivRec *viaPortPriv;
+    viaPortPrivPtr pPriv;
     DevUnion *pdevUnion;
 
     DBG_DD(ErrorF(" via_xv.c : viaSetupAdaptors (viaSetupImageVideo): \n"));
@@ -702,7 +702,7 @@ viaSetupAdaptors(ScreenPtr pScreen, XF86VideoAdaptorPtr ** adaptors)
             return 0;
         numPorts = numAdaptPort[i];
 
-        viaPortPriv =
+        pPriv =
             (viaPortPrivPtr) xnfcalloc(numPorts, sizeof(viaPortPrivRec));
         pdevUnion = (DevUnion *) xnfcalloc(numPorts, sizeof(DevUnion));
 
@@ -725,7 +725,7 @@ viaSetupAdaptors(ScreenPtr pScreen, XF86VideoAdaptorPtr ** adaptors)
         /* The adapter can handle 1 port simultaneously */
         viaAdaptPtr[i]->nPorts = numPorts;
         viaAdaptPtr[i]->pPortPrivates = pdevUnion;
-        viaAdaptPtr[i]->pPortPrivates->ptr = (pointer) viaPortPriv;
+        viaAdaptPtr[i]->pPortPrivates->ptr = (pointer) pPriv;
         viaAdaptPtr[i]->nAttributes = NUM_ATTRIBUTES_G;
         viaAdaptPtr[i]->pAttributes = AttributesG;
 
@@ -740,23 +740,23 @@ viaSetupAdaptors(ScreenPtr pScreen, XF86VideoAdaptorPtr ** adaptors)
         viaAdaptPtr[i]->ReputImage = NULL;
         viaAdaptPtr[i]->QueryImageAttributes = viaQueryImageAttributes;
         for (j = 0; j < numPorts; ++j) {
-            viaPortPriv[j].dmaBounceBuffer = NULL;
-            viaPortPriv[j].dmaBounceStride = 0;
-            viaPortPriv[j].dmaBounceLines = 0;
-            viaPortPriv[j].colorKey = 0x0821;
-            viaPortPriv[j].autoPaint = TRUE;
-            viaPortPriv[j].brightness = 5000.;
-            viaPortPriv[j].saturation = 10000;
-            viaPortPriv[j].contrast = 10000;
-            viaPortPriv[j].hue = 0;
-            viaPortPriv[j].FourCC = 0;
-            viaPortPriv[j].xv_portnum = j + usedPorts;
-            viaPortPriv[j].xvErr = xve_none;
+            pPriv[j].dmaBounceBuffer = NULL;
+            pPriv[j].dmaBounceStride = 0;
+            pPriv[j].dmaBounceLines = 0;
+            pPriv[j].colorKey = 0x0821;
+            pPriv[j].autoPaint = TRUE;
+            pPriv[j].brightness = 5000.;
+            pPriv[j].saturation = 10000;
+            pPriv[j].contrast = 10000;
+            pPriv[j].hue = 0;
+            pPriv[j].FourCC = 0;
+            pPriv[j].xv_portnum = j + usedPorts;
+            pPriv[j].xvErr = xve_none;
 
 #ifdef X_USE_REGION_NULL
-            REGION_NULL(pScreen, &viaPortPriv[j].clip);
+            REGION_NULL(pScreen, &pPriv[j].clip);
 #else
-            REGION_INIT(pScreen, &viaPortPriv[j].clip, NullBox, 1);
+            REGION_INIT(pScreen, &pPriv[j].clip, NullBox, 1);
 #endif
         }
         usedPorts += j;
