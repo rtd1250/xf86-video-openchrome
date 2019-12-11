@@ -139,13 +139,21 @@ static XF86VideoFormatRec FormatsG[NUM_FORMATS_G] = {
 
 #define NUM_ATTRIBUTES_G 6
 
+static char attributeXvColorkey[] = { "XV_COLORKEY" };
+static char attributeXvBrightness[] = { "XV_BRIGHTNESS" };
+static char attributeXvContrast[] = { "XV_CONTRAST" };
+static char attributeXvSaturation[] = { "XV_SATURATION" };
+static char attributeXvHue[] = { "XV_HUE" };
+static char attributeXvAutopaintColorkey[] =
+                                        { "XV_AUTOPAINT_COLORKEY" };
+
 static XF86AttributeRec AttributesG[NUM_ATTRIBUTES_G] = {
-    {XvSettable | XvGettable, 0, (1 << 24) - 1, "XV_COLORKEY"},
-    {XvSettable | XvGettable, 0, 10000, "XV_BRIGHTNESS"},
-    {XvSettable | XvGettable, 0, 20000, "XV_CONTRAST"},
-    {XvSettable | XvGettable, 0, 20000, "XV_SATURATION"},
-    {XvSettable | XvGettable, -180, 180, "XV_HUE"},
-    {XvSettable | XvGettable, 0, 1, "XV_AUTOPAINT_COLORKEY"}
+    {XvSettable | XvGettable,      0,  (1 << 24) - 1,          attributeXvColorkey},
+    {XvSettable | XvGettable,      0,          10000,          attributeXvBrightness},
+    {XvSettable | XvGettable,      0,          20000,          attributeXvContrast},
+    {XvSettable | XvGettable,      0,          20000,          attributeXvSaturation},
+    {XvSettable | XvGettable,   -180,            180,                 attributeXvHue},
+    {XvSettable | XvGettable,      0,              1,   attributeXvAutopaintColorkey}
 };
 
 #define NUM_IMAGES_G 7
