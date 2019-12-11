@@ -123,10 +123,10 @@ viaWaitHQVFlip(VIAPtr pVia)
 static void
 viaWaitHQVFlipClear(VIAPtr pVia, unsigned long dwData)
 {
+    unsigned count = 50000;
     CARD32 volatile *pdwState =
             (CARD32 volatile *)(pVia->MapBase + HQV_CONTROL);
     *pdwState = dwData;
-    unsigned count = 50000;
 
     while (--count && (*pdwState & HQV_FLIP_STATUS)) {
         VIASETREG(HQV_CONTROL, *pdwState | HQV_FLIP_STATUS);
