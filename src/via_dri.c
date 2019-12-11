@@ -76,8 +76,6 @@ typedef struct
 
 static char VIAKernelDriverName[] = "via";
 static char VIAClientDriverName[] = "unichrome";
-static const ViaDRMVersion drmExpected = { 1, 3, 0 };
-static const ViaDRMVersion drmCompat = { 2, 0, 0 };
 
 static char SWRastClientDriverName[] = "swrast";
 
