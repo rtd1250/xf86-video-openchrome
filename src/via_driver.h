@@ -438,7 +438,7 @@ void viaSetColorSpace(VIAPtr pVia, int hue, int saturation,
 /* In via_memcpy.c */
 typedef void (*vidCopyFunc)(unsigned char *, const unsigned char *,
                             int, int, int, int);
-extern vidCopyFunc viaVidCopyInit( char *copyType, ScreenPtr pScreen );
+extern vidCopyFunc viaVidCopyInit(const char *copyType, ScreenPtr pScreen );
 
 /* In via_xwmc.c */
 

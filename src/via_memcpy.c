@@ -515,7 +515,7 @@ cpuValid(const char *cpuinfo, const char **flags)
  * Benchmark the video copy routines and choose the fastest.
  */
 vidCopyFunc
-viaVidCopyInit(char *copyType, ScreenPtr pScreen)
+viaVidCopyInit(const char *copyType, ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
 
@@ -638,7 +638,7 @@ viaVidCopyInit(char *copyType, ScreenPtr pScreen)
 #else
 
 vidCopyFunc
-viaVidCopyInit(char *copyType, ScreenPtr pScreen)
+viaVidCopyInit(const char *copyType, ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
 
