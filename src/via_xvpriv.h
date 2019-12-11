@@ -84,7 +84,6 @@ typedef struct
 
 } viaPortPrivRec, *viaPortPrivPtr;
 
-extern viaPortPrivPtr viaPortPriv[];
 extern unsigned viaNumXvPorts;
 
 #endif /* _VIA_XVPRIV_H_ */
