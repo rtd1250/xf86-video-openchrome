@@ -302,7 +302,8 @@ viaExtTMDSSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
-    CARD8 sr12, sr13, sr5a;
+    CARD8 sr12, sr13;
+    CARD8 sr5a = 0x00;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaExtTMDSSetDisplaySource.\n"));
@@ -434,7 +435,8 @@ viaExtTMDSEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState)
 
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
-    CARD8 sr12, sr13, sr5a;
+    CARD8 sr12, sr13;
+    CARD8 sr5a = 0x00;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaExtTMDSEnableIOPads.\n"));
@@ -565,7 +567,8 @@ viaExtTMDSSetClockDriveStrength(ScrnInfoPtr pScrn, CARD8 clockDriveStrength)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
-    CARD8 sr12, sr13, sr5a;
+    CARD8 sr12, sr13;
+    CARD8 sr5a = 0x00;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaExtTMDSSetClockDriveStrength.\n"));
@@ -656,7 +659,8 @@ viaExtTMDSSetDataDriveStrength(ScrnInfoPtr pScrn, CARD8 dataDriveStrength)
 {
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
-    CARD8 sr12, sr13, sr5a;
+    CARD8 sr12, sr13;
+    CARD8 sr5a = 0x00;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaExtTMDSSetDataDriveStrength.\n"));
