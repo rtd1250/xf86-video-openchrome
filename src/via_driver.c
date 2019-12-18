@@ -1851,15 +1851,15 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
         if (!miSetVisualTypes(pScrn->depth, TrueColorMask,
                               pScrn->rgbBits, pScrn->defaultVisual))
             return FALSE;
-        if (!miSetPixmapDepths())
-            return FALSE;
     } else {
         if (!miSetVisualTypes(pScrn->depth,
                               miGetDefaultVisualMask(pScrn->depth),
                               pScrn->rgbBits, pScrn->defaultVisual))
             return FALSE;
-        if (!miSetPixmapDepths())
-            return FALSE;
+    }
+
+    if (!miSetPixmapDepths()) {
+        return FALSE;
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Visuals set up\n"));
