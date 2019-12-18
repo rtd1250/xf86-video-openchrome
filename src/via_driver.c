@@ -1847,15 +1847,11 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
 
     miClearVisualTypes();
 
-    if (pScrn->bitsPerPixel > 8 && !pVia->IsSecondary) {
-        if (!miSetVisualTypes(pScrn->depth, TrueColorMask,
-                              pScrn->rgbBits, pScrn->defaultVisual))
-            return FALSE;
-    } else {
-        if (!miSetVisualTypes(pScrn->depth,
-                              miGetDefaultVisualMask(pScrn->depth),
-                              pScrn->rgbBits, pScrn->defaultVisual))
-            return FALSE;
+    if (!miSetVisualTypes(pScrn->depth,
+            (pScrn->bitsPerPixel > 8) && (!pVia->IsSecondary) ?
+                TrueColorMask : miGetDefaultVisualMask(pScrn->depth),
+            pScrn->rgbBits, pScrn->defaultVisual)) {
+        return FALSE;
     }
 
     if (!miSetPixmapDepths()) {
