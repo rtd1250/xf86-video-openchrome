@@ -1210,7 +1210,8 @@ CreateSurface(ScrnInfoPtr pScrn, CARD32 FourCC, CARD16 Width,
         pVia->swov.SWDevice.dwSWPhysicalAddr[0] = addr;
         pVia->swov.SWDevice.dwSWPhysicalAddr[1] = addr + fbsize;
         pVia->swov.SWDevice.lpSWOverlaySurface[0] = buf;
-        pVia->swov.SWDevice.lpSWOverlaySurface[1] = buf + fbsize;
+        pVia->swov.SWDevice.lpSWOverlaySurface[1] =
+                                        (unsigned char*)buf + fbsize;
 
         if (isplanar) {
             pVia->swov.SWDevice.dwSWCrPhysicalAddr[0] =
