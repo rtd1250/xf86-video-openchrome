@@ -211,7 +211,7 @@ typedef struct _VIA {
     unsigned char*      MpegMapBase;
     unsigned char*      BltBase;
     unsigned char*      MapBaseDense;
-    unsigned char*      FBBase;
+    uint8_t*            FBBase;
     CARD8               MemClk;
 
     /* Here are all the Options */

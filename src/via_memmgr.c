@@ -212,7 +212,7 @@ drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
             break;
 #endif
         case TTM_PL_FLAG_VRAM:
-            obj->ptr = (pVia->FBBase + obj->offset);
+            obj->ptr = pVia->FBBase + obj->offset;
             break;
         default:
             obj->ptr = NULL;
