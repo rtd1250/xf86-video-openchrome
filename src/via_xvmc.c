@@ -604,8 +604,8 @@ ViaXvMCCreateSurface(ScrnInfoPtr pScrn, XvMCSurfacePtr pSurf,
     yBufSize = stride(ctx->width) * ctx->height;
     for (i = 0; i < numBuffers; ++i) {
         memset(buf, 0, yBufSize);
-        memset((unsigned *)buf + yBufSize, 0x80, yBufSize >> 1);
-        (unsigned *)buf += bufSize;
+        memset(buf + yBufSize, 0x80, yBufSize >> 1);
+        buf += bufSize;
     }
     drm_bo_unmap(pScrn, sPriv->memory_ref);
 
