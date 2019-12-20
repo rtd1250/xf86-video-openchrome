@@ -208,7 +208,7 @@ drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
         switch (obj->domain) {
 #ifdef HAVE_DRI
         case TTM_PL_FLAG_TT:
-            obj->ptr = (pVia->agpMappedAddr + obj->offset);
+            obj->ptr = (uint8_t*)pVia->agpMappedAddr + obj->offset;
             break;
 #endif
         case TTM_PL_FLAG_VRAM:
