@@ -374,9 +374,16 @@ viaExaIsOffscreen(PixmapPtr pPix)
 {
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pPix->drawable.pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
+    uint8_t* addr_size;
+    uint8_t* front_bo;
+    Bool ret;
 
-    return ((unsigned long)pPix->devPrivate.ptr -
-            (unsigned long) drm_bo_map(pScrn, pVia->drmmode.front_bo)) < pVia->drmmode.front_bo->size;
+    front_bo = drm_bo_map(pScrn, pVia->drmmode.front_bo);
+    addr_size = (uint8_t*)pPix->devPrivate.ptr -
+                                            (unsigned long)front_bo;
+    ret = (addr_size < (uint8_t*)pVia->drmmode.front_bo->size) ?
+                                                        TRUE : FALSE;
+    return ret;
 }
 
 Bool
