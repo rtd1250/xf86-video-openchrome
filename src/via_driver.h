@@ -356,6 +356,9 @@ typedef struct
 } VIAEntRec, *VIAEntPtr;
 
 
+const OptionInfoRec *VIAAvailableOptions(int chipid, int busid);
+void viaProcessOptions(ScrnInfoPtr pScrn);
+
 /* In via_display.c. */
 const xf86CrtcFuncsRec iga1_crtc_funcs;
 const xf86CrtcFuncsRec iga2_crtc_funcs;
