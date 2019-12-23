@@ -1107,6 +1107,13 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     }
 #endif
 
+    option = xf86NewOption(strEXAOptionName, strEXAValue);
+    xf86CollectOptions(pScrn, option);
+
+    viaProcessOptions(pScrn);
+
+    VIAVidHWDiffInit(pScrn);
+
     /* After umsPreInit function succeeds, PCI hardware resources are
      * memory mapped. If there is an error from this point on, they will
      * need to be explicitly relinquished. */
@@ -1116,13 +1123,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             return FALSE;
         }
     }
-
-    option = xf86NewOption(strEXAOptionName, strEXAValue);
-    xf86CollectOptions(pScrn, option);
-
-    viaProcessOptions(pScrn);
-
-    VIAVidHWDiffInit(pScrn);
 
     /* CRTC handling */
     xf86CrtcConfigInit(pScrn, &via_xf86crtc_config_funcs);
