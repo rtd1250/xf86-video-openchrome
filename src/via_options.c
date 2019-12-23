@@ -185,11 +185,232 @@ viaSetupDefaultOptions(ScrnInfoPtr pScrn)
                         "Exiting %s.\n", __func__));
 }
 
+static void
+viaProcessUMSOptions(ScrnInfoPtr pScrn)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
+    MessageType from = X_DEFAULT;
+    const char *s = NULL;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
+/*
+    pVia->VQEnable = TRUE;
+*/
+    from = xf86GetOptValBool(VIAOptions,
+                                OPTION_DISABLEVQ, &pVia->VQEnable) ?
+            X_CONFIG : X_DEFAULT;
+    if (from == X_CONFIG)
+        pVia->VQEnable = !pVia->VQEnable;
+    xf86DrvMsg(pScrn->scrnIndex, from,
+                "GPU virtual command queue will be %s.\n",
+                (pVia->VQEnable) ? "enabled" : "disabled");
+
+/*
+    pVia->DRIIrqEnable = TRUE;
+*/
+    from = xf86GetOptValBool(VIAOptions,
+                                OPTION_DISABLEIRQ,
+                                &pVia->DRIIrqEnable) ?
+            X_CONFIG : X_DEFAULT;
+    if (from == X_CONFIG)
+        pVia->DRIIrqEnable = !pVia->DRIIrqEnable;
+    xf86DrvMsg(pScrn->scrnIndex, from,
+                "DRI IRQ will be %s if DRI is enabled.\n",
+                (pVia->DRIIrqEnable) ? "enabled" : "disabled");
+
+/*
+    pVia->agpEnable = FALSE;
+*/
+    from = xf86GetOptValBool(VIAOptions,
+                                OPTION_AGP_DMA, &pVia->agpEnable) ?
+            X_CONFIG : X_DEFAULT;
+    xf86DrvMsg(pScrn->scrnIndex, from,
+                "AGP DMA will be %s if DRI is enabled.\n",
+                (pVia->agpEnable) ? "enabled" : "disabled");
+
+/*
+    pVia->dma2d = TRUE;
+*/
+    if (pVia->agpEnable) {
+        from = xf86GetOptValBool(VIAOptions,
+                                    OPTION_2D_DMA, &pVia->dma2d) ?
+                X_CONFIG : X_DEFAULT;
+        if (from == X_CONFIG)
+            pVia->dma2d = !pVia->dma2d;
+        xf86DrvMsg(pScrn->scrnIndex, from,
+                    "AGP DMA will %sbe used for 2D acceleration.\n",
+                    (pVia->dma2d) ? "" : "not ");
+    }
+
+/*
+    pVia->dmaXV = TRUE;
+*/
+    from = xf86GetOptValBool(VIAOptions,
+                                OPTION_XV_DMA, &pVia->dmaXV) ?
+            X_CONFIG : X_DEFAULT;
+    if (from == X_CONFIG)
+        pVia->dmaXV = !pVia->dmaXV;
+    xf86DrvMsg(pScrn->scrnIndex, from, "PCI DMA will %sbe used for XV "
+               "image transfer if DRI is enabled.\n",
+               (pVia->dmaXV) ? "" : "not ");
+
+#ifdef HAVE_DEBUG
+/*
+    pVia->disableXvBWCheck = FALSE;
+*/
+    from = xf86GetOptValBool(VIAOptions,
+                                OPTION_DISABLE_XV_BW_CHECK,
+                                &pVia->disableXvBWCheck) ?
+            X_CONFIG : X_DEFAULT;
+    xf86DrvMsg(pScrn->scrnIndex, from,
+                "Xv Bandwidth check is %s.\n",
+                pVia->disableXvBWCheck ? "disabled" : "enabled");
+    if (pVia->disableXvBWCheck) {
+        xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                    "You may get a \"snowy\" screen when using the Xv "
+                    "overlay.\n");
+    }
+#endif
+
+/*
+    pVia->maxDriSize = 0;
+*/
+    from = xf86GetOptValInteger(VIAOptions,
+                                OPTION_MAX_DRIMEM,
+                                &pVia->maxDriSize) ?
+            X_CONFIG : X_DEFAULT;
+    if (pVia->maxDriSize > 0)
+        xf86DrvMsg(pScrn->scrnIndex, from,
+                    "Will impose a %d kB limit on video RAM reserved "
+                    "for DRI.\n",
+                    pVia->maxDriSize);
+    else
+        xf86DrvMsg(pScrn->scrnIndex, from,
+                    "Will not impose a limit on video RAM reserved "
+                    "for DRI.\n");
+
+/*
+    pVia->agpMem = AGP_SIZE / 1024;
+*/
+    from = xf86GetOptValInteger(VIAOptions,
+                                OPTION_AGPMEM, &pVia->agpMem) ?
+            X_CONFIG : X_DEFAULT;
+    xf86DrvMsg(pScrn->scrnIndex, from,
+                "Will try to allocate %d KB of AGP memory.\n",
+                pVia->agpMem);
+
+#ifdef HAVE_DEBUG
+/*
+    pVia->PrintVGARegs = FALSE;
+*/
+    from = xf86GetOptValBool(VIAOptions,
+                                OPTION_PRINTVGAREGS,
+                                &pVia->PrintVGARegs) ?
+            X_CONFIG : X_DEFAULT;
+    xf86DrvMsg(pScrn->scrnIndex, from,
+                "Will %sprint VGA registers.\n",
+                pVia->PrintVGARegs ? "" : "not ");
+    if (pVia->PrintVGARegs)
+        /*
+         * Do this as early as possible.
+         */
+        ViaVgahwPrint(VGAHWPTR(pScrn));
+#endif /* HAVE_DEBUG */
+
+    pVIADisplay->TVDotCrawl = FALSE;
+    from = xf86GetOptValBool(VIAOptions,
+                                OPTION_TVDOTCRAWL,
+                                &pVIADisplay->TVDotCrawl) ?
+            X_CONFIG : X_DEFAULT;
+    xf86DrvMsg(pScrn->scrnIndex, from,
+                "TV dotCrawl is %s.\n",
+                pVIADisplay->TVDotCrawl ? "enabled" : "disabled");
+
+    /*
+     * TV Deflicker
+     */
+    pVIADisplay->TVDeflicker = 0;
+    from = xf86GetOptValInteger(VIAOptions, OPTION_TVDEFLICKER,
+                                &pVIADisplay->TVDeflicker) ?
+            X_CONFIG : X_DEFAULT;
+    xf86DrvMsg(pScrn->scrnIndex, from,
+                "TV deflicker is set to %d.\n",
+                pVIADisplay->TVDeflicker);
+
+    pVIADisplay->TVType = TVTYPE_NONE;
+    if ((s = xf86GetOptValString(VIAOptions, OPTION_TVTYPE))) {
+        if (!xf86NameCmp(s, "NTSC")) {
+            pVIADisplay->TVType = TVTYPE_NTSC;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+                        "TV Type is NTSC.\n");
+        } else if (!xf86NameCmp(s, "PAL")) {
+            pVIADisplay->TVType = TVTYPE_PAL;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+                        "TV Type is PAL.\n");
+        } else if (!xf86NameCmp(s, "480P")) {
+            pVIADisplay->TVType = TVTYPE_480P;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+                        "TV Type is SDTV 480P.\n");
+        } else if (!xf86NameCmp(s, "576P")) {
+            pVIADisplay->TVType = TVTYPE_576P;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+                        "TV Type is SDTV 576P.\n");
+        } else if (!xf86NameCmp(s, "720P")) {
+            pVIADisplay->TVType = TVTYPE_720P;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+                        "TV Type is HDTV 720P.\n");
+        } else if (!xf86NameCmp(s, "1080I")) {
+            pVIADisplay->TVType = TVTYPE_1080I;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+                        "TV Type is HDTV 1080i.\n");
+        }
+    } else {
+        xf86DrvMsg(pScrn->scrnIndex, X_DEFAULT,
+                    "No default TV type is set.\n");
+    }
+
+    /*
+     * TV output signal option
+     */
+    pVIADisplay->TVOutput = TVOUTPUT_NONE;
+    if ((s = xf86GetOptValString(VIAOptions, OPTION_TVOUTPUT))) {
+        if (!xf86NameCmp(s, "S-Video")) {
+            pVIADisplay->TVOutput = TVOUTPUT_SVIDEO;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+                        "TV Output Signal is S-Video.\n");
+        } else if (!xf86NameCmp(s, "Composite")) {
+            pVIADisplay->TVOutput = TVOUTPUT_COMPOSITE;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+                        "TV Output Signal is Composite.\n");
+        } else if (!xf86NameCmp(s, "SC")) {
+            pVIADisplay->TVOutput = TVOUTPUT_SC;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+                        "TV Output Signal is SC.\n");
+        } else if (!xf86NameCmp(s, "RGB")) {
+            pVIADisplay->TVOutput = TVOUTPUT_RGB;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+                        "TV Output Signal is RGB.\n");
+        } else if (!xf86NameCmp(s, "YCbCr")) {
+            pVIADisplay->TVOutput = TVOUTPUT_YCBCR;
+            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
+                        "TV Output Signal is YCbCr.\n");
+        }
+    } else {
+        xf86DrvMsg(pScrn->scrnIndex, X_DEFAULT,
+                    "No default TV output signal type is set.\n");
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
+}
+
 void
 viaProcessOptions(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
     MessageType from = X_DEFAULT;
     const char *s = NULL;
 
@@ -352,213 +573,9 @@ viaProcessOptions(ScrnInfoPtr pScrn)
         xf86DrvMsg(pScrn->scrnIndex, from,
                     "Using software cursors.\n");
 
-/*
-    pVia->VQEnable = TRUE;
-*/
-    from = xf86GetOptValBool(VIAOptions,
-                                OPTION_DISABLEVQ, &pVia->VQEnable) ?
-            X_CONFIG : X_DEFAULT;
-    if (from == X_CONFIG)
-        pVia->VQEnable = !pVia->VQEnable;
-    xf86DrvMsg(pScrn->scrnIndex, from,
-                "GPU virtual command queue will be %s.\n",
-                (pVia->VQEnable) ? "enabled" : "disabled");
-
-/*
-    pVia->DRIIrqEnable = TRUE;
-*/
-    from = xf86GetOptValBool(VIAOptions,
-                                OPTION_DISABLEIRQ,
-                                &pVia->DRIIrqEnable) ?
-            X_CONFIG : X_DEFAULT;
-    if (from == X_CONFIG)
-        pVia->DRIIrqEnable = !pVia->DRIIrqEnable;
-    xf86DrvMsg(pScrn->scrnIndex, from,
-                "DRI IRQ will be %s if DRI is enabled.\n",
-                (pVia->DRIIrqEnable) ? "enabled" : "disabled");
-
-/*
-    pVia->agpEnable = FALSE;
-*/
-    from = xf86GetOptValBool(VIAOptions,
-                                OPTION_AGP_DMA, &pVia->agpEnable) ?
-            X_CONFIG : X_DEFAULT;
-    xf86DrvMsg(pScrn->scrnIndex, from,
-                "AGP DMA will be %s if DRI is enabled.\n",
-                (pVia->agpEnable) ? "enabled" : "disabled");
-
-/*
-    pVia->dma2d = TRUE;
-*/
-    if (pVia->agpEnable) {
-        from = xf86GetOptValBool(VIAOptions,
-                                    OPTION_2D_DMA, &pVia->dma2d) ?
-                X_CONFIG : X_DEFAULT;
-        if (from == X_CONFIG)
-            pVia->dma2d = !pVia->dma2d;
-        xf86DrvMsg(pScrn->scrnIndex, from,
-                    "AGP DMA will %sbe used for 2D acceleration.\n",
-                    (pVia->dma2d) ? "" : "not ");
+    if (!pVia->KMS) {
+        viaProcessUMSOptions(pScrn);
     }
-
-/*
-    pVia->dmaXV = TRUE;
-*/
-    from = xf86GetOptValBool(VIAOptions,
-                                OPTION_XV_DMA, &pVia->dmaXV) ?
-            X_CONFIG : X_DEFAULT;
-    if (from == X_CONFIG)
-        pVia->dmaXV = !pVia->dmaXV;
-    xf86DrvMsg(pScrn->scrnIndex, from, "PCI DMA will %sbe used for XV "
-               "image transfer if DRI is enabled.\n",
-               (pVia->dmaXV) ? "" : "not ");
-
-#ifdef HAVE_DEBUG
-/*
-    pVia->disableXvBWCheck = FALSE;
-*/
-    from = xf86GetOptValBool(VIAOptions,
-                                OPTION_DISABLE_XV_BW_CHECK,
-                                &pVia->disableXvBWCheck) ?
-            X_CONFIG : X_DEFAULT;
-    xf86DrvMsg(pScrn->scrnIndex, from,
-                "Xv Bandwidth check is %s.\n",
-                pVia->disableXvBWCheck ? "disabled" : "enabled");
-    if (pVia->disableXvBWCheck) {
-        xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                    "You may get a \"snowy\" screen when using the Xv "
-                    "overlay.\n");
-    }
-#endif
-
-/*
-    pVia->maxDriSize = 0;
-*/
-    from = xf86GetOptValInteger(VIAOptions,
-                                OPTION_MAX_DRIMEM,
-                                &pVia->maxDriSize) ?
-            X_CONFIG : X_DEFAULT;
-    if (pVia->maxDriSize > 0)
-        xf86DrvMsg(pScrn->scrnIndex, from,
-                    "Will impose a %d kB limit on video RAM reserved "
-                    "for DRI.\n",
-                    pVia->maxDriSize);
-    else
-        xf86DrvMsg(pScrn->scrnIndex, from,
-                    "Will not impose a limit on video RAM reserved "
-                    "for DRI.\n");
-
-/*
-    pVia->agpMem = AGP_SIZE / 1024;
-*/
-    from = xf86GetOptValInteger(VIAOptions,
-                                OPTION_AGPMEM, &pVia->agpMem) ?
-            X_CONFIG : X_DEFAULT;
-    xf86DrvMsg(pScrn->scrnIndex, from,
-                "Will try to allocate %d KB of AGP memory.\n",
-                pVia->agpMem);
-
-    pVIADisplay = pVia->pVIADisplay;
-    pVIADisplay->TVDotCrawl = FALSE;
-    from = xf86GetOptValBool(VIAOptions,
-                                OPTION_TVDOTCRAWL,
-                                &pVIADisplay->TVDotCrawl) ?
-            X_CONFIG : X_DEFAULT;
-    xf86DrvMsg(pScrn->scrnIndex, from,
-                "TV dotCrawl is %s.\n",
-                pVIADisplay->TVDotCrawl ? "enabled" : "disabled");
-
-    /*
-     * TV Deflicker
-     */
-    pVIADisplay->TVDeflicker = 0;
-    from = xf86GetOptValInteger(VIAOptions, OPTION_TVDEFLICKER,
-                                &pVIADisplay->TVDeflicker) ?
-            X_CONFIG : X_DEFAULT;
-    xf86DrvMsg(pScrn->scrnIndex, from,
-                "TV deflicker is set to %d.\n",
-                pVIADisplay->TVDeflicker);
-
-    pVIADisplay->TVType = TVTYPE_NONE;
-    if ((s = xf86GetOptValString(VIAOptions, OPTION_TVTYPE))) {
-        if (!xf86NameCmp(s, "NTSC")) {
-            pVIADisplay->TVType = TVTYPE_NTSC;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                        "TV Type is NTSC.\n");
-        } else if (!xf86NameCmp(s, "PAL")) {
-            pVIADisplay->TVType = TVTYPE_PAL;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                        "TV Type is PAL.\n");
-        } else if (!xf86NameCmp(s, "480P")) {
-            pVIADisplay->TVType = TVTYPE_480P;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                        "TV Type is SDTV 480P.\n");
-        } else if (!xf86NameCmp(s, "576P")) {
-            pVIADisplay->TVType = TVTYPE_576P;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                        "TV Type is SDTV 576P.\n");
-        } else if (!xf86NameCmp(s, "720P")) {
-            pVIADisplay->TVType = TVTYPE_720P;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                        "TV Type is HDTV 720P.\n");
-        } else if (!xf86NameCmp(s, "1080I")) {
-            pVIADisplay->TVType = TVTYPE_1080I;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                        "TV Type is HDTV 1080i.\n");
-        }
-    } else {
-        xf86DrvMsg(pScrn->scrnIndex, X_DEFAULT,
-                    "No default TV type is set.\n");
-    }
-
-    /*
-     * TV output signal option
-     */
-    pVIADisplay->TVOutput = TVOUTPUT_NONE;
-    if ((s = xf86GetOptValString(VIAOptions, OPTION_TVOUTPUT))) {
-        if (!xf86NameCmp(s, "S-Video")) {
-            pVIADisplay->TVOutput = TVOUTPUT_SVIDEO;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                        "TV Output Signal is S-Video.\n");
-        } else if (!xf86NameCmp(s, "Composite")) {
-            pVIADisplay->TVOutput = TVOUTPUT_COMPOSITE;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                        "TV Output Signal is Composite.\n");
-        } else if (!xf86NameCmp(s, "SC")) {
-            pVIADisplay->TVOutput = TVOUTPUT_SC;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                        "TV Output Signal is SC.\n");
-        } else if (!xf86NameCmp(s, "RGB")) {
-            pVIADisplay->TVOutput = TVOUTPUT_RGB;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                        "TV Output Signal is RGB.\n");
-        } else if (!xf86NameCmp(s, "YCbCr")) {
-            pVIADisplay->TVOutput = TVOUTPUT_YCBCR;
-            xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-                        "TV Output Signal is YCbCr.\n");
-        }
-    } else {
-        xf86DrvMsg(pScrn->scrnIndex, X_DEFAULT,
-                    "No default TV output signal type is set.\n");
-    }
-
-#ifdef HAVE_DEBUG
-/*
-    pVia->PrintVGARegs = FALSE;
-*/
-    from = xf86GetOptValBool(VIAOptions,
-                                OPTION_PRINTVGAREGS,
-                                &pVia->PrintVGARegs) ?
-            X_CONFIG : X_DEFAULT;
-    xf86DrvMsg(pScrn->scrnIndex, from,
-                "Will %sprint VGA registers.\n",
-                pVia->PrintVGARegs ? "" : "not ");
-    if (pVia->PrintVGARegs)
-        /*
-         * Do this as early as possible.
-         */
-        ViaVgahwPrint(VGAHWPTR(pScrn));
-#endif /* HAVE_DEBUG */
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting %s.\n", __func__));
