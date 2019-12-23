@@ -357,6 +357,7 @@ typedef struct
 
 
 const OptionInfoRec *VIAAvailableOptions(int chipid, int busid);
+void viaSetupDefaultOptions(ScrnInfoPtr pScrn);
 void viaProcessOptions(ScrnInfoPtr pScrn);
 
 /* In via_display.c. */

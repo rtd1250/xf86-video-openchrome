@@ -1110,6 +1110,8 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     option = xf86NewOption(strEXAOptionName, strEXAValue);
     xf86CollectOptions(pScrn, option);
 
+    viaSetupDefaultOptions(pScrn);
+
     viaProcessOptions(pScrn);
 
     VIAVidHWDiffInit(pScrn);

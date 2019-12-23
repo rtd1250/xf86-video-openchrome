@@ -97,14 +97,13 @@ VIAAvailableOptions(int chipid, int busid)
 }
 
 
-static void
+void
 viaSetupDefaultOptions(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "%s - Setting up default chipset options.\n",
-                        __func__));
+                        "Entered %s.\n", __func__));
 
     pVia->shadowFB = FALSE;
     pVia->NoAccel = FALSE;
@@ -181,6 +180,9 @@ viaSetupDefaultOptions(ScrnInfoPtr pScrn)
         pVia->dmaXV = FALSE;
         break;
     }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
 }
 
 void
@@ -194,7 +196,8 @@ viaProcessOptions(ScrnInfoPtr pScrn)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered %s.\n", __func__));
 
-    viaSetupDefaultOptions(pScrn);
+    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                "Processing DDX options . . .\n");
 
     xf86ProcessOptions(pScrn->scrnIndex, pScrn->options, VIAOptions);
 
