@@ -761,7 +761,8 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
     struct pci_device *hostBridge = NULL;
     struct pci_device *dramController = NULL;
 #endif
-    CARD8 videoRAM;
+    uint8_t videoRAM;
+    int     detectedVideoRAM;
     CARD16 hostBridgeVendorID, hostBridgeDeviceID;
     CARD16 dramControllerVendorID;
     Bool status = TRUE;
@@ -810,7 +811,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 0), 0xE1);
 #endif
-        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 10;
+        detectedVideoRAM = (1 << ((videoRAM & 0x70) >> 4)) << 10;
         break;
     case PCI_DEVICE_ID_VIA_KM400_HB:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -820,7 +821,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 0), 0xE1);
 #endif
-        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 10;
+        detectedVideoRAM = (1 << ((videoRAM & 0x70) >> 4)) << 10;
         break;
     case PCI_DEVICE_ID_VIA_P4M800_AGP:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -830,7 +831,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
 #endif
-        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 10;
+        detectedVideoRAM = (1 << ((videoRAM & 0x70) >> 4)) << 10;
         break;
     case PCI_DEVICE_ID_VIA_P4M800_PRO_AGP:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -840,7 +841,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
 #endif
-        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 10;
+        detectedVideoRAM = (1 << ((videoRAM & 0x70) >> 4)) << 10;
         break;
     case PCI_DEVICE_ID_VIA_PM800_AGP:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -850,7 +851,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
 #endif
-        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 10;
+        detectedVideoRAM = (1 << ((videoRAM & 0x70) >> 4)) << 10;
         break;
     case PCI_DEVICE_ID_VIA_K8M800_AGP:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -860,7 +861,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
 #endif
-        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 10;
+        detectedVideoRAM = (1 << ((videoRAM & 0x70) >> 4)) << 10;
         break;
     case PCI_DEVICE_ID_VIA_CX700_AGP:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -870,7 +871,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
 #endif
-        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 12;
+        detectedVideoRAM = (1 << ((videoRAM & 0x70) >> 4)) << 12;
         break;
     case PCI_DEVICE_ID_VIA_P4M890_AGP:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -880,7 +881,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
 #endif
-        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 12;
+        detectedVideoRAM = (1 << ((videoRAM & 0x70) >> 4)) << 12;
         break;
     case PCI_DEVICE_ID_VIA_K8M890_AGP:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -890,7 +891,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
 #endif
-        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 12;
+        detectedVideoRAM = (1 << ((videoRAM & 0x70) >> 4)) << 12;
         break;
     case PCI_DEVICE_ID_VIA_P4M900_AGP:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -900,7 +901,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
 #endif
-        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 12;
+        detectedVideoRAM = (1 << ((videoRAM & 0x70) >> 4)) << 12;
         break;
     case PCI_DEVICE_ID_VIA_VX800_HC:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -910,7 +911,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
 #endif
-        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 12;
+        detectedVideoRAM = (1 << ((videoRAM & 0x70) >> 4)) << 12;
         break;
     case PCI_DEVICE_ID_VIA_VX855_HC:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -920,7 +921,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
 #endif
-        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 12;
+        detectedVideoRAM = (1 << ((videoRAM & 0x70) >> 4)) << 12;
         break;
     case PCI_DEVICE_ID_VIA_VX900_HC:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -930,16 +931,17 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
 #endif
-        pScrn->videoRam = (1 << ((videoRAM & 0x70) >> 4)) << 12;
+        detectedVideoRAM = (1 << ((videoRAM & 0x70) >> 4)) << 12;
         break;
     default:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                     "Could not detect available video RAM.\n");
-        pScrn->videoRam = 0;
+        detectedVideoRAM = 0;
         status = FALSE;
         break;
     }
 
+    pScrn->videoRam = detectedVideoRAM;
     if (status) {
         xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                    "Detected Video RAM Size: %d KB\n", pScrn->videoRam);
