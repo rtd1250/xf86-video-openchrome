@@ -1391,21 +1391,6 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
     pScrn->displayWidth = pScrn->virtualX;
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAScreenInit\n"));
 
-    miClearVisualTypes();
-
-    if (!miSetVisualTypes(pScrn->depth,
-            (pScrn->bitsPerPixel > 8) && (!pVia->IsSecondary) ?
-                TrueColorMask : miGetDefaultVisualMask(pScrn->depth),
-            pScrn->rgbBits, pScrn->defaultVisual)) {
-        return FALSE;
-    }
-
-    if (!miSetPixmapDepths()) {
-        return FALSE;
-    }
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Visuals set up\n"));
-
 #ifdef HAVE_DRI
     if (pVia->KMS) {
         if (drmSetMaster(pVia->drmmode.fd)) {
@@ -1441,6 +1426,21 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
 
     if (!pVia->NoAccel && !umsAccelInit(pScrn->pScreen))
         return FALSE;
+
+    miClearVisualTypes();
+
+    if (!miSetVisualTypes(pScrn->depth,
+            (pScrn->bitsPerPixel > 8) && (!pVia->IsSecondary) ?
+                TrueColorMask : miGetDefaultVisualMask(pScrn->depth),
+            pScrn->rgbBits, pScrn->defaultVisual)) {
+        return FALSE;
+    }
+
+    if (!miSetPixmapDepths()) {
+        return FALSE;
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Visuals set up\n"));
 
     if (pVia->shadowFB) {
         int pitch = BitmapBytePad(pScrn->bitsPerPixel * pScrn->virtualX);
