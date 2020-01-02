@@ -106,6 +106,9 @@ drm_bo_alloc_surface(ScrnInfoPtr pScrn, unsigned int width, unsigned int height,
 
     pitch = ALIGN_TO(pitch, alignment);
     obj = drm_bo_alloc(pScrn, pitch * height, alignment, domain);
+    if (!obj)
+        goto exit;
+
     if (!obj->pitch)
         obj->pitch = pitch;
 exit:
