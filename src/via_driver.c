@@ -1456,8 +1456,6 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
                         pScrn->bitsPerPixel))
         return FALSE;
 
-    xf86SetBlackWhitePixels(pScreen);
-
     if (pScrn->bitsPerPixel > 8) {
         VisualPtr visual;
 
@@ -1484,6 +1482,8 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
 #if 0
     xf86SetSilkenMouse(pScreen);
 #endif
+
+    xf86SetBlackWhitePixels(pScreen);
 
     miDCInitialize(pScreen, xf86GetPointerScreenFuncs());
 
