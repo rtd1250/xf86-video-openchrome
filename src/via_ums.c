@@ -1028,15 +1028,6 @@ umsPreInit(ScrnInfoPtr pScrn)
         return FALSE;
     }
 
-    /*
-     * PCI BAR are limited to 256 MB.
-     */
-    if (pScrn->videoRam > (256 << 10)) {
-        xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                    "Cannot use more than 256 MB of VRAM.\n");
-                    pScrn->videoRam = (256 << 10);
-    }
-
     /* Split the FB for SAMM. */
     /* FIXME: For now, split the FB into two equal sections.
      * This should be user-adjustable via a config option. */
