@@ -1440,8 +1440,6 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
         return FALSE;
     }
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Visuals set up\n"));
-
     if (pVia->shadowFB) {
         int pitch = BitmapBytePad(pScrn->bitsPerPixel * pScrn->virtualX);
 
@@ -1459,7 +1457,6 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
         return FALSE;
 
     xf86SetBlackWhitePixels(pScreen);
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- B & W\n"));
 
     if (pScrn->bitsPerPixel > 8) {
         VisualPtr visual;
@@ -1487,10 +1484,8 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
 #if 0
     xf86SetSilkenMouse(pScreen);
 #endif
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Backing store set up\n"));
 
     miDCInitialize(pScreen, xf86GetPointerScreenFuncs());
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- SW cursor set up\n"));
 
     if (pVia->drmmode.hwcursor) {
         xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
@@ -1506,7 +1501,6 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
             cursorSize = ((size * size) >> 3) * 2;
             break;
         default:
-            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "HWCursor ARGB enabled\n"));
             flags |= (HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_64 | HARDWARE_CURSOR_ARGB);
             size = 64;
             cursorSize = (size * size) << 2;
@@ -1540,18 +1534,13 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
 
     if (!miCreateDefColormap(pScreen))
         return FALSE;
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Def Color map set up\n"));
 
     if (!xf86HandleColormaps(pScreen, 256, 8, LoadPalette, NULL,
                              CMAP_RELOAD_ON_MODE_SWITCH
                              | CMAP_PALETTED_TRUECOLOR))
         return FALSE;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Palette loaded\n"));
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Color maps etc. set up\n"));
-
     xf86DPMSInit(pScreen, xf86DPMSSet, 0);
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- DPMS set up\n"));
 
     if (!VIAEnterVT_internal(pScrn, 1))
         return FALSE;
