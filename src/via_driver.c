@@ -1389,12 +1389,14 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
 
     pScrn->pScreen = pScreen;
     pScrn->displayWidth = pScrn->virtualX;
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAScreenInit\n"));
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
 
 #ifdef HAVE_DRI
     if (pVia->KMS) {
         if (drmSetMaster(pVia->drmmode.fd)) {
-            xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                         "drmSetMaster failed: %s\n",
                         strerror(errno));
             return FALSE;
@@ -1405,7 +1407,8 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
         if (pVia->directRenderingType == DRI_1) {
             /* DRI2 or DRI1 support */
             if (VIADRI1ScreenInit(pScreen))
-                DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "DRI1 ScreenInit commplete\n"));
+                DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                                    "DRI1 ScreenInit complete.\n"));
             else
                 pVia->directRenderingType = DRI_NONE;
         }
@@ -1526,7 +1529,7 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
         if (!xf86_cursors_init(pScreen, size, size, flags)) {
             pVia->drmmode.hwcursor = FALSE;
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                        "Hardware cursor initialization failed\n");
+                        "Hardware cursor initialization failed.\n");
         }
     }
 
@@ -1549,10 +1552,12 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
 #ifdef HAVE_DRI
         if (pVia->directRenderingType == DRI_1) {
             if (!VIADRIFinishScreenInit(pScreen)) {
-                xf86DrvMsg(pScrn->scrnIndex, X_INFO, "direct rendering disabled\n");
+                xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "Direct rendering disabled.\n");
                 pVia->directRenderingType = DRI_NONE;
             } else
-                xf86DrvMsg(pScrn->scrnIndex, X_INFO, "direct rendering enabled\n");
+                xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "Direct rendering enabled.\n");
         }
 #endif
         if (!pVia->NoAccel)
@@ -1567,17 +1572,18 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
 #ifdef HAVE_DEBUG
     if (pVia->PrintVGARegs) {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                   "VIAScreenInit: Printing VGA registers.\n");
+                    "Printing VGA registers.\n");
         ViaVgahwPrint(VGAHWPTR(pScrn));
     }
 
     if (pVia->PrintTVRegs) {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                   "VIAScreenInit: Printing TV registers.\n");
+                    "Printing TV registers.\n");
         ViaTVPrintRegs(pScrn);
     }
 #endif
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "- Done\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
     return TRUE;
 }
