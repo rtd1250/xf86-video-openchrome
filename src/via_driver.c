@@ -1429,8 +1429,16 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
     if (!drm_bo_map(pScrn, pVia->drmmode.front_bo))
         return FALSE;
 
-    if (!pVia->NoAccel && !viaUMSAccelInit(pScrn->pScreen))
-        return FALSE;
+    if ((!pVia->NoAccel) &&
+        ((pVia->directRenderingType == DRI_NONE)
+#ifdef HAVE_DRI
+        || (pVia->directRenderingType == DRI_1)
+#endif /* HAVE_DRI */
+        )) {
+        if (!viaUMSAccelInit(pScrn->pScreen)) {
+            return FALSE;
+        }
+    }
 
     miClearVisualTypes();
 
