@@ -1136,7 +1136,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             goto fail;
         }
     } else {
-        if (!umsCrtcInit(pScrn)) {
+        if (!viaUMSCrtcInit(pScrn)) {
             goto fail;
         }
     }

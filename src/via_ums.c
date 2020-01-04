@@ -1062,7 +1062,7 @@ viaUMSPreInit(ScrnInfoPtr pScrn)
 }
 
 Bool
-umsCrtcInit(ScrnInfoPtr pScrn)
+viaUMSCrtcInit(ScrnInfoPtr pScrn)
 {
     drmmode_crtc_private_ptr iga1_rec = NULL, iga2_rec = NULL;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
