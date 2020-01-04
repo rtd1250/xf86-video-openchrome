@@ -954,7 +954,7 @@ exit:
 }
 
 Bool
-umsPreInit(ScrnInfoPtr pScrn)
+viaUMSPreInit(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     VIADisplayPtr pVIADisplay = pVia->pVIADisplay;

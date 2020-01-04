@@ -1116,11 +1116,13 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 
     VIAVidHWDiffInit(pScrn);
 
-    /* After umsPreInit function succeeds, PCI hardware resources are
-     * memory mapped. If there is an error from this point on, they will
-     * need to be explicitly relinquished. */
+    /*
+     * After viaUMSPreInit() succeeds, PCI hardware resources are
+     * memory mapped.  If there is an error from this point on, they
+     * will need to be explicitly relinquished.
+     */
     if (!pVia->KMS) {
-        if (!umsPreInit(pScrn)) {
+        if (!viaUMSPreInit(pScrn)) {
             VIAFreeRec(pScrn);
             return FALSE;
         }

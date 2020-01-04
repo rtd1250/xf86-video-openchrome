@@ -1560,7 +1560,7 @@ void viaUnmapMMIO(ScrnInfoPtr pScrn);
 void viaDisableVQ(ScrnInfoPtr pScrn);
 Bool viaUMSAccelInit(ScreenPtr pScreen);
 Bool viaUMSCreate(ScrnInfoPtr pScrn);
-Bool umsPreInit(ScrnInfoPtr pScrn);
+Bool viaUMSPreInit(ScrnInfoPtr pScrn);
 Bool umsCrtcInit(ScrnInfoPtr pScrn);
 
 /* via_i2c.c */
