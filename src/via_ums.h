@@ -1558,7 +1558,7 @@ viaSetDisplayScaling(ScrnInfoPtr pScrn, Bool scalingState)
 /* via_ums.c */
 void viaUnmapMMIO(ScrnInfoPtr pScrn);
 void viaDisableVQ(ScrnInfoPtr pScrn);
-Bool umsAccelInit(ScreenPtr pScreen);
+Bool viaUMSAccelInit(ScreenPtr pScreen);
 Bool umsCreate(ScrnInfoPtr pScrn);
 Bool umsPreInit(ScrnInfoPtr pScrn);
 Bool umsCrtcInit(ScrnInfoPtr pScrn);

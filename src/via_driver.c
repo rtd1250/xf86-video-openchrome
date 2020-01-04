@@ -1427,7 +1427,7 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
     if (!drm_bo_map(pScrn, pVia->drmmode.front_bo))
         return FALSE;
 
-    if (!pVia->NoAccel && !umsAccelInit(pScrn->pScreen))
+    if (!pVia->NoAccel && !viaUMSAccelInit(pScrn->pScreen))
         return FALSE;
 
     miClearVisualTypes();
