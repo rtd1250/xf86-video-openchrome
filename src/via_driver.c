@@ -1483,9 +1483,8 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
         return FALSE;
 
     xf86SetBackingStore(pScreen);
-#if 0
+
     xf86SetSilkenMouse(pScreen);
-#endif
 
     xf86SetBlackWhitePixels(pScreen);
 
