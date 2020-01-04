@@ -691,7 +691,7 @@ err:
 }
 
 Bool
-umsCreate(ScrnInfoPtr pScrn)
+viaUMSCreate(ScrnInfoPtr pScrn)
 {
     ScreenPtr pScreen = pScrn->pScreen;
     VIAPtr pVia = VIAPTR(pScrn);

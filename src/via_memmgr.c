@@ -284,7 +284,7 @@ drm_bo_manager_init(ScrnInfoPtr pScrn)
 
     if (pVia->directRenderingType == DRI_2)
         return ret;
-    ret = umsCreate(pScrn);
+    ret = viaUMSCreate(pScrn);
 #ifdef HAVE_DRI
     if (pVia->directRenderingType == DRI_1)
         ret = VIADRIKernelInit(pScrn);
