@@ -652,10 +652,6 @@ viaUMSAccelInit(ScreenPtr pScreen)
                         "Initializing the 3D engine.\n"));
     viaInitialize3DEngine(pScrn);
 
-    pVia->exa_sync_bo = drm_bo_alloc(pScrn, 32, 32, TTM_PL_FLAG_VRAM);
-    if (!pVia->exa_sync_bo)
-        goto err;
-
     /* Sync marker space. */
     pVia->exa_sync_bo = drm_bo_alloc(pScrn, 32, 32, TTM_PL_FLAG_VRAM);
     if (!pVia->exa_sync_bo)
