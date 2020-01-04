@@ -1420,15 +1420,6 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
     if (!drm_bo_manager_init(pScrn))
         return FALSE;
 
-    format = map_legacy_formats(pScrn->bitsPerPixel, pScrn->depth);
-    pVia->drmmode.front_bo = drm_bo_alloc_surface(pScrn, pScrn->virtualX, pScrn->virtualY,
-                                                    format, 16, TTM_PL_FLAG_VRAM);
-    if (!pVia->drmmode.front_bo)
-        return FALSE;
-
-    if (!drm_bo_map(pScrn, pVia->drmmode.front_bo))
-        return FALSE;
-
     if ((!pVia->NoAccel) &&
         ((pVia->directRenderingType == DRI_NONE)
 #ifdef HAVE_DRI
@@ -1542,6 +1533,15 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
                         "Hardware cursor initialization failed.\n");
         }
     }
+
+    format = map_legacy_formats(pScrn->bitsPerPixel, pScrn->depth);
+    pVia->drmmode.front_bo = drm_bo_alloc_surface(pScrn, pScrn->virtualX, pScrn->virtualY,
+                                                    format, 16, TTM_PL_FLAG_VRAM);
+    if (!pVia->drmmode.front_bo)
+        return FALSE;
+
+    if (!drm_bo_map(pScrn, pVia->drmmode.front_bo))
+        return FALSE;
 
     pScrn->vtSema = TRUE;
     pScreen->SaveScreen = xf86SaveScreen;
