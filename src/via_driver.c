@@ -1389,11 +1389,12 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
     VIAPtr pVia = VIAPTR(pScrn);
     int format;
 
-    pScrn->pScreen = pScreen;
     pScrn->displayWidth = pScrn->virtualX;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered %s.\n", __func__));
+
+    pScrn->pScreen = pScreen;
 
 #ifdef HAVE_DRI
     if (pVia->KMS) {
