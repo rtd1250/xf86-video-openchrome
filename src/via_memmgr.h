@@ -40,8 +40,6 @@ struct buffer_object {
     int             domain;
 };
 
-/* In via_memory.c */
-Bool drm_bo_manager_init(ScrnInfoPtr pScrn);
 
 struct buffer_object *
 drm_bo_alloc_surface(ScrnInfoPtr pScrn, unsigned int width, unsigned int height,

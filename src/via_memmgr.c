@@ -275,19 +275,3 @@ drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
         free(obj);
     }
 }
-
-Bool
-drm_bo_manager_init(ScrnInfoPtr pScrn)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-    Bool ret = TRUE;
-
-    if (pVia->directRenderingType == DRI_2)
-        return ret;
-    ret = viaUMSCreate(pScrn);
-#ifdef HAVE_DRI
-    if (pVia->directRenderingType == DRI_1)
-        ret = VIADRIKernelInit(pScrn);
-#endif
-    return ret;
-}

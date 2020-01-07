@@ -1417,8 +1417,19 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
     }
 #endif
 
-    if (!drm_bo_manager_init(pScrn))
-        return FALSE;
+    if (pVia->directRenderingType != DRI_2) {
+        if (!viaUMSCreate(pScrn)) {
+            return FALSE;
+        }
+
+#ifdef HAVE_DRI
+        if (pVia->directRenderingType == DRI_1) {
+            if (!VIADRIKernelInit(pScrn)) {
+                return FALSE;
+            }
+        }
+#endif
+    }
 
     if ((!pVia->NoAccel) &&
         ((pVia->directRenderingType == DRI_NONE)
