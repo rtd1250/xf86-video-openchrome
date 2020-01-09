@@ -189,7 +189,7 @@ typedef struct _twodContext {
 } ViaTwodContext;
 
 typedef struct _VIA {
-    int                 Bpl;
+    int                 Bpp, Bpl;
 
     Bool                KMS;
     Bool                FirstInit;

@@ -739,9 +739,8 @@ viaUMSCreate(ScrnInfoPtr pScrn)
             "Frame Buffer From (%d,%d) To (%d,%d)\n",
             AvailFBArea.x1, AvailFBArea.y1, AvailFBArea.x2, AvailFBArea.y2));
 
-    offset = (pVia->FBFreeStart + ((pScrn->bitsPerPixel >> 3) - 1)) /
-                (pScrn->bitsPerPixel >> 3);
-    size = pVia->FBFreeEnd / ((pScrn->bitsPerPixel >> 3) - offset);
+    offset = (pVia->FBFreeStart + pVia->Bpp - 1) / pVia->Bpp;
+    size = pVia->FBFreeEnd / pVia->Bpp - offset;
     if (size > 0)
         xf86InitFBManagerLinear(pScreen, offset, size);
 

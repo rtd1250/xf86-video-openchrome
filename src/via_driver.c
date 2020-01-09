@@ -1152,7 +1152,8 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     }
 
     /* Set up screen parameters. */
-    pVia->Bpl = pScrn->virtualX * (pScrn->bitsPerPixel >> 3);
+    pVia->Bpp = pScrn->bitsPerPixel >> 3;
+    pVia->Bpl = pScrn->virtualX * pVia->Bpp;
 
     /* Set the current mode to the first in the list */
     pScrn->currentMode = pScrn->modes;
