@@ -504,7 +504,7 @@ ViaXvMCCreateContext(ScrnInfoPtr pScrn, XvMCContextPtr pContext,
     contextRec->chipId = pVia->ChipId;
     contextRec->screen = pScrn->scrnIndex;
     contextRec->depth = pScrn->bitsPerPixel;
-    contextRec->stride = pVia->Bpp * pScrn->virtualX;
+    contextRec->stride = pScrn->virtualX * (pScrn->bitsPerPixel >> 3);
 
     vXvMC->nContexts++;
     vXvMC->contexts[ctxNo] = pContext->context_id;
