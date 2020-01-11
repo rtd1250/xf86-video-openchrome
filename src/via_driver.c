@@ -1298,9 +1298,7 @@ VIACreateScreenResources(ScreenPtr pScreen)
     if (pVia->shadowFB)
         surface = pVia->ShadowPtr;
 
-    if (!pScreen->ModifyPixmapHeader(rootPixmap, pScrn->virtualX,
-                                        pScrn->virtualY, -1, -1,
-                                        pVia->drmmode.front_bo->pitch,
+    if (!pScreen->ModifyPixmapHeader(rootPixmap, -1, -1, -1, -1, -1,
                                         surface))
         return FALSE;
 
