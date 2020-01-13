@@ -660,7 +660,7 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
     Bool ret;
     ScreenPtr screen;
     uint32_t old_fb_id;
-    int i, pitch, old_width, old_height, old_pitch;
+    int i, pitch, old_width, old_height, old_displayWidth;
     int cpp = (scrn->bitsPerPixel + 7) / 8;
     PixmapPtr ppix;
     void *new_pixels;
@@ -684,7 +684,7 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
      * be restored. */
     old_width = scrn->virtualX;
     old_height = scrn->virtualY;
-    old_pitch = drmmode->front_bo->pitch;
+    old_displayWidth = scrn->displayWidth;
     old_fb_id = drmmode->fb_id;
     old_front = drmmode->front_bo;
 
@@ -788,7 +788,7 @@ fail:
 
     scrn->virtualX = old_width;
     scrn->virtualY = old_height;
-    scrn->displayWidth = old_pitch / cpp;
+    scrn->displayWidth = old_displayWidth;
     drmmode->fb_id = old_fb_id;
     drmmode->front_bo = old_front;
 
