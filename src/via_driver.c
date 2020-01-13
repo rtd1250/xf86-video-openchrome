@@ -718,10 +718,7 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
         goto fail;
     }
 
-    if (!pVia->shadowFB) {
-        screen->ModifyPixmapHeader(ppix, width, height, -1, -1,
-                                    pitch, new_pixels);
-    } else {
+    if (pVia->shadowFB) {
         new_pixels = malloc(scrn->displayWidth * scrn->virtualY *
                             ((scrn->bitsPerPixel + 7) >> 3));
         if (!new_pixels) {
@@ -730,10 +727,10 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
 
         free(pVia->ShadowPtr);
         pVia->ShadowPtr = new_pixels;
-        screen->ModifyPixmapHeader(ppix, width, height, -1, -1,
-                                    pitch, pVia->ShadowPtr);
-
     }
+
+    screen->ModifyPixmapHeader(ppix, width, height, -1, -1,
+                                width * cpp, new_pixels);
 
     xf86DrvMsg(scrn->scrnIndex, X_INFO,
                 "Allocated a new frame buffer: %dx%d\n",
