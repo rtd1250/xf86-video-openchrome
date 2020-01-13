@@ -660,7 +660,8 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
     Bool ret;
     ScreenPtr screen;
     uint32_t old_fb_id;
-    int i, pitch, old_width, old_height, old_displayWidth;
+    int i;
+    int old_width, old_height, old_displayWidth;
     int cpp = (scrn->bitsPerPixel + 7) / 8;
     PixmapPtr ppix;
     void *new_pixels;
@@ -695,16 +696,14 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
         goto fail;
     }
 
-    pitch = drmmode->front_bo->pitch;
-
     scrn->virtualX = width;
     scrn->virtualY = height;
-    scrn->displayWidth = pitch / cpp;
+    scrn->displayWidth = width;
 
 #ifdef HAVE_DRI
     if (pVia->KMS) {
         ret = drmModeAddFB(drmmode->fd, width, height, scrn->depth,
-                            scrn->bitsPerPixel, drmmode->front_bo->pitch,
+                            scrn->bitsPerPixel, width * cpp,
                             drmmode->front_bo->handle,
                             &drmmode->fb_id);
         if (ret) {

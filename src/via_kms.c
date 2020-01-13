@@ -192,7 +192,8 @@ drmmode_set_mode_major(xf86CrtcPtr crtc, DisplayModePtr mode,
     if (drmmode->fb_id == 0) {
         ret = drmModeAddFB(drmmode->fd, pScrn->virtualX, pScrn->virtualY,
                             pScrn->depth, pScrn->bitsPerPixel,
-                            drmmode->front_bo->pitch,
+                            pScrn->virtualX *
+                            ((pScrn->bitsPerPixel + 7) >> 3),
                             drmmode->front_bo->handle,
                             &drmmode->fb_id);
         if (ret < 0) {
