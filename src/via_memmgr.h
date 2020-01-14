@@ -34,7 +34,7 @@ struct buffer_object {
     off_t           map_offset;
     unsigned long   handle;
     unsigned long   offset;             /* Offset into fb */
-    unsigned long   pitch;
+    unsigned long   pitch;              /* No longer used. */
     unsigned long   size;
     void            *ptr;
     int             domain;

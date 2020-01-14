@@ -114,7 +114,6 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
                 /* Some day this will be moved to libdrm. */
                 args.domains = domain;
                 args.alignment = alignment;
-                args.pitch = 0;
                 args.size = size;
                 ret = drmCommandWriteRead(pVia->drmmode.fd, DRM_VIA_GEM_CREATE,
                                         &args, sizeof(struct drm_via_gem_object));
@@ -125,7 +124,6 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
                     obj->map_offset = args.map_handle;
                     obj->offset = args.offset;
                     obj->handle = args.handle;
-                    obj->pitch = args.pitch;
                     obj->size = args.size;
                     obj->domain = domain;
                     DEBUG(ErrorF("%lu bytes of DRI2 memory allocated at %lx, handle %lu\n",
