@@ -1519,14 +1519,6 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
 
     xf86SetBlackWhitePixels(pScreen);
 
-    if (!miCreateDefColormap(pScreen))
-        return FALSE;
-
-    if (!xf86HandleColormaps(pScreen, 256, 8, LoadPalette, NULL,
-                             CMAP_RELOAD_ON_MODE_SWITCH
-                             | CMAP_PALETTED_TRUECOLOR))
-        return FALSE;
-
     miDCInitialize(pScreen, xf86GetPointerScreenFuncs());
 
     if (pVia->drmmode.hwcursor) {
@@ -1586,6 +1578,14 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
     pScreen->CreateScreenResources = VIACreateScreenResources;
 
     if (!xf86CrtcScreenInit(pScreen))
+        return FALSE;
+
+    if (!miCreateDefColormap(pScreen))
+        return FALSE;
+
+    if (!xf86HandleColormaps(pScreen, 256, 8, LoadPalette, NULL,
+                             CMAP_RELOAD_ON_MODE_SWITCH
+                             | CMAP_PALETTED_TRUECOLOR))
         return FALSE;
 
     xf86DPMSInit(pScreen, xf86DPMSSet, 0);
