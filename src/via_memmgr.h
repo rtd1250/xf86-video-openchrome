@@ -23,7 +23,6 @@
 #ifndef _VIA_MEMMGR_H_
 #define _VIA_MEMMGR_H_
 
-#include <sys/mman.h>
 #include "xf86.h"
 
 #define TTM_PL_FLAG_SYSTEM	1
