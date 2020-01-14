@@ -71,51 +71,6 @@ viaOffScreenLinear(struct buffer_object *obj, ScrnInfoPtr pScrn,
 }
 
 struct buffer_object *
-drm_bo_alloc_surface(ScrnInfoPtr pScrn, unsigned int width, unsigned int height,
-                    int format, unsigned int alignment, int domain)
-{
-    struct buffer_object *obj = NULL;
-    int pitch;
-
-    switch (format) {
-    case DRM_FORMAT_C8:
-        pitch = width;
-        break;
-
-    case DRM_FORMAT_XRGB1555:
-    case DRM_FORMAT_RGB565:
-        pitch = width * 2;
-        break;
-
-    case DRM_FORMAT_RGB888:
-        pitch = width * 3;
-        break;
-
-    case DRM_FORMAT_XRGB2101010:
-    case DRM_FORMAT_XRGB8888:
-        pitch = width * 4;
-        break;
-    default:
-        pitch = 0;
-        break;
-    }
-
-    if (pitch == 0) {
-        goto exit;
-    }
-
-    pitch = ALIGN_TO(pitch, alignment);
-    obj = drm_bo_alloc(pScrn, pitch * height, alignment, domain);
-    if (!obj)
-        goto exit;
-
-    if (!obj->pitch)
-        obj->pitch = pitch;
-exit:
-    return obj;
-}
-
-struct buffer_object *
 drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int domain)
 {
     struct buffer_object *obj = NULL;

@@ -42,9 +42,6 @@ struct buffer_object {
 
 
 struct buffer_object *
-drm_bo_alloc_surface(ScrnInfoPtr pScrn, unsigned int width, unsigned int height,
-                    int format, unsigned int alignment, int domain);
-struct buffer_object *
 drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment,
                 int domain);
 void *drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj);

@@ -620,33 +620,56 @@ VIAGetRec(ScrnInfoPtr pScrn)
     return ret;
 } /* VIAGetRec */
 
-static int
-map_legacy_formats(int bpp, int depth)
+static unsigned int
+viaConvertDepthToBpp(int bpp, int depth)
 {
-	int fmt = DRM_FORMAT_XRGB8888;
+    unsigned int format = DRM_FORMAT_XRGB8888;
+    unsigned int bppSize;
 
-	switch (bpp) {
-	case 8:
-		fmt = DRM_FORMAT_C8;
-		break;
-	case 16:
-		if (depth == 15)
-			fmt = DRM_FORMAT_XRGB1555;
-		else
-			fmt = DRM_FORMAT_RGB565;
-		break;
-	case 24:
-		fmt = DRM_FORMAT_RGB888;
-		break;
-	case 32:
-		if (depth == 24)
-			fmt = DRM_FORMAT_XRGB8888;
-		else if (depth == 30)
-			fmt = DRM_FORMAT_XRGB2101010;
-	default:
-		break;
-	}
-	return fmt;
+    switch (bpp) {
+    case 8:
+        format = DRM_FORMAT_C8;
+        break;
+    case 16:
+        if (depth == 15)
+            format = DRM_FORMAT_XRGB1555;
+        else
+            format = DRM_FORMAT_RGB565;
+        break;
+    case 24:
+        format = DRM_FORMAT_RGB888;
+        break;
+    case 32:
+        if (depth == 24)
+            format = DRM_FORMAT_XRGB8888;
+        else if (depth == 30)
+            format = DRM_FORMAT_XRGB2101010;
+        break;
+    default:
+        break;
+    }
+
+    switch (format) {
+    case DRM_FORMAT_C8:
+        bppSize = 1;
+        break;
+    case DRM_FORMAT_XRGB1555:
+    case DRM_FORMAT_RGB565:
+        bppSize = 2;
+        break;
+    case DRM_FORMAT_RGB888:
+        bppSize = 3;
+        break;
+    case DRM_FORMAT_XRGB2101010:
+    case DRM_FORMAT_XRGB8888:
+        bppSize = 4;
+        break;
+    default:
+        bppSize = 0;
+        break;
+    }
+
+    return bppSize;
 }
 
 static Bool
@@ -667,7 +690,7 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
     void *new_pixels;
     VIAPtr pVia = VIAPTR(scrn);
     xf86CrtcPtr crtc = NULL;
-    int format;
+    unsigned int bppSize, alignedPitch;
 
     DEBUG(xf86DrvMsg(scrn->scrnIndex, X_INFO,
                         "Entered %s.\n", __func__));
@@ -689,13 +712,16 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
     old_fb_id = drmmode->fb_id;
     old_front = drmmode->front_bo;
 
-    format = map_legacy_formats(scrn->bitsPerPixel, scrn->depth);
-    drmmode->front_bo = drm_bo_alloc_surface(scrn, width, height, format,
-                                            16, TTM_PL_FLAG_VRAM);
+    bppSize = viaConvertDepthToBpp(scrn->bitsPerPixel,
+                                        scrn->depth);
+    alignedPitch = width * bppSize;
+    alignedPitch = ALIGN_TO(alignedPitch, 16);
+    drmmode->front_bo = drm_bo_alloc(scrn,
+                                        alignedPitch * height,
+                                        16, TTM_PL_FLAG_VRAM);
     if (!drmmode->front_bo) {
         goto fail;
     }
-
     scrn->virtualX = width;
     scrn->virtualY = height;
     scrn->displayWidth = width;
@@ -1380,7 +1406,7 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
 {
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
-    int format;
+    unsigned int bppSize, alignedPitch;
 
     pScrn->displayWidth = pScrn->virtualX;
 
@@ -1538,9 +1564,14 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
         }
     }
 
-    format = map_legacy_formats(pScrn->bitsPerPixel, pScrn->depth);
-    pVia->drmmode.front_bo = drm_bo_alloc_surface(pScrn, pScrn->virtualX, pScrn->virtualY,
-                                                    format, 16, TTM_PL_FLAG_VRAM);
+    bppSize = viaConvertDepthToBpp(pScrn->bitsPerPixel,
+                                        pScrn->depth);
+    alignedPitch = pScrn->virtualX * bppSize;
+    alignedPitch = ALIGN_TO(alignedPitch, 16);
+    pVia->drmmode.front_bo = drm_bo_alloc(pScrn,
+                                            alignedPitch *
+                                            pScrn->virtualY,
+                                            16, TTM_PL_FLAG_VRAM);
     if (!pVia->drmmode.front_bo)
         return FALSE;
 
