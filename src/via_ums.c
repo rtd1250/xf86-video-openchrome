@@ -745,17 +745,15 @@ viaUMSCreate(ScrnInfoPtr pScrn)
     offset = (pVia->FBFreeStart + ((pScrn->bitsPerPixel >> 3) - 1)) /
                 (pScrn->bitsPerPixel >> 3);
     size = (pVia->FBFreeEnd / (pScrn->bitsPerPixel >> 3)) - offset;
-    if (size <= 0) {
-        ret = FALSE;
-        goto exit;
-    }
 
-    ret = xf86InitFBManagerLinear(pScreen, offset, size);
-    if (!ret) {
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                    "xf86InitFBManagerLinear initialization "
-                    "failed.\n");
-        goto exit;
+    if (size > 0) {
+        ret = xf86InitFBManagerLinear(pScreen, offset, size);
+        if (!ret) {
+            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                        "xf86InitFBManagerLinear initialization "
+                        "failed.\n");
+            goto exit;
+        }
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
