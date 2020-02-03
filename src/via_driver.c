@@ -1371,6 +1371,7 @@ VIACloseScreen(CLOSE_SCREEN_ARGS_DECL)
 #endif
         pVia->drmmode.fb_id = 0;
 
+        drm_bo_unmap(pScrn, pVia->drmmode.front_bo);
         drm_bo_free(pScrn, pVia->drmmode.front_bo);
     }
 
