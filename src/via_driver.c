@@ -1364,14 +1364,6 @@ VIACloseScreen(CLOSE_SCREEN_ARGS_DECL)
 #endif
     xf86_cursors_fini(pScreen);
 
-    for (i = 0; i < xf86_config->num_crtc; i++) {
-        xf86CrtcPtr crtc = xf86_config->crtc[i];
-        drmmode_crtc_private_ptr iga = crtc->driver_private;
-
-        if (iga->cursor_bo)
-            drm_bo_free(pScrn, iga->cursor_bo);
-    }
-
     if (pVia->drmmode.front_bo) {
 #ifdef HAVE_DRI
         if (pVia->KMS && pVia->drmmode.fb_id)
@@ -1380,6 +1372,14 @@ VIACloseScreen(CLOSE_SCREEN_ARGS_DECL)
         pVia->drmmode.fb_id = 0;
 
         drm_bo_free(pScrn, pVia->drmmode.front_bo);
+    }
+
+    for (i = 0; i < xf86_config->num_crtc; i++) {
+        xf86CrtcPtr crtc = xf86_config->crtc[i];
+        drmmode_crtc_private_ptr iga = crtc->driver_private;
+
+        if (iga->cursor_bo)
+            drm_bo_free(pScrn, iga->cursor_bo);
     }
 
 #ifdef HAVE_DRI
