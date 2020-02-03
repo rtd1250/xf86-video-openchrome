@@ -794,7 +794,7 @@ Bool
 viaInitExa(ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
-    ExaDriverPtr pExa = exaDriverAlloc();
+    ExaDriverPtr pExa;
     Bool nPOTSupported = TRUE;
     VIAPtr pVia = VIAPTR(pScrn);
 
@@ -816,8 +816,10 @@ viaInitExa(ScreenPtr pScreen)
         return FALSE;
     }
 
-    if (!pExa)
+    pExa = exaDriverAlloc();
+    if (!pExa) {
         return FALSE;
+    }
 
     pExa->exa_major = EXA_VERSION_MAJOR;
     pExa->exa_minor = EXA_VERSION_MINOR;
