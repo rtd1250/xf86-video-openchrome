@@ -819,8 +819,6 @@ viaInitExa(ScreenPtr pScreen)
     if (!pExa)
         return FALSE;
 
-    memset(pExa, 0, sizeof(*pExa));
-
     pExa->exa_major = EXA_VERSION_MAJOR;
     pExa->exa_minor = EXA_VERSION_MINOR;
     pExa->memoryBase = pVia->FBBase;
