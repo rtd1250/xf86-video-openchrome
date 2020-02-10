@@ -1486,7 +1486,10 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
     }
 #endif
 
-    if (pVia->directRenderingType != DRI_2) {
+#ifdef HAVE_DRI
+    if (pVia->directRenderingType != DRI_2)
+#endif /* HAVE_DRI */
+    {
         if (!viaUMSCreate(pScrn)) {
             return FALSE;
         }
