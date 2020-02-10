@@ -1503,6 +1503,12 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
 #endif
     }
 
+    if (!pVia->NoAccel) {
+        if (!viaInitExa(pScreen)) {
+            return FALSE;
+        }
+    }
+
     if ((!pVia->NoAccel) &&
         ((pVia->directRenderingType == DRI_NONE)
 #ifdef HAVE_DRI
@@ -1513,9 +1519,6 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
             return FALSE;
         }
     }
-
-    if (!pVia->NoAccel && !viaInitExa(pScreen))
-        return FALSE;
 
     xf86SetBackingStore(pScreen);
 
