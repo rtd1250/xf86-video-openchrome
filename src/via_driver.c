@@ -1416,53 +1416,6 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
 
     pScrn->pScreen = pScreen;
 
-#ifdef HAVE_DRI
-    if (pVia->KMS) {
-        if (drmSetMaster(pVia->drmmode.fd)) {
-            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                        "drmSetMaster failed: %s\n",
-                        strerror(errno));
-            return FALSE;
-        }
-    }
-
-    if (pVia->drmmode.fd != -1) {
-        if (pVia->directRenderingType == DRI_1) {
-            /* DRI2 or DRI1 support */
-            if (VIADRI1ScreenInit(pScreen))
-                DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                                    "DRI1 ScreenInit complete.\n"));
-            else
-                pVia->directRenderingType = DRI_NONE;
-        }
-    }
-#endif
-
-    if (pVia->directRenderingType != DRI_2) {
-        if (!viaUMSCreate(pScrn)) {
-            return FALSE;
-        }
-
-#ifdef HAVE_DRI
-        if (pVia->directRenderingType == DRI_1) {
-            if (!VIADRIKernelInit(pScrn)) {
-                return FALSE;
-            }
-        }
-#endif
-    }
-
-    if ((!pVia->NoAccel) &&
-        ((pVia->directRenderingType == DRI_NONE)
-#ifdef HAVE_DRI
-        || (pVia->directRenderingType == DRI_1)
-#endif /* HAVE_DRI */
-        )) {
-        if (!viaUMSAccelInit(pScrn->pScreen)) {
-            return FALSE;
-        }
-    }
-
     miClearVisualTypes();
 
     if (!miSetVisualTypes(pScrn->depth,
@@ -1510,6 +1463,53 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
 
     /* Must be after RGB ordering is fixed. */
     fbPictureInit(pScreen, NULL, 0);
+
+#ifdef HAVE_DRI
+    if (pVia->KMS) {
+        if (drmSetMaster(pVia->drmmode.fd)) {
+            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                        "drmSetMaster failed: %s\n",
+                        strerror(errno));
+            return FALSE;
+        }
+    }
+
+    if (pVia->drmmode.fd != -1) {
+        if (pVia->directRenderingType == DRI_1) {
+            /* DRI2 or DRI1 support */
+            if (VIADRI1ScreenInit(pScreen))
+                DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                                    "DRI1 ScreenInit complete.\n"));
+            else
+                pVia->directRenderingType = DRI_NONE;
+        }
+    }
+#endif
+
+    if (pVia->directRenderingType != DRI_2) {
+        if (!viaUMSCreate(pScrn)) {
+            return FALSE;
+        }
+
+#ifdef HAVE_DRI
+        if (pVia->directRenderingType == DRI_1) {
+            if (!VIADRIKernelInit(pScrn)) {
+                return FALSE;
+            }
+        }
+#endif
+    }
+
+    if ((!pVia->NoAccel) &&
+        ((pVia->directRenderingType == DRI_NONE)
+#ifdef HAVE_DRI
+        || (pVia->directRenderingType == DRI_1)
+#endif /* HAVE_DRI */
+        )) {
+        if (!viaUMSAccelInit(pScrn->pScreen)) {
+            return FALSE;
+        }
+    }
 
     if (!pVia->NoAccel && !viaInitExa(pScreen))
         return FALSE;
