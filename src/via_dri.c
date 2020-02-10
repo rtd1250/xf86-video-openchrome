@@ -618,6 +618,13 @@ VIADRI1ScreenInit(ScreenPtr pScreen)
         return FALSE;
     }
 
+    if ((pVia->driSize > (pVia->maxDriSize * 1024)) &&
+        (pVia->maxDriSize > 0)) {
+        pVia->driSize = pVia->maxDriSize * 1024;
+    } else {
+        pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart) >> 2;
+    }
+
     if (!(VIAInitVisualConfigs(pScreen))) {
         VIADRICloseScreen(pScreen);
         return FALSE;

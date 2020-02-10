@@ -698,10 +698,6 @@ viaUMSCreate(ScrnInfoPtr pScrn)
 
 #ifdef HAVE_DRI
     if (pVia->directRenderingType == DRI_1) {
-        pVia->driSize = (pVia->FBFreeEnd - pVia->FBFreeStart) >> 2;
-        if ((pVia->driSize > (pVia->maxDriSize * 1024)) && pVia->maxDriSize > 0)
-            pVia->driSize = pVia->maxDriSize * 1024;
-
         /* In the case of DRI we handle all VRAM by the DRI ioctls */
         if (pVia->useEXA)
             goto exit;
