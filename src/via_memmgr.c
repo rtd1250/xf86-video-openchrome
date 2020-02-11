@@ -78,74 +78,81 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
     int ret = 0;
 
     obj = xnfcalloc(1, sizeof(*obj));
-    if (obj) {
-        switch (domain) {
-        case TTM_PL_FLAG_TT:
-        case TTM_PL_FLAG_VRAM:
-            if (pVia->directRenderingType == DRI_NONE) {
-                if (Success != viaOffScreenLinear(obj, pScrn, size)) {
-                    ErrorF("Linear memory allocation failed\n");
-                    ret = -ENOMEM;
-                } else
-                    DEBUG(ErrorF("%lu bytes of Linear memory allocated at %lx, handle %lu\n", obj->size, obj->offset, obj->handle));
-#ifdef HAVE_DRI
-            } else if (pVia->directRenderingType == DRI_1) {
-                drm_via_mem_t drm;
-
-                size = ALIGN_TO(size, alignment);
-                drm.context = DRIGetContext(pScrn->pScreen);
-                drm.size = size;
-                drm.type = (domain == TTM_PL_FLAG_TT ? VIA_MEM_AGP : VIA_MEM_VIDEO);
-                ret = drmCommandWriteRead(pVia->drmmode.fd, DRM_VIA_ALLOCMEM,
-                                            &drm, sizeof(drm_via_mem_t));
-                if (!ret && (size == drm.size)) {
-                    if (domain == TTM_PL_FLAG_VRAM)
-                        drm.offset -= pVia->FBFreeStart;
-                    obj->offset = ALIGN_TO(drm.offset, alignment);
-                    obj->handle = drm.index;
-                    obj->domain = domain;
-                    obj->size = drm.size;
-                    DEBUG(ErrorF("%lu bytes of DRI memory allocated at %lx, handle %lu\n",
-                                obj->size, obj->offset, obj->handle));
-                }
-            } else if (pVia->directRenderingType == DRI_2) {
-                struct drm_via_gem_object args;
-
-                /* Some day this will be moved to libdrm. */
-                args.domains = domain;
-                args.alignment = alignment;
-                args.size = size;
-                ret = drmCommandWriteRead(pVia->drmmode.fd, DRM_VIA_GEM_CREATE,
-                                        &args, sizeof(struct drm_via_gem_object));
-                if (!ret) {
-                    /* Okay the X server expects to know the offset because
-                     * of non-KMS. Once we have KMS working the offset
-                     * will not be valid. */
-                    obj->map_offset = args.map_handle;
-                    obj->offset = args.offset;
-                    obj->handle = args.handle;
-                    obj->size = args.size;
-                    obj->domain = domain;
-                    DEBUG(ErrorF("%lu bytes of DRI2 memory allocated at %lx, handle %lu\n",
-                                obj->size, obj->offset, obj->handle));
-                }
-#endif
-            }
-            break;
-
-        case TTM_PL_FLAG_SYSTEM:
-        default:
-            ret = -ENXIO;
-            break;
-        }
-
-        if (ret) {
-            DEBUG(ErrorF("DRM memory allocation failed %d\n", ret));
-            free(obj);
-            obj = NULL;
-        };
+    if (!obj) {
+        DEBUG(ErrorF("Allocation of a buffer object used for memory "
+                        "allocation failed\n"));
+        goto exit;
     }
-    return obj;
+
+    switch (domain) {
+    case TTM_PL_FLAG_TT:
+    case TTM_PL_FLAG_VRAM:
+        if (pVia->directRenderingType == DRI_NONE) {
+            if (Success != viaOffScreenLinear(obj, pScrn, size)) {
+                ErrorF("Linear memory allocation failed\n");
+                ret = -ENOMEM;
+            } else
+                DEBUG(ErrorF("%lu bytes of Linear memory allocated at %lx, handle %lu\n", obj->size, obj->offset, obj->handle));
+#ifdef HAVE_DRI
+        } else if (pVia->directRenderingType == DRI_1) {
+            drm_via_mem_t drm;
+
+            size = ALIGN_TO(size, alignment);
+            drm.context = DRIGetContext(pScrn->pScreen);
+            drm.size = size;
+            drm.type = (domain == TTM_PL_FLAG_TT ? VIA_MEM_AGP : VIA_MEM_VIDEO);
+            ret = drmCommandWriteRead(pVia->drmmode.fd, DRM_VIA_ALLOCMEM,
+                                        &drm, sizeof(drm_via_mem_t));
+            if (!ret && (size == drm.size)) {
+                if (domain == TTM_PL_FLAG_VRAM)
+                    drm.offset -= pVia->FBFreeStart;
+                obj->offset = ALIGN_TO(drm.offset, alignment);
+                obj->handle = drm.index;
+                obj->domain = domain;
+                obj->size = drm.size;
+                DEBUG(ErrorF("%lu bytes of DRI memory allocated at %lx, handle %lu\n",
+                            obj->size, obj->offset, obj->handle));
+            }
+        } else if (pVia->directRenderingType == DRI_2) {
+            struct drm_via_gem_object args;
+
+            /* Some day this will be moved to libdrm. */
+            args.domains = domain;
+            args.alignment = alignment;
+            args.size = size;
+            ret = drmCommandWriteRead(pVia->drmmode.fd, DRM_VIA_GEM_CREATE,
+                                    &args, sizeof(struct drm_via_gem_object));
+            if (!ret) {
+                /* Okay the X server expects to know the offset because
+                 * of non-KMS. Once we have KMS working the offset
+                 * will not be valid. */
+                obj->map_offset = args.map_handle;
+                obj->offset = args.offset;
+                obj->handle = args.handle;
+                obj->size = args.size;
+                obj->domain = domain;
+                DEBUG(ErrorF("%lu bytes of DRI2 memory allocated at %lx, handle %lu\n",
+                            obj->size, obj->offset, obj->handle));
+            }
+#endif
+        }
+        break;
+
+    case TTM_PL_FLAG_SYSTEM:
+    default:
+        ret = -ENXIO;
+        break;
+    }
+
+    if (ret) {
+        DEBUG(ErrorF("DRM memory allocation failed %d\n", ret));
+        free(obj);
+        obj = NULL;
+        goto exit;
+    }
+
+exit:
+     return obj;
 }
 
 void*
