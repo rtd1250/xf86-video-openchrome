@@ -51,23 +51,29 @@
  *	1  -  xf86 linear
  *	2  -  DRM
  */
-int
-viaOffScreenLinear(struct buffer_object *obj, ScrnInfoPtr pScrn,
-                   unsigned long size)
+static int
+viaOffScreenLinear(ScrnInfoPtr pScrn, struct buffer_object *obj,
+                    unsigned long size)
 {
-    int depth = pScrn->bitsPerPixel >> 3;
     FBLinearPtr linear;
+    int depth = pScrn->bitsPerPixel / 8;
+    int ret = 0;
 
     linear = xf86AllocateOffscreenLinear(pScrn->pScreen,
                                         (size + depth - 1) / depth,
                                         32, NULL, NULL, NULL);
-    if (!linear)
-        return BadAlloc;
+    if (!linear) {
+        ret = -ENOMEM;
+        goto exit;
+    }
+
     obj->offset = linear->offset * depth;
     obj->handle = (unsigned long) linear;
     obj->domain = TTM_PL_FLAG_VRAM;
     obj->size = size;
-    return Success;
+
+exit:
+    return ret;
 }
 
 struct buffer_object *
@@ -89,11 +95,11 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
     case TTM_PL_FLAG_TT:
     case TTM_PL_FLAG_VRAM:
         if (pVia->directRenderingType == DRI_NONE) {
-            if (Success != viaOffScreenLinear(obj, pScrn, size)) {
+            ret = viaOffScreenLinear(pScrn, obj, size);
+            if (ret) {
                 DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                                     "Linear memory allocation "
                                     "failed.\n"));
-                ret = -ENOMEM;
             } else
                 DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                                     "%lu bytes of linear memory "
