@@ -1493,20 +1493,6 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
         if (!viaUMSCreate(pScrn)) {
             return FALSE;
         }
-
-#ifdef HAVE_DRI
-        if (pVia->directRenderingType == DRI_1) {
-            if (!VIADRIKernelInit(pScrn)) {
-                return FALSE;
-            }
-        }
-#endif
-    }
-
-    if (!pVia->NoAccel) {
-        if (!viaInitExa(pScreen)) {
-            return FALSE;
-        }
     }
 
     if ((!pVia->NoAccel) &&
