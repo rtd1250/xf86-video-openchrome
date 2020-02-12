@@ -79,8 +79,9 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
 
     obj = xnfcalloc(1, sizeof(*obj));
     if (!obj) {
-        DEBUG(ErrorF("Allocation of a buffer object used for memory "
-                        "allocation failed\n"));
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                            "Allocation of a buffer object used for "
+                            "memory allocation failed.\n"));
         goto exit;
     }
 
@@ -89,10 +90,17 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
     case TTM_PL_FLAG_VRAM:
         if (pVia->directRenderingType == DRI_NONE) {
             if (Success != viaOffScreenLinear(obj, pScrn, size)) {
-                ErrorF("Linear memory allocation failed\n");
+                DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                                    "Linear memory allocation "
+                                    "failed.\n"));
                 ret = -ENOMEM;
             } else
-                DEBUG(ErrorF("%lu bytes of Linear memory allocated at %lx, handle %lu\n", obj->size, obj->offset, obj->handle));
+                DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                                    "%lu bytes of linear memory "
+                                    "allocated at 0x%lx, "
+                                    "handle 0x%lx.\n",
+                                    obj->size, obj->offset,
+                                    obj->handle));
 #ifdef HAVE_DRI
         } else if (pVia->directRenderingType == DRI_1) {
             drm_via_mem_t drm;
@@ -110,8 +118,12 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
                 obj->handle = drm.index;
                 obj->domain = domain;
                 obj->size = drm.size;
-                DEBUG(ErrorF("%lu bytes of DRI memory allocated at %lx, handle %lu\n",
-                            obj->size, obj->offset, obj->handle));
+                DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                                    "%lu bytes of DRI memory "
+                                    "allocated at 0x%lx, "
+                                    "handle 0x%lx.\n",
+                                    obj->size, obj->offset,
+                                    obj->handle));
             }
         } else if (pVia->directRenderingType == DRI_2) {
             struct drm_via_gem_object args;
@@ -131,8 +143,12 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
                 obj->handle = args.handle;
                 obj->size = args.size;
                 obj->domain = domain;
-                DEBUG(ErrorF("%lu bytes of DRI2 memory allocated at %lx, handle %lu\n",
-                            obj->size, obj->offset, obj->handle));
+                DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                                    "%lu bytes of DRI2 memory "
+                                    "allocated at 0x%lx, "
+                                    "handle 0x%lx.\n",
+                                    obj->size, obj->offset,
+                                    obj->handle));
             }
 #endif
         }
@@ -145,7 +161,9 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
     }
 
     if (ret) {
-        DEBUG(ErrorF("DRM memory allocation failed %d\n", ret));
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                            "DRM memory allocation failed.\n"
+                            "Error Code: %d\n", ret));
         free(obj);
         obj = NULL;
         goto exit;
