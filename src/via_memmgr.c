@@ -42,15 +42,6 @@
 #include "drm_fourcc.h"
 #endif
 
-/*
- *	Isolate the wonders of X memory allocation and DRI memory allocation
- *	and 4.3 or 4.4 differences in one abstraction.
- *
- *	The pool code indicates who provided the memory:
- *	0  -  nobody
- *	1  -  xf86 linear
- *	2  -  DRM
- */
 static int
 viaOffScreenLinear(ScrnInfoPtr pScrn, struct buffer_object *obj,
                     unsigned long size)
