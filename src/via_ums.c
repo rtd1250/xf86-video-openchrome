@@ -686,13 +686,81 @@ err:
     return ret;
 }
 
-Bool
-viaUMSCreate(ScrnInfoPtr pScrn)
+static Bool
+viaInitFB(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     BoxRec AvailFBArea;
     int offset, size;
     int maxY;
+    Bool ret = TRUE;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
+    maxY = pVia->FBFreeEnd / pVia->Bpl;
+
+    /*
+     * FBManager can't handle more than 32767 scan lines.
+     */
+    if (maxY > 32767)
+        maxY = 32767;
+
+    AvailFBArea.x1 = 0;
+    AvailFBArea.y1 = 0;
+    AvailFBArea.x2 = pScrn->displayWidth;
+    AvailFBArea.y2 = maxY;
+    pVia->FBFreeStart = (AvailFBArea.y2 + 1) * pVia->Bpl;
+
+    /*
+     * Initialization of the XFree86 framebuffer manager is done via
+     * Bool xf86InitFBManager(ScreenPtr pScreen, BoxPtr FullBox).
+     * FullBox represents the area of the frame buffer that the
+     * manager is allowed to manage.  This is typically a box with a
+     * width of pScrn->displayWidth and a height of as many lines as
+     * can be fit within the total video memory.
+     */
+    ret = xf86InitFBManager(pScrn->pScreen, &AvailFBArea);
+    if (!ret) {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                    "xf86InitFBManager initialization failed.\n");
+        goto exit;
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Frame buffer from (%d,%d) to (%d,%d).\n",
+                        AvailFBArea.x1, AvailFBArea.y1,
+                        AvailFBArea.x2, AvailFBArea.y2));
+
+    offset = (pVia->FBFreeStart +
+                ((pScrn->bitsPerPixel >> 3) - 1)) /
+                (pScrn->bitsPerPixel >> 3);
+    size = (pVia->FBFreeEnd / (pScrn->bitsPerPixel >> 3)) - offset;
+
+    if (size > 0) {
+        ret = xf86InitFBManagerLinear(pScrn->pScreen, offset, size);
+        if (!ret) {
+            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                        "xf86InitFBManagerLinear initialization "
+                        "failed.\n");
+            goto exit;
+        }
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Using %d lines for off screen memory.\n",
+                        AvailFBArea.y2 - pScrn->virtualY));
+
+exit:
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
+    return ret;
+}
+
+Bool
+viaUMSCreate(ScrnInfoPtr pScrn)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
     Bool ret = TRUE;
 
 #ifdef HAVE_DRI
@@ -704,57 +772,10 @@ viaUMSCreate(ScrnInfoPtr pScrn)
     } else
 #endif
     {
-        maxY = pVia->FBFreeEnd / pVia->Bpl;
-
-        /* FBManager can't handle more than 32767 scan lines */
-        if (maxY > 32767)
-            maxY = 32767;
-
-        AvailFBArea.x1 = 0;
-        AvailFBArea.y1 = 0;
-        AvailFBArea.x2 = pScrn->displayWidth;
-        AvailFBArea.y2 = maxY;
-        pVia->FBFreeStart = (AvailFBArea.y2 + 1) * pVia->Bpl;
-
-        /*
-         * Initialization of the XFree86 framebuffer manager is done
-         * via Bool xf86InitFBManager(ScreenPtr pScreen,
-         * BoxPtr FullBox).  FullBox represents the area of the
-         * frame buffer that the manager is allowed to manage.
-         * This is typically a box with a width of pScrn->displayWidth
-         * and a height of as many lines as can be fit within the
-         * total video memory.
-         */
-        ret = xf86InitFBManager(pScrn->pScreen, &AvailFBArea);
-        if (!ret) {
-            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                        "xf86InitFBManager initialization failed.\n");
+        if (!viaInitFB(pScrn)) {
+            ret = FALSE;
             goto exit;
         }
-
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "Frame buffer from (%d,%d) to (%d,%d).\n",
-                            AvailFBArea.x1, AvailFBArea.y1,
-                            AvailFBArea.x2, AvailFBArea.y2));
-
-        offset = (pVia->FBFreeStart +
-                    ((pScrn->bitsPerPixel >> 3) - 1)) /
-                    (pScrn->bitsPerPixel >> 3);
-        size = (pVia->FBFreeEnd / (pScrn->bitsPerPixel >> 3)) - offset;
-
-        if (size > 0) {
-            ret = xf86InitFBManagerLinear(pScrn->pScreen, offset, size);
-            if (!ret) {
-                xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                            "xf86InitFBManagerLinear initialization "
-                            "failed.\n");
-                goto exit;
-            }
-        }
-
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "Using %d lines for off screen memory.\n",
-                AvailFBArea.y2 - pScrn->virtualY));
     }
 
     if ((!pVia->NoAccel) && (pVia->useEXA)) {
