@@ -689,7 +689,6 @@ err:
 Bool
 viaUMSCreate(ScrnInfoPtr pScrn)
 {
-    ScreenPtr pScreen = pScrn->pScreen;
     VIAPtr pVia = VIAPTR(pScrn);
     BoxRec AvailFBArea;
     int offset, size;
@@ -726,7 +725,7 @@ viaUMSCreate(ScrnInfoPtr pScrn)
          * and a height of as many lines as can be fit within the
          * total video memory.
          */
-        ret = xf86InitFBManager(pScreen, &AvailFBArea);
+        ret = xf86InitFBManager(pScrn->pScreen, &AvailFBArea);
         if (!ret) {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                         "xf86InitFBManager initialization failed.\n");
@@ -744,7 +743,7 @@ viaUMSCreate(ScrnInfoPtr pScrn)
         size = (pVia->FBFreeEnd / (pScrn->bitsPerPixel >> 3)) - offset;
 
         if (size > 0) {
-            ret = xf86InitFBManagerLinear(pScreen, offset, size);
+            ret = xf86InitFBManagerLinear(pScrn->pScreen, offset, size);
             if (!ret) {
                 xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                             "xf86InitFBManagerLinear initialization "
@@ -759,7 +758,7 @@ viaUMSCreate(ScrnInfoPtr pScrn)
     }
 
     if ((!pVia->NoAccel) && (pVia->useEXA)) {
-        if (!viaInitExa(pScreen)) {
+        if (!viaInitExa(pScrn->pScreen)) {
             ret = FALSE;
         }
     }
