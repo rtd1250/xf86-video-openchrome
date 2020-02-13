@@ -699,7 +699,8 @@ viaUMSCreate(ScrnInfoPtr pScrn)
 #ifdef HAVE_DRI
     if (pVia->directRenderingType == DRI_1) {
         if (!VIADRIKernelInit(pScrn)) {
-            return FALSE;
+            ret = FALSE;
+            goto exit;
         }
     } else
 #endif
