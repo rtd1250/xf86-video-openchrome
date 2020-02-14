@@ -763,8 +763,21 @@ viaUMSCreate(ScrnInfoPtr pScrn)
     VIAPtr pVia = VIAPTR(pScrn);
     Bool ret = TRUE;
 
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
+    if (pVia->directRenderingType == DRI_NONE) {
+        if (!pVia->useEXA) {
+            if (!viaInitFB(pScrn)) {
+                ret = FALSE;
+            }
+        } else {
+            if (!viaInitExa(pScrn->pScreen)) {
+                ret = FALSE;
+            }
+        }
 #ifdef HAVE_DRI
-    if (pVia->directRenderingType == DRI_1) {
+    } else if (pVia->directRenderingType == DRI_1) {
         if (!VIADRIKernelInit(pScrn)) {
             ret = FALSE;
             goto exit;
@@ -776,21 +789,12 @@ viaUMSCreate(ScrnInfoPtr pScrn)
                 goto exit;
             }
         }
-    } else
 #endif
-    {
-        if (!pVia->useEXA) {
-            if (!viaInitFB(pScrn)) {
-                ret = FALSE;
-            }
-        } else {
-            if (!viaInitExa(pScrn->pScreen)) {
-                ret = FALSE;
-            }
-        }
     }
 
 exit:
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
     return ret;
 }
 
