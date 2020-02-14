@@ -769,21 +769,26 @@ viaUMSCreate(ScrnInfoPtr pScrn)
             ret = FALSE;
             goto exit;
         }
+
+        if ((!pVia->NoAccel) && (pVia->useEXA)) {
+            if (!viaInitExa(pScrn->pScreen)) {
+                ret = FALSE;
+                goto exit;
+            }
+        }
     } else
 #endif
     {
-        if (!viaInitFB(pScrn)) {
-            ret = FALSE;
-            goto exit;
+        if (!pVia->useEXA) {
+            if (!viaInitFB(pScrn)) {
+                ret = FALSE;
+            }
+        } else {
+            if (!viaInitExa(pScrn->pScreen)) {
+                ret = FALSE;
+            }
         }
     }
-
-    if ((!pVia->NoAccel) && (pVia->useEXA)) {
-        if (!viaInitExa(pScrn->pScreen)) {
-            ret = FALSE;
-        }
-    }
-
 
 exit:
     return ret;

@@ -67,6 +67,30 @@ exit:
     return ret;
 }
 
+static int
+viaEXAOffscreenAlloc(ScrnInfoPtr pScrn, struct buffer_object *obj,
+                        unsigned long size)
+{
+    ExaOffscreenArea *pArea;
+    int newSize = size;
+    int ret = 0;
+
+    pArea = exaOffscreenAlloc(pScrn->pScreen, newSize,
+                               32, TRUE, NULL, NULL);
+    if (!pArea) {
+        ret = -ENOMEM;
+        goto exit;
+    }
+
+    obj->offset = pArea->offset;
+    obj->handle = (unsigned long) pArea;
+    obj->domain = TTM_PL_FLAG_VRAM;
+    obj->size = newSize;
+
+exit:
+    return ret;
+}
+
 struct buffer_object *
 drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int domain)
 {
@@ -86,18 +110,35 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int d
     case TTM_PL_FLAG_TT:
     case TTM_PL_FLAG_VRAM:
         if (pVia->directRenderingType == DRI_NONE) {
-            ret = viaOffScreenLinear(pScrn, obj, size);
-            if (ret) {
-                DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                                    "Linear memory allocation "
-                                    "failed.\n"));
-            } else
-                DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                                    "%lu bytes of linear memory "
-                                    "allocated at 0x%lx, "
-                                    "handle 0x%lx.\n",
-                                    obj->size, obj->offset,
-                                    obj->handle));
+            if (!pVia->useEXA) {
+                ret = viaOffScreenLinear(pScrn, obj, size);
+                if (ret) {
+                    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                                        "Linear memory allocation "
+                                        "failed.\n"));
+                } else {
+                    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                                        "%lu bytes of linear memory "
+                                        "allocated at 0x%lx, handle "
+                                        "0x%lx.\n",
+                                        obj->size, obj->offset,
+                                        obj->handle));
+                }
+            } else {
+                ret = viaEXAOffscreenAlloc(pScrn, obj, size);
+                if (ret) {
+                    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                                        "EXA offscreen memory "
+                                        "allocation failed.\n"));
+                } else {
+                    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                                        "%lu bytes of EXA offscreen "
+                                        "memory allocated at 0x%lx, "
+                                        "handle 0x%lx.\n",
+                                        obj->size, obj->offset,
+                                        obj->handle));
+                }
+            }
 #ifdef HAVE_DRI
         } else if (pVia->directRenderingType == DRI_1) {
             drm_via_mem_t drm;
@@ -223,9 +264,16 @@ drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
         case TTM_PL_FLAG_VRAM:
         case TTM_PL_FLAG_TT:
             if (pVia->directRenderingType == DRI_NONE) {
-                FBLinearPtr linear = (FBLinearPtr) obj->handle;
+                if (!pVia->useEXA) {
+                    FBLinearPtr linear = (FBLinearPtr) obj->handle;
 
-                xf86FreeOffscreenLinear(linear);
+                    xf86FreeOffscreenLinear(linear);
+                } else {
+                    ExaOffscreenArea *pArea =
+                                    (ExaOffscreenArea *)obj->handle;
+
+                    exaOffscreenFree(pScrn->pScreen, pArea);
+                }
 #ifdef HAVE_DRI
             } else if (pVia->directRenderingType == DRI_1) {
                 drm_via_mem_t drm;
