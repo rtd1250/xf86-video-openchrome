@@ -468,8 +468,4 @@ Bool VIADRIBufferInit(ScrnInfoPtr pScrn);
 
 #endif /* HAVE_DRI */
 
-void viaShowCursor(ScrnInfoPtr pScrn);
-void viaHideCursor(ScrnInfoPtr pScrn);
-Bool viaHWCursorInit(ScreenPtr pScreen);
-
 #endif /* _VIA_DRIVER_H_ */
