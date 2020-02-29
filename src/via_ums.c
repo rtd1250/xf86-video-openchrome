@@ -237,20 +237,6 @@ viaMapMMIO(ScrnInfoPtr pScrn)
     pVia->FBFreeStart = 0;
     pVia->FBFreeEnd = pVia->videoRambytes;
 
-#ifdef HAVE_PCIACCESS
-    if (pVia->Chipset == VIA_VX900) {
-        pScrn->memPhysBase = pVia->PciInfo->regions[2].base_addr;
-    } else {
-        pScrn->memPhysBase = pVia->PciInfo->regions[0].base_addr;
-    }
-#else
-    if (pVia->Chipset == VIA_VX900) {
-        pScrn->memPhysBase = pVia->PciInfo->memBase[2];
-    } else {
-        pScrn->memPhysBase = pVia->PciInfo->memBase[0];
-    }
-#endif
-
     /* MMIO for MPEG engine. */
     pVia->MpegMapBase = pVia->MapBase + 0xc00;
 
@@ -765,6 +751,20 @@ viaUMSCreate(ScrnInfoPtr pScrn)
      if (pVia->IsSecondary) {
         pScrn->fbOffset = pScrn->videoRam << 10;
     }
+
+#ifdef HAVE_PCIACCESS
+    if (pVia->Chipset == VIA_VX900) {
+        pScrn->memPhysBase = pVia->PciInfo->regions[2].base_addr;
+    } else {
+        pScrn->memPhysBase = pVia->PciInfo->regions[0].base_addr;
+    }
+#else
+    if (pVia->Chipset == VIA_VX900) {
+        pScrn->memPhysBase = pVia->PciInfo->memBase[2];
+    } else {
+        pScrn->memPhysBase = pVia->PciInfo->memBase[0];
+    }
+#endif
 
     if (pVia->directRenderingType == DRI_NONE) {
         if (!pVia->useEXA) {
