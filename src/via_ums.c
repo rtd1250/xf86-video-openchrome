@@ -251,11 +251,6 @@ viaMapMMIO(ScrnInfoPtr pScrn)
     }
 #endif
 
-    pScrn->fbOffset = 0;
-    if (pVia->IsSecondary) {
-        pScrn->fbOffset = pScrn->videoRam << 10;
-    }
-
     /* MMIO for MPEG engine. */
     pVia->MpegMapBase = pVia->MapBase + 0xc00;
 
@@ -765,6 +760,11 @@ viaUMSCreate(ScrnInfoPtr pScrn)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered %s.\n", __func__));
+
+    pScrn->fbOffset = 0;
+     if (pVia->IsSecondary) {
+        pScrn->fbOffset = pScrn->videoRam << 10;
+    }
 
     if (pVia->directRenderingType == DRI_NONE) {
         if (!pVia->useEXA) {
