@@ -360,10 +360,6 @@ const OptionInfoRec *VIAAvailableOptions(int chipid, int busid);
 void viaSetupDefaultOptions(ScrnInfoPtr pScrn);
 void viaProcessOptions(ScrnInfoPtr pScrn);
 
-/* In via_display.c. */
-extern const xf86CrtcFuncsRec iga1_crtc_funcs;
-extern const xf86CrtcFuncsRec iga2_crtc_funcs;
-
 /* In via_exa.c. */
 Bool viaInitExa(ScreenPtr pScreen);
 Bool viaAccelSetMode(int bpp, ViaTwodContext * tdc);
