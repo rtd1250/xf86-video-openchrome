@@ -396,11 +396,16 @@ static void
 VIAFreeScreen(FREE_SCREEN_ARGS_DECL)
 {
     SCRN_INFO_PTR(arg);
+    VIAPtr pVia = VIAPTR(pScrn);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAFreeScreen\n"));
 
     if (xf86LoaderCheckSymbol("vgaHWFreeHWRec")) {
         vgaHWFreeHWRec(pScrn);
+    }
+
+    if (!pVia->KMS) {
+        viaUnmapMMIO(pScrn);
     }
 
     VIAFreeRec(pScrn);
@@ -1396,6 +1401,10 @@ VIACloseScreen(CLOSE_SCREEN_ARGS_DECL)
                         strerror(errno));
     }
 #endif
+
+    if (!pVia->KMS) {
+        viaUnmapMMIO(pScrn);
+    }
 
     pScrn->vtSema = FALSE;
     pScreen->CloseScreen = pVia->CloseScreen;
