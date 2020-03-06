@@ -405,6 +405,7 @@ VIAFreeScreen(FREE_SCREEN_ARGS_DECL)
     }
 
     if (!pVia->KMS) {
+        viaUnmapFB(pScrn);
         viaUnmapMMIO(pScrn);
     }
 
@@ -1215,6 +1216,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     goto exit;
 fail:
     if (!pVia->KMS) {
+        viaUnmapFB(pScrn);
         viaUnmapMMIO(pScrn);
     }
 
@@ -1403,6 +1405,7 @@ VIACloseScreen(CLOSE_SCREEN_ARGS_DECL)
 #endif
 
     if (!pVia->KMS) {
+        viaUnmapFB(pScrn);
         viaUnmapMMIO(pScrn);
     }
 
