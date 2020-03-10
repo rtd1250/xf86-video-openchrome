@@ -648,9 +648,8 @@ viaInitialize3DEngine(ScrnInfoPtr pScrn)
  * and initializes engines and acceleration method.
  */
 Bool
-viaUMSAccelInit(ScreenPtr pScreen)
+viaUMSAccelInit(ScrnInfoPtr pScrn)
 {
-    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
     Bool ret = FALSE;
 

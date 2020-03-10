@@ -1511,7 +1511,7 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
         || (pVia->directRenderingType == DRI_1)
 #endif /* HAVE_DRI */
         )) {
-        if (!viaUMSAccelInit(pScrn->pScreen)) {
+        if (!viaUMSAccelInit(pScrn)) {
             return FALSE;
         }
     }
