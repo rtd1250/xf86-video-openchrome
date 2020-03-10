@@ -807,9 +807,18 @@ viaUMSCreate(ScrnInfoPtr pScrn)
 #endif
 
     /*
+     * Map MMIO PCI hardware resources to the memory map.
+     */
+    if (!viaMapMMIO(pScrn)) {
+        ret = FALSE;
+        goto exit;
+    }
+
+    /*
      * Map FB PCI hardware resource to the memory map.
      */
     if (!viaMapFB(pScrn)) {
+        viaUnmapMMIO(pScrn);
         ret = FALSE;
         goto exit;
     }
@@ -1164,6 +1173,18 @@ viaUMSPreInit(ScrnInfoPtr pScrn)
     }
 
     return TRUE;
+}
+
+void
+viaUMSPreInitExit(ScrnInfoPtr pScrn)
+{
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
+    viaUnmapMMIO(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
 }
 
 Bool

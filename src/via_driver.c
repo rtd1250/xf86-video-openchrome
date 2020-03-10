@@ -1212,12 +1212,17 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
      */
     pVia->Bpl = pScrn->virtualX * (pScrn->bitsPerPixel / 8);
 
+    if (!pVia->KMS) {
+        viaUMSPreInitExit(pScrn);
+    }
+
     status = TRUE;
     goto exit;
 fail:
     if (!pVia->KMS) {
-        viaUnmapMMIO(pScrn);
+        viaUMSPreInitExit(pScrn);
     }
+
 free_rec:
     VIAFreeRec(pScrn);
 exit:
