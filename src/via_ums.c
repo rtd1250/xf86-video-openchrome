@@ -806,6 +806,14 @@ viaUMSCreate(ScrnInfoPtr pScrn)
     }
 #endif
 
+    /*
+     * Map FB PCI hardware resource to the memory map.
+     */
+    if (!viaMapFB(pScrn)) {
+        ret = FALSE;
+        goto exit;
+    }
+
     if (pVia->directRenderingType == DRI_NONE) {
         if (!pVia->useEXA) {
             if (!viaInitFB(pScrn)) {
@@ -1139,11 +1147,6 @@ viaUMSPreInit(ScrnInfoPtr pScrn)
 
     /* Map PCI hardware resources to the memory map. */
     if (!viaMapMMIO(pScrn)) {
-        return FALSE;
-    }
-
-    if (!viaMapFB(pScrn)) {
-        viaUnmapMMIO(pScrn);
         return FALSE;
     }
 

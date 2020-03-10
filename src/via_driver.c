@@ -1216,7 +1216,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     goto exit;
 fail:
     if (!pVia->KMS) {
-        viaUnmapFB(pScrn);
         viaUnmapMMIO(pScrn);
     }
 
