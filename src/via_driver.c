@@ -848,7 +848,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     Bool status = FALSE;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered VIAPreInit.\n"));
+                        "Entered %s.\n", __func__));
 
     pScrn->monitor = pScrn->confScreen->monitor;
 
@@ -927,8 +927,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 #ifndef HAVE_PCIACCESS
     if (pEnt->resources) {
         free(pEnt);
-        VIAFreeRec(pScrn);
-        return FALSE;
+        goto free_rec;
     }
 #endif
 
@@ -945,9 +944,9 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
             pVIAEnt = pPriv->ptr;
             if (pVIAEnt->BypassSecondary) {
                 free(pEnt);
-                VIAFreeRec(pScrn);
-                return FALSE;
+                goto free_rec;
             }
+
             pVIAEnt->pSecondaryScrn = pScrn;
             pVIAEnt->HasSecondary = TRUE;
             pVia1 = VIAPTR(pVIAEnt->pPrimaryScrn);
@@ -1016,6 +1015,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 
     if (pEnt)
         free(pEnt);
+
     xf86DrvMsg(pScrn->scrnIndex, from, "Chipset revision: %d\n", pVia->ChipRev);
 
     pVia->directRenderingType = DRI_NONE;
@@ -1144,14 +1144,13 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     VIAVidHWDiffInit(pScrn);
 
     /*
-     * After viaUMSPreInit() succeeds, PCI hardware resources are
-     * memory mapped.  If there is an error from this point on, they
-     * will need to be explicitly relinquished.
+     * After viaUMSPreInit() succeeds, MMIO PCI hardware resources
+     * are memory mapped.  If there is an error from this point on,
+     * they will need to be explicitly relinquished.
      */
     if (!pVia->KMS) {
         if (!viaUMSPreInit(pScrn)) {
-            VIAFreeRec(pScrn);
-            return FALSE;
+            goto free_rec;
         }
     }
 
@@ -1177,9 +1176,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "No valid modes found\n");
         goto fail;
     }
-
-    /* Set up screen parameters. */
-    pVia->Bpl = pScrn->virtualX * (pScrn->bitsPerPixel >> 3);
 
     /* Set the current mode to the first in the list */
     pScrn->currentMode = pScrn->modes;
@@ -1211,17 +1207,22 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         }
     }
 
+    /*
+     * Set up screen parameters.
+     */
+    pVia->Bpl = pScrn->virtualX * (pScrn->bitsPerPixel / 8);
+
     status = TRUE;
     goto exit;
 fail:
     if (!pVia->KMS) {
         viaUnmapMMIO(pScrn);
     }
-
-	VIAFreeRec(pScrn);
+free_rec:
+    VIAFreeRec(pScrn);
 exit:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting VIAPreInit.\n"));
+                        "Exiting %s.\n", __func__));
     return status;
 }
 
