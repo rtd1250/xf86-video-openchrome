@@ -863,11 +863,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         case 8:
         case 16:
         case 24:
-            /* OK */
-            break;
-        case 32:
-            /* OK */
-            pScrn->depth = 24;
             break;
         default:
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
