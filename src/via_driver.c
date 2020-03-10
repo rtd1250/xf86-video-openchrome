@@ -405,8 +405,7 @@ VIAFreeScreen(FREE_SCREEN_ARGS_DECL)
     }
 
     if (!pVia->KMS) {
-        viaUnmapFB(pScrn);
-        viaUnmapMMIO(pScrn);
+        viaUMSDestroy(pScrn);
     }
 
     VIAFreeRec(pScrn);
@@ -1404,8 +1403,7 @@ VIACloseScreen(CLOSE_SCREEN_ARGS_DECL)
 #endif
 
     if (!pVia->KMS) {
-        viaUnmapFB(pScrn);
-        viaUnmapMMIO(pScrn);
+        viaUMSDestroy(pScrn);
     }
 
     pScrn->vtSema = FALSE;

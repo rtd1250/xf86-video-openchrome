@@ -367,7 +367,7 @@ exit:
     return ret;
 }
 
-void
+static void
 viaUnmapFB(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
@@ -844,6 +844,19 @@ exit:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting %s.\n", __func__));
     return ret;
+}
+
+void
+viaUMSDestroy(ScrnInfoPtr pScrn)
+{
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
+    viaUnmapFB(pScrn);
+    viaUnmapMMIO(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
 }
 
 static Bool
