@@ -221,7 +221,7 @@ fail:
     return FALSE;
 }
 
-void
+static void
 viaUnmapMMIO(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
