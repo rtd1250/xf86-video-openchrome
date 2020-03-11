@@ -1194,7 +1194,7 @@ viaUMSCrtcInit(ScrnInfoPtr pScrn)
     VIAPtr pVia = VIAPTR(pScrn);
     VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
     VIARegPtr Regs = &pVIADisplay->SavedReg;
-#if XORG_VERSION_CURRENT >= XORG_VERSION_NUMERIC(1,8,0,0,0)
+#if XORG_VERSION_CURRENT >= XORG_VERSION_NUMERIC(1,7,99,3,0)
     ClockRangePtr clockRanges;
 #else
     ClockRangesPtr clockRanges;
@@ -1398,7 +1398,7 @@ viaUMSCrtcInit(ScrnInfoPtr pScrn)
      * available, and what sort of modes they can be used for.
      */
 
-#if XORG_VERSION_CURRENT >= XORG_VERSION_NUMERIC(1,8,0,0,0)
+#if XORG_VERSION_CURRENT >= XORG_VERSION_NUMERIC(1,7,99,3,0)
     clockRanges = xnfalloc(sizeof(ClockRange));
 #else
     clockRanges = xnfalloc(sizeof(ClockRanges));
