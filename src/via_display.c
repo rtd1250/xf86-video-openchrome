@@ -181,7 +181,6 @@ viaIGA1InitHI(ScrnInfoPtr pScrn)
     VIAPtr pVia = VIAPTR(pScrn);
 
     switch(pVia->Chipset) {
-    case VIA_PM800:
     case VIA_CX700:
     case VIA_P4M890:
     case VIA_P4M900:
@@ -216,7 +215,6 @@ viaIGA1SetHIStartingAddress(xf86CrtcPtr crtc)
     VIAPtr pVia = VIAPTR(pScrn);
 
     switch(pVia->Chipset) {
-    case VIA_PM800:
     case VIA_CX700:
     case VIA_P4M890:
     case VIA_P4M900:
@@ -242,7 +240,6 @@ viaIGA1DisplayHI(ScrnInfoPtr pScrn, Bool HI_Status)
     CARD32 temp;
 
     switch(pVia->Chipset) {
-    case VIA_PM800:
     case VIA_CX700:
     case VIA_P4M890:
     case VIA_P4M900:
@@ -275,7 +272,6 @@ viaIGA1SetHIDisplayLocation(ScrnInfoPtr pScrn,
     VIAPtr pVia = VIAPTR(pScrn);
 
     switch(pVia->Chipset) {
-    case VIA_PM800:
     case VIA_CX700:
     case VIA_P4M890:
     case VIA_P4M900:
@@ -416,7 +412,6 @@ viaIGA2InitHI(ScrnInfoPtr pScrn)
     VIAPtr pVia = VIAPTR(pScrn);
 
     switch(pVia->Chipset) {
-    case VIA_PM800:
     case VIA_CX700:
     case VIA_P4M890:
     case VIA_P4M900:
@@ -459,7 +454,6 @@ viaIGA2DisplayHI(ScrnInfoPtr pScrn, Bool HI_Status)
     CARD32 temp;
 
     switch(pVia->Chipset) {
-    case VIA_PM800:
     case VIA_CX700:
     case VIA_P4M890:
     case VIA_P4M900:
@@ -492,7 +486,6 @@ viaIGA2SetHIDisplayLocation(ScrnInfoPtr pScrn,
     VIAPtr pVia = VIAPTR(pScrn);
 
     switch(pVia->Chipset) {
-    case VIA_PM800:
     case VIA_CX700:
     case VIA_P4M890:
     case VIA_P4M900:
