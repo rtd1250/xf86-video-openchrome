@@ -44,15 +44,18 @@
 
 static int
 viaOffScreenLinear(ScrnInfoPtr pScrn, struct buffer_object *obj,
-                    unsigned long size)
+                    unsigned long size, unsigned long alignment)
 {
     FBLinearPtr linear;
     int depth = pScrn->bitsPerPixel / 8;
+    int newAlignment;
     int ret = 0;
 
+    newAlignment = alignment;
     linear = xf86AllocateOffscreenLinear(pScrn->pScreen,
-                                        (size + depth - 1) / depth,
-                                        32, NULL, NULL, NULL);
+                                            (size + depth - 1) / depth,
+                                            newAlignment,
+                                            NULL, NULL, NULL);
     if (!linear) {
         ret = -ENOMEM;
         goto exit;
@@ -69,14 +72,16 @@ exit:
 
 static int
 viaEXAOffscreenAlloc(ScrnInfoPtr pScrn, struct buffer_object *obj,
-                        unsigned long size)
+                        unsigned long size, unsigned long alignment)
 {
     ExaOffscreenArea *pArea;
     int newSize = size;
+    int newAlignment;
     int ret = 0;
 
+    newAlignment = alignment;
     pArea = exaOffscreenAlloc(pScrn->pScreen, newSize,
-                               32, TRUE, NULL, NULL);
+                                newAlignment, TRUE, NULL, NULL);
     if (!pArea) {
         ret = -ENOMEM;
         goto exit;
@@ -112,7 +117,8 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned long size,
     case TTM_PL_FLAG_VRAM:
         if (pVia->directRenderingType == DRI_NONE) {
             if (!pVia->useEXA) {
-                ret = viaOffScreenLinear(pScrn, obj, size);
+                ret = viaOffScreenLinear(pScrn, obj,
+                                            size, alignment);
                 if (ret) {
                     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                                         "Linear memory allocation "
@@ -126,7 +132,8 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned long size,
                                         obj->handle));
                 }
             } else {
-                ret = viaEXAOffscreenAlloc(pScrn, obj, size);
+                ret = viaEXAOffscreenAlloc(pScrn, obj,
+                                            size, alignment);
                 if (ret) {
                     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                                         "EXA offscreen memory "
