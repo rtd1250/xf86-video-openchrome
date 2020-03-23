@@ -365,6 +365,8 @@ int viaEXAOffscreenAlloc(ScrnInfoPtr pScrn,
                             struct buffer_object *obj,
                             unsigned long size,
                             unsigned long alignment);
+Bool viaIsAGP(VIAPtr pVia, PixmapPtr pPix, unsigned long *offset);
+Bool viaExaIsOffscreen(PixmapPtr pPix);
 Bool viaInitExa(ScreenPtr pScreen);
 Bool viaAccelSetMode(int bpp, ViaTwodContext * tdc);
 void viaSetClippingRectangle(ScrnInfoPtr pScrn,

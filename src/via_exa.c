@@ -815,6 +815,42 @@ exit:
 }
 
 Bool
+viaIsAGP(VIAPtr pVia, PixmapPtr pPix, unsigned long *offset)
+{
+#ifdef HAVE_DRI
+    unsigned long offs;
+
+    if (pVia->directRenderingType && !pVia->IsPCI) {
+        offs = ((unsigned long)pPix->devPrivate.ptr
+                - (unsigned long)pVia->agpMappedAddr);
+
+        if ((offs - pVia->scratchOffset) < pVia->agpSize) {
+            *offset = offs + pVia->agpAddr;
+            return TRUE;
+        }
+    }
+#endif
+    return FALSE;
+}
+
+Bool
+viaExaIsOffscreen(PixmapPtr pPix)
+{
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pPix->drawable.pScreen);
+    VIAPtr pVia = VIAPTR(pScrn);
+    uint8_t* addr_size;
+    uint8_t* front_bo;
+    Bool ret;
+
+    front_bo = drm_bo_map(pScrn, pVia->drmmode.front_bo);
+    addr_size = (uint8_t*)pPix->devPrivate.ptr -
+                                            (unsigned long)front_bo;
+    ret = (addr_size < (uint8_t*)pVia->drmmode.front_bo->size) ?
+                                                        TRUE : FALSE;
+    return ret;
+}
+
+Bool
 viaInitExa(ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
