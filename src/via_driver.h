@@ -361,6 +361,10 @@ void viaSetupDefaultOptions(ScrnInfoPtr pScrn);
 void viaProcessOptions(ScrnInfoPtr pScrn);
 
 /* In via_exa.c. */
+int viaEXAOffscreenAlloc(ScrnInfoPtr pScrn,
+                            struct buffer_object *obj,
+                            unsigned long size,
+                            unsigned long alignment);
 Bool viaInitExa(ScreenPtr pScreen);
 Bool viaAccelSetMode(int bpp, ViaTwodContext * tdc);
 void viaSetClippingRectangle(ScrnInfoPtr pScrn,

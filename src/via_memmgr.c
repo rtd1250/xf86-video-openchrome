@@ -70,32 +70,6 @@ exit:
     return ret;
 }
 
-static int
-viaEXAOffscreenAlloc(ScrnInfoPtr pScrn, struct buffer_object *obj,
-                        unsigned long size, unsigned long alignment)
-{
-    ExaOffscreenArea *pArea;
-    int newSize = size;
-    int newAlignment;
-    int ret = 0;
-
-    newAlignment = alignment;
-    pArea = exaOffscreenAlloc(pScrn->pScreen, newSize,
-                                newAlignment, TRUE, NULL, NULL);
-    if (!pArea) {
-        ret = -ENOMEM;
-        goto exit;
-    }
-
-    obj->offset = pArea->offset;
-    obj->handle = (unsigned long) pArea;
-    obj->domain = TTM_PL_FLAG_VRAM;
-    obj->size = newSize;
-
-exit:
-    return ret;
-}
-
 struct buffer_object *
 drm_bo_alloc(ScrnInfoPtr pScrn, unsigned long size,
                 unsigned long alignment, int domain)
