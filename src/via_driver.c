@@ -1418,6 +1418,7 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
     unsigned int bppSize, alignedPitch;
+    unsigned long alignment;
 
     pScrn->displayWidth = pScrn->virtualX;
 
@@ -1536,11 +1537,13 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
             flags |= HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_1;
             size = 32;
             cursorSize = ((size * size) >> 3) * 2;
+            alignment = cursorSize;
             break;
         default:
             flags |= (HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_64 | HARDWARE_CURSOR_ARGB);
             size = 64;
             cursorSize = (size * size) << 2;
+            alignment = cursorSize;
             break;
         }
 
@@ -1548,8 +1551,12 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
             xf86CrtcPtr crtc = xf86_config->crtc[i];
             drmmode_crtc_private_ptr iga = crtc->driver_private;
 
-            /* Set cursor location in frame buffer. */
-            iga->cursor_bo = drm_bo_alloc(pScrn, cursorSize, 16, TTM_PL_FLAG_VRAM);
+            /*
+             * Set cursor location in frame buffer.
+             */
+            iga->cursor_bo = drm_bo_alloc(pScrn,
+                                            cursorSize, alignment,
+                                            TTM_PL_FLAG_VRAM);
         }
 
         if (!xf86_cursors_init(pScreen, size, size, flags)) {
