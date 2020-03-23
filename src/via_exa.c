@@ -788,8 +788,6 @@ viaExaTexUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
 
 #endif /* HAVE_DRI */
 
-#define EXAOPT_MIGRATION_HEURISTIC  0
-
 Bool
 viaInitExa(ScreenPtr pScreen)
 {
