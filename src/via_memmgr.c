@@ -92,7 +92,8 @@ exit:
 }
 
 struct buffer_object *
-drm_bo_alloc(ScrnInfoPtr pScrn, unsigned int size, unsigned int alignment, int domain)
+drm_bo_alloc(ScrnInfoPtr pScrn, unsigned long size,
+                unsigned long alignment, int domain)
 {
     struct buffer_object *obj = NULL;
     VIAPtr pVia = VIAPTR(pScrn);
