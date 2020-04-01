@@ -1189,7 +1189,7 @@ viaIGA1SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y)
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
-    CARD32 Base;
+    unsigned long Base;
 #ifdef HAVE_DEBUG
     CARD8 cr0c, cr0d, cr34, cr48;
 #endif
@@ -2341,7 +2341,8 @@ viaIGA2SetFBStartingAddress(xf86CrtcPtr crtc, int x, int y)
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
-    CARD32 Base, tmp;
+    unsigned long Base;
+    unsigned long tmp;
 #ifdef HAVE_DEBUG
     CARD8 cr62, cr63, cr64, cra3;
 #endif
