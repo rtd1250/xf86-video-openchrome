@@ -1420,6 +1420,7 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
     unsigned int bppSize, alignedPitch;
     unsigned long alignment;
     xf86CrtcConfigPtr xf86_config;
+    struct buffer_object *bo;
     int cursorWidth, cursorHeight, flags;
     int cursorSize;
     int i;
@@ -1540,6 +1541,15 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
         cursorSize = (cursorWidth * cursorHeight) * (32 / 8);
         alignment = 1024;
 
+        /*
+         * Set cursor location in frame buffer.
+         */
+        bo = drm_bo_alloc(pScrn, cursorSize, alignment,
+                            TTM_PL_FLAG_VRAM);
+        if (!bo) {
+            return FALSE;
+        }
+
         for (i = 0; i < xf86_config->num_crtc; i++) {
             xf86CrtcPtr crtc = xf86_config->crtc[i];
             drmmode_crtc_private_ptr iga = crtc->driver_private;
@@ -1547,9 +1557,7 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
             /*
              * Set cursor location in frame buffer.
              */
-            iga->cursor_bo = drm_bo_alloc(pScrn,
-                                            cursorSize, alignment,
-                                            TTM_PL_FLAG_VRAM);
+            iga->cursor_bo = bo;
         }
 
         if (!xf86_cursors_init(pScreen,
