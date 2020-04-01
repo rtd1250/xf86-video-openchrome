@@ -1419,6 +1419,10 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
     VIAPtr pVia = VIAPTR(pScrn);
     unsigned int bppSize, alignedPitch;
     unsigned long alignment;
+    xf86CrtcConfigPtr xf86_config;
+    int cursorWidth, cursorHeight, flags;
+    int cursorSize;
+    int i;
 
     pScrn->displayWidth = pScrn->virtualX;
 
@@ -1526,26 +1530,15 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
     miDCInitialize(pScreen, xf86GetPointerScreenFuncs());
 
     if (pVia->drmmode.hwcursor) {
-        xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
-        int flags = (HARDWARE_CURSOR_AND_SOURCE_WITH_MASK |
-                     HARDWARE_CURSOR_TRUECOLOR_AT_8BPP);
-        int cursorSize, size, i = 0;
+        xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
 
-        switch (pVia->Chipset) {
-        case VIA_CLE266:
-        case VIA_KM400:
-            flags |= HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_1;
-            size = 32;
-            cursorSize = ((size * size) >> 3) * 2;
-            alignment = cursorSize;
-            break;
-        default:
-            flags |= (HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_64 | HARDWARE_CURSOR_ARGB);
-            size = 64;
-            cursorSize = (size * size) << 2;
-            alignment = cursorSize;
-            break;
-        }
+        cursorWidth = cursorHeight = 64;
+        flags = HARDWARE_CURSOR_AND_SOURCE_WITH_MASK |
+                HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_64 |
+                HARDWARE_CURSOR_TRUECOLOR_AT_8BPP |
+                HARDWARE_CURSOR_ARGB;
+        cursorSize = (cursorWidth * cursorHeight) * (32 / 8);
+        alignment = 1024;
 
         for (i = 0; i < xf86_config->num_crtc; i++) {
             xf86CrtcPtr crtc = xf86_config->crtc[i];
@@ -1559,7 +1552,8 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
                                             TTM_PL_FLAG_VRAM);
         }
 
-        if (!xf86_cursors_init(pScreen, size, size, flags)) {
+        if (!xf86_cursors_init(pScreen,
+                                cursorWidth, cursorHeight, flags)) {
             pVia->drmmode.hwcursor = FALSE;
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                         "Hardware cursor initialization failed.\n");
