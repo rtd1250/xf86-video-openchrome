@@ -3406,28 +3406,38 @@ iga1_crtc_shadow_destroy(xf86CrtcPtr crtc, PixmapPtr rotate_pixmap, void *data)
     and in all other bpps the fg and bg are in 8-8-8 RGB format.
 */
 static void
-iga1_crtc_set_cursor_colors(xf86CrtcPtr crtc, int bg, int fg)
+iga_crtc_set_cursor_colors(xf86CrtcPtr crtc, int bg, int fg)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
+    drmmode_crtc_private_ptr iga = crtc->driver_private;
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
 
     if (xf86_config->cursor_fg)
         return;
 
-    /* Don't recolour the image if we don't have to. */
-    if (fg == xf86_config->cursor_fg && bg == xf86_config->cursor_bg)
+    /*
+     * Don't recolour the image if we don't have to.
+     */
+    if ((fg == xf86_config->cursor_fg) &&
+        (bg == xf86_config->cursor_bg)) {
         return;
+    }
 
-    viaIGA1DisplayHI(pScrn, FALSE);
+    if (!iga->index) {
+        viaIGA1DisplayHI(pScrn, FALSE);
+    } else {
+        viaIGA2DisplayHI(pScrn, FALSE);
+    }
 
     xf86_config->cursor_fg = fg;
     xf86_config->cursor_bg = bg;
 }
 
 static void
-iga1_crtc_set_cursor_position(xf86CrtcPtr crtc, int x, int y)
+iga_crtc_set_cursor_position(xf86CrtcPtr crtc, int x, int y)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
+    drmmode_crtc_private_ptr iga = crtc->driver_private;
     unsigned xoff, yoff;
 
     if (x < 0) {
@@ -3444,30 +3454,44 @@ iga1_crtc_set_cursor_position(xf86CrtcPtr crtc, int x, int y)
         yoff = 0;
     }
 
-    viaIGA1SetHIDisplayLocation(pScrn, x, xoff, y, yoff);
+    if (!iga->index) {
+        viaIGA1SetHIDisplayLocation(pScrn, x, xoff, y, yoff);
+    } else {
+        viaIGA2SetHIDisplayLocation(pScrn, x, xoff, y, yoff);
+    }
 }
 
 static void
-iga1_crtc_show_cursor(xf86CrtcPtr crtc)
+iga_crtc_show_cursor(xf86CrtcPtr crtc)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
-
-    viaIGA1DisplayHI(pScrn, TRUE);
-}
-
-static void
-iga1_crtc_hide_cursor(xf86CrtcPtr crtc)
-{
-    ScrnInfoPtr pScrn = crtc->scrn;
-
-    viaIGA1DisplayHI(pScrn, FALSE);
-}
-
-static void
-iga1_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
-{
     drmmode_crtc_private_ptr iga = crtc->driver_private;
+
+    if (!iga->index) {
+        viaIGA1DisplayHI(pScrn, TRUE);
+    } else {
+        viaIGA2DisplayHI(pScrn, TRUE);
+    }
+}
+
+static void
+iga_crtc_hide_cursor(xf86CrtcPtr crtc)
+{
     ScrnInfoPtr pScrn = crtc->scrn;
+    drmmode_crtc_private_ptr iga = crtc->driver_private;
+
+    if (!iga->index) {
+        viaIGA1DisplayHI(pScrn, FALSE);
+    } else {
+        viaIGA2DisplayHI(pScrn, FALSE);
+    }
+}
+
+static void
+iga_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
+{
+    ScrnInfoPtr pScrn = crtc->scrn;
+    drmmode_crtc_private_ptr iga = crtc->driver_private;
     void *dst;
 
     dst = drm_bo_map(pScrn, iga->cursor_bo);
@@ -3475,8 +3499,13 @@ iga1_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
     memcpy(dst, image, iga->cursor_bo->size);
     drm_bo_unmap(pScrn, iga->cursor_bo);
 
-    viaIGA1InitHI(pScrn);
-    viaIGA1SetHIStartingAddress(crtc);
+    if (!iga->index) {
+        viaIGA1InitHI(pScrn);
+        viaIGA1SetHIStartingAddress(crtc);
+    } else {
+        viaIGA2InitHI(pScrn);
+        viaIGA2SetHIStartingAddress(crtc);
+    }
 }
 
 static void
@@ -3500,11 +3529,11 @@ const xf86CrtcFuncsRec iga1_crtc_funcs = {
     .shadow_create          = iga1_crtc_shadow_create,
     .shadow_allocate        = iga1_crtc_shadow_allocate,
     .shadow_destroy         = iga1_crtc_shadow_destroy,
-    .set_cursor_colors      = iga1_crtc_set_cursor_colors,
-    .set_cursor_position    = iga1_crtc_set_cursor_position,
-    .show_cursor            = iga1_crtc_show_cursor,
-    .hide_cursor            = iga1_crtc_hide_cursor,
-    .load_cursor_argb       = iga1_crtc_load_cursor_argb,
+    .set_cursor_colors      = iga_crtc_set_cursor_colors,
+    .set_cursor_position    = iga_crtc_set_cursor_position,
+    .show_cursor            = iga_crtc_show_cursor,
+    .hide_cursor            = iga_crtc_hide_cursor,
+    .load_cursor_argb       = iga_crtc_load_cursor_argb,
 #if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) > 2
     .set_origin             = iga1_crtc_set_origin,
 #endif
@@ -3799,98 +3828,6 @@ iga2_crtc_shadow_destroy(xf86CrtcPtr crtc, PixmapPtr rotate_pixmap, void *data)
 {
 }
 
-/*
-    Set the cursor foreground and background colors.  In 8bpp, fg and
-    bg are indices into the current colormap unless the
-    HARDWARE_CURSOR_TRUECOLOR_AT_8BPP flag is set.  In that case
-    and in all other bpps the fg and bg are in 8-8-8 RGB format.
-*/
-static void
-iga2_crtc_set_cursor_colors(xf86CrtcPtr crtc, int bg, int fg)
-{
-    drmmode_crtc_private_ptr iga = crtc->driver_private;
-    ScrnInfoPtr pScrn = crtc->scrn;
-    xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
-    int height = 64, width = 64, i;
-    CARD32 pixel, *dst;
-
-    if (xf86_config->cursor_fg)
-        return;
-
-    fg |= 0xff000000;
-    bg |= 0xff000000;
-
-    /* Don't recolour the image if we don't have to. */
-    if (fg == xf86_config->cursor_fg && bg == xf86_config->cursor_bg)
-        return;
-
-    viaIGA2DisplayHI(pScrn, FALSE);
-
-    dst = drm_bo_map(pScrn, iga->cursor_bo);
-    for (i = 0; i < width * height; i++, dst++)
-        if ((pixel = *dst))
-            *dst = (pixel == xf86_config->cursor_fg) ? fg : bg;
-    drm_bo_unmap(pScrn, iga->cursor_bo);
-
-    xf86_config->cursor_fg = fg;
-    xf86_config->cursor_bg = bg;
-}
-
-static void
-iga2_crtc_set_cursor_position(xf86CrtcPtr crtc, int x, int y)
-{
-    ScrnInfoPtr pScrn = crtc->scrn;
-    unsigned xoff, yoff;
-
-    if (x < 0) {
-        xoff = ((-x) & 0xFE);
-        x = 0;
-    } else {
-        xoff = 0;
-    }
-
-    if (y < 0) {
-        yoff = ((-y) & 0xFE);
-        y = 0;
-    } else {
-        yoff = 0;
-    }
-
-    viaIGA2SetHIDisplayLocation(pScrn, x, xoff, y, yoff);
-}
-
-static void
-iga2_crtc_show_cursor(xf86CrtcPtr crtc)
-{
-    ScrnInfoPtr pScrn = crtc->scrn;
-
-    viaIGA2DisplayHI(pScrn, TRUE);
-}
-
-static void
-iga2_crtc_hide_cursor(xf86CrtcPtr crtc)
-{
-    ScrnInfoPtr pScrn = crtc->scrn;
-
-    viaIGA2DisplayHI(pScrn, FALSE);
-}
-
-static void
-iga2_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
-{
-    drmmode_crtc_private_ptr iga = crtc->driver_private;
-    ScrnInfoPtr pScrn = crtc->scrn;
-    void *dst;
-
-    dst = drm_bo_map(pScrn, iga->cursor_bo);
-    memset(dst, 0x00, iga->cursor_bo->size);
-    memcpy(dst, image, iga->cursor_bo->size);
-    drm_bo_unmap(pScrn, iga->cursor_bo);
-
-    viaIGA2InitHI(pScrn);
-    viaIGA2SetHIStartingAddress(crtc);
-}
-
 const xf86CrtcFuncsRec iga2_crtc_funcs = {
     .dpms                   = iga2_crtc_dpms,
     .save                   = iga2_crtc_save,
@@ -3905,11 +3842,11 @@ const xf86CrtcFuncsRec iga2_crtc_funcs = {
     .shadow_create          = iga2_crtc_shadow_create,
     .shadow_allocate        = iga2_crtc_shadow_allocate,
     .shadow_destroy         = iga2_crtc_shadow_destroy,
-    .set_cursor_colors      = iga2_crtc_set_cursor_colors,
-    .set_cursor_position    = iga2_crtc_set_cursor_position,
-    .show_cursor            = iga2_crtc_show_cursor,
-    .hide_cursor            = iga2_crtc_hide_cursor,
-    .load_cursor_argb       = iga2_crtc_load_cursor_argb,
+    .set_cursor_colors      = iga_crtc_set_cursor_colors,
+    .set_cursor_position    = iga_crtc_set_cursor_position,
+    .show_cursor            = iga_crtc_show_cursor,
+    .hide_cursor            = iga_crtc_hide_cursor,
+    .load_cursor_argb       = iga_crtc_load_cursor_argb,
 #if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) > 2
     .set_origin             = iga2_crtc_set_origin,
 #endif
