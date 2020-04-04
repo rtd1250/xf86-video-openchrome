@@ -1533,30 +1533,13 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
     if (pVia->drmmode.hwcursor) {
         xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
 
-        switch (pVia->Chipset) {
-        case VIA_CLE266:
-        case VIA_KM400:
-        case VIA_P4M800PRO:
-            cursorWidth = cursorHeight = 64;
-            flags = HARDWARE_CURSOR_INVERT_MASK |
-                    HARDWARE_CURSOR_AND_SOURCE_WITH_MASK |
-                    HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_64 |
-                    HARDWARE_CURSOR_TRUECOLOR_AT_8BPP |
-                    HARDWARE_CURSOR_BIT_ORDER_MSBFIRST;
-            cursorSize = ((cursorWidth * cursorHeight) / 8) * 2;
-            alignment = 1024;
-            pVia->useHardwareCursor = TRUE;
-            break;
-        default:
-            cursorWidth = cursorHeight = 64;
-            flags = HARDWARE_CURSOR_AND_SOURCE_WITH_MASK |
-                    HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_64 |
-                    HARDWARE_CURSOR_TRUECOLOR_AT_8BPP |
-                    HARDWARE_CURSOR_ARGB;
-            cursorSize = (cursorWidth * cursorHeight) * (32 / 8);
-            alignment = 1024;
-            break;
-        }
+        cursorWidth = cursorHeight = 64;
+        flags = HARDWARE_CURSOR_AND_SOURCE_WITH_MASK |
+                HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_64 |
+                HARDWARE_CURSOR_TRUECOLOR_AT_8BPP |
+                HARDWARE_CURSOR_ARGB;
+        cursorSize = (cursorWidth * cursorHeight) * (32 / 8);
+        alignment = 1024;
 
         /*
          * Set cursor location in frame buffer.
