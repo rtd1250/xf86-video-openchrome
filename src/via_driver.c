@@ -130,7 +130,7 @@ _X_EXPORT DriverRec VIA = {
 /* Supported chipsets */
 static SymTabRec VIAChipsets[] = {
     {VIA_CLE266,        "CLE266"},
-    {VIA_KM400,         "KM400 / KM400A / KN400 / P4M800"},
+    {VIA_KM400,         "KM400(A) / KN400(A) / P4M800"},
     {VIA_K8M800,        "K8M800 / K8N800"},
     {VIA_PM800,         "PM800 / PN800 / PM880 / CN333 / CN400"},
     {VIA_P4M800PRO,     "P4M800 Pro / VN800 / CN700"},
