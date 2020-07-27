@@ -1480,6 +1480,12 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
     /* Must be after RGB ordering is fixed. */
     fbPictureInit(pScreen, NULL, 0);
 
+    if (!pVia->KMS) {
+        if (!viaUMSMapIOResources(pScrn)) {
+            return FALSE;
+        }
+    }
+
 #ifdef HAVE_DRI
     if (pVia->KMS) {
         if (drmSetMaster(pVia->drmmode.fd)) {
@@ -1506,7 +1512,7 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
     if (pVia->directRenderingType != DRI_2)
 #endif /* HAVE_DRI */
     {
-        if (!viaUMSCreate(pScrn)) {
+        if (!viaUMSScreenInit(pScrn)) {
             return FALSE;
         }
     }

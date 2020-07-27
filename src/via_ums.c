@@ -778,7 +778,7 @@ exit:
 }
 
 Bool
-viaUMSCreate(ScrnInfoPtr pScrn)
+viaUMSMapIOResources(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     Bool ret = TRUE;
@@ -822,6 +822,34 @@ viaUMSCreate(ScrnInfoPtr pScrn)
         goto exit;
     }
 
+exit:
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
+    return ret;
+}
+
+void
+viaUMSDestroy(ScrnInfoPtr pScrn)
+{
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
+    viaUnmapFB(pScrn);
+    viaUnmapMMIO(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
+}
+
+Bool
+viaUMSScreenInit(ScrnInfoPtr pScrn)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+    Bool ret = TRUE;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
     if (pVia->directRenderingType == DRI_NONE) {
         if (!pVia->useEXA) {
             if (!viaInitFB(pScrn)) {
@@ -852,19 +880,6 @@ exit:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting %s.\n", __func__));
     return ret;
-}
-
-void
-viaUMSDestroy(ScrnInfoPtr pScrn)
-{
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered %s.\n", __func__));
-
-    viaUnmapFB(pScrn);
-    viaUnmapMMIO(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting %s.\n", __func__));
 }
 
 static Bool
