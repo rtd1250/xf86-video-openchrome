@@ -89,7 +89,8 @@ openchrome_drv_la_SOURCES += \
          via_kms.c \
          via_xvmc.c \
          via_xvmc.h \
-         drm_fourcc.h
+         drm_fourcc.h \
+         openchrome_drm.h
 else
 EXTRA_DIST += \
          via_dri.c \
@@ -100,7 +101,8 @@ EXTRA_DIST += \
          via_kms.c \
          via_xvmc.c \
          via_xvmc.h \
-         drm_fourcc.h
+         drm_fourcc.h \
+         openchrome_drm.h
 endif
 
 via_driver.lo: version.h
