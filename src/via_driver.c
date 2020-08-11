@@ -1343,8 +1343,19 @@ VIACloseScreen(CLOSE_SCREEN_ARGS_DECL)
 {
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     xf86CrtcConfigPtr   xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
+
+    /*
+     * Since there is now only one location for the allocated
+     * hardware cursor storage, the code needs access to one of the
+     * two CRTC structs for obtaining pointer address to the hardware
+     * cursor storage.  In this case, IGA1's CRTC struct happens to
+     * be selected, but IGA2's CRTC struct can very well supply the
+     * same information.
+     */
+    xf86CrtcPtr crtc = xf86_config->crtc[0];
+    drmmode_crtc_private_ptr iga = crtc->driver_private;
+
     VIAPtr pVia = VIAPTR(pScrn);
-    int i;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIACloseScreen\n"));
 
@@ -1381,13 +1392,11 @@ VIACloseScreen(CLOSE_SCREEN_ARGS_DECL)
         drm_bo_free(pScrn, pVia->drmmode.front_bo);
     }
 
-    for (i = 0; i < xf86_config->num_crtc; i++) {
-        xf86CrtcPtr crtc = xf86_config->crtc[i];
-        drmmode_crtc_private_ptr iga = crtc->driver_private;
-
-        if (iga->cursor_bo)
-            drm_bo_free(pScrn, iga->cursor_bo);
-    }
+    if (iga->cursor_bo)
+        /*
+         * Release hardware cursor storage.
+         */
+        drm_bo_free(pScrn, iga->cursor_bo);
 
 #ifdef HAVE_DRI
     if (pVia->directRenderingType == DRI_1)
