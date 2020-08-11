@@ -30,13 +30,11 @@
 #define TTM_PL_FLAG_VRAM	4
 
 struct buffer_object {
-    off_t           map_offset;
+    void            *ptr;
+    unsigned long   size;
+    int             domain;
     unsigned long   handle;
     unsigned long   offset;             /* Offset into fb */
-    unsigned long   pitch;              /* No longer used. */
-    unsigned long   size;
-    void            *ptr;
-    int             domain;
 };
 
 

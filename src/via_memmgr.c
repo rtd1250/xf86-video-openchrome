@@ -38,6 +38,8 @@
 #include "via_driver.h"
 #ifdef HAVE_DRI
 #include "via_drm.h"
+#include "openchrome_drm.h"
+
 #else
 #include "drm_fourcc.h"
 #endif
@@ -146,23 +148,24 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned long size,
                                     obj->handle));
             }
         } else if (pVia->directRenderingType == DRI_2) {
-            struct drm_via_gem_object args;
+            struct drm_openchrome_gem_create args;
 
-            /* Some day this will be moved to libdrm. */
-            args.domains = domain;
-            args.alignment = alignment;
+            memset(&args, 0, sizeof(args));
             args.size = size;
-            ret = drmCommandWriteRead(pVia->drmmode.fd, DRM_VIA_GEM_CREATE,
-                                    &args, sizeof(struct drm_via_gem_object));
+            args.alignment = alignment;
+            args.domain = domain;
+            ret = drmCommandWriteRead(pVia->drmmode.fd,
+                            DRM_OPENCHROME_GEM_CREATE,
+                            &args,
+                            sizeof(struct drm_openchrome_gem_create));
             if (!ret) {
                 /* Okay the X server expects to know the offset because
                  * of non-KMS. Once we have KMS working the offset
                  * will not be valid. */
-                obj->map_offset = args.map_handle;
-                obj->offset = args.offset;
-                obj->handle = args.handle;
                 obj->size = args.size;
-                obj->domain = domain;
+                obj->domain = args.domain;
+                obj->handle = args.handle;
+                obj->offset = args.offset;
                 DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                                     "%lu bytes of DRI2 memory "
                                     "allocated at 0x%lx, "
@@ -197,10 +200,24 @@ void*
 drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
 {
     VIAPtr pVia = VIAPTR(pScrn);
+    int ret;
 
     if (pVia->directRenderingType == DRI_2) {
+        struct drm_openchrome_gem_map args;
+
+        memset(&args, 0, sizeof(args));
+        args.handle = obj->handle;
+        ret = drmCommandWriteRead(pVia->drmmode.fd,
+                        DRM_OPENCHROME_GEM_MAP,
+                        &args,
+                        sizeof(struct drm_openchrome_gem_map));
+        if (ret) {
+            obj->ptr = NULL;
+            goto exit;
+        }
+
         obj->ptr = mmap(0, obj->size, PROT_READ | PROT_WRITE,
-                        MAP_SHARED, pVia->drmmode.fd, obj->map_offset);
+                        MAP_SHARED, pVia->drmmode.fd, args.map_offset);
         if (obj->ptr == MAP_FAILED) {
             DEBUG(ErrorF("mmap failed with error %d\n", -errno));
             obj->ptr = NULL;
@@ -220,6 +237,8 @@ drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
             break;
         }
     }
+
+exit:
     return obj->ptr;
 }
 

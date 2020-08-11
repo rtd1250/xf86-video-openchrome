@@ -67,7 +67,7 @@ typedef struct
 
 static const ViaDRMVersion drmVIADRMExpected = { 1, 3, 0 };
 static const ViaDRMVersion drmVIADRMCompat = { 3, 0, 0 };
-static const ViaDRMVersion drmOpenChromeDRMVersion = { 3, 0, 0 };
+static const ViaDRMVersion drmOpenChromeDRMVersion = { 3, 2, 0 };
 
 /* Prototypes. */
 static void VIAIdentify(int flags);
