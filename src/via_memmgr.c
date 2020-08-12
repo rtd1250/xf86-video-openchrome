@@ -1,4 +1,5 @@
 /*
+ * Copyright © 2007 Red Hat, Inc.
  * Copyright 2003 Red Hat, Inc. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
