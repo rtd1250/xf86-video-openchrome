@@ -247,12 +247,20 @@ void
 drm_bo_unmap(ScrnInfoPtr pScrn, struct buffer_object *obj)
 {
     VIAPtr pVia = VIAPTR(pScrn);
+    struct drm_openchrome_gem_unmap args;
 
     if (pVia->directRenderingType == DRI_2) {
         munmap(obj->ptr, obj->size);
     }
 
     obj->ptr = NULL;
+
+    memset(&args, 0, sizeof(struct drm_openchrome_gem_unmap));
+    args.handle = obj->handle;
+    drmCommandRead(pVia->drmmode.fd,
+                    DRM_OPENCHROME_GEM_UNMAP,
+                    &args,
+                    sizeof(struct drm_openchrome_gem_unmap));
 }
 
 void
