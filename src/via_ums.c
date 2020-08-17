@@ -1086,62 +1086,89 @@ exit:
     return status;
 }
 
-Bool
-viaUMSPreInit(ScrnInfoPtr pScrn)
+/*
+ * This is basically a function that lets OpenChrome DDX know that
+ * it is dealing with hardware that requires special handling.
+ */
+static void
+viaQuirksInit(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
 
-    /* Checking for VIA Technologies NanoBook reference design.
-       Examples include Everex CloudBook and Sylvania g netbook.
-       It is also called FIC CE260 and CE261 by its ODM (Original
-       Design Manufacturer) name.
-       This device has its strapping resistors set to a wrong
-       setting to handle DVI. As a result, we need to make special
-       accommodations to handle DVI properly. */
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
+    /*
+     * Checking for VIA Technologies NanoBook reference design.
+     * Examples include Everex CloudBook and Sylvania g netbook.
+     * It is also called FIC CE260 and CE261 by its ODM (Original
+     * Design Manufacturer) name.
+     * This device has its strapping resistors set to a wrong
+     * setting to handle DVI. As a result, we need to make special
+     * accommodations to handle DVI properly.
+     */
     if ((pVia->Chipset == VIA_CX700) &&
         (SUBVENDOR_ID(pVia->PciInfo) == 0x1509) &&
         (SUBSYS_ID(pVia->PciInfo) == 0x2D30)) {
-
         pVIADisplay->isVIANanoBook      = TRUE;
     } else {
         pVIADisplay->isVIANanoBook      = FALSE;
     }
 
-    /* Checking for Quanta IL1 netbook. This is necessary
+    /*
+     * Checking for Quanta IL1 netbook. This is necessary
      * due to its flat panel connected to DVP1 (Digital
-     * Video Port 1) rather than its LVDS channel. */
+     * Video Port 1) rather than its LVDS channel.
+     */
     if ((pVia->Chipset == VIA_VX800) &&
         (SUBVENDOR_ID(pVia->PciInfo) == 0x152D) &&
         (SUBSYS_ID(pVia->PciInfo) == 0x0771)) {
-
         pVIADisplay->isQuantaIL1      = TRUE;
     } else {
         pVIADisplay->isQuantaIL1      = FALSE;
     }
 
-    /* Samsung NC20 netbook has its FP connected to LVDS2
+    /*
+     * Samsung NC20 netbook has its FP connected to LVDS2
      * rather than the more logical LVDS1, hence, a special
      * flag register is needed for properly controlling its
-     * FP. */
+     * FP.
+     */
     if ((pVia->Chipset == VIA_VX800) &&
         (SUBVENDOR_ID(pVia->PciInfo) == 0x144d) &&
         (SUBSYS_ID(pVia->PciInfo) == 0xc04e)) {
-
         pVIADisplay->isSamsungNC20      = TRUE;
     } else {
         pVIADisplay->isSamsungNC20      = FALSE;
     }
 
-    /* Checking for OLPC XO-1.5. */
+    /*
+     * OLPC XO-1.5 requires a special code path to handle
+     * its unusual FP configuration.
+     */
     if ((pVia->Chipset == VIA_VX855) &&
         (SUBVENDOR_ID(pVia->PciInfo) == 0x152D) &&
         (SUBSYS_ID(pVia->PciInfo) == 0x0833)) {
-
         pVIADisplay->isOLPCXO15      = TRUE;
     } else {
         pVIADisplay->isOLPCXO15      = FALSE;
     }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
+}
+
+Bool
+viaUMSPreInit(ScrnInfoPtr pScrn)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+
+    /*
+     * Initialize special flag registers to handle "quirky"
+     * hardware.
+     */
+    viaQuirksInit(pScrn);
 
     if (!xf86LoadSubModule(pScrn, "vgahw"))
         return FALSE;
