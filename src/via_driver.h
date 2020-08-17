@@ -70,7 +70,7 @@
 #include "via_memmgr.h"
 
 #include "via_regs.h"
-#include "via_kms.h"
+#include "drmmode_display.h"
 #include "via_ums.h"
 #include "via_dmabuffer.h"
 #include "via_3d.h"
