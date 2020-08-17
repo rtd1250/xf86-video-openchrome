@@ -1159,80 +1159,6 @@ viaQuirksInit(ScrnInfoPtr pScrn)
                         "Exiting %s.\n", __func__));
 }
 
-Bool
-viaUMSPreInit(ScrnInfoPtr pScrn)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    /*
-     * Initialize special flag registers to handle "quirky"
-     * hardware.
-     */
-    viaQuirksInit(pScrn);
-
-    if (!xf86LoadSubModule(pScrn, "vgahw"))
-        return FALSE;
-
-    if (!vgaHWGetHWRec(pScrn))
-        return FALSE;
-
-#if 0
-    /* Here we can alter the number of registers saved and restored by the
-     * standard vgaHWSave and Restore routines.
-     */
-    vgaHWSetRegCounts(pScrn, VGA_NUM_CRTC, VGA_NUM_SEQ, VGA_NUM_GFX,
-                      VGA_NUM_ATTR);
-#endif
-
-    if (!viaProbeVRAM(pScrn)) {
-        return FALSE;
-    }
-
-    /* Split the FB for SAMM. */
-    /* FIXME: For now, split the FB into two equal sections.
-     * This should be user-adjustable via a config option. */
-    if (pVia->IsSecondary) {
-        DevUnion *pPriv;
-        VIAEntPtr pVIAEnt;
-        VIAPtr pVia1;
-
-        pPriv = xf86GetEntityPrivate(pScrn->entityList[0], gVIAEntityIndex);
-        pVIAEnt = pPriv->ptr;
-        pScrn->videoRam = pScrn->videoRam >> 1;
-        pVIAEnt->pPrimaryScrn->videoRam = pScrn->videoRam;
-        pVia1 = VIAPTR(pVIAEnt->pPrimaryScrn);
-        pVia1->videoRambytes = pScrn->videoRam << 10;
-        pVia->FrameBufferBase += (pScrn->videoRam << 10);
-    }
-
-    pVia->videoRambytes = pScrn->videoRam << 10;
-
-    /* maybe throw in some more sanity checks here */
-#ifndef HAVE_PCIACCESS
-    pVia->PciTag = pciTag(pVia->PciInfo->bus, pVia->PciInfo->device,
-                          pVia->PciInfo->func);
-#endif
-
-    /* Map PCI hardware resources to the memory map. */
-    if (!viaMapMMIO(pScrn)) {
-        return FALSE;
-    }
-
-    return TRUE;
-}
-
-void
-viaUMSPreInitExit(ScrnInfoPtr pScrn)
-{
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered %s.\n", __func__));
-
-    viaUnmapMMIO(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting %s.\n", __func__));
-}
-
 static void
 viaSaveOriginalRegisters(ScrnInfoPtr pScrn)
 {
@@ -1395,13 +1321,16 @@ viaSaveOriginalRegisters(ScrnInfoPtr pScrn)
                         "Exiting %s.\n", __func__));
 }
 
+/*
+ * VIAPreInit code path for UMS (User Mode Setting).
+ */
 Bool
-viaUMSCrtcInit(ScrnInfoPtr pScrn)
+viaUMSPreInit(ScrnInfoPtr pScrn)
 {
-    drmmode_crtc_private_ptr iga1_rec = NULL, iga2_rec = NULL;
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
+    drmmode_crtc_private_ptr iga1_rec = NULL, iga2_rec = NULL;
+    vgaHWPtr hwp;
 #if XORG_VERSION_CURRENT >= XORG_VERSION_NUMERIC(1,7,99,3,0)
     ClockRangePtr clockRanges;
 #else
@@ -1410,6 +1339,71 @@ viaUMSCrtcInit(ScrnInfoPtr pScrn)
     int max_pitch, max_height;
     xf86CrtcPtr iga1, iga2;
     Bool ret;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
+    /*
+     * Initialize special flag registers to handle "quirky"
+     * hardware.
+     */
+    viaQuirksInit(pScrn);
+
+    if (!xf86LoadSubModule(pScrn, "vgahw")) {
+        ret = FALSE;
+        goto exit;
+    }
+
+    if (!vgaHWGetHWRec(pScrn)) {
+        ret = FALSE;
+        goto exit;
+    }
+
+#if 0
+    /* Here we can alter the number of registers saved and restored by the
+     * standard vgaHWSave and Restore routines.
+     */
+    vgaHWSetRegCounts(pScrn, VGA_NUM_CRTC, VGA_NUM_SEQ, VGA_NUM_GFX,
+                      VGA_NUM_ATTR);
+#endif
+
+    if (!viaProbeVRAM(pScrn)) {
+        ret = FALSE;
+        goto exit;
+    }
+
+    /* Split the FB for SAMM. */
+    /* FIXME: For now, split the FB into two equal sections.
+     * This should be user-adjustable via a config option. */
+    if (pVia->IsSecondary) {
+        DevUnion *pPriv;
+        VIAEntPtr pVIAEnt;
+        VIAPtr pVia1;
+
+        pPriv = xf86GetEntityPrivate(pScrn->entityList[0], gVIAEntityIndex);
+        pVIAEnt = pPriv->ptr;
+        pScrn->videoRam = pScrn->videoRam >> 1;
+        pVIAEnt->pPrimaryScrn->videoRam = pScrn->videoRam;
+        pVia1 = VIAPTR(pVIAEnt->pPrimaryScrn);
+        pVia1->videoRambytes = pScrn->videoRam << 10;
+        pVia->FrameBufferBase += (pScrn->videoRam << 10);
+    }
+
+    pVia->videoRambytes = pScrn->videoRam << 10;
+
+    /* maybe throw in some more sanity checks here */
+#ifndef HAVE_PCIACCESS
+    pVia->PciTag = pciTag(pVia->PciInfo->bus, pVia->PciInfo->device,
+                          pVia->PciInfo->func);
+#endif
+
+    /* Map PCI hardware resources to the memory map. */
+    if (!viaMapMMIO(pScrn)) {
+        ret = FALSE;
+        goto exit;
+    }
+
+    hwp = VGAHWPTR(pScrn);
 
     viaSaveOriginalRegisters(pScrn);
 
@@ -1445,17 +1439,22 @@ viaUMSCrtcInit(ScrnInfoPtr pScrn)
     }
 
     if (pVia->drmmode.hwcursor) {
-        if (!xf86LoadSubModule(pScrn, "ramdac"))
-            return FALSE;
+        if (!xf86LoadSubModule(pScrn, "ramdac")) {
+            ret = FALSE;
+            goto exit;
+        }
     }
 
-    if (!xf86LoadSubModule(pScrn, "i2c"))
+    if (!xf86LoadSubModule(pScrn, "i2c")) {
         return FALSE;
-    else
+    } else {
         ViaI2CInit(pScrn);
+    }
 
-    if (!xf86LoadSubModule(pScrn, "ddc"))
-        return FALSE;
+    if (!xf86LoadSubModule(pScrn, "ddc")) {
+        ret = FALSE;
+        goto exit;
+    }
 
     /*
      * Set up ClockRanges, which describe what clock ranges are
@@ -1484,15 +1483,18 @@ viaUMSCrtcInit(ScrnInfoPtr pScrn)
     iga1_rec = (drmmode_crtc_private_ptr) xnfcalloc(sizeof(drmmode_crtc_private_rec), 1);
     if (!iga1_rec) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "IGA1 Rec allocation failed.\n");
-        return FALSE;
+        ret = FALSE;
+        goto exit;
     }
 
     iga1 = xf86CrtcCreate(pScrn, &iga1_crtc_funcs);
     if (!iga1) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "xf86CrtcCreate failed.\n");
         free(iga1_rec);
-        return FALSE;
+        ret = FALSE;
+        goto exit;
     }
+
     iga1_rec->drmmode = &pVia->drmmode;
     iga1_rec->index = 0;
     iga1->driver_private = iga1_rec;
@@ -1501,7 +1503,8 @@ viaUMSCrtcInit(ScrnInfoPtr pScrn)
     if (!iga2_rec) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "IGA1 Rec allocation failed.\n");
         xf86CrtcDestroy(iga1);
-        return FALSE;
+        ret = FALSE;
+        goto exit;
     }
 
     iga2 = xf86CrtcCreate(pScrn, &iga2_crtc_funcs);
@@ -1509,8 +1512,10 @@ viaUMSCrtcInit(ScrnInfoPtr pScrn)
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "xf86CrtcCreate failed.\n");
         xf86CrtcDestroy(iga1);
         free(iga2_rec);
-        return FALSE;
+        ret = FALSE;
+        goto exit;
     }
+
     iga2_rec->drmmode = &pVia->drmmode;
     iga2_rec->index = 1;
     iga2->driver_private = iga2_rec;
@@ -1520,7 +1525,8 @@ viaUMSCrtcInit(ScrnInfoPtr pScrn)
                     "Detected bitsPerPixel to be 0 bit.\n");
         xf86CrtcDestroy(iga2);
         xf86CrtcDestroy(iga1);
-        return FALSE;
+        ret = FALSE;
+        goto exit;
     }
 
     /*
@@ -1543,6 +1549,20 @@ viaUMSCrtcInit(ScrnInfoPtr pScrn)
     viaInitDisplay(pScrn);
 
     ret = xf86InitialConfiguration(pScrn, TRUE);
-
+exit:
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
     return ret;
+}
+
+void
+viaUMSPreInitExit(ScrnInfoPtr pScrn)
+{
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
+    viaUnmapMMIO(pScrn);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
 }

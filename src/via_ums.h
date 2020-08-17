@@ -1563,7 +1563,6 @@ void viaUMSDestroy(ScrnInfoPtr pScrn);
 Bool viaUMSScreenInit(ScrnInfoPtr pScrn);
 Bool viaUMSPreInit(ScrnInfoPtr pScrn);
 void viaUMSPreInitExit(ScrnInfoPtr pScrn);
-Bool viaUMSCrtcInit(ScrnInfoPtr pScrn);
 
 /* via_i2c.c */
 void ViaI2CInit(ScrnInfoPtr pScrn);

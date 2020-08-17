@@ -1133,23 +1133,17 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 
     VIAVidHWDiffInit(pScrn);
 
-    /*
-     * After viaUMSPreInit() succeeds, MMIO PCI hardware resources
-     * are memory mapped.  If there is an error from this point on,
-     * they will need to be explicitly relinquished.
-     */
-    if (!pVia->KMS) {
-        if (!viaUMSPreInit(pScrn)) {
-            goto free_rec;
-        }
-    }
-
     if (pVia->KMS) {
         if (!drmmode_pre_init(pScrn, &pVia->drmmode)) {
             goto fail;
         }
     } else {
-        if (!viaUMSCrtcInit(pScrn)) {
+        /*
+         * After viaUMSPreInit() succeeds, MMIO PCI hardware resources
+         * are memory mapped.  If there is an error from this point on,
+         * they will need to be explicitly relinquished.
+         */
+        if (!viaUMSPreInit(pScrn)) {
             goto fail;
         }
     }
