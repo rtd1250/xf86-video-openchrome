@@ -255,6 +255,40 @@ static unsigned numAdaptPort[XV_ADAPT_NUM] = { 1 };
  *  F U N C T I O N
  */
 
+static xf86CrtcPtr
+window_belongs_to_crtc(ScrnInfoPtr pScrn, int x, int y, int w, int h)
+{
+    xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
+    int largest = 0, area = 0, i;
+    BoxRec crtc_area, overlap;
+    xf86CrtcPtr best = NULL;
+
+    for (i = 0; i < xf86_config->num_crtc; i++) {
+        xf86CrtcPtr crtc = xf86_config->crtc[i];
+
+        if (crtc->enabled) {
+            crtc_area.x1 = crtc->x;
+            crtc_area.x2 = crtc->x + xf86ModeWidth(&crtc->mode, crtc->rotation);
+            crtc_area.y1 = crtc->y;
+            crtc_area.y2 = crtc->y + xf86ModeHeight(&crtc->mode, crtc->rotation);
+            overlap.x1 = crtc_area.x1 > x ? crtc_area.x1 : x;
+            overlap.x2 = crtc_area.x2 < x + w ? crtc_area.x2 : x + w;
+            overlap.y1 = crtc_area.y1 > y ? crtc_area.y1 : y;
+            overlap.y2 = crtc_area.y2 < y ? crtc_area.y2 : y + h;
+
+            if (overlap.x1 >= overlap.x2 || overlap.y1 >= overlap.y2)
+                overlap.x1 = overlap.x2 = overlap.y1 = overlap.y2 = 0;
+
+            area = (overlap.x2 - overlap.x1) * (overlap.y2 - overlap.y1);
+            if (area > largest) {
+                area = largest;
+                best = crtc;
+            }
+        }
+    }
+    return best;
+}
+
 /*
  *   Decide if the mode support video overlay. This depends on the bandwidth
  *   of the mode and the type of RAM available.
