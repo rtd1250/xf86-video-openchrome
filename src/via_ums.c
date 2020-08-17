@@ -29,6 +29,11 @@
 #include "globals.h"
 #include "via_driver.h"
 
+static const
+xf86CrtcConfigFuncsRec via_xf86crtc_config_funcs = {
+    via_xf86crtc_resize
+};
+
 static void
 viaMMIOEnable(ScrnInfoPtr pScrn)
 {
@@ -1217,6 +1222,7 @@ viaUMSCrtcInit(ScrnInfoPtr pScrn)
     int max_pitch, max_height;
     xf86CrtcPtr iga1, iga2;
     uint32_t i;
+    Bool ret;
 
     vgaHWSave(pScrn, &hwp->SavedReg, VGA_SR_ALL);
 
@@ -1427,6 +1433,8 @@ viaUMSCrtcInit(ScrnInfoPtr pScrn)
     clockRanges->doubleScanAllowed = FALSE;
     pScrn->clockRanges = clockRanges;
 
+    xf86CrtcConfigInit(pScrn, &via_xf86crtc_config_funcs);
+
     /*
      * Now handle the outputs
      */
@@ -1491,5 +1499,7 @@ viaUMSCrtcInit(ScrnInfoPtr pScrn)
 
     viaInitDisplay(pScrn);
 
-    return TRUE;
+    ret = xf86InitialConfiguration(pScrn, TRUE);
+
+    return ret;
 }

@@ -677,7 +677,7 @@ viaConvertDepthToBpp(int bpp, int depth)
     return bppSize;
 }
 
-static Bool
+Bool
 via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
 {
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(scrn);
@@ -825,11 +825,6 @@ fail:
                         "Exiting %s.\n", __func__));
     return FALSE;
 }
-
-static const
-xf86CrtcConfigFuncsRec via_xf86crtc_config_funcs = {
-    via_xf86crtc_resize
-};
 
 static Bool
 VIAPreInit(ScrnInfoPtr pScrn, int flags)
@@ -1149,9 +1144,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         }
     }
 
-    /* CRTC handling */
-    xf86CrtcConfigInit(pScrn, &via_xf86crtc_config_funcs);
-
     if (pVia->KMS) {
         if (!KMSCrtcInit(pScrn, &pVia->drmmode)) {
             goto fail;
@@ -1160,11 +1152,6 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
         if (!viaUMSCrtcInit(pScrn)) {
             goto fail;
         }
-    }
-
-    if (!xf86InitialConfiguration(pScrn, TRUE)) {
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Initial configuration failed\n");
-        goto fail;
     }
 
     if (!pScrn->modes) {

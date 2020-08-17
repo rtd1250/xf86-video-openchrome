@@ -359,6 +359,7 @@ typedef struct
 const OptionInfoRec *VIAAvailableOptions(int chipid, int busid);
 void viaSetupDefaultOptions(ScrnInfoPtr pScrn);
 void viaProcessOptions(ScrnInfoPtr pScrn);
+Bool via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height);
 
 /* In via_exa.c. */
 int viaEXAOffscreenAlloc(ScrnInfoPtr pScrn,
