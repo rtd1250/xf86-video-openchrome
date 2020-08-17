@@ -783,7 +783,7 @@ Bool KMSCrtcInit(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
     return TRUE;
 }
 
-#ifdef HAVE_UDEV
+#ifdef HAVE_LIBUDEV
 static void
 drmmode_handle_uevents(int fd, void *closure)
 {
@@ -802,7 +802,7 @@ drmmode_handle_uevents(int fd, void *closure)
 
 void drmmode_uevent_init(ScrnInfoPtr scrn, drmmode_ptr drmmode)
 {
-#ifdef HAVE_UDEV
+#ifdef HAVE_LIBUDEV
     struct udev_monitor *mon;
     struct udev *u;
 
@@ -832,7 +832,7 @@ void drmmode_uevent_init(ScrnInfoPtr scrn, drmmode_ptr drmmode)
 
 void drmmode_uevent_fini(ScrnInfoPtr scrn, drmmode_ptr drmmode)
 {
-#ifdef HAVE_UDEV
+#ifdef HAVE_LIBUDEV
     if (drmmode->uevent_handler) {
         struct udev *u = udev_monitor_get_udev(drmmode->uevent_monitor);
 

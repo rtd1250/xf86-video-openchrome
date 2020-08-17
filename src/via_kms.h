@@ -30,7 +30,7 @@
 #ifdef HAVE_DRI
 #include "xf86drmMode.h"
 #endif
-#ifdef HAVE_UDEV
+#ifdef HAVE_LIBUDEV
 #include "libudev.h"
 #endif
 
@@ -43,7 +43,7 @@ typedef struct {
     drmEventContext event_context;
 #endif
     ScrnInfoPtr scrn;
-#ifdef HAVE_UDEV
+#ifdef HAVE_LIBUDEV
     struct udev_monitor *uevent_monitor;
     InputHandlerProc uevent_handler;
 #endif
