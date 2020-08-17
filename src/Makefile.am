@@ -81,24 +81,24 @@ openchrome_drv_la_SOURCES = \
 
 if DRI
 openchrome_drv_la_SOURCES += \
+         drmmode_display.c \
          via_dri.c \
          via_dri.h \
          via_drm.h \
          via_drmclient.h \
          via_kms.h \
-         via_kms.c \
          via_xvmc.c \
          via_xvmc.h \
          drm_fourcc.h \
          openchrome_drm.h
 else
 EXTRA_DIST += \
+         drmmode_display.c \
          via_dri.c \
          via_dri.h \
          via_drm.h \
          via_drmclient.h \
          via_kms.h \
-         via_kms.c \
          via_xvmc.c \
          via_xvmc.h \
          drm_fourcc.h \
