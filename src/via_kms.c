@@ -764,12 +764,10 @@ xf86CrtcConfigFuncsRec via_xf86crtc_config_funcs = {
     via_xf86crtc_resize
 };
 
-Bool KMSCrtcInit(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
+Bool drmmode_pre_init(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
 {
     int i;
     Bool ret;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "KMSCrtcInit\n"));
 
     xf86CrtcConfigInit(pScrn, &via_xf86crtc_config_funcs);
 

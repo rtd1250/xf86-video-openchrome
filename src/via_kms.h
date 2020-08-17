@@ -84,7 +84,10 @@ typedef struct {
 } drmmode_output_private_rec, *drmmode_output_private_ptr;
 #endif
 
-extern Bool KMSCrtcInit(ScrnInfoPtr pScrn, drmmode_ptr drmmode);
+
+extern Bool drmmode_pre_init(ScrnInfoPtr pScrn, drmmode_ptr drmmode);
+
 extern void drmmode_uevent_init(ScrnInfoPtr scrn, drmmode_ptr drmmode);
 extern void drmmode_uevent_fini(ScrnInfoPtr scrn, drmmode_ptr drmmode);
+
 #endif

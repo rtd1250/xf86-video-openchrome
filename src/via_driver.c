@@ -1145,7 +1145,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     }
 
     if (pVia->KMS) {
-        if (!KMSCrtcInit(pScrn, &pVia->drmmode)) {
+        if (!drmmode_pre_init(pScrn, &pVia->drmmode)) {
             goto fail;
         }
     } else {
