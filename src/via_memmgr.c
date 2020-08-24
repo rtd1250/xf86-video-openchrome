@@ -204,8 +204,28 @@ drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
 #ifdef HAVE_DRI
     struct drm_openchrome_gem_map args;
     int ret;
+#endif /* HAVE_DRI */
 
-    if (pVia->directRenderingType == DRI_2) {
+    if ((pVia->directRenderingType == DRI_NONE)
+#ifdef HAVE_DRI
+        || (pVia->directRenderingType == DRI_1)
+#endif /* HAVE_DRI */
+    ) {
+        switch (obj->domain) {
+#ifdef HAVE_DRI
+        case TTM_PL_FLAG_TT:
+            obj->ptr = (uint8_t*)pVia->agpMappedAddr + obj->offset;
+            break;
+#endif /* HAVE_DRI */
+        case TTM_PL_FLAG_VRAM:
+            obj->ptr = pVia->FBBase + obj->offset;
+            break;
+        default:
+            obj->ptr = NULL;
+            break;
+        }
+#ifdef HAVE_DRI
+    } else if (pVia->directRenderingType == DRI_2) {
         memset(&args, 0, sizeof(args));
         args.handle = obj->handle;
         ret = drmCommandWriteRead(pVia->drmmode.fd,
@@ -223,22 +243,7 @@ drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
             DEBUG(ErrorF("mmap failed with error %d\n", -errno));
             obj->ptr = NULL;
         }
-    } else
 #endif /* HAVE_DRI */
-    {
-        switch (obj->domain) {
-#ifdef HAVE_DRI
-        case TTM_PL_FLAG_TT:
-            obj->ptr = (uint8_t*)pVia->agpMappedAddr + obj->offset;
-            break;
-#endif /* HAVE_DRI */
-        case TTM_PL_FLAG_VRAM:
-            obj->ptr = pVia->FBBase + obj->offset;
-            break;
-        default:
-            obj->ptr = NULL;
-            break;
-        }
     }
 
 #ifdef HAVE_DRI
@@ -250,12 +255,19 @@ exit:
 void
 drm_bo_unmap(ScrnInfoPtr pScrn, struct buffer_object *obj)
 {
-#ifdef HAVE_DRI
     VIAPtr pVia = VIAPTR(pScrn);
+#ifdef HAVE_DRI
     struct drm_openchrome_gem_unmap args;
     int ret;
+#endif /* HAVE_DRI */
 
-    if (pVia->directRenderingType == DRI_2) {
+    if ((pVia->directRenderingType == DRI_NONE)
+#ifdef HAVE_DRI
+        || (pVia->directRenderingType == DRI_1)
+#endif /* HAVE_DRI */
+    ) {
+#ifdef HAVE_DRI
+    } else if (pVia->directRenderingType == DRI_2) {
         munmap(obj->ptr, obj->size);
 
         memset(&args, 0, sizeof(struct drm_openchrome_gem_unmap));
@@ -267,9 +279,10 @@ drm_bo_unmap(ScrnInfoPtr pScrn, struct buffer_object *obj)
         if (ret) {
             goto exit;
         }
-
+#endif /* HAVE_DRI */
     }
 
+#ifdef HAVE_DRI
 exit:
 #endif /* HAVE_DRI */
     obj->ptr = NULL;
