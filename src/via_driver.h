@@ -88,6 +88,12 @@
 #include "via_vt1632.h"
 
 #include "compat-api.h"
+
+
+#define VIA_NAME            "OpenChrome"
+#define VIA_DRIVER_NAME     "openchrome"
+#define VIA_VERSION         ((VIA_MAJOR_VERSION << 24) | (VIA_MINOR_VERSION << 16) | VIA_PATCHLEVEL)
+
 #define VIA_AGP_UPL_SIZE    (1024*128)
 #define VIA_DMA_DL_SIZE     (1024*128)
 #define VIA_SCRATCH_SIZE    (4*1024*1024)
@@ -104,9 +110,6 @@
 #define AGP_PAGE_SIZE 4096
 #define AGP_PAGES 8192
 #define AGP_SIZE (AGP_PAGE_SIZE * AGP_PAGES)
-
-#define DRIVER_NAME     "openchrome"
-#define VIA_VERSION     ((VIA_MAJOR_VERSION << 24) | (VIA_MINOR_VERSION << 16) | VIA_PATCHLEVEL)
 
 #define VIA_VQ_SIZE     (256 * 1024)
 
