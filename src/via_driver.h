@@ -80,8 +80,6 @@
 
 #ifdef HAVE_PCIACCESS
 #include <pciaccess.h>
-#else
-#include "xf86PciInfo.h"
 #endif
 #include <errno.h>
 
