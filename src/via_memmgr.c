@@ -201,11 +201,11 @@ void*
 drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
 {
     VIAPtr pVia = VIAPTR(pScrn);
+#ifdef HAVE_DRI
+    struct drm_openchrome_gem_map args;
     int ret;
 
     if (pVia->directRenderingType == DRI_2) {
-        struct drm_openchrome_gem_map args;
-
         memset(&args, 0, sizeof(args));
         args.handle = obj->handle;
         ret = drmCommandWriteRead(pVia->drmmode.fd,
@@ -223,13 +223,15 @@ drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
             DEBUG(ErrorF("mmap failed with error %d\n", -errno));
             obj->ptr = NULL;
         }
-    } else {
+    } else
+#endif /* HAVE_DRI */
+    {
         switch (obj->domain) {
 #ifdef HAVE_DRI
         case TTM_PL_FLAG_TT:
             obj->ptr = (uint8_t*)pVia->agpMappedAddr + obj->offset;
             break;
-#endif
+#endif /* HAVE_DRI */
         case TTM_PL_FLAG_VRAM:
             obj->ptr = pVia->FBBase + obj->offset;
             break;
@@ -239,28 +241,38 @@ drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
         }
     }
 
+#ifdef HAVE_DRI
 exit:
+#endif /* HAVE_DRI */
     return obj->ptr;
 }
 
 void
 drm_bo_unmap(ScrnInfoPtr pScrn, struct buffer_object *obj)
 {
+#ifdef HAVE_DRI
     VIAPtr pVia = VIAPTR(pScrn);
     struct drm_openchrome_gem_unmap args;
+    int ret;
 
     if (pVia->directRenderingType == DRI_2) {
         munmap(obj->ptr, obj->size);
+
+        memset(&args, 0, sizeof(struct drm_openchrome_gem_unmap));
+        args.handle = obj->handle;
+        ret = drmCommandRead(pVia->drmmode.fd,
+                        DRM_OPENCHROME_GEM_UNMAP,
+                        &args,
+                        sizeof(struct drm_openchrome_gem_unmap));
+        if (ret) {
+            goto exit;
+        }
+
     }
 
+exit:
+#endif /* HAVE_DRI */
     obj->ptr = NULL;
-
-    memset(&args, 0, sizeof(struct drm_openchrome_gem_unmap));
-    args.handle = obj->handle;
-    drmCommandRead(pVia->drmmode.fd,
-                    DRM_OPENCHROME_GEM_UNMAP,
-                    &args,
-                    sizeof(struct drm_openchrome_gem_unmap));
 }
 
 void
