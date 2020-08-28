@@ -90,9 +90,9 @@
 
 #define VIA_NAME            "OpenChrome"
 #define VIA_DRIVER_NAME     "openchrome"
-#define VIA_DRIVER_VERSION  (VIA_MAJOR_VERSION << 24) | \
-                            (VIA_MINOR_VERSION << 16) | \
-                            VIA_PATCHLEVEL
+#define VIA_DRIVER_VERSION  (PACKAGE_VERSION_MAJOR << 24) | \
+                            (PACKAGE_VERSION_MINOR << 16) | \
+                            PACKAGE_VERSION_PATCHLEVEL
 
 #define VIA_AGP_UPL_SIZE    (1024*128)
 #define VIA_DMA_DL_SIZE     (1024*128)
