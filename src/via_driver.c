@@ -109,7 +109,7 @@ static const struct pci_id_match via_device_match[] = {
 #endif /* HAVE_PCIACCESS */
 
 _X_EXPORT DriverRec VIA = {
-    VIA_VERSION,
+    VIA_DRIVER_VERSION,
     VIA_DRIVER_NAME,
     VIAIdentify,
 #ifdef HAVE_PCIACCESS
@@ -429,7 +429,7 @@ via_pci_probe(DriverPtr driver, int entity_num,
                                NULL, NULL, NULL, NULL, NULL);
 
     if (scrn != NULL) {
-        scrn->driverVersion = VIA_VERSION;
+        scrn->driverVersion = VIA_DRIVER_VERSION;
         scrn->driverName = VIA_DRIVER_NAME;
         scrn->name = VIA_NAME;
         scrn->Probe = NULL;
@@ -502,7 +502,7 @@ VIAProbe(DriverPtr drv, int flags)
 
             if ((pScrn = xf86ConfigPciEntity(pScrn, 0, usedChips[i],
                                              VIAPciChipsets, 0, 0, 0, 0, 0))) {
-				pScrn->driverVersion = VIA_VERSION;
+				pScrn->driverVersion = VIA_DRIVER_VERSION;
 				pScrn->driverName = VIA_DRIVER_NAME;
 				pScrn->name = VIA_NAME;
 				pScrn->Probe = VIAProbe;
