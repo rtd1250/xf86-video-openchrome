@@ -110,7 +110,7 @@ static const struct pci_id_match via_device_match[] = {
 
 _X_EXPORT DriverRec VIA = {
     VIA_VERSION,
-    DRIVER_NAME,
+    VIA_DRIVER_NAME,
     VIAIdentify,
 #ifdef HAVE_PCIACCESS
     NULL,
@@ -430,8 +430,8 @@ via_pci_probe(DriverPtr driver, int entity_num,
 
     if (scrn != NULL) {
         scrn->driverVersion = VIA_VERSION;
-        scrn->driverName = DRIVER_NAME;
-        scrn->name = "CHROME";
+        scrn->driverName = VIA_DRIVER_NAME;
+        scrn->name = VIA_NAME;
         scrn->Probe = NULL;
 
         scrn->PreInit = VIAPreInit;
@@ -503,8 +503,8 @@ VIAProbe(DriverPtr drv, int flags)
             if ((pScrn = xf86ConfigPciEntity(pScrn, 0, usedChips[i],
                                              VIAPciChipsets, 0, 0, 0, 0, 0))) {
 				pScrn->driverVersion = VIA_VERSION;
-				pScrn->driverName = DRIVER_NAME;
-				pScrn->name = "CHROME";
+				pScrn->driverName = VIA_DRIVER_NAME;
+				pScrn->name = VIA_NAME;
 				pScrn->Probe = VIAProbe;
 				pScrn->PreInit = VIAPreInit;
 				pScrn->ScreenInit = VIAScreenInit;
