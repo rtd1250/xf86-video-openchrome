@@ -52,6 +52,11 @@ AC_ARG_WITH(xorg-module-dir,
             [moduledir="$withval"],
             [moduledir="$libdir/xorg/modules"])
 
+AC_ARG_ENABLE(dri, AS_HELP_STRING([--disable-dri],
+                                  [Disable DRI support [[default=auto]]]),
+              [DRI="$enableval"],
+              [DRI=auto])
+
 AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug],
 				    [Enable debugging support [[default=no]]]),
               [DEBUG="$enableval"],
@@ -96,29 +101,33 @@ if test x$XSERVER_LIBPCIACCESS = xyes; then
        PKG_CHECK_MODULES([PCIACCESS], [pciaccess >= 0.8.0])
 fi
 
-PKG_CHECK_MODULES(DRI, [libdrm >= 2.0 xf86driproto])
-save_CPPFLAGS="$CPPFLAGS"
-CPPFLAGS="$XORG_CFLAGS $DRI_CFLAGS"
-AC_CHECK_HEADER([dri.h],
-              [have_dri_h="yes"], [have_dri_h="no"],[-])
-AC_CHECK_HEADER([sarea.h],
-              [have_sarea_h="yes"], [have_sarea_h="no"],[-])
+if test "$DRI" != no; then
+        PKG_CHECK_MODULES(DRI, [libdrm >= 2.0 xf86driproto])
+        save_CPPFLAGS="$CPPFLAGS"
+        CPPFLAGS="$XORG_CFLAGS $DRI_CFLAGS"
+        AC_CHECK_HEADER([dri.h],
+                      [have_dri_h="yes"], [have_dri_h="no"],[-])
+        AC_CHECK_HEADER([sarea.h],
+                      [have_sarea_h="yes"], [have_sarea_h="no"],[-])
 AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[
 #include <xorg-server.h>
 #include <dristruct.h>
-              ]])],
-              [have_dristruct_h="yes"], [have_dristruct_h="no"],[-])
-AC_CHECK_HEADER([damage.h],
-              [have_damage_h="yes"], [have_damage_h="no"],[-])
-CPPFLAGS="$save_CPPFLAGS"
+                      ]])],
+                      [have_dristruct_h="yes"], [have_dristruct_h="no"],[-])
+        AC_CHECK_HEADER([damage.h],
+                      [have_damage_h="yes"], [have_damage_h="no"],[-])
+        CPPFLAGS="$save_CPPFLAGS"
+fi
 
 AC_MSG_CHECKING([whether to include DRI support])
-if test "$have_dri_h" = yes -a \
-        "$have_sarea_h" = yes -a \
-        "$have_dristruct_h" = yes; then
-        DRI="yes"
-else
-        DRI="no"
+if test x$DRI = xauto; then
+        if test "$have_dri_h" = yes -a \
+                "$have_sarea_h" = yes -a \
+                "$have_dristruct_h" = yes; then
+                DRI="yes"
+        else
+                DRI="no"
+        fi
 fi
 AC_MSG_RESULT([$DRI])
 
