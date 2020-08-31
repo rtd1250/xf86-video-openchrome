@@ -85,17 +85,14 @@ PKG_CHECK_MODULES(XEXT, [xextproto >= 7.0.99.1],
  HAVE_XEXTPROTO_71="yes"; AC_DEFINE(HAVE_XEXTPROTO_71, 1, [xextproto 7.1 available]),
  HAVE_XEXTPROTO_71="no")
 AM_CONDITIONAL(HAVE_XEXTPROTO_71, [ test "$HAVE_XEXTPROTO_71" = "yes" ])
+sdkdir=$(pkg-config --variable=sdkdir xorg-server)
 
 # Checks for libraries.
 
-
-save_CPPFLAGS="$CPPFLAGS"
-CPPFLAGS="$XORG_CFLAGS $CPPFLAGS"
 AC_CHECK_HEADER(xf86Modes.h,[XMODES=yes],[XMODES=no],[#include "xorg-server.h"])
 AC_CHECK_DECL(XSERVER_LIBPCIACCESS,
              [XSERVER_LIBPCIACCESS=yes],[XSERVER_LIBPCIACCESS=no],
-             [#include "xorg-server.h"])
-CPPFLAGS="$save_CPPFLAGS"
+             [#include "xorg/xorg-server.h"])
 
 if test x$XSERVER_LIBPCIACCESS = xyes; then
        PKG_CHECK_MODULES([PCIACCESS], [pciaccess >= 0.8.0])
