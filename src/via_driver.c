@@ -49,7 +49,7 @@
 #endif
 #include "xf86Crtc.h"
 
-#ifdef HAVE_DRI
+#ifdef XF86DRI
 #include "dri.h"
 #else
 #include "drm_fourcc.h"
@@ -277,7 +277,7 @@ VIAEnterVT_internal(ScrnInfoPtr pScrn, int flags)
             viaRestoreVideo(pScrn);
         }
 
-#ifdef HAVE_DRI
+#ifdef XF86DRI
         if (pVia->directRenderingType == DRI_1) {
             kickVblank(pScrn);
             VIADRIRingBufferInit(pScrn);
@@ -310,7 +310,7 @@ VIALeaveVT_internal(ScrnInfoPtr pScrn, int flags)
                         "Entered %s.\n", __func__));
 
     if (!flags) {
-#ifdef HAVE_DRI
+#ifdef XF86DRI
         if (pVia->directRenderingType == DRI_1) {
             volatile drm_via_sarea_t *saPriv = (drm_via_sarea_t *) DRIGetSAREAPrivate(pScrn->pScreen);
 
@@ -733,7 +733,7 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
     scrn->virtualY = height;
     scrn->displayWidth = width;
 
-#ifdef HAVE_DRI
+#ifdef XF86DRI
     if (pVia->KMS) {
         ret = drmModeAddFB(drmmode->fd, width, height, scrn->depth,
                             scrn->bitsPerPixel, width * cpp,
@@ -792,7 +792,7 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
         }
     }
 
-#ifdef HAVE_DRI
+#ifdef XF86DRI
     if (pVia->KMS && old_fb_id) {
         drmModeRmFB(drmmode->fd, old_fb_id);
     }
@@ -834,7 +834,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     EntityInfoPtr pEnt;
     VIAPtr pVia;
     MessageType from = X_DEFAULT;
-#ifdef HAVE_DRI
+#ifdef XF86DRI
     char *busId = NULL;
     drmVersionPtr drmVer;
 #endif
@@ -1012,7 +1012,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 
     pVia->directRenderingType = DRI_NONE;
     pVia->KMS = FALSE;
-#ifdef HAVE_DRI
+#ifdef XF86DRI
     busId = DRICreatePCIBusID(pVia->PciInfo);
 
     /* Look for OpenChrome DRM first. */
@@ -1299,7 +1299,7 @@ VIACreateScreenResources(ScreenPtr pScreen)
 
     rootPixmap = pScreen->GetScreenPixmap(pScreen);
 
-#ifdef HAVE_DRI
+#ifdef XF86DRI
     drmmode_uevent_init(pScrn, &pVia->drmmode);
 #endif
     surface = drm_bo_map(pScrn, pVia->drmmode.front_bo);
@@ -1359,13 +1359,13 @@ VIACloseScreen(CLOSE_SCREEN_ARGS_DECL)
     if (pScrn->vtSema)
         VIALeaveVT(VT_FUNC_ARGS(0));
 
-#ifdef HAVE_DRI
+#ifdef XF86DRI
     drmmode_uevent_fini(pScrn, &pVia->drmmode);
 #endif
     xf86_cursors_fini(pScreen);
 
     if (pVia->drmmode.front_bo) {
-#ifdef HAVE_DRI
+#ifdef XF86DRI
         if (pVia->KMS && pVia->drmmode.fb_id)
             drmModeRmFB(pVia->drmmode.fd, pVia->drmmode.fb_id);
 #endif
@@ -1381,7 +1381,7 @@ VIACloseScreen(CLOSE_SCREEN_ARGS_DECL)
          */
         drm_bo_free(pScrn, iga->cursor_bo);
 
-#ifdef HAVE_DRI
+#ifdef XF86DRI
     if (pVia->directRenderingType == DRI_1)
         VIADRICloseScreen(pScreen);
 
@@ -1478,7 +1478,7 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
         }
     }
 
-#ifdef HAVE_DRI
+#ifdef XF86DRI
     if (pVia->KMS) {
         if (drmSetMaster(pVia->drmmode.fd)) {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
@@ -1500,9 +1500,9 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
     }
 #endif
 
-#ifdef HAVE_DRI
+#ifdef XF86DRI
     if (pVia->directRenderingType != DRI_2)
-#endif /* HAVE_DRI */
+#endif /* XF86DRI */
     {
         if (!viaUMSScreenInit(pScrn)) {
             return FALSE;
@@ -1511,9 +1511,9 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
 
     if ((!pVia->NoAccel) &&
         ((pVia->directRenderingType == DRI_NONE)
-#ifdef HAVE_DRI
+#ifdef XF86DRI
         || (pVia->directRenderingType == DRI_1)
-#endif /* HAVE_DRI */
+#endif /* XF86DRI */
         )) {
         if (!viaUMSAccelInit(pScrn)) {
             return FALSE;
@@ -1613,7 +1613,7 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
         return FALSE;
 
     if (pVia->directRenderingType != DRI_2) {
-#ifdef HAVE_DRI
+#ifdef XF86DRI
         if (pVia->directRenderingType == DRI_1) {
             if (!VIADRIFinishScreenInit(pScreen)) {
                 xf86DrvMsg(pScrn->scrnIndex, X_INFO,

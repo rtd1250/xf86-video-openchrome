@@ -55,7 +55,7 @@
 #include "xf86RandR12.h"
 #include "xf86cmap.h"
 
-#ifdef HAVE_DRI
+#ifdef XF86DRI
 #define _XF86DRI_SERVER_
 #include "xf86dri.h"
 #include "sarea.h"
@@ -141,7 +141,7 @@ enum dri_type {
 	DRI_2
 };
 
-#ifdef HAVE_DRI
+#ifdef XF86DRI
 
 #define VIA_XVMC_MAX_BUFFERS 2
 #define VIA_XVMC_MAX_CONTEXTS 4
@@ -269,7 +269,7 @@ typedef struct _VIA {
     char *              scratchAddr;
     Bool                noComposite;
     struct buffer_object *scratchBuffer;
-#ifdef HAVE_DRI
+#ifdef XF86DRI
     struct buffer_object *texAGPBuffer;
     char *              dBounce;
 #endif
@@ -287,7 +287,7 @@ typedef struct _VIA {
 
     drmmode_rec         drmmode;
     enum dri_type       directRenderingType;
-#ifdef HAVE_DRI
+#ifdef XF86DRI
     Bool                XvMCEnabled;
     DRIInfoPtr          pDRIInfo;
     int                 numVisualConfigs;
@@ -452,7 +452,7 @@ extern vidCopyFunc viaVidCopyInit(const char *copyType, ScreenPtr pScreen );
 
 /* In via_xwmc.c */
 
-#ifdef HAVE_DRI
+#ifdef XF86DRI
 /* Basic init and exit functions */
 void ViaInitXVMC(ScreenPtr pScreen);
 void ViaCleanupXVMC(ScrnInfoPtr pScrn, XF86VideoAdaptorPtr *XvAdaptors, int XvAdaptorCount);
@@ -462,7 +462,7 @@ int viaXvMCInitXv(ScrnInfoPtr pScrn, XF86VideoAdaptorPtr XvAdapt);
 unsigned long viaXvMCPutImageSize(ScrnInfoPtr pScrn);
 #endif
 
-#ifdef HAVE_DRI
+#ifdef XF86DRI
 Bool VIADRI1ScreenInit(ScreenPtr pScreen);
 void VIADRICloseScreen(ScreenPtr pScreen);
 Bool VIADRIFinishScreenInit(ScreenPtr pScreen);
@@ -472,6 +472,6 @@ void viaDRIOffscreenRestore(ScrnInfoPtr pScrn);
 void viaDRIOffscreenSave(ScrnInfoPtr pScrn);
 Bool VIADRIBufferInit(ScrnInfoPtr pScrn);
 
-#endif /* HAVE_DRI */
+#endif /* XF86DRI */
 
 #endif /* _VIA_DRIVER_H_ */

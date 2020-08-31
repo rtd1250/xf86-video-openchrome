@@ -27,7 +27,7 @@
 #ifndef _VIA_PRIV_H_
 #define _VIA_PRIV_H_ 1
 
-#ifdef HAVE_DRI
+#ifdef XF86DRI
 #include "via_drm.h"
 #endif
 #include "exa.h"

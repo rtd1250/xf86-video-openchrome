@@ -31,13 +31,13 @@
 #include "xf86_OSproc.h"
 #include "xf86fbman.h"
 
-#ifdef HAVE_DRI
+#ifdef XF86DRI
 #include "xf86drm.h"
 #endif
 
 #include "drm_fourcc.h"
 #include "via_driver.h"
-#ifdef HAVE_DRI
+#ifdef XF86DRI
 #include "via_drm.h"
 #include "openchrome_drm.h"
 
@@ -124,7 +124,7 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned long size,
                                         obj->handle));
                 }
             }
-#ifdef HAVE_DRI
+#ifdef XF86DRI
         } else if (pVia->directRenderingType == DRI_1) {
             drm_via_mem_t drm;
 
@@ -201,22 +201,22 @@ void*
 drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-#ifdef HAVE_DRI
+#ifdef XF86DRI
     struct drm_openchrome_gem_map args;
     int ret;
-#endif /* HAVE_DRI */
+#endif /* XF86DRI */
 
     if ((pVia->directRenderingType == DRI_NONE)
-#ifdef HAVE_DRI
+#ifdef XF86DRI
         || (pVia->directRenderingType == DRI_1)
-#endif /* HAVE_DRI */
+#endif /* XF86DRI */
     ) {
         switch (obj->domain) {
-#ifdef HAVE_DRI
+#ifdef XF86DRI
         case TTM_PL_FLAG_TT:
             obj->ptr = (uint8_t*)pVia->agpMappedAddr + obj->offset;
             break;
-#endif /* HAVE_DRI */
+#endif /* XF86DRI */
         case TTM_PL_FLAG_VRAM:
             obj->ptr = pVia->FBBase + obj->offset;
             break;
@@ -224,7 +224,7 @@ drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
             obj->ptr = NULL;
             break;
         }
-#ifdef HAVE_DRI
+#ifdef XF86DRI
     } else if (pVia->directRenderingType == DRI_2) {
         memset(&args, 0, sizeof(args));
         args.handle = obj->handle;
@@ -243,12 +243,12 @@ drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
             DEBUG(ErrorF("mmap failed with error %d\n", -errno));
             obj->ptr = NULL;
         }
-#endif /* HAVE_DRI */
+#endif /* XF86DRI */
     }
 
-#ifdef HAVE_DRI
+#ifdef XF86DRI
 exit:
-#endif /* HAVE_DRI */
+#endif /* XF86DRI */
     return obj->ptr;
 }
 
@@ -256,17 +256,17 @@ void
 drm_bo_unmap(ScrnInfoPtr pScrn, struct buffer_object *obj)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-#ifdef HAVE_DRI
+#ifdef XF86DRI
     struct drm_openchrome_gem_unmap args;
     int ret;
-#endif /* HAVE_DRI */
+#endif /* XF86DRI */
 
     if ((pVia->directRenderingType == DRI_NONE)
-#ifdef HAVE_DRI
+#ifdef XF86DRI
         || (pVia->directRenderingType == DRI_1)
-#endif /* HAVE_DRI */
+#endif /* XF86DRI */
     ) {
-#ifdef HAVE_DRI
+#ifdef XF86DRI
     } else if (pVia->directRenderingType == DRI_2) {
         munmap(obj->ptr, obj->size);
 
@@ -279,12 +279,12 @@ drm_bo_unmap(ScrnInfoPtr pScrn, struct buffer_object *obj)
         if (ret) {
             goto exit;
         }
-#endif /* HAVE_DRI */
+#endif /* XF86DRI */
     }
 
-#ifdef HAVE_DRI
+#ifdef XF86DRI
 exit:
-#endif /* HAVE_DRI */
+#endif /* XF86DRI */
     obj->ptr = NULL;
 }
 
@@ -309,7 +309,7 @@ drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
 
                     exaOffscreenFree(pScrn->pScreen, pArea);
                 }
-#ifdef HAVE_DRI
+#ifdef XF86DRI
             } else if (pVia->directRenderingType == DRI_1) {
                 drm_via_mem_t drm;
 

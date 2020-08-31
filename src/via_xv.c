@@ -592,7 +592,7 @@ viaExitVideo(ScrnInfoPtr pScrn)
 
     DBG_DD(ErrorF(" via_xv.c : viaExitVideo : \n"));
 
-#ifdef HAVE_DRI
+#ifdef XF86DRI
     ViaCleanupXVMC(pScrn, viaAdaptPtr, XV_ADAPT_NUM);
 #endif
 
@@ -642,7 +642,7 @@ viaInitVideo(ScreenPtr pScreen)
     num_new = 0;
 
     pVia->useDmaBlit = FALSE;
-#ifdef HAVE_DRI
+#ifdef XF86DRI
     pVia->useDmaBlit = (pVia->directRenderingType == DRI_1) &&
     ((pVia->Chipset == VIA_CLE266) ||
         (pVia->Chipset == VIA_KM400) ||
@@ -700,7 +700,7 @@ viaInitVideo(ScreenPtr pScreen)
 
     if (num_adaptors) {
         xf86XVScreenInit(pScreen, allAdaptors, num_adaptors);
-#ifdef HAVE_DRI
+#ifdef XF86DRI
         ViaInitXVMC(pScreen);
 #endif
         viaSetColorSpace(pVia, 0, 0, 0, 0, TRUE);
@@ -795,7 +795,7 @@ viaSetupAdaptors(ScreenPtr pScreen, XF86VideoAdaptorPtr ** adaptors)
         }
         usedPorts += j;
 
-#ifdef HAVE_DRI
+#ifdef XF86DRI
         viaXvMCInitXv(pScrn, viaAdaptPtr[i]);
 #endif
 
@@ -1022,7 +1022,7 @@ nv12cp(unsigned char *dst, const unsigned char *src, int dstPitch,
             src + srcVOffset, w >> 1, w >>1, dstPitch, h >> 1);
 }
 
-#ifdef HAVE_DRI
+#ifdef XF86DRI
 
 static int
 viaDmaBlitImage(VIAPtr pVia,
@@ -1240,7 +1240,7 @@ viaPutImage(ScrnInfoPtr pScrn,
                 dstPitch = pVia->swov.SWDevice.dwPitch;
 
                 if (pVia->useDmaBlit) {
-#ifdef HAVE_DRI
+#ifdef XF86DRI
                     if (viaDmaBlitImage(pVia, pPriv, buf,
                         (CARD32) pVia->swov.SWDevice.dwSWPhysicalAddr[pVia->dwFrameNum & 1],
                         width, height, dstPitch, id)) {
@@ -1448,7 +1448,7 @@ viaQueryImageAttributes(ScrnInfoPtr pScrn,
             break;
         case FOURCC_XVMC:
             *h = (*h + 1) & ~1;
-#ifdef HAVE_DRI
+#ifdef XF86DRI
             size = viaXvMCPutImageSize(pScrn);
 #else
             size = 0;
