@@ -58,17 +58,17 @@ AC_ARG_ENABLE(dri, AS_HELP_STRING([--disable-dri],
               [DRI=auto])
 
 AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug],
-				    [Enable debugging support [[default=no]]]),
+                                    [Enable debugging support [[default=no]]]),
               [DEBUG="$enableval"],
               [DEBUG=no])
 
 AC_ARG_ENABLE(xv-debug, AS_HELP_STRING([--enable-xv-debug],
-				    [Enable XVideo debugging support [[default=no]]]),
+                                       [Enable XVideo debugging support [[default=no]]]),
               [XV_DEBUG="$enableval"],
               [XV_DEBUG=no])
 
 AC_ARG_ENABLE(viaregtool, AS_HELP_STRING([--enable-viaregtool],
-				    [Enable build of registers dumper tool [[default=no]]]),
+                                         [Enable build of registers dumper tool [[default=no]]]),
               [TOOLS="$enableval"],
               [TOOLS=no])
 
