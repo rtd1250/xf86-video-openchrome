@@ -689,10 +689,10 @@ viaUMSAccelInit(ScrnInfoPtr pScrn)
     pVia->curMarker = 0;
     pVia->lastMarkerRead = 0;
 
-#ifdef XF86DRI
+#ifdef OPENCHROMEDRI
     pVia->dBounce = NULL;
     pVia->scratchAddr = NULL;
-#endif /* XF86DRI */
+#endif /* OPENCHROMEDRI */
     ret = TRUE;
 err:
     if (!ret) {
@@ -865,7 +865,7 @@ viaUMSScreenInit(ScrnInfoPtr pScrn)
                 ret = FALSE;
             }
         }
-#ifdef XF86DRI
+#ifdef OPENCHROMEDRI
     } else if (pVia->directRenderingType == DRI_1) {
         if (!VIADRIKernelInit(pScrn)) {
             ret = FALSE;

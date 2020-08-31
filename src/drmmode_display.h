@@ -27,7 +27,7 @@
 #ifndef DRMMODE_DISPLAY_H
 #define DRMMODE_DISPLAY_H
 
-#ifdef XF86DRI
+#ifdef OPENCHROMEDRI
 #include "xf86drmMode.h"
 #endif
 #ifdef HAVE_LIBUDEV
@@ -37,7 +37,7 @@
 typedef struct {
     int fd;
     uint32_t fb_id;
-#ifdef XF86DRI
+#ifdef OPENCHROMEDRI
     drmModeResPtr mode_res;
     drmModeFBPtr mode_fb;
     drmEventContext event_context;
@@ -54,7 +54,7 @@ typedef struct {
 
 typedef struct {
     drmmode_ptr drmmode;
-#ifdef XF86DRI
+#ifdef OPENCHROMEDRI
     drmModeCrtcPtr mode_crtc;
 #endif
     struct buffer_object *cursor_bo;
@@ -62,7 +62,7 @@ typedef struct {
     int index;
 } drmmode_crtc_private_rec, *drmmode_crtc_private_ptr;
 
-#ifdef XF86DRI
+#ifdef OPENCHROMEDRI
 typedef struct {
     drmModePropertyPtr mode_prop;
     uint64_t value;

@@ -30,7 +30,7 @@
 #include "xf86.h"
 #include "xf86_OSproc.h"
 
-#ifdef XF86DRI
+#ifdef OPENCHROMEDRI
 #include "xf86drm.h"
 #include "via_drmclient.h"
 #include "via_drm.h"

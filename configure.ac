@@ -140,8 +140,8 @@ AC_MSG_RESULT([$DRI])
 AM_CONDITIONAL(DRI, test x$DRI = xyes)
 if test "$DRI" = yes; then
         PKG_CHECK_MODULES(DRI, [libdrm xf86driproto])
-        AC_DEFINE(XF86DRI,1,[Enable DRI driver support])
-        AC_DEFINE(XF86DRI_DEVEL,1,[Enable developmental DRI driver support])
+        AC_DEFINE(OPENCHROMEDRI,1,[Enable DRI driver support])
+        AC_DEFINE(OPENCHROMEDRI_DEVEL,1,[Enable developmental DRI driver support])
         case "$host_cpu" in
             i*86)
                 XVMC=yes ;;
