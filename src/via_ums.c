@@ -97,7 +97,7 @@ viaMapMMIO(ScrnInfoPtr pScrn)
     VIAPtr pVia = VIAPTR(pScrn);
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     CARD8 val;
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
     int err;
 #else
     unsigned char *tmp;
@@ -106,7 +106,7 @@ viaMapMMIO(ScrnInfoPtr pScrn)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaMapMMIO.\n"));
 
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
     pVia->MmioBase = pVia->PciInfo->regions[1].base_addr;
 #else
     pVia->MmioBase = pVia->PciInfo->memBase[1];
@@ -117,7 +117,7 @@ viaMapMMIO(ScrnInfoPtr pScrn)
                 "size %u KB.\n",
                 pVia->MmioBase, VIA_MMIO_REGSIZE / 1024);
 
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
     err = pci_device_map_range(pVia->PciInfo,
                                pVia->MmioBase,
                                VIA_MMIO_REGSIZE, PCI_DEV_MAP_FLAG_WRITABLE,
@@ -146,7 +146,7 @@ viaMapMMIO(ScrnInfoPtr pScrn)
                "size %u KB.\n",
                pVia->MmioBase + VIA_MMIO_BLTBASE, VIA_MMIO_BLTSIZE / 1024);
 
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
     err = pci_device_map_range(pVia->PciInfo,
                                pVia->MmioBase + VIA_MMIO_BLTBASE,
                                VIA_MMIO_BLTSIZE, PCI_DEV_MAP_FLAG_WRITABLE,
@@ -196,7 +196,7 @@ viaMapMMIO(ScrnInfoPtr pScrn)
 
 fail:
 
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
     if (pVia->BltBase) {
         pci_device_unmap_range(pVia->PciInfo, (pointer) pVia->BltBase,
                                VIA_MMIO_BLTSIZE);
@@ -236,7 +236,7 @@ viaUnmapMMIO(ScrnInfoPtr pScrn)
 
     viaMMIODisable(pScrn);
 
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
     if (pVia->BltBase) {
         pci_device_unmap_range(pVia->PciInfo, (pointer) pVia->BltBase,
                                VIA_MMIO_BLTSIZE);
@@ -269,7 +269,7 @@ static Bool
 viaMapFB(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
     int err;
 #else
     unsigned char *tmp;
@@ -285,7 +285,7 @@ viaMapFB(ScrnInfoPtr pScrn)
         goto exit;
     }
 
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
     if (pVia->Chipset == VIA_VX900) {
         pVia->FrameBufferBase = pVia->PciInfo->regions[2].base_addr;
     } else {
@@ -299,7 +299,7 @@ viaMapFB(ScrnInfoPtr pScrn)
     }
 #endif
 
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
     err = pci_device_map_range(pVia->PciInfo, pVia->FrameBufferBase,
                                 pVia->videoRambytes,
                                 PCI_DEV_MAP_FLAG_WRITABLE |
@@ -380,7 +380,7 @@ viaUnmapFB(ScrnInfoPtr pScrn)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered %s.\n", __func__));
 
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
     if (pVia->FBBase) {
         pci_device_unmap_range(pVia->PciInfo, (pointer) pVia->FBBase,
                                pVia->videoRambytes);
@@ -796,7 +796,7 @@ viaUMSMapIOResources(ScrnInfoPtr pScrn)
         pScrn->fbOffset = pScrn->videoRam << 10;
     }
 
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
     if (pVia->Chipset == VIA_VX900) {
         pScrn->memPhysBase = pVia->PciInfo->regions[2].base_addr;
     } else {
@@ -890,7 +890,7 @@ exit:
 static Bool
 viaProbeVRAM(ScrnInfoPtr pScrn)
 {
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
     struct pci_device *hostBridge = NULL;
     struct pci_device *dramController = NULL;
 #endif
@@ -903,7 +903,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaProbeVRAM.\n"));
 
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
     hostBridge = pci_device_find_by_slot(0, 0, 0, 0);
     hostBridgeVendorID = VENDOR_ID(hostBridge);
 #else
@@ -915,7 +915,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
         goto exit;
     }
 
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
     hostBridgeDeviceID = DEVICE_ID(hostBridge);
 #else
     hostBridgeDeviceID = pciReadWord(pciTag(0, 0, 0), 0x02);
@@ -923,7 +923,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
 
     if ((hostBridgeDeviceID != PCI_DEVICE_ID_VIA_CLE266_HB) &&
         (hostBridgeDeviceID != PCI_DEVICE_ID_VIA_KM400_HB)) {
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
         dramController = pci_device_find_by_slot(0, 0, 0, 3);
         dramControllerVendorID = VENDOR_ID(dramController);
 #else
@@ -939,7 +939,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
     case PCI_DEVICE_ID_VIA_CLE266_HB:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                     "CLE266 chipset host bridge detected.\n");
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
         pci_device_cfg_read_u8(hostBridge, &videoRAM, 0xE1);
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 0), 0xE1);
@@ -949,7 +949,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
     case PCI_DEVICE_ID_VIA_KM400_HB:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                     "KM400 chipset host bridge detected.\n");
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
         pci_device_cfg_read_u8(hostBridge, &videoRAM, 0xE1);
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 0), 0xE1);
@@ -959,7 +959,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
     case PCI_DEVICE_ID_VIA_P4M800_AGP:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                     "P4M800 chipset AGP bridge detected.\n");
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
         pci_device_cfg_read_u8(dramController, &videoRAM, 0xA1);
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
@@ -969,7 +969,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
     case PCI_DEVICE_ID_VIA_P4M800_PRO_AGP:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                     "P4M800 Pro chipset AGP bridge detected.\n");
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
         pci_device_cfg_read_u8(dramController, &videoRAM, 0xA1);
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
@@ -979,7 +979,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
     case PCI_DEVICE_ID_VIA_PM800_AGP:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                     "PM800 chipset AGP bridge detected.\n");
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
         pci_device_cfg_read_u8(dramController, &videoRAM, 0xA1);
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
@@ -989,7 +989,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
     case PCI_DEVICE_ID_VIA_K8M800_AGP:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                     "K8M800 chipset AGP bridge detected.\n");
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
         pci_device_cfg_read_u8(dramController, &videoRAM, 0xA1);
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
@@ -999,7 +999,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
     case PCI_DEVICE_ID_VIA_CX700_AGP:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                     "CX700 chipset AGP bridge detected.\n");
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
         pci_device_cfg_read_u8(dramController, &videoRAM, 0xA1);
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
@@ -1009,7 +1009,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
     case PCI_DEVICE_ID_VIA_P4M890_AGP:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                     "P4M890 chipset AGP bridge detected.\n");
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
         pci_device_cfg_read_u8(dramController, &videoRAM, 0xA1);
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
@@ -1019,7 +1019,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
     case PCI_DEVICE_ID_VIA_K8M890_AGP:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                     "K8M890 chipset AGP bridge detected.\n");
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
         pci_device_cfg_read_u8(dramController, &videoRAM, 0xA1);
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
@@ -1029,7 +1029,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
     case PCI_DEVICE_ID_VIA_P4M900_AGP:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                     "P4M900 chipset AGP bridge detected.\n");
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
         pci_device_cfg_read_u8(dramController, &videoRAM, 0xA1);
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
@@ -1039,7 +1039,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
     case PCI_DEVICE_ID_VIA_VX800_HC:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                     "VX800 chipset host controller detected.\n");
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
         pci_device_cfg_read_u8(dramController, &videoRAM, 0xA1);
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
@@ -1049,7 +1049,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
     case PCI_DEVICE_ID_VIA_VX855_HC:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                     "VX855 chipset host controller detected.\n");
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
         pci_device_cfg_read_u8(dramController, &videoRAM, 0xA1);
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
@@ -1059,7 +1059,7 @@ viaProbeVRAM(ScrnInfoPtr pScrn)
     case PCI_DEVICE_ID_VIA_VX900_HC:
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                     "VX900 chipset host controller detected.\n");
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
         pci_device_cfg_read_u8(dramController, &videoRAM, 0xA1);
 #else
         videoRAM = pciReadByte(pciTag(0, 0, 3), 0xA1);
@@ -1392,7 +1392,7 @@ viaUMSPreInit(ScrnInfoPtr pScrn)
     pVia->videoRambytes = pScrn->videoRam << 10;
 
     /* maybe throw in some more sanity checks here */
-#ifndef HAVE_PCIACCESS
+#ifndef XSERVER_LIBPCIACCESS
     pVia->PciTag = pciTag(pVia->PciInfo->bus, pVia->PciInfo->device,
                           pVia->PciInfo->func);
 #endif

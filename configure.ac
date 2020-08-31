@@ -87,11 +87,14 @@ AM_CONDITIONAL(HAVE_XEXTPROTO_71, [ test "$HAVE_XEXTPROTO_71" = "yes" ])
 save_CPPFLAGS="$CPPFLAGS"
 CPPFLAGS="$XORG_CFLAGS $CPPFLAGS"
 AC_CHECK_HEADER(xf86Modes.h,[XMODES=yes],[XMODES=no],[#include "xorg-server.h"])
-PKG_CHECK_MODULES([PCIACCESS], [pciaccess >= 0.11.0],
- HAVE_PCIACCESS="yes"; AC_DEFINE(HAVE_PCIACCESS, 1, [libpciacces available]),
- HAVE_PCIACCESS="no")
-AC_SUBST([PCIACCESS_CFLAGS])
-AC_SUBST([PCIACCESS_LIBS])
+AC_CHECK_DECL(XSERVER_LIBPCIACCESS,
+             [XSERVER_LIBPCIACCESS=yes],[XSERVER_LIBPCIACCESS=no],
+             [#include "xorg-server.h"])
+CPPFLAGS="$save_CPPFLAGS"
+
+if test x$XSERVER_LIBPCIACCESS = xyes; then
+       PKG_CHECK_MODULES([PCIACCESS], [pciaccess >= 0.8.0])
+fi
 
 PKG_CHECK_MODULES(DRI, [libdrm >= 2.0 xf86driproto])
 save_CPPFLAGS="$CPPFLAGS"
@@ -160,6 +163,15 @@ AC_MSG_CHECKING([whether to build XvMC driver support])
 AC_MSG_RESULT([$XVMC])
 
 AM_CONDITIONAL(XVMC, test x$XVMC = xyes)
+
+# Check the ABI_VIDEODRV_VERSION
+SAVE_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS $XORG_CFLAGS"
+
+AM_CONDITIONAL(XSERVER_LIBPCIACCESS, test x$XSERVER_LIBPCIACCESS = xyes)
+if test "$XSERVER_LIBPCIACCESS" = yes; then
+        AC_DEFINE(XSERVER_LIBPCIACCESS,1,[Enable libpciaccess])
+fi
 
 AM_CONDITIONAL(DEBUG, test x$DEBUG = xyes)
 if test "$DEBUG" = yes; then

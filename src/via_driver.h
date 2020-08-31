@@ -78,7 +78,7 @@
 #include "via_xv_overlay.h"
 #include "via_eng_regs.h"
 
-#ifdef HAVE_PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
 #include <pciaccess.h>
 #endif
 #include <errno.h>
@@ -226,10 +226,8 @@ typedef struct _VIA {
 
 	CreateScreenResourcesProcPtr CreateScreenResources;
     CloseScreenProcPtr  CloseScreen;
-#ifdef HAVE_PCIACCESS
     struct pci_device  *PciInfo;
-#else
-    pciVideoPtr         PciInfo;
+#ifndef XSERVER_LIBPCIACCESS
     PCITAG PciTag;
 #endif
     int                 Chipset;
