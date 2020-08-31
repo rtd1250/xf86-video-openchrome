@@ -31,7 +31,7 @@ EXTRA_DIST = version.h
 CONFIG_CLEAN_FILES= version.h
 AM_CFLAGS = @XORG_CFLAGS@ $(CWARNFLAGS) @LIBUDEV_CFLAGS@ @DRI_CFLAGS@
 openchrome_drv_la_LTLIBRARIES = openchrome_drv.la
-openchrome_drv_la_LDFLAGS = -module -avoid-version @LIBUDEV_LIBS@
+openchrome_drv_la_LDFLAGS = -module -avoid-version
 openchrome_drv_ladir = @moduledir@/drivers
 
 openchrome_drv_la_SOURCES = \
