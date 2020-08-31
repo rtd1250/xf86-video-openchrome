@@ -89,7 +89,6 @@ sdkdir=$(pkg-config --variable=sdkdir xorg-server)
 
 # Checks for libraries.
 
-AC_CHECK_HEADER(xf86Modes.h,[XMODES=yes],[XMODES=no],[#include "xorg-server.h"])
 AC_CHECK_DECL(XSERVER_LIBPCIACCESS,
              [XSERVER_LIBPCIACCESS=yes],[XSERVER_LIBPCIACCESS=no],
              [#include "xorg/xorg-server.h"])
