@@ -96,7 +96,6 @@ AC_SUBST([PCIACCESS_LIBS])
 PKG_CHECK_MODULES(DRI, [libdrm >= 2.4.4 xf86driproto],
  DRI="yes"; AC_DEFINE(HAVE_DRI, 1, [DRI is available]),
  DRI="no")
-AC_MSG_CHECKING([whether to build KMS support])
 AC_MSG_RESULT([$DRI])
 
 AM_CONDITIONAL(DRI, test x$DRI = xyes)
