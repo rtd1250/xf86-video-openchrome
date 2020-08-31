@@ -142,6 +142,21 @@ if test "$DRI" = yes; then
         PKG_CHECK_MODULES(DRI, [libdrm xf86driproto])
         AC_DEFINE(OPENCHROMEDRI,1,[Enable DRI driver support])
         AC_DEFINE(OPENCHROMEDRI_DEVEL,1,[Enable developmental DRI driver support])
+        save_CFLAGS="$CFLAGS"
+        CFLAGS="$XORG_CFLAGS $DRI_CFLAGS $CFLAGS"
+        AC_CHECK_HEADER(xf86drmMode.h,
+                        [DRM_MODE=yes], [DRM_MODE=no],
+                        [#include <stdint.h>
+                         #include <stdlib.h>])
+        if test "x$DRM_MODE" = xyes; then
+            PKG_CHECK_MODULES(LIBUDEV, [libudev],
+                              [LIBUDEV=yes], [LIBUDEV=no])
+            if test "x$LIBUDEV" = xyes; then
+                AC_DEFINE(HAVE_LIBUDEV, 1, [libudev support])
+            fi
+        fi
+        CFLAGS="$save_CFLAGS"
+
         case "$host_cpu" in
             i*86)
                 XVMC=yes ;;
