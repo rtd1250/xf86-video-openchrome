@@ -40,7 +40,6 @@
 #include <X11/extensions/dpms.h>
 #endif
 
-#include "version.h"
 #include "via_driver.h"
 #include "drm_fourcc.h"
 
@@ -449,9 +448,6 @@ via_pci_probe(DriverPtr driver, int entity_num,
         xf86Msg(X_NOTICE,
                 "For support, please refer to"
                 " https://www.freedesktop.org/wiki/Openchrome/.\n");
-#ifdef BUILDCOMMENT
-        xf86Msg(X_NOTICE, BUILDCOMMENT"\n");
-#endif
     }
     return scrn != NULL;
 }
@@ -490,10 +486,6 @@ VIAProbe(DriverPtr drv, int flags)
             "VIA Technologies does not support this driver in any way.\n");
     xf86Msg(X_NOTICE, "For support, please refer to"
                       " https://www.freedesktop.org/wiki/Openchrome/.\n");
-
-#ifdef BUILDCOMMENT
-    xf86Msg(X_NOTICE, BUILDCOMMENT"\n");
-#endif
 
     if (flags & PROBE_DETECT) {
         foundScreen = TRUE;

@@ -26,9 +26,6 @@
 
 SUBDIRS = xvmc
 
-BUILT_SOURCES = version.h
-EXTRA_DIST = version.h
-CONFIG_CLEAN_FILES= version.h
 AM_CFLAGS = @XORG_CFLAGS@ $(CWARNFLAGS) @DRI_CFLAGS@ @LIBUDEV_CFLAGS@
 openchrome_drv_la_LTLIBRARIES = openchrome_drv.la
 openchrome_drv_la_LDFLAGS = -module -avoid-version
@@ -92,7 +89,7 @@ openchrome_drv_la_SOURCES += \
          drm_fourcc.h \
          openchrome_drm.h
 else
-EXTRA_DIST += \
+EXTRA_DIST = \
          drmmode_display.c \
          drmmode_display.h \
          via_dri.c \
@@ -104,23 +101,3 @@ EXTRA_DIST += \
          drm_fourcc.h \
          openchrome_drm.h
 endif
-
-via_driver.lo: version.h
-version.h: $(openchrome_drv_la_SOURCES)
-	@if [ -d ../.git ]; then \
-        echo '#define BUILDCOMMENT "(development build, branch' \
-                     "`git branch -v | sed 's/no branch/no_branch/' | \
-                      awk '/^\*/ { print $$2 }'`" \
-                     'at revision' \
-                     "`git log -1 --pretty=format:%h | head -1`"')"' \
-                    > $@.tmp; \
-    fi
-
-	@chmod 666 $@.tmp
-	@mv $@.tmp $@
-	@echo "created $@"
-
-dist-hook:
-	@[ -e version.h ] && rm version.h; \
-	echo '#define BUILDCOMMENT "(openchrome '$(VERSION)' release)"' \
-	> version.h
