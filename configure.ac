@@ -58,6 +58,11 @@ AC_ARG_ENABLE(dri, AS_HELP_STRING([--disable-dri],
               [DRI="$enableval"],
               [DRI=auto])
 
+AC_ARG_ENABLE(kms, AS_HELP_STRING([--disable-kms],
+                                  [Disable KMS support [[default=enabled]]]),
+              [DRM_MODE="$enableval"],
+              [DRM_MODE=yes])
+
 AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug],
                                     [Enable debugging support [[default=no]]]),
               [DEBUG="$enableval"],
@@ -143,16 +148,20 @@ if test "$DRI" = yes; then
     AC_DEFINE(OPENCHROMEDRI_DEVEL, 1, [Enable developmental DRI driver support])
     save_CFLAGS="$CFLAGS"
     CFLAGS="$XORG_CFLAGS $DRI_CFLAGS $CFLAGS"
-    AC_CHECK_HEADER(xf86drmMode.h,
-                    [DRM_MODE=yes], [DRM_MODE=no],
-                    [#include <stdint.h>
-                     #include <stdlib.h>])
     if test "x$DRM_MODE" = xyes; then
-        PKG_CHECK_MODULES(LIBUDEV, [libudev],
-                          [LIBUDEV=yes], [LIBUDEV=no])
-        if test "x$LIBUDEV" = xyes; then
-            AC_DEFINE(HAVE_LIBUDEV, 1, [libudev support])
+        AC_CHECK_HEADER(xf86drmMode.h,
+                        [DRM_KMS=yes], [DRM_KMS=no],
+                        [#include <stdint.h>
+                         #include <stdlib.h>])
+        if test "x$DRM_KMS" = xyes; then
+            PKG_CHECK_MODULES(LIBUDEV, [libudev],
+                              [LIBUDEV=yes], [LIBUDEV=no])
+            if test "x$LIBUDEV" = xyes; then
+                AC_DEFINE(HAVE_LIBUDEV, 1, [libudev support])
+            fi
         fi
+    else
+        DRM_KMS=no
     fi
     CFLAGS="$save_CFLAGS"
 
@@ -165,8 +174,12 @@ if test "$DRI" = yes; then
             XVMC=no ;;
     esac
 else
+    DRM_KMS=no
     XVMC="no"
 fi
+
+AC_MSG_CHECKING([whether to include KMS support])
+AC_MSG_RESULT([$DRM_KMS])
 
 if test "x$XVMC" = xyes; then
     AC_CHECK_HEADERS(pthread.h sys/ioctl.h sys/time.h time.h,,[XVMC="no"; break],)
@@ -175,6 +188,8 @@ fi
 
 AC_MSG_CHECKING([whether to build XvMC driver support])
 AC_MSG_RESULT([$XVMC])
+
+AM_CONDITIONAL(XF86DRM_MODE, test "x$DRM_KMS" = xyes)
 
 AM_CONDITIONAL(XVMC, test x$XVMC = xyes)
 

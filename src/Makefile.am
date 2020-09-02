@@ -26,78 +26,70 @@
 
 SUBDIRS = xvmc
 
+if DRI
+OPENCHROME_DRI_SRCS = \
+    via_dri.c \
+    via_xvmc.c
+endif
+
+if XF86DRM_MODE
+OPENCHROME_KMS_SRCS = \
+    drmmode_display.c
+endif
+
 AM_CFLAGS = @XORG_CFLAGS@ $(CWARNFLAGS) @DRI_CFLAGS@ @LIBUDEV_CFLAGS@
+
 openchrome_drv_la_LTLIBRARIES = openchrome_drv.la
 openchrome_drv_la_LDFLAGS = -module -avoid-version
 openchrome_drv_ladir = @moduledir@/drivers
 
 openchrome_drv_la_SOURCES = \
-         compat-api.h \
-         via_eng_regs.h \
-         via_3d.c \
-         via_3d.h \
-         via_3d_reg.h \
-         via_analog.c \
-         via_rop.h \
-         via_exa.c \
-         via_exa_h2.c \
-         via_exa_h6.c \
-         via_ums.h \
-         via_ch7xxx.c \
-         via_ch7xxx.h \
-         via_display.c \
-         via_dmabuffer.h \
-         via_driver.c \
-         via_driver.h \
-         via_i2c.c \
-         via_fp.c \
-         via_fp.h \
-         via_memcpy.c \
-         via_memmgr.h \
-         via_memmgr.c \
-         via_options.c \
-         via_outputs.c \
-         via_priv.h \
-         via_regs.h \
-         via_sii164.c \
-         via_sii164.h \
-         via_tmds.c \
-         via_tv.c \
-         via_xv_overlay.c \
-         via_xv_overlay.h \
-         via_ums.c \
-         via_vgahw.c \
-         via_vgahw.h \
-         via_xv.c \
-         via_xv.h \
-         via_vt162x.c \
-         via_vt162x.h \
-         via_vt1632.c \
-         via_vt1632.h \
-         via_xvpriv.h
+    via_3d.c \
+    via_analog.c \
+    via_ch7xxx.c \
+    via_display.c \
+    via_driver.c \
+    via_exa.c \
+    via_exa_h2.c \
+    via_exa_h6.c \
+    via_fp.c \
+    via_i2c.c \
+    via_memcpy.c \
+    via_memmgr.c \
+    via_options.c \
+    via_outputs.c \
+    via_sii164.c \
+    via_tmds.c \
+    via_tv.c \
+    via_ums.c \
+    via_vgahw.c \
+    via_vt162x.c \
+    via_vt1632.c \
+    via_xv.c \
+    via_xv_overlay.c \
+    $(OPENCHROME_DRI_SRCS) \
+    $(OPENCHROME_KMS_SRCS)
 
-if DRI
-openchrome_drv_la_SOURCES += \
-         drmmode_display.c \
-         drmmode_display.h \
-         via_dri.c \
-         via_dri.h \
-         via_drm.h \
-         via_drmclient.h \
-         via_xvmc.c \
-         via_xvmc.h \
-         drm_fourcc.h \
-         openchrome_drm.h
-else
 EXTRA_DIST = \
-         drmmode_display.c \
-         drmmode_display.h \
-         via_dri.c \
-         via_dri.h \
-         via_drm.h \
-         via_drmclient.h \
-         via_xvmc.c \
-         via_xvmc.h \
-         drm_fourcc.h \
-         openchrome_drm.h
-endif
+    compat-api.h \
+    drmmode_display.h \
+    version.h \
+    via_3d.h \
+    via_3d_reg.h \
+    via_ch7xxx.h \
+    via_dmabuffer.h \
+    via_driver.h \
+    via_eng_regs.h \
+    via_fp.c \
+    via_memmgr.h \
+    via_priv.h \
+    via_regs.h \
+    via_rop.h \
+    via_sii164.h \
+    via_ums.h \
+    via_vgahw.h \
+    via_vt162x.h \
+    via_vt1632.h \
+    via_xv.h \
+    via_xv_overlay.h \
+    via_xvpriv.h
