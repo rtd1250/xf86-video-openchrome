@@ -142,6 +142,15 @@ enum dri_type {
 };
 
 #ifdef OPENCHROMEDRI
+typedef struct
+{
+    int major;
+    int minor;
+    int patchlevel;
+} ViaDRMVersion;
+#endif /* OPENCHROMEDRI */
+
+#ifdef OPENCHROMEDRI
 
 #define VIA_XVMC_MAX_BUFFERS 2
 #define VIA_XVMC_MAX_CONTEXTS 4

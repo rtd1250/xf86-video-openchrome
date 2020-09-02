@@ -57,16 +57,11 @@
 /* RandR support */
 #include "xf86RandR12.h"
 
-typedef struct
-{
-	int major;
-	int minor;
-	int patchlevel;
-} ViaDRMVersion;
-
+#ifdef OPENCHROMEDRI
 static const ViaDRMVersion drmVIADRMExpected = { 1, 3, 0 };
 static const ViaDRMVersion drmVIADRMCompat = { 3, 0, 0 };
 static const ViaDRMVersion drmOpenChromeDRMVersion = { 3, 3, 0 };
+#endif /* OPENCHROMEDRI */
 
 /* Prototypes. */
 static void VIAIdentify(int flags);

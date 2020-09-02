@@ -67,13 +67,6 @@ extern void GlxSetVisualConfigs(int nconfigs,
                                 __GLXvisualConfig * configs,
                                 void **configprivs);
 
-typedef struct
-{
-    int major;
-    int minor;
-    int patchlevel;
-} ViaDRMVersion;
-
 static char VIAKernelDriverName[] = "via";
 static char VIAClientDriverName[] = "unichrome";
 
