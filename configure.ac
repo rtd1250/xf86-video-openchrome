@@ -42,6 +42,7 @@ XORG_DEFAULT_OPTIONS
 # Initialize libtool
 AC_DISABLE_STATIC
 AC_PROG_LIBTOOL
+
 AC_SYS_LARGEFILE
 
 AH_TOP([#include "xorg-server.h"])
@@ -82,22 +83,21 @@ XORG_DRIVER_CHECK_EXT(DPMSExtension, xextproto)
 # Checks for pkg-config packages
 PKG_CHECK_MODULES(XORG, [xorg-server xproto fontsproto glproto $REQUIRED_MODULES])
 PKG_CHECK_MODULES(XEXT, [xextproto >= 7.0.99.1],
- HAVE_XEXTPROTO_71="yes"; AC_DEFINE(HAVE_XEXTPROTO_71, 1, [xextproto 7.1 available]),
- HAVE_XEXTPROTO_71="no")
+                  HAVE_XEXTPROTO_71="yes"; AC_DEFINE(HAVE_XEXTPROTO_71, 1, [xextproto 7.1 available]),
+                  HAVE_XEXTPROTO_71="no")
 AM_CONDITIONAL(HAVE_XEXTPROTO_71, [ test "$HAVE_XEXTPROTO_71" = "yes" ])
 sdkdir=$(pkg-config --variable=sdkdir xorg-server)
 
 # Checks for libraries.
-
 SAVE_CPPFLAGS="$CPPFLAGS"
 CPPFLAGS="$CPPFLAGS $XORG_CFLAGS"
 AC_CHECK_DECL(XSERVER_LIBPCIACCESS,
-             [XSERVER_LIBPCIACCESS=yes],[XSERVER_LIBPCIACCESS=no],
+             [XSERVER_LIBPCIACCESS=yes], [XSERVER_LIBPCIACCESS=no],
              [#include "xorg-server.h"])
 CPPFLAGS="$SAVE_CPPFLAGS"
 
 if test x$XSERVER_LIBPCIACCESS = xyes; then
-       PKG_CHECK_MODULES([PCIACCESS], [pciaccess >= 0.8.0])
+    PKG_CHECK_MODULES([PCIACCESS], [pciaccess >= 0.8.0])
 fi
 
 if test "$DRI" != no; then
@@ -124,54 +124,53 @@ if test "$DRI" != no; then
     fi
 fi
 
-
 AC_MSG_CHECKING([whether to include DRI support])
 if test x$DRI = xauto; then
-        if test "$have_dri_h" = yes -a \
-                "$have_sarea_h" = yes -a \
-                "$have_dristruct_h" = yes; then
-                DRI="yes"
-        else
-                DRI="no"
-        fi
+    if test "$have_dri_h" = yes -a \
+        "$have_sarea_h" = yes -a \
+        "$have_dristruct_h" = yes; then
+        DRI="yes"
+    else
+        DRI="no"
+    fi
 fi
 AC_MSG_RESULT([$DRI])
 
 AM_CONDITIONAL(DRI, test x$DRI = xyes)
 if test "$DRI" = yes; then
-        PKG_CHECK_MODULES(DRI, [libdrm xf86driproto])
-        AC_DEFINE(OPENCHROMEDRI,1,[Enable DRI driver support])
-        AC_DEFINE(OPENCHROMEDRI_DEVEL,1,[Enable developmental DRI driver support])
-        save_CFLAGS="$CFLAGS"
-        CFLAGS="$XORG_CFLAGS $DRI_CFLAGS $CFLAGS"
-        AC_CHECK_HEADER(xf86drmMode.h,
-                        [DRM_MODE=yes], [DRM_MODE=no],
-                        [#include <stdint.h>
-                         #include <stdlib.h>])
-        if test "x$DRM_MODE" = xyes; then
-            PKG_CHECK_MODULES(LIBUDEV, [libudev],
-                              [LIBUDEV=yes], [LIBUDEV=no])
-            if test "x$LIBUDEV" = xyes; then
-                AC_DEFINE(HAVE_LIBUDEV, 1, [libudev support])
-            fi
+    PKG_CHECK_MODULES(DRI, [libdrm xf86driproto])
+    AC_DEFINE(OPENCHROMEDRI, 1, [Enable DRI driver support])
+    AC_DEFINE(OPENCHROMEDRI_DEVEL, 1, [Enable developmental DRI driver support])
+    save_CFLAGS="$CFLAGS"
+    CFLAGS="$XORG_CFLAGS $DRI_CFLAGS $CFLAGS"
+    AC_CHECK_HEADER(xf86drmMode.h,
+                    [DRM_MODE=yes], [DRM_MODE=no],
+                    [#include <stdint.h>
+                     #include <stdlib.h>])
+    if test "x$DRM_MODE" = xyes; then
+        PKG_CHECK_MODULES(LIBUDEV, [libudev],
+                          [LIBUDEV=yes], [LIBUDEV=no])
+        if test "x$LIBUDEV" = xyes; then
+            AC_DEFINE(HAVE_LIBUDEV, 1, [libudev support])
         fi
-        CFLAGS="$save_CFLAGS"
+    fi
+    CFLAGS="$save_CFLAGS"
 
-        case "$host_cpu" in
-            i*86)
-                XVMC=yes ;;
-            amd64*|x86_64*)
-                XVMC=yes ;;
-            *)
-                XVMC=no ;;
-        esac
+    case "$host_cpu" in
+        i*86)
+            XVMC=yes ;;
+        amd64*|x86_64*)
+            XVMC=yes ;;
+        *)
+            XVMC=no ;;
+    esac
 else
-        XVMC="no"
+    XVMC="no"
 fi
 
 if test "x$XVMC" = xyes; then
-	AC_CHECK_HEADERS(pthread.h sys/ioctl.h sys/time.h time.h,,[XVMC="no"; break],)
-	PKG_CHECK_MODULES(XVMC, [x11 xext xvmc])
+    AC_CHECK_HEADERS(pthread.h sys/ioctl.h sys/time.h time.h,,[XVMC="no"; break],)
+    PKG_CHECK_MODULES(XVMC, [x11 xext xvmc])
 fi
 
 AC_MSG_CHECKING([whether to build XvMC driver support])
@@ -181,22 +180,22 @@ AM_CONDITIONAL(XVMC, test x$XVMC = xyes)
 
 AM_CONDITIONAL(XSERVER_LIBPCIACCESS, test x$XSERVER_LIBPCIACCESS = xyes)
 if test "$XSERVER_LIBPCIACCESS" = yes; then
-        AC_DEFINE(XSERVER_LIBPCIACCESS,1,[Enable libpciaccess])
+    AC_DEFINE(XSERVER_LIBPCIACCESS, 1, [Enable libpciaccess])
 fi
 
 AM_CONDITIONAL(DEBUG, test x$DEBUG = xyes)
 if test "$DEBUG" = yes; then
-        AC_DEFINE(HAVE_DEBUG,1,[Enable debug support])
+    AC_DEFINE(HAVE_DEBUG, 1, [Enable debug support])
 fi
 
 AM_CONDITIONAL(XV_DEBUG, test x$XV_DEBUG = xyes)
 if test "$XV_DEBUG" = yes; then
-        AC_DEFINE(XV_DEBUG,1,[Enable XVideo debug support])
+    AC_DEFINE(XV_DEBUG, 1, [Enable XVideo debug support])
 fi
 
 AM_CONDITIONAL(TOOLS, test x$TOOLS = xyes)
 if test "$TOOLS" = yes; then
-        AC_DEFINE(TOOLS,1,[Enable build of registers dumper tool])
+    AC_DEFINE(TOOLS, 1, [Enable build of registers dumper tool])
 fi
 
 AC_DEFINE(X_USE_REGION_NULL, 1, [Compatibility define for older Xen])
