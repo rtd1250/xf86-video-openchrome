@@ -869,19 +869,16 @@ viaUMSScreenInit(ScrnInfoPtr pScrn)
     } else if (pVia->directRenderingType == DRI_1) {
         if (!VIADRIKernelInit(pScrn)) {
             ret = FALSE;
-            goto exit;
         }
 
         if ((!pVia->NoAccel) && (pVia->useEXA)) {
             if (!viaInitExa(pScrn->pScreen)) {
                 ret = FALSE;
-                goto exit;
             }
         }
 #endif
     }
 
-exit:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting %s.\n", __func__));
     return ret;
