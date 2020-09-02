@@ -43,24 +43,6 @@
 #include "via_regs.h"
 #include "via_dmabuffer.h"
 
-/*
- * Use PCI MMIO to flush the command buffer when AGP DMA is not available.
- */
-static void
-viaDumpDMA(ViaCommandBuffer *cb)
-{
-    register CARD32 *bp = cb->buf;
-    CARD32 *endp = bp + cb->pos;
-
-    while (bp != endp) {
-        if (((bp - cb->buf) & 3) == 0) {
-            ErrorF("\n %04lx: ", (unsigned long)(bp - cb->buf));
-        }
-        ErrorF("0x%08x ", (unsigned)*bp++);
-    }
-    ErrorF("\n");
-}
-
 static void
 viaFlushPCI(ViaCommandBuffer *cb)
 {
@@ -134,6 +116,24 @@ viaFlushPCI(ViaCommandBuffer *cb)
 }
 
 #ifdef OPENCHROMEDRI
+/*
+ * Use PCI MMIO to flush the command buffer when AGP DMA is not available.
+ */
+static void
+viaDumpDMA(ViaCommandBuffer *cb)
+{
+    register CARD32 *bp = cb->buf;
+    CARD32 *endp = bp + cb->pos;
+
+    while (bp != endp) {
+        if (((bp - cb->buf) & 3) == 0) {
+            ErrorF("\n %04lx: ", (unsigned long)(bp - cb->buf));
+        }
+        ErrorF("0x%08x ", (unsigned)*bp++);
+    }
+    ErrorF("\n");
+}
+
 /*
  * Flush the command buffer using DRM. If in PCI mode, we can bypass DRM,
  * but not for command buffers that contain 3D engine state, since then
