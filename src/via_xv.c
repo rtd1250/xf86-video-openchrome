@@ -48,6 +48,8 @@
 #include "via_xvpriv.h"
 #include "fourcc.h"
 
+#include "via_eng_regs.h"
+
 /*
  * D E F I N E
  */

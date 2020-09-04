@@ -29,6 +29,8 @@
 #include "config.h"
 #endif
 
+#include "via_eng_regs.h"
+
 #include "via_driver.h"
 
 static ViaExpireNumberTable CLE266AExpireNumber[] = {

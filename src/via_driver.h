@@ -76,7 +76,6 @@
 #include "via_3d.h"
 #include "via_xv.h"
 #include "via_xv_overlay.h"
-#include "via_eng_regs.h"
 
 #ifdef XSERVER_LIBPCIACCESS
 #include <pciaccess.h>

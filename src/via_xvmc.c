@@ -59,6 +59,7 @@
 #include "dri.h"
 #include "via_xvpriv.h"
 #include "via_xv.h"
+#include "via_eng_regs.h"
 
 #define MAKE_ATOM(a) MakeAtom(a, strlen(a), TRUE)
 

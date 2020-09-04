@@ -40,6 +40,8 @@
 #include <math.h>
 #include <unistd.h>
 
+#include "via_eng_regs.h"
+
 /*
  * Warning: this file contains revision checks which are CLE266-specific.
  * There seems to be no checking present for KM400 or more recent devices.
