@@ -83,8 +83,6 @@
 #include "via_xv.h"
 #include "via_xv_overlay.h"
 
-#include "via_vt1632.h"
-
 #include "compat-api.h"
 
 
