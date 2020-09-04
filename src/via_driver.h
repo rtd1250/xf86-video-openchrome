@@ -126,6 +126,22 @@
 #define VIDEO_ENGINE_CLE    1   /* CLE First generation video engine */
 #define VIDEO_ENGINE_CME    2   /* CME Second generation video engine */
 
+#ifdef XSERVER_LIBPCIACCESS
+#define VIA_MEMBASE(p,n)  (p)->regions[(n)].base_addr
+#define VENDOR_ID(p)      (p)->vendor_id
+#define DEVICE_ID(p)      (p)->device_id
+#define SUBVENDOR_ID(p)   (p)->subvendor_id
+#define SUBSYS_ID(p)      (p)->subdevice_id
+#define CHIP_REVISION(p)  (p)->revision
+#else
+#define VIA_MEMBASE(p,n)  (p)->memBase[n]
+#define VENDOR_ID(p)      (p)->vendor
+#define DEVICE_ID(p)      (p)->chipType
+#define SUBVENDOR_ID(p)   (p)->subsysVendor
+#define SUBSYS_ID(p)      (p)->subsysCard
+#define CHIP_REVISION(p)  (p)->chipRev
+#endif
+
 extern int gVIAEntityIndex;
 
 /*
