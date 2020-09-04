@@ -28,6 +28,7 @@
 #define DRMMODE_DISPLAY_H
 
 #ifdef OPENCHROMEDRI
+#include "xf86drm.h"
 #include "xf86drmMode.h"
 #endif
 #ifdef HAVE_LIBUDEV
