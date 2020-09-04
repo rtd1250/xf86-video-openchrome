@@ -33,6 +33,9 @@
 #include "shadow.h"
 
 #include "globals.h"
+
+#include "xf86.h"
+
 #ifdef HAVE_XEXTPROTO_71
 #include <X11/extensions/dpmsconst.h>
 #else
@@ -40,7 +43,6 @@
 #include <X11/extensions/dpms.h>
 #endif
 
-#include "via_driver.h"
 #include "drm_fourcc.h"
 
 #if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 6
@@ -56,6 +58,9 @@
 
 /* RandR support */
 #include "xf86RandR12.h"
+
+#include "via_driver.h"
+
 
 #ifdef OPENCHROMEDRI
 static const ViaDRMVersion drmVIADRMExpected = { 1, 3, 0 };
