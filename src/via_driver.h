@@ -34,26 +34,33 @@
 #define DEBUG(x)
 #endif
 
-#include "vgaHW.h"
-#include "xf86.h"
 
+#include "compiler.h"
+
+#include <errno.h>
+
+#include "vgaHW.h"
+
+#include "xf86.h"
+#include "xf86_OSproc.h"
+#include "xf86cmap.h"
+#include "xf86Crtc.h"
+#include "xf86Cursor.h"
+#include "xf86fbman.h"
+#include "xf86Pci.h"
+#include "xf86RandR12.h"
 #if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 6
 #include "xf86Resources.h"
 #endif
 
-#include "xf86Pci.h"
-#include "xf86_OSproc.h"
-#include "compiler.h"
-#include "xf86Cursor.h"
-#include "mipointer.h"
-#include "micmap.h"
-#include "fourcc.h"
+#include "exa.h"
 #include "fb.h"
-
-#include "xf86Crtc.h"
-#include "xf86fbman.h"
-#include "xf86RandR12.h"
-#include "xf86cmap.h"
+#include "fourcc.h"
+#include "micmap.h"
+#include "mipointer.h"
+#ifdef XSERVER_LIBPCIACCESS
+#include <pciaccess.h>
+#endif
 
 #ifdef OPENCHROMEDRI
 #define _XF86DRI_SERVER_
@@ -66,7 +73,6 @@
 #include "via_drmclient.h"
 #include "via_drm.h"
 #endif
-#include "exa.h"
 #include "via_memmgr.h"
 
 #include "via_regs.h"
@@ -76,11 +82,6 @@
 #include "via_3d.h"
 #include "via_xv.h"
 #include "via_xv_overlay.h"
-
-#ifdef XSERVER_LIBPCIACCESS
-#include <pciaccess.h>
-#endif
-#include <errno.h>
 
 #include "via_vt1632.h"
 
