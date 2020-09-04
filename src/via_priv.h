@@ -27,11 +27,6 @@
 #ifndef _VIA_PRIV_H_
 #define _VIA_PRIV_H_ 1
 
-#ifdef OPENCHROMEDRI
-#include "via_drm.h"
-#endif
-#include "exa.h"
-
 /*
  * Alignment macro functions
  */
