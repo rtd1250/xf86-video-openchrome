@@ -62,28 +62,31 @@
 #include <pciaccess.h>
 #endif
 
+#include "compat-api.h"
+
+#include "drmmode_display.h"
+
+#include "via_3d.h"
+#include "via_dmabuffer.h"
+#include "via_memmgr.h"
+#include "via_regs.h"
+#include "via_ums.h"
+#include "via_xv.h"
+#include "via_xv_overlay.h"
+
 #ifdef OPENCHROMEDRI
 #define _XF86DRI_SERVER_
 #include "xf86dri.h"
+
 #include "sarea.h"
 #include "dri.h"
 #include "drm_fourcc.h"
 #include "GL/glxint.h"
+
 #include "via_dri.h"
 #include "via_drmclient.h"
 #include "via_drm.h"
 #endif
-#include "via_memmgr.h"
-
-#include "via_regs.h"
-#include "drmmode_display.h"
-#include "via_ums.h"
-#include "via_dmabuffer.h"
-#include "via_3d.h"
-#include "via_xv.h"
-#include "via_xv_overlay.h"
-
-#include "compat-api.h"
 
 
 #define VIA_NAME            "OpenChrome"
