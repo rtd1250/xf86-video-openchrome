@@ -91,5 +91,6 @@ EXTRA_DIST = \
     via_vt162x.h \
     via_vt1632.h \
     via_xv.h \
-    via_xv_overlay.h \
-    via_xvpriv.h
+    via_xvpriv.h \
+    via_xvmc.h \
+    via_xv_overlay.h
