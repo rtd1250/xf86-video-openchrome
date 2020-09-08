@@ -82,7 +82,6 @@ EXTRA_DIST = \
     via_eng_regs.h \
     via_fp.c \
     via_memmgr.h \
-    via_priv.h \
     via_regs.h \
     via_rop.h \
     via_sii164.h \
