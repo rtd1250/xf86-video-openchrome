@@ -820,16 +820,172 @@ fail:
     return FALSE;
 }
 
+/*
+ * viaDrmOpen() probably should not be located here, but for now,
+ * it will stay here.  Someday, it will move into a different file.
+ */
+#ifdef OPENCHROMEDRI
+static Bool
+viaDrmOpen(ScrnInfoPtr pScrn)
+{
+    VIAPtr pVia = VIAPTR(pScrn);
+    char *busId = NULL;
+    drmVersionPtr drmVer;
+    Bool status = FALSE;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
+    if (xf86LoaderCheckSymbol("DRICreatePCIBusID")) {
+        busId = DRICreatePCIBusID(pVia->PciInfo);
+        if (!busId) {
+            goto exit;
+        }
+    } else {
+        busId = malloc(64);
+        if (!busId) {
+            goto exit;
+        }
+
+        sprintf(busId,
+                "PCI:%d:%d:%d",
+                pVia->PciInfo->bus,
+#ifdef XSERVER_LIBPCIACCESS
+                pVia->PciInfo->dev,
+#else
+                pVia->PciInfo->device,
+#endif
+                pVia->PciInfo->func);
+    }
+
+    /*
+     * Look for OpenChrome DRM first.
+     * KMS supports needs to be present for OpenChrome DRM to
+     * function properly.
+     */
+    pVia->drmmode.fd = drmOpen("openchrome", busId);
+    if (pVia->drmmode.fd != -1) {
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                    "OpenChrome DRM detected.\n");
+        drmVer = drmGetVersion(pVia->drmmode.fd);
+        if (drmVer) {
+            pVia->drmVerMajor = drmVer->version_major;
+            pVia->drmVerMinor = drmVer->version_minor;
+            pVia->drmVerPatchLevel = drmVer->version_patchlevel;
+            drmFreeVersion(drmVer);
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "OpenChrome DRM Version: %d.%d.%d\n",
+                        pVia->drmVerMajor, pVia->drmVerMinor,
+                        pVia->drmVerPatchLevel);
+
+            if ((pVia->drmVerMajor > drmOpenChromeDRMVersion.major) ||
+                ((pVia->drmVerMajor == drmOpenChromeDRMVersion.major) &&
+                (pVia->drmVerMinor >= drmOpenChromeDRMVersion.minor))) {
+                if (!drmCheckModesettingSupported(busId)) {
+                    pVia->KMS = TRUE;
+                    pVia->directRenderingType = DRI_2;
+                    pVia->NoAccel = TRUE;
+                    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                                "KMS is supported by "
+                                "OpenChrome DRM.\n");
+                } else {
+                    xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                                "KMS is not available.\n");
+                    xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                                "Disabling OpenChrome DRM support.\n");
+                }
+            } else {
+                xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                            "Unsupported version of OpenChrome DRM "
+                            "detected.\n");
+                xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                            "Only OpenChrome DRM Version %d.%d or "
+                            "later is supported.\n",
+                            drmOpenChromeDRMVersion.major,
+                            drmOpenChromeDRMVersion.minor);
+                xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                            "Disabling OpenChrome DRM support.\n");
+            }
+        } else {
+            xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                        "Not able to obtain OpenChrome DRM version.\n");
+            xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                        "Disabling OpenChrome DRM support.\n");
+        }
+    }
+
+    free(busId);
+
+    /*
+     * Now, check for "legacy" DRI1 VIA DRM.
+     */
+    if (!pVia->KMS) {
+        busId = DRICreatePCIBusID(pVia->PciInfo);
+        pVia->drmmode.fd = drmOpen("via", busId);
+        if (pVia->drmmode.fd != -1) {
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "VIA DRM detected.\n");
+            drmVer = drmGetVersion(pVia->drmmode.fd);
+            if (drmVer) {
+                pVia->drmVerMajor = drmVer->version_major;
+                pVia->drmVerMinor = drmVer->version_minor;
+                pVia->drmVerPatchLevel = drmVer->version_patchlevel;
+                drmFreeVersion(drmVer);
+
+                xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "VIA DRM Version: %d.%d.%d\n",
+                            pVia->drmVerMajor, pVia->drmVerMinor,
+                            pVia->drmVerPatchLevel);
+
+                if (((pVia->drmVerMajor > drmVIADRMExpected.major) &&
+                    (pVia->drmVerMajor < drmVIADRMCompat.major)) ||
+                    ((pVia->drmVerMajor == drmVIADRMExpected.major) &&
+                    (pVia->drmVerMinor >= drmVIADRMExpected.minor) &&
+                    (pVia->drmVerMajor < drmVIADRMCompat.major))) {
+                    pVia->directRenderingType = DRI_1;
+                    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                                "This version of VIA DRM is "
+                                "compatible with OpenChrome DDX.\n");
+                } else {
+                    xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                                "This version of VIA DRM is not "
+                                "compatible with OpenChrome DDX.\n"
+                                "OpenChrome DDX can work with "
+                                "VIA DRM Version %d.%d to %d.%d.\n",
+                                drmVIADRMExpected.major,
+                                drmVIADRMExpected.minor,
+                                drmVIADRMCompat.major,
+                                drmVIADRMCompat.minor);
+                    xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                                "Disabling VIA DRM support.\n");
+                }
+            } else {
+                xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                            "Not able to obtain VIA DRM version.\n");
+            }
+        } else {
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "OpenChrome DDX will now operate "
+                        "without DRM.\n");
+        }
+
+        free(busId);
+    }
+
+    status = TRUE;
+exit:
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
+    return status;
+}
+#endif /* OPENCHROMEDRI */
+
 static Bool
 VIAPreInit(ScrnInfoPtr pScrn, int flags)
 {
     EntityInfoPtr pEnt;
     VIAPtr pVia;
     MessageType from = X_DEFAULT;
-#ifdef OPENCHROMEDRI
-    char *busId = NULL;
-    drmVersionPtr drmVer;
-#endif
     rgb defaultWeight = {0, 0, 0};
     rgb defaultMask = {0, 0, 0};
     Gamma defaultGamma = {0.0, 0.0, 0.0};
@@ -1005,135 +1161,10 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     pVia->directRenderingType = DRI_NONE;
     pVia->KMS = FALSE;
 #ifdef OPENCHROMEDRI
-    if (xf86LoaderCheckSymbol("DRICreatePCIBusID")) {
-        busId = DRICreatePCIBusID(pVia->PciInfo);
-    } else {
-        busId = malloc(64);
-        if (!busId) {
-            goto free_rec;
-        }
-
-        sprintf(busId,
-                "PCI:%d:%d:%d",
-                pVia->PciInfo->bus,
-#ifdef XSERVER_LIBPCIACCESS
-                pVia->PciInfo->dev,
-#else
-                pVia->PciInfo->device,
-#endif
-                pVia->PciInfo->func);
+    if (!viaDrmOpen(pScrn)) {
+        goto free_rec;
     }
-
-    /* Look for OpenChrome DRM first. */
-    /* KMS supports needs to be present for OpenChrome DRM to
-     * function properly.*/
-    pVia->drmmode.fd = drmOpen("openchrome", busId);
-    if (pVia->drmmode.fd != -1) {
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                    "OpenChrome DRM detected.\n");
-        drmVer = drmGetVersion(pVia->drmmode.fd);
-        if (drmVer) {
-            pVia->drmVerMajor = drmVer->version_major;
-            pVia->drmVerMinor = drmVer->version_minor;
-            pVia->drmVerPatchLevel = drmVer->version_patchlevel;
-            drmFreeVersion(drmVer);
-            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "OpenChrome DRM Version: %d.%d.%d\n",
-                        pVia->drmVerMajor, pVia->drmVerMinor,
-                        pVia->drmVerPatchLevel);
-
-            if ((pVia->drmVerMajor > drmOpenChromeDRMVersion.major) ||
-                ((pVia->drmVerMajor == drmOpenChromeDRMVersion.major) &&
-                (pVia->drmVerMinor >= drmOpenChromeDRMVersion.minor))) {
-                if (!drmCheckModesettingSupported(busId)) {
-                    pVia->KMS = TRUE;
-                    pVia->directRenderingType = DRI_2;
-                    pVia->NoAccel = TRUE;
-                    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                                "KMS is supported by "
-                                "OpenChrome DRM.\n");
-                } else {
-                    xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                                "KMS is not available.\n");
-                    xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                                "Disabling OpenChrome DRM support.\n");
-                }
-            } else {
-                xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                            "Unsupported version of OpenChrome DRM "
-                            "detected.\n");
-                xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                            "Only OpenChrome DRM Version %d.%d or "
-                            "later is supported.\n",
-                            drmOpenChromeDRMVersion.major,
-                            drmOpenChromeDRMVersion.minor);
-                xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                            "Disabling OpenChrome DRM support.\n");
-            }
-        } else {
-            xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                        "Not able to obtain OpenChrome DRM version.\n");
-            xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                        "Disabling OpenChrome DRM support.\n");
-        }
-    }
-
-    free(busId);
-
-    /* Now, check for "legacy" DRI1 VIA DRM. */
-    if (!pVia->KMS) {
-        busId = DRICreatePCIBusID(pVia->PciInfo);
-        pVia->drmmode.fd = drmOpen("via", busId);
-        if (pVia->drmmode.fd != -1) {
-            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "VIA DRM detected.\n");
-            drmVer = drmGetVersion(pVia->drmmode.fd);
-            if (drmVer) {
-                pVia->drmVerMajor = drmVer->version_major;
-                pVia->drmVerMinor = drmVer->version_minor;
-                pVia->drmVerPatchLevel = drmVer->version_patchlevel;
-                drmFreeVersion(drmVer);
-
-                xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "VIA DRM Version: %d.%d.%d\n",
-                            pVia->drmVerMajor, pVia->drmVerMinor,
-                            pVia->drmVerPatchLevel);
-
-                if (((pVia->drmVerMajor > drmVIADRMExpected.major) &&
-                    (pVia->drmVerMajor < drmVIADRMCompat.major)) ||
-                    ((pVia->drmVerMajor == drmVIADRMExpected.major) &&
-                    (pVia->drmVerMinor >= drmVIADRMExpected.minor) &&
-                    (pVia->drmVerMajor < drmVIADRMCompat.major))) {
-                    pVia->directRenderingType = DRI_1;
-                    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                                "This version of VIA DRM is "
-                                "compatible with OpenChrome DDX.\n");
-                } else {
-                    xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                                "This version of VIA DRM is not "
-                                "compatible with OpenChrome DDX.\n"
-                                "OpenChrome DDX can work with "
-                                "VIA DRM Version %d.%d to %d.%d.\n",
-                                drmVIADRMExpected.major,
-                                drmVIADRMExpected.minor,
-                                drmVIADRMCompat.major,
-                                drmVIADRMCompat.minor);
-                    xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                                "Disabling VIA DRM support.\n");
-                }
-            } else {
-                xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                            "Not able to obtain VIA DRM version.\n");
-            }
-        } else {
-            xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "OpenChrome DDX will now operate "
-                        "without DRM.\n");
-        }
-
-        free(busId);
-    }
-#endif
+#endif /* OPENCHROMEDRI */
 
     option = xf86NewOption(strEXAOptionName, strEXAValue);
     xf86CollectOptions(pScrn, option);
