@@ -439,9 +439,9 @@ via_pci_probe(DriverPtr driver, int entity_num,
         scrn->ScreenInit = VIAScreenInit;
         scrn->SwitchMode = VIASwitchMode;
         scrn->AdjustFrame = VIAAdjustFrame;
-		scrn->EnterVT = VIAEnterVT;
-		scrn->LeaveVT = VIALeaveVT;
-		scrn->FreeScreen = VIAFreeScreen;
+        scrn->EnterVT = VIAEnterVT;
+        scrn->LeaveVT = VIALeaveVT;
+        scrn->FreeScreen = VIAFreeScreen;
 
         xf86Msg(X_NOTICE,
                 "VIA Technologies does not support this driver in any way.\n");
@@ -496,18 +496,18 @@ VIAProbe(DriverPtr drv, int flags)
 
             if ((pScrn = xf86ConfigPciEntity(pScrn, 0, usedChips[i],
                                              VIAPciChipsets, 0, 0, 0, 0, 0))) {
-				pScrn->driverVersion = VIA_DRIVER_VERSION;
-				pScrn->driverName = VIA_DRIVER_NAME;
-				pScrn->name = VIA_NAME;
-				pScrn->Probe = VIAProbe;
-				pScrn->PreInit = VIAPreInit;
-				pScrn->ScreenInit = VIAScreenInit;
-				pScrn->SwitchMode = VIASwitchMode;
-				pScrn->AdjustFrame = VIAAdjustFrame;
-				pScrn->EnterVT = VIAEnterVT;
-				pScrn->LeaveVT = VIALeaveVT;
-				pScrn->FreeScreen = VIAFreeScreen;
-				foundScreen = TRUE;
+                pScrn->driverVersion = VIA_DRIVER_VERSION;
+                pScrn->driverName = VIA_DRIVER_NAME;
+                pScrn->name = VIA_NAME;
+                pScrn->Probe = VIAProbe;
+                pScrn->PreInit = VIAPreInit;
+                pScrn->ScreenInit = VIAScreenInit;
+                pScrn->SwitchMode = VIASwitchMode;
+                pScrn->AdjustFrame = VIAAdjustFrame;
+                pScrn->EnterVT = VIAEnterVT;
+                pScrn->LeaveVT = VIALeaveVT;
+                pScrn->FreeScreen = VIAFreeScreen;
+                foundScreen = TRUE;
             }
 #if 0
             xf86ConfigActivePciEntity(pScrn,
@@ -1203,7 +1203,7 @@ exit:
 
 static void
 LoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
-		LOCO * colors, VisualPtr pVisual)
+            LOCO * colors, VisualPtr pVisual)
 {
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
     CARD16 lut_r[256], lut_g[256], lut_b[256];
@@ -1265,7 +1265,7 @@ viaUpdatePacked(ScreenPtr pScreen, shadowBufPtr pBuf)
 
 static void *
 viaShadowWindow(ScreenPtr pScreen, CARD32 row, CARD32 offset, int mode,
-				CARD32 *size, void *closure)
+                CARD32 *size, void *closure)
 {
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     VIAPtr pVia = VIAPTR(pScrn);
