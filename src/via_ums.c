@@ -1335,7 +1335,7 @@ viaUMSPreInit(ScrnInfoPtr pScrn)
 #endif
     int max_pitch, max_height;
     xf86CrtcPtr iga1, iga2;
-    Bool ret;
+    Bool status = FALSE;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered %s.\n", __func__));
@@ -1347,12 +1347,10 @@ viaUMSPreInit(ScrnInfoPtr pScrn)
     viaQuirksInit(pScrn);
 
     if (!xf86LoadSubModule(pScrn, "vgahw")) {
-        ret = FALSE;
         goto exit;
     }
 
     if (!vgaHWGetHWRec(pScrn)) {
-        ret = FALSE;
         goto exit;
     }
 
@@ -1365,7 +1363,6 @@ viaUMSPreInit(ScrnInfoPtr pScrn)
 #endif
 
     if (!viaProbeVRAM(pScrn)) {
-        ret = FALSE;
         goto exit;
     }
 
@@ -1396,7 +1393,6 @@ viaUMSPreInit(ScrnInfoPtr pScrn)
 
     /* Map PCI hardware resources to the memory map. */
     if (!viaMapMMIO(pScrn)) {
-        ret = FALSE;
         goto exit;
     }
 
@@ -1437,20 +1433,18 @@ viaUMSPreInit(ScrnInfoPtr pScrn)
 
     if (pVia->drmmode.hwcursor) {
         if (!xf86LoadSubModule(pScrn, "ramdac")) {
-            ret = FALSE;
-            goto exit;
+            goto free_mmio;
         }
     }
 
     if (!xf86LoadSubModule(pScrn, "i2c")) {
-        return FALSE;
+        goto free_mmio;
     } else {
         ViaI2CInit(pScrn);
     }
 
     if (!xf86LoadSubModule(pScrn, "ddc")) {
-        ret = FALSE;
-        goto exit;
+        goto free_mmio;
     }
 
     /*
@@ -1480,16 +1474,14 @@ viaUMSPreInit(ScrnInfoPtr pScrn)
     iga1_rec = (drmmode_crtc_private_ptr) xnfcalloc(sizeof(drmmode_crtc_private_rec), 1);
     if (!iga1_rec) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "IGA1 Rec allocation failed.\n");
-        ret = FALSE;
-        goto exit;
+        goto free_mmio;
     }
 
     iga1 = xf86CrtcCreate(pScrn, &iga1_crtc_funcs);
     if (!iga1) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "xf86CrtcCreate failed.\n");
         free(iga1_rec);
-        ret = FALSE;
-        goto exit;
+        goto free_mmio;
     }
 
     iga1_rec->drmmode = &pVia->drmmode;
@@ -1500,8 +1492,7 @@ viaUMSPreInit(ScrnInfoPtr pScrn)
     if (!iga2_rec) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "IGA1 Rec allocation failed.\n");
         xf86CrtcDestroy(iga1);
-        ret = FALSE;
-        goto exit;
+        goto free_mmio;
     }
 
     iga2 = xf86CrtcCreate(pScrn, &iga2_crtc_funcs);
@@ -1509,8 +1500,7 @@ viaUMSPreInit(ScrnInfoPtr pScrn)
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "xf86CrtcCreate failed.\n");
         xf86CrtcDestroy(iga1);
         free(iga2_rec);
-        ret = FALSE;
-        goto exit;
+        goto free_mmio;
     }
 
     iga2_rec->drmmode = &pVia->drmmode;
@@ -1522,8 +1512,7 @@ viaUMSPreInit(ScrnInfoPtr pScrn)
                     "Detected bitsPerPixel to be 0 bit.\n");
         xf86CrtcDestroy(iga2);
         xf86CrtcDestroy(iga1);
-        ret = FALSE;
-        goto exit;
+        goto free_mmio;
     }
 
     /*
@@ -1545,11 +1534,14 @@ viaUMSPreInit(ScrnInfoPtr pScrn)
 
     viaInitDisplay(pScrn);
 
-    ret = xf86InitialConfiguration(pScrn, TRUE);
+    status = xf86InitialConfiguration(pScrn, TRUE);
+    goto exit;
+free_mmio:
+    viaUnmapMMIO(pScrn);
 exit:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting %s.\n", __func__));
-    return ret;
+    return status;
 }
 
 void

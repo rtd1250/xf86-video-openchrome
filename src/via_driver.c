@@ -1177,7 +1177,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
 
     if (pVia->KMS) {
         if (!drmmode_pre_init(pScrn, &pVia->drmmode)) {
-            goto fail;
+            goto free_rec;
         }
     } else {
         /*
@@ -1186,7 +1186,7 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
          * they will need to be explicitly relinquished.
          */
         if (!viaUMSPreInit(pScrn)) {
-            goto fail;
+            goto free_rec;
         }
     }
 
