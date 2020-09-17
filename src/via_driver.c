@@ -863,7 +863,7 @@ viaDrmOpen(ScrnInfoPtr pScrn)
      * KMS supports needs to be present for OpenChrome DRM to
      * function properly.
      */
-    pVia->drmmode.fd = drmOpen("openchrome", busId);
+    pVia->drmmode.fd = drmOpen(OPENCHROME_DRM_DRIVER_NAME, busId);
     if (pVia->drmmode.fd != -1) {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                     "OpenChrome DRM detected.\n");
@@ -921,7 +921,7 @@ viaDrmOpen(ScrnInfoPtr pScrn)
      */
     if (!pVia->KMS) {
         busId = DRICreatePCIBusID(pVia->PciInfo);
-        pVia->drmmode.fd = drmOpen("via", busId);
+        pVia->drmmode.fd = drmOpen(VIA_DRM_DRIVER_NAME, busId);
         if (pVia->drmmode.fd != -1) {
             xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "VIA DRM detected.\n");

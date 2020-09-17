@@ -95,6 +95,9 @@
                             (PACKAGE_VERSION_MINOR << 16) | \
                             PACKAGE_VERSION_PATCHLEVEL
 
+#define OPENCHROME_DRM_DRIVER_NAME  "openchrome"
+#define VIA_DRM_DRIVER_NAME         "via"
+
 #define VIA_AGP_UPL_SIZE    (1024*128)
 #define VIA_DMA_DL_SIZE     (1024*128)
 #define VIA_SCRATCH_SIZE    (4*1024*1024)
