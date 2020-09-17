@@ -1005,7 +1005,24 @@ VIAPreInit(ScrnInfoPtr pScrn, int flags)
     pVia->directRenderingType = DRI_NONE;
     pVia->KMS = FALSE;
 #ifdef OPENCHROMEDRI
-    busId = DRICreatePCIBusID(pVia->PciInfo);
+    if (xf86LoaderCheckSymbol("DRICreatePCIBusID")) {
+        busId = DRICreatePCIBusID(pVia->PciInfo);
+    } else {
+        busId = malloc(64);
+        if (!busId) {
+            goto free_rec;
+        }
+
+        sprintf(busId,
+                "PCI:%d:%d:%d",
+                pVia->PciInfo->bus,
+#ifdef XSERVER_LIBPCIACCESS
+                pVia->PciInfo->dev,
+#else
+                pVia->PciInfo->device,
+#endif
+                pVia->PciInfo->func);
+    }
 
     /* Look for OpenChrome DRM first. */
     /* KMS supports needs to be present for OpenChrome DRM to
