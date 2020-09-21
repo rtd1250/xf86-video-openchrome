@@ -73,7 +73,6 @@ openchrome_drv_la_SOURCES = \
 EXTRA_DIST = \
     compat-api.h \
     drmmode_display.h \
-    version.h \
     via_3d.h \
     via_3d_reg.h \
     via_ch7xxx.h \
