@@ -209,7 +209,7 @@ viaTMDSIOPadSetting(ScrnInfoPtr pScrn, Bool ioPadOn)
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
-    CARD8 sr12, sr13, sr5a;
+    CARD8 sr13, sr5a;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaTMDSIOPadSetting.\n"));
@@ -221,9 +221,6 @@ viaTMDSIOPadSetting(ScrnInfoPtr pScrn, Bool ioPadOn)
                         "Setting 3C5.5A[0] to 0.\n"));
     ViaSeqMask(hwp, 0x5A, sr5a & 0xFE, 0x01);
 
-    sr12 = hwp->readSeq(hwp, 0x12);
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "SR12: 0x%02X\n", sr12));
     sr13 = hwp->readSeq(hwp, 0x13);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "SR13: 0x%02X\n", sr13));
@@ -749,7 +746,9 @@ viaExtTMDSSetDataDriveStrength(ScrnInfoPtr pScrn, CARD8 dataDriveStrength)
 static void
 via_tmds_create_resources(xf86OutputPtr output)
 {
+#ifdef HAVE_DEBUG
     ScrnInfoPtr pScrn = output->scrn;
+#endif /* HAVE_DEBUG */
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_tmds_create_resources.\n"));
@@ -788,7 +787,9 @@ via_tmds_dpms(xf86OutputPtr output, int mode)
 static void
 via_tmds_save(xf86OutputPtr output)
 {
+#ifdef HAVE_DEBUG
     ScrnInfoPtr pScrn = output->scrn;
+#endif /* HAVE_DEBUG */
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_tmds_save.\n"));
@@ -800,7 +801,9 @@ via_tmds_save(xf86OutputPtr output)
 static void
 via_tmds_restore(xf86OutputPtr output)
 {
+#ifdef HAVE_DEBUG
     ScrnInfoPtr pScrn = output->scrn;
+#endif /* HAVE_DEBUG */
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_tmds_restore.\n"));
@@ -833,7 +836,9 @@ static Bool
 via_tmds_mode_fixup(xf86OutputPtr output, DisplayModePtr mode,
                       DisplayModePtr adjusted_mode)
 {
+#ifdef HAVE_DEBUG
     ScrnInfoPtr pScrn = output->scrn;
+#endif /* HAVE_DEBUG */
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_tmds_mode_fixup.\n"));
@@ -943,7 +948,9 @@ static Bool
 via_tmds_set_property(xf86OutputPtr output, Atom property,
                      RRPropertyValuePtr value)
 {
+#ifdef HAVE_DEBUG
     ScrnInfoPtr pScrn = output->scrn;
+#endif /* HAVE_DEBUG */
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_tmds_set_property.\n"));
@@ -958,7 +965,9 @@ via_tmds_set_property(xf86OutputPtr output, Atom property,
 static Bool
 via_tmds_get_property(xf86OutputPtr output, Atom property)
 {
+#ifdef HAVE_DEBUG
     ScrnInfoPtr pScrn = output->scrn;
+#endif /* HAVE_DEBUG */
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_tmds_get_property.\n"));
@@ -972,7 +981,9 @@ via_tmds_get_property(xf86OutputPtr output, Atom property)
 static void
 via_tmds_destroy(xf86OutputPtr output)
 {
+#ifdef HAVE_DEBUG
     ScrnInfoPtr pScrn = output->scrn;
+#endif /* HAVE_DEBUG */
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_tmds_destroy.\n"));
@@ -1090,7 +1101,7 @@ viaExtTMDSProbe(ScrnInfoPtr pScrn)
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
-    CARD8 sr12, sr13;
+    CARD8 sr12;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered viaExtTMDSProbe.\n"));
@@ -1132,11 +1143,8 @@ viaExtTMDSProbe(ScrnInfoPtr pScrn)
     }
 
     sr12 = hwp->readSeq(hwp, 0x12);
-    sr13 = hwp->readSeq(hwp, 0x13);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "SR12: 0x%02X\n", sr12));
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "SR13: 0x%02X\n", sr13));
     if (pVIADisplay->extTMDSPresence) {
         switch (pVia->Chipset) {
         case VIA_CLE266:
