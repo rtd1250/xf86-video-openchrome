@@ -77,9 +77,11 @@ EXTRA_DIST = \
     via_3d_reg.h \
     via_ch7xxx.h \
     via_dmabuffer.h \
+    via_dri.h \
     via_driver.h \
+    via_drmclient.h \
     via_eng_regs.h \
-    via_fp.c \
+    via_fp.h \
     via_memmgr.h \
     via_regs.h \
     via_rop.h \
