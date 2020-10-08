@@ -1340,8 +1340,11 @@ VIACreateScreenResources(ScreenPtr pScreen)
     rootPixmap = pScreen->GetScreenPixmap(pScreen);
 
 #ifdef OPENCHROMEDRI
-    drmmode_uevent_init(pScrn, &pVia->drmmode);
+    if (pVia->KMS) {
+        drmmode_uevent_init(pScrn, &pVia->drmmode);
+    }
 #endif
+
     surface = drm_bo_map(pScrn, pVia->drmmode.front_bo);
     if (!surface)
         return FALSE;
@@ -1382,6 +1385,12 @@ VIACloseScreen(CLOSE_SCREEN_ARGS_DECL)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIACloseScreen\n"));
 
+#ifdef OPENCHROMEDRI
+    if (pVia->KMS) {
+        drmmode_uevent_fini(pScrn, &pVia->drmmode);
+    }
+#endif /* OPENCHROMEDRI */
+
     if (pVia->directRenderingType != DRI_2)
         viaExitVideo(pScrn);
 
@@ -1399,9 +1408,6 @@ VIACloseScreen(CLOSE_SCREEN_ARGS_DECL)
     if (pScrn->vtSema)
         VIALeaveVT(VT_FUNC_ARGS(0));
 
-#ifdef OPENCHROMEDRI
-    drmmode_uevent_fini(pScrn, &pVia->drmmode);
-#endif
     xf86_cursors_fini(pScreen);
 
     if (pVia->drmmode.front_bo) {
@@ -1426,8 +1432,6 @@ VIACloseScreen(CLOSE_SCREEN_ARGS_DECL)
         VIADRICloseScreen(pScreen);
 
     if (pVia->KMS) {
-        drmmode_uevent_fini(pScrn, &pVia->drmmode);
-
         if (drmDropMaster(pVia->drmmode.fd))
             xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
                         "drmDropMaster failed: %s\n",
