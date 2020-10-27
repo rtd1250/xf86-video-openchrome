@@ -65,7 +65,7 @@
 #ifdef OPENCHROMEDRI
 static const ViaDRMVersion drmVIADRMExpected = { 1, 3, 0 };
 static const ViaDRMVersion drmVIADRMCompat = { 3, 0, 0 };
-static const ViaDRMVersion drmOpenChromeDRMVersion = { 3, 3, 0 };
+static const ViaDRMVersion drmOpenChromeDRMVersion = { 3, 4, 0 };
 #endif /* OPENCHROMEDRI */
 
 /* Prototypes. */
@@ -717,7 +717,7 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
     alignedPitch = ALIGN_TO(alignedPitch, 16);
     drmmode->front_bo = drm_bo_alloc(scrn,
                                         alignedPitch * height,
-                                        16, TTM_PL_FLAG_VRAM);
+                                        16, TTM_PL_VRAM);
     if (!drmmode->front_bo) {
         goto fail;
     }
@@ -1596,7 +1596,7 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
          * Set cursor location in frame buffer.
          */
         bo = drm_bo_alloc(pScrn, cursorSize, alignment,
-                            TTM_PL_FLAG_VRAM);
+                            TTM_PL_VRAM);
         if (!bo) {
             return FALSE;
         }
@@ -1626,7 +1626,7 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
     pVia->drmmode.front_bo = drm_bo_alloc(pScrn,
                                             alignedPitch *
                                             pScrn->virtualY,
-                                            16, TTM_PL_FLAG_VRAM);
+                                            16, TTM_PL_VRAM);
     if (!pVia->drmmode.front_bo)
         return FALSE;
 

@@ -662,7 +662,7 @@ viaUMSAccelInit(ScrnInfoPtr pScrn)
                         "Entered %s.\n", __func__));
 
     pVia->VQStart = 0;
-    pVia->vq_bo = drm_bo_alloc(pScrn, VIA_VQ_SIZE, 16, TTM_PL_FLAG_VRAM);
+    pVia->vq_bo = drm_bo_alloc(pScrn, VIA_VQ_SIZE, 16, TTM_PL_VRAM);
     if (!pVia->vq_bo)
         goto err;
 
@@ -678,7 +678,7 @@ viaUMSAccelInit(ScrnInfoPtr pScrn)
     viaInitialize3DEngine(pScrn);
 
     /* Sync marker space. */
-    pVia->exa_sync_bo = drm_bo_alloc(pScrn, 32, 32, TTM_PL_FLAG_VRAM);
+    pVia->exa_sync_bo = drm_bo_alloc(pScrn, 32, 32, TTM_PL_VRAM);
     if (!pVia->exa_sync_bo)
         goto err;
 

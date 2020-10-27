@@ -26,9 +26,11 @@
 
 #include "xf86.h"
 
-#define TTM_PL_FLAG_SYSTEM	1
-#define TTM_PL_FLAG_TT		2
-#define TTM_PL_FLAG_VRAM	4
+
+#define TTM_PL_SYSTEM           0
+#define TTM_PL_TT               1
+#define TTM_PL_VRAM             2
+#define TTM_PL_PRIV             3
 
 struct buffer_object {
     void            *ptr;

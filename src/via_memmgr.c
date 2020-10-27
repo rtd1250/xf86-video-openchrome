@@ -66,7 +66,7 @@ viaOffScreenLinear(ScrnInfoPtr pScrn, struct buffer_object *obj,
 
     obj->offset = linear->offset * depth;
     obj->handle = (unsigned long) linear;
-    obj->domain = TTM_PL_FLAG_VRAM;
+    obj->domain = TTM_PL_VRAM;
     obj->size = size;
 
 exit:
@@ -90,8 +90,8 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned long size,
     }
 
     switch (domain) {
-    case TTM_PL_FLAG_TT:
-    case TTM_PL_FLAG_VRAM:
+    case TTM_PL_TT:
+    case TTM_PL_VRAM:
         if (pVia->directRenderingType == DRI_NONE) {
             if (!pVia->useEXA) {
                 ret = viaOffScreenLinear(pScrn, obj,
@@ -131,11 +131,11 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned long size,
             size = ALIGN_TO(size, alignment);
             drm.context = DRIGetContext(pScrn->pScreen);
             drm.size = size;
-            drm.type = (domain == TTM_PL_FLAG_TT ? VIA_MEM_AGP : VIA_MEM_VIDEO);
+            drm.type = (domain == TTM_PL_TT ? VIA_MEM_AGP : VIA_MEM_VIDEO);
             ret = drmCommandWriteRead(pVia->drmmode.fd, DRM_VIA_ALLOCMEM,
                                         &drm, sizeof(drm_via_mem_t));
             if (!ret && (size == drm.size)) {
-                if (domain == TTM_PL_FLAG_VRAM)
+                if (domain == TTM_PL_VRAM)
                     drm.offset -= pVia->FBFreeStart;
                 obj->offset = ALIGN_TO(drm.offset, alignment);
                 obj->handle = drm.index;
@@ -178,7 +178,7 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned long size,
         }
         break;
 
-    case TTM_PL_FLAG_SYSTEM:
+    case TTM_PL_SYSTEM:
     default:
         ret = -ENXIO;
         break;
@@ -213,11 +213,11 @@ drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
     ) {
         switch (obj->domain) {
 #ifdef OPENCHROMEDRI
-        case TTM_PL_FLAG_TT:
+        case TTM_PL_TT:
             obj->ptr = (uint8_t*)pVia->agpMappedAddr + obj->offset;
             break;
 #endif /* OPENCHROMEDRI */
-        case TTM_PL_FLAG_VRAM:
+        case TTM_PL_VRAM:
             obj->ptr = pVia->FBBase + obj->offset;
             break;
         default:
@@ -296,8 +296,8 @@ drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
     if (obj) {
         DEBUG(ErrorF("Freed %lu (pool %d)\n", obj->offset, obj->domain));
         switch (obj->domain) {
-        case TTM_PL_FLAG_VRAM:
-        case TTM_PL_FLAG_TT:
+        case TTM_PL_VRAM:
+        case TTM_PL_TT:
             if (pVia->directRenderingType == DRI_NONE) {
                 if (!pVia->useEXA) {
                     FBLinearPtr linear = (FBLinearPtr) obj->handle;

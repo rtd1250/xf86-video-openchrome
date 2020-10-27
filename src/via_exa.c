@@ -807,7 +807,7 @@ viaEXAOffscreenAlloc(ScrnInfoPtr pScrn, struct buffer_object *obj,
 
     obj->offset = pArea->offset;
     obj->handle = (unsigned long) pArea;
-    obj->domain = TTM_PL_FLAG_VRAM;
+    obj->domain = TTM_PL_VRAM;
     obj->size = newSize;
 
 exit:
@@ -1009,7 +1009,7 @@ viaFinishInitAccel(ScreenPtr pScreen)
             if (pVia->exaDriverPtr->UploadToScreen == viaExaTexUploadToScreen) {
                 size = VIA_AGP_UPL_SIZE * 2;
 
-                pVia->texAGPBuffer = drm_bo_alloc(pScrn, size, 32, TTM_PL_FLAG_TT);
+                pVia->texAGPBuffer = drm_bo_alloc(pScrn, size, 32, TTM_PL_TT);
                 if (pVia->texAGPBuffer) {
                     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                                "Allocated %u kiB of AGP memory for "
@@ -1020,7 +1020,7 @@ viaFinishInitAccel(ScreenPtr pScreen)
             }
 
             size = pVia->exaScratchSize * 1024;
-            pVia->scratchBuffer = drm_bo_alloc(pScrn, size, 32, TTM_PL_FLAG_TT);
+            pVia->scratchBuffer = drm_bo_alloc(pScrn, size, 32, TTM_PL_TT);
             if (pVia->scratchBuffer) {
                 xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                            "Allocated %u kiB of AGP memory for "
@@ -1034,7 +1034,7 @@ viaFinishInitAccel(ScreenPtr pScreen)
 #endif /* OPENCHROMEDRI */
     if (!pVia->scratchAddr && pVia->useEXA) {
         size = pVia->exaScratchSize * 1024 + 32;
-        pVia->scratchBuffer = drm_bo_alloc(pScrn, size, 32, TTM_PL_FLAG_SYSTEM);
+        pVia->scratchBuffer = drm_bo_alloc(pScrn, size, 32, TTM_PL_SYSTEM);
 
         if (pVia->scratchBuffer) {
             xf86DrvMsg(pScrn->scrnIndex, X_INFO,
