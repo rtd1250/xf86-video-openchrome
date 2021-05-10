@@ -873,11 +873,6 @@ via_tv_init(ScrnInfoPtr pScrn)
     /* Save now */
     pVIADisplay->TVSave(pScrn);
 
-#ifdef HAVE_DEBUG
-    if (VIAPTR(pScrn)->PrintTVRegs)
-        pVIADisplay->TVPrintRegs(pScrn);
-#endif
-
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_tv_init.\n"));
     return TRUE;

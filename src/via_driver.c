@@ -1689,14 +1689,6 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
     if (serverGeneration == 1)
         xf86ShowUnusedOptions(pScrn->scrnIndex, pScrn->options);
 
-#ifdef HAVE_DEBUG
-    if (pVia->PrintTVRegs) {
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                    "Printing TV registers.\n");
-        ViaTVPrintRegs(pScrn);
-    }
-#endif
-
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting %s.\n", __func__));
     return TRUE;

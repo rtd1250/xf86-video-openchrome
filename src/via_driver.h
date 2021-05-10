@@ -361,7 +361,6 @@ typedef struct _VIA {
 #ifdef HAVE_DEBUG
     Bool                disableXvBWCheck;
     Bool                DumpVGAROM;
-    Bool                PrintTVRegs;
 #endif /* HAVE_DEBUG */
 
     video_via_regs*     VideoRegs;
