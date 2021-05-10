@@ -38,7 +38,6 @@
 typedef enum
 {
 #ifdef HAVE_DEBUG
-    OPTION_PRINTVGAREGS,
     OPTION_PRINTTVREGS,
 #endif
     OPTION_NOACCEL,
@@ -65,7 +64,6 @@ typedef enum
 
 static OptionInfoRec VIAOptions[] = {
 #ifdef HAVE_DEBUG /* Don't document these three. */
-    {OPTION_PRINTVGAREGS,        "PrintVGARegs",     OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_PRINTTVREGS,         "PrintTVRegs",      OPTV_BOOLEAN, {0}, FALSE},
 #endif
     {OPTION_NOACCEL,             "NoAccel",          OPTV_BOOLEAN, {0}, FALSE},
@@ -122,9 +120,6 @@ viaSetupDefaultOptions(ScrnInfoPtr pScrn)
     pVia->maxDriSize = 0;
     pVia->agpMem = AGP_SIZE / 1024;
     pVia->VideoEngine = VIDEO_ENGINE_CLE;
-#ifdef HAVE_DEBUG
-    pVia->PrintVGARegs = FALSE;
-#endif
 
     /*
      * Disable vertical interpolation because the size of
@@ -301,24 +296,6 @@ viaProcessUMSOptions(ScrnInfoPtr pScrn)
     xf86DrvMsg(pScrn->scrnIndex, from,
                 "Will try to allocate %d KB of AGP memory.\n",
                 pVia->agpMem);
-
-#ifdef HAVE_DEBUG
-/*
-    pVia->PrintVGARegs = FALSE;
-*/
-    from = xf86GetOptValBool(VIAOptions,
-                                OPTION_PRINTVGAREGS,
-                                &pVia->PrintVGARegs) ?
-            X_CONFIG : X_DEFAULT;
-    xf86DrvMsg(pScrn->scrnIndex, from,
-                "Will %sprint VGA registers.\n",
-                pVia->PrintVGARegs ? "" : "not ");
-    if (pVia->PrintVGARegs)
-        /*
-         * Do this as early as possible.
-         */
-        ViaVgahwPrint(VGAHWPTR(pScrn));
-#endif /* HAVE_DEBUG */
 
     pVIADisplay->TVDotCrawl = FALSE;
     from = xf86GetOptValBool(VIAOptions,

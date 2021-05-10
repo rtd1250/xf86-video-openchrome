@@ -1690,12 +1690,6 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
         xf86ShowUnusedOptions(pScrn->scrnIndex, pScrn->options);
 
 #ifdef HAVE_DEBUG
-    if (pVia->PrintVGARegs) {
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                    "Printing VGA registers.\n");
-        ViaVgahwPrint(VGAHWPTR(pScrn));
-    }
-
     if (pVia->PrintTVRegs) {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                     "Printing TV registers.\n");
