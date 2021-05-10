@@ -401,6 +401,16 @@ VIAFreeScreen(FREE_SCREEN_ARGS_DECL)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VIAFreeScreen\n"));
 
+    /*
+     * There is no guarantee that pVia
+     * (same as pScrn->driverPrivate) is valid.
+     * Hence, check to see if it is a null pointer.
+     * If it is null, do nothing and exit.
+     */
+    if (!pVia) {
+        goto exit;
+    }
+
     if (xf86LoaderCheckSymbol("vgaHWFreeHWRec")) {
         vgaHWFreeHWRec(pScrn);
     }
@@ -410,6 +420,8 @@ VIAFreeScreen(FREE_SCREEN_ARGS_DECL)
     }
 
     VIAFreeRec(pScrn);
+exit:
+    return;
 }
 
 static void
