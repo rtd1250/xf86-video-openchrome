@@ -3246,7 +3246,7 @@ iga_crtc_mode_set(xf86CrtcPtr crtc,
         pVIADisplay->Clock = ViaModeDotClockTranslate(pScrn, adjusted_mode);
         pVIADisplay->ClockExternal = FALSE;
         ViaSetPrimaryDotclock(pScrn, pVIADisplay->Clock);
-        ViaSetUseExternalClock(hwp);
+        viaSetUseExternalClock(pScrn);
         ViaCrtcMask(hwp, 0x6B, 0x00, 0x01);
 
         viaIGA1SetFBStartingAddress(crtc, x, y);
@@ -3276,7 +3276,7 @@ iga_crtc_mode_set(xf86CrtcPtr crtc,
         pVIADisplay->Clock = ViaModeDotClockTranslate(pScrn, adjusted_mode);
         pVIADisplay->ClockExternal = FALSE;
         ViaSetSecondaryDotclock(pScrn, pVIADisplay->Clock);
-        ViaSetUseExternalClock(hwp);
+        viaSetUseExternalClock(pScrn);
 
         viaIGA2SetFBStartingAddress(crtc, x, y);
         VIAVidAdjustFrame(pScrn, x, y);

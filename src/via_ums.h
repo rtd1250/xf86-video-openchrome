@@ -1602,10 +1602,10 @@ Bool xf86I2CMaskByte(I2CDevPtr d, I2CByte subaddr,
 /* via_output.c */
 void viaInitDisplay(ScrnInfoPtr pScrn);
 CARD32 ViaGetMemoryBandwidth(ScrnInfoPtr pScrn);
+void viaSetUseExternalClock(ScrnInfoPtr pScrn);
 CARD32 ViaModeDotClockTranslate(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void ViaSetPrimaryDotclock(ScrnInfoPtr pScrn, CARD32 clock);
 void ViaSetSecondaryDotclock(ScrnInfoPtr pScrn, CARD32 clock);
-void ViaSetUseExternalClock(vgaHWPtr hwp);
 
 /* via_display.c */
 void ViaGammaDisable(ScrnInfoPtr pScrn);

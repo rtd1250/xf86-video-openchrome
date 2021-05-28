@@ -156,15 +156,19 @@ ViaGetMemoryBandwidth(ScrnInfoPtr pScrn)
  * Needs to be called to reset the dotclock (after SR40:2/1 reset)
  */
 void
-ViaSetUseExternalClock(vgaHWPtr hwp)
+viaSetUseExternalClock(ScrnInfoPtr pScrn)
 {
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
     CARD8 data;
 
-    DEBUG(xf86DrvMsg(hwp->pScrn->scrnIndex, X_INFO,
-                     "ViaSetUseExternalClock\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
 
     data = hwp->readMiscOut(hwp);
     hwp->writeMiscOut(hwp, data | 0x0C);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
 }
 
 /*
