@@ -382,6 +382,21 @@ viaIGA1HWReset(ScrnInfoPtr pScrn, Bool resetState)
 }
 
 /*
+ * Resets IGA2 hardware.
+ */
+static inline void
+viaIGA2HWReset(ScrnInfoPtr pScrn, CARD8 resetState)
+{
+    /* 3X5.6A[6] - Second Display Channel Reset
+     *             0: Reset
+     *             1: Normal Operation */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x6A, resetState << 6, 0x40);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "IGA2 HW Reset: %s\n",
+                        (resetState & 0x01) ? "Off" : "On"));
+}
+
+/*
  * Sets IGA1 palette LUT resolution. (6-bit or 8-bit)
  */
 static inline void

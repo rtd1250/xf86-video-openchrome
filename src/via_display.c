@@ -291,29 +291,6 @@ viaIGA1SetHIDisplayLocation(ScrnInfoPtr pScrn,
 }
 
 /*
- * Resets IGA2 hardware.
- */
-static void
-viaIGA2HWReset(ScrnInfoPtr pScrn, CARD8 resetState)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaIGA2HWReset.\n"));
-
-    /* 3X5.6A[6] - Second Display Channel Reset
-     *             0: Reset
-     *             1: Normal Operation */
-    ViaCrtcMask(hwp, 0x6A, resetState << 6, 0x40);
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "IGA2 HW Reset: %s\n",
-                (resetState & 0x01) ? "Off" : "On");
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaIGA2HWReset.\n"));
-}
-
-/*
  * Controls IGA2 display channel state.
  */
 void
