@@ -3235,48 +3235,83 @@ iga1_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
 }
 
 static void
-iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
-                    DisplayModePtr adjusted_mode,
+iga_crtc_mode_set(xf86CrtcPtr crtc,
+                    DisplayModePtr mode, DisplayModePtr adjusted_mode,
                     int x, int y)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
+    drmmode_crtc_private_ptr iga = crtc->driver_private;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered iga1_crtc_mode_set.\n"));
+                        "Entered %s.\n", __func__));
 
-    /* Put IGA1 into a reset state. */
-    viaIGA1HWReset(pScrn, TRUE);
+    if (!iga->index) {
+        /* Put IGA1 into a reset state. */
+        viaIGA1HWReset(pScrn, TRUE);
 
-    viaIGAInitCommon(pScrn);
-    viaIGA1Init(pScrn);
+        viaIGAInitCommon(pScrn);
+        viaIGA1Init(pScrn);
 
-    ViaPrintMode(pScrn, adjusted_mode);
+        ViaPrintMode(pScrn, adjusted_mode);
 
-    /* Set color depth. */
-    viaIGA1SetColorDepth(pScrn, pScrn->bitsPerPixel);
+        /* Set color depth. */
+        viaIGA1SetColorDepth(pScrn, pScrn->bitsPerPixel);
 
-    /* Set display controller screen parameters. */
-    viaIGA1SetDisplayRegister(pScrn, adjusted_mode);
+        /* Set display controller screen parameters. */
+        viaIGA1SetDisplayRegister(pScrn, adjusted_mode);
 
-    ViaSetPrimaryFIFO(pScrn, adjusted_mode);
+        ViaSetPrimaryFIFO(pScrn, adjusted_mode);
 
-    pVIADisplay->Clock = ViaModeDotClockTranslate(pScrn, adjusted_mode);
-    pVIADisplay->ClockExternal = FALSE;
-    ViaSetPrimaryDotclock(pScrn, pVIADisplay->Clock);
-    ViaSetUseExternalClock(hwp);
-    ViaCrtcMask(hwp, 0x6B, 0x00, 0x01);
+        pVIADisplay->Clock = ViaModeDotClockTranslate(pScrn, adjusted_mode);
+        pVIADisplay->ClockExternal = FALSE;
+        ViaSetPrimaryDotclock(pScrn, pVIADisplay->Clock);
+        ViaSetUseExternalClock(hwp);
+        ViaCrtcMask(hwp, 0x6B, 0x00, 0x01);
 
-    viaIGA1SetFBStartingAddress(crtc, x, y);
-    VIAVidAdjustFrame(pScrn, x, y);
+        viaIGA1SetFBStartingAddress(crtc, x, y);
+        VIAVidAdjustFrame(pScrn, x, y);
 
-    /* Put IGA1 back into a normal operating state. */
-    viaIGA1HWReset(pScrn, FALSE);
+        /* Put IGA1 back into a normal operating state. */
+        viaIGA1HWReset(pScrn, FALSE);
+    } else {
+        /* Put IGA2 into a reset state. */
+        viaIGA2HWReset(pScrn, TRUE);
+
+        /* Disable IGA2 display channel. */
+        viaIGA2DisplayChannel(pScrn, FALSE);
+
+        viaIGAInitCommon(pScrn);
+        viaIGA2Init(pScrn);
+
+        ViaPrintMode(pScrn, adjusted_mode);
+
+        /* Set color depth. */
+        viaIGA2SetColorDepth(pScrn, pScrn->bitsPerPixel);
+
+        /* Set display controller screen parameters. */
+        viaIGA2SetDisplayRegister(pScrn, adjusted_mode);
+
+        ViaSetSecondaryFIFO(pScrn, adjusted_mode);
+        pVIADisplay->Clock = ViaModeDotClockTranslate(pScrn, adjusted_mode);
+        pVIADisplay->ClockExternal = FALSE;
+        ViaSetSecondaryDotclock(pScrn, pVIADisplay->Clock);
+        ViaSetUseExternalClock(hwp);
+
+        viaIGA2SetFBStartingAddress(crtc, x, y);
+        VIAVidAdjustFrame(pScrn, x, y);
+
+        /* Enable IGA2 display channel. */
+        viaIGA2DisplayChannel(pScrn, TRUE);
+
+        /* Put IGA2 back into a normal operating state. */
+        viaIGA2HWReset(pScrn, FALSE);
+    }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting iga1_crtc_mode_set.\n"));
+                        "Exiting %s.\n", __func__));
 }
 
 static void
@@ -3495,7 +3530,7 @@ const xf86CrtcFuncsRec iga1_crtc_funcs = {
     .unlock                 = iga1_crtc_unlock,
     .mode_fixup             = iga1_crtc_mode_fixup,
     .prepare                = iga1_crtc_prepare,
-    .mode_set               = iga1_crtc_mode_set,
+    .mode_set               = iga_crtc_mode_set,
     .commit                 = iga1_crtc_commit,
     .gamma_set              = iga1_crtc_gamma_set,
     .shadow_create          = iga1_crtc_shadow_create,
@@ -3661,54 +3696,6 @@ iga2_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
 }
 
 static void
-iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
-                    DisplayModePtr adjusted_mode, int x, int y)
-{
-    ScrnInfoPtr pScrn = crtc->scrn;
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered iga2_crtc_mode_set.\n"));
-
-    /* Put IGA2 into a reset state. */
-    viaIGA2HWReset(pScrn, TRUE);
-
-    /* Disable IGA2 display channel. */
-    viaIGA2DisplayChannel(pScrn, FALSE);
-
-    viaIGAInitCommon(pScrn);
-    viaIGA2Init(pScrn);
-
-    ViaPrintMode(pScrn, adjusted_mode);
-
-    /* Set color depth. */
-    viaIGA2SetColorDepth(pScrn, pScrn->bitsPerPixel);
-
-    /* Set display controller screen parameters. */
-    viaIGA2SetDisplayRegister(pScrn, adjusted_mode);
-
-    ViaSetSecondaryFIFO(pScrn, adjusted_mode);
-    pVIADisplay->Clock = ViaModeDotClockTranslate(pScrn, adjusted_mode);
-    pVIADisplay->ClockExternal = FALSE;
-    ViaSetSecondaryDotclock(pScrn, pVIADisplay->Clock);
-    ViaSetUseExternalClock(hwp);
-
-    viaIGA2SetFBStartingAddress(crtc, x, y);
-    VIAVidAdjustFrame(pScrn, x, y);
-
-    /* Enable IGA2 display channel. */
-    viaIGA2DisplayChannel(pScrn, TRUE);
-
-    /* Put IGA2 back into a normal operating state. */
-    viaIGA2HWReset(pScrn, FALSE);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting iga2_crtc_mode_set.\n"));
-}
-
-static void
 iga2_crtc_commit(xf86CrtcPtr crtc)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
@@ -3808,7 +3795,7 @@ const xf86CrtcFuncsRec iga2_crtc_funcs = {
     .unlock                 = iga2_crtc_unlock,
     .mode_fixup             = iga2_crtc_mode_fixup,
     .prepare                = iga2_crtc_prepare,
-    .mode_set               = iga2_crtc_mode_set,
+    .mode_set               = iga_crtc_mode_set,
     .commit                 = iga2_crtc_commit,
     .gamma_set              = iga2_crtc_gamma_set,
     .shadow_create          = iga2_crtc_shadow_create,
