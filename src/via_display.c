@@ -3219,7 +3219,6 @@ iga_crtc_mode_set(xf86CrtcPtr crtc,
 {
     ScrnInfoPtr pScrn = crtc->scrn;
     drmmode_crtc_private_ptr iga = crtc->driver_private;
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
     VIAPtr pVia = VIAPTR(pScrn);
     VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
 
@@ -3247,7 +3246,6 @@ iga_crtc_mode_set(xf86CrtcPtr crtc,
         pVIADisplay->ClockExternal = FALSE;
         ViaSetPrimaryDotclock(pScrn, pVIADisplay->Clock);
         viaSetUseExternalClock(pScrn);
-        ViaCrtcMask(hwp, 0x6B, 0x00, 0x01);
 
         viaIGA1SetFBStartingAddress(crtc, x, y);
         VIAVidAdjustFrame(pScrn, x, y);
