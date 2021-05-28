@@ -3183,18 +3183,24 @@ iga1_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
 }
 
 static void
-iga1_crtc_prepare(xf86CrtcPtr crtc)
+iga_crtc_prepare(xf86CrtcPtr crtc)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
+    drmmode_crtc_private_ptr iga = crtc->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered iga1_crtc_prepare.\n"));
+                        "Entered %s.\n", __func__));
 
-    /* Turn off IGA1. */
-    viaIGA1SetDisplayOutput(pScrn, FALSE);
+    if (!iga->index) {
+        /* Turn off IGA1. */
+        viaIGA1SetDisplayOutput(pScrn, FALSE);
+    } else {
+        /* Turn off IGA2. */
+        viaIGA2SetDisplayOutput(pScrn, FALSE);
+    }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting iga1_crtc_prepare.\n"));
+                        "Exiting %s.\n", __func__));
 }
 
 static void
@@ -3505,7 +3511,7 @@ const xf86CrtcFuncsRec iga1_crtc_funcs = {
     .lock                   = iga1_crtc_lock,
     .unlock                 = iga1_crtc_unlock,
     .mode_fixup             = iga1_crtc_mode_fixup,
-    .prepare                = iga1_crtc_prepare,
+    .prepare                = iga_crtc_prepare,
     .mode_set               = iga_crtc_mode_set,
     .commit                 = iga1_crtc_commit,
     .gamma_set              = iga1_crtc_gamma_set,
@@ -3642,21 +3648,6 @@ iga2_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
 }
 
 static void
-iga2_crtc_prepare(xf86CrtcPtr crtc)
-{
-    ScrnInfoPtr pScrn = crtc->scrn;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered iga2_crtc_prepare.\n"));
-
-    /* Turn off IGA2. */
-    viaIGA2SetDisplayOutput(pScrn, FALSE);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting iga2_crtc_prepare.\n"));
-}
-
-static void
 iga2_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
@@ -3770,7 +3761,7 @@ const xf86CrtcFuncsRec iga2_crtc_funcs = {
     .lock                   = iga2_crtc_lock,
     .unlock                 = iga2_crtc_unlock,
     .mode_fixup             = iga2_crtc_mode_fixup,
-    .prepare                = iga2_crtc_prepare,
+    .prepare                = iga_crtc_prepare,
     .mode_set               = iga_crtc_mode_set,
     .commit                 = iga2_crtc_commit,
     .gamma_set              = iga2_crtc_gamma_set,
