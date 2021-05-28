@@ -3680,7 +3680,7 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
                         "Entered iga2_crtc_mode_set.\n"));
 
     /* Put IGA2 into a reset state. */
-    viaIGA2HWReset(pScrn, 0x00);
+    viaIGA2HWReset(pScrn, TRUE);
 
     /* Disable IGA2 display channel. */
     viaIGA2DisplayChannel(pScrn, FALSE);
@@ -3709,7 +3709,7 @@ iga2_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     viaIGA2DisplayChannel(pScrn, TRUE);
 
     /* Put IGA2 back into a normal operating state. */
-    viaIGA2HWReset(pScrn, 0x01);
+    viaIGA2HWReset(pScrn, FALSE);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting iga2_crtc_mode_set.\n"));
