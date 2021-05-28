@@ -3242,21 +3242,6 @@ iga_crtc_prepare(xf86CrtcPtr crtc)
 }
 
 static void
-iga1_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
-{
-    ScrnInfoPtr pScrn = crtc->scrn;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered iga1_crtc_set_origin.\n"));
-
-    viaIGA1SetFBStartingAddress(crtc, x, y);
-    VIAVidAdjustFrame(pScrn, x, y);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting iga1_crtc_set_origin.\n"));
-}
-
-static void
 iga_crtc_mode_set(xf86CrtcPtr crtc,
                     DisplayModePtr mode, DisplayModePtr adjusted_mode,
                     int x, int y)
@@ -3541,6 +3526,29 @@ iga_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
     }
 }
 
+#if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) > 2
+static void
+iga_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
+{
+    ScrnInfoPtr pScrn = crtc->scrn;
+    drmmode_crtc_private_ptr iga = crtc->driver_private;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
+    if (!iga->index) {
+        viaIGA1SetFBStartingAddress(crtc, x, y);
+    } else {
+        viaIGA2SetFBStartingAddress(crtc, x, y);
+    }
+
+    VIAVidAdjustFrame(pScrn, x, y);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
+}
+#endif /* GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) > 2 */
+
 static void
 iga_crtc_destroy(xf86CrtcPtr crtc)
 {
@@ -3568,8 +3576,8 @@ const xf86CrtcFuncsRec iga1_crtc_funcs = {
     .hide_cursor            = iga_crtc_hide_cursor,
     .load_cursor_argb       = iga_crtc_load_cursor_argb,
 #if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) > 2
-    .set_origin             = iga1_crtc_set_origin,
-#endif
+    .set_origin             = iga_crtc_set_origin,
+#endif /* GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) > 2 */
     .destroy                = iga_crtc_destroy,
 };
 
@@ -3633,21 +3641,6 @@ iga2_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
     }
 
     return TRUE;
-}
-
-static void
-iga2_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
-{
-    ScrnInfoPtr pScrn = crtc->scrn;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered iga2_crtc_set_origin.\n"));
-
-    viaIGA2SetFBStartingAddress(crtc, x, y);
-    VIAVidAdjustFrame(pScrn, x, y);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting iga2_crtc_set_origin.\n"));
 }
 
 static void
@@ -3747,7 +3740,7 @@ const xf86CrtcFuncsRec iga2_crtc_funcs = {
     .hide_cursor            = iga_crtc_hide_cursor,
     .load_cursor_argb       = iga_crtc_load_cursor_argb,
 #if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) > 2
-    .set_origin             = iga2_crtc_set_origin,
-#endif
+    .set_origin             = iga_crtc_set_origin,
+#endif /* GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) > 2 */
     .destroy                = iga_crtc_destroy,
 };
