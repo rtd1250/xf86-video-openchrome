@@ -115,7 +115,6 @@ viaIGA1SetColorDepth(ScrnInfoPtr pScrn, CARD8 bitsPerPixel)
     case 16:
         ViaSeqMask(hwp, 0x15, 0x14, 0x1C);
         break;
-    case 24:
     case 32:
         ViaSeqMask(hwp, 0x15, 0x1C, 0x1C);
         break;
@@ -125,7 +124,6 @@ viaIGA1SetColorDepth(ScrnInfoPtr pScrn, CARD8 bitsPerPixel)
 
     if ((bitsPerPixel == 8)
         || (bitsPerPixel == 16)
-        || (bitsPerPixel == 24)
         || (bitsPerPixel == 32)) {
 
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -314,7 +312,6 @@ viaIGA2SetColorDepth(ScrnInfoPtr pScrn, CARD8 bitsPerPixel)
         case 16:
             ViaCrtcMask(hwp, 0x67, 0x40, 0xC0);
             break;
-        case 24:
         case 32:
             ViaCrtcMask(hwp, 0x67, 0xC0, 0xC0);
             break;
@@ -324,7 +321,6 @@ viaIGA2SetColorDepth(ScrnInfoPtr pScrn, CARD8 bitsPerPixel)
 
     if ((bitsPerPixel == 8)
         || (bitsPerPixel == 16)
-        || (bitsPerPixel == 24)
         || (bitsPerPixel == 32)) {
 
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -487,7 +483,6 @@ VIALoadRgbLut(ScrnInfoPtr pScrn, int start, int numColors, LOCO *colors)
             break;
         case 8:
         case 16:
-        case 24:
         case 32:
             for (i = start; i < numColors; i++) {
                 hwp->writeDacWriteAddr(hwp, i);
@@ -2664,7 +2659,7 @@ ViaSetSecondaryFIFO(ScrnInfoPtr pScrn, DisplayModePtr mode)
                     hwp->writeCrtc(hwp, 0x68, 0x67);/* depth 6, threshold 7 */
                 }
             } else {
-                if ((pScrn->bitsPerPixel >= 24)
+                if ((pScrn->bitsPerPixel == 32)
                     && (((mode->VDisplay > 768)
                          && (pVia->MemClk <= VIA_MEM_DDR200)) ||
                         ((mode->HDisplay > 1280)
@@ -3400,7 +3395,6 @@ iga1_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
         /* Turn gamma correction off. */
         viaIGA1SetGamma(pScrn, FALSE);
         break;
-    case 24:
     case 32:
         /* IGA1 will access the palette LUT. */
         viaSetPaletteLUTAccess(pScrn, 0x00);
@@ -3641,7 +3635,6 @@ iga2_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
         /* Turn gamma correction off. */
         viaIGA2SetGamma(pScrn, FALSE);
         break;
-    case 24:
     case 32:
         /* IGA2 will access the palette LUT. */
         viaSetPaletteLUTAccess(pScrn, 0x01);
