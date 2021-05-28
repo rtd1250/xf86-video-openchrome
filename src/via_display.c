@@ -3075,7 +3075,7 @@ ViaShadowCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 }
 
 static void
-iga_crtc_dpms(xf86CrtcPtr crtc, int mode)
+via_crtc_dpms(xf86CrtcPtr crtc, int mode)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
     drmmode_crtc_private_ptr iga = crtc->driver_private;
@@ -3116,7 +3116,7 @@ iga_crtc_dpms(xf86CrtcPtr crtc, int mode)
 }
 
 static void
-iga_crtc_save(xf86CrtcPtr crtc)
+via_crtc_save(xf86CrtcPtr crtc)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
     drmmode_crtc_private_ptr iga = crtc->driver_private;
@@ -3135,7 +3135,7 @@ iga_crtc_save(xf86CrtcPtr crtc)
 }
 
 static void
-iga_crtc_restore(xf86CrtcPtr crtc)
+via_crtc_restore(xf86CrtcPtr crtc)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
     drmmode_crtc_private_ptr iga = crtc->driver_private;
@@ -3154,7 +3154,7 @@ iga_crtc_restore(xf86CrtcPtr crtc)
 }
 
 static Bool
-iga_crtc_lock(xf86CrtcPtr crtc)
+via_crtc_lock(xf86CrtcPtr crtc)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
 
@@ -3168,7 +3168,7 @@ iga_crtc_lock(xf86CrtcPtr crtc)
 }
 
 static void
-iga_crtc_unlock(xf86CrtcPtr crtc)
+via_crtc_unlock(xf86CrtcPtr crtc)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
 
@@ -3180,7 +3180,7 @@ iga_crtc_unlock(xf86CrtcPtr crtc)
 }
 
 static Bool
-iga_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
+via_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
                         DisplayModePtr adjusted_mode)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
@@ -3237,7 +3237,7 @@ iga_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
 }
 
 static void
-iga_crtc_prepare(xf86CrtcPtr crtc)
+via_crtc_prepare(xf86CrtcPtr crtc)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
     drmmode_crtc_private_ptr iga = crtc->driver_private;
@@ -3258,7 +3258,7 @@ iga_crtc_prepare(xf86CrtcPtr crtc)
 }
 
 static void
-iga_crtc_mode_set(xf86CrtcPtr crtc,
+via_crtc_mode_set(xf86CrtcPtr crtc,
                     DisplayModePtr mode, DisplayModePtr adjusted_mode,
                     int x, int y)
 {
@@ -3336,7 +3336,7 @@ iga_crtc_mode_set(xf86CrtcPtr crtc,
 }
 
 static void
-iga_crtc_commit(xf86CrtcPtr crtc)
+via_crtc_commit(xf86CrtcPtr crtc)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
     drmmode_crtc_private_ptr iga = crtc->driver_private;
@@ -3357,7 +3357,7 @@ iga_crtc_commit(xf86CrtcPtr crtc)
 }
 
 static void
-iga_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
+via_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
                     int size)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
@@ -3407,7 +3407,7 @@ iga_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
     and in all other bpps the fg and bg are in 8-8-8 RGB format.
 */
 static void
-iga_crtc_set_cursor_colors(xf86CrtcPtr crtc, int bg, int fg)
+via_crtc_set_cursor_colors(xf86CrtcPtr crtc, int bg, int fg)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
     drmmode_crtc_private_ptr iga = crtc->driver_private;
@@ -3435,7 +3435,7 @@ iga_crtc_set_cursor_colors(xf86CrtcPtr crtc, int bg, int fg)
 }
 
 static void
-iga_crtc_set_cursor_position(xf86CrtcPtr crtc, int x, int y)
+via_crtc_set_cursor_position(xf86CrtcPtr crtc, int x, int y)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
     drmmode_crtc_private_ptr iga = crtc->driver_private;
@@ -3463,7 +3463,7 @@ iga_crtc_set_cursor_position(xf86CrtcPtr crtc, int x, int y)
 }
 
 static void
-iga_crtc_show_cursor(xf86CrtcPtr crtc)
+via_crtc_show_cursor(xf86CrtcPtr crtc)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
     drmmode_crtc_private_ptr iga = crtc->driver_private;
@@ -3476,7 +3476,7 @@ iga_crtc_show_cursor(xf86CrtcPtr crtc)
 }
 
 static void
-iga_crtc_hide_cursor(xf86CrtcPtr crtc)
+via_crtc_hide_cursor(xf86CrtcPtr crtc)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
     drmmode_crtc_private_ptr iga = crtc->driver_private;
@@ -3489,7 +3489,7 @@ iga_crtc_hide_cursor(xf86CrtcPtr crtc)
 }
 
 static void
-iga_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
+via_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
     drmmode_crtc_private_ptr iga = crtc->driver_private;
@@ -3510,7 +3510,7 @@ iga_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
 }
 
 static void
-iga_crtc_destroy(xf86CrtcPtr crtc)
+via_crtc_destroy(xf86CrtcPtr crtc)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
 
@@ -3526,7 +3526,7 @@ iga_crtc_destroy(xf86CrtcPtr crtc)
 
 #if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) > 2
 static void
-iga_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
+via_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
     drmmode_crtc_private_ptr iga = crtc->driver_private;
@@ -3547,24 +3547,24 @@ iga_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
 }
 #endif /* GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) > 2 */
 
-const xf86CrtcFuncsRec iga_crtc_funcs = {
-    .dpms                   = iga_crtc_dpms,
-    .save                   = iga_crtc_save,
-    .restore                = iga_crtc_restore,
-    .lock                   = iga_crtc_lock,
-    .unlock                 = iga_crtc_unlock,
-    .mode_fixup             = iga_crtc_mode_fixup,
-    .prepare                = iga_crtc_prepare,
-    .mode_set               = iga_crtc_mode_set,
-    .commit                 = iga_crtc_commit,
-    .gamma_set              = iga_crtc_gamma_set,
-    .set_cursor_colors      = iga_crtc_set_cursor_colors,
-    .set_cursor_position    = iga_crtc_set_cursor_position,
-    .show_cursor            = iga_crtc_show_cursor,
-    .hide_cursor            = iga_crtc_hide_cursor,
-    .load_cursor_argb       = iga_crtc_load_cursor_argb,
-    .destroy                = iga_crtc_destroy,
+const xf86CrtcFuncsRec via_crtc_funcs = {
+    .dpms                   = via_crtc_dpms,
+    .save                   = via_crtc_save,
+    .restore                = via_crtc_restore,
+    .lock                   = via_crtc_lock,
+    .unlock                 = via_crtc_unlock,
+    .mode_fixup             = via_crtc_mode_fixup,
+    .prepare                = via_crtc_prepare,
+    .mode_set               = via_crtc_mode_set,
+    .commit                 = via_crtc_commit,
+    .gamma_set              = via_crtc_gamma_set,
+    .set_cursor_colors      = via_crtc_set_cursor_colors,
+    .set_cursor_position    = via_crtc_set_cursor_position,
+    .show_cursor            = via_crtc_show_cursor,
+    .hide_cursor            = via_crtc_hide_cursor,
+    .load_cursor_argb       = via_crtc_load_cursor_argb,
+    .destroy                = via_crtc_destroy,
 #if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) > 2
-    .set_origin             = iga_crtc_set_origin,
+    .set_origin             = via_crtc_set_origin,
 #endif /* GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) > 2 */
 };

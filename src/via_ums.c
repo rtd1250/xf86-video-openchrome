@@ -1477,7 +1477,7 @@ viaUMSPreInit(ScrnInfoPtr pScrn)
         goto free_mmio;
     }
 
-    iga1 = xf86CrtcCreate(pScrn, &iga_crtc_funcs);
+    iga1 = xf86CrtcCreate(pScrn, &via_crtc_funcs);
     if (!iga1) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "xf86CrtcCreate failed.\n");
         free(iga1_rec);
@@ -1495,7 +1495,7 @@ viaUMSPreInit(ScrnInfoPtr pScrn)
         goto free_mmio;
     }
 
-    iga2 = xf86CrtcCreate(pScrn, &iga_crtc_funcs);
+    iga2 = xf86CrtcCreate(pScrn, &via_crtc_funcs);
     if (!iga2) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "xf86CrtcCreate failed.\n");
         xf86CrtcDestroy(iga1);

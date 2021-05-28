@@ -1621,7 +1621,7 @@ void viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode);
 void viaIGA2Save(ScrnInfoPtr pScrn);
 void viaIGA2Restore(ScrnInfoPtr pScrn);
 void ViaShadowCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode);
-extern const xf86CrtcFuncsRec iga_crtc_funcs;
+extern const xf86CrtcFuncsRec via_crtc_funcs;
 
 /* via_analog.c */
 void viaAnalogProbe(ScrnInfoPtr pScrn);
