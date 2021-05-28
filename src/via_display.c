@@ -3121,11 +3121,22 @@ iga_crtc_dpms(xf86CrtcPtr crtc, int mode)
 }
 
 static void
-iga1_crtc_save(xf86CrtcPtr crtc)
+iga_crtc_save(xf86CrtcPtr crtc)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
+    drmmode_crtc_private_ptr iga = crtc->driver_private;
 
-    viaIGA1Save(pScrn);
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
+    if (!iga->index) {
+        viaIGA1Save(pScrn);
+    } else {
+        viaIGA2Save(pScrn);
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
 }
 
 static void
@@ -3528,7 +3539,7 @@ iga_crtc_destroy(xf86CrtcPtr crtc)
 
 const xf86CrtcFuncsRec iga1_crtc_funcs = {
     .dpms                   = iga_crtc_dpms,
-    .save                   = iga1_crtc_save,
+    .save                   = iga_crtc_save,
     .restore                = iga1_crtc_restore,
     .lock                   = iga1_crtc_lock,
     .unlock                 = iga1_crtc_unlock,
@@ -3550,20 +3561,6 @@ const xf86CrtcFuncsRec iga1_crtc_funcs = {
 #endif
     .destroy                = iga_crtc_destroy,
 };
-
-static void
-iga2_crtc_save(xf86CrtcPtr crtc)
-{
-    ScrnInfoPtr pScrn = crtc->scrn;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered iga2_crtc_save.\n"));
-
-    viaIGA2Save(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting iga2_crtc_save.\n"));
-}
 
 static void
 iga2_crtc_restore(xf86CrtcPtr crtc)
@@ -3735,7 +3732,7 @@ iga2_crtc_shadow_destroy(xf86CrtcPtr crtc, PixmapPtr rotate_pixmap, void *data)
 
 const xf86CrtcFuncsRec iga2_crtc_funcs = {
     .dpms                   = iga_crtc_dpms,
-    .save                   = iga2_crtc_save,
+    .save                   = iga_crtc_save,
     .restore                = iga2_crtc_restore,
     .lock                   = iga2_crtc_lock,
     .unlock                 = iga2_crtc_unlock,
