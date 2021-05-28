@@ -3378,79 +3378,23 @@ iga_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
         /* Set palette LUT to 8-bit mode. */
         viaIGA1SetPaletteLUTResolution(pScrn, TRUE);
 
-        switch (pScrn->bitsPerPixel) {
-        case 8:
-            /* IGA1 will access the palette LUT. */
-            viaSetPaletteLUTAccess(pScrn, 0x00);
+        /* IGA1 will access the palette LUT. */
+        viaSetPaletteLUTAccess(pScrn, 0x00);
 
-            VIALoadRgbLut(pScrn, 0, size, colors);
-
-            /* Turn gamma correction off. */
-            viaIGA1SetGamma(pScrn, FALSE);
-            break;
-        case 16:
-            /* IGA1 will access the palette LUT. */
-            viaSetPaletteLUTAccess(pScrn, 0x00);
-
-            VIALoadRgbLut(pScrn, 0, size, colors);
-
-            /* Turn gamma correction off. */
-            viaIGA1SetGamma(pScrn, FALSE);
-            break;
-        case 32:
-            /* IGA1 will access the palette LUT. */
-            viaSetPaletteLUTAccess(pScrn, 0x00);
-
-            VIALoadRgbLut(pScrn, 0, size, colors);
-
-            /* Turn gamma correction off. */
-            viaIGA1SetGamma(pScrn, FALSE);
-            break;
-        default:
-            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                        "Unsupported color depth: %d\n",
-                        pScrn->bitsPerPixel);
-            break;
-        }
+        /* Turn gamma correction off. */
+        viaIGA1SetGamma(pScrn, FALSE);
     } else {
         /* Set palette LUT to 8-bit mode. */
-        viaIGA2SetPaletteLUTResolution(pScrn, 0x01);
+        viaIGA2SetPaletteLUTResolution(pScrn, TRUE);
 
-        switch (pScrn->bitsPerPixel) {
-        case 8:
-            /* IGA2 will access the palette LUT. */
-            viaSetPaletteLUTAccess(pScrn, 0x01);
+        /* IGA2 will access the palette LUT. */
+        viaSetPaletteLUTAccess(pScrn, 0x01);
 
-            VIALoadRgbLut(pScrn, 0, size, colors);
-
-            /* Turn gamma correction off. */
-            viaIGA2SetGamma(pScrn, FALSE);
-            break;
-        case 16:
-            /* IGA2 will access the palette LUT. */
-            viaSetPaletteLUTAccess(pScrn, 0x01);
-
-            VIALoadRgbLut(pScrn, 0, size, colors);
-
-            /* Turn gamma correction off. */
-            viaIGA2SetGamma(pScrn, FALSE);
-            break;
-        case 32:
-            /* IGA2 will access the palette LUT. */
-            viaSetPaletteLUTAccess(pScrn, 0x01);
-
-            VIALoadRgbLut(pScrn, 0, size, colors);
-
-            /* Turn gamma correction off. */
-            viaIGA2SetGamma(pScrn, FALSE);
-            break;
-        default:
-            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                        "Unsupported color depth: %d\n",
-                        pScrn->bitsPerPixel);
-            break;
-        }
+        /* Turn gamma correction off. */
+        viaIGA2SetGamma(pScrn, FALSE);
     }
+
+    VIALoadRgbLut(pScrn, 0, size, colors);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting %s.\n", __func__));
