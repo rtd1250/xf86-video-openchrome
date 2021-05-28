@@ -2366,11 +2366,11 @@ viaIGA2SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
         ViaCrtcMask(hwp, 0x62, 0x00, 0x01);
     }
 
-    /* Keep interlace mode off. */
+    /* Interlace mode selection for IGA2. */
     /* 3X5.67[5] - Second Display Interlace Mode
      *             0: Off
      *             1: On */
-    ViaCrtcMask(hwp, 0x67, 0x00, 0x20);
+    ViaCrtcMask(hwp, 0x67, (mode->Flags & V_CLKDIV2) ? BIT(5) : 0x00, BIT(5));
 
 
     /* Set IGA2 horizontal total pixels.*/
