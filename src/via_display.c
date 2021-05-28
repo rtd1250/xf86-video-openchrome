@@ -3250,12 +3250,6 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     /* Put IGA1 into a reset state. */
     viaIGA1HWReset(pScrn, TRUE);
 
-    if (!vgaHWInit(pScrn, adjusted_mode)) {
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "vgaHWInit failed.\n"));
-        goto exit;
-    }
-
     viaIGAInitCommon(pScrn);
     viaIGA1Init(pScrn);
 
@@ -3278,7 +3272,6 @@ iga1_crtc_mode_set(xf86CrtcPtr crtc, DisplayModePtr mode,
     viaIGA1SetFBStartingAddress(crtc, x, y);
     VIAVidAdjustFrame(pScrn, x, y);
 
-exit:
     /* Put IGA1 back into a normal operating state. */
     viaIGA1HWReset(pScrn, FALSE);
 
