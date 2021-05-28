@@ -461,6 +461,21 @@ viaIGA2SetDisplayOutput(ScrnInfoPtr pScrn, Bool outputState)
 }
 
 /*
+ * Controls IGA2 display channel state.
+ */
+static inline void
+viaIGA2DisplayChannel(ScrnInfoPtr pScrn, Bool channelState)
+{
+    /* 3X5.6A[7] - Second Display Channel Enable */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x6A,
+                channelState ? BIT(7) : 0x00, BIT(7));
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "IGA2 Display Channel: %s\n",
+                        channelState ? "On" : "Off"));
+}
+
+/*
  * Sets DIP0 (Digital Interface Port 0) I/O pad state.
  * CLE266 chipset only.
  */
@@ -1593,7 +1608,6 @@ void ViaSetSecondaryDotclock(ScrnInfoPtr pScrn, CARD32 clock);
 void ViaSetUseExternalClock(vgaHWPtr hwp);
 
 /* via_display.c */
-void viaIGA2DisplayChannel(ScrnInfoPtr pScrn, Bool channelState);
 void ViaGammaDisable(ScrnInfoPtr pScrn);
 void viaIGAInitCommon(ScrnInfoPtr pScrn);
 void viaIGA1Init(ScrnInfoPtr pScrn);

@@ -291,28 +291,6 @@ viaIGA1SetHIDisplayLocation(ScrnInfoPtr pScrn,
 }
 
 /*
- * Controls IGA2 display channel state.
- */
-void
-viaIGA2DisplayChannel(ScrnInfoPtr pScrn, Bool channelState)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaIGA2DisplayChannel.\n"));
-
-    /* 3X5.6A[7] - Second Display Channel Enable */
-    ViaCrtcMask(hwp, 0x6A, channelState << 7, 0x80);
-
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "IGA2 Display Channel: %s\n",
-                channelState ? "On" : "Off");
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaIGA2DisplayChannel.\n"));
-}
-
-/*
  * Sets IGA2 color depth.
  */
 static void
