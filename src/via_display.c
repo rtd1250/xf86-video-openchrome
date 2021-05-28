@@ -3539,29 +3539,7 @@ iga_crtc_destroy(xf86CrtcPtr crtc)
         free(crtc->driver_private);
 }
 
-const xf86CrtcFuncsRec iga1_crtc_funcs = {
-    .dpms                   = iga_crtc_dpms,
-    .save                   = iga_crtc_save,
-    .restore                = iga_crtc_restore,
-    .lock                   = iga_crtc_lock,
-    .unlock                 = iga_crtc_unlock,
-    .mode_fixup             = iga_crtc_mode_fixup,
-    .prepare                = iga_crtc_prepare,
-    .mode_set               = iga_crtc_mode_set,
-    .commit                 = iga_crtc_commit,
-    .gamma_set              = iga_crtc_gamma_set,
-    .set_cursor_colors      = iga_crtc_set_cursor_colors,
-    .set_cursor_position    = iga_crtc_set_cursor_position,
-    .show_cursor            = iga_crtc_show_cursor,
-    .hide_cursor            = iga_crtc_hide_cursor,
-    .load_cursor_argb       = iga_crtc_load_cursor_argb,
-#if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) > 2
-    .set_origin             = iga_crtc_set_origin,
-#endif /* GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) > 2 */
-    .destroy                = iga_crtc_destroy,
-};
-
-const xf86CrtcFuncsRec iga2_crtc_funcs = {
+const xf86CrtcFuncsRec iga_crtc_funcs = {
     .dpms                   = iga_crtc_dpms,
     .save                   = iga_crtc_save,
     .restore                = iga_crtc_restore,
