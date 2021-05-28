@@ -3173,8 +3173,15 @@ iga_crtc_lock(xf86CrtcPtr crtc)
 }
 
 static void
-iga1_crtc_unlock(xf86CrtcPtr crtc)
+iga_crtc_unlock(xf86CrtcPtr crtc)
 {
+    ScrnInfoPtr pScrn = crtc->scrn;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
 }
 
 static Bool
@@ -3569,7 +3576,7 @@ const xf86CrtcFuncsRec iga1_crtc_funcs = {
     .save                   = iga_crtc_save,
     .restore                = iga_crtc_restore,
     .lock                   = iga_crtc_lock,
-    .unlock                 = iga1_crtc_unlock,
+    .unlock                 = iga_crtc_unlock,
     .mode_fixup             = iga1_crtc_mode_fixup,
     .prepare                = iga_crtc_prepare,
     .mode_set               = iga_crtc_mode_set,
@@ -3588,11 +3595,6 @@ const xf86CrtcFuncsRec iga1_crtc_funcs = {
 #endif /* GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) > 2 */
     .destroy                = iga_crtc_destroy,
 };
-
-static void
-iga2_crtc_unlock(xf86CrtcPtr crtc)
-{
-}
 
 static Bool
 iga2_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
@@ -3727,7 +3729,7 @@ const xf86CrtcFuncsRec iga2_crtc_funcs = {
     .save                   = iga_crtc_save,
     .restore                = iga_crtc_restore,
     .lock                   = iga_crtc_lock,
-    .unlock                 = iga2_crtc_unlock,
+    .unlock                 = iga_crtc_unlock,
     .mode_fixup             = iga2_crtc_mode_fixup,
     .prepare                = iga_crtc_prepare,
     .mode_set               = iga_crtc_mode_set,
