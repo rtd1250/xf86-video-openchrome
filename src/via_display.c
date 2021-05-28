@@ -1207,11 +1207,11 @@ viaIGA1SetDisplayRegister(ScrnInfoPtr pScrn, DisplayModePtr mode)
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                 "IGA1 Requested Screen Mode: %s\n", mode->name);
 
-    if (mode->Flags & V_CLKDIV2) {
-        ViaSeqMask(hwp, 0x01, 0x08, 0x08);
-    } else {
-        ViaSeqMask(hwp, 0x01, 0x00, 0x08);
-    }
+    /* Interlace mode selection for IGA1. */
+    /* 3C5.01[3] - First Display Interlace Mode
+     *             0: Off
+     *             1: On */
+    ViaSeqMask(hwp, 0x01, (mode->Flags & V_CLKDIV2) ? BIT(3) : 0x00, BIT(3));
 
     ViaCrtcMask(hwp, 0x03, 0x80, 0x80); /* enable vertical retrace access */
 
