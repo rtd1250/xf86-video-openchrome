@@ -3185,10 +3185,11 @@ iga_crtc_unlock(xf86CrtcPtr crtc)
 }
 
 static Bool
-iga1_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
+iga_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
                         DisplayModePtr adjusted_mode)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
+    drmmode_crtc_private_ptr iga = crtc->driver_private;
     VIAPtr pVia = VIAPTR(pScrn);
     CARD32 temp;
     ModeStatus modestatus;
@@ -3202,7 +3203,12 @@ iga1_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
         return FALSE;
     }
 
-    modestatus = viaIGA1ModeValid(pScrn, mode);
+    if (!iga->index) {
+        modestatus = viaIGA1ModeValid(pScrn, mode);
+    } else {
+        modestatus = viaIGA2ModeValid(pScrn, mode);
+    }
+
     if (modestatus != MODE_OK) {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Not using mode \"%s\" : %s.\n",
                    mode->name, xf86ModeStatusToString(modestatus));
@@ -3577,7 +3583,7 @@ const xf86CrtcFuncsRec iga1_crtc_funcs = {
     .restore                = iga_crtc_restore,
     .lock                   = iga_crtc_lock,
     .unlock                 = iga_crtc_unlock,
-    .mode_fixup             = iga1_crtc_mode_fixup,
+    .mode_fixup             = iga_crtc_mode_fixup,
     .prepare                = iga_crtc_prepare,
     .mode_set               = iga_crtc_mode_set,
     .commit                 = iga_crtc_commit,
@@ -3595,57 +3601,6 @@ const xf86CrtcFuncsRec iga1_crtc_funcs = {
 #endif /* GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) > 2 */
     .destroy                = iga_crtc_destroy,
 };
-
-static Bool
-iga2_crtc_mode_fixup(xf86CrtcPtr crtc, DisplayModePtr mode,
-                        DisplayModePtr adjusted_mode)
-{
-    ScrnInfoPtr pScrn = crtc->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
-    CARD32 temp;
-    ModeStatus modestatus;
-
-    if ((mode->Clock < pScrn->clockRanges->minClock) ||
-        (mode->Clock > pScrn->clockRanges->maxClock)) {
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                   "Clock for mode \"%s\" outside of allowed range (%u (%u - %u))\n",
-                   mode->name, mode->Clock, pScrn->clockRanges->minClock,
-                   pScrn->clockRanges->maxClock);
-        return FALSE;
-    }
-
-    modestatus = viaIGA2ModeValid(pScrn, mode);
-    if (modestatus != MODE_OK) {
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Not using mode \"%s\" : %s.\n",
-                   mode->name, xf86ModeStatusToString(modestatus));
-        return FALSE;
-    }
-
-    temp = mode->CrtcHDisplay * mode->CrtcVDisplay * mode->VRefresh *
-            (pScrn->bitsPerPixel >> 3);
-    if (pVia->pVIADisplay->Bandwidth < temp) {
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                    "Required bandwidth is not available. (%u > %u)\n",
-                    (unsigned)temp, (unsigned)pVia->pVIADisplay->Bandwidth);
-        return FALSE;
-    }
-
-    if (!pScrn->bitsPerPixel) {
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                    "Invalid bpp information.\n");
-        return FALSE;
-    }
-
-    /* 16 is the Chrome IGP display controller memory alignment. */
-    if (crtc->x % (16 / ((pScrn->bitsPerPixel + 7) >> 3))) {
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                    "The X location specified is not properly aligned "
-                    "to Chrome IGP's memory alignment.\n");
-        return FALSE;
-    }
-
-    return TRUE;
-}
 
 static void
 iga2_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
@@ -3730,7 +3685,7 @@ const xf86CrtcFuncsRec iga2_crtc_funcs = {
     .restore                = iga_crtc_restore,
     .lock                   = iga_crtc_lock,
     .unlock                 = iga_crtc_unlock,
-    .mode_fixup             = iga2_crtc_mode_fixup,
+    .mode_fixup             = iga_crtc_mode_fixup,
     .prepare                = iga_crtc_prepare,
     .mode_set               = iga_crtc_mode_set,
     .commit                 = iga_crtc_commit,
