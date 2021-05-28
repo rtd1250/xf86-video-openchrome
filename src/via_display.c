@@ -3509,6 +3509,21 @@ iga_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
     }
 }
 
+static void
+iga_crtc_destroy(xf86CrtcPtr crtc)
+{
+    ScrnInfoPtr pScrn = crtc->scrn;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
+    if (crtc->driver_private)
+        free(crtc->driver_private);
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
+}
+
 #if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) > 2
 static void
 iga_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
@@ -3532,13 +3547,6 @@ iga_crtc_set_origin(xf86CrtcPtr crtc, int x, int y)
 }
 #endif /* GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) > 2 */
 
-static void
-iga_crtc_destroy(xf86CrtcPtr crtc)
-{
-    if (crtc->driver_private)
-        free(crtc->driver_private);
-}
-
 const xf86CrtcFuncsRec iga_crtc_funcs = {
     .dpms                   = iga_crtc_dpms,
     .save                   = iga_crtc_save,
@@ -3555,8 +3563,8 @@ const xf86CrtcFuncsRec iga_crtc_funcs = {
     .show_cursor            = iga_crtc_show_cursor,
     .hide_cursor            = iga_crtc_hide_cursor,
     .load_cursor_argb       = iga_crtc_load_cursor_argb,
+    .destroy                = iga_crtc_destroy,
 #if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) > 2
     .set_origin             = iga_crtc_set_origin,
 #endif /* GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) > 2 */
-    .destroy                = iga_crtc_destroy,
 };
