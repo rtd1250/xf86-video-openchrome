@@ -3080,28 +3080,44 @@ ViaShadowCRTCSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 }
 
 static void
-iga1_crtc_dpms(xf86CrtcPtr crtc, int mode)
+iga_crtc_dpms(xf86CrtcPtr crtc, int mode)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
+    drmmode_crtc_private_ptr iga = crtc->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered iga1_crtc_dpms.\n"));
+                        "Entered %s.\n", __func__));
 
-    switch (mode) {
-    case DPMSModeOn:
-    case DPMSModeStandby:
-    case DPMSModeSuspend:
-        viaIGA1SetDisplayOutput(pScrn, TRUE);
-        break;
-    case DPMSModeOff:
-        viaIGA1SetDisplayOutput(pScrn, FALSE);
-        break;
-    default:
-        break;
+    if (!iga->index) {
+        switch (mode) {
+        case DPMSModeOn:
+        case DPMSModeStandby:
+        case DPMSModeSuspend:
+            viaIGA1SetDisplayOutput(pScrn, TRUE);
+            break;
+        case DPMSModeOff:
+            viaIGA1SetDisplayOutput(pScrn, FALSE);
+            break;
+        default:
+            break;
+        }
+    } else {
+        switch (mode) {
+        case DPMSModeOn:
+            viaIGA2SetDisplayOutput(pScrn, TRUE);
+            break;
+        case DPMSModeStandby:
+        case DPMSModeSuspend:
+        case DPMSModeOff:
+            viaIGA2SetDisplayOutput(pScrn, FALSE);
+            break;
+        default:
+            break;
+        }
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting iga1_crtc_dpms.\n"));
+                        "Exiting %s.\n", __func__));
 }
 
 static void
@@ -3511,7 +3527,7 @@ iga_crtc_destroy(xf86CrtcPtr crtc)
 }
 
 const xf86CrtcFuncsRec iga1_crtc_funcs = {
-    .dpms                   = iga1_crtc_dpms,
+    .dpms                   = iga_crtc_dpms,
     .save                   = iga1_crtc_save,
     .restore                = iga1_crtc_restore,
     .lock                   = iga1_crtc_lock,
@@ -3534,34 +3550,6 @@ const xf86CrtcFuncsRec iga1_crtc_funcs = {
 #endif
     .destroy                = iga_crtc_destroy,
 };
-
-static void
-iga2_crtc_dpms(xf86CrtcPtr crtc, int mode)
-{
-    ScrnInfoPtr pScrn = crtc->scrn;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered iga2_crtc_dpms.\n"));
-
-    switch (mode) {
-    case DPMSModeOn:
-        viaIGA2SetDisplayOutput(pScrn, TRUE);
-        break;
-    case DPMSModeStandby:
-    case DPMSModeSuspend:
-    case DPMSModeOff:
-        viaIGA2SetDisplayOutput(pScrn, FALSE);
-        break;
-    default:
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "Invalid DPMS mode: %d\n",
-                    mode);
-        break;
-    }
-    //vgaHWSaveScreen(pScrn->pScreen, mode);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting iga2_crtc_dpms.\n"));
-}
 
 static void
 iga2_crtc_save(xf86CrtcPtr crtc)
@@ -3746,7 +3734,7 @@ iga2_crtc_shadow_destroy(xf86CrtcPtr crtc, PixmapPtr rotate_pixmap, void *data)
 }
 
 const xf86CrtcFuncsRec iga2_crtc_funcs = {
-    .dpms                   = iga2_crtc_dpms,
+    .dpms                   = iga_crtc_dpms,
     .save                   = iga2_crtc_save,
     .restore                = iga2_crtc_restore,
     .lock                   = iga2_crtc_lock,
