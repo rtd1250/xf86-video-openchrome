@@ -3400,23 +3400,6 @@ iga_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
                         "Exiting %s.\n", __func__));
 }
 
-static void *
-iga1_crtc_shadow_allocate (xf86CrtcPtr crtc, int width, int height)
-{
-    return NULL;
-}
-
-static PixmapPtr
-iga1_crtc_shadow_create(xf86CrtcPtr crtc, void *data, int width, int height)
-{
-    return NULL;
-}
-
-static void
-iga1_crtc_shadow_destroy(xf86CrtcPtr crtc, PixmapPtr rotate_pixmap, void *data)
-{
-}
-
 /*
     Set the cursor foreground and background colors.  In 8bpp, fg and
     bg are indices into the current colormap unless the
@@ -3567,9 +3550,6 @@ const xf86CrtcFuncsRec iga1_crtc_funcs = {
     .mode_set               = iga_crtc_mode_set,
     .commit                 = iga_crtc_commit,
     .gamma_set              = iga_crtc_gamma_set,
-    .shadow_create          = iga1_crtc_shadow_create,
-    .shadow_allocate        = iga1_crtc_shadow_allocate,
-    .shadow_destroy         = iga1_crtc_shadow_destroy,
     .set_cursor_colors      = iga_crtc_set_cursor_colors,
     .set_cursor_position    = iga_crtc_set_cursor_position,
     .show_cursor            = iga_crtc_show_cursor,
@@ -3580,23 +3560,6 @@ const xf86CrtcFuncsRec iga1_crtc_funcs = {
 #endif /* GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) > 2 */
     .destroy                = iga_crtc_destroy,
 };
-
-static void *
-iga2_crtc_shadow_allocate (xf86CrtcPtr crtc, int width, int height)
-{
-    return NULL;
-}
-
-static PixmapPtr
-iga2_crtc_shadow_create(xf86CrtcPtr crtc, void *data, int width, int height)
-{
-    return NULL;
-}
-
-static void
-iga2_crtc_shadow_destroy(xf86CrtcPtr crtc, PixmapPtr rotate_pixmap, void *data)
-{
-}
 
 const xf86CrtcFuncsRec iga2_crtc_funcs = {
     .dpms                   = iga_crtc_dpms,
@@ -3609,9 +3572,6 @@ const xf86CrtcFuncsRec iga2_crtc_funcs = {
     .mode_set               = iga_crtc_mode_set,
     .commit                 = iga_crtc_commit,
     .gamma_set              = iga_crtc_gamma_set,
-    .shadow_create          = iga2_crtc_shadow_create,
-    .shadow_allocate        = iga2_crtc_shadow_allocate,
-    .shadow_destroy         = iga2_crtc_shadow_destroy,
     .set_cursor_colors      = iga_crtc_set_cursor_colors,
     .set_cursor_position    = iga_crtc_set_cursor_position,
     .show_cursor            = iga_crtc_show_cursor,
