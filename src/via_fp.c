@@ -47,24 +47,16 @@ static ViaPanelModeRec ViaPanelNativeModes[] = {
     {1280,  768, FALSE,  TRUE},
     {1280, 1024,  TRUE,  TRUE},
     {1400, 1050,  TRUE,  TRUE},
-    {1600, 1200,  TRUE,  TRUE},
+    {1440,  900,  TRUE,  TRUE},
     {1280,  800, FALSE,  TRUE},
     { 800,  480, FALSE,  TRUE},
-    {1024,  768,  TRUE,  TRUE},
+    {1024,  600,  TRUE,  TRUE},
     {1366,  768, FALSE, FALSE},
-    {1024,  768,  TRUE, FALSE},
-    {1280,  768, FALSE, FALSE},
-    {1280, 1024,  TRUE, FALSE},
-    {1400, 1050,  TRUE, FALSE},
-    {1600, 1200,  TRUE, FALSE},
-    {1366,  768, FALSE, FALSE},
-    {1024,  600, FALSE,  TRUE},
-    {1280,  768,  TRUE,  TRUE},
-    {1280,  800, FALSE,  TRUE},
-    {1360,  768, FALSE, FALSE},
-    {1280,  768,  TRUE, FALSE},
-    { 480,  640, FALSE,  TRUE},
-    {1200,  900, FALSE, FALSE}};
+    {1680, 1050,  TRUE, FALSE},
+    {1920, 1200, FALSE, FALSE},
+    { 640,  240,  TRUE, FALSE},
+    { 480,  640,  TRUE, FALSE}
+};
 
 #define MODEPREFIX(name) NULL, NULL, name, 0, M_T_DRIVER | M_T_DEFAULT
 #define MODESUFFIX 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,FALSE,FALSE,0,NULL,0,0.0,0.0
