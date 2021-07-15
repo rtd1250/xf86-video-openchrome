@@ -3496,7 +3496,6 @@ via_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
     void *dst;
 
     dst = drm_bo_map(pScrn, iga->cursor_bo);
-    memset(dst, 0x00, iga->cursor_bo->size);
     memcpy(dst, image, iga->cursor_bo->size);
     drm_bo_unmap(pScrn, iga->cursor_bo);
 
