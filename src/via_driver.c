@@ -1591,23 +1591,17 @@ VIAScreenInit(SCREEN_INIT_ARGS_DECL)
         switch (pVia->Chipset) {
         case VIA_CLE266:
         case VIA_KM400:
-            flags = HARDWARE_CURSOR_INVERT_MASK |
-                    HARDWARE_CURSOR_AND_SOURCE_WITH_MASK |
-                    HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_64 |
-                    HARDWARE_CURSOR_TRUECOLOR_AT_8BPP |
-                    HARDWARE_CURSOR_BIT_ORDER_MSBFIRST;
-            cursorSize = ((cursorWidth * cursorHeight) / 8) * 2;
-            pVia->useHardwareCursor = TRUE;
+            flags = 0;
             break;
         default:
             flags = HARDWARE_CURSOR_AND_SOURCE_WITH_MASK |
                     HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_64 |
                     HARDWARE_CURSOR_TRUECOLOR_AT_8BPP |
                     HARDWARE_CURSOR_ARGB;
-            cursorSize = (cursorWidth * cursorHeight) * (32 / 8);
             break;
         }
 
+        cursorSize = (cursorWidth * cursorHeight) * (32 / 8);
         alignment = 1024;
 
         /*

@@ -175,83 +175,6 @@ viaIGA1SetGamma(ScrnInfoPtr pScrn, CARD8 gammaCorrection)
                         "Exiting viaIGA1SetGamma.\n"));
 }
 
-/*
- * This function displays or hides hardware cursor (HC).
- */
-static void
-viaSelectIGAHC(ScrnInfoPtr pScrn, Bool igaSelect)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-    uint32_t temp;
-
-    temp = VIAGETREG(VIA_REG_CURSOR_MODE);
-    temp &= 0x7FFFFFFF;
-    temp |= igaSelect ? 0x80000000 : 0x00000000;
-
-    /* VIA_REG_CURSOR_MODE[31] - Hardware cursor display path */
-    VIASETREG(VIA_REG_CURSOR_MODE, temp);
-}
-
-/*
- * This function displays or hides hardware cursor (HC).
- */
-static void
-viaDisplayHC(ScrnInfoPtr pScrn, Bool hcStatus)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-    uint32_t temp;
-
-    temp = VIAGETREG(VIA_REG_CURSOR_MODE);
-    temp &= 0xFFFFFFFE;
-    temp |= hcStatus ? 0x00000001 : 0x00000000;
-
-    /* VIA_REG_CURSOR_MODE[0] - Hardware Cursor Enable */
-    VIASETREG(VIA_REG_CURSOR_MODE, temp);
-}
-
-static void
-viaSetHCStartingAddress(xf86CrtcPtr crtc)
-{
-    drmmode_crtc_private_ptr iga = crtc->driver_private;
-    ScrnInfoPtr pScrn = crtc->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
-    uint32_t temp;
-
-    temp = VIAGETREG(VIA_REG_CURSOR_MODE);
-    temp &= 0xFC0000FF;
-    temp |= iga->cursor_bo->offset;
-
-    /*
-     * 64x64 hardware cursor
-     */
-    temp &= 0xFFFFFFFD;
-
-    /*
-     * VIA_REG_CURSOR_MODE[25:8] - Hardware Cursor Base Address
-     */
-    VIASETREG(VIA_REG_CURSOR_MODE, temp);
-}
-
-static void
-viaSetHCLocation(ScrnInfoPtr pScrn,
-                    int x, unsigned int xoff,
-                    int y, unsigned int yoff)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    VIASETREG(VIA_REG_CURSOR_POS, ((x    << 16) | (y    & 0x07ff)));
-    VIASETREG(VIA_REG_CURSOR_ORG, ((xoff << 16) | (yoff & 0x07ff)));
-}
-
-static void
-viaSetHCColor(ScrnInfoPtr pScrn, int bg, int fg)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-
-    VIASETREG(VIA_REG_CURSOR_BG, bg);
-    VIASETREG(VIA_REG_CURSOR_FG, fg);
-}
-
 static void
 viaIGA1InitHI(ScrnInfoPtr pScrn)
 {
@@ -3489,7 +3412,6 @@ via_crtc_set_cursor_colors(xf86CrtcPtr crtc, int bg, int fg)
     ScrnInfoPtr pScrn = crtc->scrn;
     drmmode_crtc_private_ptr iga = crtc->driver_private;
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
 
     if (xf86_config->cursor_fg)
         return;
@@ -3502,14 +3424,10 @@ via_crtc_set_cursor_colors(xf86CrtcPtr crtc, int bg, int fg)
         return;
     }
 
-    if (pVia->useHardwareCursor) {
-        viaSetHCColor(pScrn, bg, fg);
+    if (!iga->index) {
+        viaIGA1DisplayHI(pScrn, FALSE);
     } else {
-        if (!iga->index) {
-            viaIGA1DisplayHI(pScrn, FALSE);
-        } else {
-            viaIGA2DisplayHI(pScrn, FALSE);
-        }
+        viaIGA2DisplayHI(pScrn, FALSE);
     }
 
     xf86_config->cursor_fg = fg;
@@ -3521,7 +3439,6 @@ via_crtc_set_cursor_position(xf86CrtcPtr crtc, int x, int y)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
     drmmode_crtc_private_ptr iga = crtc->driver_private;
-    VIAPtr pVia = VIAPTR(pScrn);
     unsigned xoff, yoff;
 
     if (x < 0) {
@@ -3538,14 +3455,10 @@ via_crtc_set_cursor_position(xf86CrtcPtr crtc, int x, int y)
         yoff = 0;
     }
 
-    if (pVia->useHardwareCursor) {
-        viaSetHCLocation(pScrn, x, xoff, y, yoff);
+    if (!iga->index) {
+        viaIGA1SetHIDisplayLocation(pScrn, x, xoff, y, yoff);
     } else {
-        if (!iga->index) {
-            viaIGA1SetHIDisplayLocation(pScrn, x, xoff, y, yoff);
-        } else {
-            viaIGA2SetHIDisplayLocation(pScrn, x, xoff, y, yoff);
-        }
+        viaIGA2SetHIDisplayLocation(pScrn, x, xoff, y, yoff);
     }
 }
 
@@ -3554,18 +3467,11 @@ via_crtc_show_cursor(xf86CrtcPtr crtc)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
     drmmode_crtc_private_ptr iga = crtc->driver_private;
-    VIAPtr pVia = VIAPTR(pScrn);
 
-    if (pVia->useHardwareCursor) {
-        viaSelectIGAHC(pScrn,
-                        iga->index ? TRUE : FALSE);
-        viaDisplayHC(pScrn, TRUE);
+    if (!iga->index) {
+        viaIGA1DisplayHI(pScrn, TRUE);
     } else {
-        if (!iga->index) {
-            viaIGA1DisplayHI(pScrn, TRUE);
-        } else {
-            viaIGA2DisplayHI(pScrn, TRUE);
-        }
+        viaIGA2DisplayHI(pScrn, TRUE);
     }
 }
 
@@ -3574,33 +3480,12 @@ via_crtc_hide_cursor(xf86CrtcPtr crtc)
 {
     ScrnInfoPtr pScrn = crtc->scrn;
     drmmode_crtc_private_ptr iga = crtc->driver_private;
-    VIAPtr pVia = VIAPTR(pScrn);
 
-    if (pVia->useHardwareCursor) {
-        viaSelectIGAHC(pScrn,
-                        iga->index ? TRUE : FALSE);
-        viaDisplayHC(pScrn, FALSE);
+    if (!iga->index) {
+        viaIGA1DisplayHI(pScrn, FALSE);
     } else {
-        if (!iga->index) {
-            viaIGA1DisplayHI(pScrn, FALSE);
-        } else {
-            viaIGA2DisplayHI(pScrn, FALSE);
-        }
+        viaIGA2DisplayHI(pScrn, FALSE);
     }
-}
-
-static void
-iga_crtc_load_cursor_image(xf86CrtcPtr crtc, CARD8 *image)
-{
-    drmmode_crtc_private_ptr iga = crtc->driver_private;
-    ScrnInfoPtr pScrn = crtc->scrn;
-    void *dst;
-
-    dst = drm_bo_map(pScrn, iga->cursor_bo);
-    memcpy(dst, image, iga->cursor_bo->size);
-    drm_bo_unmap(pScrn, iga->cursor_bo);
-
-    viaSetHCStartingAddress(crtc);
 }
 
 static void
@@ -3677,7 +3562,6 @@ const xf86CrtcFuncsRec via_crtc_funcs = {
     .set_cursor_position    = via_crtc_set_cursor_position,
     .show_cursor            = via_crtc_show_cursor,
     .hide_cursor            = via_crtc_hide_cursor,
-    .load_cursor_image      = iga_crtc_load_cursor_image,
     .load_cursor_argb       = via_crtc_load_cursor_argb,
     .destroy                = via_crtc_destroy,
 #if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) > 2
