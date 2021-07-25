@@ -1219,9 +1219,14 @@ viaFPProbe(ScrnInfoPtr pScrn)
     /* Detect the presence of FPs. */
     switch (pVia->Chipset) {
     case VIA_CLE266:
-        if ((sr12 & BIT(4)) || (cr3b & BIT(3))) {
+        /*
+         * 3C5.12[4] - FPD17 pin strapping (DIP1)
+         *             0: DVI / Capture
+         *             1: Panel
+         */
+        if ((!(sr12 & BIT(4))) && (cr3b & BIT(3))) {
             pVIADisplay->intFP1Presence = TRUE;
-            pVIADisplay->intFP1DIPort = VIA_DI_PORT_DIP0;
+            pVIADisplay->intFP1DIPort = VIA_DI_PORT_DIP1;
         } else {
             pVIADisplay->intFP1Presence = FALSE;
             pVIADisplay->intFP1DIPort = VIA_DI_PORT_NONE;
