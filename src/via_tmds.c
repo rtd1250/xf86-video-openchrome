@@ -776,17 +776,19 @@ viaExtTMDSProbe(ScrnInfoPtr pScrn)
     if (pVIADisplay->extTMDSPresence) {
         switch (pVia->Chipset) {
         case VIA_CLE266:
-
-            /* 3C5.12[4] - FPD17 pin strapping
-             *             0: TMDS transmitter (DVI) / capture device
-             *             1: Flat panel */
-            if (!(sr12 & BIT(4))) {
+            /*
+             *  3C5.12[5] - FPD18 pin strapping (DIP0)
+             *             0: DVI
+             *             1: TV
+             */
+            if (!(sr12 & BIT(5))) {
                 pVIADisplay->extTMDSDIPort = VIA_DI_PORT_DIP0;
-
-            /* 3C5.12[5] - FPD18 pin strapping
-             *             0: TMDS transmitter (DVI)
-             *             1: TV encoder */
-            } else if (!(sr12 & BIT(5))) {
+            /*
+             * 3C5.12[4] - FPD17 pin strapping (DIP1)
+             *             0: DVI / Capture
+             *             1: Panel
+             */
+            } else if (!(sr12 & BIT(4))) {
                 pVIADisplay->extTMDSDIPort = VIA_DI_PORT_DIP1;
             } else {
                 pVIADisplay->extTMDSDIPort = VIA_DI_PORT_NONE;
