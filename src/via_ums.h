@@ -517,6 +517,50 @@ viaDIP0SetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
                         (displaySource & 0x01) + 1));
 }
 
+/*
+ * Sets DIP1 (Digital Interface Port 1) I/O pad state.
+ * CLE266 chipset only.
+ */
+static inline void
+viaDIP1SetIOPadState(ScrnInfoPtr pScrn, CARD8 ioPadState)
+{
+    /*
+     * 3C5.1E[5:4] - DIP1 I/O Pad Control
+     *               00: I/O pad off
+     *               11: I/O pad on
+     */
+    ViaSeqMask(VGAHWPTR(pScrn), 0x1E,
+                ioPadState << 4, BIT(5) | BIT(4));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "DIP1 I/O Pad State: %s\n",
+                        ((ioPadState & (BIT(1) | BIT(0))) == 0x03) ?
+                            "On" :
+                        ((ioPadState & (BIT(1) | BIT(0))) == 0x02) ?
+                            "Unknown" :
+                        ((ioPadState & (BIT(1) | BIT(0))) == 0x01) ?
+                            "Unknown" :
+                            "Off"));
+}
+
+/*
+ * Sets the display source of DIP1 (Digital Interface Port 1)
+ * interface. CLE266 chipset only.
+ */
+static inline void
+viaDIP1SetDisplaySource(ScrnInfoPtr pScrn, uint8_t displaySource)
+{
+    /*
+     * 3X5.93[7] - DIP1 Data Source Selection
+     *             0: IGA1
+     *             1: IGA2
+     */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x93,
+                displaySource << 7, BIT(7));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "DIP1 Display Source: IGA%d\n",
+                        (displaySource & 0x01) + 1));
+}
+
 
 /*
  * Sets DVP0 (Digital Video Port 0) I/O pad state.
