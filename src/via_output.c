@@ -47,6 +47,9 @@ viaIOPadState(ScrnInfoPtr pScrn, uint32_t diPort, uint8_t ioPadState)
                         "Entered %s.\n", __func__));
 
     switch(diPort) {
+    case VIA_DI_PORT_DIP0:
+        viaDIP0SetIOPadState(pScrn, ioPadState);
+        break;
     case VIA_DI_PORT_DVP0:
         viaDVP0SetIOPadState(pScrn, ioPadState);
         break;
@@ -92,6 +95,9 @@ viaDisplaySource(ScrnInfoPtr pScrn, uint32_t diPort, int index)
                         "Entered %s.\n", __func__));
 
     switch(diPort) {
+    case VIA_DI_PORT_DIP0:
+        viaDIP0SetDisplaySource(pScrn, displaySource);
+        break;
     case VIA_DI_PORT_DVP0:
         viaDVP0SetDisplaySource(pScrn, displaySource);
         break;
