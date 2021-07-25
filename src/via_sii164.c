@@ -299,7 +299,7 @@ via_sii164_mode_set(xf86OutputPtr output, DisplayModePtr mode,
         viaSiI164InitRegisters(pScrn, pSiI164Rec->pSiI164I2CDev);
         viaSiI164DumpRegisters(pScrn, pSiI164Rec->pSiI164I2CDev);
 
-        viaExtTMDSSetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
+        viaDisplaySource(pScrn, pSiI164Rec->diPort, iga->index);
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,

@@ -313,7 +313,7 @@ via_vt1632_mode_set(xf86OutputPtr output, DisplayModePtr mode,
         viaVT1632InitRegisters(pScrn, pVIAVT1632->VT1632I2CDev);
         viaVT1632DumpRegisters(pScrn, pVIAVT1632->VT1632I2CDev);
 
-        viaExtTMDSSetDisplaySource(pScrn, iga->index ? 0x01 : 0x00);
+        viaDisplaySource(pScrn, pVIAVT1632->diPort, iga->index);
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,

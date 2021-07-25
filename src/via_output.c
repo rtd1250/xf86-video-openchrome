@@ -84,6 +84,53 @@ viaIOPadState(ScrnInfoPtr pScrn, uint32_t diPort, uint8_t ioPadState)
 }
 
 void
+viaDisplaySource(ScrnInfoPtr pScrn, uint32_t diPort, int index)
+{
+    CARD8 displaySource = index & 0x01;
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
+    switch(diPort) {
+    case VIA_DI_PORT_DVP0:
+        viaDVP0SetDisplaySource(pScrn, displaySource);
+        break;
+    case VIA_DI_PORT_DVP1:
+        viaDVP1SetDisplaySource(pScrn, displaySource);
+        break;
+    case VIA_DI_PORT_FPDPLOW:
+        viaFPDPLowSetDisplaySource(pScrn, displaySource);
+        viaDVP1SetDisplaySource(pScrn, displaySource);
+        break;
+    case VIA_DI_PORT_FPDPHIGH:
+        viaFPDPHighSetDisplaySource(pScrn, displaySource);
+        viaDVP0SetDisplaySource(pScrn, displaySource);
+        break;
+    case (VIA_DI_PORT_FPDPLOW |
+          VIA_DI_PORT_FPDPHIGH):
+        viaFPDPLowSetDisplaySource(pScrn, displaySource);
+        viaFPDPHighSetDisplaySource(pScrn, displaySource);
+        break;
+    case VIA_DI_PORT_LVDS1:
+        viaLVDS1SetDisplaySource(pScrn, displaySource);
+        break;
+    case VIA_DI_PORT_LVDS2:
+        viaLVDS2SetDisplaySource(pScrn, displaySource);
+        break;
+    case (VIA_DI_PORT_LVDS1 |
+          VIA_DI_PORT_LVDS2):
+        viaLVDS1SetDisplaySource(pScrn, displaySource);
+        viaLVDS2SetDisplaySource(pScrn, displaySource);
+        break;
+    default:
+        break;
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
+}
+
+void
 viaInitDisplay(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);

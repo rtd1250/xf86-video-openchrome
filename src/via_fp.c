@@ -542,56 +542,6 @@ viaFPSyncPolarity(ScrnInfoPtr pScrn, uint32_t diPort, unsigned int flags)
                         "Exiting viaFPSyncPolarity.\n"));
 }
 
-static void
-viaFPDisplaySource(ScrnInfoPtr pScrn, uint32_t diPort, int index)
-{
-    CARD8 displaySource = index & 0x01;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaFPDisplaySource.\n"));
-
-    switch(diPort) {
-    case VIA_DI_PORT_DVP0:
-        viaDVP0SetDisplaySource(pScrn, displaySource);
-        break;
-    case VIA_DI_PORT_DVP1:
-        viaDVP1SetDisplaySource(pScrn, displaySource);
-        break;
-    case VIA_DI_PORT_FPDPLOW:
-        viaFPDPLowSetDisplaySource(pScrn, displaySource);
-        viaDVP1SetDisplaySource(pScrn, displaySource);
-        break;
-    case VIA_DI_PORT_FPDPHIGH:
-        viaFPDPHighSetDisplaySource(pScrn, displaySource);
-        viaDVP0SetDisplaySource(pScrn, displaySource);
-        break;
-    case (VIA_DI_PORT_FPDPLOW |
-          VIA_DI_PORT_FPDPHIGH):
-        viaFPDPLowSetDisplaySource(pScrn, displaySource);
-        viaFPDPHighSetDisplaySource(pScrn, displaySource);
-        break;
-    case VIA_DI_PORT_LVDS1:
-        viaLVDS1SetDisplaySource(pScrn, displaySource);
-        break;
-    case VIA_DI_PORT_LVDS2:
-        viaLVDS2SetDisplaySource(pScrn, displaySource);
-        break;
-    case (VIA_DI_PORT_LVDS1 |
-          VIA_DI_PORT_LVDS2):
-        viaLVDS1SetDisplaySource(pScrn, displaySource);
-        viaLVDS2SetDisplaySource(pScrn, displaySource);
-        break;
-    default:
-        break;
-    }
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "FP Display Source: IGA%d\n",
-                displaySource + 1);
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaFPDisplaySource.\n"));
-}
-
 /*
  * Try to interpret EDID ourselves.
  */
@@ -1063,7 +1013,7 @@ via_fp_mode_set(xf86OutputPtr output, DisplayModePtr mode,
         }
 
         viaFPSyncPolarity(pScrn, pVIAFP->diPort, adjusted_mode->Flags);
-        viaFPDisplaySource(pScrn, pVIAFP->diPort, iga->index);
+        viaDisplaySource(pScrn, pVIAFP->diPort, iga->index);
     }
 }
 
