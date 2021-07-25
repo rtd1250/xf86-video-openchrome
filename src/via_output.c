@@ -41,6 +41,49 @@
 #include <unistd.h>
 
 void
+viaIOPadState(ScrnInfoPtr pScrn, uint32_t diPort, uint8_t ioPadState)
+{
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
+    switch(diPort) {
+    case VIA_DI_PORT_DVP0:
+        viaDVP0SetIOPadState(pScrn, ioPadState);
+        break;
+    case VIA_DI_PORT_DVP1:
+        viaDVP1SetIOPadState(pScrn, ioPadState);
+        break;
+    case VIA_DI_PORT_FPDPLOW:
+        viaFPDPLowSetIOPadState(pScrn, ioPadState);
+        break;
+    case VIA_DI_PORT_FPDPHIGH:
+        viaFPDPHighSetIOPadState(pScrn, ioPadState);
+        break;
+    case (VIA_DI_PORT_FPDPLOW |
+          VIA_DI_PORT_FPDPHIGH):
+        viaFPDPLowSetIOPadState(pScrn, ioPadState);
+        viaFPDPHighSetIOPadState(pScrn, ioPadState);
+        break;
+    case VIA_DI_PORT_LVDS1:
+        viaLVDS1SetIOPadSetting(pScrn, ioPadState);
+        break;
+    case VIA_DI_PORT_LVDS2:
+        viaLVDS2SetIOPadSetting(pScrn, ioPadState);
+        break;
+    case (VIA_DI_PORT_LVDS1 |
+          VIA_DI_PORT_LVDS2):
+        viaLVDS1SetIOPadSetting(pScrn, ioPadState);
+        viaLVDS2SetIOPadSetting(pScrn, ioPadState);
+        break;
+    default:
+        break;
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
+}
+
+void
 viaInitDisplay(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);

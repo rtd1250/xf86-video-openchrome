@@ -402,53 +402,6 @@ viaFPPower(ScrnInfoPtr pScrn, int Chipset, uint32_t diPort,
 }
 
 static void
-viaFPIOPadState(ScrnInfoPtr pScrn, uint32_t diPort, Bool ioPadOn)
-{
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaFPIOPadState.\n"));
-
-    switch(diPort) {
-    case VIA_DI_PORT_DVP0:
-        viaDVP0SetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
-        break;
-    case VIA_DI_PORT_DVP1:
-        viaDVP1SetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
-        break;
-    case VIA_DI_PORT_FPDPLOW:
-        viaFPDPLowSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
-        break;
-    case VIA_DI_PORT_FPDPHIGH:
-        viaFPDPHighSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
-        break;
-    case (VIA_DI_PORT_FPDPLOW |
-          VIA_DI_PORT_FPDPHIGH):
-        viaFPDPLowSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
-        viaFPDPHighSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
-        break;
-    case VIA_DI_PORT_LVDS1:
-        viaLVDS1SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
-        break;
-    case VIA_DI_PORT_LVDS2:
-        viaLVDS2SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
-        break;
-    case (VIA_DI_PORT_LVDS1 |
-          VIA_DI_PORT_LVDS2):
-        viaLVDS1SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
-        viaLVDS2SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
-        break;
-    default:
-        break;
-    }
-
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "FP I/O Pad: %s\n",
-                ioPadOn ? "On": "Off");
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaFPIOPadState.\n"));
-}
-
-static void
 viaFPFormat(ScrnInfoPtr pScrn, uint32_t diPort, CARD8 format)
 {
     CARD8 temp = format & 0x01;
@@ -973,13 +926,13 @@ via_fp_dpms(xf86OutputPtr output, int mode)
     switch (mode) {
     case DPMSModeOn:
         viaFPPower(pScrn, pVia->Chipset, pVIAFP->diPort, TRUE);
-        viaFPIOPadState(pScrn, pVIAFP->diPort, TRUE);
+        viaIOPadState(pScrn, pVIAFP->diPort, 0x03);
         break;
     case DPMSModeStandby:
     case DPMSModeSuspend:
     case DPMSModeOff:
         viaFPPower(pScrn, pVia->Chipset, pVIAFP->diPort, FALSE);
-        viaFPIOPadState(pScrn, pVIAFP->diPort, FALSE);
+        viaIOPadState(pScrn, pVIAFP->diPort, 0x00);
         break;
     default:
         break;
@@ -1047,7 +1000,7 @@ via_fp_prepare(xf86OutputPtr output)
                         "Entered via_fp_prepare.\n"));
 
     viaFPPower(pScrn, pVia->Chipset, pVIAFP->diPort, FALSE);
-    viaFPIOPadState(pScrn, pVIAFP->diPort, FALSE);
+    viaIOPadState(pScrn, pVIAFP->diPort, 0x00);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_fp_prepare.\n"));
@@ -1064,7 +1017,7 @@ via_fp_commit(xf86OutputPtr output)
                         "Entered via_fp_commit.\n"));
 
     viaFPPower(pScrn, pVia->Chipset, pVIAFP->diPort, TRUE);
-    viaFPIOPadState(pScrn, pVIAFP->diPort, TRUE);
+    viaIOPadState(pScrn, pVIAFP->diPort, 0x03);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_fp_commit.\n"));

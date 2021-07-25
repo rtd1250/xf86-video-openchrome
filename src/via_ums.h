@@ -1600,6 +1600,7 @@ Bool xf86I2CMaskByte(I2CDevPtr d, I2CByte subaddr,
                         I2CByte value, I2CByte mask);
 
 /* via_output.c */
+void viaIOPadState(ScrnInfoPtr pScrn, uint32_t diPort, uint8_t ioPadState);
 void viaInitDisplay(ScrnInfoPtr pScrn);
 CARD32 ViaGetMemoryBandwidth(ScrnInfoPtr pScrn);
 void viaSetUseExternalClock(ScrnInfoPtr pScrn);
@@ -1632,10 +1633,7 @@ void viaFPProbe(ScrnInfoPtr pScrn);
 void viaFPInit(ScrnInfoPtr pScrn);
 
 /* via_tmds.c */
-void viaExtTMDSIOPadState(ScrnInfoPtr pScrn, uint32_t diPort,
-                            Bool ioPadOn);
 void viaExtTMDSSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource);
-void viaExtTMDSEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState);
 void viaExtTMDSSetClockDriveStrength(ScrnInfoPtr pScrn,
                                         CARD8 clockDriveStrength);
 void viaExtTMDSSetDataDriveStrength(ScrnInfoPtr pScrn,

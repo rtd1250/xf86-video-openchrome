@@ -203,97 +203,6 @@ viaTMDSPower(ScrnInfoPtr pScrn, Bool powerState)
                         "Exiting viaTMDSPower.\n"));
 }
 
-static void
-viaTMDSIOPadSetting(ScrnInfoPtr pScrn, Bool ioPadOn)
-{
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
-    CARD8 sr13, sr5a;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaTMDSIOPadSetting.\n"));
-
-    sr5a = hwp->readSeq(hwp, 0x5A);
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "SR5A: 0x%02X\n", sr5a));
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Setting 3C5.5A[0] to 0.\n"));
-    ViaSeqMask(hwp, 0x5A, sr5a & 0xFE, 0x01);
-
-    sr13 = hwp->readSeq(hwp, 0x13);
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "SR13: 0x%02X\n", sr13));
-
-    /*
-     * 3C5.13[7:6] - DVP1D15 and DVP1D14 pin strappings
-     *               00: LVDS1 + LVDS2
-     *               01: DVI + LVDS2
-     *               10: Dual LVDS (LVDS1 + LVDS2 used
-     *                   simultaneously)
-     *               11: DVI only
-     */
-    if ((((~(sr13 & BIT(7))) && (sr13 & BIT(6))) ||
-        ((sr13 & BIT(7)) && (sr13 & BIT(6)))) ||
-        (pVIADisplay->isVIANanoBook)) {
-        viaLVDS1SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
-    }
-
-    hwp->writeSeq(hwp, 0x5A, sr5a);
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Restoring 3C5.5A[0].\n"));
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaTMDSIOPadSetting.\n"));
-}
-
-void
-viaExtTMDSIOPadState(ScrnInfoPtr pScrn, uint32_t diPort, Bool ioPadOn)
-{
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered %s.\n", __func__));
-
-    switch(diPort) {
-    case VIA_DI_PORT_DVP0:
-        viaDVP0SetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
-        break;
-    case VIA_DI_PORT_DVP1:
-        viaDVP1SetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
-        break;
-    case VIA_DI_PORT_FPDPLOW:
-        viaFPDPLowSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
-        break;
-    case VIA_DI_PORT_FPDPHIGH:
-        viaFPDPHighSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
-        break;
-    case (VIA_DI_PORT_FPDPLOW |
-          VIA_DI_PORT_FPDPHIGH):
-        viaFPDPLowSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
-        viaFPDPHighSetIOPadState(pScrn, ioPadOn ? 0x03 : 0x00);
-        break;
-    case VIA_DI_PORT_LVDS1:
-        viaLVDS1SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
-        break;
-    case VIA_DI_PORT_LVDS2:
-        viaLVDS2SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
-        break;
-    case (VIA_DI_PORT_LVDS1 |
-          VIA_DI_PORT_LVDS2):
-        viaLVDS1SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
-        viaLVDS2SetIOPadSetting(pScrn, ioPadOn ? 0x03 : 0x00);
-        break;
-    default:
-        break;
-    }
-
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                "DVI I/O Pad: %s\n",
-                ioPadOn ? "On": "Off");
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting %s.\n", __func__));
-}
-
 void
 viaExtTMDSSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
 {
@@ -424,139 +333,6 @@ viaExtTMDSSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting viaExtTMDSSetDisplaySource.\n"));
-}
-
-void
-viaExtTMDSEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState)
-{
-
-    vgaHWPtr hwp = VGAHWPTR(pScrn);
-    VIAPtr pVia = VIAPTR(pScrn);
-    CARD8 sr12, sr13;
-    CARD8 sr5a = 0x00;
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaExtTMDSEnableIOPads.\n"));
-
-    if ((pVia->Chipset == VIA_CX700)
-        || (pVia->Chipset == VIA_VX800)
-        || (pVia->Chipset == VIA_VX855)
-        || (pVia->Chipset == VIA_VX900)) {
-
-        sr5a = hwp->readSeq(hwp, 0x5A);
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "SR5A: 0x%02X\n", sr5a));
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "Setting 3C5.5A[0] to 0.\n"));
-        ViaSeqMask(hwp, 0x5A, sr5a & 0xFE, 0x01);
-    }
-
-    sr12 = hwp->readSeq(hwp, 0x12);
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "SR12: 0x%02X\n", sr12));
-    sr13 = hwp->readSeq(hwp, 0x13);
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "SR13: 0x%02X\n", sr13));
-    switch (pVia->Chipset) {
-    case VIA_CLE266:
-        /* 3C5.12[5] - FPD18 pin strapping
-         *             0: DIP0 (Digital Interface Port 0) is used by
-         *                a TMDS transmitter (DVI)
-         *             1: DIP0 (Digital Interface Port 0) is used by
-         *                a TV encoder */
-        if (!(sr12 & 0x20)) {
-            viaDIP0SetIOPadState(pScrn, ioPadState);
-        } else {
-            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                        "DIP0 was not set up for "
-                        "TMDS transmitter use.\n");
-        }
-
-        break;
-    case VIA_KM400:
-    case VIA_K8M800:
-    case VIA_PM800:
-    case VIA_P4M800PRO:
-        /* 3C5.13[3] - DVP0D8 pin strapping
-         *             0: AGP pins are used for AGP
-         *             1: AGP pins are used by FPDP
-         *                (Flat Panel Display Port)
-         * 3C5.12[6] - DVP0D6 pin strapping
-         *             0: Disable DVP0 (Digital Video Port 0)
-         *             1: Enable DVP0 (Digital Video Port 0)
-         * 3C5.12[5] - DVP0D5 pin strapping
-         *             0: DVP0 is used by a TMDS transmitter (DVI)
-         *             1: DVP0 is used by a TV encoder
-         * 3C5.12[4] - DVP0D4 pin strapping
-         *             0: Dual 12-bit FPDP (Flat Panel Display Port)
-         *             1: 24-bit FPDP (Flat Panel Display Port) */
-        if ((sr12 & 0x40) && (!(sr12 & 0x20))) {
-            viaDVP0SetIOPadState(pScrn, ioPadState);
-        } else if ((sr13 & 0x08) && (!(sr12 & 0x10))) {
-            viaFPDPLowSetIOPadState(pScrn, ioPadState);
-        } else {
-            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                        "None of the external ports were set up for "
-                        "TMDS transmitter use.\n");
-        }
-
-        break;
-    case VIA_P4M890:
-    case VIA_K8M890:
-    case VIA_P4M900:
-        /* 3C5.12[6] - FPD6 pin strapping
-         *             0: Disable DVP0 (Digital Video Port 0)
-         *             1: Enable DVP0 (Digital Video Port 0)
-         * 3C5.12[5] - FPD5 pin strapping
-         *             0: DVP0 is used by a TMDS transmitter (DVI)
-         *             1: DVP0 is used by a TV encoder */
-        if ((sr12 & 0x40) && (!(sr12 & 0x20))) {
-            viaDVP0SetIOPadState(pScrn, ioPadState);
-        } else if (!(sr12 & 0x10)) {
-            viaFPDPLowSetIOPadState(pScrn, ioPadState);
-        } else {
-            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                        "None of the external ports were set up for "
-                        "TMDS transmitter use.\n");
-        }
-
-        break;
-    case VIA_CX700:
-    case VIA_VX800:
-    case VIA_VX855:
-    case VIA_VX900:
-        /* 3C5.13[6] - DVP1 DVP / capture port selection
-         *             0: DVP1 is used as a DVP (Digital Video Port)
-         *             1: DVP1 is used as a capture port
-         */
-        if (!(sr13 & 0x40)) {
-            viaDVP1SetIOPadState(pScrn, ioPadState);
-        } else {
-            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                        "DVP1 is not set up for TMDS "
-                        "transmitter use.\n");
-        }
-
-        break;
-    default:
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                    "Unrecognized IGP for "
-                    "TMDS transmitter use.\n");
-        break;
-    }
-
-    if ((pVia->Chipset == VIA_CX700)
-        || (pVia->Chipset == VIA_VX800)
-        || (pVia->Chipset == VIA_VX855)
-        || (pVia->Chipset == VIA_VX900)) {
-
-        hwp->writeSeq(hwp, 0x5A, sr5a);
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "Restoring 3C5.5A[0].\n"));
-    }
-
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaExtTMDSEnableIOPads.\n"));
 }
 
 void
@@ -761,6 +537,7 @@ static void
 via_tmds_dpms(xf86OutputPtr output, int mode)
 {
     ScrnInfoPtr pScrn = output->scrn;
+    VIATMDSPtr pVIATMDS = (VIATMDSPtr) output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_tmds_dpms.\n"));
@@ -768,13 +545,13 @@ via_tmds_dpms(xf86OutputPtr output, int mode)
     switch (mode) {
     case DPMSModeOn:
         viaTMDSPower(pScrn, TRUE);
-        viaTMDSIOPadSetting(pScrn, TRUE);
+        viaIOPadState(pScrn, pVIATMDS->diPort, 0x03);
         break;
     case DPMSModeStandby:
     case DPMSModeSuspend:
     case DPMSModeOff:
         viaTMDSPower(pScrn, FALSE);
-        viaTMDSIOPadSetting(pScrn, FALSE);
+        viaIOPadState(pScrn, pVIATMDS->diPort, 0x00);
         break;
     default:
         break;
@@ -852,12 +629,13 @@ static void
 via_tmds_prepare(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
+    VIATMDSPtr pVIATMDS = (VIATMDSPtr) output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_tmds_prepare.\n"));
 
     viaTMDSPower(pScrn, FALSE);
-    viaTMDSIOPadSetting(pScrn, FALSE);
+    viaIOPadState(pScrn, pVIATMDS->diPort, 0x00);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_tmds_prepare.\n"));
@@ -867,12 +645,13 @@ static void
 via_tmds_commit(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
+    VIATMDSPtr pVIATMDS = (VIATMDSPtr) output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Entered via_tmds_commit.\n"));
 
     viaTMDSPower(pScrn, TRUE);
-    viaTMDSIOPadSetting(pScrn, TRUE);
+    viaIOPadState(pScrn, pVIATMDS->diPort, 0x03);
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_tmds_commit.\n"));
