@@ -697,6 +697,13 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
     temp = hwp->readCrtc(hwp, 0x47);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "CR47: 0x%02X\n", temp));
+
+    if (pVia->Chipset == VIA_CLE266) {
+        temp = hwp->readCrtc(hwp, 0x55);
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                            "CR55: 0x%02X\n", temp));
+    }
+
     temp = hwp->readCrtc(hwp, 0x6B);
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "CR6B: 0x%02X\n", temp));
@@ -915,6 +922,15 @@ viaIGAInitCommon(ScrnInfoPtr pScrn)
      * 3X5.47[0] - LCD Simultaneous Mode Backdoor Register for
      *             Clock Select and CRTC Register Protect */
     ViaCrtcMask(hwp, 0x47, 0x00, 0x23);
+
+    /*
+     * It was observed on NeoWare CA10 thin client with DVI that not
+     * resetting CR55[7] to 0 causes the screen driven by IGA2 to get
+     * distorted.
+     */
+    if (pVia->Chipset == VIA_CLE266) {
+        ViaCrtcMask(hwp, 0x55, 0x00, BIT(7));
+    }
 
     /* 3X5.6B[3] - Simultaneous Display Enable
      *             0: Disable
