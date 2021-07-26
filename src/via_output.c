@@ -90,6 +90,27 @@ viaIOPadState(ScrnInfoPtr pScrn, uint32_t diPort, uint8_t ioPadState)
 }
 
 void
+viaOutputEnable(ScrnInfoPtr pScrn, uint32_t diPort, Bool outputEnable)
+{
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
+    switch(diPort) {
+    case VIA_DI_PORT_DIP0:
+        viaDIP0SetOutputEnable(pScrn, outputEnable);
+        break;
+    case VIA_DI_PORT_DIP1:
+        viaDIP1SetOutputEnable(pScrn, outputEnable);
+        break;
+    default:
+        break;
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
+}
+
+void
 viaDisplaySource(ScrnInfoPtr pScrn, uint32_t diPort, int index)
 {
     CARD8 displaySource = index & 0x01;

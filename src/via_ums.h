@@ -501,6 +501,25 @@ viaDIP0SetIOPadState(ScrnInfoPtr pScrn, CARD8 ioPadState)
 }
 
 /*
+ * Output enable of DIP0 (Digital Interface Port 0) interface.
+ * CLE266 chipset only.
+ */
+static inline void
+viaDIP0SetOutputEnable(ScrnInfoPtr pScrn, Bool outputEnable)
+{
+    /*
+     * 3X5.6C[0] - DIP0 Output Enable
+     *             0: Output Disable
+     *             1: Output Enable
+     */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x6C,
+                outputEnable ? 0x01 : 0x00, BIT(0));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "DIP0 Output: %s\n",
+                        outputEnable ? "Enable" : "Disable"));
+}
+
+/*
  * Sets the display source of DIP0 (Digital Interface Port 0)
  * interface. CLE266 chipset only.
  */
@@ -540,6 +559,25 @@ viaDIP1SetIOPadState(ScrnInfoPtr pScrn, CARD8 ioPadState)
                         ((ioPadState & (BIT(1) | BIT(0))) == 0x01) ?
                             "Unknown" :
                             "Off"));
+}
+
+/*
+ * Output enable of DIP1 (Digital Interface Port 1) interface.
+ * CLE266 chipset only.
+ */
+static inline void
+viaDIP1SetOutputEnable(ScrnInfoPtr pScrn, Bool outputEnable)
+{
+    /*
+     * 3X5.93[0] - DIP1 Output Enable
+     *             0: Output Disable
+     *             1: Output Enable
+     */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x93,
+                outputEnable ? 0x01 : 0x00, BIT(0));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "DIP1 Output: %s\n",
+                        outputEnable ? "Enable" : "Disable"));
 }
 
 /*
@@ -1646,6 +1684,7 @@ Bool xf86I2CMaskByte(I2CDevPtr d, I2CByte subaddr,
 /* via_output.c */
 void viaDisplaySource(ScrnInfoPtr pScrn, uint32_t diPort, int index);
 void viaIOPadState(ScrnInfoPtr pScrn, uint32_t diPort, uint8_t ioPadState);
+void viaOutputEnable(ScrnInfoPtr pScrn, uint32_t diPort, Bool outputEnable);
 void viaInitDisplay(ScrnInfoPtr pScrn);
 CARD32 ViaGetMemoryBandwidth(ScrnInfoPtr pScrn);
 void viaSetUseExternalClock(ScrnInfoPtr pScrn);

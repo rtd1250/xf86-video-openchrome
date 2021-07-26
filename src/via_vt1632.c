@@ -265,6 +265,7 @@ static void
 via_vt1632_prepare(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
     viaVT1632RecPtr pVIAVT1632 = output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -272,6 +273,10 @@ via_vt1632_prepare(xf86OutputPtr output)
 
     viaVT1632Power(pScrn, pVIAVT1632->VT1632I2CDev, FALSE);
     viaIOPadState(pScrn, pVIAVT1632->diPort, 0x00);
+
+    if (pVia->Chipset == VIA_CLE266) {
+        viaOutputEnable(pScrn, pVIAVT1632->diPort, FALSE);
+    }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting %s.\n", __func__));
@@ -281,6 +286,7 @@ static void
 via_vt1632_commit(xf86OutputPtr output)
 {
     ScrnInfoPtr pScrn = output->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
     viaVT1632RecPtr pVIAVT1632 = output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -288,6 +294,10 @@ via_vt1632_commit(xf86OutputPtr output)
 
     viaVT1632Power(pScrn, pVIAVT1632->VT1632I2CDev, TRUE);
     viaIOPadState(pScrn, pVIAVT1632->diPort, 0x03);
+
+    if (pVia->Chipset == VIA_CLE266) {
+        viaOutputEnable(pScrn, pVIAVT1632->diPort, TRUE);
+    }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting %s.\n", __func__));

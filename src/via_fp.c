@@ -952,6 +952,10 @@ via_fp_prepare(xf86OutputPtr output)
     viaFPPower(pScrn, pVia->Chipset, pVIAFP->diPort, FALSE);
     viaIOPadState(pScrn, pVIAFP->diPort, 0x00);
 
+    if (pVia->Chipset == VIA_CLE266) {
+        viaOutputEnable(pScrn, pVIAFP->diPort, FALSE);
+    }
+
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_fp_prepare.\n"));
 }
@@ -968,6 +972,10 @@ via_fp_commit(xf86OutputPtr output)
 
     viaFPPower(pScrn, pVia->Chipset, pVIAFP->diPort, TRUE);
     viaIOPadState(pScrn, pVIAFP->diPort, 0x03);
+
+    if (pVia->Chipset == VIA_CLE266) {
+        viaOutputEnable(pScrn, pVIAFP->diPort, TRUE);
+    }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting via_fp_commit.\n"));
