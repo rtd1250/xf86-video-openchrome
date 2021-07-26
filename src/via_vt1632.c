@@ -309,6 +309,7 @@ via_vt1632_mode_set(xf86OutputPtr output, DisplayModePtr mode,
 {
     ScrnInfoPtr pScrn = output->scrn;
     drmmode_crtc_private_ptr iga = output->crtc->driver_private;
+    VIAPtr pVia = VIAPTR(pScrn);
     viaVT1632RecPtr pVIAVT1632 = output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -318,6 +319,10 @@ via_vt1632_mode_set(xf86OutputPtr output, DisplayModePtr mode,
         viaExtTMDSSetClockDriveStrength(pScrn, 0x03);
         viaExtTMDSSetDataDriveStrength(pScrn, 0x03);
         viaIOPadState(pScrn, pVIAVT1632->diPort, 0x03);
+
+        if (pVia->Chipset == VIA_CLE266) {
+            viaClockSource(pScrn, pVIAVT1632->diPort, TRUE);
+        }
 
         viaVT1632DumpRegisters(pScrn, pVIAVT1632->VT1632I2CDev);
         viaVT1632InitRegisters(pScrn, pVIAVT1632->VT1632I2CDev);

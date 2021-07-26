@@ -520,6 +520,25 @@ viaDIP0SetOutputEnable(ScrnInfoPtr pScrn, Bool outputEnable)
 }
 
 /*
+ * Sets the clock source of DIP0 (Digital Interface Port 0)
+ * interface. CLE266 chipset only.
+ */
+static inline void
+viaDIP0SetClockSource(ScrnInfoPtr pScrn, Bool clockSource)
+{
+    /*
+     * 3X5.6C[5] - DIP0 Clock Source
+     *             0: External
+     *             1: Internal
+     */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x6C,
+                clockSource ? BIT(5) : 0x00, BIT(5));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "DIP0 Clock Source: %s\n",
+                        clockSource ? "Internal" : "External"));
+}
+
+/*
  * Sets the display source of DIP0 (Digital Interface Port 0)
  * interface. CLE266 chipset only.
  */
@@ -578,6 +597,25 @@ viaDIP1SetOutputEnable(ScrnInfoPtr pScrn, Bool outputEnable)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "DIP1 Output: %s\n",
                         outputEnable ? "Enable" : "Disable"));
+}
+
+/*
+ * Sets the clock source of DIP1 (Digital Interface Port 1)
+ * interface. CLE266 chipset only.
+ */
+static inline void
+viaDIP1SetClockSource(ScrnInfoPtr pScrn, Bool clockSource)
+{
+    /*
+     * 3X5.93[5] - DIP1 Clock Source
+     *             0: External
+     *             1: Internal
+     */
+    ViaCrtcMask(VGAHWPTR(pScrn), 0x93,
+                clockSource ? BIT(5) : 0x00, BIT(5));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "DIP1 Clock Source: %s\n",
+                        clockSource ? "Internal" : "External"));
 }
 
 /*
@@ -1685,6 +1723,7 @@ Bool xf86I2CMaskByte(I2CDevPtr d, I2CByte subaddr,
 void viaDisplaySource(ScrnInfoPtr pScrn, uint32_t diPort, int index);
 void viaIOPadState(ScrnInfoPtr pScrn, uint32_t diPort, uint8_t ioPadState);
 void viaOutputEnable(ScrnInfoPtr pScrn, uint32_t diPort, Bool outputEnable);
+void viaClockSource(ScrnInfoPtr pScrn, uint32_t diPort, Bool clockSource);
 void viaInitDisplay(ScrnInfoPtr pScrn);
 CARD32 ViaGetMemoryBandwidth(ScrnInfoPtr pScrn);
 void viaSetUseExternalClock(ScrnInfoPtr pScrn);

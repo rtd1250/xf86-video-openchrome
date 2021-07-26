@@ -111,6 +111,27 @@ viaOutputEnable(ScrnInfoPtr pScrn, uint32_t diPort, Bool outputEnable)
 }
 
 void
+viaClockSource(ScrnInfoPtr pScrn, uint32_t diPort, Bool clockSource)
+{
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Entered %s.\n", __func__));
+
+    switch(diPort) {
+    case VIA_DI_PORT_DIP0:
+        viaDIP0SetClockSource(pScrn, clockSource);
+        break;
+    case VIA_DI_PORT_DIP1:
+        viaDIP1SetClockSource(pScrn, clockSource);
+        break;
+    default:
+        break;
+    }
+
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                        "Exiting %s.\n", __func__));
+}
+
+void
 viaDisplaySource(ScrnInfoPtr pScrn, uint32_t diPort, int index)
 {
     CARD8 displaySource = index & 0x01;
