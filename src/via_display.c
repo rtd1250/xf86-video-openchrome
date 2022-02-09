@@ -3412,6 +3412,15 @@ via_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green, CARD16 *blue,
 
     VIALoadRgbLut(pScrn, 0, size, colors);
 
+    /*
+     * Turn gamma correction on.
+     */
+    if (!iga->index) {
+        viaIGA1SetGamma(pScrn, TRUE);
+    } else {
+        viaIGA2SetGamma(pScrn, TRUE);
+    }
+
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting %s.\n", __func__));
 }
