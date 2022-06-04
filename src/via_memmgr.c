@@ -93,7 +93,7 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned long size,
     case TTM_PL_TT:
     case TTM_PL_VRAM:
         if (pVia->directRenderingType == DRI_NONE) {
-            if (!pVia->useEXA) {
+            if ((pVia->NoAccel) || (!pVia->useEXA)) {
                 ret = viaOffScreenLinear(pScrn, obj,
                                             size, alignment);
                 if (ret) {
@@ -299,7 +299,7 @@ drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
         case TTM_PL_VRAM:
         case TTM_PL_TT:
             if (pVia->directRenderingType == DRI_NONE) {
-                if (!pVia->useEXA) {
+                if ((pVia->NoAccel) || (!pVia->useEXA)) {
                     FBLinearPtr linear = (FBLinearPtr) obj->handle;
 
                     xf86FreeOffscreenLinear(linear);

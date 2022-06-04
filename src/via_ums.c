@@ -856,7 +856,7 @@ viaUMSScreenInit(ScrnInfoPtr pScrn)
                         "Entered %s.\n", __func__));
 
     if (pVia->directRenderingType == DRI_NONE) {
-        if (!pVia->useEXA) {
+        if ((pVia->NoAccel) || (!pVia->useEXA)) {
             if (!viaInitFB(pScrn)) {
                 ret = FALSE;
             }
