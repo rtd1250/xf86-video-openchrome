@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <inttypes.h>
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
@@ -1045,7 +1046,7 @@ static void dump_sl(const char *pfx)
 	temp = (readb_idx_reg(0x3c5, 0x6d) & 0x7f);
 	sl_in_mem_addr |= (temp << 37);
 
-	printf("%sSL in System memory: 0x%llx, RTSF in SL: 0x%lx\n",
+	printf("%sSL in System memory: 0x%"PRIx64", RTSF in SL: 0x%lx\n",
 		pfx, sl_in_mem_addr, rtsf_in_sl_addr);
 }
 
