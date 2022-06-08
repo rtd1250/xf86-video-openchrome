@@ -39,7 +39,6 @@
 #include "via_driver.h"
 #ifdef OPENCHROMEDRI
 #include "via_drm.h"
-#include "openchrome_drm.h"
 
 #else
 #include "drm_fourcc.h"
@@ -149,16 +148,16 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned long size,
                                     obj->handle));
             }
         } else if (pVia->directRenderingType == DRI_2) {
-            struct drm_openchrome_gem_create args;
+            struct drm_via_gem_create args;
 
             memset(&args, 0, sizeof(args));
             args.size = size;
             args.alignment = alignment;
             args.domain = domain;
             ret = drmCommandWriteRead(pVia->drmmode.fd,
-                            DRM_OPENCHROME_GEM_CREATE,
+                            DRM_VIA_GEM_CREATE,
                             &args,
-                            sizeof(struct drm_openchrome_gem_create));
+                            sizeof(struct drm_via_gem_create));
             if (!ret) {
                 /* Okay the X server expects to know the offset because
                  * of non-KMS. Once we have KMS working the offset
@@ -202,7 +201,7 @@ drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
 {
     VIAPtr pVia = VIAPTR(pScrn);
 #ifdef OPENCHROMEDRI
-    struct drm_openchrome_gem_map args;
+    struct drm_via_gem_map args;
     int ret;
 #endif /* OPENCHROMEDRI */
 
@@ -229,9 +228,9 @@ drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
         memset(&args, 0, sizeof(args));
         args.handle = obj->handle;
         ret = drmCommandWriteRead(pVia->drmmode.fd,
-                        DRM_OPENCHROME_GEM_MAP,
+                        DRM_VIA_GEM_MAP,
                         &args,
-                        sizeof(struct drm_openchrome_gem_map));
+                        sizeof(struct drm_via_gem_map));
         if (ret) {
             obj->ptr = NULL;
             goto exit;
@@ -257,7 +256,7 @@ drm_bo_unmap(ScrnInfoPtr pScrn, struct buffer_object *obj)
 {
     VIAPtr pVia = VIAPTR(pScrn);
 #ifdef OPENCHROMEDRI
-    struct drm_openchrome_gem_unmap args;
+    struct drm_via_gem_unmap args;
     int ret;
 #endif /* OPENCHROMEDRI */
 
@@ -270,12 +269,12 @@ drm_bo_unmap(ScrnInfoPtr pScrn, struct buffer_object *obj)
     } else if (pVia->directRenderingType == DRI_2) {
         munmap(obj->ptr, obj->size);
 
-        memset(&args, 0, sizeof(struct drm_openchrome_gem_unmap));
+        memset(&args, 0, sizeof(struct drm_via_gem_unmap));
         args.handle = obj->handle;
         ret = drmCommandRead(pVia->drmmode.fd,
-                        DRM_OPENCHROME_GEM_UNMAP,
+                        DRM_VIA_GEM_UNMAP,
                         &args,
-                        sizeof(struct drm_openchrome_gem_unmap));
+                        sizeof(struct drm_via_gem_unmap));
         if (ret) {
             goto exit;
         }

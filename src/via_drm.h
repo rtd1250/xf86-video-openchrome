@@ -1,4 +1,5 @@
 /*
+ * Copyright © 2020 Kevin Brace
  * Copyright 1998-2003 VIA Technologies, Inc. All Rights Reserved.
  * Copyright 2001-2003 S3 Graphics, Inc. All Rights Reserved.
  *
@@ -16,10 +17,10 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL
- * VIA, S3 GRAPHICS, AND/OR ITS SUPPLIERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
+ * THE AUTHORS, COPYRIGHT HOLDERS, AND/OR ITS SUPPLIERS BE LIABLE FOR ANY
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT
+ * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
+ * THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #ifndef _VIA_DRM_H_
 #define _VIA_DRM_H_
@@ -81,6 +82,11 @@ extern "C" {
 #define DRM_VIA_DMA_BLIT        0x0e
 #define DRM_VIA_BLIT_SYNC       0x0f
 
+#define	DRM_VIA_GEM_CREATE	0x10
+#define	DRM_VIA_GEM_MAP		0x11
+#define	DRM_VIA_GEM_UNMAP	0x12
+
+
 #define DRM_IOCTL_VIA_ALLOCMEM	  DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_ALLOCMEM, drm_via_mem_t)
 #define DRM_IOCTL_VIA_FREEMEM	  DRM_IOW( DRM_COMMAND_BASE + DRM_VIA_FREEMEM, drm_via_mem_t)
 #define DRM_IOCTL_VIA_AGP_INIT	  DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_AGP_INIT, drm_via_agp_t)
@@ -96,6 +102,10 @@ extern "C" {
 #define DRM_IOCTL_VIA_WAIT_IRQ    DRM_IOWR( DRM_COMMAND_BASE + DRM_VIA_WAIT_IRQ, drm_via_irqwait_t)
 #define DRM_IOCTL_VIA_DMA_BLIT    DRM_IOW(DRM_COMMAND_BASE + DRM_VIA_DMA_BLIT, drm_via_dmablit_t)
 #define DRM_IOCTL_VIA_BLIT_SYNC   DRM_IOW(DRM_COMMAND_BASE + DRM_VIA_BLIT_SYNC, drm_via_blitsync_t)
+
+#define	DRM_IOCTL_VIA_GEM_CREATE	DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_GEM_CREATE, struct drm_via_gem_create)
+#define	DRM_IOCTL_VIA_GEM_MAP		DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_GEM_MAP, struct drm_via_gem_map)
+#define	DRM_IOCTL_VIA_GEM_UNMAP		DRM_IOR(DRM_COMMAND_BASE + DRM_VIA_GEM_UNMAP, struct drm_via_gem_unmap)
 
 /* Indices into buf.Setup where various bits of state are mirrored per
  * context and per buffer.  These can be fired at the card as a unit,
@@ -274,6 +284,23 @@ typedef struct drm_via_dmablit {
 
 	drm_via_blitsync_t sync;
 } drm_via_dmablit_t;
+
+struct drm_via_gem_create {
+	uint64_t size;
+	uint32_t alignment;
+	uint32_t domain;
+	uint32_t handle;
+	uint64_t offset;
+};
+
+struct drm_via_gem_map {
+	uint32_t handle;
+	uint64_t map_offset;
+};
+
+struct drm_via_gem_unmap {
+	uint32_t handle;
+};
 
 #if defined(__cplusplus)
 }
