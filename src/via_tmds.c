@@ -799,18 +799,17 @@ viaExtTMDSProbe(ScrnInfoPtr pScrn)
         case VIA_P4M800PRO:
         case VIA_PM800:
         case VIA_K8M800:
-            /* 3C5.12[6] - DVP0D6 pin strapping
-             *             0: Disable DVP0 (Digital Video Port 0) for
-             *                DVI or TV out use
-             *             1: Enable DVP0 (Digital Video Port 0) for
-             *                DVI or TV out use
-             * 3C5.12[5] - DVP0D5 pin strapping
-             *             0: TMDS transmitter (DVI)
-             *             1: TV encoder */
-            if ((sr12 & BIT(6)) && (!(sr12 & BIT(5)))) {
+            /*
+             * For DVP0 to be configured to not be used for a TV
+             * encoder, DVP0D[6] (SR12[6]) needs to be strapped
+             * low (0).  In addition, DVP0D[5] (SR12[5]) also needs
+             * to be strapped low (0) for DVP0 to be configured for
+             * DVI transmitter use.
+             */
+            if (!(sr12 & BIT(6)) && (!(sr12 & BIT(5)))) {
                 pVIADisplay->extTMDSDIPort = VIA_DI_PORT_DVP0;
             } else {
-                pVIADisplay->extTMDSDIPort = VIA_DI_PORT_DVP1;
+                pVIADisplay->extTMDSDIPort = VIA_DI_PORT_NONE;
             }
 
             break;
