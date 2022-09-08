@@ -293,16 +293,16 @@ typedef struct drm_via_dmablit {
  * OpenChrome DRM IOCTL structs
  */
 struct drm_via_gem_alloc {
-	uint32_t alignment;
-	uint64_t size;
-	uint32_t domain;
-	uint32_t handle;
-	uint64_t offset;
+	__u32 alignment;
+	__u64 size;
+	__u32 domain;
+	__u32 handle;
+	__u64 offset;
 };
 
 struct drm_via_gem_mmap {
-	uint32_t handle;
-	uint64_t offset;
+	__u32 handle;
+	__u64 offset;
 };
 
 #if defined(__cplusplus)
