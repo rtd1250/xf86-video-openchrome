@@ -84,7 +84,6 @@ extern "C" {
 
 #define	DRM_VIA_GEM_CREATE	0x10
 #define	DRM_VIA_GEM_MAP		0x11
-#define	DRM_VIA_GEM_UNMAP	0x12
 
 
 #define DRM_IOCTL_VIA_ALLOCMEM	  DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_ALLOCMEM, drm_via_mem_t)
@@ -105,7 +104,6 @@ extern "C" {
 
 #define	DRM_IOCTL_VIA_GEM_CREATE	DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_GEM_CREATE, struct drm_via_gem_create)
 #define	DRM_IOCTL_VIA_GEM_MAP		DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_GEM_MAP, struct drm_via_gem_map)
-#define	DRM_IOCTL_VIA_GEM_UNMAP		DRM_IOR(DRM_COMMAND_BASE + DRM_VIA_GEM_UNMAP, struct drm_via_gem_unmap)
 
 /* Indices into buf.Setup where various bits of state are mirrored per
  * context and per buffer.  These can be fired at the card as a unit,
@@ -296,10 +294,6 @@ struct drm_via_gem_create {
 struct drm_via_gem_map {
 	uint32_t handle;
 	uint64_t map_offset;
-};
-
-struct drm_via_gem_unmap {
-	uint32_t handle;
 };
 
 #if defined(__cplusplus)
