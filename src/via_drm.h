@@ -292,18 +292,41 @@ typedef struct drm_via_dmablit {
 /*
  * OpenChrome DRM IOCTL structs
  */
+
+/**
+ * struct drm_via_gem_alloc - IOCTL argument for allocating a GEM based BO
+ * (Buffer Object).
+ */
 struct drm_via_gem_alloc {
+	/* Alignment of the BO. */
 	__u32 alignment;
 	__u32 pad;
+
+	/* Size of the BO. Note that the actual size gets returned from DRM.*/
 	__u64 size;
+
+	/*
+	 * TTM domain of the BO. Note that the actual domain gets returned
+	 * from DRM.
+	 */
 	__u32 domain;
+
+	/* GEM handle to the BO returned from DRM. */
 	__u32 handle;
+
+	/* Offset returned from DRM. */
 	__u64 offset;
 };
 
+/**
+ * struct drm_via_gem_mmap - IOCTL argument for mapping a GEM based BO.
+ */
 struct drm_via_gem_mmap {
+	/* GEM handle of the BO. */
 	__u32 handle;
 	__u32 pad;
+
+	/* Offset returned from DRM. */
 	__u64 offset;
 };
 
