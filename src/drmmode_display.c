@@ -249,7 +249,6 @@ drmmode_load_cursor_argb (xf86CrtcPtr crtc, CARD32 *image)
     /* cursor should be mapped already */
     ptr = drm_bo_map(crtc->scrn, drmmode_crtc->cursor_bo);
     memcpy(ptr, image, drmmode_crtc->cursor_bo->size);
-    drm_bo_unmap(crtc->scrn, drmmode_crtc->cursor_bo);
 
     if (drmModeSetCursor(drmmode_crtc->drmmode->fd, drmmode_crtc->mode_crtc->crtc_id,
                             handle, cursor_info->MaxWidth, cursor_info->MaxHeight)) {

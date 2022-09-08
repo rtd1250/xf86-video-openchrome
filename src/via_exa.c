@@ -1080,11 +1080,9 @@ viaExitAccel(ScreenPtr pScreen)
             pVia->scratchBuffer = NULL;
         }
         if (pVia->vq_bo) {
-            drm_bo_unmap(pScrn, pVia->vq_bo);
             drm_bo_free(pScrn, pVia->vq_bo);
         }
         if (pVia->exa_sync_bo) {
-            drm_bo_unmap(pScrn, pVia->exa_sync_bo);
             drm_bo_free(pScrn, pVia->exa_sync_bo);
         }
         if (pVia->exaDriverPtr) {

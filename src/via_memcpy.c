@@ -627,7 +627,6 @@ viaVidCopyInit(const char *copyType, ScreenPtr pScreen)
     }
     free(buf3);
     free(buf2);
-    drm_bo_unmap(pScrn, tmpFbBuffer);
     drm_bo_free(pScrn, tmpFbBuffer);
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                "Using %s YUV42X copy for %s.\n",

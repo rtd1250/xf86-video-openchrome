@@ -252,42 +252,6 @@ exit:
 }
 
 void
-drm_bo_unmap(ScrnInfoPtr pScrn, struct buffer_object *obj)
-{
-    VIAPtr pVia = VIAPTR(pScrn);
-#ifdef OPENCHROMEDRI
-    struct drm_via_gem_unmap args;
-    int ret;
-#endif /* OPENCHROMEDRI */
-
-    if ((pVia->directRenderingType == DRI_NONE)
-#ifdef OPENCHROMEDRI
-        || (pVia->directRenderingType == DRI_1)
-#endif /* OPENCHROMEDRI */
-    ) {
-#ifdef OPENCHROMEDRI
-    } else if (pVia->directRenderingType == DRI_2) {
-        munmap(obj->ptr, obj->size);
-
-        memset(&args, 0, sizeof(struct drm_via_gem_unmap));
-        args.handle = obj->handle;
-        ret = drmCommandRead(pVia->drmmode.fd,
-                        DRM_VIA_GEM_UNMAP,
-                        &args,
-                        sizeof(struct drm_via_gem_unmap));
-        if (ret) {
-            goto exit;
-        }
-#endif /* OPENCHROMEDRI */
-    }
-
-#ifdef OPENCHROMEDRI
-exit:
-#endif /* OPENCHROMEDRI */
-    obj->ptr = NULL;
-}
-
-void
 drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
 {
     VIAPtr pVia = VIAPTR(pScrn);
@@ -314,14 +278,20 @@ drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
 
                 drm.index = obj->handle;
                 if (drmCommandWrite(pVia->drmmode.fd, DRM_VIA_FREEMEM,
-                                    &drm, sizeof(drm_via_mem_t)) < 0)
+                                    &drm, sizeof(drm_via_mem_t)) < 0) {
                     ErrorF("DRM failed to free for handle %lu.\n", obj->handle);
+                    return;
+                }
             } else  if (pVia->directRenderingType == DRI_2) {
                 struct drm_gem_close close;
 
+                munmap(obj->ptr, obj->size);
+
                 close.handle = obj->handle;
-                if (drmIoctl(pVia->drmmode.fd, DRM_IOCTL_GEM_CLOSE, &close) < 0)
+                if (drmIoctl(pVia->drmmode.fd, DRM_IOCTL_GEM_CLOSE, &close) < 0) {
                     ErrorF("DRM failed to free for handle %lu.\n", obj->handle);
+                    return;
+                }
 #endif
             }
             break;
@@ -329,6 +299,8 @@ drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
         default:
             break;
         }
+
+        obj->ptr = NULL;
         free(obj);
     }
 }

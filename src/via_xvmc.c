@@ -608,7 +608,6 @@ ViaXvMCCreateSurface(ScrnInfoPtr pScrn, XvMCSurfacePtr pSurf,
         memset((unsigned char*)buf + yBufSize, 0x80, yBufSize >> 1);
         buf = (unsigned char*)buf + bufSize;
     }
-    drm_bo_unmap(pScrn, sPriv->memory_ref);
 
     vXvMC->sPrivs[srfNo] = sPriv;
     vXvMC->surfaces[srfNo] = pSurf->surface_id;

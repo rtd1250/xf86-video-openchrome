@@ -696,10 +696,8 @@ viaUMSAccelInit(ScrnInfoPtr pScrn)
     ret = TRUE;
 err:
     if (!ret) {
-        if (pVia->markerBuf) {
-            drm_bo_unmap(pScrn, pVia->exa_sync_bo);
+        if (pVia->markerBuf)
             pVia->markerBuf = NULL;
-        }
         if (pVia->exa_sync_bo)
             drm_bo_free(pScrn, pVia->exa_sync_bo);
         if (pVia->vq_bo)

@@ -929,7 +929,6 @@ viaDRIOffscreenSave(ScrnInfoPtr pScrn)
                        strerror(-err));
         }
         memcpy(dst, src, srcSize);
-        drm_bo_unmap(pScrn, pVia->driOffScreenMem);
     } else {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                    "Out of memory trying to backup DRI offscreen memory.\n");
@@ -949,8 +948,6 @@ viaDRIOffscreenRestore(ScrnInfoPtr pScrn)
         memcpy(dst, src, pVia->driOffScreenMem->size);
         free(pVia->driOffScreenSave);
         pVia->driOffScreenSave = NULL;
-
-        drm_bo_unmap(pScrn, pVia->driOffScreenMem);
     } else {
     }
 }

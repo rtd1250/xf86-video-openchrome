@@ -803,7 +803,6 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
 #endif
 
     if (old_fb_id) {
-        drm_bo_unmap(scrn, old_front);
         drm_bo_free(scrn, old_front);
     }
 
@@ -815,7 +814,6 @@ via_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
 
 fail:
     if (drmmode->front_bo) {
-        drm_bo_unmap(scrn, drmmode->front_bo);
         drm_bo_free(scrn, drmmode->front_bo);
     }
 
@@ -1378,7 +1376,6 @@ VIACloseScreen(CLOSE_SCREEN_ARGS_DECL)
 #endif
         pVia->drmmode.fb_id = 0;
 
-        drm_bo_unmap(pScrn, pVia->drmmode.front_bo);
         drm_bo_free(pScrn, pVia->drmmode.front_bo);
     }
 

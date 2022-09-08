@@ -45,7 +45,6 @@ struct buffer_object *
 drm_bo_alloc(ScrnInfoPtr pScrn, unsigned long size,
                 unsigned long alignment, int domain);
 void *drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj);
-void drm_bo_unmap(ScrnInfoPtr pScrn, struct buffer_object *obj);
 void drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *);
 
 #endif

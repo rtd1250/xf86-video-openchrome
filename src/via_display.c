@@ -3522,7 +3522,6 @@ via_crtc_load_cursor_argb(xf86CrtcPtr crtc, CARD32 *image)
 
     dst = drm_bo_map(pScrn, iga->cursor_bo);
     memcpy(dst, image, iga->cursor_bo->size);
-    drm_bo_unmap(pScrn, iga->cursor_bo);
 
     if (!iga->index) {
         viaIGA1InitHI(pScrn);
