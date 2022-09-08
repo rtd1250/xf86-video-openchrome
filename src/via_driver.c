@@ -65,7 +65,7 @@
 #ifdef OPENCHROMEDRI
 static const ViaDRMVersion drmVIADRMExpected = { 1, 3, 0 };
 static const ViaDRMVersion drmVIADRMCompat = { 3, 0, 0 };
-static const ViaDRMVersion drmVIADRMKMSSupport = { 3, 5, 0 };
+static const ViaDRMVersion drmVIADRMKMSSupport = { 3, 6, 0 };
 #endif /* OPENCHROMEDRI */
 
 /* Prototypes. */
