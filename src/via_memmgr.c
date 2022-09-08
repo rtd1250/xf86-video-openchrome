@@ -151,8 +151,8 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned long size,
             struct drm_via_gem_alloc args;
 
             memset(&args, 0, sizeof(args));
-            args.size = size;
             args.alignment = alignment;
+            args.size = size;
             args.domain = domain;
             ret = drmCommandWriteRead(pVia->drmmode.fd,
                             DRM_VIA_GEM_ALLOC,
@@ -237,7 +237,7 @@ drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
         }
 
         obj->ptr = mmap(0, obj->size, PROT_READ | PROT_WRITE,
-                        MAP_SHARED, pVia->drmmode.fd, args.map_offset);
+                        MAP_SHARED, pVia->drmmode.fd, args.offset);
         if (obj->ptr == MAP_FAILED) {
             DEBUG(ErrorF("mmap failed with error %d\n", -errno));
             obj->ptr = NULL;
