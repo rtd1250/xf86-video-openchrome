@@ -294,6 +294,7 @@ typedef struct drm_via_dmablit {
  */
 struct drm_via_gem_alloc {
 	__u32 alignment;
+	__u32 pad;
 	__u64 size;
 	__u32 domain;
 	__u32 handle;
@@ -302,6 +303,7 @@ struct drm_via_gem_alloc {
 
 struct drm_via_gem_mmap {
 	__u32 handle;
+	__u32 pad;
 	__u64 offset;
 };
 
