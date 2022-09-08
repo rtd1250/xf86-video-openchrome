@@ -148,16 +148,16 @@ drm_bo_alloc(ScrnInfoPtr pScrn, unsigned long size,
                                     obj->handle));
             }
         } else if (pVia->directRenderingType == DRI_2) {
-            struct drm_via_gem_create args;
+            struct drm_via_gem_alloc args;
 
             memset(&args, 0, sizeof(args));
             args.size = size;
             args.alignment = alignment;
             args.domain = domain;
             ret = drmCommandWriteRead(pVia->drmmode.fd,
-                            DRM_VIA_GEM_CREATE,
+                            DRM_VIA_GEM_ALLOC,
                             &args,
-                            sizeof(struct drm_via_gem_create));
+                            sizeof(struct drm_via_gem_alloc));
             if (!ret) {
                 /* Okay the X server expects to know the offset because
                  * of non-KMS. Once we have KMS working the offset
@@ -201,7 +201,7 @@ drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
 {
     VIAPtr pVia = VIAPTR(pScrn);
 #ifdef OPENCHROMEDRI
-    struct drm_via_gem_map args;
+    struct drm_via_gem_mmap args;
     int ret;
 #endif /* OPENCHROMEDRI */
 
@@ -228,9 +228,9 @@ drm_bo_map(ScrnInfoPtr pScrn, struct buffer_object *obj)
         memset(&args, 0, sizeof(args));
         args.handle = obj->handle;
         ret = drmCommandWriteRead(pVia->drmmode.fd,
-                        DRM_VIA_GEM_MAP,
+                        DRM_VIA_GEM_MMAP,
                         &args,
-                        sizeof(struct drm_via_gem_map));
+                        sizeof(struct drm_via_gem_mmap));
         if (ret) {
             obj->ptr = NULL;
             goto exit;

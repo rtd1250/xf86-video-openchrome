@@ -82,8 +82,11 @@ extern "C" {
 #define DRM_VIA_DMA_BLIT        0x0e
 #define DRM_VIA_BLIT_SYNC       0x0f
 
-#define	DRM_VIA_GEM_CREATE	0x10
-#define	DRM_VIA_GEM_MAP		0x11
+/*
+ * OpenChrome DRM IOCTLs
+ */
+#define	DRM_VIA_GEM_ALLOC	0x20
+#define	DRM_VIA_GEM_MMAP	0x21
 
 
 #define DRM_IOCTL_VIA_ALLOCMEM	  DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_ALLOCMEM, drm_via_mem_t)
@@ -102,8 +105,11 @@ extern "C" {
 #define DRM_IOCTL_VIA_DMA_BLIT    DRM_IOW(DRM_COMMAND_BASE + DRM_VIA_DMA_BLIT, drm_via_dmablit_t)
 #define DRM_IOCTL_VIA_BLIT_SYNC   DRM_IOW(DRM_COMMAND_BASE + DRM_VIA_BLIT_SYNC, drm_via_blitsync_t)
 
-#define	DRM_IOCTL_VIA_GEM_CREATE	DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_GEM_CREATE, struct drm_via_gem_create)
-#define	DRM_IOCTL_VIA_GEM_MAP		DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_GEM_MAP, struct drm_via_gem_map)
+/*
+ * OpenChrome DRM IOCTLs
+ */
+#define	DRM_IOCTL_VIA_GEM_ALLOC   DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_GEM_ALLOC, struct drm_via_gem_alloc)
+#define	DRM_IOCTL_VIA_GEM_MMAP    DRM_IOWR(DRM_COMMAND_BASE + DRM_VIA_GEM_MMAP, struct drm_via_gem_mmap)
 
 /* Indices into buf.Setup where various bits of state are mirrored per
  * context and per buffer.  These can be fired at the card as a unit,
@@ -283,7 +289,10 @@ typedef struct drm_via_dmablit {
 	drm_via_blitsync_t sync;
 } drm_via_dmablit_t;
 
-struct drm_via_gem_create {
+/*
+ * OpenChrome DRM IOCTL structs
+ */
+struct drm_via_gem_alloc {
 	uint64_t size;
 	uint32_t alignment;
 	uint32_t domain;
@@ -291,7 +300,7 @@ struct drm_via_gem_create {
 	uint64_t offset;
 };
 
-struct drm_via_gem_map {
+struct drm_via_gem_mmap {
 	uint32_t handle;
 	uint64_t map_offset;
 };
