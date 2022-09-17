@@ -33,8 +33,6 @@
 #include "config.h"
 #endif
 
-#include <X11/Xarch.h>
-
 #include <GL/gl.h>
 #include <sys/mman.h>
 
