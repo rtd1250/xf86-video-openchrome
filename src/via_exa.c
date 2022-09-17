@@ -35,8 +35,6 @@
 
 #include <errno.h>
 
-#include <sys/mman.h>
-
 #include "via_driver.h"
 #include "via_regs.h"
 #include "via_dmabuffer.h"
