@@ -49,6 +49,7 @@
 #include "xf86RAC.h"
 #endif
 #include "xf86Crtc.h"
+#include "xf86cmap.h"
 
 #ifdef OPENCHROMEDRI
 #include "dri.h"

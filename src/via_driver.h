@@ -43,7 +43,6 @@
 
 #include "xf86.h"
 #include "xf86_OSproc.h"
-#include "xf86cmap.h"
 #include "xf86Crtc.h"
 #include "xf86Cursor.h"
 #include "xf86fbman.h"
