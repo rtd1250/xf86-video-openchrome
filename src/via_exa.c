@@ -33,7 +33,6 @@
 #include "config.h"
 #endif
 
-#include <GL/gl.h>
 #include <sys/mman.h>
 
 #include "via_driver.h"
