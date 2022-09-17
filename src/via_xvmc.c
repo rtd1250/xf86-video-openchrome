@@ -32,7 +32,6 @@
 #endif
 
 #include "compiler.h"
-#include "regionstr.h"
 
 #ifdef OPENCHROMEDRI
 

@@ -37,7 +37,6 @@
 #endif
 
 #include "compiler.h"
-#include "regionstr.h"
 #include "via_driver.h"
 
 #include "xf86xv.h"
