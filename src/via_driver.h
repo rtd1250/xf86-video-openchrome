@@ -41,7 +41,6 @@
 
 #include "xf86.h"
 #include "xf86Crtc.h"
-#include "xf86Cursor.h"
 #include "xf86fbman.h"
 #include "xf86RandR12.h"
 #if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 6
