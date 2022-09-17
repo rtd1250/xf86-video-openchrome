@@ -34,6 +34,8 @@
 
 #include "globals.h"
 
+#include "micmap.h"
+
 #include "xf86.h"
 
 #ifdef HAVE_XEXTPROTO_71

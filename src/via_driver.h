@@ -54,7 +54,6 @@
 #include "exa.h"
 #include "fb.h"
 #include "fourcc.h"
-#include "micmap.h"
 #include "mipointer.h"
 #ifdef XSERVER_LIBPCIACCESS
 #include <pciaccess.h>
