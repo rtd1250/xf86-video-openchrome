@@ -33,7 +33,6 @@
 #endif
 
 #include "compiler.h"
-#include "xf86Pci.h"
 #include "regionstr.h"
 
 #ifdef OPENCHROMEDRI
