@@ -34,7 +34,6 @@
 #endif
 
 #include <X11/Xarch.h>
-#include "miline.h"
 
 #include "via_driver.h"
 #include "via_regs.h"

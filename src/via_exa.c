@@ -34,7 +34,6 @@
 #endif
 
 #include <X11/Xarch.h>
-#include "miline.h"
 
 #include <GL/gl.h>
 #include <sys/mman.h>
