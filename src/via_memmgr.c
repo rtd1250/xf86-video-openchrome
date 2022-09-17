@@ -31,7 +31,6 @@
 #include <sys/mman.h>
 
 #include "xf86.h"
-#include "xf86_OSproc.h"
 #include "xf86fbman.h"
 
 #ifdef OPENCHROMEDRI

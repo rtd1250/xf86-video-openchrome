@@ -28,7 +28,6 @@
 #endif
 
 #include "xf86.h"
-#include "xf86_OSproc.h"
 
 #ifdef OPENCHROMEDRI
 #include "xf86drm.h"
