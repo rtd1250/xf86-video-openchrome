@@ -52,6 +52,7 @@
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/XvMC.h>
 #include "via_xvmc.h"
+#include "sarea.h"
 #include "dristruct.h"
 #include "dri.h"
 #include "via_xvpriv.h"

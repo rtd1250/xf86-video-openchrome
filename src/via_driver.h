@@ -71,7 +71,6 @@
 #define _XF86DRI_SERVER_
 #include "xf86dri.h"
 
-#include "sarea.h"
 #include "dri.h"
 #include "drm_fourcc.h"
 #include "GL/glxint.h"
