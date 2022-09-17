@@ -37,8 +37,6 @@
 
 #include "compiler.h"
 
-#include <errno.h>
-
 #include "vgaHW.h"
 
 #include "xf86.h"
