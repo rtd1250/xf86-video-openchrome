@@ -1770,7 +1770,7 @@ void viaExtTMDSInit(ScrnInfoPtr pScrn);
 
 /*via_tv.c */
 #ifdef HAVE_DEBUG
-void ViaTVPrintRegs(ScrnInfoPtr pScrn);
+void ViaTVPrintRegs(xf86OutputPtr output);
 #endif
 void via_tv_init(ScrnInfoPtr pScrn);
 

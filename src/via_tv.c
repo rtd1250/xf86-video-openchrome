@@ -522,8 +522,9 @@ viaTVSetDataDriveStrength(ScrnInfoPtr pScrn, CARD8 dataDriveStrength)
 }
 
 static void
-ViaTVSave(ScrnInfoPtr pScrn)
+ViaTVSave(xf86OutputPtr output)
 {
+    ScrnInfoPtr pScrn = output->scrn;
     VIADisplayPtr pVIADisplay = VIAPTR(pScrn)->pVIADisplay;
 
     if (pVIADisplay->TVSave)
@@ -531,8 +532,9 @@ ViaTVSave(ScrnInfoPtr pScrn)
 }
 
 static void
-ViaTVRestore(ScrnInfoPtr pScrn)
+ViaTVRestore(xf86OutputPtr output)
 {
+    ScrnInfoPtr pScrn = output->scrn;
     VIADisplayPtr pVIADisplay = VIAPTR(pScrn)->pVIADisplay;
 
     if (pVIADisplay->TVRestore)
@@ -540,8 +542,9 @@ ViaTVRestore(ScrnInfoPtr pScrn)
 }
 
 static Bool
-ViaTVDACSense(ScrnInfoPtr pScrn)
+ViaTVDACSense(xf86OutputPtr output)
 {
+    ScrnInfoPtr pScrn = output->scrn;
     VIADisplayPtr pVIADisplay = VIAPTR(pScrn)->pVIADisplay;
 
     if (pVIADisplay->TVDACSense)
@@ -550,9 +553,10 @@ ViaTVDACSense(ScrnInfoPtr pScrn)
 }
 
 static void
-ViaTVSetMode(xf86CrtcPtr crtc, DisplayModePtr mode)
+ViaTVSetMode(xf86OutputPtr output, DisplayModePtr mode)
 {
-    ScrnInfoPtr pScrn = crtc->scrn;
+    ScrnInfoPtr pScrn = output->scrn;
+    xf86CrtcPtr crtc = output->crtc;
     VIAPtr pVia = VIAPTR(pScrn);
     VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
 
@@ -568,8 +572,9 @@ ViaTVSetMode(xf86CrtcPtr crtc, DisplayModePtr mode)
 }
 
 static void
-ViaTVPower(ScrnInfoPtr pScrn, Bool On)
+ViaTVPower(xf86OutputPtr output, Bool On)
 {
+    ScrnInfoPtr pScrn = output->scrn;
     VIADisplayPtr pVIADisplay = VIAPTR(pScrn)->pVIADisplay;
 
 #ifdef HAVE_DEBUG
@@ -585,8 +590,9 @@ ViaTVPower(ScrnInfoPtr pScrn, Bool On)
 
 #ifdef HAVE_DEBUG
 void
-ViaTVPrintRegs(ScrnInfoPtr pScrn)
+ViaTVPrintRegs(xf86OutputPtr output)
 {
+    ScrnInfoPtr pScrn = output->scrn;
     VIADisplayPtr pVIADisplay = VIAPTR(pScrn)->pVIADisplay;
 
     if (pVIADisplay->TVPrintRegs)
@@ -617,17 +623,15 @@ via_tv_get_property(xf86OutputPtr output, Atom property)
 static void
 via_tv_dpms(xf86OutputPtr output, int mode)
 {
-    ScrnInfoPtr pScrn = output->scrn;
-
     switch (mode) {
     case DPMSModeOn:
-        ViaTVPower(pScrn, TRUE);
+        ViaTVPower(output, TRUE);
         break;
 
     case DPMSModeStandby:
     case DPMSModeSuspend:
     case DPMSModeOff:
-        ViaTVPower(pScrn, FALSE);
+        ViaTVPower(output, FALSE);
         break;
     }
 }
@@ -635,17 +639,13 @@ via_tv_dpms(xf86OutputPtr output, int mode)
 static void
 via_tv_save(xf86OutputPtr output)
 {
-    ScrnInfoPtr pScrn = output->scrn;
-
-    ViaTVSave(pScrn);
+    ViaTVSave(output);
 }
 
 static void
 via_tv_restore(xf86OutputPtr output)
 {
-    ScrnInfoPtr pScrn = output->scrn;
-
-    ViaTVRestore(pScrn);
+    ViaTVRestore(output);
 }
 
 static int
@@ -697,7 +697,7 @@ via_tv_mode_set(xf86OutputPtr output, DisplayModePtr mode,
         viaTVSetClockDriveStrength(pScrn, 0x03);
         viaTVSetDataDriveStrength(pScrn, 0x03);
 
-        ViaTVSetMode(output->crtc, adjusted_mode);
+        ViaTVSetMode(output, adjusted_mode);
     }
 
     pVia->FirstInit = FALSE;
@@ -707,9 +707,8 @@ static xf86OutputStatus
 via_tv_detect(xf86OutputPtr output)
 {
     xf86OutputStatus status = XF86OutputStatusDisconnected;
-    ScrnInfoPtr pScrn = output->scrn;
 
-    if (ViaTVDACSense(pScrn))
+    if (ViaTVDACSense(output))
         status = XF86OutputStatusConnected;
     return status;
 }
