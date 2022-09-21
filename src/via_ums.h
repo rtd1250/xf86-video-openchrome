@@ -233,8 +233,6 @@ typedef struct _VIADISPLAY {
 
     VIARegRec           SavedReg;
 
-    xf86OutputPtr tv;
-
     CARD32      Clock; /* register value for the dotclock */
     Bool        ClockExternal;
     CARD32      Bandwidth; /* available memory bandwidth */
@@ -242,26 +240,9 @@ typedef struct _VIADISPLAY {
     /* TV entries */
     int         TVEncoder;
     int         TVOutput;
-    I2CDevPtr   TVI2CDev;
     int         TVType;
     Bool        TVDotCrawl;
     int         TVDeflicker;
-    CARD8       TVRegs[0xFF];
-    int         TVNumRegs;
-
-    /* TV Callbacks */
-    void (*TVSave) (ScrnInfoPtr pScrn);
-    void (*TVRestore) (ScrnInfoPtr pScrn);
-    Bool (*TVDACSense) (ScrnInfoPtr pScrn);
-    ModeStatus (*TVModeValid) (ScrnInfoPtr pScrn, DisplayModePtr mode);
-    void (*TVModeI2C) (ScrnInfoPtr pScrn, DisplayModePtr mode);
-    void (*TVModeCrtc) (xf86CrtcPtr crtc, DisplayModePtr mode);
-    void (*TVPower) (ScrnInfoPtr pScrn, Bool On);
-    void (*LCDPower) (ScrnInfoPtr pScrn, Bool On);
-    DisplayModePtr TVModes;
-    int            TVNumModes;
-    void (*TVPrintRegs) (ScrnInfoPtr pScrn);
-
 } VIADisplayRec, *VIADisplayPtr;
 
 typedef struct _VIAANALOG {
@@ -304,6 +285,31 @@ typedef struct _VIATMDS {
     uint32_t    diPort;
     CARD8       i2cBus;
 } VIATMDSRec, *VIATMDSPtr;
+
+typedef struct _VIATV {
+    int         TVEncoder;
+    int         TVOutput;
+    int         TVType;
+    Bool        TVDotCrawl;
+    int         TVDeflicker;
+    CARD8       TVRegs[0xFF];
+    int         TVNumRegs;
+
+    /* TV Callbacks */
+    void (*TVSave) (xf86OutputPtr output);
+    void (*TVRestore) (xf86OutputPtr output);
+    Bool (*TVDACSense) (xf86OutputPtr output);
+    ModeStatus (*TVModeValid) (xf86OutputPtr output, DisplayModePtr mode);
+    void (*TVModeI2C) (xf86OutputPtr output, DisplayModePtr mode);
+    void (*TVModeCrtc) (xf86OutputPtr output, DisplayModePtr mode);
+    void (*TVPower) (xf86OutputPtr output, Bool On);
+    void (*LCDPower) (xf86OutputPtr output, Bool On);
+    DisplayModePtr TVModes;
+    int            TVNumModes;
+    void (*TVPrintRegs) (xf86OutputPtr output);
+
+    I2CDevPtr pVIATVI2CDev;
+} viaTVRec, *viaTVRecPtr;
 
 typedef struct
 {
@@ -1776,10 +1782,10 @@ void via_tv_init(ScrnInfoPtr pScrn);
 
 /* via_vt162x.c */
 I2CDevPtr ViaVT162xDetect(ScrnInfoPtr pScrn, I2CBusPtr pBus, CARD8 Address);
-void ViaVT162xInit(ScrnInfoPtr pScrn);
+void ViaVT162xInit(xf86OutputPtr output);
 
 /* via_ch7xxx.c */
 I2CDevPtr ViaCH7xxxDetect(ScrnInfoPtr pScrn, I2CBusPtr pBus, CARD8 Address);
-void ViaCH7xxxInit(ScrnInfoPtr pScrn);
+void ViaCH7xxxInit(xf86OutputPtr output);
 
 #endif /* _VIA_UMS_H_ */

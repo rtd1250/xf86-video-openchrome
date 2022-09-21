@@ -380,9 +380,6 @@ VIAFreeRec(ScrnInfoPtr pScrn)
     pVIADisplay = pVia->pVIADisplay;
 
     if (pVIADisplay) {
-        if (pVIADisplay->TVI2CDev)
-            xf86DestroyI2CDevRec(pVIADisplay->TVI2CDev, TRUE);
-
         pVia->pVIADisplay = NULL;
         free(pVIADisplay);
     }
@@ -621,8 +618,6 @@ VIAGetRec(ScrnInfoPtr pScrn)
         pVIADisplay = pVia->pVIADisplay;
 
         if (pVIADisplay) {
-            pVIADisplay->TVI2CDev = NULL;
-
             pVia->VideoRegs = (video_via_regs *) xnfcalloc(sizeof(video_via_regs), 1);
             if (!pVia->VideoRegs) {
                 free(pVIADisplay);

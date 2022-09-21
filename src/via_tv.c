@@ -524,58 +524,52 @@ viaTVSetDataDriveStrength(ScrnInfoPtr pScrn, CARD8 dataDriveStrength)
 static void
 ViaTVSave(xf86OutputPtr output)
 {
-    ScrnInfoPtr pScrn = output->scrn;
-    VIADisplayPtr pVIADisplay = VIAPTR(pScrn)->pVIADisplay;
+    viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
-    if (pVIADisplay->TVSave)
-        pVIADisplay->TVSave(pScrn);
+    if (pVIATV->TVSave)
+        pVIATV->TVSave(output);
 }
 
 static void
 ViaTVRestore(xf86OutputPtr output)
 {
-    ScrnInfoPtr pScrn = output->scrn;
-    VIADisplayPtr pVIADisplay = VIAPTR(pScrn)->pVIADisplay;
+    viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
-    if (pVIADisplay->TVRestore)
-        pVIADisplay->TVRestore(pScrn);
+    if (pVIATV->TVRestore)
+        pVIATV->TVRestore(output);
 }
 
 static Bool
 ViaTVDACSense(xf86OutputPtr output)
 {
-    ScrnInfoPtr pScrn = output->scrn;
-    VIADisplayPtr pVIADisplay = VIAPTR(pScrn)->pVIADisplay;
+    viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
-    if (pVIADisplay->TVDACSense)
-        return pVIADisplay->TVDACSense(pScrn);
+    if (pVIATV->TVDACSense)
+        return pVIATV->TVDACSense(output);
     return FALSE;
 }
 
 static void
 ViaTVSetMode(xf86OutputPtr output, DisplayModePtr mode)
 {
-    ScrnInfoPtr pScrn = output->scrn;
-    xf86CrtcPtr crtc = output->crtc;
-    VIAPtr pVia = VIAPTR(pScrn);
-    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
+    viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
-    if (pVIADisplay->TVModeI2C)
-        pVIADisplay->TVModeI2C(pScrn, mode);
+    if (pVIATV->TVModeI2C)
+        pVIATV->TVModeI2C(output, mode);
 
-    if (pVIADisplay->TVModeCrtc)
-        pVIADisplay->TVModeCrtc(crtc, mode);
+    if (pVIATV->TVModeCrtc)
+        pVIATV->TVModeCrtc(output, mode);
 
     /* TV reset. */
-    xf86I2CWriteByte(pVIADisplay->TVI2CDev, 0x1D, 0x00);
-    xf86I2CWriteByte(pVIADisplay->TVI2CDev, 0x1D, 0x80);
+    xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x1D, 0x00);
+    xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x1D, 0x80);
 }
 
 static void
 ViaTVPower(xf86OutputPtr output, Bool On)
 {
     ScrnInfoPtr pScrn = output->scrn;
-    VIADisplayPtr pVIADisplay = VIAPTR(pScrn)->pVIADisplay;
+    viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
 #ifdef HAVE_DEBUG
     if (On)
@@ -584,19 +578,18 @@ ViaTVPower(xf86OutputPtr output, Bool On)
         xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaTVPower: Off.\n");
 #endif
 
-    if (pVIADisplay->TVPower)
-        pVIADisplay->TVPower(pScrn, On);
+    if (pVIATV->TVPower)
+        pVIATV->TVPower(output, On);
 }
 
 #ifdef HAVE_DEBUG
 void
 ViaTVPrintRegs(xf86OutputPtr output)
 {
-    ScrnInfoPtr pScrn = output->scrn;
-    VIADisplayPtr pVIADisplay = VIAPTR(pScrn)->pVIADisplay;
+    viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
-    if (pVIADisplay->TVPrintRegs)
-        pVIADisplay->TVPrintRegs(pScrn);
+    if (pVIATV->TVPrintRegs)
+        pVIATV->TVPrintRegs(output);
 }
 #endif /* HAVE_DEBUG */
 
@@ -717,12 +710,11 @@ static DisplayModePtr
 via_tv_get_modes(xf86OutputPtr output)
 {
     DisplayModePtr modes = NULL, mode = NULL;
-    ScrnInfoPtr pScrn = output->scrn;
-    VIAPtr pVia = VIAPTR(pScrn);
+    viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
     int i;
 
-    for (i = 0; i < pVia->pVIADisplay->TVNumModes; i++) {
-        mode = xf86DuplicateMode(&pVia->pVIADisplay->TVModes[i]);
+    for (i = 0; i < pVIATV->TVNumModes; i++) {
+        mode = xf86DuplicateMode(&pVIATV->TVModes[i]);
         modes = xf86ModesAdd(modes, mode);
     }
     return modes;
@@ -762,6 +754,8 @@ via_tv_init(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
+    viaTVRecPtr pVIATV;
+    I2CDevPtr pI2CDevice = NULL;
     xf86OutputPtr output;
     char outputNameBuffer[32];
 
@@ -770,66 +764,32 @@ via_tv_init(ScrnInfoPtr pScrn)
 
     /* preset some pVIADisplay TV related values -- move up */
     pVIADisplay->TVEncoder = VIA_NONETV;
-    pVIADisplay->TVI2CDev = NULL;
-    pVIADisplay->TVSave = NULL;
-    pVIADisplay->TVRestore = NULL;
-    pVIADisplay->TVDACSense = NULL;
-    pVIADisplay->TVModeValid = NULL;
-    pVIADisplay->TVModeI2C = NULL;
-    pVIADisplay->TVModeCrtc = NULL;
-    pVIADisplay->TVPower = NULL;
-    pVIADisplay->TVModes = NULL;
-    pVIADisplay->TVPrintRegs = NULL;
-    pVIADisplay->LCDPower = NULL;
-    pVIADisplay->TVNumRegs = 0;
 
     /*
      * On an SK43G (KM400/Ch7011), false positive detections at a VT162x
      * chip were observed, so try to detect the Ch7011 first.
      */
     if (pVIADisplay->pI2CBus2 && xf86I2CProbeAddress(pVIADisplay->pI2CBus2, 0xEC))
-        pVIADisplay->TVI2CDev = ViaCH7xxxDetect(pScrn, pVIADisplay->pI2CBus2, 0xEC);
+        pI2CDevice = ViaCH7xxxDetect(pScrn, pVIADisplay->pI2CBus2, 0xEC);
     else if (pVIADisplay->pI2CBus2 && xf86I2CProbeAddress(pVIADisplay->pI2CBus2, 0x40))
-        pVIADisplay->TVI2CDev = ViaVT162xDetect(pScrn, pVIADisplay->pI2CBus2, 0x40);
+        pI2CDevice = ViaVT162xDetect(pScrn, pVIADisplay->pI2CBus2, 0x40);
     else if (pVIADisplay->pI2CBus3 && xf86I2CProbeAddress(pVIADisplay->pI2CBus3, 0x40))
-        pVIADisplay->TVI2CDev = ViaVT162xDetect(pScrn, pVIADisplay->pI2CBus3, 0x40);
+        pI2CDevice = ViaVT162xDetect(pScrn, pVIADisplay->pI2CBus3, 0x40);
     else if (pVIADisplay->pI2CBus2 && xf86I2CProbeAddress(pVIADisplay->pI2CBus2, 0xEA))
-        pVIADisplay->TVI2CDev = ViaCH7xxxDetect(pScrn, pVIADisplay->pI2CBus2, 0xEA);
+        pI2CDevice = ViaCH7xxxDetect(pScrn, pVIADisplay->pI2CBus2, 0xEA);
     else if (pVIADisplay->pI2CBus3 && xf86I2CProbeAddress(pVIADisplay->pI2CBus3, 0xEA))
-        pVIADisplay->TVI2CDev = ViaCH7xxxDetect(pScrn, pVIADisplay->pI2CBus3, 0xEA);
+        pI2CDevice = ViaCH7xxxDetect(pScrn, pVIADisplay->pI2CBus3, 0xEA);
 
-    if (!pVIADisplay->TVI2CDev) {
+    if (!pI2CDevice) {
         xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                     "Did not detect a TV encoder.\n");
         goto exit;
     }
 
-    switch (pVIADisplay->TVEncoder) {
-        case VIA_VT1621:
-        case VIA_VT1622:
-        case VIA_VT1623:
-        case VIA_VT1625:
-            ViaVT162xInit(pScrn);
-            break;
-        case VIA_CH7011:
-        case VIA_CH7019A:
-        case VIA_CH7019B:
-            ViaCH7xxxInit(pScrn);
-            break;
-        default:
-            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                        "Was not able to initialize a known TV encoder.\n");
-            goto exit;
-            break;
-    }
-
-    if (!pVIADisplay->TVSave || !pVIADisplay->TVRestore
-        || !pVIADisplay->TVDACSense || !pVIADisplay->TVModeValid
-        || !pVIADisplay->TVModeI2C || !pVIADisplay->TVModeCrtc
-        || !pVIADisplay->TVPower || !pVIADisplay->TVModes
-        || !pVIADisplay->TVPrintRegs) {
-        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                   "TV encoder was not properly initialized.\n");
+    pVIATV = (viaTVRecPtr) xnfcalloc(1, sizeof(viaTVRec));
+    if (pVIATV) {
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                            "Failed to allocate storage for TV.\n"));
         goto free_i2c;
     }
 
@@ -838,7 +798,7 @@ via_tv_init(ScrnInfoPtr pScrn)
     if (!output) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                    "Failed to register TV as an output.\n");
-        goto free_i2c;
+        goto free_mem;
     }
 
     /*
@@ -846,35 +806,91 @@ via_tv_init(ScrnInfoPtr pScrn)
      */
     pVIADisplay->numberTV++;
 
-    pVIADisplay->tv = output;
+    pVia->FirstInit = TRUE;
 
-    /* Save now */
-    pVIADisplay->TVSave(pScrn);
+    output->driver_private = pVIATV;
 
     /*
      * To allow TV output on both CRTCs, set bit 0 and 1.
      */
     output->possible_crtcs = BIT(1) | BIT(0);
 
-    pVia->FirstInit = TRUE;
+    pVIATV->TVEncoder = pVIADisplay->TVEncoder;
+    pVIATV->TVOutput = pVIADisplay->TVOutput;
+    pVIATV->TVType = pVIADisplay->TVType;
+    pVIATV->TVDotCrawl = pVIADisplay->TVDotCrawl;
+    pVIATV->TVDeflicker = pVIADisplay->TVDeflicker;
+
+    pVIATV->TVSave = NULL;
+    pVIATV->TVRestore = NULL;
+    pVIATV->TVDACSense = NULL;
+    pVIATV->TVModeValid = NULL;
+    pVIATV->TVModeI2C = NULL;
+    pVIATV->TVModeCrtc = NULL;
+    pVIATV->TVPower = NULL;
+    pVIATV->TVModes = NULL;
+    pVIATV->TVPrintRegs = NULL;
+    pVIATV->LCDPower = NULL;
+    pVIATV->TVNumRegs = 0;
+
+    pVIATV->pVIATVI2CDev = pI2CDevice;
+
+    switch (pVIATV->TVEncoder) {
+        case VIA_VT1621:
+        case VIA_VT1622:
+        case VIA_VT1623:
+        case VIA_VT1625:
+            ViaVT162xInit(output);
+            break;
+        case VIA_CH7011:
+        case VIA_CH7019A:
+        case VIA_CH7019B:
+            ViaCH7xxxInit(output);
+            break;
+        default:
+            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                        "Was not able to initialize a known TV encoder.\n");
+            goto free_mem;
+            break;
+    }
+
+    if (!pVIATV->TVSave || !pVIATV->TVRestore
+        || !pVIATV->TVDACSense || !pVIATV->TVModeValid
+        || !pVIATV->TVModeI2C || !pVIATV->TVModeCrtc
+        || !pVIATV->TVPower || !pVIATV->TVModes
+        || !pVIATV->TVPrintRegs) {
+        xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                   "TV encoder was not properly initialized.\n");
+        goto free_mem;
+    }
+
+    /*
+     * Save TV registers.
+     */
+    pVIATV->TVSave(output);
+
     goto exit;
+free_mem:
+    pVIATV->TVOutput = TVOUTPUT_NONE;
+    pVIATV->TVEncoder = VIA_NONETV;
+
+    pVIATV->TVSave = NULL;
+    pVIATV->TVRestore = NULL;
+    pVIATV->TVDACSense = NULL;
+    pVIATV->TVModeValid = NULL;
+    pVIATV->TVModeI2C = NULL;
+    pVIATV->TVModeCrtc = NULL;
+    pVIATV->TVPower = NULL;
+    pVIATV->TVModes = NULL;
+    pVIATV->TVPrintRegs = NULL;
+    pVIATV->TVNumRegs = 0;
+
+    xf86DestroyI2CDevRec(pVIATV->pVIATVI2CDev, TRUE);
+    pVIATV->pVIATVI2CDev = NULL;
+    free(pVIATV);
 free_i2c:
     pVIADisplay->TVOutput = TVOUTPUT_NONE;
     pVIADisplay->TVEncoder = VIA_NONETV;
-    pVIADisplay->TVI2CDev = NULL;
-    pVIADisplay->TVSave = NULL;
-    pVIADisplay->TVRestore = NULL;
-    pVIADisplay->TVDACSense = NULL;
-    pVIADisplay->TVModeValid = NULL;
-    pVIADisplay->TVModeI2C = NULL;
-    pVIADisplay->TVModeCrtc = NULL;
-    pVIADisplay->TVPower = NULL;
-    pVIADisplay->TVModes = NULL;
-    pVIADisplay->TVPrintRegs = NULL;
-    pVIADisplay->TVNumRegs = 0;
-
-    xf86DestroyI2CDevRec(pVIADisplay->TVI2CDev, TRUE);
-    pVIADisplay->TVI2CDev = NULL;
 exit:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                         "Exiting %s.\n", __func__));
