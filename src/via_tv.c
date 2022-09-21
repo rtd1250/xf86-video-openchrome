@@ -756,17 +756,18 @@ static const xf86OutputFuncsRec via_tv_funcs = {
 };
 
 /*
- *
+ * TV initialization
  */
-Bool
+void
 via_tv_init(ScrnInfoPtr pScrn)
 {
     VIAPtr pVia = VIAPTR(pScrn);
     VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
-    xf86OutputPtr output = NULL;
+    xf86OutputPtr output;
+    char outputNameBuffer[32];
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered via_tv_init.\n"));
+                        "Entered %s.\n", __func__));
 
     /* preset some pVIADisplay TV related values -- move up */
     pVIADisplay->TVEncoder = VIA_NONETV;
@@ -801,10 +802,7 @@ via_tv_init(ScrnInfoPtr pScrn)
     if (!pVIADisplay->TVI2CDev) {
         xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                     "Did not detect a TV encoder.\n");
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "Exiting via_tv_init.\n"));
-
-        return FALSE;
+        goto exit;
     }
 
     switch (pVIADisplay->TVEncoder) {
@@ -822,9 +820,7 @@ via_tv_init(ScrnInfoPtr pScrn)
         default:
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                         "Was not able to initialize a known TV encoder.\n");
-            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                                "Exiting via_tv_init.\n"));
-            return FALSE;
+            goto exit;
             break;
     }
 
@@ -833,47 +829,55 @@ via_tv_init(ScrnInfoPtr pScrn)
         || !pVIADisplay->TVModeI2C || !pVIADisplay->TVModeCrtc
         || !pVIADisplay->TVPower || !pVIADisplay->TVModes
         || !pVIADisplay->TVPrintRegs) {
-
-        xf86DestroyI2CDevRec(pVIADisplay->TVI2CDev, TRUE);
-
-        pVIADisplay->TVI2CDev = NULL;
-        pVIADisplay->TVOutput = TVOUTPUT_NONE;
-        pVIADisplay->TVEncoder = VIA_NONETV;
-        pVIADisplay->TVI2CDev = NULL;
-        pVIADisplay->TVSave = NULL;
-        pVIADisplay->TVRestore = NULL;
-        pVIADisplay->TVDACSense = NULL;
-        pVIADisplay->TVModeValid = NULL;
-        pVIADisplay->TVModeI2C = NULL;
-        pVIADisplay->TVModeCrtc = NULL;
-        pVIADisplay->TVPower = NULL;
-        pVIADisplay->TVModes = NULL;
-        pVIADisplay->TVPrintRegs = NULL;
-        pVIADisplay->TVNumRegs = 0;
-
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                    "TV encoder was not properly initialized.\n");
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                            "Exiting via_tv_init.\n"));
-        return FALSE;
+        goto free_i2c;
     }
 
-    output = xf86OutputCreate(pScrn, &via_tv_funcs, "TV-1");
-    pVia->FirstInit = TRUE;
-
-    if (output) {
-        /* Allow tv output on both crtcs, set bit 0 and 1. */
-        output->possible_crtcs = 0x3;
-    } else {
+    sprintf(outputNameBuffer, "TV-%d", (pVIADisplay->numberTV));
+    output = xf86OutputCreate(pScrn, &via_tv_funcs, outputNameBuffer);
+    if (!output) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-                   "Failed to register TV-1.\n");
+                   "Failed to register TV as an output.\n");
+        goto free_i2c;
     }
+
+    /*
+     * Increment the number of TV encoders.
+     */
+    pVIADisplay->numberTV++;
 
     pVIADisplay->tv = output;
+
     /* Save now */
     pVIADisplay->TVSave(pScrn);
 
+    /*
+     * To allow TV output on both CRTCs, set bit 0 and 1.
+     */
+    output->possible_crtcs = BIT(1) | BIT(0);
+
+    pVia->FirstInit = TRUE;
+    goto exit;
+free_i2c:
+    pVIADisplay->TVOutput = TVOUTPUT_NONE;
+    pVIADisplay->TVEncoder = VIA_NONETV;
+    pVIADisplay->TVI2CDev = NULL;
+    pVIADisplay->TVSave = NULL;
+    pVIADisplay->TVRestore = NULL;
+    pVIADisplay->TVDACSense = NULL;
+    pVIADisplay->TVModeValid = NULL;
+    pVIADisplay->TVModeI2C = NULL;
+    pVIADisplay->TVModeCrtc = NULL;
+    pVIADisplay->TVPower = NULL;
+    pVIADisplay->TVModes = NULL;
+    pVIADisplay->TVPrintRegs = NULL;
+    pVIADisplay->TVNumRegs = 0;
+
+    xf86DestroyI2CDevRec(pVIADisplay->TVI2CDev, TRUE);
+    pVIADisplay->TVI2CDev = NULL;
+exit:
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting via_tv_init.\n"));
-    return TRUE;
+                        "Exiting %s.\n", __func__));
+    return;
 }

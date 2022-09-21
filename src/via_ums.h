@@ -201,6 +201,9 @@ typedef struct _VIADISPLAY {
     /* Keeping track of the number of FP (Flat Panel) connectors. */
     unsigned int        numberFP;
 
+    /* Keeping track of the number of TV (Television) connectors. */
+    unsigned int        numberTV;
+
     CARD8       I2CDevices;
     CARD8       mappedI2CBus;
 
@@ -1769,7 +1772,7 @@ void viaExtTMDSInit(ScrnInfoPtr pScrn);
 #ifdef HAVE_DEBUG
 void ViaTVPrintRegs(ScrnInfoPtr pScrn);
 #endif
-Bool via_tv_init(ScrnInfoPtr pScrn);
+void via_tv_init(ScrnInfoPtr pScrn);
 
 /* via_vt162x.c */
 I2CDevPtr ViaVT162xDetect(ScrnInfoPtr pScrn, I2CBusPtr pBus, CARD8 Address);

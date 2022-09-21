@@ -202,6 +202,9 @@ viaInitDisplay(ScrnInfoPtr pScrn)
     /* Initialize the number of FP connectors. */
     pVIADisplay->numberFP = 0;
 
+    /* Initialize the number of TV connectors. */
+    pVIADisplay->numberTV = 0;
+
     viaExtTMDSProbe(pScrn);
     viaTMDSProbe(pScrn);
 
