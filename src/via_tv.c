@@ -50,7 +50,7 @@ viaTVSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
     CARD8 sr5a = 0x00;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaTVSetDisplaySource.\n"));
+                        "Entered %s.\n", __func__));
 
     if ((pVia->Chipset == VIA_CX700)
         || (pVia->Chipset == VIA_VX800)
@@ -173,7 +173,7 @@ viaTVSetDisplaySource(ScrnInfoPtr pScrn, CARD8 displaySource)
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaTVSetDisplaySource.\n"));
+                        "Exiting %s.\n", __func__));
 }
 
 static void
@@ -185,7 +185,7 @@ viaTVEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState)
     CARD8 sr5a = 0x00;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaTVEnableIOPads.\n"));
+                        "Entered %s.\n", __func__));
 
     if ((pVia->Chipset == VIA_CX700)
         || (pVia->Chipset == VIA_VX800)
@@ -308,7 +308,7 @@ viaTVEnableIOPads(ScrnInfoPtr pScrn, CARD8 ioPadState)
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaTVEnableIOPads.\n"));
+                        "Exiting %s.\n", __func__));
 }
 
 static void
@@ -320,7 +320,7 @@ viaTVSetClockDriveStrength(ScrnInfoPtr pScrn, CARD8 clockDriveStrength)
     CARD8 sr5a = 0x00;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaTVSetClockDriveStrength.\n"));
+                        "Entered %s.\n", __func__));
 
     if ((pVia->Chipset == VIA_CX700)
         || (pVia->Chipset == VIA_VX800)
@@ -413,7 +413,7 @@ viaTVSetClockDriveStrength(ScrnInfoPtr pScrn, CARD8 clockDriveStrength)
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaTVSetClockDriveStrength.\n"));
+                        "Exiting %s.\n", __func__));
 }
 
 static void
@@ -425,7 +425,7 @@ viaTVSetDataDriveStrength(ScrnInfoPtr pScrn, CARD8 dataDriveStrength)
     CARD8 sr5a = 0x00;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Entered viaTVSetDataDriveStrength.\n"));
+                        "Entered %s.\n", __func__));
 
     if ((pVia->Chipset == VIA_CX700)
         || (pVia->Chipset == VIA_VX800)
@@ -518,7 +518,7 @@ viaTVSetDataDriveStrength(ScrnInfoPtr pScrn, CARD8 dataDriveStrength)
     }
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                        "Exiting viaTVSetDataDriveStrength.\n"));
+                        "Exiting %s.\n", __func__));
 }
 
 static void
@@ -573,9 +573,9 @@ ViaTVPower(xf86OutputPtr output, Bool On)
 
 #ifdef HAVE_DEBUG
     if (On)
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaTVPower: On.\n");
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s: On.\n", __func__);
     else
-        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaTVPower: Off.\n");
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s: Off.\n", __func__);
 #endif
 
     if (pVIATV->TVPower)

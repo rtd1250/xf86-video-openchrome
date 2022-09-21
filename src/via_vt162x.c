@@ -40,7 +40,7 @@ ViaSetTVClockSource(xf86OutputPtr output)
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaSetTVClockSource\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     switch(pVIATV->TVEncoder) {
         case VIA_VT1625:
@@ -105,7 +105,7 @@ ViaVT162xDetect(ScrnInfoPtr pScrn, I2CBusPtr pBus, CARD8 Address)
     I2CDevPtr pDev = xf86CreateI2CDevRec();
     CARD8 buf;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaVT162xDetect\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     pDev->DevName = "VT162x";
     pDev->SlaveAddr = Address;
@@ -170,7 +170,7 @@ VT162xSave(xf86OutputPtr output)
     ScrnInfoPtr pScrn = output->scrn;
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT162xSave\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     for (i = 0; i < pVIATV->TVNumRegs; i++)
         xf86I2CReadByte(pVIATV->pVIATVI2CDev, i, &(pVIATV->TVRegs[i]));
@@ -184,7 +184,7 @@ VT162xRestore(xf86OutputPtr output)
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
     int i;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT162xRestore\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     for (i = 0; i < pVIATV->TVNumRegs; i++)
         xf86I2CWriteByte(pVIATV->pVIATVI2CDev, i, pVIATV->TVRegs[i]);
@@ -260,7 +260,7 @@ VT1621DACSense(xf86OutputPtr output)
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
     CARD8 sense;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1621DACSense\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     sense = VT162xDACSenseI2C(pVIATV->pVIATVI2CDev);
     switch (sense) {
@@ -302,7 +302,7 @@ VT1622DACSense(xf86OutputPtr output)
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
     CARD8 sense;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1622DACSense\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     sense = VT162xDACSenseI2C(pVIATV->pVIATVI2CDev);
     switch (sense) {
@@ -354,7 +354,7 @@ VT1625DACSense(xf86OutputPtr output)
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
     CARD8 sense;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1625DACSense\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     sense = VT1625DACSenseI2C(pVIATV->pVIATVI2CDev);
     switch (sense) {
@@ -403,7 +403,7 @@ VT1621ModeIndex(xf86OutputPtr output, DisplayModePtr mode)
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
     int i;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1621ModeIndex\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     for (i = 0; VT1621Table[i].Width; i++) {
         if ((VT1621Table[i].Width == mode->CrtcHDisplay) &&
@@ -412,8 +412,8 @@ VT1621ModeIndex(xf86OutputPtr output, DisplayModePtr mode)
             !(strcmp(VT1621Table[i].name, mode->name)))
             return i;
     }
-    xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "VT1621ModeIndex:"
-               " Mode \"%s\" not found in Table\n", mode->name);
+    xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "%s:"
+               " Mode \"%s\" not found in Table\n", __func__, mode->name);
     return 0xFF;
 }
 
@@ -423,7 +423,7 @@ VT1621ModeValid(xf86OutputPtr output, DisplayModePtr mode)
     ScrnInfoPtr pScrn = output->scrn;
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1621ModeValid\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     if ((mode->PrivSize != sizeof(struct VT162xModePrivate)) ||
         ((mode->Private != (void *)&VT162xModePrivateNTSC) &&
@@ -458,7 +458,7 @@ VT1622ModeIndex(xf86OutputPtr output, DisplayModePtr mode)
     struct VT162XTableRec *Table;
     int i;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1622ModeIndex\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     if (pVIATV->TVEncoder == VIA_VT1622)
         Table = VT1622Table;
@@ -481,8 +481,8 @@ VT1622ModeIndex(xf86OutputPtr output, DisplayModePtr mode)
             !strcmp(Table[i].name, mode->name))
             return i;
     }
-    xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "VT1622ModeIndex:"
-               " Mode \"%s\" not found in Table\n", mode->name);
+    xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "%s:"
+               " Mode \"%s\" not found in Table\n", __func__, mode->name);
     return 0xFF;
 }
 
@@ -492,7 +492,7 @@ VT1622ModeValid(xf86OutputPtr output, DisplayModePtr mode)
     ScrnInfoPtr pScrn = output->scrn;
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1622ModeValid\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     if ((mode->PrivSize != sizeof(struct VT162xModePrivate)) ||
         ((mode->Private != (void *)&VT162xModePrivateNTSC) &&
@@ -525,7 +525,7 @@ VT1625ModeValid(xf86OutputPtr output, DisplayModePtr mode)
     ScrnInfoPtr pScrn = output->scrn;
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1625ModeValid\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     if ((mode->PrivSize != sizeof(struct VT162xModePrivate)) ||
         ((mode->Private != (void *)&VT162xModePrivateNTSC) &&
@@ -594,7 +594,7 @@ VT1621ModeI2C(xf86OutputPtr output, DisplayModePtr mode)
     struct VT1621TableRec Table = VT1621Table[VT1621ModeIndex(output, mode)];
     CARD8 i;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1621ModeI2C\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     for (i = 0; i < 0x16; i++)
         xf86I2CWriteByte(pVIATV->pVIATVI2CDev, i, Table.TV[i]);
@@ -644,7 +644,7 @@ VT1621ModeCrtc(xf86OutputPtr output, DisplayModePtr mode)
     VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
     struct VT1621TableRec Table = VT1621Table[VT1621ModeIndex(output, mode)];
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1621ModeCrtc\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     if (pVia->IsSecondary) {
         hwp->writeCrtc(hwp, 0x6A, 0x80);
@@ -676,7 +676,7 @@ VT1622ModeI2C(xf86OutputPtr output, DisplayModePtr mode)
     struct VT162XTableRec Table;
     CARD8 save, i;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1622ModeI2C\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     if (pVIATV->TVEncoder == VIA_VT1622)
         Table = VT1622Table[VT1622ModeIndex(output, mode)];
@@ -780,7 +780,7 @@ VT1622ModeCrtc(xf86OutputPtr output, DisplayModePtr mode)
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
     struct VT162XTableRec Table;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1622ModeCrtc\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     if (pVIATV->TVEncoder == VIA_VT1622)
         Table = VT1622Table[VT1622ModeIndex(output, mode)];
@@ -833,7 +833,7 @@ VT1621Power(xf86OutputPtr output, Bool On)
     ScrnInfoPtr pScrn = output->scrn;
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1621Power\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     if (On)
         xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x0E, 0x00);
@@ -847,7 +847,7 @@ VT1622Power(xf86OutputPtr output, Bool On)
     ScrnInfoPtr pScrn = output->scrn;
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1622Power\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     if (On)
         xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x0E, 0x00);
@@ -861,7 +861,7 @@ VT1625Power(xf86OutputPtr output, Bool On)
     ScrnInfoPtr pScrn = output->scrn;
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1625Power\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     if (On)
         xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x0E, 0x00);
@@ -876,7 +876,7 @@ ViaVT162xInit(xf86OutputPtr output)
     ScrnInfoPtr pScrn = output->scrn;
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaVT162xInit\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     switch (pVIATV->TVEncoder) {
         case VIA_VT1621:

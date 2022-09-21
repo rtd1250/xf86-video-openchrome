@@ -66,7 +66,7 @@ ViaCH7xxxDetect(ScrnInfoPtr pScrn, I2CBusPtr pBus, CARD8 Address)
     I2CDevPtr pDev = xf86CreateI2CDevRec();
     CARD8 buf;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaCH7xxxDetect\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     pDev->DevName = "CH7xxx";
     pDev->SlaveAddr = Address;
@@ -144,7 +144,7 @@ CH7xxxSave(xf86OutputPtr output)
     ScrnInfoPtr pScrn = output->scrn;
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CH7xxxSave\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     for (i = 0; i < pVIATV->TVNumRegs; i++)
         xf86I2CReadByte(pVIATV->pVIATVI2CDev, i, &(pVIATV->TVRegs[i]));
@@ -158,7 +158,7 @@ CH7xxxRestore(xf86OutputPtr output)
     ScrnInfoPtr pScrn = output->scrn;
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CH7xxxRestore\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     for (i = 0; i < pVIATV->TVNumRegs; i++)
         xf86I2CWriteByte(pVIATV->pVIATVI2CDev, i, pVIATV->TVRegs[i]);
@@ -208,7 +208,7 @@ CH7xxxDACSense(xf86OutputPtr output)
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
     CARD8 sense;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CH7xxxDACDetect\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     /* is this needed? IH */
     if (!pVIATV->pVIATVI2CDev ||
@@ -257,7 +257,7 @@ CH7011ModeIndex(xf86OutputPtr output, DisplayModePtr mode)
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
     int i;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CH7011ModeIndex\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
     for (i = 0; CH7011Table[i].Width; i++) {
         if ((CH7011Table[i].Width == mode->CrtcHDisplay) &&
             (CH7011Table[i].Height == mode->CrtcVDisplay) &&
@@ -265,8 +265,8 @@ CH7011ModeIndex(xf86OutputPtr output, DisplayModePtr mode)
             !(strcmp(CH7011Table[i].name, mode->name)))
             return i;
     }
-    xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "CH7011ModeIndex:"
-               " Mode \"%s\" not found in Table\n", mode->name);
+    xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "%s:"
+               " Mode \"%s\" not found in Table\n", __func__, mode->name);
     return 0xFF;
 }
 
@@ -277,7 +277,7 @@ CH7019ModeIndex(xf86OutputPtr output, DisplayModePtr mode)
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
     int i;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CH7019ModeIndex\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
     for (i = 0; CH7019Table[i].Width; i++) {
         if ((CH7019Table[i].Width == mode->CrtcHDisplay) &&
             (CH7019Table[i].Height == mode->CrtcVDisplay) &&
@@ -285,8 +285,8 @@ CH7019ModeIndex(xf86OutputPtr output, DisplayModePtr mode)
             !(strcmp(CH7019Table[i].name, mode->name)))
             return i;
     }
-    xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "CH7019ModeIndex:"
-               " Mode \"%s\" not found in Table\n", mode->name);
+    xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "%s:"
+               " Mode \"%s\" not found in Table\n", __func__, mode->name);
     return 0xFF;
 }
 
@@ -299,7 +299,7 @@ CH7xxxModeValid(xf86OutputPtr output, DisplayModePtr mode)
     ScrnInfoPtr pScrn = output->scrn;
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CH7xxxModeValid\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     if ((mode->PrivSize != sizeof(struct CH7xxxModePrivate)) ||
         ((mode->Private != (void *) &CH7xxxModePrivateNTSC) &&
@@ -354,7 +354,7 @@ CH7xxxModeI2C(xf86OutputPtr output, DisplayModePtr mode)
         Mask = ch7019MaskTable;
     }
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CH7011ModeI2C\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x49, 0x3E);
     xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x1E, 0xD0);
@@ -433,7 +433,7 @@ CH7xxxModeCrtc(xf86OutputPtr output, DisplayModePtr mode)
         Mask = ch7019MaskTable;
     }
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CH7xxxModeCrtc\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     if (pVia->IsSecondary) {
         switch (pScrn->bitsPerPixel) {
@@ -521,10 +521,10 @@ CH7xxxTVPower(xf86OutputPtr output, Bool On)
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
     if (On){
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CH7xxxTVPower: On\n"));
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s: On\n", __func__));
         xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x49, 0x20);
     }else{
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CH7xxxTVPower: Off\n"));
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s: Off\n", __func__));
         xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x49, 0x3E);
         xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x1E, 0xD0);
     }
@@ -539,7 +539,7 @@ CH7019LCDPower(xf86OutputPtr output, Bool On)
     int i;
 
     if (On){
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CH7xxxLCDPower: On\n"));
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s: On\n", __func__));
         W_Buffer[0] = 0x63;
         W_Buffer[1] = 0x4B;
         xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,2, NULL,0);
@@ -555,13 +555,15 @@ CH7019LCDPower(xf86OutputPtr output, Bool On)
             W_Buffer[1] = (R_Buffer[0] | 0x40);
             xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,2, NULL,0);
             DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                             "CH7xxxLCDPower: [%d]write 0x63 = %X!\n", i+1, W_Buffer[1]));
+                             "%s: [%d]write 0x63 = %X!\n",
+                             __func__, i+1, W_Buffer[1]));
             usleep(1);
             W_Buffer[0] = 0x63;
             W_Buffer[1] &= ~0x40;
             xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,2, NULL,0);
             DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                             "CH7xxxLCDPower: [%d]write 0x63 = %X!\n", i+1, W_Buffer[1]));
+                             "%s: [%d]write 0x63 = %X!\n",
+                             __func__, i+1, W_Buffer[1]));
             usleep(100);
             W_Buffer[0] = 0x66;
             xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,1, R_Buffer,1);
@@ -572,7 +574,7 @@ CH7019LCDPower(xf86OutputPtr output, Bool On)
                 W_Buffer[1] = R_Buffer[0] | 0x01;
                 xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,2, NULL,0);
                 DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                         "CH7xxxLCDPower: CH7019 PLL lock ok!\n"));
+                         "%s: CH7019 PLL lock ok!\n", __func__));
                 /* reset data path */
                 W_Buffer[0] = 0x48;
                 xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,1, R_Buffer,1);
@@ -585,12 +587,14 @@ CH7019LCDPower(xf86OutputPtr output, Bool On)
             }
 
             DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                             "CH7xxxLCDPower: [%d]CH7019 PLL lock fail!\n", i+1));
+                             "%s: [%d]CH7019 PLL lock fail!\n",
+                             __func__, i+1));
             DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                             "CH7xxxLCDPower: [%d]0x66 = %X!\n", i+1, R_Buffer[0]));
+                             "%s: [%d]0x66 = %X!\n",
+                             __func__, i+1, R_Buffer[0]));
         }
     }else{
-        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CH7xxxLCDPower: Off\n"));
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s: Off\n", __func__));
         /* Turn off VDD (Turn off backlignt only) */
         W_Buffer[0] = 0x66;
         xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,1, R_Buffer,1);
@@ -614,7 +618,7 @@ ViaCH7xxxInit(xf86OutputPtr output)
     ScrnInfoPtr pScrn = output->scrn;
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
-    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaCH7xxxInit\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     switch (pVIATV->TVEncoder) {
         case VIA_CH7011:
@@ -651,7 +655,8 @@ ViaCH7xxxInit(xf86OutputPtr output)
 #endif
             break;
         default:
-            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "ViaCH7xxxInit missing\n"));
+            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "%s missing\n",
+                    __func__));
             break;
     }
 
