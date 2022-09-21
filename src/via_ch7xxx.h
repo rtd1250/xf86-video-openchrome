@@ -62,9 +62,9 @@ static struct CH7xxxModePrivate CH7xxxModePrivatePAL = {
 
 #define MODEPREFIX(name) NULL, NULL, name, 0,M_T_DEFAULT
 #define MODESUFFIXNTSC       0,0, 0,0,0,0,0,0,0, 0,0,0,0,0,0,FALSE,FALSE,\
-	sizeof(struct CH7xxxModePrivate),(void *)&CH7xxxModePrivateNTSC,0,0.0,0.0
+    sizeof(struct CH7xxxModePrivate),(void *)&CH7xxxModePrivateNTSC,0,0.0,0.0
 #define MODESUFFIXPAL        0,0, 0,0,0,0,0,0,0, 0,0,0,0,0,0,FALSE,FALSE,\
-	sizeof(struct CH7xxxModePrivate),(void *)&CH7xxxModePrivatePAL,0,0.0,0.0
+    sizeof(struct CH7xxxModePrivate),(void *)&CH7xxxModePrivatePAL,0,0.0,0.0
 
 /* dotclock is just for modeline validation */
 static DisplayModeRec CH7011Modes[]={
@@ -136,22 +136,22 @@ struct CH7xxxTableRec {
 static struct CH7xxxTableRec
 CH7011Table[] = {
     { "640x480", 640,  480, TVTYPE_NTSC,
-      { 0X6A, /* 0x00		Mode 17 */
-        0X3F, /* 0x01 FF	Default 0x27 (was 7F) */
-        0X7E, /* 0x02 VBW	Default 0xBE (was 0x7E) */
-        0X8B, /* 0x03 TE	Decent Text 0x8B (was 8D) */
-        0X28, /* 0x04 SAV	Default 0x50 (was 0x21) */
-        0X2C, /* 0x05 HP	Default 0x50 (was 0x2E) */
-        0X05, /* 0x06 VP	Default 0x00 (was 0x04) */
-        0X83, /* 0x07 BL	Default 0x83 */
-        0X03, /* 0x08 CE	Default 0x03 */
-        0X80, /* 0x09 TPC	Default 0x80 */
-        0X3F, /* 0x0A PLLM	Default 0x3F */
-        0X7E, /* 0x0B PLLN	Default 0x7E */
-        0X20, /* 0x0C FSCI	Default 0x20 */
-        0X80, /* 0x0D FSCI	Default 0x80 */
-        0X00, /* 0x0E FSCI	Default 0x08 (was 00) */
-        0X00, /* 0x0F FSCI	Default 0xEB (was 00) */
+      { 0X6A, /* 0x00       Mode 17 */
+        0X3F, /* 0x01 FF    Default 0x27 (was 7F) */
+        0X7E, /* 0x02 VBW   Default 0xBE (was 0x7E) */
+        0X8B, /* 0x03 TE    Decent Text 0x8B (was 8D) */
+        0X28, /* 0x04 SAV   Default 0x50 (was 0x21) */
+        0X2C, /* 0x05 HP    Default 0x50 (was 0x2E) */
+        0X05, /* 0x06 VP    Default 0x00 (was 0x04) */
+        0X83, /* 0x07 BL    Default 0x83 */
+        0X03, /* 0x08 CE    Default 0x03 */
+        0X80, /* 0x09 TPC   Default 0x80 */
+        0X3F, /* 0x0A PLLM  Default 0x3F */
+        0X7E, /* 0x0B PLLN  Default 0x7E */
+        0X20, /* 0x0C FSCI  Default 0x20 */
+        0X80, /* 0x0D FSCI  Default 0x80 */
+        0X00, /* 0x0E FSCI  Default 0x08 (was 00) */
+        0X00, /* 0x0F FSCI  Default 0xEB (was 00) */
         0,    /* 0x10 CIVC */
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* We don't touch these */
         0X48, /* 0x1C */
@@ -208,15 +208,15 @@ CH7011Table[] = {
     },
 
     { "800x600", 800,  600, TVTYPE_NTSC,
-      { 0XCF, /* 0x00		Mode 29 */
-        0X27, /* 0x01 FF	Default 0x27  (was 7F) */
-        0XBE, /* 0x02 VBW	Default 0xBE (was 0x76) */
-        0X8B, /* 0x03 TE	Decent Text 0x8B (was 8F) */
+      { 0XCF, /* 0x00       Mode 29 */
+        0X27, /* 0x01 FF    Default 0x27  (was 7F) */
+        0XBE, /* 0x02 VBW   Default 0xBE (was 0x76) */
+        0X8B, /* 0x03 TE    Decent Text 0x8B (was 8F) */
         0X59, /* 0x04 SAV*/
         0X3C, /* 0x05 HP */
         0X15, /* 0x06 VP */
-        0X66, /* 0x07 BL	Default 0x83 */
-        0X3,  /* 0x08 CE	Default 0x03 */
+        0X66, /* 0x07 BL    Default 0x83 */
+        0X3,  /* 0x08 CE    Default 0x03 */
         0X88,
         0X59,
         0X2E,
@@ -260,7 +260,7 @@ CH7011Table[] = {
 /*check these two modes*/
     { "1024x768", 1024, 768, TVTYPE_NTSC,
       { 0XEE,
-        0X3F, /* 0x01 FF	Default 0x27 (was 7F) */
+        0X3F, /* 0x01 FF    Default 0x27 (was 7F) */
         0X7E,
         0X87,
         0X49,
@@ -309,31 +309,31 @@ CH7011Table[] = {
     },
 
     { "640x480Over", 640,  480, TVTYPE_NTSC,
-      { 0X69, /* 0x00 DM	Mode 16 640x480 1/1 */
-        0X3F, /* 0x01 FF	Default 0x27 (was 7F) */
-        0X7E, /* 0x02 VBW	Default 0xBE (was 7E) */
-        0X03, /* 0x03 TE	Decent text 0x83 (was 8D) */
-        0X18, /* 0x04 SAV	Default 0x50 (was 10) */
-        0X19, /* 0x05 HP	Default 0x50 */
-        0XFB, /* 0x06 VP	Default 0x00 */
-        0X83, /* 0x07 BL	Default 0x83 (NTSC-J 66) */
-        0X03, /* 0x08 CE	Default 0x03 */
-        0X80, /* 0x09 TPC	Default 0x80 */
-        0X3F, /* 0x0A PLLM	Default 0x3F */
-        0X6E, /* 0x0B PLLN	Default 0x7E */
-        0X25, /* 0x0C FSCI	Default 0x25 */
-        0X24, /* 0x0D FSCI	Default 0x24 */
-        0X92, /* 0x0E FSCI	Default 0x9C (was 92) */
-        0X49, /* 0x0F FSCI	Default 0x7A (was 49) */
-        0X00, /* 0x10 CIVC	Default 0x01 */
+      { 0X69, /* 0x00 DM    Mode 16 640x480 1/1 */
+        0X3F, /* 0x01 FF    Default 0x27 (was 7F) */
+        0X7E, /* 0x02 VBW   Default 0xBE (was 7E) */
+        0X03, /* 0x03 TE    Decent text 0x83 (was 8D) */
+        0X18, /* 0x04 SAV   Default 0x50 (was 10) */
+        0X19, /* 0x05 HP    Default 0x50 */
+        0XFB, /* 0x06 VP    Default 0x00 */
+        0X83, /* 0x07 BL    Default 0x83 (NTSC-J 66) */
+        0X03, /* 0x08 CE    Default 0x03 */
+        0X80, /* 0x09 TPC   Default 0x80 */
+        0X3F, /* 0x0A PLLM  Default 0x3F */
+        0X6E, /* 0x0B PLLN  Default 0x7E */
+        0X25, /* 0x0C FSCI  Default 0x25 */
+        0X24, /* 0x0D FSCI  Default 0x24 */
+        0X92, /* 0x0E FSCI  Default 0x9C (was 92) */
+        0X49, /* 0x0F FSCI  Default 0x7A (was 49) */
+        0X00, /* 0x10 CIVC  Default 0x01 */
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* We don't touch these */
-        0X48, /* 0x1C CM	Default 0x00 */
-        0X40, /* 0x1D IC	Default 0x88 */
-        0XD2, /* 0x1E GPIO	Default 0xC0 */
-        0X80, /* 0x1F IDF	Default	0x00 */
+        0X48, /* 0x1C CM    Default 0x00 */
+        0X40, /* 0x1D IC    Default 0x88 */
+        0XD2, /* 0x1E GPIO  Default 0xC0 */
+        0X80, /* 0x1F IDF   Default 0x00 */
         0X40, /* 0x20 CD */
         0X00, /* 0x21 DC */
-        0X00, /* 0x22 BCO	Default 0x00 */ },
+        0X00, /* 0x22 BCO   Default 0x00 */ },
 /* why is this #ifed, what's the difference? */
 #if 0
         { 0X55, 0X4F, 0X4F, 0X99, 0X51, 0X18, 0X2E, 0X3E, 0, 0X40, 0, 0, 0, 0, 0, 0, 0XE7, 0, 0XDF, 0, 0, 0XDF, 0X2F, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
@@ -393,9 +393,9 @@ CH7011Table[] = {
     },
 
     { "800x600Over", 800,  600, TVTYPE_NTSC,
-        { 0XCE, /* 0x00		Mode 28 */
-          0X27, /* 0x01		Default 0x27 (was 7F) */
-          0XBE, /* 0x02		Default 0xBE (was 76) */
+        { 0XCE, /* 0x00     Mode 28 */
+          0X27, /* 0x01     Default 0x27 (was 7F) */
+          0XBE, /* 0x02     Default 0xBE (was 76) */
           0X8F, /* 0x03 */
           0X51, /* 0x04 */
           0X2E, /* 0x05 */
@@ -442,7 +442,7 @@ CH7011Table[] = {
 
     { "1024x768Over", 1024,  768, TVTYPE_NTSC,
       { 0XED,
-        0X3F, /* 0x01 FF	Default 0x27 (was 7F) */
+        0X3F, /* 0x01 FF    Default 0x27 (was 7F) */
         0X7E,
         0X87,
         0X49,
@@ -491,31 +491,31 @@ CH7011Table[] = {
     },
 
     { "720x480", 720,  480, TVTYPE_NTSC,
-        { 0X89, /* 0x00 DM	Mode 19 720x480 1/1 */
-          0X3F, /* 0x01 FF	Default 0x27 (was 7F) */
-          0X7E, /* 0x02 VBW	Default 0xBE (was 7E) */
-          0X03, /* 0x03 TE	Decent text 0x83 (was 8D) */
-          0X18, /* 0x04 SAV	Default 0x50 (was 10) */
-          0X19, /* 0x05 HP	Default 0x50 */
-          0XFB, /* 0x06 VP	Default 0x00 */
-          0X83, /* 0x07 BL	Default 0x83 (NTSC-J 66) */
-          0X03, /* 0x08 CE	Default 0x03 */
-          0X80, /* 0x09 TPC	Default 0x80 */
-          0X3F, /* 0x0A PLLM	Default 0x3F */
-          0X7C, /* 0x0B PLLN	Default 0x7C */
-          0X21, /* 0x0C FSCI	Default 0x25 */
-          0X04, /* 0x0D FSCI	Default 0x04 */
-          0X10, /* 0x0E FSCI	Default 0x10 */
-          0X41, /* 0x0F FSCI	Default 0x41 */
-          0X00, /* 0x10 CIVC	Default 0x01 */
+        { 0X89, /* 0x00 DM  Mode 19 720x480 1/1 */
+          0X3F, /* 0x01 FF  Default 0x27 (was 7F) */
+          0X7E, /* 0x02 VBW Default 0xBE (was 7E) */
+          0X03, /* 0x03 TE  Decent text 0x83 (was 8D) */
+          0X18, /* 0x04 SAV Default 0x50 (was 10) */
+          0X19, /* 0x05 HP  Default 0x50 */
+          0XFB, /* 0x06 VP  Default 0x00 */
+          0X83, /* 0x07 BL  Default 0x83 (NTSC-J 66) */
+          0X03, /* 0x08 CE  Default 0x03 */
+          0X80, /* 0x09 TPC Default 0x80 */
+          0X3F, /* 0x0A PLLM    Default 0x3F */
+          0X7C, /* 0x0B PLLN    Default 0x7C */
+          0X21, /* 0x0C FSCI    Default 0x25 */
+          0X04, /* 0x0D FSCI    Default 0x04 */
+          0X10, /* 0x0E FSCI    Default 0x10 */
+          0X41, /* 0x0F FSCI    Default 0x41 */
+          0X00, /* 0x10 CIVC    Default 0x01 */
           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* We don't touch these */
-          0X48, /* 0x1C CM	Default 0x00 */
-          0X40, /* 0x1D IC	Default 0x88 */
-          0XD2, /* 0x1E GPIO	Default 0xC0 */
-          0X80, /* 0x1F IDF	Default	0x00 */
+          0X48, /* 0x1C CM  Default 0x00 */
+          0X40, /* 0x1D IC  Default 0x88 */
+          0XD2, /* 0x1E GPIO    Default 0xC0 */
+          0X80, /* 0x1F IDF Default 0x00 */
           0X40, /* 0x20 CD */
           0X00, /* 0x21 DC */
-          0X00, /* 0x22 BCO	Default 0x00 */ },
+          0X00, /* 0x22 BCO Default 0x00 */ },
         { 0X64, 0X59, 0X59, 0X88, 0X5B, 0X81, 0X56, 0X3E, 0, 0X40, 0, 0, 0, 0, 0, 0, 0XFF, 0, 0XDF, 0, 0, 0XDF, 0X57, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
         { 0X20, 0X40, 0, 0X4, 0X87, 0X1C, 0, 0 },
         { 0, 0, 0, 0X87, 0X1C, 0, 0, 0 },

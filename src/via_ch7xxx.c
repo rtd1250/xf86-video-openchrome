@@ -45,11 +45,11 @@ CH7xxxPrintRegs(xf86OutputPtr output)
     CARD8 i, buf;
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Printing registers for %s\n",
-	       pVIATV->pVIATVI2CDev->DevName);
+               pVIATV->pVIATVI2CDev->DevName);
 
     for (i = 0; i < pVIATV->TVNumRegs; i++) {
-	xf86I2CReadByte(pVIATV->pVIATVI2CDev, i, &buf);
-	xf86DrvMsg(pScrn->scrnIndex, X_INFO, "TV%02X: 0x%02X\n", i, buf);
+        xf86I2CReadByte(pVIATV->pVIATVI2CDev, i, &buf);
+        xf86DrvMsg(pScrn->scrnIndex, X_INFO, "TV%02X: 0x%02X\n", i, buf);
     }
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "End of TV registers.\n");
@@ -73,8 +73,8 @@ ViaCH7xxxDetect(ScrnInfoPtr pScrn, I2CBusPtr pBus, CARD8 Address)
     pDev->pI2CBus = pBus;
 
     if (!xf86I2CDevInit(pDev)) {
-		xf86DestroyI2CDevRec(pDev, TRUE);
-		return NULL;
+        xf86DestroyI2CDevRec(pDev, TRUE);
+        return NULL;
     }
 
     if (!xf86I2CReadByte(pDev, 0x4B, &buf)) {
@@ -194,7 +194,7 @@ CH7xxxDACSenseI2C(I2CDevPtr pDev)
  *  A CH7xxx hack. (T. Lewis. S-Video fixed by P. Langdale)
  *
  *  CH7xxx Cable types (C+S and YcBcR untested and almost certainly wrong) 
- *		0x10 = Composite
+ *      0x10 = Composite
  *      0x0C = S-Video
  *      0x02 = Composite+S-Video
  *      0x04 = YcBcR
@@ -210,10 +210,10 @@ CH7xxxDACSense(xf86OutputPtr output)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CH7xxxDACDetect\n"));
 
-	/* is this needed? IH */
+    /* is this needed? IH */
     if (!pVIATV->pVIATVI2CDev ||
         !pVIATV->TVEncoder)
-	    return FALSE;
+        return FALSE;
 
     sense = CH7xxxDACSenseI2C(pVIATV->pVIATVI2CDev);
 
@@ -222,32 +222,32 @@ CH7xxxDACSense(xf86OutputPtr output)
      * 0x10 (Composite), 0x0C (S-Video) and 0x00 (Nothing connected)
      * seem to be correct however.
      */
-	switch (sense) {
-	    case 0x10:
-		pVIATV->TVOutput = TVOUTPUT_COMPOSITE;
-		xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "CH7xxx: Composite connected.\n");
-		return TRUE;
-	    case 0x0C:
-		pVIATV->TVOutput = TVOUTPUT_SVIDEO;
-		xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "CH7xxx: S-Video connected.\n");
-		return TRUE;
-	    case 0x02:
-		pVIATV->TVOutput = TVOUTPUT_SC;
-		xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "CHxxx: Composite+S-Video connected.\n");
-		return TRUE;
-	    case 0x04:
-		pVIATV->TVOutput = TVOUTPUT_YCBCR;
-		xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "CHxxx: YcBcR Connected.\n");
-		return TRUE;
-	    case 0x00:
-		pVIATV->TVOutput = TVOUTPUT_NONE;
-		xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "CH7xxx: Nothing connected.\n");
-		return FALSE;
-	    default:
-		pVIATV->TVOutput = TVOUTPUT_NONE;
-		xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "CH7xxx: Unknown cable combination: 0x0%2X.\n",sense);
-		return FALSE;
-	}
+    switch (sense) {
+        case 0x10:
+        pVIATV->TVOutput = TVOUTPUT_COMPOSITE;
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "CH7xxx: Composite connected.\n");
+        return TRUE;
+        case 0x0C:
+        pVIATV->TVOutput = TVOUTPUT_SVIDEO;
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "CH7xxx: S-Video connected.\n");
+        return TRUE;
+        case 0x02:
+        pVIATV->TVOutput = TVOUTPUT_SC;
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "CHxxx: Composite+S-Video connected.\n");
+        return TRUE;
+        case 0x04:
+        pVIATV->TVOutput = TVOUTPUT_YCBCR;
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "CHxxx: YcBcR Connected.\n");
+        return TRUE;
+        case 0x00:
+        pVIATV->TVOutput = TVOUTPUT_NONE;
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "CH7xxx: Nothing connected.\n");
+        return FALSE;
+        default:
+        pVIATV->TVOutput = TVOUTPUT_NONE;
+        xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "CH7xxx: Unknown cable combination: 0x0%2X.\n",sense);
+        return FALSE;
+    }
 }
 
 static CARD8
@@ -410,14 +410,14 @@ CH7xxxModeI2C(xf86OutputPtr output, DisplayModePtr mode)
 static void
 CH7xxxModeCrtc(xf86OutputPtr output, DisplayModePtr mode)
 {
-	xf86CrtcPtr crtc = output->crtc;
-	ScrnInfoPtr pScrn = crtc->scrn;
-	vgaHWPtr hwp = VGAHWPTR(pScrn);
-	VIAPtr pVia =  VIAPTR(pScrn);
-	VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
-	viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
-	CARD8  *CRTC, *Misc;
-	int  i, j;
+    xf86CrtcPtr crtc = output->crtc;
+    ScrnInfoPtr pScrn = crtc->scrn;
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia =  VIAPTR(pScrn);
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
+    viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
+    CARD8  *CRTC, *Misc;
+    int  i, j;
 
     VIABIOSTVMASKTableRec Mask;
     struct CH7xxxTableRec Table;
@@ -517,92 +517,92 @@ CH7xxxModeCrtc(xf86OutputPtr output, DisplayModePtr mode)
 static void
 CH7xxxTVPower(xf86OutputPtr output, Bool On)
 {
-	ScrnInfoPtr pScrn = output->scrn;
-	viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
+    ScrnInfoPtr pScrn = output->scrn;
+    viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
-	if (On){
-		DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CH7xxxTVPower: On\n"));
-		xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x49, 0x20);
-	}else{
-		DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CH7xxxTVPower: Off\n"));
-		xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x49, 0x3E);
-		xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x1E, 0xD0);
+    if (On){
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CH7xxxTVPower: On\n"));
+        xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x49, 0x20);
+    }else{
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CH7xxxTVPower: Off\n"));
+        xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x49, 0x3E);
+        xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x1E, 0xD0);
     }
 }
 
 static void
 CH7019LCDPower(xf86OutputPtr output, Bool On)
 {
-	ScrnInfoPtr pScrn = output->scrn;
-	viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
-	CARD8 W_Buffer[2], R_Buffer[1];
-	int i;
+    ScrnInfoPtr pScrn = output->scrn;
+    viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
+    CARD8 W_Buffer[2], R_Buffer[1];
+    int i;
 
-	if (On){
-		DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CH7xxxLCDPower: On\n"));
-		W_Buffer[0] = 0x63;
-		W_Buffer[1] = 0x4B;
-		xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,2, NULL,0);
-		W_Buffer[0] = 0x66;
-		W_Buffer[1] = 0x20;
-		xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,2, NULL,0);
+    if (On){
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CH7xxxLCDPower: On\n"));
+        W_Buffer[0] = 0x63;
+        W_Buffer[1] = 0x4B;
+        xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,2, NULL,0);
+        W_Buffer[0] = 0x66;
+        W_Buffer[1] = 0x20;
+        xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,2, NULL,0);
 
-		for (i = 0; i < 10; i++) {
-			W_Buffer[0] = 0x63;
-			xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,1, R_Buffer,1);
-			usleep(100);
-			W_Buffer[0] = 0x63;
-			W_Buffer[1] = (R_Buffer[0] | 0x40);
-			xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,2, NULL,0);
-			DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+        for (i = 0; i < 10; i++) {
+            W_Buffer[0] = 0x63;
+            xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,1, R_Buffer,1);
+            usleep(100);
+            W_Buffer[0] = 0x63;
+            W_Buffer[1] = (R_Buffer[0] | 0x40);
+            xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,2, NULL,0);
+            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                              "CH7xxxLCDPower: [%d]write 0x63 = %X!\n", i+1, W_Buffer[1]));
-			usleep(1);
-			W_Buffer[0] = 0x63;
-			W_Buffer[1] &= ~0x40;
-			xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,2, NULL,0);
-			DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+            usleep(1);
+            W_Buffer[0] = 0x63;
+            W_Buffer[1] &= ~0x40;
+            xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,2, NULL,0);
+            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                              "CH7xxxLCDPower: [%d]write 0x63 = %X!\n", i+1, W_Buffer[1]));
-			usleep(100);
-			W_Buffer[0] = 0x66;
-			xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,1, R_Buffer,1);
+            usleep(100);
+            W_Buffer[0] = 0x66;
+            xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,1, R_Buffer,1);
 
-			if (((R_Buffer[0] & 0x44) == 0x44) || (i >= 9)) {
-				/* PLL lock OK, Turn on VDD */
-				usleep(500);
-				W_Buffer[1] = R_Buffer[0] | 0x01;
-				xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,2, NULL,0);
-				DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-						 "CH7xxxLCDPower: CH7019 PLL lock ok!\n"));
-				/* reset data path */
-				W_Buffer[0] = 0x48;
-				xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,1, R_Buffer,1);
-				W_Buffer[1] = R_Buffer[0] & ~0x08;
-				xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,2, NULL,0);
-				usleep(1);
-				W_Buffer[1] = R_Buffer[0];
-				xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,2, NULL,0);
-				break;
-			}
+            if (((R_Buffer[0] & 0x44) == 0x44) || (i >= 9)) {
+                /* PLL lock OK, Turn on VDD */
+                usleep(500);
+                W_Buffer[1] = R_Buffer[0] | 0x01;
+                xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,2, NULL,0);
+                DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                         "CH7xxxLCDPower: CH7019 PLL lock ok!\n"));
+                /* reset data path */
+                W_Buffer[0] = 0x48;
+                xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,1, R_Buffer,1);
+                W_Buffer[1] = R_Buffer[0] & ~0x08;
+                xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,2, NULL,0);
+                usleep(1);
+                W_Buffer[1] = R_Buffer[0];
+                xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,2, NULL,0);
+                break;
+            }
 
             DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                              "CH7xxxLCDPower: [%d]CH7019 PLL lock fail!\n", i+1));
             DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
                              "CH7xxxLCDPower: [%d]0x66 = %X!\n", i+1, R_Buffer[0]));
-		}
-	}else{
-		DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CH7xxxLCDPower: Off\n"));
-		/* Turn off VDD (Turn off backlignt only) */
-		W_Buffer[0] = 0x66;
-		xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,1, R_Buffer,1);
-		W_Buffer[1] &= ~0x01;
-		xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,2, NULL,0);
-		usleep(100);
-		/* Turn off LVDS path */
-		W_Buffer[0] = 0x63;
-		xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,1, R_Buffer,1);
-		W_Buffer[1] = (R_Buffer[0] | 0x40);
-		xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,2, NULL,0);
-	}
+        }
+    }else{
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "CH7xxxLCDPower: Off\n"));
+        /* Turn off VDD (Turn off backlignt only) */
+        W_Buffer[0] = 0x66;
+        xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,1, R_Buffer,1);
+        W_Buffer[1] &= ~0x01;
+        xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,2, NULL,0);
+        usleep(100);
+        /* Turn off LVDS path */
+        W_Buffer[0] = 0x63;
+        xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,1, R_Buffer,1);
+        W_Buffer[1] = (R_Buffer[0] | 0x40);
+        xf86I2CWriteRead(pVIATV->pVIATVI2CDev, W_Buffer,2, NULL,0);
+    }
 }
 
 /*

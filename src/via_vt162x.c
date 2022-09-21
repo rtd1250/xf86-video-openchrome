@@ -33,14 +33,14 @@
 static void
 ViaSetTVClockSource(xf86OutputPtr output)
 {
-	xf86CrtcPtr crtc = output->crtc;
-	drmmode_crtc_private_ptr iga = crtc->driver_private;
-	ScrnInfoPtr pScrn = crtc->scrn;
-	VIAPtr pVia = VIAPTR(pScrn);
-	viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
-	vgaHWPtr hwp = VGAHWPTR(pScrn);
+    xf86CrtcPtr crtc = output->crtc;
+    drmmode_crtc_private_ptr iga = crtc->driver_private;
+    ScrnInfoPtr pScrn = crtc->scrn;
+    VIAPtr pVia = VIAPTR(pScrn);
+    viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
 
-	DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaSetTVClockSource\n"));
+    DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "ViaSetTVClockSource\n"));
 
     switch(pVIATV->TVEncoder) {
         case VIA_VT1625:
@@ -69,10 +69,10 @@ ViaSetTVClockSource(xf86OutputPtr output)
             }
             break;
         default:
-			if (!iga->index)
-				ViaCrtcMask(hwp, 0x6C, 0x50, 0xF0);
-			else
-				ViaCrtcMask(hwp, 0x6C, 0x05, 0x0F);
+            if (!iga->index)
+                ViaCrtcMask(hwp, 0x6C, 0x50, 0xF0);
+            else
+                ViaCrtcMask(hwp, 0x6C, 0x05, 0x0F);
             break;
     }
 
@@ -638,11 +638,11 @@ VT1621ModeI2C(xf86OutputPtr output, DisplayModePtr mode)
 static void
 VT1621ModeCrtc(xf86OutputPtr output, DisplayModePtr mode)
 {
-	ScrnInfoPtr pScrn = output->scrn;
-	vgaHWPtr hwp = VGAHWPTR(pScrn);
-	VIAPtr pVia = VIAPTR(pScrn);
-	VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
-	struct VT1621TableRec Table = VT1621Table[VT1621ModeIndex(output, mode)];
+    ScrnInfoPtr pScrn = output->scrn;
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIADisplayPtr pVIADisplay = pVia->pVIADisplay;
+    struct VT1621TableRec Table = VT1621Table[VT1621ModeIndex(output, mode)];
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1621ModeCrtc\n"));
 
@@ -773,12 +773,12 @@ VT1622ModeI2C(xf86OutputPtr output, DisplayModePtr mode)
 static void
 VT1622ModeCrtc(xf86OutputPtr output, DisplayModePtr mode)
 {
-	ScrnInfoPtr pScrn = output->scrn;
-	vgaHWPtr hwp = VGAHWPTR(pScrn);
-	VIAPtr pVia = VIAPTR(pScrn);
-	VIADisplayPtr pVIADisplay = VIAPTR(pScrn)->pVIADisplay;
-	viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
-	struct VT162XTableRec Table;
+    ScrnInfoPtr pScrn = output->scrn;
+    vgaHWPtr hwp = VGAHWPTR(pScrn);
+    VIAPtr pVia = VIAPTR(pScrn);
+    VIADisplayPtr pVIADisplay = VIAPTR(pScrn)->pVIADisplay;
+    viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
+    struct VT162XTableRec Table;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "VT1622ModeCrtc\n"));
 
