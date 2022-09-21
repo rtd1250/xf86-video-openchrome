@@ -42,38 +42,38 @@ ViaSetTVClockSource(xf86OutputPtr output)
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
-    switch(pVIATV->TVEncoder) {
-        case VIA_VT1625:
-            /* External TV: */
-            switch(pVia->Chipset) {
-                case VIA_CX700:
-                case VIA_VX800:
-                case VIA_VX855:
-                case VIA_VX900:
-                    /* IGA1 */
-                    if (!iga->index) {
-                        /* Fixing it to DVP1 for IGA1. */
-                        ViaCrtcMask(hwp, 0x6C, 0xB0, 0xF0);
-                    /* IGA2 */
-                    } else {
-                        /* Fixing it to DVP1 for IGA2. */
-                        ViaCrtcMask(hwp, 0x6C, 0x0B, 0x0F);
-                    }
-                    break;
-                default:
-                    if (!iga->index)
-                        ViaCrtcMask(hwp, 0x6C, 0x21, 0x21);
-                    else
-                        ViaCrtcMask(hwp, 0x6C, 0xA1, 0xA1);
-                    break;
+    switch (pVIATV->TVEncoder) {
+    case VIA_VT1625:
+        /* External TV: */
+        switch (pVia->Chipset) {
+        case VIA_CX700:
+        case VIA_VX800:
+        case VIA_VX855:
+        case VIA_VX900:
+            /* IGA1 */
+            if (!iga->index) {
+                /* Fixing it to DVP1 for IGA1. */
+                ViaCrtcMask(hwp, 0x6C, 0xB0, 0xF0);
+            /* IGA2 */
+            } else {
+                /* Fixing it to DVP1 for IGA2. */
+                ViaCrtcMask(hwp, 0x6C, 0x0B, 0x0F);
             }
             break;
         default:
             if (!iga->index)
-                ViaCrtcMask(hwp, 0x6C, 0x50, 0xF0);
+                ViaCrtcMask(hwp, 0x6C, 0x21, 0x21);
             else
-                ViaCrtcMask(hwp, 0x6C, 0x05, 0x0F);
+                ViaCrtcMask(hwp, 0x6C, 0xA1, 0xA1);
             break;
+        }
+        break;
+    default:
+        if (!iga->index)
+            ViaCrtcMask(hwp, 0x6C, 0x50, 0xF0);
+        else
+            ViaCrtcMask(hwp, 0x6C, 0x05, 0x0F);
+        break;
     }
 
 }
@@ -84,7 +84,6 @@ VT162xPrintRegs(xf86OutputPtr output)
     ScrnInfoPtr pScrn = output->scrn;
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
     CARD8 i, buf;
-
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Printing registers for %s\n",
                pVIATV->pVIATVI2CDev->DevName);
@@ -125,38 +124,38 @@ ViaVT162xDetect(ScrnInfoPtr pScrn, I2CBusPtr pBus, CARD8 Address)
     }
 
     switch (buf) {
-        case 0x02:
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                       "Detected VIA Technologies VT1621 TV Encoder\n");
-            pVIADisplay->TVEncoder = VIA_VT1621;
-            pDev->DevName = "VT1621";
-            break;
-        case 0x03:
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                       "Detected VIA Technologies VT1622 TV Encoder\n");
-            pVIADisplay->TVEncoder = VIA_VT1622;
-            pDev->DevName = "VT1622";
-            break;
-        case 0x10:
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                       "Detected VIA Technologies VT1622A/VT1623 TV Encoder\n");
-            pVIADisplay->TVEncoder = VIA_VT1623;
-            pDev->DevName = "VT1623";
-            break;
-        case 0x50:
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                       "Detected VIA Technologies VT1625 TV Encoder\n");
-            pVIADisplay->TVEncoder = VIA_VT1625;
-            pDev->DevName = "VT1625";
-            break;
-        default:
-            pVIADisplay->TVEncoder = VIA_NONETV;
-            xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                       "Unknown TV Encoder found at %s %X.\n",
-                       pBus->BusName, Address);
-            xf86DestroyI2CDevRec(pDev, TRUE);
-            pDev = NULL;
-            break;
+    case 0x02:
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                   "Detected VIA Technologies VT1621 TV Encoder\n");
+        pVIADisplay->TVEncoder = VIA_VT1621;
+        pDev->DevName = "VT1621";
+        break;
+    case 0x03:
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                   "Detected VIA Technologies VT1622 TV Encoder\n");
+        pVIADisplay->TVEncoder = VIA_VT1622;
+        pDev->DevName = "VT1622";
+        break;
+    case 0x10:
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                   "Detected VIA Technologies VT1622A/VT1623 TV Encoder\n");
+        pVIADisplay->TVEncoder = VIA_VT1623;
+        pDev->DevName = "VT1623";
+        break;
+    case 0x50:
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                   "Detected VIA Technologies VT1625 TV Encoder\n");
+        pVIADisplay->TVEncoder = VIA_VT1625;
+        pDev->DevName = "VT1625";
+        break;
+    default:
+        pVIADisplay->TVEncoder = VIA_NONETV;
+        xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                   "Unknown TV Encoder found at %s %X.\n",
+                   pBus->BusName, Address);
+        xf86DestroyI2CDevRec(pDev, TRUE);
+        pDev = NULL;
+        break;
     }
 
     return pDev;
@@ -264,31 +263,31 @@ VT1621DACSense(xf86OutputPtr output)
 
     sense = VT162xDACSenseI2C(pVIATV->pVIATVI2CDev);
     switch (sense) {
-        case 0x00:
-            pVIATV->TVOutput = TVOUTPUT_SC;
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                       "VT1621: S-Video & Composite connected.\n");
-            return TRUE;
-        case 0x01:
-            pVIATV->TVOutput = TVOUTPUT_COMPOSITE;
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                       "VT1621: Composite connected.\n");
-            return TRUE;
-        case 0x02:
-            pVIATV->TVOutput = TVOUTPUT_SVIDEO;
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                       "VT1621: S-Video connected.\n");
-            return TRUE;
-        case 0x03:
-            pVIATV->TVOutput = TVOUTPUT_NONE;
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                       "VT1621: Nothing connected.\n");
-            return FALSE;
-        default:
-            pVIATV->TVOutput = TVOUTPUT_NONE;
-            xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                       "VT1621: Unknown cable combination: 0x0%2X.\n", sense);
-            return FALSE;
+    case 0x00:
+        pVIATV->TVOutput = TVOUTPUT_SC;
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                   "VT1621: S-Video & Composite connected.\n");
+        return TRUE;
+    case 0x01:
+        pVIATV->TVOutput = TVOUTPUT_COMPOSITE;
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                   "VT1621: Composite connected.\n");
+        return TRUE;
+    case 0x02:
+        pVIATV->TVOutput = TVOUTPUT_SVIDEO;
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                   "VT1621: S-Video connected.\n");
+        return TRUE;
+    case 0x03:
+        pVIATV->TVOutput = TVOUTPUT_NONE;
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                   "VT1621: Nothing connected.\n");
+        return FALSE;
+    default:
+        pVIATV->TVOutput = TVOUTPUT_NONE;
+        xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                   "VT1621: Unknown cable combination: 0x0%2X.\n", sense);
+        return FALSE;
     }
 }
 
@@ -306,41 +305,41 @@ VT1622DACSense(xf86OutputPtr output)
 
     sense = VT162xDACSenseI2C(pVIATV->pVIATVI2CDev);
     switch (sense) {
-        case 0x00:  /* DAC A,B,C,D */
-            pVIATV->TVOutput = TVOUTPUT_RGB;
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                       "VT162x: RGB connected.\n");
-            return TRUE;
-        case 0x01:  /* DAC A,B,C */
-            pVIATV->TVOutput = TVOUTPUT_SC;
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                       "VT162x: S-Video & Composite connected.\n");
-            return TRUE;
-        case 0x07:  /* DAC A */
-            pVIATV->TVOutput = TVOUTPUT_COMPOSITE;
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                       "VT162x: Composite connected.\n");
-            return TRUE;
-        case 0x08:  /* DAC B,C,D */
-            pVIATV->TVOutput = TVOUTPUT_YCBCR;
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                       "VT162x: YcBcR connected.\n");
-            return TRUE;
-        case 0x09:  /* DAC B,C */
-            pVIATV->TVOutput = TVOUTPUT_SVIDEO;
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                       "VT162x: S-Video connected.\n");
-            return TRUE;
-        case 0x0F:
-            pVIATV->TVOutput = TVOUTPUT_NONE;
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                       "VT162x: Nothing connected.\n");
-            return FALSE;
-        default:
-            pVIATV->TVOutput = TVOUTPUT_NONE;
-            xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                       "VT162x: Unknown cable combination: 0x0%2X.\n", sense);
-            return FALSE;
+    case 0x00:  /* DAC A,B,C,D */
+        pVIATV->TVOutput = TVOUTPUT_RGB;
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                   "VT162x: RGB connected.\n");
+        return TRUE;
+    case 0x01:  /* DAC A,B,C */
+        pVIATV->TVOutput = TVOUTPUT_SC;
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                   "VT162x: S-Video & Composite connected.\n");
+        return TRUE;
+    case 0x07:  /* DAC A */
+        pVIATV->TVOutput = TVOUTPUT_COMPOSITE;
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                   "VT162x: Composite connected.\n");
+        return TRUE;
+    case 0x08:  /* DAC B,C,D */
+        pVIATV->TVOutput = TVOUTPUT_YCBCR;
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                   "VT162x: YcBcR connected.\n");
+        return TRUE;
+    case 0x09:  /* DAC B,C */
+        pVIATV->TVOutput = TVOUTPUT_SVIDEO;
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                   "VT162x: S-Video connected.\n");
+        return TRUE;
+    case 0x0F:
+        pVIATV->TVOutput = TVOUTPUT_NONE;
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                   "VT162x: Nothing connected.\n");
+        return FALSE;
+    default:
+        pVIATV->TVOutput = TVOUTPUT_NONE;
+        xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                   "VT162x: Unknown cable combination: 0x0%2X.\n", sense);
+        return FALSE;
     }
 }
 
@@ -358,41 +357,41 @@ VT1625DACSense(xf86OutputPtr output)
 
     sense = VT1625DACSenseI2C(pVIATV->pVIATVI2CDev);
     switch (sense) {
-        case 0x00:  /* DAC A,B,C,D,E,F */
-            pVIATV->TVOutput = TVOUTPUT_RGB;
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                       "VT1625: RGB connected.\n");
-            return TRUE;
-        case 0x07:  /* DAC A,B,C */
-            pVIATV->TVOutput = TVOUTPUT_SC;
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                       "VT1625: S-Video & Composite connected.\n");
-            return TRUE;
-        case 0x37:  /* DAC C */
-            pVIATV->TVOutput = TVOUTPUT_COMPOSITE;
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                       "VT1625: Composite connected.\n");
-            return TRUE;
-        case 0x38:  /* DAC D,E,F */
-            pVIATV->TVOutput = TVOUTPUT_YCBCR;
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                       "VT1625: YCbCr connected.\n");
-            return TRUE;
-        case 0x0F:  /* DAC A,B */
-            pVIATV->TVOutput = TVOUTPUT_SVIDEO;
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                       "VT1625: S-Video connected.\n");
-            return TRUE;
-        case 0x3F:
-            pVIATV->TVOutput = TVOUTPUT_NONE;
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
-                       "VT1625: Nothing connected.\n");
-            return FALSE;
-        default:
-            pVIATV->TVOutput = TVOUTPUT_NONE;
-            xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-                       "VT1625: Unknown cable combination: 0x0%2X.\n", sense);
-            return FALSE;
+    case 0x00:  /* DAC A,B,C,D,E,F */
+        pVIATV->TVOutput = TVOUTPUT_RGB;
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                   "VT1625: RGB connected.\n");
+        return TRUE;
+    case 0x07:  /* DAC A,B,C */
+        pVIATV->TVOutput = TVOUTPUT_SC;
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                   "VT1625: S-Video & Composite connected.\n");
+        return TRUE;
+    case 0x37:  /* DAC C */
+        pVIATV->TVOutput = TVOUTPUT_COMPOSITE;
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                   "VT1625: Composite connected.\n");
+        return TRUE;
+    case 0x38:  /* DAC D,E,F */
+        pVIATV->TVOutput = TVOUTPUT_YCBCR;
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                   "VT1625: YCbCr connected.\n");
+        return TRUE;
+    case 0x0F:  /* DAC A,B */
+        pVIATV->TVOutput = TVOUTPUT_SVIDEO;
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                   "VT1625: S-Video connected.\n");
+        return TRUE;
+    case 0x3F:
+        pVIATV->TVOutput = TVOUTPUT_NONE;
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
+                   "VT1625: Nothing connected.\n");
+        return FALSE;
+    default:
+        pVIATV->TVOutput = TVOUTPUT_NONE;
+        xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                   "VT1625: Unknown cable combination: 0x0%2X.\n", sense);
+        return FALSE;
     }
 }
 
@@ -412,6 +411,7 @@ VT1621ModeIndex(xf86OutputPtr output, DisplayModePtr mode)
             !(strcmp(VT1621Table[i].name, mode->name)))
             return i;
     }
+
     xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "%s:"
                " Mode \"%s\" not found in Table\n", __func__, mode->name);
     return 0xFF;
@@ -481,6 +481,7 @@ VT1622ModeIndex(xf86OutputPtr output, DisplayModePtr mode)
             !strcmp(Table[i].name, mode->name))
             return i;
     }
+
     xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "%s:"
                " Mode \"%s\" not found in Table\n", __func__, mode->name);
     return 0xFF;

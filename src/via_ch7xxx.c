@@ -85,51 +85,52 @@ ViaCH7xxxDetect(ScrnInfoPtr pScrn, I2CBusPtr pBus, CARD8 Address)
     }
 
     switch (buf) {
-        case 0x17:
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "Detected Chrontel CH7011 TV Encoder\n");
-            pVIADisplay->TVEncoder = VIA_CH7011;
-            pDev->DevName="CH7011";
-            break;
-        case 0x19:
-            xf86I2CReadByte(pDev, 0x4A, &buf);
-            if (buf == 0x81) {
-                xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "Detected Chrontel CH7019A LVDS Transmitter/TV Encoder\n");
-                pVIADisplay->TVEncoder = VIA_CH7019A;
-                pDev->DevName="CH7019A";
-            } else {
-                xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "Detected Chrontel CH7019B LVDS Transmitter/TV Encoder\n");
-                pVIADisplay->TVEncoder = VIA_CH7019B;
-                pDev->DevName="CH7019B";
-            }
-            break;
-        case 0x1B:
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "Detected Chrontel CH7017 LVDS Transmitter\n");
-            pVIADisplay->TVEncoder = VIA_CH7017;
-            pDev->DevName="CH7017";
-            break;
-        case 0x3A:
-            /* single init table --> single channel LVDS transmitter ? */
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "Detected Chrontel CH7304 LVDS Transmitter\n");
-            pVIADisplay->TVEncoder = VIA_CH7304;
-            pDev->DevName="CH7304";
-            break;
-        case 0x3B:
-            /* dual init table --> dual channel LVDS transmitter ? */
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "Detected Chrontel CH7305 LVDS Transmitter\n");
-            pVIADisplay->TVEncoder = VIA_CH7305;
-            pDev->DevName="CH7305";
-            break;
-        default:
-            pVIADisplay->TVEncoder = VIA_NONETV;
-            xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Unknown CH7xxx"
-                       " device found. [%x:0x1B contains %x]\n",
-                       Address, buf);
-            xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "Unknown CH7xxx encoder found\n");
+    case 0x17:
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "Detected Chrontel CH7011 TV Encoder\n");
+        pVIADisplay->TVEncoder = VIA_CH7011;
+        pDev->DevName="CH7011";
+        break;
+    case 0x19:
+        xf86I2CReadByte(pDev, 0x4A, &buf);
+        if (buf == 0x81) {
+            xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "Detected Chrontel CH7019A LVDS Transmitter/TV Encoder\n");
+            pVIADisplay->TVEncoder = VIA_CH7019A;
+            pDev->DevName="CH7019A";
+        } else {
+            xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "Detected Chrontel CH7019B LVDS Transmitter/TV Encoder\n");
+            pVIADisplay->TVEncoder = VIA_CH7019B;
+            pDev->DevName="CH7019B";
+        }
+        break;
+    case 0x1B:
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "Detected Chrontel CH7017 LVDS Transmitter\n");
+        pVIADisplay->TVEncoder = VIA_CH7017;
+        pDev->DevName="CH7017";
+        break;
+    case 0x3A:
+        /* single init table --> single channel LVDS transmitter ? */
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "Detected Chrontel CH7304 LVDS Transmitter\n");
+        pVIADisplay->TVEncoder = VIA_CH7304;
+        pDev->DevName="CH7304";
+        break;
+    case 0x3B:
+        /* dual init table --> dual channel LVDS transmitter ? */
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "Detected Chrontel CH7305 LVDS Transmitter\n");
+        pVIADisplay->TVEncoder = VIA_CH7305;
+        pDev->DevName="CH7305";
+        break;
+    default:
+        pVIADisplay->TVEncoder = VIA_NONETV;
+        xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Unknown CH7xxx"
+                   " device found. [%x:0x1B contains %x]\n",
+                   Address, buf);
+        xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "Unknown CH7xxx encoder found\n");
 
-            xf86DestroyI2CDevRec(pDev,TRUE);
-            pDev = NULL;
-            break;
+        xf86DestroyI2CDevRec(pDev,TRUE);
+        pDev = NULL;
+        break;
     }
+
     return pDev;
 }
 
@@ -167,7 +168,7 @@ CH7xxxRestore(xf86OutputPtr output)
 static CARD8
 CH7xxxDACSenseI2C(I2CDevPtr pDev)
 {
-    CARD8  save, sense;
+    CARD8 save, sense;
 
     /* Turn all DACP on*/
     xf86I2CWriteByte(pDev, 0x49, 0x20);
@@ -223,27 +224,27 @@ CH7xxxDACSense(xf86OutputPtr output)
      * seem to be correct however.
      */
     switch (sense) {
-        case 0x10:
+    case 0x10:
         pVIATV->TVOutput = TVOUTPUT_COMPOSITE;
         xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "CH7xxx: Composite connected.\n");
         return TRUE;
-        case 0x0C:
+    case 0x0C:
         pVIATV->TVOutput = TVOUTPUT_SVIDEO;
         xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "CH7xxx: S-Video connected.\n");
         return TRUE;
-        case 0x02:
+    case 0x02:
         pVIATV->TVOutput = TVOUTPUT_SC;
         xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "CHxxx: Composite+S-Video connected.\n");
         return TRUE;
-        case 0x04:
+    case 0x04:
         pVIATV->TVOutput = TVOUTPUT_YCBCR;
         xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "CHxxx: YcBcR Connected.\n");
         return TRUE;
-        case 0x00:
+    case 0x00:
         pVIATV->TVOutput = TVOUTPUT_NONE;
         xf86DrvMsg(pScrn->scrnIndex, X_PROBED, "CH7xxx: Nothing connected.\n");
         return FALSE;
-        default:
+    default:
         pVIATV->TVOutput = TVOUTPUT_NONE;
         xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "CH7xxx: Unknown cable combination: 0x0%2X.\n",sense);
         return FALSE;
@@ -258,6 +259,7 @@ CH7011ModeIndex(xf86OutputPtr output, DisplayModePtr mode)
     int i;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
+
     for (i = 0; CH7011Table[i].Width; i++) {
         if ((CH7011Table[i].Width == mode->CrtcHDisplay) &&
             (CH7011Table[i].Height == mode->CrtcVDisplay) &&
@@ -265,6 +267,7 @@ CH7011ModeIndex(xf86OutputPtr output, DisplayModePtr mode)
             !(strcmp(CH7011Table[i].name, mode->name)))
             return i;
     }
+
     xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "%s:"
                " Mode \"%s\" not found in Table\n", __func__, mode->name);
     return 0xFF;
@@ -285,6 +288,7 @@ CH7019ModeIndex(xf86OutputPtr output, DisplayModePtr mode)
             !(strcmp(CH7019Table[i].name, mode->name)))
             return i;
     }
+
     xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "%s:"
                " Mode \"%s\" not found in Table\n", __func__, mode->name);
     return 0xFF;
@@ -318,16 +322,14 @@ CH7xxxModeValid(xf86OutputPtr output, DisplayModePtr mode)
         return MODE_BAD;
     }
 
-    if (pVIATV->TVEncoder == VIA_CH7011)
-    {
+    if (pVIATV->TVEncoder == VIA_CH7011) {
         if (CH7011ModeIndex(output, mode) != 0xFF)
             return MODE_OK;
-    }
-    else
-    {
+    } else {
         if (CH7019ModeIndex(output, mode) != 0xFF)
             return MODE_OK;
     }
+
     return MODE_BAD;
 }
 
@@ -337,19 +339,14 @@ CH7xxxModeI2C(xf86OutputPtr output, DisplayModePtr mode)
     ScrnInfoPtr pScrn = output->scrn;
     VIAPtr pVia = VIAPTR(pScrn);
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
-
     CARD8   i, j;
-
     VIABIOSTVMASKTableRec Mask;
     struct CH7xxxTableRec Table;
 
-    if (pVIATV->TVEncoder == VIA_CH7011)
-    {
+    if (pVIATV->TVEncoder == VIA_CH7011) {
         Table = CH7011Table[CH7011ModeIndex(output, mode)];
         Mask = ch7011MaskTable;
-    }
-    else
-    {
+    } else {
         Table = CH7019Table[CH7019ModeIndex(output, mode)];
         Mask = ch7019MaskTable;
     }
@@ -383,21 +380,21 @@ CH7xxxModeI2C(xf86OutputPtr output, DisplayModePtr mode)
     /*
      * Only Composite and SVideo have been tested.
      */
-    switch(pVIATV->TVOutput){
-        case TVOUTPUT_COMPOSITE:
-            xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x49, 0x2E);
-            break;
-        case TVOUTPUT_SVIDEO:
-            xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x49, 0x32);
-            break;
-        case TVOUTPUT_SC:
-            xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x49, 0x3C);
-            break;
-        case TVOUTPUT_YCBCR:
-            xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x49, 0x3A);
-            break;
-        default:
-            break;
+    switch (pVIATV->TVOutput) {
+    case TVOUTPUT_COMPOSITE:
+        xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x49, 0x2E);
+        break;
+    case TVOUTPUT_SVIDEO:
+        xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x49, 0x32);
+        break;
+    case TVOUTPUT_SC:
+        xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x49, 0x3C);
+        break;
+    case TVOUTPUT_YCBCR:
+        xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x49, 0x3A);
+        break;
+    default:
+        break;
     }
 
     if (pVia->IsSecondary) { /* Patch as setting 2nd path */
@@ -418,17 +415,13 @@ CH7xxxModeCrtc(xf86OutputPtr output, DisplayModePtr mode)
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
     CARD8  *CRTC, *Misc;
     int  i, j;
-
     VIABIOSTVMASKTableRec Mask;
     struct CH7xxxTableRec Table;
 
-    if (pVIATV->TVEncoder == VIA_CH7011)
-    {
+    if (pVIATV->TVEncoder == VIA_CH7011) {
         Table = CH7011Table[CH7011ModeIndex(output, mode)];
         Mask = ch7011MaskTable;
-    }
-    else
-    {
+    } else {
         Table = CH7019Table[CH7019ModeIndex(output, mode)];
         Mask = ch7019MaskTable;
     }
@@ -437,16 +430,16 @@ CH7xxxModeCrtc(xf86OutputPtr output, DisplayModePtr mode)
 
     if (pVia->IsSecondary) {
         switch (pScrn->bitsPerPixel) {
-            case 16:
-                CRTC = Table.CRTC2_16BPP;
-                break;
-            case 32:
-                CRTC = Table.CRTC2_32BPP;
-                break;
-            case 8:
-            default:
-                CRTC = Table.CRTC2_8BPP;
-                break;
+        case 16:
+            CRTC = Table.CRTC2_16BPP;
+            break;
+        case 32:
+            CRTC = Table.CRTC2_32BPP;
+            break;
+        case 8:
+        default:
+            CRTC = Table.CRTC2_8BPP;
+            break;
         }
         Misc = Table.Misc2;
 
@@ -468,9 +461,8 @@ CH7xxxModeCrtc(xf86OutputPtr output, DisplayModePtr mode)
 
         /* Disable LCD Scaling */
         if (!pVia->SAMM || pVia->FirstInit)
-            hwp->writeCrtc(hwp, 0x79, 0x00);}
-    else {
-
+            hwp->writeCrtc(hwp, 0x79, 0x00);
+    } else {
         CRTC = Table.CRTC1;
         Misc = Table.Misc1;
 
@@ -520,10 +512,10 @@ CH7xxxTVPower(xf86OutputPtr output, Bool On)
     ScrnInfoPtr pScrn = output->scrn;
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
-    if (On){
+    if (On) {
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s: On\n", __func__));
         xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x49, 0x20);
-    }else{
+    } else {
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s: Off\n", __func__));
         xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x49, 0x3E);
         xf86I2CWriteByte(pVIATV->pVIATVI2CDev, 0x1E, 0xD0);
@@ -538,7 +530,7 @@ CH7019LCDPower(xf86OutputPtr output, Bool On)
     CARD8 W_Buffer[2], R_Buffer[1];
     int i;
 
-    if (On){
+    if (On) {
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s: On\n", __func__));
         W_Buffer[0] = 0x63;
         W_Buffer[1] = 0x4B;
@@ -593,7 +585,7 @@ CH7019LCDPower(xf86OutputPtr output, Bool On)
                              "%s: [%d]0x66 = %X!\n",
                              __func__, i+1, R_Buffer[0]));
         }
-    }else{
+    } else {
         DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s: Off\n", __func__));
         /* Turn off VDD (Turn off backlignt only) */
         W_Buffer[0] = 0x66;
@@ -621,43 +613,43 @@ ViaCH7xxxInit(xf86OutputPtr output)
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
 
     switch (pVIATV->TVEncoder) {
-        case VIA_CH7011:
-            pVIATV->TVSave = CH7xxxSave;
-            pVIATV->TVRestore = CH7xxxRestore;
-            pVIATV->TVDACSense = CH7xxxDACSense;
-            pVIATV->TVModeValid = CH7xxxModeValid;
-            pVIATV->TVModeI2C = CH7xxxModeI2C;
-            pVIATV->TVModeCrtc = CH7xxxModeCrtc;
-            pVIATV->TVPower = CH7xxxTVPower;
-            pVIATV->TVModes = CH7011Modes;
-            pVIATV->TVNumModes = sizeof(CH7011Modes) / sizeof(DisplayModeRec);
-            pVIATV->LCDPower = NULL;
-            pVIATV->TVNumRegs = CH_7011_MAX_NUM_REG;
+    case VIA_CH7011:
+        pVIATV->TVSave = CH7xxxSave;
+        pVIATV->TVRestore = CH7xxxRestore;
+        pVIATV->TVDACSense = CH7xxxDACSense;
+        pVIATV->TVModeValid = CH7xxxModeValid;
+        pVIATV->TVModeI2C = CH7xxxModeI2C;
+        pVIATV->TVModeCrtc = CH7xxxModeCrtc;
+        pVIATV->TVPower = CH7xxxTVPower;
+        pVIATV->TVModes = CH7011Modes;
+        pVIATV->TVNumModes = sizeof(CH7011Modes) / sizeof(DisplayModeRec);
+        pVIATV->LCDPower = NULL;
+        pVIATV->TVNumRegs = CH_7011_MAX_NUM_REG;
 #ifdef HAVE_DEBUG
-            pVIATV->TVPrintRegs = CH7xxxPrintRegs;
+        pVIATV->TVPrintRegs = CH7xxxPrintRegs;
 #endif
-            break;
-        case VIA_CH7019A:
-        case VIA_CH7019B:
-            pVIATV->TVDACSense = CH7xxxDACSense;
-            pVIATV->TVSave = CH7xxxSave;
-            pVIATV->TVRestore = CH7xxxRestore;
-            pVIATV->TVModeValid = CH7xxxModeValid;
-            pVIATV->TVModeI2C = CH7xxxModeI2C;
-            pVIATV->TVModeCrtc = CH7xxxModeCrtc;
-            pVIATV->TVPower = CH7xxxTVPower;
-            pVIATV->TVModes = CH7019Modes;
-            pVIATV->TVNumModes = sizeof(CH7019Modes) / sizeof(DisplayModeRec);
-            pVIATV->LCDPower = CH7019LCDPower;
-            pVIATV->TVNumRegs = CH_7019_MAX_NUM_REG;
+        break;
+    case VIA_CH7019A:
+    case VIA_CH7019B:
+        pVIATV->TVDACSense = CH7xxxDACSense;
+        pVIATV->TVSave = CH7xxxSave;
+        pVIATV->TVRestore = CH7xxxRestore;
+        pVIATV->TVModeValid = CH7xxxModeValid;
+        pVIATV->TVModeI2C = CH7xxxModeI2C;
+        pVIATV->TVModeCrtc = CH7xxxModeCrtc;
+        pVIATV->TVPower = CH7xxxTVPower;
+        pVIATV->TVModes = CH7019Modes;
+        pVIATV->TVNumModes = sizeof(CH7019Modes) / sizeof(DisplayModeRec);
+        pVIATV->LCDPower = CH7019LCDPower;
+        pVIATV->TVNumRegs = CH_7019_MAX_NUM_REG;
 #ifdef HAVE_DEBUG
-            pVIATV->TVPrintRegs = CH7xxxPrintRegs;
+        pVIATV->TVPrintRegs = CH7xxxPrintRegs;
 #endif
-            break;
-        default:
-            DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "%s missing\n",
-                    __func__));
-            break;
+        break;
+    default:
+        DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "%s missing\n",
+                __func__));
+        break;
     }
 
     /* Save before continuing */

@@ -546,6 +546,7 @@ ViaTVDACSense(xf86OutputPtr output)
 
     if (pVIATV->TVDACSense)
         return pVIATV->TVDACSense(output);
+
     return FALSE;
 }
 
@@ -703,6 +704,7 @@ via_tv_detect(xf86OutputPtr output)
 
     if (ViaTVDACSense(output))
         status = XF86OutputStatusConnected;
+
     return status;
 }
 
@@ -717,6 +719,7 @@ via_tv_get_modes(xf86OutputPtr output)
         mode = xf86DuplicateMode(&pVIATV->TVModes[i]);
         modes = xf86ModesAdd(modes, mode);
     }
+
     return modes;
 }
 
