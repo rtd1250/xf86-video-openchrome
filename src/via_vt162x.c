@@ -167,7 +167,9 @@ static void
 VT162xSave(xf86OutputPtr output)
 {
     int i;
+#ifdef HAVE_DEBUG
     ScrnInfoPtr pScrn = output->scrn;
+#endif /* HAVE_DEBUG */
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
@@ -180,7 +182,9 @@ VT162xSave(xf86OutputPtr output)
 static void
 VT162xRestore(xf86OutputPtr output)
 {
+#ifdef HAVE_DEBUG
     ScrnInfoPtr pScrn = output->scrn;
+#endif /* HAVE_DEBUG */
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
     int i;
 
@@ -832,7 +836,9 @@ VT1622ModeCrtc(xf86OutputPtr output, DisplayModePtr mode)
 static void
 VT1621Power(xf86OutputPtr output, Bool On)
 {
+#ifdef HAVE_DEBUG
     ScrnInfoPtr pScrn = output->scrn;
+#endif /* HAVE_DEBUG */
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
@@ -846,7 +852,9 @@ VT1621Power(xf86OutputPtr output, Bool On)
 static void
 VT1622Power(xf86OutputPtr output, Bool On)
 {
+#ifdef HAVE_DEBUG
     ScrnInfoPtr pScrn = output->scrn;
+#endif /* HAVE_DEBUG */
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
@@ -860,7 +868,9 @@ VT1622Power(xf86OutputPtr output, Bool On)
 static void
 VT1625Power(xf86OutputPtr output, Bool On)
 {
+#ifdef HAVE_DEBUG
     ScrnInfoPtr pScrn = output->scrn;
+#endif /* HAVE_DEBUG */
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
@@ -875,7 +885,9 @@ VT1625Power(xf86OutputPtr output, Bool On)
 void
 ViaVT162xInit(xf86OutputPtr output)
 {
+#ifdef HAVE_DEBUG
     ScrnInfoPtr pScrn = output->scrn;
+#endif /* HAVE_DEBUG */
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));

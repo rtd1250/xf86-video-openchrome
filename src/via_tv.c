@@ -569,7 +569,9 @@ ViaTVSetMode(xf86OutputPtr output, DisplayModePtr mode)
 static void
 ViaTVPower(xf86OutputPtr output, Bool On)
 {
+#ifdef HAVE_DEBUG
     ScrnInfoPtr pScrn = output->scrn;
+#endif /* HAVE_DEBUG */
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
 #ifdef HAVE_DEBUG

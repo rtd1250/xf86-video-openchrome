@@ -142,7 +142,9 @@ static void
 CH7xxxSave(xf86OutputPtr output)
 {
     int i;
+#ifdef HAVE_DEBUG
     ScrnInfoPtr pScrn = output->scrn;
+#endif /* HAVE_DEBUG */
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
@@ -156,7 +158,9 @@ static void
 CH7xxxRestore(xf86OutputPtr output)
 {
     int i;
+#ifdef HAVE_DEBUG
     ScrnInfoPtr pScrn = output->scrn;
+#endif /* HAVE_DEBUG */
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
@@ -509,7 +513,9 @@ CH7xxxModeCrtc(xf86OutputPtr output, DisplayModePtr mode)
 static void
 CH7xxxTVPower(xf86OutputPtr output, Bool On)
 {
+#ifdef HAVE_DEBUG
     ScrnInfoPtr pScrn = output->scrn;
+#endif /* HAVE_DEBUG */
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
     if (On) {
@@ -525,7 +531,9 @@ CH7xxxTVPower(xf86OutputPtr output, Bool On)
 static void
 CH7019LCDPower(xf86OutputPtr output, Bool On)
 {
+#ifdef HAVE_DEBUG
     ScrnInfoPtr pScrn = output->scrn;
+#endif /* HAVE_DEBUG */
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
     CARD8 W_Buffer[2], R_Buffer[1];
     int i;
@@ -607,7 +615,9 @@ CH7019LCDPower(xf86OutputPtr output, Bool On)
 void
 ViaCH7xxxInit(xf86OutputPtr output)
 {
+#ifdef HAVE_DEBUG
     ScrnInfoPtr pScrn = output->scrn;
+#endif /* HAVE_DEBUG */
     viaTVRecPtr pVIATV = (viaTVRecPtr) output->driver_private;
 
     DEBUG(xf86DrvMsg(pScrn->scrnIndex, X_INFO, "%s\n", __func__));
