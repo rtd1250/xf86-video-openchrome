@@ -832,7 +832,9 @@ via_tv_init(ScrnInfoPtr pScrn)
     pVIATV->TVModeCrtc = NULL;
     pVIATV->TVPower = NULL;
     pVIATV->TVModes = NULL;
+#ifdef HAVE_DEBUG
     pVIATV->TVPrintRegs = NULL;
+#endif /* HAVE_DEBUG */
     pVIATV->LCDPower = NULL;
     pVIATV->TVNumRegs = 0;
 
@@ -861,7 +863,10 @@ via_tv_init(ScrnInfoPtr pScrn)
         || !pVIATV->TVDACSense || !pVIATV->TVModeValid
         || !pVIATV->TVModeI2C || !pVIATV->TVModeCrtc
         || !pVIATV->TVPower || !pVIATV->TVModes
-        || !pVIATV->TVPrintRegs) {
+#ifdef HAVE_DEBUG
+        || !pVIATV->TVPrintRegs
+#endif /* HAVE_DEBUG */
+        ) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                    "TV encoder was not properly initialized.\n");
         goto free_mem;
@@ -885,7 +890,9 @@ free_mem:
     pVIATV->TVModeCrtc = NULL;
     pVIATV->TVPower = NULL;
     pVIATV->TVModes = NULL;
+#ifdef HAVE_DEBUG
     pVIATV->TVPrintRegs = NULL;
+#endif /* HAVE_DEBUG */
     pVIATV->TVNumRegs = 0;
 
     xf86DestroyI2CDevRec(pVIATV->pVIATVI2CDev, TRUE);

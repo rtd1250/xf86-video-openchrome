@@ -78,6 +78,7 @@ ViaSetTVClockSource(xf86OutputPtr output)
 
 }
 
+#ifdef HAVE_DEBUG
 static void
 VT162xPrintRegs(xf86OutputPtr output)
 {
@@ -95,7 +96,7 @@ VT162xPrintRegs(xf86OutputPtr output)
 
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "End of TV registers.\n");
 }
-
+#endif /* HAVE_DEBUG */
 
 I2CDevPtr
 ViaVT162xDetect(ScrnInfoPtr pScrn, I2CBusPtr pBus, CARD8 Address)
@@ -890,7 +891,9 @@ ViaVT162xInit(xf86OutputPtr output)
             pVIATV->TVPower = VT1621Power;
             pVIATV->TVModes = VT1621Modes;
             pVIATV->TVNumModes = sizeof(VT1621Modes) / sizeof(DisplayModeRec);
+#ifdef HAVE_DEBUG
             pVIATV->TVPrintRegs = VT162xPrintRegs;
+#endif /* HAVE_DEBUG */
             pVIATV->TVNumRegs = 0x68;
             break;
         case VIA_VT1622:
@@ -903,7 +906,9 @@ ViaVT162xInit(xf86OutputPtr output)
             pVIATV->TVPower = VT1622Power;
             pVIATV->TVModes = VT1622Modes;
             pVIATV->TVNumModes = sizeof(VT1622Modes) / sizeof(DisplayModeRec);
+#ifdef HAVE_DEBUG
             pVIATV->TVPrintRegs = VT162xPrintRegs;
+#endif /* HAVE_DEBUG */
             pVIATV->TVNumRegs = 0x68;
             break;
         case VIA_VT1623:
@@ -916,7 +921,9 @@ ViaVT162xInit(xf86OutputPtr output)
             pVIATV->TVPower = VT1622Power;
             pVIATV->TVModes = VT1623Modes;
             pVIATV->TVNumModes = sizeof(VT1623Modes) / sizeof(DisplayModeRec);
+#ifdef HAVE_DEBUG
             pVIATV->TVPrintRegs = VT162xPrintRegs;
+#endif /* HAVE_DEBUG */
             pVIATV->TVNumRegs = 0x6C;
             break;
         case VIA_VT1625:
@@ -929,7 +936,9 @@ ViaVT162xInit(xf86OutputPtr output)
             pVIATV->TVPower = VT1625Power;
             pVIATV->TVModes = VT1625Modes;
             pVIATV->TVNumModes = sizeof(VT1625Modes) / sizeof(DisplayModeRec);
+#ifdef HAVE_DEBUG
             pVIATV->TVPrintRegs = VT162xPrintRegs;
+#endif /* HAVE_DEBUG */
             pVIATV->TVNumRegs = 0x82;
             break;
         default:
