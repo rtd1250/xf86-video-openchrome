@@ -285,9 +285,12 @@ drm_bo_free(ScrnInfoPtr pScrn, struct buffer_object *obj)
                     return;
                 }
             } else  if (pVia->directRenderingType == DRI_2) {
+                struct drm_gem_close close;
+
                 munmap(obj->ptr, obj->size);
 
-                if (drmCloseBufferHandle(pVia->drmmode.fd, obj->handle)) {
+                close.handle = obj->handle;
+                if (drmIoctl(pVia->drmmode.fd, DRM_IOCTL_GEM_CLOSE, &close) < 0) {
                     ErrorF("DRM failed to free for handle %lu.\n", obj->handle);
                     return;
                 }
