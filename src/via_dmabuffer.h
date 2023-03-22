@@ -43,41 +43,41 @@ typedef struct _ViaCommandBuffer
 #define VIA_DMASIZE 16384
 
 #define H1_ADDR(val) (((val) >> 2) | 0xF0000000)
-#define WAITFLAGS(flags)			\
+#define WAITFLAGS(flags)                        \
     (cb)->waitFlags |= (flags)
 
-#define BEGIN_RING(size)					\
-    do {								\
-	if (cb->flushFunc && (cb->pos > (cb->bufSize-(size)))) {	\
-	    cb->flushFunc(cb);					\
-	}								\
+#define BEGIN_RING(size)                                        \
+    do {                                                                \
+        if (cb->flushFunc && (cb->pos > (cb->bufSize-(size)))) {        \
+            cb->flushFunc(cb);                                  \
+        }                                                               \
     } while(0)
 
-#define BEGIN_H2(paraType, h2size)			\
-  do{							\
-    BEGIN_RING((h2size)+6);				\
-    if (cb->mode == 2 && (paraType) == cb->rindex)	\
-      break;						\
-    if (cb->pos & 1)					\
-      OUT_RING(HC_DUMMY);				\
-    cb->header_start = cb->pos;				\
-    cb->rindex = paraType;				\
-    cb->mode = 2;					\
-    OUT_RING(HALCYON_HEADER2);				\
-    OUT_RING((paraType) << 16);						\
-    if (!cb->has3dState && ((paraType) != HC_ParaType_CmdVdata)) {	\
-      cb->has3dState = TRUE;						\
-    }									\
+#define BEGIN_H2(paraType, h2size)                      \
+  do{                                                   \
+    BEGIN_RING((h2size)+6);                             \
+    if (cb->mode == 2 && (paraType) == cb->rindex)      \
+      break;                                            \
+    if (cb->pos & 1)                                    \
+      OUT_RING(HC_DUMMY);                               \
+    cb->header_start = cb->pos;                         \
+    cb->rindex = paraType;                              \
+    cb->mode = 2;                                       \
+    OUT_RING(HALCYON_HEADER2);                          \
+    OUT_RING((paraType) << 16);                                         \
+    if (!cb->has3dState && ((paraType) != HC_ParaType_CmdVdata)) {      \
+      cb->has3dState = TRUE;                                            \
+    }                                                                   \
   } while(0);
 
-#define OUT_RING(val) do{	\
-	(cb)->buf[(cb)->pos++] = (val);	\
+#define OUT_RING(val) do{       \
+        (cb)->buf[(cb)->pos++] = (val); \
     } while(0);
 
-#define OUT_RING_QW(val1, val2)			\
-    do {						\
-	(cb)->buf[(cb)->pos++] = (val1);		\
-	(cb)->buf[(cb)->pos++] = (val2);		\
+#define OUT_RING_QW(val1, val2)                 \
+    do {                                                \
+        (cb)->buf[(cb)->pos++] = (val1);                \
+        (cb)->buf[(cb)->pos++] = (val2);                \
     } while (0)
 
 #define ADVANCE_RING \
