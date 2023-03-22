@@ -93,26 +93,26 @@ typedef struct _Via3DState
     Bool useDestAlpha;
     ViaTextureUnit tex[VIA_NUM_TEXUNITS];
     void (*setDestination) (struct _Via3DState * v3d, CARD32 offset,
-	CARD32 pitch, int format);
+        CARD32 pitch, int format);
     void (*setDrawing) (struct _Via3DState * v3d, int rop,
-	CARD32 planeMask, CARD32 solidColor, CARD32 solidAlpha);
+        CARD32 planeMask, CARD32 solidColor, CARD32 solidAlpha);
     void (*setFlags) (struct _Via3DState * v3d, int numTextures,
-	Bool writeAlpha, Bool writeColor, Bool blend);
+        Bool writeAlpha, Bool writeColor, Bool blend);
         Bool(*setTexture) (struct _Via3DState * v3d, int tex, CARD32 offset,
-	CARD32 pitch, Bool nPot, CARD32 width, CARD32 height, int format,
-	ViaTextureModes sMode, ViaTextureModes tMode,
-	ViaTexBlendingModes blendingMode, Bool agpTexture);
+        CARD32 pitch, Bool nPot, CARD32 width, CARD32 height, int format,
+        ViaTextureModes sMode, ViaTextureModes tMode,
+        ViaTexBlendingModes blendingMode, Bool agpTexture);
     void (*setTexBlendCol) (struct _Via3DState * v3d, int tex, Bool component,
-	CARD32 color);
+        CARD32 color);
     void (*setCompositeOperator) (struct _Via3DState * v3d, CARD8 op);
         Bool(*opSupported) (CARD8 op);
     void (*emitQuad) (struct _Via3DState * v3d, ViaCommandBuffer * cb,
-	int dstX, int dstY, int src0X, int src0Y, int src1X, int src1Y, int w,
-	int h);
+        int dstX, int dstY, int src0X, int src0Y, int src1X, int src1Y, int w,
+        int h);
     void (*emitState) (struct _Via3DState * v3d, ViaCommandBuffer * cb,
-	Bool forceUpload);
+        Bool forceUpload);
     void (*emitClipRect) (struct _Via3DState * v3d, ViaCommandBuffer * cb,
-	int x, int y, int w, int h);
+        int x, int y, int w, int h);
         Bool(*dstSupported) (int format);
         Bool(*texSupported) (int format);
 } Via3DState;
