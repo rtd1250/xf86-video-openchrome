@@ -113,8 +113,8 @@ typedef struct _Via3DState
         Bool forceUpload);
     void (*emitClipRect) (struct _Via3DState * v3d, ViaCommandBuffer * cb,
         int x, int y, int w, int h);
-        Bool(*dstSupported) (int format);
-        Bool(*texSupported) (int format);
+    Bool(*dstSupported) (int format);
+    Bool(*texSupported) (int format);
 } Via3DState;
 
 void viaInit3DState(Via3DState * v3d);
