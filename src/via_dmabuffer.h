@@ -42,11 +42,34 @@ typedef struct _ViaCommandBuffer
 
 #define VIA_DMASIZE 16384
 
-#define H1_ADDR(val) \
-    (((val) >> 2) | 0xF0000000)
+#define RING_VARS   \
+    ViaCommandBuffer *cb = &pVia->cb
+
+#define ADVANCE_RING    \
+    cb->flushFunc(cb)
 
 #define WAITFLAGS(flags)    \
     (cb)->waitFlags |= (flags)
+
+#define H1_ADDR(val) \
+    (((val) >> 2) | 0xF0000000)
+
+#define OUT_RING(val)                   \
+    do {                                \
+        (cb)->buf[(cb)->pos++] = (val); \
+    } while(0);
+
+#define OUT_RING_QW(val1, val2)             \
+    do {                                    \
+        (cb)->buf[(cb)->pos++] = (val1);    \
+        (cb)->buf[(cb)->pos++] = (val2);    \
+    } while (0)
+
+#define OUT_RING_H1(val1, val2) \
+    OUT_RING_QW(H1_ADDR(val1), val2)
+
+#define OUT_RING_SubA(val1, val2)   \
+    OUT_RING(((val1) << HC_SubA_SHIFT) | ((val2) & HC_Para_MASK))
 
 #define BEGIN_RING(size)                                            \
     do {                                                            \
@@ -71,28 +94,5 @@ typedef struct _ViaCommandBuffer
             cb->has3dState = TRUE;                                      \
         }                                                               \
     } while(0);
-
-#define OUT_RING(val)                   \
-    do {                                \
-        (cb)->buf[(cb)->pos++] = (val); \
-    } while(0);
-
-#define OUT_RING_QW(val1, val2)             \
-    do {                                    \
-        (cb)->buf[(cb)->pos++] = (val1);    \
-        (cb)->buf[(cb)->pos++] = (val2);    \
-    } while (0)
-
-#define ADVANCE_RING    \
-    cb->flushFunc(cb)
-
-#define RING_VARS   \
-    ViaCommandBuffer *cb = &pVia->cb
-
-#define OUT_RING_H1(val1, val2) \
-    OUT_RING_QW(H1_ADDR(val1), val2)
-
-#define OUT_RING_SubA(val1, val2)   \
-    OUT_RING(((val1) << HC_SubA_SHIFT) | ((val2) & HC_Para_MASK))
 
 #endif
