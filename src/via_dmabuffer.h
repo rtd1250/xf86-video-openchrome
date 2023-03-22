@@ -26,9 +26,10 @@
 
 #include "via_3d_reg.h"
 
+typedef struct _VIA VIARec, *VIAPtr;
+
 typedef struct _ViaCommandBuffer
 {
-    ScrnInfoPtr pScrn;
     CARD32 *buf;
     CARD32 waitFlags;
     unsigned pos;
@@ -37,7 +38,7 @@ typedef struct _ViaCommandBuffer
     int header_start;
     int rindex;
     Bool has3dState;
-    void (*flushFunc) (struct _ViaCommandBuffer * cb);
+    void (*flushFunc) (VIAPtr pVia, struct _ViaCommandBuffer * cb);
 } ViaCommandBuffer;
 
 #define VIA_DMASIZE 16384
@@ -46,7 +47,7 @@ typedef struct _ViaCommandBuffer
     ViaCommandBuffer *cb = &pVia->cb
 
 #define ADVANCE_RING    \
-    cb->flushFunc(cb)
+    cb->flushFunc(pVia, cb)
 
 #define WAITFLAGS(flags)    \
     (cb)->waitFlags |= (flags)
@@ -74,7 +75,7 @@ typedef struct _ViaCommandBuffer
 #define BEGIN_RING(size)                                            \
     do {                                                            \
         if (cb->flushFunc && (cb->pos > (cb->bufSize-(size)))) {    \
-            cb->flushFunc(cb);                                      \
+            cb->flushFunc(pVia, cb);                                      \
         }                                                           \
     } while(0)
 

@@ -437,8 +437,8 @@ viaExaPrepareComposite_H2(int op, PicturePtr pSrcPicture,
     }
 
     v3d->setFlags(v3d, curTex, FALSE, TRUE, TRUE);
-    v3d->emitState(v3d, &pVia->cb, viaCheckUpload(pScrn, v3d));
-    v3d->emitClipRect(v3d, &pVia->cb, 0, 0, pDst->drawable.width,
+    v3d->emitState(pVia, v3d, &pVia->cb, viaCheckUpload(pScrn, v3d));
+    v3d->emitClipRect(pVia, v3d, &pVia->cb, 0, 0, pDst->drawable.width,
                       pDst->drawable.height);
 
     return TRUE;
@@ -465,9 +465,9 @@ viaExaComposite_H2(PixmapPtr pDst, int srcX, int srcY, int maskX, int maskY,
     }
 
     if (pVia->maskP || pVia->srcP)
-        v3d->emitState(v3d, &pVia->cb, viaCheckUpload(pScrn, v3d));
+        v3d->emitState(pVia, v3d, &pVia->cb, viaCheckUpload(pScrn, v3d));
 
-    v3d->emitQuad(v3d, &pVia->cb, dstX, dstY, srcX, srcY, maskX, maskY,
+    v3d->emitQuad(pVia, v3d, &pVia->cb, dstX, dstY, srcX, srcY, maskX, maskY,
                   width, height);
 }
 
@@ -491,7 +491,7 @@ viaAccelTextureBlit(ScrnInfoPtr pScrn, unsigned long srcOffset,
     v3d->setTexture(v3d, 0, srcOffset, srcPitch, TRUE,
                     1 << wOrder, 1 << hOrder, srcFormat,
                     via_single, via_single, via_src, FALSE);
-    v3d->emitState(v3d, &pVia->cb, viaCheckUpload(pScrn, v3d));
-    v3d->emitClipRect(v3d, &pVia->cb, dstX, dstY, w, h);
-    v3d->emitQuad(v3d, &pVia->cb, dstX, dstY, srcX, srcY, 0, 0, w, h);
+    v3d->emitState(pVia, v3d, &pVia->cb, viaCheckUpload(pScrn, v3d));
+    v3d->emitClipRect(pVia, v3d, &pVia->cb, dstX, dstY, w, h);
+    v3d->emitQuad(pVia, v3d, &pVia->cb, dstX, dstY, srcX, srcY, 0, 0, w, h);
 }

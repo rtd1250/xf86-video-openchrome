@@ -450,8 +450,8 @@ viaExaPrepareComposite_H6(int op, PicturePtr pSrcPicture,
     }
 
     v3d->setFlags(v3d, curTex, FALSE, TRUE, TRUE);
-    v3d->emitState(v3d, &pVia->cb, viaCheckUpload(pScrn, v3d));
-    v3d->emitClipRect(v3d, &pVia->cb, 0, 0, pDst->drawable.width,
+    v3d->emitState(pVia, v3d, &pVia->cb, viaCheckUpload(pScrn, v3d));
+    v3d->emitClipRect(pVia, v3d, &pVia->cb, 0, 0, pDst->drawable.width,
                       pDst->drawable.height);
 
     return TRUE;
@@ -478,8 +478,8 @@ viaExaComposite_H6(PixmapPtr pDst, int srcX, int srcY, int maskX, int maskY,
     }
 
     if (pVia->maskP || pVia->srcP)
-        v3d->emitState(v3d, &pVia->cb, viaCheckUpload(pScrn, v3d));
+        v3d->emitState(pVia, v3d, &pVia->cb, viaCheckUpload(pScrn, v3d));
 
-    v3d->emitQuad(v3d, &pVia->cb, dstX, dstY, srcX, srcY, maskX, maskY,
+    v3d->emitQuad(pVia, v3d, &pVia->cb, dstX, dstY, srcX, srcY, maskX, maskY,
                   width, height);
 }

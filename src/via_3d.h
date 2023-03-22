@@ -30,6 +30,8 @@
 
 #define VIA_NUM_TEXUNITS 2
 
+typedef struct _VIA VIARec, *VIAPtr;
+
 typedef enum
 {
     via_single,
@@ -106,12 +108,15 @@ typedef struct _Via3DState
         CARD32 color);
     void (*setCompositeOperator) (struct _Via3DState * v3d, CARD8 op);
         Bool(*opSupported) (CARD8 op);
-    void (*emitQuad) (struct _Via3DState * v3d, ViaCommandBuffer * cb,
-        int dstX, int dstY, int src0X, int src0Y, int src1X, int src1Y, int w,
-        int h);
-    void (*emitState) (struct _Via3DState * v3d, ViaCommandBuffer * cb,
+    void (*emitQuad) (VIAPtr pVia,
+        struct _Via3DState * v3d, ViaCommandBuffer * cb,
+        int dstX, int dstY, int src0X, int src0Y, int src1X, int src1Y,
+        int w, int h);
+    void (*emitState) (VIAPtr pVia,
+        struct _Via3DState * v3d, ViaCommandBuffer * cb,
         Bool forceUpload);
-    void (*emitClipRect) (struct _Via3DState * v3d, ViaCommandBuffer * cb,
+    void (*emitClipRect) (VIAPtr pVia,
+        struct _Via3DState * v3d, ViaCommandBuffer * cb,
         int x, int y, int w, int h);
     Bool(*dstSupported) (int format);
     Bool(*texSupported) (int format);

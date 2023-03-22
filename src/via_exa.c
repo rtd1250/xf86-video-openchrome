@@ -40,7 +40,7 @@
 #include "via_dmabuffer.h"
 
 static void
-viaFlushPCI(ViaCommandBuffer *cb)
+viaFlushPCI(VIAPtr pVia, ViaCommandBuffer *cb)
 {
     register CARD32 *bp = cb->buf;
     CARD32 transSetting;
@@ -48,7 +48,6 @@ viaFlushPCI(ViaCommandBuffer *cb)
     unsigned loop = 0;
     register CARD32 offset = 0;
     register CARD32 value;
-    VIAPtr pVia = VIAPTR(cb->pScrn);
 
     while (bp < endp) {
         if (*bp == HALCYON_HEADER2) {
@@ -136,10 +135,8 @@ viaDumpDMA(ViaCommandBuffer *cb)
  * the DRM command verifier will lose track of the 3D engine state.
  */
 static void
-viaFlushDRIEnabled(ViaCommandBuffer *cb)
+viaFlushDRIEnabled(VIAPtr pVia, ViaCommandBuffer *cb)
 {
-    ScrnInfoPtr pScrn = cb->pScrn;
-    VIAPtr pVia = VIAPTR(pScrn);
     char *tmp = (char *)cb->buf;
     int tmpSize;
     drm_via_cmdbuffer_t b;
@@ -170,7 +167,7 @@ viaFlushDRIEnabled(ViaCommandBuffer *cb)
         }
         cb->pos = 0;
     } else {
-        viaFlushPCI(cb);
+        viaFlushPCI(pVia, cb);
     }
 }
 #endif
@@ -180,13 +177,8 @@ viaFlushDRIEnabled(ViaCommandBuffer *cb)
  * are intended for Unichrome Pro group A video commands.
  */
 static int
-viaSetupCBuffer(ScrnInfoPtr pScrn, ViaCommandBuffer *cb, unsigned size)
+viaSetupCBuffer(VIAPtr pVia, ViaCommandBuffer *cb, unsigned size)
 {
-#ifdef OPENCHROMEDRI
-    VIAPtr pVia = VIAPTR(pScrn);
-#endif
-
-    cb->pScrn = pScrn;
     cb->bufSize = ((size == 0) ? VIA_DMASIZE : size) >> 2;
     cb->buf = (CARD32 *) calloc(cb->bufSize, sizeof(CARD32));
     if (!cb->buf)
@@ -744,8 +736,8 @@ viaExaTexUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
                          via_single, via_single, via_src, TRUE))
         return FALSE;
 
-    v3d->emitState(v3d, &pVia->cb, viaCheckUpload(pScrn, v3d));
-    v3d->emitClipRect(v3d, &pVia->cb, 0, 0, pDst->drawable.width,
+    v3d->emitState(pVia, v3d, &pVia->cb, viaCheckUpload(pScrn, v3d));
+    v3d->emitClipRect(pVia, v3d, &pVia->cb, 0, 0, pDst->drawable.width,
                       pDst->drawable.height);
 
     buf = 1;
@@ -767,8 +759,8 @@ viaExaTexUploadToScreen(PixmapPtr pDst, int x, int y, int w, int h, char *src,
             src += src_pitch;
         }
 
-        v3d->emitQuad(v3d, &pVia->cb, x, y + yOffs, 0, (buf) ? height : 0, 0,
-                      0, w, bufH);
+        v3d->emitQuad(pVia, v3d, &pVia->cb, x, y + yOffs,
+                        0, (buf) ? height : 0, 0, 0, w, bufH);
 
         sync[buf] = pVia->exaDriverPtr->MarkSync(pScrn->pScreen);
 
@@ -867,7 +859,7 @@ viaInitExa(ScreenPtr pScreen)
     pVia->nPOT[0] = nPOTSupported;
     pVia->nPOT[1] = nPOTSupported;
 
-    if (Success != viaSetupCBuffer(pScrn, &pVia->cb, 0)) {
+    if (Success != viaSetupCBuffer(pVia, &pVia->cb, 0)) {
         pVia->NoAccel = TRUE;
         return FALSE;
     }

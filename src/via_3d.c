@@ -277,8 +277,9 @@ via3DOpSupported(CARD8 op)
 }
 
 static void
-via3DEmitQuad(Via3DState * v3d, ViaCommandBuffer * cb, int dstX, int dstY,
-              int src0X, int src0Y, int src1X, int src1Y, int w, int h)
+via3DEmitQuad(VIAPtr pVia,
+                Via3DState * v3d, ViaCommandBuffer * cb, int dstX, int dstY,
+                int src0X, int src0Y, int src1X, int src1Y, int w, int h)
 {
     CARD32 acmd;
     float dx1, dx2, dy1, dy2, sx1[2], sx2[2], sy1[2], sy2[2], wf;
@@ -384,7 +385,9 @@ via3DEmitQuad(Via3DState * v3d, ViaCommandBuffer * cb, int dstX, int dstY,
 }
 
 static void
-via3DEmitState(Via3DState * v3d, ViaCommandBuffer * cb, Bool forceUpload)
+via3DEmitState(VIAPtr pVia,
+                Via3DState * v3d, ViaCommandBuffer * cb,
+                Bool forceUpload)
 {
     int i;
     Bool saveHas3dState;
@@ -532,8 +535,9 @@ via3DEmitState(Via3DState * v3d, ViaCommandBuffer * cb, Bool forceUpload)
  * has3dState flag afterwards.
  */
 static void
-via3DEmitClipRect(Via3DState * v3d, ViaCommandBuffer * cb, int x, int y,
-                  int w, int h)
+via3DEmitClipRect(VIAPtr pVia,
+                    Via3DState * v3d, ViaCommandBuffer * cb,
+                    int x, int y, int w, int h)
 {
     Bool saveHas3dState;
 
