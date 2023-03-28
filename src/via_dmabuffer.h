@@ -53,7 +53,7 @@ typedef struct _ViaCommandBuffer
     (cb)->waitFlags |= (flags)
 
 #define H1_ADDR(val) \
-    (((val) >> 2) | 0xF0000000)
+    (((val) >> 2) | HALCYON_HEADER1)
 
 #define OUT_RING(val)                   \
     do {                                \
